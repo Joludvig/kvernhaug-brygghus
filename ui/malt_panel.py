@@ -1,5 +1,11 @@
 import streamlit as st
 
+FORETRUKKET_KATEGORI_REKKEFØLGE = [
+    "Norsk Malt", "Basemalt", "Hvete- / Rugmalt",
+    "Karamell- / Krystallmalt", "Spesialmalt (Røstet / Andre)",
+    "Flakes / Korn", "Spraymalt",
+]
+
 def render_malt_panel(malt_database):
     st.header("🌾 Meskekaret (Grist)")
     if st.button("➕ Legg til malt", key="add_malt_btn"):
@@ -8,9 +14,12 @@ def render_malt_panel(malt_database):
 
     total_malt_vekt = sum(m["mengde"] for m in st.session_state.valgt_malt if m["id"] in malt_database)
     
-    # Bygg opp dropdown-menyen basert på kategorier
+    # Bygg kategoriliste dynamisk frå databasen, med foretrukket rekkefølge
+    alle_db_kategorier = {info.get("kategori") for info in malt_database.values() if info and info.get("kategori")}
+    malt_kategorier = [k for k in FORETRUKKET_KATEGORI_REKKEFØLGE if k in alle_db_kategorier]
+    malt_kategorier += sorted(k for k in alle_db_kategorier if k not in FORETRUKKET_KATEGORI_REKKEFØLGE)
+
     malt_id_kart, malt_meny_valg = {}, []
-    malt_kategorier = ["Norsk Malt", "Basemalt", "Hvete- / Rugmalt", "Karamell- / Krystallmalt", "Spesialmalt (Røstet / Andre)", "Flakes / Korn", "Spraymalt"]
     for kat in malt_kategorier:
         har_varer = False
         midlertidig_liste = []
