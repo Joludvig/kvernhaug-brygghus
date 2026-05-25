@@ -30,8 +30,9 @@ def sjekk_smakskonflikter(recipe):
     _FLORALE_HUMLE = {
         "cascade", "centennial", "east_kent_goldings", "saaz", "goldings",
         "harlequin", "hersbrucker", "jester", "mystic", "perle",
-        "styrian_dragon", "tettnang", "hallertau_mittelfruh",
+        "styrian_dragon", "styrian_golding", "tettnang", "hallertau_mittelfruh",
         "hallertau_blanc", "hallertau_tradition",
+        "amarillo", "talus", "ella", "pacific_sunrise",
     }
     if flavor.get("Krydder", 0) > 3.0:
         for hop in recipe["hops"]:
