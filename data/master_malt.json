@@ -1147,7 +1147,7 @@
     "butikk_match": {},
     "verified": true,
     "source": "bruker_forslag_v0_1",
-    "display_group": "NORSK MALT",
+    "display_group": "HVETE / RUG",
     "canonical_style": "rye"
   },
   "flaket_havre": {
@@ -1424,7 +1424,7 @@
     "butikk_match": {},
     "verified": true,
     "source": "coverage_expansion_p1",
-    "display_group": "RØSTET / MØRK",
+    "display_group": "HVETE / RUG",
     "canonical_style": "chocolate"
   }
 }

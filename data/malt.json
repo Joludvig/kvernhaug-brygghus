@@ -775,7 +775,7 @@
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
     "pris_olbrygging": 0,
-    "display_group": "NORSK MALT"
+    "display_group": "HVETE / RUG"
   },
   "flaket_havre": {
     "display_name": "Flaket Havre",
@@ -979,6 +979,6 @@
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
     "pris_olbrygging": 0,
-    "display_group": "RØSTET / MØRK"
+    "display_group": "HVETE / RUG"
   }
 }
