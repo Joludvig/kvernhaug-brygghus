@@ -58,7 +58,7 @@ def beregn_total_ibu(valgt_humle_liste, humle_data, volum, beregnet_og):
         tid = h["tid"]
         
         if navn in humle_data and gram > 0:
-            alfa = humle_data[navn]["alfa"]
+            alfa = humle_data[navn].get("alfa", humle_data[navn].get("alfa_typisk", 5.0))
             
             # 2. Times-faktor: Beregner utnyttelseskurven basert på antall minutter i koketiden
             # Formel: (1 - e^(-0.04 * tid)) / 4.15
