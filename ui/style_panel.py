@@ -24,9 +24,10 @@ def render_style_panel(ctx, humle_database):
         for konflikt in ctx["conflicts"]: st.error(konflikt)
 
     # Blomster-advarsel basert på aktive tags
+    _FLORALE_TAGS = {"blomst", "blomster", "floral", "parfyme", "parfymert"}
     aktive_humle_tags = set()
     for h in st.session_state.valgt_humle:
         if h["gram"] > 0 and h["id"] in humle_database:
-            aktive_humle_tags.update(humle_database[h["id"]]["smakstags"])
-    if "blomster" in aktive_humle_tags or "parfyme" in aktive_humle_tags:
+            aktive_humle_tags.update(humle_database[h["id"]].get("smakstags", []))
+    if aktive_humle_tags & _FLORALE_TAGS:
         st.error("⚠️ **ADVARSEL!** Ølet vil få en **parfymert og blomsteraktig smak**.")

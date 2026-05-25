@@ -27,15 +27,19 @@ def sjekk_smakskonflikter(recipe):
         )
 
     # 3. KONFLIKT: Krydderestere krasjer med florale humler (Parfyme-fella)
-    # Siden du hater dette, setter vi et strengt flagg her!
-    if flavor.get("Krydder", 0) > 4.0 and (flavor.get("Sitrus", 0) > 3.0 or flavor.get("Fruktighet", 0) > 4.0):
-        # Vi sjekker om det er parfymerte humler aktive i oppskriften
+    _FLORALE_HUMLE = {
+        "cascade", "centennial", "east_kent_goldings", "saaz", "goldings",
+        "harlequin", "hersbrucker", "jester", "mystic", "perle",
+        "styrian_dragon", "tettnang", "hallertau_mittelfruh",
+        "hallertau_blanc", "hallertau_tradition",
+    }
+    if flavor.get("Krydder", 0) > 3.0:
         for hop in recipe["hops"]:
-            if hop["id"] in ["us_cascade", "ekg_uk", "saaz_cz"]:
+            if hop.get("id") in _FLORALE_HUMLE and hop.get("gram", 0) > 0:
                 advarsler.append(
-                    "🧼 **Parfyme- og såpe-alarm!** Gjæren din produserer mye krydder/estere, samtidig som du bruker en floral "
-                    "humle (som Cascade, Saaz eller EKG). Dette vil forsterke den intense **blomster- og parfymerte smaken** "
-                    "som du hater. Vurder å bytte til en helt ren gjær (US-05) eller mer tropiske humler (Citra/Galaxy)."
+                    "🧼 **Parfyme-/såpefare:** Blomsterpreget humle sammen med krydret belgisk gjær "
+                    "kan gi parfymeaktig preg. Vurder å bytte til nøytral gjær (US-05) eller "
+                    "mer tropiske humler (Citra/Galaxy)."
                 )
                 break
 
