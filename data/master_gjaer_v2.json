@@ -775,7 +775,7 @@
       "ren",
       "tørr",
       "allsidig",
-      "americansk ale"
+      "amerikansk ale"
     ],
     "attenuation": 0.77,
     "aliases": [
@@ -1197,7 +1197,7 @@
       "tsjekkisk lager",
       "ren",
       "maltfull",
-      "soft"
+      "myk"
     ],
     "attenuation": 0.77,
     "aliases": [
@@ -1619,7 +1619,7 @@
       "nøytral",
       "ren",
       "allsidig",
-      "americansk ale"
+      "amerikansk ale"
     ],
     "attenuation": 0.75,
     "aliases": [
@@ -1636,7 +1636,7 @@
     "source": "master_seed_v2"
   },
   "cs_rokkar": {
-    "display_name": "CellarScience CS Rokkar",
+    "display_name": "CellarScience CS Røkkar",
     "produsent": "CellarScience",
     "kategori": "Kveik",
     "gjaertype": "Kveik",
