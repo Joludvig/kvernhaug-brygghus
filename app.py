@@ -54,7 +54,7 @@ if "valgt_malt" not in st.session_state:
     første_malt = next(iter(malt_database), "weyermann_pilsner")
     st.session_state.valgt_malt = [{"id": første_malt, "mengde": 5.0}]
 if "valgt_humle" not in st.session_state:
-    første_humle = next(iter(humle_database), "magnum_de")
+    første_humle = next(iter(humle_database), "magnum")
     st.session_state.valgt_humle = [{"id": første_humle, "gram": 20, "tid": 60}]
 if "valgt_gjaer_id" not in st.session_state:
     st.session_state.valgt_gjaer_id = next(iter(gjaer_database), "safale_us_05")

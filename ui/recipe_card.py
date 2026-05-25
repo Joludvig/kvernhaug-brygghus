@@ -18,7 +18,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 st.toast(f"Slettet {ctx['name']}", icon="🗑️")
                 st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
                 st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
-                st.session_state.valgt_gjaer_id = "fermentis_us05"
+                st.session_state.valgt_gjaer_id = "safale_us_05"
                 st.session_state.gjeldende_navn = "Kvernhaug Spesial"
                 st.rerun()
 
