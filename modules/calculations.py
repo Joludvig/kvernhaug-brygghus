@@ -12,7 +12,8 @@ def beregn_og(valgt_malt_liste, malt_data, volum, effektivitet):
             totale_poeng += (mengde * (potensiale - 1) * 1000)
     if volum == 0:
         return 1.000
-    return 1 + ((totale_poeng * effektivitet) / volum) / 1000
+    # 8.3454 konverterer fra lbs/gallon (PPG) til kg/liter (metrisk)
+    return 1 + ((totale_poeng * effektivitet * 8.3454) / volum) / 1000
 
 
 def beregn_ebc(valgt_malt_liste, malt_data, volum):
