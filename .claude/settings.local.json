@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m streamlit run app.py --server.port 8501 --server.headless true)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Invoke-WebRequest -Uri \"http://localhost:8501\" -UseBasicParsing -TimeoutSec 5)",
+      "Bash(Select-Object -ExpandProperty StatusCode)",
+      "PowerShell(Start-Sleep -Seconds 6; try { \\(Invoke-WebRequest -Uri \"http://localhost:8501\" -UseBasicParsing -TimeoutSec 5\\).StatusCode } catch { \"Not ready: $_\" })",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(python -c \"import json; d=json.load\\(open\\('C:/Users/jolud/OneDrive/Kvernhaug Brygghus/raw_data/malt_raw.json','r',encoding='utf-8'\\)\\); print\\(f'Malt: {len\\(d\\)} produkter'\\); print\\([x['navn'] for x in d[:5]]\\)\")",
+      "Bash(python -c ' *)",
+      "PowerShell(Get-Process python -ErrorAction SilentlyContinue)",
+      "Bash(python -c \"import json; d=json.load\\(open\\('data/master_humle_v0_1.json',encoding='utf-8'\\)\\); print\\(f'Antall humler: {len\\(d\\)}'\\); print\\('verified-verdier:', set\\(v.get\\(\\\\\"verified\\\\\"\\) for v in d.values\\(\\)\\)\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('ui/import_panel.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK - ingen syntax-feil'\\)\")",
+      "Bash(python build_master.py)",
+      "Bash(del build_master.py)",
+      "Bash(python merge_master.py)",
+      "Bash(del merge_master.py)",
+      "Bash(python -c \"import json; m=json.load\\(open\\('data/master_malt.json',encoding='utf-8'\\)\\); g=json.load\\(open\\('data/master_gjaer_v0_1.json',encoding='utf-8'\\)\\); print\\('Malt:',len\\(m\\)\\); print\\('Gjær:',len\\(g\\)\\)\")",
+      "Bash(python modules/store_matcher.py)",
+      "Bash(python modules/db_cleanup.py)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "WebSearch",
+      "Bash(python -m streamlit run app.py --server.headless true)",
+      "Bash(python -c \"from ui.review_panel import render_review_panel; print\\('Import OK'\\)\")",
+      "Bash(python update_master.py)"
+    ]
+  }
+}

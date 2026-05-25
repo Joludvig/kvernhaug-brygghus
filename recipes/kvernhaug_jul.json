@@ -1,0 +1,27 @@
+{
+  "name": "Kvernhaug JUl",
+  "batch_size": 20.0,
+  "efficiency": 0.75,
+  "malts": [
+    {
+      "id": "weyermann_pilsner",
+      "mengde": 5.0
+    }
+  ],
+  "hops": [
+    {
+      "id": "usa_citra",
+      "gram": 20,
+      "tid": 60
+    }
+  ],
+  "yeast": "fermentis_us05",
+  "stats": {
+    "og": 1.0069375,
+    "fg": 1.00152625,
+    "abv": 0.7102265625000117,
+    "ibu": 45.855406260209364,
+    "ebc": 4.47654601040878
+  },
+  "flavor_profile": {}
+}

@@ -1,0 +1,162 @@
+# ui/import_panel.py
+import streamlit as st
+import json
+import os
+from modules.store_scraper import kjor_full_skanning
+from modules.ingredient_normalizer import ai_normaliser_tekst
+
+def render_import_panel():
+    st.write("---")
+    st.header("🧠 Kvernhaug AI: Import- & Sortimentsbygger")
+    st.caption("Trål vestbrygg.no og olbrygging.no live, kjør lingvistisk AI-normalisering og oppdater master-databasene.")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    # === KNAPP 1: SKANN BUTIKKER ===
+    with col1:
+        if st.button("🔍 Trål og skann butikker", use_container_width=True):
+            with st.spinner("Cravler nettbutikker side for side (delay 1s)..."):
+                # Slett gamle review-filer ved ny skanning så vi ikke ser gammel info
+                for k in ["malt", "humle", "gjaer"]:
+                    p = f"raw_data/{k}_review.json"
+                    if os.path.exists(p): os.remove(p)
+                
+                m, h, g = kjor_full_skanning()
+                st.success(f"Skanning ferdig! Fant {m} malttyper, {h} humlesorter, og {g} gjærtyper.")
+                st.session_state["raw_scanned"] = True
+                st.rerun()
+                
+    # === KNAPP 2: AI NORMALISERING ===
+    with col2:
+        raw_finnes = os.path.exists("raw_data/malt_raw.json")
+        if st.button("🧠 Kjør AI-normalisering", use_container_width=True, disabled=not raw_finnes):
+            status_element = st.empty()
+            progress_bar = st.progress(0)
+            
+            with st.spinner("AI leser produktbeskrivelser og utleder sensoriske akser..."):
+                try:
+                    kategorier = ["malt", "humle", "gjaer"]
+                    for i, kat in enumerate(kategorier):
+                        status_element.markdown(f"🧠 **AI-behandler:** Tolker og normaliserer `{kat}`-rådata...")
+                        
+                        if os.path.exists(f"raw_data/{kat}_raw.json"):
+                            with open(f"raw_data/{kat}_raw.json", "r", encoding="utf-8-sig") as f:
+                                varer = json.load(f)
+                            
+                            normalisert_kart = {}
+                            for v in varer:
+                                m_id, master_obj = ai_normaliser_tekst(v)
+                                if m_id in normalisert_kart:
+                                    if v["butikk"] == "vestbrygg": normalisert_kart[m_id]["pris_vestbrygg"] = v["pris"]
+                                    if v["butikk"] == "olbrygging": normalisert_kart[m_id]["pris_olbrygging"] = v["pris"]
+                                else:
+                                    normalisert_kart[m_id] = master_obj
+                                    
+                            with open(f"raw_data/{kat}_review.json", "w", encoding="utf-8") as f_out:
+                                json.dump(normalisert_kart, f_out, ensure_ascii=False, indent=2)
+                        
+                        progress_bar.progress((i + 1) / len(kategorier))
+                    
+                    progress_bar.empty()
+                    status_element.empty()
+                    
+                    st.session_state["vis_ai_suksess"] = True
+                    st.toast("AI-normalisering fullført!", icon="🧠")
+                    st.rerun()
+                    
+                except Exception as e:
+                    st.error(f"💥 Det skjedde en feil under AI-normaliseringen: {e}")
+                
+    # === KNAPP 3: LAGRE TIL MASTER DB ===
+    with col3:
+        review_finnes = os.path.exists("raw_data/malt_review.json") and os.path.getsize("raw_data/malt_review.json") > 0
+        if st.button("📥 Importer til Master DB", use_container_width=True, disabled=not review_finnes):
+            imported_count = 0
+            for kat in ["malt", "humle", "gjaer"]:
+                r_sti = f"raw_data/{kat}_review.json"
+                h_sti = f"data/{kat}.json"
+                
+                if os.path.exists(r_sti) and os.path.exists(h_sti) and os.path.getsize(r_sti) > 0:
+                    with open(r_sti, "r", encoding="utf-8-sig") as f1: rev = json.load(f1)
+                    with open(h_sti, "r", encoding="utf-8-sig") as f2: hoved = json.load(f2)
+                    
+                    for k_id, info in rev.items():
+                        # SIKKERHETSLÅS: Hopp over tomme ID-er, og feiltolket utstyrsstøy
+                        if not k_id.strip() or info.get("display_name", "").lower() in ["ukjent", "humle", "malt", "gjær"]:
+                            continue
+                            
+                        if k_id not in hoved:
+                            # Sørg for riktig visuell kategori i Master DB
+                            if kat == "malt":
+                                if info.get("kategori", "").lower() == "spraymalt":
+                                    info["kategori"] = "Spraymalt"
+                                else:
+                                    info["kategori"] = "Basemalt"
+                            elif kat == "humle":
+                                info["kategori"] = "humle"
+                                if "attenuation" in info: del info["attenuation"]
+                            elif kat == "gjaer": 
+                                info["kategori"] = "Tørrgjær"
+                                
+                            hoved[k_id] = info
+                            imported_count += 1
+                            
+                    with open(h_sti, "w", encoding="utf-8") as f_save:
+                        json.dump(hoved, f_save, ensure_ascii=False, indent=2)
+            
+            if "vis_ai_suksess" in st.session_state:
+                del st.session_state["vis_ai_suksess"]
+                
+            st.session_state["import_rapport_antall"] = imported_count
+            st.toast(f"📥 {imported_count} råvarer flettet inn i Master DB!", icon="💾")
+            st.rerun()
+
+    # --- STÅENDE TILBAKEMELDINGER ---
+    if "import_rapport_antall" in st.session_state:
+        antall = st.session_state["import_rapport_antall"]
+        st.success(f"💾 **Suksess!** {antall} splitter nye ingredienser ble automatisk godkjent, deduplisert og flettet inn i Master-database!")
+        del st.session_state["import_rapport_antall"]
+
+    if st.session_state.get("vis_ai_suksess"):
+        st.success("🎉 AI-normalisering fullført! Råvarene er ferdig tolket, fargetestet og klare for review i rapporten under.")
+
+    # --- SENSORISK IMPORT-RAPPORT (VISNING AV FANER) ---
+    st.write("---")
+    st.subheader("📊 Sensorisk Import-Rapport (Review)")
+    
+    malt_r, humle_r, gjaer_r = {}, {}, {}
+    try:
+        if os.path.exists("raw_data/malt_review.json") and os.path.getsize("raw_data/malt_review.json") > 0:
+            with open("raw_data/malt_review.json", "r", encoding="utf-8-sig") as f: malt_r = json.load(f)
+        if os.path.exists("raw_data/humle_review.json") and os.path.getsize("raw_data/humle_review.json") > 0:
+            with open("raw_data/humle_review.json", "r", encoding="utf-8-sig") as f: humle_r = json.load(f)
+        if os.path.exists("raw_data/gjaer_review.json") and os.path.getsize("raw_data/gjaer_review.json") > 0:
+            with open("raw_data/gjaer_review.json", "r", encoding="utf-8-sig") as f: gjaer_r = json.load(f)
+    except:
+        pass
+        
+    tab1, tab2, tab3 = st.tabs(["🌾 Skannet Malt", "🌿 Skannet Humle", "🧫 Skannet Gjær"])
+    
+    with tab1:
+        if malt_r:
+            for m_id, info in list(malt_r.items())[:5]:
+                st.markdown(f"🔹 **ID:** `{m_id}` — *{info.get('display_name', 'Ukjent')}* ({info.get('produsent', 'Ukjent')})")
+                st.caption(f"👅 *AI Utledede Smakstags:* {', '.join(info.get('smakstags', []))} | 📏 *Farge:* {info.get('ebc', 4.0)} EBC")
+        else:
+            st.info("Ingen nye maltdata klare til review. Klikk på 'Trål og skann' -> 'Kjør AI-normalisering'.")
+            
+    with tab2:
+        if humle_r:
+            for h_id, info in list(humle_r.items())[:5]:
+                st.markdown(f"🔹 **ID:** `{h_id}` — *{info.get('display_name', 'Ukjent')}*")
+                st.caption(f"👃 *AI Aromaprofil:* {', '.join(info.get('smakstags', []))} | 🧪 *Alfa-syre:* {info.get('alfa', 5.0)}%")
+        else:
+            st.info("Ingen nye humledata klare til review.")
+
+    with tab3:
+        if gjaer_r:
+            for g_id, info in list(gjaer_r.items())[:5]:
+                st.markdown(f"🔹 **ID:** `{g_id}` — *{info.get('display_name', 'Ukjent')}* ({info.get('produsent', 'Ukjent')})")
+                st.caption(f"🧪 *AI Utbrenthetsgrad (Attenuation):* {int(info.get('attenuation', 0.75) * 100)}% | 💰 *Pris:* {info.get('pris_olbrygging', 59)} kr")
+        else:
+            st.info("Ingen nye gjærdata klare til review.")

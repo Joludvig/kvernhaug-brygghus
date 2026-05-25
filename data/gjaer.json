@@ -1,0 +1,1329 @@
+{
+  "lalbrew_house_ale": {
+    "display_name": "LalBrew House Ale",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "allsidig",
+      "ren",
+      "lett fruktig"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 65.0
+  },
+  "bohemian_lager_m84": {
+    "display_name": "Bohemian Lager M84",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "krystallklar",
+      "tradisjonell lager"
+    ],
+    "attenuation": 0.76,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 69.0,
+    "pris_per_pakke": 59.0
+  },
+  "belgian_ale_m41": {
+    "display_name": "Belgian Ale M41",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "fruktig",
+      "blomst",
+      "belgisk",
+      "krydret"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 65.0
+  },
+  "bavarian_wheat_m20": {
+    "display_name": "Bavarian Wheat M20",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hvete",
+      "tradisjonell weizen"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "k22_stalljen": {
+    "display_name": "K.22 Stalljen",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "allsidig",
+      "frisk",
+      "nøytral kveik"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "k9_ebbegarden": {
+    "display_name": "K.9 Ebbegarden",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "aprikos",
+      "fersken",
+      "tropisk fruktighet"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "lalbrew_new_england": {
+    "display_name": "LalBrew New England",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "myk",
+      "fruktig",
+      "tykk",
+      "NEIPA",
+      "tropisk"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 69.0
+  },
+  "lalbrew_munich_classic": {
+    "display_name": "LalBrew Munich Classic",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "tradisjonell hvete",
+      "bayersk"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 69.0
+  },
+  "california_lager_m54": {
+    "display_name": "California Lager M54",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "allsidig lager",
+      "fersk"
+    ],
+    "attenuation": 0.76,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 59.0,
+    "pris_per_pakke": 59.0
+  },
+  "empire_ale_m15": {
+    "display_name": "Empire Ale M15",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "lys frukt",
+      "nøtter",
+      "tørr"
+    ],
+    "attenuation": 0.72,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 69.0,
+    "pris_per_pakke": 59.0
+  },
+  "lalbrew_diamond_lager": {
+    "display_name": "LalBrew Diamond Lager",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "profesjonell lager",
+      "nøytral"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "k14_eitrheim": {
+    "display_name": "K.14 Eitrheim",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "tropisk",
+      "fersken",
+      "blomst"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "k1_voss": {
+    "display_name": "K.1 Voss",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ],
+    "attenuation": 0.78,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "french_saison_m29": {
+    "display_name": "French Saison M29",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "pepper",
+      "krydret",
+      "tørr",
+      "saison"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 65.0
+  },
+  "belgian_tripel_m31": {
+    "display_name": "Belgian Tripel M31",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "fruktig",
+      "krydret",
+      "belgisk",
+      "tørr finish"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 59.0,
+    "pris_per_pakke": 65.0
+  },
+  "belgian_wit_m21": {
+    "display_name": "Belgian Wit M21",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "sitrus",
+      "koriander",
+      "hvete",
+      "belgisk wit"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 59.0,
+    "pris_per_pakke": 59.0
+  },
+  "bavarian_lager_m76": {
+    "display_name": "Bavarian Lager M76",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "tradisjonell lager",
+      "bayersk"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 69.0,
+    "pris_per_pakke": 79.0
+  },
+  "safale_us_05": {
+    "display_name": "SafAle US-05",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "allsidig"
+    ],
+    "attenuation": 0.81,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "safale_s04": {
+    "display_name": "SafAle S-04",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "mild frukt",
+      "engelsk",
+      "nøytral",
+      "lav gjærsmak"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "saflager_w3470": {
+    "display_name": "SafLager W-34/70",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "tradisjonell lager",
+      "standard lager"
+    ],
+    "attenuation": 0.82,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 89.0
+  },
+  "lalbrew_voss_kveik": {
+    "display_name": "LalBrew Voss Kveik",
+    "produsent": "Lallemand",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ],
+    "attenuation": 0.78,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "lalbrew_verdant": {
+    "display_name": "LalBrew Verdant IPA",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "fruktig",
+      "myk",
+      "NEIPA",
+      "pasjonsfrukt"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "wyeast_1318": {
+    "display_name": "Wyeast 1318 London Ale III",
+    "produsent": "Wyeast",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "frukt",
+      "malt",
+      "engelsk",
+      "medium attenuation"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0
+  },
+  "safale_be134": {
+    "display_name": "SafAle BE-134",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "tørr",
+      "belgisk",
+      "pepper",
+      "fruktig"
+    ],
+    "attenuation": 0.87,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "safale_k97": {
+    "display_name": "SafAle K-97",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "mild",
+      "nøytral",
+      "kölsch",
+      "hvit frukt",
+      "ren"
+    ],
+    "attenuation": 0.81,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "saflager_s23": {
+    "display_name": "SafLager S-23",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "lett fruktig",
+      "kontinental lager",
+      "standard"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "saflager_s189": {
+    "display_name": "SafLager S-189",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "sveitsisk lager",
+      "crisp"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 89.0
+  },
+  "wlp_001": {
+    "display_name": "WLP 001 California Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "allsidig",
+      "americansk ale"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_002": {
+    "display_name": "WLP 002 English Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "maltfull",
+      "lav attenuation",
+      "engelsk",
+      "mild frukt",
+      "søt avslutning"
+    ],
+    "attenuation": 0.67,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_007": {
+    "display_name": "WLP 007 Dry English Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tørr",
+      "engelsk",
+      "ren",
+      "mild frukt"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_028": {
+    "display_name": "WLP 028 Edinburgh Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "skotsk",
+      "maltfull",
+      "ren",
+      "mild"
+    ],
+    "attenuation": 0.72,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_029": {
+    "display_name": "WLP 029 German Ale / Kölsch",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "kölsch",
+      "ren",
+      "mild frukt",
+      "delikat",
+      "klar"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_300": {
+    "display_name": "WLP 300 Hefeweizen",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hefeweizen",
+      "bayersk hvete"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_400": {
+    "display_name": "WLP 400 Belgian Wit",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "krydret",
+      "sitrus",
+      "belgisk wit",
+      "fenolisk",
+      "tart"
+    ],
+    "attenuation": 0.76,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_518": {
+    "display_name": "WLP 518 Opshaug Kveik",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "mango",
+      "kveik",
+      "fruktig",
+      "varm fermentering"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_530": {
+    "display_name": "WLP 530 Abbey Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "tykk",
+      "frukt",
+      "plomme",
+      "klosterbrygg"
+    ],
+    "attenuation": 0.78,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_550": {
+    "display_name": "WLP 550 Belgian Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "krydret",
+      "frukt",
+      "belgisk",
+      "fenolisk",
+      "kompleks"
+    ],
+    "attenuation": 0.82,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_565": {
+    "display_name": "WLP 565 Saison Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "saison",
+      "krydret",
+      "tørr",
+      "pepper",
+      "belgisk"
+    ],
+    "attenuation": 0.78,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_566": {
+    "display_name": "WLP 566 Saison Ale II",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "saison",
+      "fruktig",
+      "tørr",
+      "tropisk",
+      "belgisk"
+    ],
+    "attenuation": 0.82,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_618": {
+    "display_name": "WLP 618 NA All Day",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Spesialgjær",
+    "smakstags": [
+      "alkoholfri",
+      "lavalkohol",
+      "ren",
+      "lett"
+    ],
+    "attenuation": 0.35,
+    "pris_vestbrygg": 249.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 249.0
+  },
+  "wlp_800": {
+    "display_name": "WLP 800 Pilsner Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "bøhmisk pilsner",
+      "ren",
+      "crisp",
+      "klassisk lager",
+      "klar"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_802": {
+    "display_name": "WLP 802 Czech Budejovice Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "tsjekkisk lager",
+      "ren",
+      "maltfull",
+      "soft"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_830": {
+    "display_name": "WLP 830 German Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "tysk lager",
+      "ren",
+      "malt",
+      "klassisk",
+      "nøytral"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_833": {
+    "display_name": "WLP 833 German Bock",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "bock",
+      "maltfull",
+      "tysk",
+      "rik",
+      "søt avslutning"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "wlp_940": {
+    "display_name": "WLP 940 Mexican Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "crisp",
+      "lett lager",
+      "nøytral",
+      "klar"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 198.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 198.0
+  },
+  "lalbrew_nottingham": {
+    "display_name": "LalBrew Nottingham",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "allsidig",
+      "høy attenuation"
+    ],
+    "attenuation": 0.83,
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 69.0
+  },
+  "lalbrew_philly_sour": {
+    "display_name": "LalBrew Philly Sour",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Spesialgjær",
+    "smakstags": [
+      "sur",
+      "fruktig",
+      "fersken",
+      "laktisk",
+      "ett-steg suring"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "lalbrew_pomona": {
+    "display_name": "LalBrew Pomona",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "IPA",
+      "biotransformasjon",
+      "fruktig",
+      "myk"
+    ],
+    "attenuation": 0.76,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0
+  },
+  "lalbrew_nova_lager": {
+    "display_name": "LalBrew Nova Lager",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "lager ved aletemperatur",
+      "nøytral",
+      "allsidig"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 78.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 78.0
+  },
+  "voss_kveik_m12": {
+    "display_name": "Voss Kveik M12",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "appelsin",
+      "fruktig",
+      "varm fermentering",
+      "sitrus"
+    ],
+    "attenuation": 0.78,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 89.0
+  },
+  "liberty_bell_m36": {
+    "display_name": "Liberty Bell Ale M36",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "lett fruktig",
+      "allsidig",
+      "ren",
+      "pale ale"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "new_world_strong_m42": {
+    "display_name": "New World Strong Ale M42",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "høy alkohol",
+      "sterk ale",
+      "tørr"
+    ],
+    "attenuation": 0.79,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "us_west_coast_m44": {
+    "display_name": "U.S. West Coast M44",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "west coast",
+      "IPA",
+      "tørr",
+      "allsidig"
+    ],
+    "attenuation": 0.81,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0
+  },
+  "hophead_m66": {
+    "display_name": "Hophead Ale M66",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "hop-forward",
+      "IPA",
+      "fruktig",
+      "tropisk",
+      "hop-forsterkende"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 69.0
+  },
+  "lutra_kveik": {
+    "display_name": "Lutra Kveik",
+    "produsent": "Omega Yeast",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "nøytral",
+      "ren",
+      "varm fermentering",
+      "allsidig kveik"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 149.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 149.0
+  },
+  "cs_velo": {
+    "display_name": "CellarScience CS Velo",
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "allsidig",
+      "americansk ale"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 39.0,
+    "pris_per_pakke": 0
+  },
+  "cs_rokkar": {
+    "display_name": "CellarScience CS Rokkar",
+    "produsent": "CellarScience",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "norsk kveik",
+      "fruktig",
+      "varm fermentering"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 39.0,
+    "pris_per_pakke": 0
+  },
+  "cs_jungle": {
+    "display_name": "CellarScience CS Jungle",
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "IPA",
+      "hop-forward",
+      "fruktig"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 39.0,
+    "pris_per_pakke": 0
+  },
+  "cs_ne_hazy": {
+    "display_name": "CellarScience CS NE Hazy",
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "NEIPA",
+      "hazy",
+      "tropisk",
+      "biotransformasjon"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 39.0,
+    "pris_per_pakke": 0
+  },
+  "cs_big_ben": {
+    "display_name": "CellarScience CS Big Ben",
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "maltfull",
+      "ESB",
+      "lav attenuation"
+    ],
+    "attenuation": 0.7,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0
+  },
+  "cs_maison": {
+    "display_name": "CellarScience CS Maison",
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "krydret",
+      "fruktig",
+      "saison"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 39.0,
+    "pris_per_pakke": 0
+  },
+  "cs_hefe": {
+    "display_name": "CellarScience CS Hefe",
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hefeweizen",
+      "hvete"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 39.0,
+    "pris_per_pakke": 0
+  },
+  "cs_west_coast": {
+    "display_name": "CellarScience CS West Coast",
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "west coast",
+      "ren",
+      "tørr",
+      "IPA",
+      "nøytral"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 39.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_004": {
+    "display_name": "WLP 004 Irish Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "irsk",
+      "tørr stout",
+      "mild frukt",
+      "ren"
+    ],
+    "attenuation": 0.71,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_005": {
+    "display_name": "WLP 005 British Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "maltfull",
+      "mild frukt",
+      "lav attenuation"
+    ],
+    "attenuation": 0.67,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 399.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_008": {
+    "display_name": "WLP 008 East Coast Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "east coast",
+      "allsidig"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_013": {
+    "display_name": "WLP 013 London Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "maltfull",
+      "bitter",
+      "rik"
+    ],
+    "attenuation": 0.67,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_023": {
+    "display_name": "WLP 023 Burton Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "mineraler",
+      "bitter",
+      "tørr"
+    ],
+    "attenuation": 0.69,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_051": {
+    "display_name": "WLP 051 California Ale V",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "lett fruktig",
+      "americansk"
+    ],
+    "attenuation": 0.7,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_066": {
+    "display_name": "WLP 066 London Fog Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "hazy",
+      "tropisk",
+      "NEIPA",
+      "saftig",
+      "fruktig"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_067": {
+    "display_name": "WLP 067 Coastal Haze Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "hazy",
+      "saftig",
+      "fruktig",
+      "NEIPA"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_077": {
+    "display_name": "WLP 077 Tropicale Yeast Blend",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "mango",
+      "ananas",
+      "fruktig",
+      "blend"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_080": {
+    "display_name": "WLP 080 Cream Ale Yeast Blend",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "cream ale",
+      "lett fruktig"
+    ],
+    "attenuation": 0.76,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_090": {
+    "display_name": "WLP 090 San Diego Super",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "høy attenuation",
+      "allsidig"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_095": {
+    "display_name": "WLP 095 Burlington Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "NEIPA",
+      "tropisk",
+      "hazy",
+      "Vermont-stil"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_099": {
+    "display_name": "WLP 099 Super High Gravity Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "høy alkohol",
+      "nøytral",
+      "sterk øl",
+      "allsidig"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 349.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_380": {
+    "display_name": "WLP 380 Hefeweizen Ale IV",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hefeweizen",
+      "bayersk hvete"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_510": {
+    "display_name": "WLP 510 Bastogne Belgian Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "tørr",
+      "krydret",
+      "saison-preg"
+    ],
+    "attenuation": 0.8,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_521": {
+    "display_name": "WLP 521 Hornindal Kveik",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "tropisk",
+      "fersken",
+      "varm fermentering"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_545": {
+    "display_name": "WLP 545 Belgian Strong Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "sterk",
+      "fruktig",
+      "kompleks"
+    ],
+    "attenuation": 0.78,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  },
+  "wlp_4000": {
+    "display_name": "WLP 4000 Vermont Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "NEIPA",
+      "tropisk",
+      "hazy",
+      "Vermont-stil",
+      "Conan"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 199.0,
+    "pris_per_pakke": 0
+  }
+}

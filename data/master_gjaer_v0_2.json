@@ -1,0 +1,2482 @@
+{
+  "safale_us_05": {
+    "display_name": "SafAle US-05",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "tørr",
+      "humlefokus"
+    ],
+    "kategorier": {},
+    "attenuation": 0.81,
+    "aliases": [
+      "US-05",
+      "US05",
+      "SafAle US-05",
+      "Fermentis US-05"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "safale_s_04": {
+    "display_name": "SafAle S-04",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "lett fruktig",
+      "maltfokus"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "S-04",
+      "S04",
+      "SafAle S-04",
+      "Fermentis S-04"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "safale_k_97": {
+    "display_name": "SafAle K-97",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "lett fruktig",
+      "kölsch",
+      "tysk ale"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.8,
+    "aliases": [
+      "K-97",
+      "K97",
+      "SafAle K-97"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "safale_s_33": {
+    "display_name": "SafAle S-33",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "fruktig",
+      "maltfylde",
+      "lav utgjæring"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.7,
+    "aliases": [
+      "S-33",
+      "S33",
+      "SafAle S-33"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "safale_be_134": {
+    "display_name": "SafAle BE-134",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "pepper",
+      "krydret",
+      "tørr",
+      "saison"
+    ],
+    "kategorier": {
+      "Krydder": 6
+    },
+    "attenuation": 0.88,
+    "aliases": [
+      "BE-134",
+      "BE134",
+      "SafAle BE-134"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "safale_be_256": {
+    "display_name": "SafAle BE-256",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "krydret"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.82,
+    "aliases": [
+      "BE-256",
+      "BE256",
+      "SafAle BE-256",
+      "Abbaye"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "safbrew_t_58": {
+    "display_name": "SafBrew T-58",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "pepper",
+      "krydder",
+      "fruktig",
+      "belgisk"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.72,
+    "aliases": [
+      "T-58",
+      "T58",
+      "SafBrew T-58"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "saflager_w_34_70": {
+    "display_name": "SafLager W-34/70",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "klassisk lager",
+      "pilsner"
+    ],
+    "kategorier": {},
+    "attenuation": 0.82,
+    "aliases": [
+      "W-34/70",
+      "W34/70",
+      "Saflager W-34/70 11,5gr",
+      "Fermentis Saflager W-34/70"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 89.0,
+        "url": "https://www.vestbrygg.no/fermentis/40317/saflager-w-34-70-11-5gr-t%c3%b8rrgj%c3%a6r-til-%c3%b8lbrygging"
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 89.0
+  },
+  "saflager_s_23": {
+    "display_name": "SafLager S-23",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "lager",
+      "ren",
+      "lett fruktig"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.82,
+    "aliases": [
+      "S-23",
+      "S23",
+      "SafLager S-23"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "saflager_s_189": {
+    "display_name": "SafLager S-189",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "lager",
+      "maltfokus"
+    ],
+    "kategorier": {
+      "Maltfylde": 3
+    },
+    "attenuation": 0.82,
+    "aliases": [
+      "S-189",
+      "S189",
+      "SafLager S-189"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_nottingham": {
+    "display_name": "LalBrew Nottingham",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "allsidig",
+      "rask",
+      "nøytral"
+    ],
+    "kategorier": {},
+    "attenuation": 0.77,
+    "aliases": [
+      "Nottingham",
+      "LalBrew Nottingham"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_voss_kveik": {
+    "display_name": "LalBrew Voss Kveik",
+    "produsent": "Lallemand",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ],
+    "kategorier": {
+      "Sitrus": 5
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "LalBrew Voss Kveik",
+      "Lallemand Voss"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_verdant_ipa": {
+    "display_name": "LalBrew Verdant IPA",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "fersken",
+      "aprikos",
+      "myk",
+      "NEIPA"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.74,
+    "aliases": [
+      "Verdant IPA",
+      "Verdant",
+      "LalBrew Verdant IPA"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_new_england": {
+    "display_name": "LalBrew New England",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "myk",
+      "fruktig",
+      "NEIPA",
+      "tropisk"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.74,
+    "aliases": [
+      "New England",
+      "East Coast Ale",
+      "LalBrew New England"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_house_ale": {
+    "display_name": "LalBrew House Ale",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "allsidig",
+      "ren",
+      "lett fruktig"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.74,
+    "aliases": [
+      "House Ale",
+      "LalBrew House Ale"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_munich_classic": {
+    "display_name": "LalBrew Munich Classic",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hvete",
+      "bayersk"
+    ],
+    "kategorier": {
+      "Steinfrukt": 4,
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.74,
+    "aliases": [
+      "Munich Classic",
+      "LalBrew Munich Classic"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_diamond_lager": {
+    "display_name": "LalBrew Diamond Lager",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "lager",
+      "nøytral"
+    ],
+    "kategorier": {},
+    "attenuation": 0.8,
+    "aliases": [
+      "Diamond Lager",
+      "LalBrew Diamond Lager"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_belle_saison": {
+    "display_name": "LalBrew Belle Saison",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "pepper",
+      "krydret",
+      "tørr",
+      "saison"
+    ],
+    "kategorier": {
+      "Krydder": 6
+    },
+    "attenuation": 0.89,
+    "aliases": [
+      "Belle Saison",
+      "LalBrew Belle Saison"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_windsor": {
+    "display_name": "LalBrew Windsor",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "fruktig",
+      "maltfylde"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.7,
+    "aliases": [
+      "Windsor",
+      "LalBrew Windsor"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_london": {
+    "display_name": "LalBrew London",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "malt",
+      "lett fruktig",
+      "myk"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.73,
+    "aliases": [
+      "London Ale",
+      "LalBrew London"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_philly_sour": {
+    "display_name": "LalBrew Philly Sour",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Sour",
+    "smakstags": [
+      "syrlig",
+      "fruktig",
+      "rød frukt"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "Philly Sour",
+      "LalBrew Philly Sour"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "lalbrew_farmhouse": {
+    "display_name": "LalBrew Farmhouse",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "pepper",
+      "krydret",
+      "tørr",
+      "farmhouse"
+    ],
+    "kategorier": {
+      "Krydder": 6
+    },
+    "attenuation": 0.86,
+    "aliases": [
+      "Farmhouse",
+      "LalBrew Farmhouse"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m15_empire_ale": {
+    "display_name": "Mangrove Jack's M15 Empire Ale",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "lys frukt",
+      "nøtter",
+      "malt"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.72,
+    "aliases": [
+      "Empire Ale M15",
+      "M15",
+      "Mangrove Jack M15"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m20_bavarian_wheat": {
+    "display_name": "Mangrove Jack's M20 Bavarian Wheat",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hvete",
+      "weizen"
+    ],
+    "kategorier": {
+      "Steinfrukt": 4,
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.74,
+    "aliases": [
+      "Bavarian Wheat M20",
+      "M20",
+      "Mangrove Jack M20"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m21_belgian_wit": {
+    "display_name": "Mangrove Jack's M21 Belgian Wit",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "sitrus",
+      "koriander",
+      "hvete",
+      "belgisk wit"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.73,
+    "aliases": [
+      "Belgian Wit M21",
+      "M21",
+      "Mangrove Jack M21"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m29_french_saison": {
+    "display_name": "Mangrove Jack's M29 French Saison",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "pepper",
+      "krydret",
+      "tørr",
+      "saison"
+    ],
+    "kategorier": {
+      "Krydder": 6
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "French Saison M29",
+      "M29",
+      "Mangrove Jack M29"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m31_belgian_tripel": {
+    "display_name": "Mangrove Jack's M31 Belgian Tripel",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "krydret",
+      "tørr finish"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "Belgian Tripel M31",
+      "M31",
+      "Mangrove Jack M31"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m36_liberty_bell": {
+    "display_name": "Mangrove Jack's M36 Liberty Bell Ale",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "fruktig",
+      "malt",
+      "balansert"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.76,
+    "aliases": [
+      "Liberty Bell M36",
+      "M36",
+      "Mangrove Jack M36"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m41_belgian_ale": {
+    "display_name": "Mangrove Jack's M41 Belgian Ale",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "blomst",
+      "krydret"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "Belgian Ale M41",
+      "M41",
+      "Mangrove Jack M41"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m42_new_world_strong": {
+    "display_name": "Mangrove Jack's M42 New World Strong Ale",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "sterk ale",
+      "nøytral",
+      "tørr"
+    ],
+    "kategorier": {},
+    "attenuation": 0.78,
+    "aliases": [
+      "New World Strong Ale M42",
+      "M42",
+      "Mangrove Jack M42"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m44_us_west_coast": {
+    "display_name": "Mangrove Jack's M44 US West Coast",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "humlefokus",
+      "amerikansk",
+      "tørr"
+    ],
+    "kategorier": {},
+    "attenuation": 0.78,
+    "aliases": [
+      "US West Coast M44",
+      "M44",
+      "Mangrove Jack M44"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m54_california_lager": {
+    "display_name": "Mangrove Jack's M54 California Lager",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "lager ved aletemperatur",
+      "allsidig"
+    ],
+    "kategorier": {},
+    "attenuation": 0.76,
+    "aliases": [
+      "California Lager M54",
+      "M54",
+      "Mangrove Jack M54"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m76_bavarian_lager": {
+    "display_name": "Mangrove Jack's M76 Bavarian Lager",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "bayersk",
+      "lager"
+    ],
+    "kategorier": {
+      "Maltfylde": 3
+    },
+    "attenuation": 0.77,
+    "aliases": [
+      "Bavarian Lager M76",
+      "M76",
+      "Mangrove Jack M76"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "mangrove_m84_bohemian_lager": {
+    "display_name": "Mangrove Jack's M84 Bohemian Lager",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "tsjekkisk lager",
+      "klar"
+    ],
+    "kategorier": {
+      "Maltfylde": 3
+    },
+    "attenuation": 0.76,
+    "aliases": [
+      "Bohemian Lager M84",
+      "M84",
+      "Mangrove Jack M84"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "kveikyeastery_k1_voss": {
+    "display_name": "K.1 Voss",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ],
+    "kategorier": {
+      "Sitrus": 5
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "K.1 Voss",
+      "K1 Voss",
+      "K.1 Voss Homebrew"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "kveikyeastery_k9_ebbegarden": {
+    "display_name": "K.9 Ebbegarden",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "aprikos",
+      "fersken",
+      "tropisk",
+      "kveik"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "K.9 Ebbegarden",
+      "K9 Ebbegarden",
+      "K.9 Ebbegarden Homebrew"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "kveikyeastery_k14_eitrheim": {
+    "display_name": "K.14 Eitrheim",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "tropisk",
+      "fersken",
+      "blomst",
+      "kveik"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.77,
+    "aliases": [
+      "K.14 Eitrheim",
+      "K14 Eitrheim",
+      "K.14 Eitrheim Homebrew"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "kveikyeastery_k22_stalljen": {
+    "display_name": "K.22 Stalljen",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "frisk",
+      "nøytral kveik",
+      "allsidig",
+      "kveik"
+    ],
+    "kategorier": {},
+    "attenuation": 0.77,
+    "aliases": [
+      "K.22 Stalljen",
+      "K22 Stalljen",
+      "K.22 Stalljen Homebrew"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp001_california_ale": {
+    "display_name": "WLP001 California Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "amerikansk",
+      "humlefokus",
+      "nøytral"
+    ],
+    "kategorier": {},
+    "attenuation": 0.76,
+    "aliases": [
+      "WLP001",
+      "California Ale",
+      "White Labs WLP001"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp002_english_ale": {
+    "display_name": "WLP002 English Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "malt",
+      "fruktig",
+      "lav utgjæring"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.68,
+    "aliases": [
+      "WLP002",
+      "English Ale",
+      "White Labs WLP002"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp004_irish_ale": {
+    "display_name": "WLP004 Irish Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "irsk",
+      "malt",
+      "lett fruktig",
+      "stout"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.72,
+    "aliases": [
+      "WLP004",
+      "Irish Ale",
+      "White Labs WLP004"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp005_british_ale": {
+    "display_name": "WLP005 British Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "malt",
+      "fruktig",
+      "fylde"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.72,
+    "aliases": [
+      "WLP005",
+      "British Ale",
+      "White Labs WLP005"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp007_dry_english_ale": {
+    "display_name": "WLP007 Dry English Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "tørr",
+      "ren",
+      "malt"
+    ],
+    "kategorier": {
+      "Maltfylde": 3
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "WLP007",
+      "Dry English Ale",
+      "White Labs WLP007"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp013_london_ale": {
+    "display_name": "WLP013 London Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "malt",
+      "lett fruktig",
+      "mineral"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.72,
+    "aliases": [
+      "WLP013",
+      "London Ale",
+      "White Labs WLP013"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp023_burton_ale": {
+    "display_name": "WLP023 Burton Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "fruktig",
+      "mineral",
+      "engelsk",
+      "lett svovel"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.72,
+    "aliases": [
+      "WLP023",
+      "Burton Ale",
+      "White Labs WLP023"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp028_edinburgh_scottish_ale": {
+    "display_name": "WLP028 Edinburgh Scottish Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "maltfokus",
+      "ren",
+      "skotsk",
+      "lett røyk"
+    ],
+    "kategorier": {
+      "Maltfylde": 3
+    },
+    "attenuation": 0.72,
+    "aliases": [
+      "WLP028",
+      "Edinburgh Scottish Ale",
+      "Scottish Ale",
+      "White Labs WLP028"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp029_german_ale_kolsch": {
+    "display_name": "WLP029 German Ale/Kölsch",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "lett fruktig",
+      "tysk ale",
+      "kölsch"
+    ],
+    "kategorier": {
+      "Fruktighet": 5
+    },
+    "attenuation": 0.76,
+    "aliases": [
+      "WLP029",
+      "German Ale",
+      "Kölsch",
+      "Kolsch",
+      "White Labs WLP029"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp300_hefeweizen_ale": {
+    "display_name": "WLP300 Hefeweizen Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hvete",
+      "weizen"
+    ],
+    "kategorier": {
+      "Steinfrukt": 4,
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "WLP300",
+      "Hefeweizen Ale",
+      "White Labs WLP300"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp320_american_hefeweizen": {
+    "display_name": "WLP320 American Hefeweizen",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "ren hvete",
+      "lett fruktig",
+      "lav nellik",
+      "amerikansk hvete"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "WLP320",
+      "American Hefeweizen",
+      "White Labs WLP320"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp400_belgian_wit": {
+    "display_name": "WLP400 Belgian Wit",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "krydret",
+      "sitrus",
+      "hvete",
+      "belgisk wit"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.75,
+    "aliases": [
+      "WLP400",
+      "Belgian Wit",
+      "White Labs WLP400"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp500_monastery_ale": {
+    "display_name": "WLP500 Monastery Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "krydret",
+      "plomme"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "WLP500",
+      "Monastery Ale",
+      "White Labs WLP500"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp530_abbey_ale": {
+    "display_name": "WLP530 Abbey Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "krydret",
+      "tørr",
+      "fruktig"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.8,
+    "aliases": [
+      "WLP530",
+      "Abbey Ale",
+      "White Labs WLP530"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp550_belgian_ale": {
+    "display_name": "WLP550 Belgian Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "krydret",
+      "fenol",
+      "fruktig"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.8,
+    "aliases": [
+      "WLP550",
+      "Belgian Ale",
+      "White Labs WLP550"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp565_belgian_saison": {
+    "display_name": "WLP565 Belgian Saison I",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "saison",
+      "pepper",
+      "krydret",
+      "tørr"
+    ],
+    "kategorier": {
+      "Krydder": 6
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "WLP565",
+      "Belgian Saison",
+      "Belgian Saison I",
+      "White Labs WLP565"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp570_belgian_golden_ale": {
+    "display_name": "WLP570 Belgian Golden Ale",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "krydret",
+      "lys"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Krydder": 6
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "WLP570",
+      "Belgian Golden Ale",
+      "White Labs WLP570"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp800_pilsner_lager": {
+    "display_name": "WLP800 Pilsner Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "pilsner",
+      "ren",
+      "lager",
+      "malt"
+    ],
+    "kategorier": {
+      "Maltfylde": 3
+    },
+    "attenuation": 0.76,
+    "aliases": [
+      "WLP800",
+      "Pilsner Lager",
+      "White Labs WLP800"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp830_german_lager": {
+    "display_name": "WLP830 German Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "tysk lager",
+      "pilsner",
+      "malt"
+    ],
+    "kategorier": {
+      "Maltfylde": 3
+    },
+    "attenuation": 0.78,
+    "aliases": [
+      "WLP830",
+      "German Lager",
+      "White Labs WLP830"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wlp940_mexican_lager": {
+    "display_name": "WLP940 Mexican Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "lett",
+      "lager",
+      "nøytral"
+    ],
+    "kategorier": {},
+    "attenuation": 0.78,
+    "aliases": [
+      "WLP940",
+      "Mexican Lager",
+      "White Labs WLP940"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": false,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  },
+  "wyeast_1318_london_ale_iii": {
+    "display_name": "Wyeast 1318 London Ale III",
+    "produsent": "Wyeast",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "fruktig",
+      "malt",
+      "myk munnfølelse"
+    ],
+    "kategorier": {
+      "Fruktighet": 5,
+      "Maltfylde": 3
+    },
+    "attenuation": 0.73,
+    "aliases": [
+      "Wyeast 1318",
+      "1318",
+      "London Ale III",
+      "Wyeast London Ale III"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 0.0,
+        "url": null
+      },
+      "olbrygging": {
+        "pris": 0.0,
+        "url": null
+      },
+      "litebrygg": {
+        "pris": 0.0,
+        "url": null
+      }
+    },
+    "verified": true,
+    "locked": true,
+    "source": "master_seed_v0_2",
+    "pris_vestbrygg": 0.0,
+    "pris_olbrygging": 0.0,
+    "pris_litebrygg": 0.0,
+    "pris_per_pakke": 0.0
+  }
+}

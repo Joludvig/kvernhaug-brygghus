@@ -1,0 +1,399 @@
+{
+  "mangrove_m21_belgian_wit": {
+    "display_name": "Belgian Wit M21",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "sitrus",
+      "koriander",
+      "hvete",
+      "belgisk wit"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0,
+    "data_quality": "high"
+  },
+  "mangrove_m84_bohemian_lager": {
+    "display_name": "Bohemian Lager M84",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "krystallklar",
+      "tradisjonell lager"
+    ],
+    "attenuation": 0.76,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0,
+    "data_quality": "high"
+  },
+  "lalbrew_house_ale": {
+    "display_name": "LalBrew House Ale",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "smakstags": [
+      "nøytral",
+      "allsidig",
+      "ren",
+      "lett fruktig"
+    ],
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 0,
+    "attenuation": 0.74,
+    "pris_per_pakke": 65.0,
+    "gjaertype": "Ale",
+    "data_quality": "high"
+  },
+  "lalbrew_new_england": {
+    "display_name": "Lalbrew New England",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "smakstags": [
+      "myk",
+      "fruktig",
+      "tykk",
+      "NEIPA",
+      "tropisk"
+    ],
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 0,
+    "attenuation": 0.74,
+    "pris_per_pakke": 69.0,
+    "gjaertype": "Ale",
+    "data_quality": "high"
+  },
+  "mangrove_m20_bavarian_wheat": {
+    "display_name": "Bavarian Wheat M20",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hvete",
+      "tradisjonell weizen"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0,
+    "data_quality": "high"
+  },
+  "lalbrew_diamond_lager": {
+    "display_name": "Lalbrew Diamond Lager",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "smakstags": [
+      "ren",
+      "klar",
+      "profesjonell lager",
+      "nøytral"
+    ],
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "attenuation": 0.8,
+    "pris_per_pakke": 59.0,
+    "gjaertype": "Lager",
+    "data_quality": "high"
+  },
+  "kveikyeastery_k22_stalljen": {
+    "display_name": "K.22 Stalljen",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "allsidig",
+      "frisk",
+      "nøytral kveik"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0,
+    "data_quality": "high"
+  },
+  "kveikyeastery_k9_ebbegarden": {
+    "display_name": "K.9 Ebbegarden",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "aprikos",
+      "fersken",
+      "tropisk fruktighet"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0,
+    "data_quality": "high"
+  },
+  "mangrove_m76_bavarian_lager": {
+    "display_name": "Bavarian Lager M76",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "tradisjonell lager",
+      "bayersk"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0,
+    "data_quality": "high"
+  },
+  "mangrove_m31_belgian_tripel": {
+    "display_name": "Belgian Tripel M31",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "fruktig",
+      "krydret",
+      "belgisk",
+      "tørr finish"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 65.0,
+    "data_quality": "high"
+  },
+  "mangrove_m54_california_lager": {
+    "display_name": "California Lager M54",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "allsidig lager",
+      "fersk"
+    ],
+    "attenuation": 0.76,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0,
+    "data_quality": "high"
+  },
+  "kveikyeastery_k14_eitrheim": {
+    "display_name": "K.14 Eitrheim",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "tropisk",
+      "fersken",
+      "blomst"
+    ],
+    "attenuation": 0.77,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 79.0,
+    "data_quality": "high"
+  },
+  "mangrove_m29_french_saison": {
+    "display_name": "French Saison M29",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Saison",
+    "smakstags": [
+      "pepper",
+      "krydret",
+      "tørr",
+      "saison"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 65.0,
+    "data_quality": "high"
+  },
+  "mangrove_m15_empire_ale": {
+    "display_name": "Empire Ale M15",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "lys frukt",
+      "nøtter",
+      "tørr"
+    ],
+    "attenuation": 0.72,
+    "pris_vestbrygg": 59.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 59.0,
+    "data_quality": "high"
+  },
+  "kveikyeastery_k1_voss": {
+    "display_name": "K.1 Voss Homebrew",
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ],
+    "kategorier": {
+      "Fruktighet": 7,
+      "Sitrus": 6
+    },
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0,
+    "attenuation": 0.78,
+    "pris_per_pakke": 79.0,
+    "gjaertype": "Kveik",
+    "data_quality": "high"
+  },
+  "lalbrew_munich_classic": {
+    "display_name": "Lalbrew Munich Classic",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "tradisjonell hvete",
+      "bayersk"
+    ],
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 0,
+    "attenuation": 0.74,
+    "pris_per_pakke": 69.0,
+    "gjaertype": "Hvetegjær",
+    "data_quality": "high"
+  },
+  "mangrove_m41_belgian_ale": {
+    "display_name": "Belgian Ale M41",
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "fruktig",
+      "blomst",
+      "belgisk",
+      "krydret"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 65.0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 65.0,
+    "data_quality": "high"
+  },
+  "fermentis_us05": {
+    "display_name": "SafAle US-05",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "allsidig"
+    ],
+    "attenuation": 0.81,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0,
+    "data_quality": "high"
+  },
+  "fermentis_s04": {
+    "display_name": "SafAle S-04",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "mild frukt",
+      "engelsk",
+      "nøytral",
+      "lav gjærsmak"
+    ],
+    "attenuation": 0.75,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0,
+    "data_quality": "high"
+  },
+  "fermentis_w3470": {
+    "display_name": "SafLager W-34/70",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "tradisjonell lager",
+      "standard lager"
+    ],
+    "attenuation": 0.82,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0,
+    "data_quality": "high"
+  },
+  "lalbrew_voss_kveik": {
+    "display_name": "LalBrew Voss Kveik",
+    "produsent": "Lallemand",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ],
+    "attenuation": 0.78,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0,
+    "data_quality": "high"
+  },
+  "lalbrew_verdant": {
+    "display_name": "LalBrew Verdant IPA",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "fruktig",
+      "myk",
+      "NEIPA",
+      "pasjonsfrukt"
+    ],
+    "attenuation": 0.74,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0,
+    "data_quality": "high"
+  },
+  "wyeast_1318": {
+    "display_name": "Wyeast 1318 London Ale III",
+    "produsent": "Wyeast",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "frukt",
+      "malt",
+      "engelsk",
+      "medium attenuation"
+    ],
+    "attenuation": 0.73,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "pris_per_pakke": 0,
+    "data_quality": "high"
+  }
+}

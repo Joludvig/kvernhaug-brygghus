@@ -1,0 +1,2067 @@
+{
+  "amarillo": {
+    "display_name": "Amarillo",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Amarillo 2024 Humle Pellets - 100g USA",
+      "Amarillo 2023 100g 7,5% AA",
+      "Amarillo 2024 100g 11% AA",
+      "Amarillo 2024 5 kg"
+    ],
+    "smakstags": [
+      "appelsin",
+      "mandarin",
+      "aprikos",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Fruktighet": 5,
+      "Steinfrukt": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Amarillo",
+          "Amarillo 2024 Humle Pellets - 100g USA",
+          "Amarillo 2023 100g 7,5% AA",
+          "Amarillo 2024 100g 11% AA"
+        ],
+        "pris": 109.0,
+        "url": "https://vestbrygg.no/pellets/30195/amarillo-2024-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Amarillo",
+          "Amarillo 2024 Humle Pellets - 100g USA",
+          "Amarillo 2023 100g 7,5% AA",
+          "Amarillo 2024 100g 11% AA"
+        ],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/111097/amarillo-2024-100g-11pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "azacca": {
+    "display_name": "Azacca",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Azacca 2023 Humle Pellets - 100g USA",
+      "Azacca 2024 100g 11,9% AA",
+      "Azacca 2024 5 kg"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Azacca",
+          "Azacca 2023 Humle Pellets - 100g USA",
+          "Azacca 2024 100g 11,9% AA"
+        ],
+        "pris": 99.0,
+        "url": "https://vestbrygg.no/pellets/30194/azacca-2023-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Azacca",
+          "Azacca 2023 Humle Pellets - 100g USA",
+          "Azacca 2024 100g 11,9% AA"
+        ],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/110956/azacca-2024-100g-11-9pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "bru_1": {
+    "display_name": "BRU-1",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Bru-1 Humle Pellets - 100g",
+      "BRU-1 2024 100g 15,7% AA",
+      "BRU-1 2022 100 g",
+      "BRU-1 2024 5 kg",
+      "BRU-1 2023 100 g"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "BRU-1",
+          "Bru-1 Humle Pellets - 100g",
+          "BRU-1 2024 100g 15,7% AA"
+        ],
+        "pris": 109.0,
+        "url": "https://vestbrygg.no/pellets/103677/bru-1-humle-pellets-100g-humle-pellets",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "BRU-1",
+          "Bru-1 Humle Pellets - 100g",
+          "BRU-1 2024 100g 15,7% AA"
+        ],
+        "pris": 99.0,
+        "url": "https://www.olbrygging.no/humle/110958/bru-1-2024-100g-15-7pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "cascade": {
+    "display_name": "Cascade",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Cascade 2025 Humle Pellets - 100g USA",
+      "Cascade 2024 100g 9,5% AA"
+    ],
+    "smakstags": [
+      "grapefrukt",
+      "blomst",
+      "krydder"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Krydder": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Cascade",
+          "Cascade 2025 Humle Pellets - 100g USA",
+          "Cascade 2024 100g 9,5% AA"
+        ],
+        "pris": 99.0,
+        "url": "https://vestbrygg.no/pellets/30175/cascade-2025-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Cascade",
+          "Cascade 2025 Humle Pellets - 100g USA",
+          "Cascade 2024 100g 9,5% AA"
+        ],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/110285/cascade-2024-100g-9-5-pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "centennial": {
+    "display_name": "Centennial",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Centennial 2025 Humle Pellets - 100g USA",
+      "Centennial 2025 100g 10,4% AA",
+      "Centennial 2024 5 kg",
+      "Centennial 2025 5 kg"
+    ],
+    "smakstags": [
+      "sitron",
+      "grapefrukt",
+      "blomst",
+      "furu"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Furunål": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Centennial",
+          "Centennial 2025 Humle Pellets - 100g USA",
+          "Centennial 2025 100g 10,4% AA"
+        ],
+        "pris": 98.0,
+        "url": "https://vestbrygg.no/pellets/30145/centennial-2025-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Centennial",
+          "Centennial 2025 Humle Pellets - 100g USA",
+          "Centennial 2025 100g 10,4% AA"
+        ],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/112051/centennial-2025-100g-10-4-pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "challenger": {
+    "display_name": "Challenger",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "Challenger Humle Pellets - 100g UK"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Challenger",
+          "Challenger Humle Pellets - 100g UK"
+        ],
+        "pris": 69.0,
+        "url": "https://vestbrygg.no/pellets/30232/challenger-humle-pellets-100g-uk-storbritannia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Challenger",
+          "Challenger Humle Pellets - 100g UK"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "chinook": {
+    "display_name": "Chinook",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Chinook 2024 Humle Pellets - 100g USA",
+      "Chinook 2024 100g 11,1% AA",
+      "Chinook 2024 5 kg"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Chinook",
+          "Chinook 2024 Humle Pellets - 100g USA",
+          "Chinook 2024 100g 11,1% AA"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30180/chinook-2024-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Chinook",
+          "Chinook 2024 Humle Pellets - 100g USA",
+          "Chinook 2024 100g 11,1% AA"
+        ],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/110289/chinook-2024-100g-11-1pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "citra": {
+    "display_name": "Citra",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Citra 2025 Humle Pellets - 100g USA",
+      "Citra 2024 100g 13,9% AA",
+      "Citra T90 Pellets",
+      "Citra 2024 5 kg"
+    ],
+    "smakstags": [
+      "sitrus",
+      "grapefrukt",
+      "lime",
+      "pasjonsfrukt",
+      "ananas"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Citra",
+          "Citra 2025 Humle Pellets - 100g USA",
+          "Citra 2024 100g 13,9% AA",
+          "Citra T90 Pellets"
+        ],
+        "pris": 119.0,
+        "url": "https://vestbrygg.no/pellets/31120/citra-2025-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Citra",
+          "Citra 2025 Humle Pellets - 100g USA",
+          "Citra 2024 100g 13,9% AA",
+          "Citra T90 Pellets"
+        ],
+        "pris": 99.0,
+        "url": "https://www.olbrygging.no/humle/110600/citra-2024-100g-13-9pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "citra_lupomax": {
+    "display_name": "Citra LUPOMAX",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Citra LUPOMAX 2024 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Citra LUPOMAX",
+          "Citra LUPOMAX 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": 145.0,
+        "url": "https://vestbrygg.no/pellets/104561/citra-lupomax-2024-humle-pellets-100g-usa-lupomax",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Citra LUPOMAX",
+          "Citra LUPOMAX 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "columbus": {
+    "display_name": "Columbus",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Columbus 2024 Humle Pellets - 100g USA",
+      "Columbus 2023 5 kg 13,9% Alfasyre"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Columbus",
+          "Columbus 2024 Humle Pellets - 100g USA",
+          "Columbus 2023 5 kg 13,9% Alfasyre"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30198/columbus-2024-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Columbus",
+          "Columbus 2024 Humle Pellets - 100g USA",
+          "Columbus 2023 5 kg 13,9% Alfasyre"
+        ],
+        "pris": 990.0,
+        "url": "https://www.olbrygging.no/humle/111249/columbus-2023-5-kg-13-9pcnt-alfasyre",
+        "pakke_gram": 5000.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "east_kent_goldings": {
+    "display_name": "East Kent Goldings",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "East Kent Goldings 2025 Pellets - 100g UK",
+      "EKG"
+    ],
+    "smakstags": [
+      "honning",
+      "urter",
+      "blomster",
+      "mild krydder"
+    ],
+    "kategorier": {
+      "Krydder": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "East Kent Goldings",
+          "East Kent Goldings 2025 Pellets - 100g UK",
+          "EKG"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30230/east-kent-goldings-2025-pellets-100g-uk-storbritannia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "East Kent Goldings",
+          "East Kent Goldings 2025 Pellets - 100g UK",
+          "EKG"
+        ],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/109503/east-kent-golding-2023-100g-5-8-aapcnt-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "ekuanot": {
+    "display_name": "Ekuanot",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Ekuanot (Equinox) 2023 100g USA",
+      "Equinox"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Ekuanot",
+          "Ekuanot (Equinox) 2023 100g USA",
+          "Equinox"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/103350/ekuanot-equinox-2023-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Ekuanot",
+          "Ekuanot (Equinox) 2023 100g USA",
+          "Equinox"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "el_dorado": {
+    "display_name": "El Dorado",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "El Dorado 2023 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "El Dorado",
+          "El Dorado 2023 Humle Pellets - 100g USA"
+        ],
+        "pris": 99.0,
+        "url": "https://vestbrygg.no/pellets/103480/el-dorado-2023-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "El Dorado",
+          "El Dorado 2023 Humle Pellets - 100g USA"
+        ],
+        "pris": 99.0,
+        "url": "https://www.olbrygging.no/humle/111253/el-dorado-2024-100g-13-1pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "fuggles": {
+    "display_name": "Fuggles",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "Fuggles",
+      "Fuggle",
+      "Fuggle 2024",
+      "Fuggles 2023 Humle Pellets - 100g"
+    ],
+    "smakstags": [
+      "jordlig",
+      "treverk",
+      "urter"
+    ],
+    "kategorier": {
+      "Jordlig": 4,
+      "Krydder": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Fuggles",
+          "Fuggles 2023 Humle Pellets - 100g"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30231/fuggles-2023-humle-pellets-100g",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Fuggles",
+          "Fuggles 2023 Humle Pellets - 100g"
+        ],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/110961/fuggle-2024-100g-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "galaxy": {
+    "display_name": "Galaxy",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Australia",
+    "aliases": [
+      "Galaxy 2025 Humle Pellets - 100g Australia"
+    ],
+    "smakstags": [
+      "pasjonsfrukt",
+      "fersken",
+      "sitrus",
+      "tropisk"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Galaxy",
+          "Galaxy 2025 Humle Pellets - 100g Australia"
+        ],
+        "pris": 119.0,
+        "url": "https://vestbrygg.no/pellets/103447/galaxy-2025-humle-pellets-100g-australia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Galaxy",
+          "Galaxy 2025 Humle Pellets - 100g Australia"
+        ],
+        "pris": 109.0,
+        "url": "https://www.olbrygging.no/humle/110604/galaxy-2024-100g-18-4pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "goldings": {
+    "display_name": "Goldings",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "Goldings 2024 Humle Pellets - 100g"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Goldings",
+          "Goldings 2024 Humle Pellets - 100g"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30233/goldings-2024-humle-pellets-100g",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Goldings",
+          "Goldings 2024 Humle Pellets - 100g"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "harlequin": {
+    "display_name": "Harlequin",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "Harlequin 2023 Pellets - 100g UK"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Harlequin",
+          "Harlequin 2023 Pellets - 100g UK"
+        ],
+        "pris": 99.0,
+        "url": "https://vestbrygg.no/pellets/104019/harlequin-2023-pellets-100g-uk-storbritannia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Harlequin",
+          "Harlequin 2023 Pellets - 100g UK"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "herkules": {
+    "display_name": "Herkules",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Herkules 2023 Humle Pellets - 100g Tyskland"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Herkules",
+          "Herkules 2023 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/104022/herkules-2023-humle-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Herkules",
+          "Herkules 2023 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "hersbrucker": {
+    "display_name": "Hersbrucker",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Hersbrucker 2024 Humle Pellets - 100g Tyskland"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Hersbrucker",
+          "Hersbrucker 2024 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 69.0,
+        "url": "https://vestbrygg.no/pellets/30649/hersbrucker-2024-humle-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Hersbrucker",
+          "Hersbrucker 2024 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 59.0,
+        "url": "https://www.olbrygging.no/humle/110489/hersbrucker-2024-100g-2-4pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "idaho_7": {
+    "display_name": "Idaho-7",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Idaho-7 Humle Pellets 2025 - 100g"
+    ],
+    "smakstags": [
+      "tropisk frukt",
+      "aprikos",
+      "furu",
+      "sitrus"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5,
+      "Furunål": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Idaho-7",
+          "Idaho-7 Humle Pellets 2025 - 100g"
+        ],
+        "pris": 119.0,
+        "url": "https://vestbrygg.no/pellets/103666/idaho-7-humle-pellets-2025-100g-humle-pellets",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Idaho-7",
+          "Idaho-7 Humle Pellets 2025 - 100g"
+        ],
+        "pris": 490.0,
+        "url": "https://www.olbrygging.no/humle/111227/idaho-7-2021-5-kg-11-4pcnt-alfasyre",
+        "pakke_gram": 5000.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "jester": {
+    "display_name": "Jester",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "Jester 2023 Pellets - 100g UK"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Jester",
+          "Jester 2023 Pellets - 100g UK"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/104027/jester-2023-pellets-100g-uk-storbritannia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Jester",
+          "Jester 2023 Pellets - 100g UK"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "lemondrop": {
+    "display_name": "Lemondrop",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Lemondrop 2022 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Lemondrop",
+          "Lemondrop 2022 Humle Pellets - 100g USA"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/104371/lemondrop-2022-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Lemondrop",
+          "Lemondrop 2022 Humle Pellets - 100g USA"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "magnum": {
+    "display_name": "Magnum",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Magnum 2024 Humle Pellets - 100g Tyskland"
+    ],
+    "smakstags": [
+      "ren bitterhet",
+      "nøytral aroma"
+    ],
+    "kategorier": {
+      "Bitterhet": 8
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Magnum",
+          "Magnum 2024 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30403/magnum-2024-humle-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Magnum",
+          "Magnum 2024 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 59.0,
+        "url": "https://www.olbrygging.no/humle/110491/magnum-2024-100g-13-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "mandarina_bavaria": {
+    "display_name": "Mandarina Bavaria",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Mandarina Bavaria 2024 Pellets - 100g Tyskland"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Mandarina Bavaria",
+          "Mandarina Bavaria 2024 Pellets - 100g Tyskland"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30637/mandarina-bavaria-2024-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Mandarina Bavaria",
+          "Mandarina Bavaria 2024 Pellets - 100g Tyskland"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "hallertau_mittelfruh": {
+    "display_name": "Hallertau Mittelfrüh",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Mittelfrü 2024 Humle Pellets - 100g Tyskland",
+      "Mittelfrüh",
+      "Hallertauer Mittelfrüh"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Hallertau Mittelfrüh",
+          "Mittelfrü 2024 Humle Pellets - 100g Tyskland",
+          "Mittelfrüh",
+          "Hallertauer Mittelfrüh"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30650/mittelfr%c3%bc-2024-humle-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Hallertau Mittelfrüh",
+          "Mittelfrü 2024 Humle Pellets - 100g Tyskland",
+          "Mittelfrüh",
+          "Hallertauer Mittelfrüh"
+        ],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/110485/hallertau-mittelfruh-2024-100g-3-3pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "mosaic": {
+    "display_name": "Mosaic",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Mosaic 2025 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [
+      "mango",
+      "blåbær",
+      "tropisk frukt",
+      "furunål"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Furunål": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Mosaic",
+          "Mosaic 2025 Humle Pellets - 100g USA"
+        ],
+        "pris": 109.0,
+        "url": "https://vestbrygg.no/pellets/30183/mosaic-2025-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Mosaic",
+          "Mosaic 2025 Humle Pellets - 100g USA"
+        ],
+        "pris": 99.0,
+        "url": "https://www.olbrygging.no/humle/110602/mosaic-2024-100g-13-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "mosaic_lupomax": {
+    "display_name": "Mosaic LUPOMAX",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Mosaic LUPOMAX 2024 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Mosaic LUPOMAX",
+          "Mosaic LUPOMAX 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": 139.0,
+        "url": "https://vestbrygg.no/pellets/104563/mosaic-lupomax-2024-humle-pellets-100g-usa-lupomax",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Mosaic LUPOMAX",
+          "Mosaic LUPOMAX 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "motueka": {
+    "display_name": "Motueka",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Motueka 2024 Humle Pellets - 100g New Zealand"
+    ],
+    "smakstags": [
+      "lime",
+      "sitrus",
+      "tropisk frukt"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Motueka",
+          "Motueka 2024 Humle Pellets - 100g New Zealand"
+        ],
+        "pris": 119.0,
+        "url": "https://vestbrygg.no/pellets/31121/motueka-2024-humle-pellets-100g-new-zealand",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Motueka",
+          "Motueka 2024 Humle Pellets - 100g New Zealand"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "mystic": {
+    "display_name": "Mystic",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "Mystic 2023 Pellets - 100g UK"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Mystic",
+          "Mystic 2023 Pellets - 100g UK"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/104016/mystic-2023-pellets-100g-uk-storbritannia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Mystic",
+          "Mystic 2023 Pellets - 100g UK"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "nelson_sauvin": {
+    "display_name": "Nelson Sauvin",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Nelson Sauvin 2025 Humle Pellets - 100g New Zealand"
+    ],
+    "smakstags": [
+      "hvitvin",
+      "stikkelsbær",
+      "druer",
+      "pasjonsfrukt"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Vinøs": 6
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Nelson Sauvin",
+          "Nelson Sauvin 2025 Humle Pellets - 100g New Zealand"
+        ],
+        "pris": 119.0,
+        "url": "https://vestbrygg.no/pellets/30715/nelson-sauvin-2025-humle-pellets-100g-new-zealand",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Nelson Sauvin",
+          "Nelson Sauvin 2025 Humle Pellets - 100g New Zealand"
+        ],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/111821/nelson-sauvin-2024-100g-9-6pcnt-alfasyre",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "northern_brewer": {
+    "display_name": "Northern Brewer",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Northern Brewer2024 Pellets - 100g Tyskland",
+      "Northern Brewer 2024"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Northern Brewer",
+          "Northern Brewer2024 Pellets - 100g Tyskland",
+          "Northern Brewer 2024"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30647/northern-brewer2024-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Northern Brewer",
+          "Northern Brewer2024 Pellets - 100g Tyskland",
+          "Northern Brewer 2024"
+        ],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/110487/northern-brewer-2024-100g-7-5pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "perle": {
+    "display_name": "Perle",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Perle 2024 Humle Pellets - 100g Tyskland"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Perle",
+          "Perle 2024 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30646/perle-2024-humle-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Perle",
+          "Perle 2024 Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 59.0,
+        "url": "https://www.olbrygging.no/humle/110291/perle-2024-100g-6-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "rakau": {
+    "display_name": "Rakau",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Rakau Humle Pellets - 100g New Zealand"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Rakau",
+          "Rakau Humle Pellets - 100g New Zealand"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30713/rakau-humle-pellets-100g-new-zealand",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Rakau",
+          "Rakau Humle Pellets - 100g New Zealand"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "saaz": {
+    "display_name": "Saaz",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Czech Republic",
+    "aliases": [
+      "Saaz 2025 Humle Pellets - 100g Tsjekkia"
+    ],
+    "smakstags": [
+      "urter",
+      "krydder",
+      "jordlig",
+      "blomster"
+    ],
+    "kategorier": {
+      "Jordlig": 4,
+      "Krydder": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Saaz",
+          "Saaz 2025 Humle Pellets - 100g Tsjekkia"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30307/saaz-2025-humle-pellets-100g-tsjekkia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Saaz",
+          "Saaz 2025 Humle Pellets - 100g Tsjekkia"
+        ],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/110293/saaz-2024-100g-2-9pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "sabro": {
+    "display_name": "Sabro",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Sabro 2024 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [
+      "kokos",
+      "ananas",
+      "steinfrukt",
+      "sedertre"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Sabro",
+          "Sabro 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": 99.0,
+        "url": "https://vestbrygg.no/pellets/103950/sabro-2024-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Sabro",
+          "Sabro 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/110483/sabro-2024-100g-15-5pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "simcoe": {
+    "display_name": "Simcoe",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Simcoe 2024 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [
+      "furu",
+      "pasjonsfrukt",
+      "sitrus",
+      "jordlig"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Furunål": 5,
+      "Jordlig": 4
+    },
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Simcoe",
+          "Simcoe 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": 109.0,
+        "url": "https://vestbrygg.no/pellets/30185/simcoe-2024-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Simcoe",
+          "Simcoe 2024 Humle Pellets - 100g USA"
+        ],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/111240/simcoe-2023-100g-12-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "styrian_dragon": {
+    "display_name": "Styrian Dragon",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Slovenia",
+    "aliases": [
+      "Styrian Dragon 2024 Pellets - 100g Slovenia"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Styrian Dragon",
+          "Styrian Dragon 2024 Pellets - 100g Slovenia"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/104539/styrian-dragon-2024-pellets-100g-slovenia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Styrian Dragon",
+          "Styrian Dragon 2024 Pellets - 100g Slovenia"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "styrian_golding": {
+    "display_name": "Styrian Golding",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Slovenia",
+    "aliases": [
+      "Styrian Golding 2023 Pellets - 100g Slovenia"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Styrian Golding",
+          "Styrian Golding 2023 Pellets - 100g Slovenia"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/104073/styrian-golding-2023-pellets-100g-slovenia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Styrian Golding",
+          "Styrian Golding 2023 Pellets - 100g Slovenia"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "superdelic": {
+    "display_name": "Superdelic",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Superdelic 2024 Humle Pellets - 100g NZ"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Superdelic",
+          "Superdelic 2024 Humle Pellets - 100g NZ"
+        ],
+        "pris": 119.0,
+        "url": "https://vestbrygg.no/pellets/104313/superdelic-2024-humle-pellets-100g-nz",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Superdelic",
+          "Superdelic 2024 Humle Pellets - 100g NZ"
+        ],
+        "pris": null,
+        "url": null
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "talus": {
+    "display_name": "Talus",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Talus 2023 Humle Pellets - 100g USA"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Talus",
+          "Talus 2023 Humle Pellets - 100g USA"
+        ],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/104075/talus-2023-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Talus",
+          "Talus 2023 Humle Pellets - 100g USA"
+        ],
+        "pris": 35.0,
+        "url": "https://www.olbrygging.no/humle/108330/talus-2022-100g-8-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "tettnang": {
+    "display_name": "Tettnang",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Tettnang Humle Pellets - 100g Tyskland"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Tettnang",
+          "Tettnang Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30648/tettnang-humle-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Tettnang",
+          "Tettnang Humle Pellets - 100g Tyskland"
+        ],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/112059/tettnanger-2025-100g-4-3pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "waimea": {
+    "display_name": "Waimea",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Waimea Humle Pellets - 100g"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Waimea",
+          "Waimea Humle Pellets - 100g"
+        ],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30714/waimea-humle-pellets-100g",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Waimea",
+          "Waimea Humle Pellets - 100g"
+        ],
+        "pris": 69.0,
+        "url": "https://www.olbrygging.no/humle/112072/waimea-2024-100g",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "akoya": {
+    "display_name": "Akoya",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Ukjent",
+    "aliases": [
+      "Akoya 2024 100g 9,5% AA",
+      "Akoya 2024 5 kg"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Akoya",
+          "Akoya 2024 100g 9,5% AA"
+        ],
+        "pris": null,
+        "url": null
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Akoya",
+          "Akoya 2024 100g 9,5% AA"
+        ],
+        "pris": 59.0,
+        "url": "https://www.olbrygging.no/humle/110968/akoya-2024-100g-9-5pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "alora": {
+    "display_name": "Alora",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Ukjent",
+    "aliases": [
+      "Alora 2024 100g 10% AA",
+      "Alora 2024 5 kg"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Alora",
+          "Alora 2024 100g 10% AA"
+        ],
+        "pris": null,
+        "url": null
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Alora",
+          "Alora 2024 100g 10% AA"
+        ],
+        "pris": 99.0,
+        "url": "https://www.olbrygging.no/humle/110962/alora-2024-100g-10pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "cashmere": {
+    "display_name": "Cashmere",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Cashmere 2023 5 kg 9,5% Alfasyre",
+      "Cashmere 2023 - 5 kg"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Cashmere",
+          "Cashmere 2023 5 kg 9,5% Alfasyre"
+        ],
+        "pris": null,
+        "url": null
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Cashmere",
+          "Cashmere 2023 5 kg 9,5% Alfasyre"
+        ],
+        "pris": 490.0,
+        "url": "https://www.olbrygging.no/humle/111737/cashmere-2023-5-kg-9-5pcnt-alfasyre",
+        "pakke_gram": 5000.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "celeia": {
+    "display_name": "Celeia",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Slovenia",
+    "aliases": [
+      "Celeia 2024 100g 3,2% AA"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": null,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [
+          "Celeia",
+          "Celeia 2024 100g 3,2% AA"
+        ],
+        "pris": null,
+        "url": null
+      },
+      "olbrygging": {
+        "search_terms": [
+          "Celeia",
+          "Celeia 2024 100g 3,2% AA"
+        ],
+        "pris": 69.0,
+        "url": "https://www.olbrygging.no/humle/111524/celeia-2024-100g-3-2pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "comet": {
+    "display_name": "Comet",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Comet",
+      "Comet 2021",
+      "Comet 2022"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 9.3,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 40.0,
+        "url": "https://www.olbrygging.no/humle/107380/comet-2022-100g-9-3pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "eclipse_2021": {
+    "display_name": "Eclipse 2021",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Eclipse 2021",
+      "Eclipse 2021 Humle",
+      "Eclipse 2021 Pellets"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 17.7,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 36.0,
+        "url": "https://www.olbrygging.no/humle/105844/eclipse-2021-100g-17-7pcnt-alfasyre",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "eclipse_2024": {
+    "display_name": "Eclipse 2024",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Eclipse 2024",
+      "Eclipse 2024 Humle",
+      "Eclipse 2024 Pellets"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 19.7,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 109.0,
+        "url": "https://www.olbrygging.no/humle/110606/eclipse-2024-100g-19-7pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "ella": {
+    "display_name": "Ella",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Australia",
+    "aliases": [
+      "Ella",
+      "Ella Humle",
+      "Ella Pellets"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 16.5,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 28.0,
+        "url": "https://www.olbrygging.no/humle/105835/ella-2021-100g-16-5pcnt-alfasyre",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "hallertau_blanc": {
+    "display_name": "Hallertau Blanc",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Hallertau Blanc",
+      "Hallertau Blanc Humle"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 9.4,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 59.0,
+        "url": "https://www.olbrygging.no/humle/110966/hallertau-blanc-2024-100g-9-4pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "hallertau_tradition": {
+    "display_name": "Hallertau Tradition",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Hallertau Tradition",
+      "Tradition Humle",
+      "Hallertau Tradition Humle"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 5.6,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 59.0,
+        "url": "https://www.olbrygging.no/humle/110970/hallertau-tradition-2024-100g-5-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "hbc_630": {
+    "display_name": "HBC 630",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "HBC 630",
+      "HBC630",
+      "HBC 630 Humle"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 13.7,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 40.0,
+        "url": "https://www.olbrygging.no/humle/108266/hbc-630-2022-100g-13-7pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "kohatu": {
+    "display_name": "Kohatu",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Kohatu",
+      "Kohatu Humle",
+      "Kohatu Pellets"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 6.0,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 69.0,
+        "url": "https://www.olbrygging.no/humle/112062/kohatu-2024-100g-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "krush": {
+    "display_name": "Krush",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Krush",
+      "Krush Humle",
+      "Krush Pellets"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 13.6,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/110596/krush-2024-100g-13-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "moutere": {
+    "display_name": "Moutere",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Moutere",
+      "Moutere Humle",
+      "Moutere Pellets"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 16.6,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 69.0,
+        "url": "https://www.olbrygging.no/humle/112065/moutere-2024-100g-16-6pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "nectaron": {
+    "display_name": "Nectaron",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Nectaron",
+      "Nectaron Humle",
+      "Nectaron Pellets"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 11.9,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 109.0,
+        "url": "https://www.olbrygging.no/humle/110964/nectaron-2024-100g-11-9pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "pacific_sunrise": {
+    "display_name": "Pacific Sunrise",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Pacific Sunrise",
+      "Pacific Sunrise Humle"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 11.5,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 69.0,
+        "url": "https://www.olbrygging.no/humle/112068/pacific-sunrise-2024-100g-11-5pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "southern_star": {
+    "display_name": "Southern Star",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "New Zealand",
+    "aliases": [
+      "Southern Star",
+      "Southern Star Humle"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 15.0,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 28.0,
+        "url": "https://www.olbrygging.no/humle/104366/southern-star-2021-100g-15pcnt-alfasyre",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "vic_secret": {
+    "display_name": "Vic Secret",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Australia",
+    "aliases": [
+      "Vic Secret",
+      "Vic Secret Humle",
+      "Victoria Secret"
+    ],
+    "smakstags": [],
+    "kategorier": {},
+    "alfa_typisk": 20.4,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 28.0,
+        "url": "https://www.olbrygging.no/humle/105843/vic-secret-2021-100g-20-4pcnt-alfasyre",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  }
+}

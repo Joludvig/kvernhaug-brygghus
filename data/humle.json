@@ -1,0 +1,544 @@
+{
+  "amarillo": {
+    "display_name": "Amarillo",
+    "kategori": "humle",
+    "smakstags": [
+      "appelsin",
+      "mandarin",
+      "aprikos",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Fruktighet": 5,
+      "Steinfrukt": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 109.0,
+    "pris_olbrygging": 89.0
+  },
+  "azacca": {
+    "display_name": "Azacca",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 99.0,
+    "pris_olbrygging": 79.0
+  },
+  "bru_1": {
+    "display_name": "BRU-1",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 109.0,
+    "pris_olbrygging": 99.0
+  },
+  "cascade": {
+    "display_name": "Cascade",
+    "kategori": "humle",
+    "smakstags": [
+      "grapefrukt",
+      "blomst",
+      "krydder"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Krydder": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 99.0,
+    "pris_olbrygging": 89.0
+  },
+  "centennial": {
+    "display_name": "Centennial",
+    "kategori": "humle",
+    "smakstags": [
+      "sitron",
+      "grapefrukt",
+      "blomst",
+      "furu"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Furunål": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 98.0,
+    "pris_olbrygging": 89.0
+  },
+  "challenger": {
+    "display_name": "Challenger",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 0
+  },
+  "chinook": {
+    "display_name": "Chinook",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 79.0
+  },
+  "citra": {
+    "display_name": "Citra",
+    "kategori": "humle",
+    "smakstags": [
+      "sitrus",
+      "grapefrukt",
+      "lime",
+      "pasjonsfrukt",
+      "ananas"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 119.0,
+    "pris_olbrygging": 99.0
+  },
+  "citra_lupomax": {
+    "display_name": "Citra LUPOMAX",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 145.0,
+    "pris_olbrygging": 0
+  },
+  "columbus": {
+    "display_name": "Columbus",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 990.0
+  },
+  "east_kent_goldings": {
+    "display_name": "East Kent Goldings",
+    "kategori": "humle",
+    "smakstags": [
+      "honning",
+      "urter",
+      "blomster",
+      "mild krydder"
+    ],
+    "kategorier": {
+      "Krydder": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 79.0
+  },
+  "ekuanot": {
+    "display_name": "Ekuanot",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0
+  },
+  "el_dorado": {
+    "display_name": "El Dorado",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 99.0,
+    "pris_olbrygging": 99.0
+  },
+  "fuggles": {
+    "display_name": "Fuggles",
+    "kategori": "humle",
+    "smakstags": [
+      "jordlig",
+      "treverk",
+      "urter"
+    ],
+    "kategorier": {
+      "Jordlig": 4,
+      "Krydder": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 79.0
+  },
+  "galaxy": {
+    "display_name": "Galaxy",
+    "kategori": "humle",
+    "smakstags": [
+      "pasjonsfrukt",
+      "fersken",
+      "sitrus",
+      "tropisk"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 119.0,
+    "pris_olbrygging": 109.0
+  },
+  "goldings": {
+    "display_name": "Goldings",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0
+  },
+  "harlequin": {
+    "display_name": "Harlequin",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 99.0,
+    "pris_olbrygging": 0
+  },
+  "herkules": {
+    "display_name": "Herkules",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0
+  },
+  "hersbrucker": {
+    "display_name": "Hersbrucker",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 69.0,
+    "pris_olbrygging": 59.0
+  },
+  "idaho_7": {
+    "display_name": "Idaho-7",
+    "kategori": "humle",
+    "smakstags": [
+      "tropisk frukt",
+      "aprikos",
+      "furu",
+      "sitrus"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5,
+      "Furunål": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 119.0,
+    "pris_olbrygging": 490.0
+  },
+  "jester": {
+    "display_name": "Jester",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0
+  },
+  "lemondrop": {
+    "display_name": "Lemondrop",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0
+  },
+  "magnum": {
+    "display_name": "Magnum",
+    "kategori": "humle",
+    "smakstags": [
+      "ren bitterhet",
+      "nøytral aroma"
+    ],
+    "kategorier": {
+      "Bitterhet": 8
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 59.0
+  },
+  "mandarina_bavaria": {
+    "display_name": "Mandarina Bavaria",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0
+  },
+  "hallertau_mittelfruh": {
+    "display_name": "Hallertau Mittelfrüh",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 79.0
+  },
+  "mosaic": {
+    "display_name": "Mosaic",
+    "kategori": "humle",
+    "smakstags": [
+      "mango",
+      "blåbær",
+      "tropisk frukt",
+      "furunål"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Furunål": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 109.0,
+    "pris_olbrygging": 99.0
+  },
+  "mosaic_lupomax": {
+    "display_name": "Mosaic LUPOMAX",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 139.0,
+    "pris_olbrygging": 0
+  },
+  "motueka": {
+    "display_name": "Motueka",
+    "kategori": "humle",
+    "smakstags": [
+      "lime",
+      "sitrus",
+      "tropisk frukt"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 119.0,
+    "pris_olbrygging": 0
+  },
+  "mystic": {
+    "display_name": "Mystic",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0
+  },
+  "nelson_sauvin": {
+    "display_name": "Nelson Sauvin",
+    "kategori": "humle",
+    "smakstags": [
+      "hvitvin",
+      "stikkelsbær",
+      "druer",
+      "pasjonsfrukt"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Vinøs": 6
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 119.0,
+    "pris_olbrygging": 89.0
+  },
+  "northern_brewer": {
+    "display_name": "Northern Brewer",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 79.0
+  },
+  "perle": {
+    "display_name": "Perle",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 59.0
+  },
+  "rakau": {
+    "display_name": "Rakau",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 0
+  },
+  "saaz": {
+    "display_name": "Saaz",
+    "kategori": "humle",
+    "smakstags": [
+      "urter",
+      "krydder",
+      "jordlig",
+      "blomster"
+    ],
+    "kategorier": {
+      "Jordlig": 4,
+      "Krydder": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 79.0
+  },
+  "sabro": {
+    "display_name": "Sabro",
+    "kategori": "humle",
+    "smakstags": [
+      "kokos",
+      "ananas",
+      "steinfrukt",
+      "sedertre"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 99.0,
+    "pris_olbrygging": 89.0
+  },
+  "simcoe": {
+    "display_name": "Simcoe",
+    "kategori": "humle",
+    "smakstags": [
+      "furu",
+      "pasjonsfrukt",
+      "sitrus",
+      "jordlig"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Furunål": 5,
+      "Jordlig": 4
+    },
+    "alfa": 5.0,
+    "pris_vestbrygg": 109.0,
+    "pris_olbrygging": 79.0
+  },
+  "styrian_dragon": {
+    "display_name": "Styrian Dragon",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0
+  },
+  "styrian_golding": {
+    "display_name": "Styrian Golding",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 0
+  },
+  "superdelic": {
+    "display_name": "Superdelic",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 119.0,
+    "pris_olbrygging": 0
+  },
+  "talus": {
+    "display_name": "Talus",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 89.0,
+    "pris_olbrygging": 35.0
+  },
+  "tettnang": {
+    "display_name": "Tettnang",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 79.0
+  },
+  "waimea": {
+    "display_name": "Waimea",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 79.0,
+    "pris_olbrygging": 69.0
+  },
+  "akoya": {
+    "display_name": "Akoya",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 59.0
+  },
+  "alora": {
+    "display_name": "Alora",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 99.0
+  },
+  "cashmere": {
+    "display_name": "Cashmere",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 490.0
+  },
+  "celeia": {
+    "display_name": "Celeia",
+    "kategori": "humle",
+    "smakstags": [],
+    "kategorier": {},
+    "alfa": 5.0,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 69.0
+  }
+}

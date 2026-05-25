@@ -1,0 +1,119 @@
+# modules/store_scraper.py
+import json
+import os
+import time
+from modules.product_link_scraper import finn_produktsider, finn_gjær_fra_sitemap, parse_produktside
+
+def _sikre_raw_mappe():
+    if not os.path.exists("raw_data"):
+        os.makedirs("raw_data")
+
+def kjor_full_skanning():
+    """Hovedmotor som kjører den nye dype link- og produktskanning-pipelinen med krasjsikring."""
+    _sikre_raw_mappe()
+    
+    # Initialiser tellere slik at vi ALDRI returnerer None til Streamlit
+    antall_malt = 0
+    antall_humle = 0
+    antall_gjaer = 0
+    
+    try:
+        # --- 1. SKANNER MALT ---
+        print("==================================================")
+        print("Skanner MALT via strukturerte produktlenker...")
+        print("==================================================")
+        malt_lenker_vest = finn_produktsider("https://vestbrygg.no", "råvarer/malt", "malt")
+        # Oppdatert til den korrekte råvarebanen hos Ølbrygging: ol/raavarer/malt
+        malt_lenker_ol = finn_produktsider("https://olbrygging.no", "ol/raavarer/malt", "malt")
+        
+        malt_data = []
+        for url in malt_lenker_vest:
+            res = parse_produktside(url, "malt", "vestbrygg")
+            if res: malt_data.append(res)
+            time.sleep(1)
+            
+        for url in malt_lenker_ol:
+            res = parse_produktside(url, "malt", "olbrygging")
+            if res: malt_data.append(res)
+            time.sleep(1)
+            
+        with open("raw_data/malt_raw.json", "w", encoding="utf-8") as f:
+            json.dump(malt_data, f, ensure_ascii=False, indent=2)
+        antall_malt = len(malt_data)
+
+        # --- 2. SKANNER HUMLE ---
+        print("==================================================")
+        print("Skanner HUMLE via strukturerte produktlenker...")
+        print("==================================================")
+        humle_lenker_vest = finn_produktsider("https://vestbrygg.no", "råvarer/humle", "humle")
+        # Oppdatert til den korrekte råvarebanen hos Ølbrygging: ol/raavarer/humle
+        humle_lenker_ol = finn_produktsider("https://olbrygging.no", "ol/raavarer/humle", "humle")
+        
+        humle_data = []
+        for url in humle_lenker_vest:
+            res = parse_produktside(url, "humle", "vestbrygg")
+            if res: humle_data.append(res)
+            time.sleep(1)
+            
+        for url in humle_lenker_ol:
+            res = parse_produktside(url, "humle", "olbrygging")
+            if res: humle_data.append(res)
+            time.sleep(1)
+            
+        with open("raw_data/humle_raw.json", "w", encoding="utf-8") as f:
+            json.dump(humle_data, f, ensure_ascii=False, indent=2)
+        antall_humle = len(humle_data)
+
+        # --- 3. SKANNER GJÆR ---
+        print("==================================================")
+        print("Skanner GJÆR via strukturerte produktlenker...")
+        print("==================================================")
+        # Sitemap er primærkilde — eneste måten å finne alle gjær inkl. Fermentis
+        gjaer_urls_vest = set(finn_gjær_fra_sitemap("https://vestbrygg.no"))
+        # Kategorisider som supplement for evt. produkter sitemap mangler
+        for sti in ["råvarer/gjær", "råvarer/gjær/tørrgjær", "råvarer/gjær/fersk-gjær"]:
+            gjaer_urls_vest |= set(finn_produktsider("https://vestbrygg.no", sti, "gjaer"))
+
+        gjaer_lenker_ol_torr = finn_produktsider("https://olbrygging.no", "ol/raavarer/gjaer/torrgjaer", "gjaer")
+        gjaer_lenker_ol_fersk = finn_produktsider("https://olbrygging.no", "ol/raavarer/gjaer/ferskgjaer", "gjaer")
+
+        # Fast injeksjon av Wyeast 1318 fra Litebrygg
+        london_1318_url = "https://www.litebrygg.no/products/wyeast-1318---london-ale-iii"
+
+        gjaer_data = []
+        print(f"[FAST INJEKSJON] Henter offisielle data for Wyeast 1318...")
+        res_1318 = parse_produktside(london_1318_url, "gjaer", "litebrygg")
+        if res_1318:
+            res_1318["attenuation"] = 0.73
+            res_1318["produsent"] = "Wyeast"
+            gjaer_data.append(res_1318)
+
+        sett_vest_urls = {r["url"] for r in gjaer_data}
+        for url in gjaer_urls_vest:
+            if url in sett_vest_urls:
+                continue
+            res = parse_produktside(url, "gjaer", "vestbrygg")
+            if res:
+                gjaer_data.append(res)
+                sett_vest_urls.add(url)
+            time.sleep(1)
+
+        sett_ol_urls = sett_vest_urls.copy()
+        for url in (gjaer_lenker_ol_torr + gjaer_lenker_ol_fersk):
+            if url in sett_ol_urls:
+                continue
+            res = parse_produktside(url, "gjaer", "olbrygging")
+            if res:
+                gjaer_data.append(res)
+                sett_ol_urls.add(url)
+            time.sleep(1)
+            
+        with open("raw_data/gjaer_raw.json", "w", encoding="utf-8") as f:
+            json.dump(gjaer_data, f, ensure_ascii=False, indent=2)
+        antall_gjaer = len(gjaer_data)
+        
+    except Exception as e:
+        print(f"[ERROR] Det skjedde en feil under den globale skanningen: {e}")
+        
+    # SIKKERHETS-RETURN: Returnerer alltid tallverdier uansett om noe feilet, så Streamlit aldri krasjer
+    return antall_malt, antall_humle, antall_gjaer

@@ -1,0 +1,747 @@
+{
+  "bohemian_pilsner_floor": {
+    "display_name": "Bohemian Pilsner Floor Malt",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "kjeks",
+      "lyst korn",
+      "honning"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 1,
+      "Maltfylde": 3
+    },
+    "ebc": 4.0,
+    "potensiale": 1.037,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Pilsner",
+      "Lys Lager",
+      "Bock"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 70.0,
+    "pris_olbrygging": 39.0
+  },
+  "carafa_special_1": {
+    "display_name": "Carafa Special 1 Malt",
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "mørk kakao",
+      "kaffe",
+      "toast",
+      "myk røst"
+    ],
+    "kategorier": {
+      "Sjokolade": 4,
+      "Kaffe": 3,
+      "Toast": 2,
+      "Maltfylde": 2
+    },
+    "ebc": 900.0,
+    "potensiale": 1.025,
+    "maks_prosent": 8,
+    "anbefalte_stiler": [
+      "Schwarzbier",
+      "Dunkel",
+      "Stout / Porter"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 60.0,
+    "pris_olbrygging": 35.0
+  },
+  "acidulated": {
+    "display_name": "Acidulated Malt",
+    "produsent": "Ireks",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "sur",
+      "frisk",
+      "sitron",
+      "lys syrlighet"
+    ],
+    "kategorier": {
+      "Syrlig": 5,
+      "Frisk": 3,
+      "Maltfylde": 1
+    },
+    "ebc": 4.0,
+    "potensiale": 1.033,
+    "maks_prosent": 10,
+    "anbefalte_stiler": [
+      "Berliner Weisse",
+      "Sure Øl",
+      "Gose"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 70.0,
+    "pris_olbrygging": 31.16
+  },
+  "brown": {
+    "display_name": "Brown Malt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "toast",
+      "nøtter",
+      "tørket brød",
+      "mild kaffe"
+    ],
+    "kategorier": {
+      "Toast": 6,
+      "Nøtter": 4,
+      "Kaffe": 3
+    },
+    "ebc": 200.0,
+    "potensiale": 1.03,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Brown Ale",
+      "Porter",
+      "Mild"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 0
+  },
+  "carafa_special_3": {
+    "display_name": "Carafa Special 3 Malt",
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "mørk sjokolade",
+      "espresso",
+      "brent",
+      "kakao"
+    ],
+    "kategorier": {
+      "Sjokolade": 7,
+      "Kaffe": 6,
+      "Bitterhet": 2
+    },
+    "ebc": 1400.0,
+    "potensiale": 1.025,
+    "maks_prosent": 8,
+    "anbefalte_stiler": [
+      "Stout / Porter",
+      "Schwarzbier",
+      "Svart Øl"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 60.0,
+    "pris_olbrygging": 0
+  },
+  "chocolate": {
+    "display_name": "Chocolate Malt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "mørk sjokolade",
+      "kakao",
+      "røstet kaffe"
+    ],
+    "kategorier": {
+      "Sjokolade": 8,
+      "Kaffe": 5,
+      "Toast": 4
+    },
+    "ebc": 1175.0,
+    "potensiale": 1.025,
+    "maks_prosent": 10,
+    "anbefalte_stiler": [
+      "Stout / Porter",
+      "Svart Øl",
+      "Brown Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 0
+  },
+  "cara_crystalcara_gold": {
+    "display_name": "Cara Crystal / Cara Gold Malt",
+    "produsent": "Castle Malting",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "karamell",
+      "toffee",
+      "honning",
+      "belgisk"
+    ],
+    "kategorier": {
+      "Karamell": 5,
+      "Honning": 3,
+      "Maltfylde": 3
+    },
+    "ebc": 120.0,
+    "potensiale": 1.03,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Belgisk Ale",
+      "Amber Ale",
+      "Dubbel"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 60.0,
+    "pris_olbrygging": 0
+  },
+  "carahell": {
+    "display_name": "Carahell Malt",
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "lys karamell",
+      "honning",
+      "brød",
+      "mild sødme"
+    ],
+    "kategorier": {
+      "Karamell": 3,
+      "Honning": 4,
+      "Brød": 2
+    },
+    "ebc": 25.0,
+    "potensiale": 1.034,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Pilsner",
+      "Lys Lager",
+      "Helles"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 40.0,
+    "pris_olbrygging": 40.0
+  },
+  "biscuit": {
+    "display_name": "Biscuit Malt",
+    "produsent": "Brewferm",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "kjeks",
+      "toast",
+      "brødskorpe",
+      "nøtter"
+    ],
+    "kategorier": {
+      "Brød": 5,
+      "Toast": 6,
+      "Nøtter": 3
+    },
+    "ebc": 50.0,
+    "potensiale": 1.034,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Pale Ale",
+      "Amber Ale",
+      "Belgisk Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 60.0,
+    "pris_olbrygging": 28.0
+  },
+  "caramunich_1": {
+    "display_name": "Caramunich 1 Malt",
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "lys karamell",
+      "honning",
+      "mild fruktig"
+    ],
+    "kategorier": {
+      "Karamell": 5,
+      "Honning": 3,
+      "Fruktig": 2
+    },
+    "ebc": 90.0,
+    "potensiale": 1.03,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Märzen",
+      "Bock",
+      "Amber Lager"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 0
+  },
+  "amber": {
+    "display_name": "Amber Malt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "toast",
+      "nøtter",
+      "tørket frukt",
+      "lett karamell"
+    ],
+    "kategorier": {
+      "Toast": 5,
+      "Nøtter": 4,
+      "Karamell": 3
+    },
+    "ebc": 110.0,
+    "potensiale": 1.03,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Bitter",
+      "Brown Ale",
+      "Porter"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 0
+  },
+  "caraaroma": {
+    "display_name": "CaraAroma Malt",
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "mørk karamell",
+      "plomme",
+      "rosiner",
+      "tørket frukt"
+    ],
+    "kategorier": {
+      "Karamell": 8,
+      "Maltfylde": 6,
+      "Fruktig": 4
+    },
+    "ebc": 400.0,
+    "potensiale": 1.025,
+    "maks_prosent": 10,
+    "anbefalte_stiler": [
+      "Bock / Juleøl",
+      "Barleywine",
+      "Stout"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 60.0,
+    "pris_olbrygging": 0
+  },
+  "carared": {
+    "display_name": "CaraRed Malt",
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "lys karamell",
+      "toast",
+      "rød",
+      "lett brød"
+    ],
+    "kategorier": {
+      "Karamell": 4,
+      "Brød": 3,
+      "Maltfylde": 3
+    },
+    "ebc": 50.0,
+    "potensiale": 1.034,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Irsk Rød",
+      "Amber Ale",
+      "Scottish Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 40.0,
+    "pris_olbrygging": 0
+  },
+  "carafa_special_2": {
+    "display_name": "Carafa Special 2 Malt",
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "sjokolade",
+      "kaffe",
+      "brent korn"
+    ],
+    "kategorier": {
+      "Sjokolade": 6,
+      "Kaffe": 4,
+      "Toast": 3
+    },
+    "ebc": 1150.0,
+    "potensiale": 1.025,
+    "maks_prosent": 8,
+    "anbefalte_stiler": [
+      "Stout / Porter",
+      "Schwarzbier",
+      "Svart Øl"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 60.0,
+    "pris_olbrygging": 0
+  },
+  "spray_light_68_ebc": {
+    "display_name": "Spraymalt Light (6-8 EBC)",
+    "produsent": "Ukjent",
+    "kategori": "Spraymalt",
+    "smakstags": [
+      "maltpreg",
+      "lyst",
+      "lett",
+      "nøytral"
+    ],
+    "kategorier": {
+      "Brød": 3,
+      "Maltfylde": 2
+    },
+    "ebc": 7.0,
+    "potensiale": 1.036,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Alle øl"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 139.8,
+    "pris_olbrygging": 0
+  },
+  "black": {
+    "display_name": "Black Malt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "espresso",
+      "brent",
+      "kakao",
+      "bitter røst"
+    ],
+    "kategorier": {
+      "Kaffe": 8,
+      "Sjokolade": 6,
+      "Bitterhet": 3
+    },
+    "ebc": 1500.0,
+    "potensiale": 1.025,
+    "maks_prosent": 5,
+    "anbefalte_stiler": [
+      "Stout / Porter",
+      "Svart Øl"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 40.0
+  },
+  "crystal_maple_carapils": {
+    "display_name": "Crystal Maple / Carapils Malt",
+    "produsent": "Viking Malt",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "nøytral",
+      "kropp",
+      "skum",
+      "lys"
+    ],
+    "kategorier": {
+      "Maltfylde": 4,
+      "Brød": 1
+    },
+    "ebc": 8.0,
+    "potensiale": 1.037,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Alle øl (kropp og skum)"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 36.0
+  },
+  "caraamber": {
+    "display_name": "CaraAmber Malt",
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "karamell",
+      "tørket frukt",
+      "rød fruktig"
+    ],
+    "kategorier": {
+      "Karamell": 5,
+      "Toast": 3,
+      "Maltfylde": 3
+    },
+    "ebc": 70.0,
+    "potensiale": 1.03,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Amber Ale",
+      "Rød Øl",
+      "Scottish Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 40.0,
+    "pris_olbrygging": 0
+  },
+  "caramunich_3": {
+    "display_name": "Caramunich 3 Malt",
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "mørk karamell",
+      "rosiner",
+      "tørket frukt",
+      "plomme"
+    ],
+    "kategorier": {
+      "Karamell": 7,
+      "Maltfylde": 5,
+      "Fruktig": 3
+    },
+    "ebc": 150.0,
+    "potensiale": 1.03,
+    "maks_prosent": 15,
+    "anbefalte_stiler": [
+      "Bock",
+      "Dunkel",
+      "Barleywine"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 0
+  },
+  "spray_medium": {
+    "display_name": "Spraymalt Medium",
+    "produsent": "Ukjent",
+    "kategori": "Spraymalt",
+    "smakstags": [
+      "maltpreg",
+      "karamell",
+      "rund",
+      "medium"
+    ],
+    "kategorier": {
+      "Brød": 3,
+      "Karamell": 3,
+      "Maltfylde": 4
+    },
+    "ebc": 20.0,
+    "potensiale": 1.035,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Alle øl"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 169.0,
+    "pris_olbrygging": 0
+  },
+  "abbey": {
+    "display_name": "Abbey Malt",
+    "produsent": "Brewferm",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "karamell",
+      "fruktig",
+      "belgisk",
+      "honning"
+    ],
+    "kategorier": {
+      "Karamell": 4,
+      "Fruktig": 5,
+      "Maltfylde": 3
+    },
+    "ebc": 50.0,
+    "potensiale": 1.034,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Belgisk Ale",
+      "Dubbel",
+      "Tripel"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 0
+  },
+  "crystal": {
+    "display_name": "Crystal Malt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "karamell",
+      "honning",
+      "fruktig",
+      "toffee"
+    ],
+    "kategorier": {
+      "Karamell": 6,
+      "Honning": 3,
+      "Fruktig": 2
+    },
+    "ebc": 150.0,
+    "potensiale": 1.03,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "IPA",
+      "Pale Ale",
+      "Bitter"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 60.0,
+    "pris_olbrygging": 0
+  },
+  "caramunich_2": {
+    "display_name": "Caramunich 2 Malt",
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "karamell",
+      "mørkt sukker",
+      "tørket frukt"
+    ],
+    "kategorier": {
+      "Karamell": 6,
+      "Honning": 2,
+      "Maltfylde": 4
+    },
+    "ebc": 120.0,
+    "potensiale": 1.03,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Märzen",
+      "Bock",
+      "Amber Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 50.0,
+    "pris_olbrygging": 0
+  },
+  "weyermann_pilsner": {
+    "display_name": "Weyermann Pilsner Malt",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "korn",
+      "lys honning",
+      "mild malt"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 2,
+      "Maltfylde": 3
+    },
+    "ebc": 3.5,
+    "potensiale": 1.037,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Pilsner",
+      "Lys Lager",
+      "Belgisk Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0
+  },
+  "weyermann_munich_1": {
+    "display_name": "Weyermann Munich I",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "honning",
+      "münchenermalt",
+      "maltrik"
+    ],
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 5
+    },
+    "ebc": 14.5,
+    "potensiale": 1.036,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Märzen",
+      "Bock",
+      "Dunkel",
+      "Altbier"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0
+  },
+  "fawcett_maris_otter": {
+    "display_name": "Thomas Fawcett Maris Otter",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "kjeks",
+      "nøtter",
+      "lys fruktig",
+      "engelsk base"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Nøtter": 3,
+      "Maltfylde": 5
+    },
+    "ebc": 5.5,
+    "potensiale": 1.038,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Bitter",
+      "Pale Ale",
+      "IPA",
+      "Stout"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0
+  },
+  "bestmalz_red_x": {
+    "display_name": "BestMalz Red X",
+    "produsent": "BestMalz",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "rød",
+      "karamell",
+      "brød",
+      "mild fruktig"
+    ],
+    "kategorier": {
+      "Karamell": 5,
+      "Brød": 4,
+      "Maltfylde": 4
+    },
+    "ebc": 15.0,
+    "potensiale": 1.034,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Rød Lager",
+      "Amber Ale",
+      "Irsk Rød"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0
+  },
+  "bonsak_rugmalt": {
+    "display_name": "Bonsak Rugmalt",
+    "produsent": "Bonsak",
+    "kategori": "Norsk Malt",
+    "smakstags": [
+      "rug",
+      "krydret",
+      "jordlig",
+      "kompleks"
+    ],
+    "kategorier": {
+      "Brød": 3,
+      "Krydret": 4,
+      "Maltfylde": 3
+    },
+    "ebc": 4.0,
+    "potensiale": 1.033,
+    "maks_prosent": 30,
+    "anbefalte_stiler": [
+      "Norsk Gårdsøl",
+      "Rugbrygg",
+      "Saison"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0
+  }
+}
