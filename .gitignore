@@ -9,3 +9,6 @@ __pycache__/
 
 # Virtual environment
 .venv/
+
+# Generated logs
+raw_data/*.txt
