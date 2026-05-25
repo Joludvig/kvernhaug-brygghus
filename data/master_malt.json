@@ -1,6 +1,6 @@
 {
   "bohemian_pilsner_floor": {
-    "display_name": "Bohemian Pilsner Floor Malt",
+    "display_name": "Bohemian Pilsner Floor",
     "produsent": "Weyermann",
     "kategori": "Basemalt",
     "smakstags": [
@@ -24,7 +24,12 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Bohemian Pilsner Floor Malt"
+      "Bohemian Pilsner Floor Malt",
+      "Bohemian Pilsner Floor",
+      "Bohemian Pilsner",
+      "Pilsner Floor Malt",
+      "Floor Malted Pilsner",
+      "Weyermann Bohemian Pilsner"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -40,7 +45,7 @@
     "source": "master_seed_v0_1"
   },
   "carafa_special_1": {
-    "display_name": "Carafa Special 1 Malt",
+    "display_name": "Carafa Special I",
     "produsent": "Weyermann",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -152,7 +157,10 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Brown Malt"
+      "Brown Malt",
+      "Brown",
+      "Fawcett Brown",
+      "Thomas Fawcett Brown Malt"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -164,7 +172,7 @@
     "source": "master_seed_v0_1"
   },
   "carafa_special_3": {
-    "display_name": "Carafa Special 3 Malt",
+    "display_name": "Carafa Special III",
     "produsent": "Weyermann",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -242,7 +250,7 @@
     "source": "master_seed_v0_1"
   },
   "cara_crystalcara_gold": {
-    "display_name": "Cara Crystal / Cara Gold Malt",
+    "display_name": "Château Cara Crystal",
     "produsent": "Castle Malting",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -266,8 +274,12 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Cara Crystal/Cara Gold Malt",
+      "Château Cara Crystal",
+      "Chateau Cara Crystal",
+      "Cara Crystal",
       "Cara Crystal Malt",
+      "Château Cara Crystal Malt",
+      "Cara Gold",
       "Cara Gold Malt"
     ],
     "butikk_match": {
@@ -280,7 +292,7 @@
     "source": "master_seed_v0_1"
   },
   "carahell": {
-    "display_name": "Carahell Malt",
+    "display_name": "CaraHell",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -304,7 +316,11 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Carahell Malt"
+      "CaraHell",
+      "Carahell",
+      "Carahell Malt",
+      "Cara Hell",
+      "CaraHell Weyermann"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -363,7 +379,7 @@
     "source": "master_seed_v0_1"
   },
   "caramunich_1": {
-    "display_name": "Caramunich 1 Malt",
+    "display_name": "CaraMunich I",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -386,7 +402,13 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Caramunich 1 Malt"
+      "CaraMunich I",
+      "Caramunich 1",
+      "Caramunich 1 Malt",
+      "CaraMunich 1",
+      "CaraMunich Type I",
+      "Weyermann CaraMunich I",
+      "Caramunich I"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -434,7 +456,7 @@
     "source": "master_seed_v0_1"
   },
   "caraaroma": {
-    "display_name": "CaraAroma Malt",
+    "display_name": "CaraAroma",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -458,7 +480,11 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "CaraAroma Malt"
+      "CaraAroma",
+      "CaraAroma Malt",
+      "Cara Aroma",
+      "Cara Aroma Malt",
+      "Weyermann CaraAroma"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -470,7 +496,7 @@
     "source": "master_seed_v0_1"
   },
   "carared": {
-    "display_name": "CaraRed Malt",
+    "display_name": "CaraRed",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -494,7 +520,11 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "CaraRed Malt"
+      "CaraRed",
+      "CaraRed Malt",
+      "Cara Red",
+      "Cara Red Malt",
+      "Weyermann CaraRed"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -506,7 +536,7 @@
     "source": "master_seed_v0_1"
   },
   "carafa_special_2": {
-    "display_name": "Carafa Special 2 Malt",
+    "display_name": "Carafa Special II",
     "produsent": "Weyermann",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -622,7 +652,7 @@
     "source": "master_seed_v0_1"
   },
   "crystal_maple_carapils": {
-    "display_name": "Crystal Maple / Carapils Malt",
+    "display_name": "Carapils",
     "produsent": "Viking Malt",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -643,9 +673,12 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Crystal Maple / Carapils Malt",
       "Carapils",
-      "Carapils Malt"
+      "Carapils Malt",
+      "Crystal Maple",
+      "Crystal Maple Malt",
+      "Dextrin Malt",
+      "Cara Pils"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -661,7 +694,7 @@
     "source": "master_seed_v0_1"
   },
   "caraamber": {
-    "display_name": "CaraAmber Malt",
+    "display_name": "CaraAmber",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -684,7 +717,11 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "CaraAmber Malt"
+      "CaraAmber",
+      "CaraAmber Malt",
+      "Cara Amber",
+      "Cara Amber Malt",
+      "Weyermann CaraAmber"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -696,7 +733,7 @@
     "source": "master_seed_v0_1"
   },
   "caramunich_3": {
-    "display_name": "Caramunich 3 Malt",
+    "display_name": "CaraMunich III",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -720,7 +757,13 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Caramunich 3 Malt"
+      "CaraMunich III",
+      "Caramunich 3",
+      "Caramunich 3 Malt",
+      "CaraMunich 3",
+      "CaraMunich Type III",
+      "Weyermann CaraMunich III",
+      "Caramunich III"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -791,7 +834,11 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Abbey Malt"
+      "Abbey Malt",
+      "Abbey",
+      "Château Abbey",
+      "Chateau Abbey",
+      "Château Abbey Malt"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -828,7 +875,11 @@
     "knust_tilgjengelig": false,
     "aliases": [
       "Crystal Malt",
-      "Crystal Malt 150 EBC"
+      "Crystal Malt 150 EBC",
+      "Crystal 150",
+      "Fawcett Crystal",
+      "Thomas Fawcett Crystal",
+      "Caramel Malt"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -840,7 +891,7 @@
     "source": "master_seed_v0_1"
   },
   "caramunich_2": {
-    "display_name": "Caramunich 2 Malt",
+    "display_name": "CaraMunich II",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -863,7 +914,13 @@
     ],
     "knust_tilgjengelig": false,
     "aliases": [
-      "Caramunich 2 Malt"
+      "CaraMunich II",
+      "Caramunich 2",
+      "Caramunich 2 Malt",
+      "CaraMunich 2",
+      "CaraMunich Type II",
+      "Weyermann CaraMunich II",
+      "Caramunich II"
     ],
     "butikk_match": {
       "vestbrygg": {
@@ -875,7 +932,7 @@
     "source": "master_seed_v0_1"
   },
   "weyermann_pilsner": {
-    "display_name": "Weyermann Pilsner Malt",
+    "display_name": "Pilsner Malt",
     "produsent": "Weyermann",
     "kategori": "Basemalt",
     "smakstags": [
@@ -907,7 +964,7 @@
     "source": "bruker_forslag_v0_1"
   },
   "weyermann_munich_1": {
-    "display_name": "Weyermann Munich I",
+    "display_name": "Munich I",
     "produsent": "Weyermann",
     "kategori": "Basemalt",
     "smakstags": [
@@ -941,7 +998,7 @@
     "source": "bruker_forslag_v0_1"
   },
   "fawcett_maris_otter": {
-    "display_name": "Thomas Fawcett Maris Otter",
+    "display_name": "Maris Otter",
     "produsent": "Thomas Fawcett",
     "kategori": "Basemalt",
     "smakstags": [
@@ -974,7 +1031,7 @@
     "source": "bruker_forslag_v0_1"
   },
   "bestmalz_red_x": {
-    "display_name": "BestMalz Red X",
+    "display_name": "Red X",
     "produsent": "BestMalz",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -1006,7 +1063,7 @@
     "source": "bruker_forslag_v0_1"
   },
   "bonsak_rugmalt": {
-    "display_name": "Bonsak Rugmalt",
+    "display_name": "Rugmalt",
     "produsent": "Bonsak",
     "kategori": "Norsk Malt",
     "smakstags": [
@@ -1036,5 +1093,42 @@
     "butikk_match": {},
     "verified": true,
     "source": "bruker_forslag_v0_1"
+  },
+  "flaket_havre": {
+    "display_name": "Flaket Havre",
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "smakstags": [
+      "kremete",
+      "fyldig",
+      "silkemyk",
+      "nøytralt korn"
+    ],
+    "kategorier": {
+      "Kremete": 5,
+      "Maltfylde": 3
+    },
+    "ebc": 2.0,
+    "potensiale": 1.037,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Stout",
+      "Porter",
+      "Wheat Beer",
+      "Hazy IPA"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Flaket Havre",
+      "flaket havre",
+      "flaked oats",
+      "oat flakes",
+      "havreflak",
+      "havre",
+      "oats"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "bruker_forslag_v0_2"
   }
 }
