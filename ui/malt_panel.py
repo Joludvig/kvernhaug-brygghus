@@ -1,10 +1,29 @@
 import streamlit as st
 
-FORETRUKKET_KATEGORI_REKKEFØLGE = [
-    "Norsk Malt", "Basemalt", "Hvete- / Rugmalt",
-    "Karamell- / Krystallmalt", "Spesialmalt (Røstet / Andre)",
-    "Flakes / Korn", "Spraymalt",
+FORETRUKKET_GRUPPE_REKKEFØLGE = [
+    "PALE / PILSNER",
+    "MUNICH / VIENNA",
+    "HVETE / RUG",
+    "KARAMELL / CRYSTAL",
+    "RØSTET / MØRK",
+    "SPESIALMALT",
+    "FLAKES / UMALTET",
+    "NORSK MALT",
+    "EKSTRAKT / SPRAYMALT",
 ]
+
+KATEGORI_TIL_GRUPPE = {
+    "Basemalt": "PALE / PILSNER",
+    "Hvete- / Rugmalt": "HVETE / RUG",
+    "Karamell- / Krystallmalt": "KARAMELL / CRYSTAL",
+    "Spesialmalt (Røstet / Andre)": "RØSTET / MØRK",
+    "Flakes / Korn": "FLAKES / UMALTET",
+    "Spraymalt": "EKSTRAKT / SPRAYMALT",
+    "Norsk Malt": "NORSK MALT",
+}
+
+def _malt_gruppe(info):
+    return info.get("display_group") or KATEGORI_TIL_GRUPPE.get(info.get("kategori", ""), "SPESIALMALT")
 
 def render_malt_panel(malt_database):
     st.header("🌾 Meskekaret (Grist)")
@@ -13,24 +32,23 @@ def render_malt_panel(malt_database):
         st.rerun()
 
     total_malt_vekt = sum(m["mengde"] for m in st.session_state.valgt_malt if m["id"] in malt_database)
-    
-    # Bygg kategoriliste dynamisk frå databasen, med foretrukket rekkefølge
-    alle_db_kategorier = {info.get("kategori") for info in malt_database.values() if info and info.get("kategori")}
-    malt_kategorier = [k for k in FORETRUKKET_KATEGORI_REKKEFØLGE if k in alle_db_kategorier]
-    malt_kategorier += sorted(k for k in alle_db_kategorier if k not in FORETRUKKET_KATEGORI_REKKEFØLGE)
+
+    alle_db_grupper = {_malt_gruppe(info) for info in malt_database.values() if info}
+    malt_grupper = [g for g in FORETRUKKET_GRUPPE_REKKEFØLGE if g in alle_db_grupper]
+    malt_grupper += sorted(g for g in alle_db_grupper if g not in FORETRUKKET_GRUPPE_REKKEFØLGE)
 
     malt_id_kart, malt_meny_valg = {}, []
-    for kat in malt_kategorier:
+    for gruppe in malt_grupper:
         har_varer = False
         midlertidig_liste = []
         for m_id, info in malt_database.items():
-            if info.get("kategori") == kat:
+            if _malt_gruppe(info) == gruppe:
                 visnings_navn = f"{info['display_name']} ({info['produsent']})"
                 malt_id_kart[visnings_navn] = m_id
                 midlertidig_liste.append(visnings_navn)
                 har_varer = True
         if har_varer:
-            malt_meny_valg.append(f"--- {kat.upper()} ---")
+            malt_meny_valg.append(f"--- {gruppe} ---")
             malt_meny_valg.extend(midlertidig_liste)
 
     # SKUDDSIKKER FALLBACK: Hvis databasen er tom, legger vi inn et standard testvalg
