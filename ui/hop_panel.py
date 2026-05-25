@@ -9,7 +9,12 @@ def render_hop_panel(humle_database):
     humle_id_kart, humle_meny_valg = {}, []
     for h_id, info in humle_database.items():
         if info:
-            visnings_navn = f"{info.get('display_name', h_id)} ({info.get('produsent', 'Ukjent')})"
+            opprinnelse = info.get("opprinnelse", "")
+            visnings_navn = (
+                f"{info.get('display_name', h_id)} ({opprinnelse})"
+                if opprinnelse and opprinnelse != "Ukjent"
+                else info.get("display_name", h_id)
+            )
             humle_id_kart[visnings_navn] = h_id
             humle_meny_valg.append(visnings_navn)
 

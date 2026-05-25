@@ -49,8 +49,17 @@
       "Azacca 2024 100g 11,9% AA",
       "Azacca 2024 5 kg"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "appelsin",
+      "tropisk",
+      "ananas",
+      "mango"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -81,8 +90,18 @@
       "BRU-1 2024 5 kg",
       "BRU-1 2023 100 g"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "furu",
+      "lime"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 6,
+      "Fruktighet": 5,
+      "Furunål": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -184,8 +203,15 @@
     "aliases": [
       "Challenger Humle Pellets - 100g UK"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "krydder",
+      "sedertre",
+      "mild bitterhet"
+    ],
+    "kategorier": {
+      "Krydder": 5,
+      "Bitterhet": 6
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -208,8 +234,16 @@
       "Chinook 2024 100g 11,1% AA",
       "Chinook 2024 5 kg"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "furu",
+      "grapefrukt",
+      "krydder"
+    ],
+    "kategorier": {
+      "Furunål": 6,
+      "Sitrus": 5,
+      "Krydder": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -277,8 +311,18 @@
     "aliases": [
       "Citra LUPOMAX 2024 Humle Pellets - 100g USA"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitrus",
+      "grapefrukt",
+      "lime",
+      "pasjonsfrukt",
+      "ananas"
+    ],
+    "kategorier": {
+      "Sitrus": 7,
+      "Tropisk": 7,
+      "Fruktighet": 6
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -300,8 +344,16 @@
       "Columbus 2024 Humle Pellets - 100g USA",
       "Columbus 2023 5 kg 13,9% Alfasyre"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "krydder",
+      "jordlig",
+      "svart pepper"
+    ],
+    "kategorier": {
+      "Krydder": 5,
+      "Jordlig": 5,
+      "Bitterhet": 7
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -365,8 +417,17 @@
       "Ekuanot (Equinox) 2023 100g USA",
       "Equinox"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "ananas",
+      "lime",
+      "melon",
+      "tropisk"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -387,8 +448,17 @@
     "aliases": [
       "El Dorado 2023 Humle Pellets - 100g USA"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "vannmelon",
+      "tropisk",
+      "aprikos",
+      "candy"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -491,8 +561,16 @@
     "aliases": [
       "Goldings 2024 Humle Pellets - 100g"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "honning",
+      "urter",
+      "blomst",
+      "krydder"
+    ],
+    "kategorier": {
+      "Jordlig": 4,
+      "Krydder": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -513,8 +591,15 @@
     "aliases": [
       "Harlequin 2023 Pellets - 100g UK"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitron",
+      "lime",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Fruktighet": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -535,8 +620,14 @@
     "aliases": [
       "Herkules 2023 Humle Pellets - 100g Tyskland"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "ren bitterhet",
+      "urter"
+    ],
+    "kategorier": {
+      "Bitterhet": 8,
+      "Krydder": 3
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -557,8 +648,15 @@
     "aliases": [
       "Hersbrucker 2024 Humle Pellets - 100g Tyskland"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "urter",
+      "blomst",
+      "krydder"
+    ],
+    "kategorier": {
+      "Jordlig": 3,
+      "Krydder": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -624,8 +722,16 @@
     "aliases": [
       "Jester 2023 Pellets - 100g UK"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "blomst"
+    ],
+    "kategorier": {
+      "Tropisk": 5,
+      "Sitrus": 5,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -646,8 +752,15 @@
     "aliases": [
       "Lemondrop 2022 Humle Pellets - 100g USA"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitron",
+      "lime",
+      "melon"
+    ],
+    "kategorier": {
+      "Sitrus": 7,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -701,8 +814,15 @@
     "aliases": [
       "Mandarina Bavaria 2024 Pellets - 100g Tyskland"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "mandarin",
+      "appelsin",
+      "sitrus"
+    ],
+    "kategorier": {
+      "Sitrus": 7,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -725,8 +845,15 @@
       "Mittelfrüh",
       "Hallertauer Mittelfrüh"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "urter",
+      "blomst",
+      "mild krydder"
+    ],
+    "kategorier": {
+      "Jordlig": 3,
+      "Krydder": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -790,8 +917,17 @@
     "aliases": [
       "Mosaic LUPOMAX 2024 Humle Pellets - 100g USA"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "mango",
+      "blåbær",
+      "tropisk frukt",
+      "furunål"
+    ],
+    "kategorier": {
+      "Tropisk": 7,
+      "Fruktighet": 7,
+      "Furunål": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -842,8 +978,15 @@
     "aliases": [
       "Mystic 2023 Pellets - 100g UK"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "blomst",
+      "frukt",
+      "urter"
+    ],
+    "kategorier": {
+      "Fruktighet": 4,
+      "Krydder": 3
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -902,8 +1045,15 @@
       "Northern Brewer2024 Pellets - 100g Tyskland",
       "Northern Brewer 2024"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "furu",
+      "urter",
+      "treverk"
+    ],
+    "kategorier": {
+      "Furunål": 5,
+      "Jordlig": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -930,8 +1080,15 @@
     "aliases": [
       "Perle 2024 Humle Pellets - 100g Tyskland"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "urter",
+      "blomst",
+      "mild krydder"
+    ],
+    "kategorier": {
+      "Krydder": 4,
+      "Jordlig": 3
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -958,8 +1115,17 @@
     "aliases": [
       "Rakau Humle Pellets - 100g New Zealand"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "fersken",
+      "aprikos",
+      "furu",
+      "tropisk"
+    ],
+    "kategorier": {
+      "Steinfrukt": 5,
+      "Furunål": 5,
+      "Tropisk": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -1092,8 +1258,16 @@
     "aliases": [
       "Styrian Dragon 2024 Pellets - 100g Slovenia"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitrus",
+      "tropisk",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Fruktighet": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -1114,8 +1288,15 @@
     "aliases": [
       "Styrian Golding 2023 Pellets - 100g Slovenia"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "jordlig",
+      "krydder",
+      "blomst"
+    ],
+    "kategorier": {
+      "Jordlig": 5,
+      "Krydder": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -1136,8 +1317,16 @@
     "aliases": [
       "Superdelic 2024 Humle Pellets - 100g NZ"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "urter"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Sitrus": 5,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -1158,8 +1347,16 @@
     "aliases": [
       "Talus 2023 Humle Pellets - 100g USA"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "grapefrukt",
+      "tropisk",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -1186,8 +1383,15 @@
     "aliases": [
       "Tettnang Humle Pellets - 100g Tyskland"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "urter",
+      "blomst",
+      "krydder"
+    ],
+    "kategorier": {
+      "Krydder": 4,
+      "Jordlig": 3
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -1214,8 +1418,16 @@
     "aliases": [
       "Waimea Humle Pellets - 100g"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitrus",
+      "furu",
+      "tropisk frukt"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Furunål": 5,
+      "Tropisk": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "vestbrygg": {
@@ -1243,8 +1455,16 @@
       "Akoya 2024 100g 9,5% AA",
       "Akoya 2024 5 kg"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "tropisk",
+      "sitron",
+      "fersken"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Steinfrukt": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "olbrygging": {
@@ -1266,8 +1486,16 @@
       "Alora 2024 100g 10% AA",
       "Alora 2024 5 kg"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "frukt"
+    ],
+    "kategorier": {
+      "Tropisk": 5,
+      "Sitrus": 4,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "olbrygging": {
@@ -1289,8 +1517,16 @@
       "Cashmere 2023 5 kg 9,5% Alfasyre",
       "Cashmere 2023 - 5 kg"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitron",
+      "lime",
+      "fersken"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Steinfrukt": 5,
+      "Fruktighet": 5
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "olbrygging": {
@@ -1311,8 +1547,15 @@
     "aliases": [
       "Celeia 2024 100g 3,2% AA"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "jordlig",
+      "urter",
+      "krydder"
+    ],
+    "kategorier": {
+      "Jordlig": 5,
+      "Krydder": 4
+    },
     "alfa_typisk": null,
     "butikk_match": {
       "olbrygging": {
@@ -1335,8 +1578,15 @@
       "Comet 2021",
       "Comet 2022"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "grapefrukt",
+      "sitrus",
+      "urter"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Jordlig": 3
+    },
     "alfa_typisk": 9.3,
     "butikk_match": {
       "olbrygging": {
@@ -1359,8 +1609,16 @@
       "Eclipse 2021 Humle",
       "Eclipse 2021 Pellets"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "resin",
+      "tropisk",
+      "furu"
+    ],
+    "kategorier": {
+      "Bitterhet": 6,
+      "Furunål": 4,
+      "Tropisk": 3
+    },
     "alfa_typisk": 17.7,
     "butikk_match": {
       "olbrygging": {
@@ -1383,8 +1641,16 @@
       "Eclipse 2024 Humle",
       "Eclipse 2024 Pellets"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "resin",
+      "tropisk",
+      "furu"
+    ],
+    "kategorier": {
+      "Bitterhet": 6,
+      "Furunål": 4,
+      "Tropisk": 3
+    },
     "alfa_typisk": 19.7,
     "butikk_match": {
       "olbrygging": {
@@ -1407,8 +1673,16 @@
       "Ella Humle",
       "Ella Pellets"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "tropisk",
+      "blomst",
+      "krydder"
+    ],
+    "kategorier": {
+      "Tropisk": 5,
+      "Fruktighet": 5,
+      "Krydder": 4
+    },
     "alfa_typisk": 16.5,
     "butikk_match": {
       "olbrygging": {
@@ -1430,8 +1704,17 @@
       "Hallertau Blanc",
       "Hallertau Blanc Humle"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "hvitvin",
+      "sitron",
+      "grapefrukt",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Vinøs": 5,
+      "Fruktighet": 4
+    },
     "alfa_typisk": 9.4,
     "butikk_match": {
       "olbrygging": {
@@ -1454,8 +1737,15 @@
       "Tradition Humle",
       "Hallertau Tradition Humle"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "urter",
+      "blomst",
+      "mild krydder"
+    ],
+    "kategorier": {
+      "Jordlig": 3,
+      "Krydder": 4
+    },
     "alfa_typisk": 5.6,
     "butikk_match": {
       "olbrygging": {
@@ -1478,8 +1768,16 @@
       "HBC630",
       "HBC 630 Humle"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "pasjonsfrukt",
+      "tropisk",
+      "sitrus"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Sitrus": 5,
+      "Fruktighet": 5
+    },
     "alfa_typisk": 13.7,
     "butikk_match": {
       "olbrygging": {
@@ -1502,8 +1800,16 @@
       "Kohatu Humle",
       "Kohatu Pellets"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "furu",
+      "tropisk",
+      "fersken"
+    ],
+    "kategorier": {
+      "Furunål": 5,
+      "Tropisk": 5,
+      "Steinfrukt": 4
+    },
     "alfa_typisk": 6.0,
     "butikk_match": {
       "olbrygging": {
@@ -1526,8 +1832,16 @@
       "Krush Humle",
       "Krush Pellets"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "pasjonsfrukt",
+      "tropisk",
+      "sitrus"
+    ],
+    "kategorier": {
+      "Tropisk": 6,
+      "Sitrus": 5,
+      "Fruktighet": 6
+    },
     "alfa_typisk": 13.6,
     "butikk_match": {
       "olbrygging": {
@@ -1550,8 +1864,16 @@
       "Moutere Humle",
       "Moutere Pellets"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitrus",
+      "tropisk",
+      "fersken"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Steinfrukt": 4
+    },
     "alfa_typisk": 16.6,
     "butikk_match": {
       "olbrygging": {
@@ -1574,8 +1896,18 @@
       "Nectaron Humle",
       "Nectaron Pellets"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "hvit fersken",
+      "tropisk",
+      "ananas",
+      "sitrus"
+    ],
+    "kategorier": {
+      "Tropisk": 7,
+      "Steinfrukt": 6,
+      "Sitrus": 5,
+      "Fruktighet": 6
+    },
     "alfa_typisk": 11.9,
     "butikk_match": {
       "olbrygging": {
@@ -1597,8 +1929,16 @@
       "Pacific Sunrise",
       "Pacific Sunrise Humle"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitrus",
+      "tropisk",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Fruktighet": 4
+    },
     "alfa_typisk": 11.5,
     "butikk_match": {
       "olbrygging": {
@@ -1620,8 +1960,15 @@
       "Southern Star",
       "Southern Star Humle"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "sitrus",
+      "tropisk"
+    ],
+    "kategorier": {
+      "Bitterhet": 6,
+      "Sitrus": 4,
+      "Tropisk": 4
+    },
     "alfa_typisk": 15.0,
     "butikk_match": {
       "olbrygging": {
@@ -1644,8 +1991,16 @@
       "Vic Secret Humle",
       "Victoria Secret"
     ],
-    "smakstags": [],
-    "kategorier": {},
+    "smakstags": [
+      "furu",
+      "pasjonsfrukt",
+      "tropisk"
+    ],
+    "kategorier": {
+      "Bitterhet": 7,
+      "Furunål": 5,
+      "Tropisk": 5
+    },
     "alfa_typisk": 20.4,
     "butikk_match": {
       "olbrygging": {
