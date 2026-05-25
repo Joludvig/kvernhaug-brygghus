@@ -45,8 +45,9 @@ def render_hop_panel(humle_database):
             h_alfa, h_smak, h_pris = 0.0, "", "0.0 kr"
             if ny_h_id in humle_database:
                 h_info = humle_database[ny_h_id]
-                h_alfa = h_info.get("alfa", 12.0)
-                h_smak = ", ".join(h_info.get("smakstags", ["fruktig"]))
+                h_alfa = h_info.get("alfa_typisk") or h_info.get("alfa", 12.0)
+                smakstags_liste = h_info.get("smakstags") or []
+                h_smak = ", ".join(smakstags_liste)
                 butikk_navn = st.session_state.get("global_butikk", "Ølbrygging.no")
                 h_pris_nokkel = "pris_olbrygging" if butikk_navn == "Ølbrygging.no" else "pris_vestbrygg"
                 h_pris = f"{(nytt_gram * h_info.get(h_pris_nokkel, 99.0) / 100):.1f} kr"
@@ -63,7 +64,10 @@ def render_hop_panel(humle_database):
                 if st.button("❌", key=f"slett_humle_{j}"):
                     st.session_state.valgt_humle.pop(j)
                     st.rerun()
-            if h_smak: st.caption(f"👃 *Aromaprofil:* {h_smak}")
+            if h_smak:
+                st.caption(f"👃 *Smak:* {h_smak}")
+            else:
+                st.caption("Ingen smaksprofil registrert ennå")
             st.write("")
             oppdatert_humle_liste.append({"id": ny_h_id, "gram": nytt_gram, "tid": ny_tid})
     st.session_state.valgt_humle = oppdatert_humle_liste
