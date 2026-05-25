@@ -12,7 +12,13 @@ def render_style_panel(ctx, humle_database):
 
     st.write("---")
     st.subheader("🎯 BJCP Stil-matching (Prosentvis):")
-    for s_item in ctx['style_analysis']["stil_liste"]:
+    relevante_stiler = sorted(
+        [s for s in ctx['style_analysis']["stil_liste"] if s["score"] > 0],
+        key=lambda x: (-x["score"], x["prio"])
+    )
+    if not relevante_stiler:
+        st.caption("Ingen stiler matcher oppskriften din ennå.")
+    for s_item in relevante_stiler:
         st.write(f"🔹 **{s_item['stil']}:** `{s_item['score']}% match`")
         if s_item["mangler"] and s_item["score"] > 20:
             with st.expander(f"Se hva som mangler for {s_item['stil']}"):
