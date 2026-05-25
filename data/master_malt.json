@@ -1130,5 +1130,231 @@
     "butikk_match": {},
     "verified": true,
     "source": "bruker_forslag_v0_2"
+  },
+  "vienna": {
+    "display_name": "Vienna Malt",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "honning",
+      "kjeks",
+      "mild karamell"
+    ],
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 4
+    },
+    "ebc": 7.0,
+    "potensiale": 1.036,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Vienna Lager",
+      "Märzen",
+      "Altbier",
+      "Amber Lager"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Vienna Malt",
+      "Vienna",
+      "Weyermann Vienna",
+      "Weyermann Vienna Malt",
+      "Vienna Malt Weyermann"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "coverage_expansion_p1"
+  },
+  "pale_ale_malt": {
+    "display_name": "Pale Ale Malt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "kjeks",
+      "nøtter",
+      "lett brød",
+      "lys fruktighet"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Nøtter": 2,
+      "Maltfylde": 4
+    },
+    "ebc": 5.5,
+    "potensiale": 1.038,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Pale Ale",
+      "IPA",
+      "Bitter",
+      "Golden Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Pale Ale Malt",
+      "Fawcett Pale Ale",
+      "Thomas Fawcett Pale Ale",
+      "Pale Ale Malt Fawcett",
+      "English Pale Ale Malt",
+      "Pale Malt"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "coverage_expansion_p1"
+  },
+  "pale_wheat": {
+    "display_name": "Pale Wheat Malt",
+    "produsent": "Weyermann",
+    "kategori": "Hvete- / Rugmalt",
+    "smakstags": [
+      "hvete",
+      "lyst brød",
+      "myk",
+      "frisk"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Fruktig": 2,
+      "Maltfylde": 3
+    },
+    "ebc": 3.0,
+    "potensiale": 1.037,
+    "maks_prosent": 70,
+    "anbefalte_stiler": [
+      "Hefeweizen",
+      "Weizenbock",
+      "American Wheat",
+      "Witbier"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Pale Wheat Malt",
+      "Pale Wheat",
+      "Weyermann Pale Wheat",
+      "Weyermann Pale Wheat Malt",
+      "Wheat Malt",
+      "Hvetemalt",
+      "Hvete Malt",
+      "Weyermann Hvetemalt"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "coverage_expansion_p1"
+  },
+  "special_b": {
+    "display_name": "Special B",
+    "produsent": "Castle Malting",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "rosiner",
+      "plomme",
+      "mørk frukt",
+      "mørk karamell",
+      "porter"
+    ],
+    "kategorier": {
+      "Karamell": 7,
+      "Fruktig": 6,
+      "Maltfylde": 4
+    },
+    "ebc": 350.0,
+    "potensiale": 1.03,
+    "maks_prosent": 10,
+    "anbefalte_stiler": [
+      "Dubbel",
+      "Quadrupel",
+      "Strong Ale",
+      "Porter"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Special B",
+      "Special B Malt",
+      "Château Special B",
+      "Chateau Special B",
+      "Castle Special B",
+      "Spécial B",
+      "Special B Castle"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "coverage_expansion_p1"
+  },
+  "roasted_barley": {
+    "display_name": "Roasted Barley",
+    "produsent": "Diverse",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "kaffe",
+      "mørk sjokolade",
+      "bitter røst",
+      "tørr"
+    ],
+    "kategorier": {
+      "Kaffe": 7,
+      "Sjokolade": 5,
+      "Toast": 3
+    },
+    "ebc": 1200.0,
+    "potensiale": 1.025,
+    "maks_prosent": 10,
+    "anbefalte_stiler": [
+      "Dry Stout",
+      "Irish Stout",
+      "Stout",
+      "Porter"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Roasted Barley",
+      "Ristet Bygg",
+      "Roasted Malt",
+      "Bestmalz Roasted Barley",
+      "Fawcett Roasted Barley",
+      "Unmalted Roasted Barley"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "coverage_expansion_p1"
+  },
+  "chocolate_wheat": {
+    "display_name": "Chocolate Wheat Malt",
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "sjokolade",
+      "kakao",
+      "mild røst",
+      "nøtter",
+      "hvete"
+    ],
+    "kategorier": {
+      "Sjokolade": 6,
+      "Kaffe": 3,
+      "Maltfylde": 2
+    },
+    "ebc": 650.0,
+    "potensiale": 1.03,
+    "maks_prosent": 15,
+    "anbefalte_stiler": [
+      "Stout",
+      "Porter",
+      "Dark Wheat Beer",
+      "Dunkelweizen"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Chocolate Wheat Malt",
+      "Chocolate Wheat",
+      "Weyermann Chocolate Wheat",
+      "Weyermann Chocolate Wheat Malt",
+      "Sjokolade Hvetemalt",
+      "Sjokolade Hvete"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "coverage_expansion_p1"
   }
 }
