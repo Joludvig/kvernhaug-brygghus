@@ -1,4 +1,9 @@
 {
+  "_meta": {
+    "generated": true,
+    "generated_from": "master_malt.json",
+    "note": "Ikke editer direkte. Synkroniser via Import-panel i appen (Importer til Master DB)."
+  },
   "bohemian_pilsner_floor": {
     "display_name": "Bohemian Pilsner Floor Malt",
     "produsent": "Weyermann",

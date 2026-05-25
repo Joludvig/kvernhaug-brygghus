@@ -39,9 +39,9 @@ def last_json_data(filnavn):
         
     try:
         with open(filsti, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+        return {k: v for k, v in data.items() if not k.startswith("_")}
     except json.JSONDecodeError:
-        # Hvis filen inneholder korrupt data, returner en tom struktur i stedet for å krasje
         return {}
 
 # 2. Sentral lasting av de tre råvaredatabasene
@@ -57,14 +57,16 @@ if "valgt_humle" not in st.session_state:
     første_humle = next(iter(humle_database), "magnum_de")
     st.session_state.valgt_humle = [{"id": første_humle, "gram": 20, "tid": 60}]
 if "valgt_gjaer_id" not in st.session_state:
-    st.session_state.valgt_gjaer_id = next(iter(gjaer_database), "fermentis_us05")
+    st.session_state.valgt_gjaer_id = next(iter(gjaer_database), "safale_us_05")
 if "gjeldende_navn" not in st.session_state:
     st.session_state.gjeldende_navn = "Kvernhaug Spesial"
-if "global_butikk" not in st.session_state: 
+if "global_butikk" not in st.session_state:
     st.session_state.global_butikk = "Ølbrygging.no"
+if "import_versjon" not in st.session_state:
+    st.session_state.import_versjon = 0
 
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
-render_sidebar(malt_database, humle_database, gjaer_database)
+render_sidebar()
 
 # 5. KJØR SENTRAL BEREGNINGS-MOTOR (Prioritet: Central Engine)
 # Her flates databaser ut, Tinseth-IBU regnes, smakshjul kalkuleres og 

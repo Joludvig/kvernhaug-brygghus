@@ -2,6 +2,7 @@
 import streamlit as st
 import json
 import os
+import datetime
 from modules.store_scraper import kjor_full_skanning
 from modules.store_matcher import (
     match_store_data_to_master,
@@ -115,8 +116,16 @@ def render_import_panel():
                 with open(master_sti, "r", encoding="utf-8") as f:
                     master = json.load(f)
 
-                db = {m_id: felt_fn(m_info) for m_id, m_info in master.items()}
-                imported_count += len(db)
+                db = {}
+                db["_meta"] = {
+                    "generated": True,
+                    "generated_from": os.path.basename(master_sti),
+                    "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
+                    "note": "Ikke editer direkte. Synkroniser via Import-panel i appen."
+                }
+                for m_id, m_info in master.items():
+                    db[m_id] = felt_fn(m_info)
+                imported_count += len(db) - 1
 
                 with open(db_sti, "w", encoding="utf-8") as f:
                     json.dump(db, f, ensure_ascii=False, indent=2)
