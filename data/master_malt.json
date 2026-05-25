@@ -42,7 +42,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "PALE / PILSNER",
+    "canonical_style": "pilsner"
   },
   "carafa_special_1": {
     "display_name": "Carafa Special I",
@@ -86,7 +88,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "roasted"
   },
   "acidulated": {
     "display_name": "Acidulated Malt",
@@ -130,7 +134,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "SPESIALMALT",
+    "canonical_style": "acidulated"
   },
   "brown": {
     "display_name": "Brown Malt",
@@ -169,7 +175,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "brown"
   },
   "carafa_special_3": {
     "display_name": "Carafa Special III",
@@ -212,7 +220,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "roasted"
   },
   "chocolate": {
     "display_name": "Chocolate Malt",
@@ -247,7 +257,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "chocolate"
   },
   "cara_crystalcara_gold": {
     "display_name": "Château Cara Crystal",
@@ -289,7 +301,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "carahell": {
     "display_name": "CaraHell",
@@ -333,7 +347,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "biscuit": {
     "display_name": "Biscuit Malt",
@@ -376,7 +392,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "SPESIALMALT",
+    "canonical_style": "biscuit"
   },
   "caramunich_1": {
     "display_name": "CaraMunich I",
@@ -417,7 +435,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "amber": {
     "display_name": "Amber Malt",
@@ -453,7 +473,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "SPESIALMALT",
+    "canonical_style": "amber"
   },
   "caraaroma": {
     "display_name": "CaraAroma",
@@ -493,7 +515,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "carared": {
     "display_name": "CaraRed",
@@ -533,7 +557,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "carafa_special_2": {
     "display_name": "Carafa Special II",
@@ -575,7 +601,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "roasted"
   },
   "spray_light_68_ebc": {
     "display_name": "Spraymalt Light (6-8 EBC)",
@@ -610,7 +638,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "EKSTRAKT / SPRAYMALT",
+    "canonical_style": "extract"
   },
   "black": {
     "display_name": "Black Malt",
@@ -649,7 +679,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "roasted"
   },
   "crystal_maple_carapils": {
     "display_name": "Carapils",
@@ -691,7 +723,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "caraamber": {
     "display_name": "CaraAmber",
@@ -730,7 +764,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "caramunich_3": {
     "display_name": "CaraMunich III",
@@ -772,7 +808,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "spray_medium": {
     "display_name": "Spraymalt Medium",
@@ -807,7 +845,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "EKSTRAKT / SPRAYMALT",
+    "canonical_style": "extract"
   },
   "abbey": {
     "display_name": "Abbey Malt",
@@ -847,7 +887,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "SPESIALMALT",
+    "canonical_style": "biscuit"
   },
   "crystal": {
     "display_name": "Crystal Malt",
@@ -888,7 +930,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "crystal"
   },
   "caramunich_2": {
     "display_name": "CaraMunich II",
@@ -929,7 +973,9 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "weyermann_pilsner": {
     "display_name": "Pilsner Malt",
@@ -961,7 +1007,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "display_group": "PALE / PILSNER",
+    "canonical_style": "pilsner"
   },
   "weyermann_munich_1": {
     "display_name": "Munich I",
@@ -995,7 +1043,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "display_group": "MUNICH / VIENNA",
+    "canonical_style": "munich"
   },
   "fawcett_maris_otter": {
     "display_name": "Maris Otter",
@@ -1028,7 +1078,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "display_group": "PALE / PILSNER",
+    "canonical_style": "pale_ale"
   },
   "bestmalz_red_x": {
     "display_name": "Red X",
@@ -1060,7 +1112,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "display_group": "SPESIALMALT",
+    "canonical_style": "red_x"
   },
   "bonsak_rugmalt": {
     "display_name": "Rugmalt",
@@ -1092,7 +1146,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "display_group": "NORSK MALT",
+    "canonical_style": "rye"
   },
   "flaket_havre": {
     "display_name": "Flaket Havre",
@@ -1129,7 +1185,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "bruker_forslag_v0_2"
+    "source": "bruker_forslag_v0_2",
+    "display_group": "FLAKES / UMALTET",
+    "canonical_style": "flaked"
   },
   "vienna": {
     "display_name": "Vienna Malt",
@@ -1165,7 +1223,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "coverage_expansion_p1"
+    "source": "coverage_expansion_p1",
+    "display_group": "MUNICH / VIENNA",
+    "canonical_style": "vienna"
   },
   "pale_ale_malt": {
     "display_name": "Pale Ale Malt",
@@ -1202,7 +1262,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "coverage_expansion_p1"
+    "source": "coverage_expansion_p1",
+    "display_group": "PALE / PILSNER",
+    "canonical_style": "pale_ale"
   },
   "pale_wheat": {
     "display_name": "Pale Wheat Malt",
@@ -1241,7 +1303,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "coverage_expansion_p1"
+    "source": "coverage_expansion_p1",
+    "display_group": "HVETE / RUG",
+    "canonical_style": "wheat"
   },
   "special_b": {
     "display_name": "Special B",
@@ -1280,7 +1344,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "coverage_expansion_p1"
+    "source": "coverage_expansion_p1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
   },
   "roasted_barley": {
     "display_name": "Roasted Barley",
@@ -1317,7 +1383,9 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "coverage_expansion_p1"
+    "source": "coverage_expansion_p1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "roasted"
   },
   "chocolate_wheat": {
     "display_name": "Chocolate Wheat Malt",
@@ -1355,6 +1423,8 @@
     ],
     "butikk_match": {},
     "verified": true,
-    "source": "coverage_expansion_p1"
+    "source": "coverage_expansion_p1",
+    "display_group": "RØSTET / MØRK",
+    "canonical_style": "chocolate"
   }
 }

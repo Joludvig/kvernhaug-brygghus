@@ -5,7 +5,7 @@
     "note": "Ikke editer direkte. Synkroniser via Import-panel i appen (Importer til Master DB)."
   },
   "bohemian_pilsner_floor": {
-    "display_name": "Bohemian Pilsner Floor Malt",
+    "display_name": "Bohemian Pilsner Floor",
     "produsent": "Weyermann",
     "kategori": "Basemalt",
     "smakstags": [
@@ -29,10 +29,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 70.0,
-    "pris_olbrygging": 39.0
+    "pris_olbrygging": 39.0,
+    "display_group": "PALE / PILSNER"
   },
   "carafa_special_1": {
-    "display_name": "Carafa Special 1 Malt",
+    "display_name": "Carafa Special I",
     "produsent": "Weyermann",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -57,7 +58,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 60.0,
-    "pris_olbrygging": 35.0
+    "pris_olbrygging": 37.0,
+    "display_group": "RØSTET / MØRK"
   },
   "acidulated": {
     "display_name": "Acidulated Malt",
@@ -84,7 +86,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 70.0,
-    "pris_olbrygging": 31.16
+    "pris_olbrygging": 31.16,
+    "display_group": "SPESIALMALT"
   },
   "brown": {
     "display_name": "Brown Malt",
@@ -111,10 +114,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "RØSTET / MØRK"
   },
   "carafa_special_3": {
-    "display_name": "Carafa Special 3 Malt",
+    "display_name": "Carafa Special III",
     "produsent": "Weyermann",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -138,7 +142,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 60.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 35.0,
+    "display_group": "RØSTET / MØRK"
   },
   "chocolate": {
     "display_name": "Chocolate Malt",
@@ -164,10 +169,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "RØSTET / MØRK"
   },
   "cara_crystalcara_gold": {
-    "display_name": "Cara Crystal / Cara Gold Malt",
+    "display_name": "Château Cara Crystal",
     "produsent": "Castle Malting",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -191,10 +197,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 60.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "carahell": {
-    "display_name": "Carahell Malt",
+    "display_name": "CaraHell",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -218,7 +225,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 40.0,
-    "pris_olbrygging": 40.0
+    "pris_olbrygging": 40.0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "biscuit": {
     "display_name": "Biscuit Malt",
@@ -245,10 +253,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 60.0,
-    "pris_olbrygging": 28.0
+    "pris_olbrygging": 28.0,
+    "display_group": "SPESIALMALT"
   },
   "caramunich_1": {
-    "display_name": "Caramunich 1 Malt",
+    "display_name": "CaraMunich I",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -271,7 +280,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "amber": {
     "display_name": "Amber Malt",
@@ -298,10 +308,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "SPESIALMALT"
   },
   "caraaroma": {
-    "display_name": "CaraAroma Malt",
+    "display_name": "CaraAroma",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -325,10 +336,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 60.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "carared": {
-    "display_name": "CaraRed Malt",
+    "display_name": "CaraRed",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -352,10 +364,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 40.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "carafa_special_2": {
-    "display_name": "Carafa Special 2 Malt",
+    "display_name": "Carafa Special II",
     "produsent": "Weyermann",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -378,7 +391,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 60.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 35.0,
+    "display_group": "RØSTET / MØRK"
   },
   "spray_light_68_ebc": {
     "display_name": "Spraymalt Light (6-8 EBC)",
@@ -402,7 +416,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 139.8,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "EKSTRAKT / SPRAYMALT"
   },
   "black": {
     "display_name": "Black Malt",
@@ -428,10 +443,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 40.0
+    "pris_olbrygging": 40.0,
+    "display_group": "RØSTET / MØRK"
   },
   "crystal_maple_carapils": {
-    "display_name": "Crystal Maple / Carapils Malt",
+    "display_name": "Carapils",
     "produsent": "Viking Malt",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -452,10 +468,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 36.0
+    "pris_olbrygging": 36.0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "caraamber": {
-    "display_name": "CaraAmber Malt",
+    "display_name": "CaraAmber",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -478,10 +495,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 40.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "caramunich_3": {
-    "display_name": "Caramunich 3 Malt",
+    "display_name": "CaraMunich III",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -505,7 +523,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "spray_medium": {
     "display_name": "Spraymalt Medium",
@@ -530,7 +549,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 169.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "EKSTRAKT / SPRAYMALT"
   },
   "abbey": {
     "display_name": "Abbey Malt",
@@ -557,7 +577,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "SPESIALMALT"
   },
   "crystal": {
     "display_name": "Crystal Malt",
@@ -584,10 +605,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 60.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "caramunich_2": {
-    "display_name": "Caramunich 2 Malt",
+    "display_name": "CaraMunich II",
     "produsent": "Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
@@ -610,10 +632,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 50.0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "weyermann_pilsner": {
-    "display_name": "Weyermann Pilsner Malt",
+    "display_name": "Pilsner Malt",
     "produsent": "Weyermann",
     "kategori": "Basemalt",
     "smakstags": [
@@ -637,10 +660,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "PALE / PILSNER"
   },
   "weyermann_munich_1": {
-    "display_name": "Weyermann Munich I",
+    "display_name": "Munich I",
     "produsent": "Weyermann",
     "kategori": "Basemalt",
     "smakstags": [
@@ -665,10 +689,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "MUNICH / VIENNA"
   },
   "fawcett_maris_otter": {
-    "display_name": "Thomas Fawcett Maris Otter",
+    "display_name": "Maris Otter",
     "produsent": "Thomas Fawcett",
     "kategori": "Basemalt",
     "smakstags": [
@@ -693,10 +718,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "PALE / PILSNER"
   },
   "bestmalz_red_x": {
-    "display_name": "BestMalz Red X",
+    "display_name": "Red X",
     "produsent": "BestMalz",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
@@ -720,10 +746,11 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "SPESIALMALT"
   },
   "bonsak_rugmalt": {
-    "display_name": "Bonsak Rugmalt",
+    "display_name": "Rugmalt",
     "produsent": "Bonsak",
     "kategori": "Norsk Malt",
     "smakstags": [
@@ -747,7 +774,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "NORSK MALT"
   },
   "flaket_havre": {
     "display_name": "Flaket Havre",
@@ -757,7 +785,7 @@
       "kremete",
       "fyldig",
       "silkemyk",
-      "noytralt korn"
+      "nøytralt korn"
     ],
     "kategorier": {
       "Kremete": 5,
@@ -774,7 +802,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0.0,
-    "pris_olbrygging": 0.0
+    "pris_olbrygging": 0.0,
+    "display_group": "FLAKES / UMALTET"
   },
   "vienna": {
     "display_name": "Vienna Malt",
@@ -802,7 +831,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "MUNICH / VIENNA"
   },
   "pale_ale_malt": {
     "display_name": "Pale Ale Malt",
@@ -830,7 +860,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "PALE / PILSNER"
   },
   "pale_wheat": {
     "display_name": "Pale Wheat Malt",
@@ -858,7 +889,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "HVETE / RUG"
   },
   "special_b": {
     "display_name": "Special B",
@@ -887,7 +919,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
   },
   "roasted_barley": {
     "display_name": "Roasted Barley",
@@ -915,7 +948,8 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "RØSTET / MØRK"
   },
   "chocolate_wheat": {
     "display_name": "Chocolate Wheat Malt",
@@ -944,6 +978,7 @@
     ],
     "knust_tilgjengelig": false,
     "pris_vestbrygg": 0,
-    "pris_olbrygging": 0
+    "pris_olbrygging": 0,
+    "display_group": "RØSTET / MØRK"
   }
 }
