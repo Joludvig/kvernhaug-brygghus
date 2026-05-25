@@ -1,4 +1,11 @@
-*.tmp.*
+# Python cache
 __pycache__/
 *.pyc
+*.pyo
+
+# Editor temp files (Claude Code / VSCode)
+*.tmp
+*.tmp.*
+
+# Virtual environment
 .venv/
