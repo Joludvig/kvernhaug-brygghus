@@ -10,7 +10,7 @@ def render_malt_panel(malt_database):
     
     # Bygg opp dropdown-menyen basert på kategorier
     malt_id_kart, malt_meny_valg = {}, []
-    malt_kategorier = ["Norsk Malt", "Basemalt", "Karamell- / Krystallmalt", "Spesialmalt (Røstet / Andre)", "Flakes / Korn", "Spraymalt"]
+    malt_kategorier = ["Norsk Malt", "Basemalt", "Hvete- / Rugmalt", "Karamell- / Krystallmalt", "Spesialmalt (Røstet / Andre)", "Flakes / Korn", "Spraymalt"]
     for kat in malt_kategorier:
         har_varer = False
         midlertidig_liste = []
@@ -30,25 +30,25 @@ def render_malt_panel(malt_database):
         malt_meny_valg = ["Pilsner Malt (Weyermann)"]
         malt_id_kart["Pilsner Malt (Weyermann)"] = "weyermann_pilsner"
 
+    _v = st.session_state.get("import_versjon", 0)
     oppdatert_malt_liste = []
     for i, m_item in enumerate(st.session_state.valgt_malt):
         with st.container():
             r_col1, r_col2, r_col3, r_col4, r_col5, r_col6, r_col7 = st.columns([2.8, 1.0, 1.0, 1.0, 1.0, 1.3, 0.5])
-            
+
             gjeldende_id = m_item["id"]
             gjeldende_visning = next((v for v, mid in malt_id_kart.items() if mid == gjeldende_id), None)
             if not gjeldende_visning or gjeldende_visning not in malt_meny_valg:
                 gjeldende_visning = next((v for v in malt_meny_valg if not v.startswith("---")), malt_meny_valg[0])
             standard_indeks = malt_meny_valg.index(gjeldende_visning)
-            
+
             with r_col1:
-                valgt_visning = st.selectbox(f"Malt #{i+1}", malt_meny_valg, key=f"malt_ui_{i}", index=standard_indeks)
-                # FIKSET: Sjekker at valgt_visning faktisk eksisterer (ikke er None) før startswith kjøres
+                valgt_visning = st.selectbox(f"Malt #{i+1}", malt_meny_valg, key=f"malt_ui_{i}_v{_v}", index=standard_indeks)
                 if valgt_visning and valgt_visning.startswith("---"):
                     valgt_visning = next((v for v in malt_meny_valg if not v.startswith("---")), valgt_visning)
                 ny_id = malt_id_kart.get(valgt_visning, next(iter(malt_id_kart.values()), ""))
             with r_col2:
-                ny_mengde = st.number_input(f"Kg", min_value=0.0, value=m_item["mengde"], step=0.1, key=f"malt_kg_{i}")
+                ny_mengde = st.number_input(f"Kg", min_value=0.0, value=m_item["mengde"], step=0.1, key=f"malt_kg_{i}_v{_v}")
             
             ebc_visning, prosent_visning, og_bidrag_visning, pris_visning, tags_visning = 0.0, "0.0 %", "+0.000", "0.0 kr", ""
             if ny_id in malt_database:
@@ -67,13 +67,13 @@ def render_malt_panel(malt_database):
                 prosent_visning = f"{(ny_mengde / total_malt_vekt * 100):.1f} %" if total_malt_vekt > 0 else "0.0 %"
                 pris_visning = f"{ny_mengde * 35.0:.1f} kr"
 
-            with r_col3: st.text_input("Andel", value=prosent_visning, disabled=True, key=f"malt_pct_{i}")
-            with r_col4: st.text_input("Farge", value=f"{ebc_visning:.1f} EBC", disabled=True, key=f"malt_ebc_{i}")
-            with r_col5: st.text_input("OG-bidrag", value=og_bidrag_visning, disabled=True, key=f"malt_og_{i}")
-            with r_col6: st.text_input("Pris", value=pris_visning, disabled=True, key=f"malt_pris_{i}")
+            with r_col3: st.text_input("Andel", value=prosent_visning, disabled=True, key=f"malt_pct_{i}_v{_v}")
+            with r_col4: st.text_input("Farge", value=f"{ebc_visning:.1f} EBC", disabled=True, key=f"malt_ebc_{i}_v{_v}")
+            with r_col5: st.text_input("OG-bidrag", value=og_bidrag_visning, disabled=True, key=f"malt_og_{i}_v{_v}")
+            with r_col6: st.text_input("Pris", value=pris_visning, disabled=True, key=f"malt_pris_{i}_v{_v}")
             with r_col7:
                 st.write(" ")
-                if st.button("❌", key=f"slett_malt_{i}"):
+                if st.button("❌", key=f"slett_malt_{i}_v{_v}"):
                     st.session_state.valgt_malt.pop(i)
                     st.rerun()
             if tags_visning: st.caption(f"👅 *Smaksprofil:* {tags_visning}")
