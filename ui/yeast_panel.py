@@ -23,9 +23,18 @@ def render_yeast_panel(gjaer_database):
             
     g_indeks = gjaer_meny_valg.index(gjeldende_g_visning) if gjeldende_g_visning in gjaer_meny_valg else 0
     valgt_gjaer_visning = st.selectbox("Velg gjær:", gjaer_meny_valg, index=g_indeks)
-    
+
     # FIKSET: Sjekker at vi faktisk har en gyldig verdi i kartet før vi lagrer til session state
     if valgt_gjaer_visning and valgt_gjaer_visning in gjaer_id_kart:
         st.session_state.valgt_gjaer_id = gjaer_id_kart[valgt_gjaer_visning]
     else:
         st.session_state.valgt_gjaer_id = "fermentis_us05"
+
+    g_id = st.session_state.valgt_gjaer_id
+    if g_id in gjaer_database:
+        g_info = gjaer_database[g_id]
+        smakstags = g_info.get("smakstags") or []
+        if smakstags:
+            st.caption(f"🧪 *Smak:* {', '.join(smakstags)}")
+        else:
+            st.caption("Ingen smaksprofil registrert ennå")

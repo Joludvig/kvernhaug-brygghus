@@ -47,7 +47,7 @@ def last_json_data(filnavn):
 # 2. Sentral lasting av de tre råvaredatabasene
 malt_database = last_json_data("malt.json")
 humle_database = last_json_data("master_humle_v2.json")
-gjaer_database = last_json_data("gjaer.json")
+gjaer_database = last_json_data("master_gjaer_v2.json")
 
 # 3. Initialiser globale session states hvis appen startes for første gang
 if "valgt_malt" not in st.session_state:
