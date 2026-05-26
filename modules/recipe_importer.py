@@ -34,18 +34,35 @@ def _finn_beste_treff(navn_sokt, db, terskel=0.6):
     return None, None, best_score
 
 
+_UNICODE_SPACES = "   ⁠​­"
+
+def _normaliser_tekst(text):
+    """Renser tekst for BOM, CRLF og uvanlige whitespace-varianter."""
+    text = text.lstrip("﻿")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    for tegn in _UNICODE_SPACES:
+        text = text.replace(tegn, " ")
+    text = text.replace("`", "")
+    return text
+
+
 def parse_recipe_text(text):
     """
     Parser fritekst-oppskrift til lister av malt, humle og gjær.
 
     Støttede formater:
-      5 kg Maris Otter
-      300 g CaraMunich
-      20 g Magnum 60 min
-      Wyeast 1318 London Ale III
+      5 kg Maris Otter          (malt i kg)
+      300 g CaraMunich          (malt i gram)
+      20 g Magnum 60 min        (humle)
+      Wyeast 1318 London Ale III (gjær)
 
-    Returnerer dict med nøklene: malt, humle, gjaer
+      Total malt: 6 kg          (kreves for prosentformat)
+      90% Maris Otter           (malt i prosent)
+
+    Returnerer dict med nøklene: malt, humle, gjaer, warnings
     """
+    text = _normaliser_tekst(text)
+
     # Humle: <tall> g <navn> <tall> min
     re_humle = re.compile(
         r"^\s*(\d+[\.,]?\d*)\s*g\s+(.+?)\s+(\d+)\s*min\s*$", re.IGNORECASE
@@ -58,12 +75,36 @@ def parse_recipe_text(text):
     re_malt_g = re.compile(
         r"^\s*(\d+[\.,]?\d*)\s*g\s+(.+?)\s*$", re.IGNORECASE
     )
+    # Total maltmengde: "Total malt: 6 kg" / "Totalt malt 6 kg" (norsk og engelsk)
+    re_total_malt = re.compile(
+        r"^totalt?\s*malt\s*:?\s*(\d+[\.,]?\d*)\s*(kg|g)\b", re.IGNORECASE
+    )
+    # Malt i prosent: "90% Maris Otter"
+    re_malt_pct = re.compile(
+        r"^\s*(\d+[\.,]?\d*)\s*%\s+(.+?)\s*$", re.IGNORECASE
+    )
+    # Kjente metadata-linjer som skal ignoreres (ikke sendes til gjær-bøtta)
+    re_metadata = re.compile(
+        r"^(?:batch(?:\s*size)?|volum(?:e)?|boil|kok(?:etid)?|efficiency|effektivitet|og|fg|ibu|abv)\s*:",
+        re.IGNORECASE
+    )
 
-    malt_liste, humle_liste, gjaer_liste = [], [], []
+    malt_liste, humle_liste, gjaer_liste, pct_malt_liste = [], [], [], []
+    total_malt_kg = None
+    warnings = []
 
-    for linje in text.splitlines():
+    for linje in text.split("\n"):
         linje = linje.strip()
         if not linje or linje.startswith("#"):
+            continue
+        if re_metadata.match(linje):
+            continue
+
+        # Total maltmengde-deklarasjon — sjekk FØR kg-mønsteret (starter med tekst, ikke tall)
+        m = re_total_malt.match(linje)
+        if m:
+            verdi = float(m.group(1).replace(",", "."))
+            total_malt_kg = verdi if m.group(2).lower() == "kg" else verdi / 1000.0
             continue
 
         m = re_humle.match(linje)
@@ -72,6 +113,14 @@ def parse_recipe_text(text):
                 "navn": m.group(2).strip(),
                 "gram": float(m.group(1).replace(",", ".")),
                 "tid": int(m.group(3)),
+            })
+            continue
+
+        m = re_malt_pct.match(linje)
+        if m:
+            pct_malt_liste.append({
+                "navn": m.group(2).strip(),
+                "pct": float(m.group(1).replace(",", ".")),
             })
             continue
 
@@ -94,7 +143,25 @@ def parse_recipe_text(text):
         # Ingen mengde — behandles som gjær
         gjaer_liste.append({"navn": linje})
 
-    return {"malt": malt_liste, "humle": humle_liste, "gjaer": gjaer_liste}
+    # Konverter prosent-malt → kg etter hele teksten er skannet
+    if pct_malt_liste:
+        total_pct = sum(p["pct"] for p in pct_malt_liste)
+        if abs(total_pct - 100.0) > 5.0:
+            warnings.append(
+                f"Maltprosentene summerer til {total_pct:.1f}% (forventet ~100%)."
+            )
+        if total_malt_kg is None:
+            warnings.append(
+                "Mangler 'Total malt: X kg' — oppgi total maltmengde for å konvertere prosenter til kg."
+            )
+        else:
+            for p in pct_malt_liste:
+                malt_liste.append({
+                    "navn": p["navn"],
+                    "mengde": round(p["pct"] / 100.0 * total_malt_kg, 3),
+                })
+
+    return {"malt": malt_liste, "humle": humle_liste, "gjaer": gjaer_liste, "warnings": warnings}
 
 
 def match_imported_ingredients(parsed, malt_db, humle_db, gjaer_db):
@@ -171,3 +238,7 @@ def apply_import_to_session_state(import_result):
         ]
     if matched["gjaer"]:
         st.session_state.valgt_gjaer_id = matched["gjaer"]["id"]
+
+    # Øk versjonstelleren så alle widget-nøkler i malt/humle-panelene får nye nøkler
+    # og Streamlit tvinges til å bruke index-parameteren ved neste render
+    st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1

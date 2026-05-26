@@ -1,3 +1,4 @@
+import json
 import streamlit as st
 from modules.recipe_storage import hent_alle_oppskrifter
 from modules.recipe_importer import (
@@ -6,7 +7,14 @@ from modules.recipe_importer import (
     apply_import_to_session_state,
 )
 
-def render_sidebar(malt_database, humle_database, gjaer_database):
+def _last_master_db(filnavn):
+    try:
+        with open(f"data/{filnavn}", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def render_sidebar():
     st.sidebar.header("📁 Lagrede oppskrifter")
     lagrede_brygg = hent_alle_oppskrifter()
     if lagrede_brygg:
@@ -17,6 +25,7 @@ def render_sidebar(malt_database, humle_database, gjaer_database):
             st.session_state.valgt_humle = r_data["hops"]
             st.session_state.valgt_gjaer_id = r_data["yeast"] if isinstance(r_data["yeast"], str) else r_data["yeast"].get("id", "fermentis_us05")
             st.session_state.gjeldende_navn = r_data["name"]
+            st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
             st.sidebar.success(f"Laddet: {valgt_lagret_navn}")
             st.rerun()
     else:
@@ -25,24 +34,42 @@ def render_sidebar(malt_database, humle_database, gjaer_database):
     st.sidebar.write("---")
     with st.sidebar.expander("📥 Importer oppskrift fra tekst"):
         st.caption(
-            "Lim inn ingredienser, én per linje:\n\n"
-            "`5 kg Maris Otter`\n"
-            "`300 g CaraMunich`\n"
-            "`20 g Magnum 60 min`\n"
-            "`Wyeast 1318 London Ale III`"
+            "**Kg-format:**\n\n"
+            "`5 kg Maris Otter`\n\n"
+            "`300 g CaraMunich`\n\n"
+            "**Prosentformat** (krever total maltmengde):\n\n"
+            "`Total malt: 6 kg`\n\n"
+            "`90% Maris Otter`\n\n"
+            "`10% Crystal Malt`\n\n"
+            "**Humle og gjær:**\n\n"
+            "`20 g Magnum 60 min`\n\n"
+            "`Wyeast 1318 London Ale III`\n\n"
+            "⚠️ Humle må ha koketid, f.eks. `50 g Magnum 60 min`."
         )
         import_tekst = st.text_area("Oppskrift:", height=160, key="import_tekst_input", label_visibility="collapsed")
 
         if st.button("🔍 Analyser", key="import_analyser_btn", use_container_width=True):
             if import_tekst.strip():
                 parsed = parse_recipe_text(import_tekst)
-                resultat = match_imported_ingredients(parsed, malt_database, humle_database, gjaer_database)
+                master_malt  = _last_master_db("master_malt.json")
+                master_humle = _last_master_db("master_humle_v2.json")
+                master_gjaer = _last_master_db("master_gjaer_v2.json")
+                resultat = match_imported_ingredients(parsed, master_malt, master_humle, master_gjaer)
                 st.session_state["import_preview"] = resultat
+                st.session_state["import_parsed"] = parsed
             else:
                 st.warning("Lim inn ingredienser først.")
 
         preview = st.session_state.get("import_preview")
         if preview:
+            parsed_debug = st.session_state.get("import_parsed", {})
+            n_malt  = len(parsed_debug.get("malt", []))
+            n_humle = len(parsed_debug.get("humle", []))
+            n_gjaer = len(parsed_debug.get("gjaer", []))
+            st.caption(f"Tolket: {n_malt} malt · {n_humle} humle · {n_gjaer} gjær-linje(r)")
+            for w in parsed_debug.get("warnings", []):
+                st.warning(w)
+
             matched = preview["matched"]
             unmatched = preview["unmatched"]
 
@@ -70,4 +97,5 @@ def render_sidebar(malt_database, humle_database, gjaer_database):
                 if st.button("✅ Importer oppskrift", key="import_bekreft_btn", use_container_width=True):
                     apply_import_to_session_state(preview)
                     del st.session_state["import_preview"]
+                    del st.session_state["import_parsed"]
                     st.rerun()
