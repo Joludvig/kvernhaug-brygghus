@@ -12,10 +12,10 @@ def render_yeast_panel(gjaer_database):
     # SKUDDSIKKER FALLBACK: Hvis gjærdatabasen er tom, legger vi inn et standard testvalg
     # slik at selectboxen ikke blir tom (noe som forårsaker None-krasj)
     if not gjaer_meny_valg:
-        gjaer_meny_valg = ["SafAle US-05 (Amerikansk Ale) (Fermentis (Tørr))"]
-        gjaer_id_kart["SafAle US-05 (Amerikansk Ale) (Fermentis (Tørr))"] = "fermentis_us05"
+        gjaer_meny_valg = ["SafAle US-05 (Fermentis)"]
+        gjaer_id_kart["SafAle US-05 (Fermentis)"] = "safale_us_05"
 
-    gjeldende_g_visning = "SafAle US-05 (Amerikansk Ale) (Fermentis (Tørr))"
+    gjeldende_g_visning = "SafAle US-05 (Fermentis)"
     for visning, g_id in gjaer_id_kart.items():
         if g_id == st.session_state.valgt_gjaer_id:
             gjeldende_g_visning = visning
@@ -28,13 +28,15 @@ def render_yeast_panel(gjaer_database):
     if valgt_gjaer_visning and valgt_gjaer_visning in gjaer_id_kart:
         st.session_state.valgt_gjaer_id = gjaer_id_kart[valgt_gjaer_visning]
     else:
-        st.session_state.valgt_gjaer_id = "fermentis_us05"
+        st.session_state.valgt_gjaer_id = "safale_us_05"
 
     g_id = st.session_state.valgt_gjaer_id
     if g_id in gjaer_database:
         g_info = gjaer_database[g_id]
         smakstags = g_info.get("smakstags") or []
+        att_pst = int(round(g_info.get("attenuation", 0.75) * 100))
+        att_str = f"{att_pst}% gjæring"
         if smakstags:
-            st.caption(f"🧪 *Smak:* {', '.join(smakstags)}")
+            st.caption(f"🧪 *Smak:* {', '.join(smakstags)} · {att_str}")
         else:
-            st.caption("Ingen smaksprofil registrert ennå")
+            st.caption(f"🧪 {att_str}")
