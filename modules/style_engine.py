@@ -1,4 +1,38 @@
-# modules/style_engine.py - DEL 1
+# modules/style_engine.py
+
+_ENGLISH_ALE_MALTS  = {"fawcett_maris_otter", "pale_ale_malt"}
+_ENGLISH_ALE_HOPS   = {"east_kent_goldings", "fuggles", "goldings"}
+_ENGLISH_ALE_YEASTS = {"safale_s04", "wlp002", "wlp007", "wyeast_1318", "lalbrew_london"}
+_DARK_MALT_IDS = {
+    "pale_chocolate", "roasted_barley", "carafa_special_1",
+    "carafa_special_2", "carafa_special_3", "chocolate_wheat", "dark_wheat",
+}
+
+_ENGLISH_STYLES_BASE = {"English Bitter", "Best Bitter", "ESB / Strong Bitter"}
+_ENGLISH_STYLES_DARK = {"Robust Porter"}
+_LAGER_BOCK_STYLES   = {
+    "Tysk Pilsner", "Tsjekkisk Pilsner", "Münchener Dunkel",
+    "Heller Bock (Mai-Bock)", "Dunkles Bock", "Klassisk Røykøl (Rauchbier)",
+}
+
+_ENGLISH_ALE_BOOST  = 20
+_LAGER_BOCK_PENALTY = 20
+
+
+def detect_recipe_signatures(recipe):
+    malts = {m["id"] for m in recipe.get("malts", [])}
+    hops  = {h["id"] for h in recipe.get("hops",  [])}
+    yeast = recipe.get("yeast", "")
+    english_ale = (
+        bool(malts & _ENGLISH_ALE_MALTS) or
+        bool(hops  & _ENGLISH_ALE_HOPS)  or
+        yeast in _ENGLISH_ALE_YEASTS
+    )
+    return {
+        "english_ale": english_ale,
+        "dark_malt": bool(malts & _DARK_MALT_IDS),
+    }
+
 
 def analyser_stil_og_balanse(recipe):
     """
@@ -106,12 +140,35 @@ def analyser_stil_og_balanse(recipe):
             "beskrivelse": "Et lyst, sterkt klosterøl. Varmende alkohol med toner av pepper, nellik og pære."
         },
         "Amerikansk IPA": {
-            "prio": 8, "kat_navn": "🤢 Humledominert IPA (Nederst)",
+            "prio": 8, "kat_navn": "🍋 Humledominert IPA",
             "og": (1.056, 1.070), "fg": (1.008, 1.014), "abv": (5.5, 7.5), "ibu": (40, 70), "ebc": (12, 30),
             "smak_krav": {"Sitrus": 6, "Tropisk": 6, "Fruktighet": 4},
             "beskrivelse": "Moderne, overhumlet stil der maltkarakteren skyves helt til side."
-
-        }
+        },
+        "English Bitter": {
+            "prio": 9, "kat_navn": "🇬🇧 Engelsk Ale",
+            "og": (1.030, 1.039), "fg": (1.007, 1.011), "abv": (3.2, 3.8), "ibu": (25, 35), "ebc": (12, 36),
+            "smak_krav": {"Brød": 4, "Maltfylde": 3, "Bitterhet": 3},
+            "beskrivelse": "Lett, tørr britisk øl. Ren maltsødme balansert av fin jordlig humlebitterhet."
+        },
+        "Best Bitter": {
+            "prio": 9, "kat_navn": "🇬🇧 Engelsk Ale",
+            "og": (1.040, 1.048), "fg": (1.008, 1.012), "abv": (3.8, 4.6), "ibu": (25, 40), "ebc": (12, 32),
+            "smak_krav": {"Brød": 4, "Maltfylde": 4, "Nøtter": 2, "Bitterhet": 3},
+            "beskrivelse": "Klassisk britisk fatøl med god maltbalanse og jordlig EKG-karakter."
+        },
+        "ESB / Strong Bitter": {
+            "prio": 9, "kat_navn": "🇬🇧 Engelsk Ale",
+            "og": (1.048, 1.060), "fg": (1.010, 1.016), "abv": (4.6, 6.2), "ibu": (30, 50), "ebc": (12, 44),
+            "smak_krav": {"Brød": 5, "Maltfylde": 5, "Nøtter": 2, "Bitterhet": 4},
+            "beskrivelse": "Kraftig britisk bitter med rik maltsødme, nøtteaktige toner og markant bitterhet."
+        },
+        "English Dark Mild": {
+            "prio": 9, "kat_navn": "🇬🇧 Engelsk Ale",
+            "og": (1.030, 1.038), "fg": (1.008, 1.013), "abv": (3.0, 3.8), "ibu": (10, 25), "ebc": (24, 100),
+            "smak_krav": {"Brød": 3, "Maltfylde": 3, "Karamell": 2},
+            "beskrivelse": "En liten, mørk og søtlig britisk tradisjonsstil med mild malt- og karamellsmak."
+        },
     }
 # modules/style_engine.py - DEL 3
     # --- 3. BJCP STYLE SCORING MOTOR ---
@@ -161,6 +218,17 @@ def analyser_stil_og_balanse(recipe):
             "stil": stil_navn, "score": endelig_score, "mangler": mangler,
             "beskrivelse": krav["beskrivelse"], "prio": krav["prio"], "kat_navn": krav["kat_navn"]
         })
+
+    # --- SIGNATURJUSTERING ---
+    sigs = detect_recipe_signatures(recipe)
+    if sigs["english_ale"]:
+        for s in stil_matcher:
+            if s["stil"] in _ENGLISH_STYLES_BASE:
+                s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
+            elif s["stil"] in _ENGLISH_STYLES_DARK and sigs["dark_malt"]:
+                s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
+            elif s["stil"] in _LAGER_BOCK_STYLES:
+                s["score"] = max(0, s["score"] - _LAGER_BOCK_PENALTY)
 
     # Sorterer etter din "prio" (1 til 8)
     stil_matcher = sorted(stil_matcher, key=lambda x: (x["prio"], -x["score"]))
