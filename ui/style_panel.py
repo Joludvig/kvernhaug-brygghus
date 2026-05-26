@@ -13,7 +13,7 @@ def render_style_panel(ctx, humle_database):
     st.write("---")
     st.subheader("🎯 BJCP Stil-matching (Prosentvis):")
     relevante_stiler = sorted(
-        [s for s in ctx['style_analysis']["stil_liste"] if s["score"] > 0],
+        [s for s in ctx['style_analysis']["stil_liste"] if s["score"] >= 5],
         key=lambda x: (-x["score"], x["prio"])
     )
     if not relevante_stiler:
