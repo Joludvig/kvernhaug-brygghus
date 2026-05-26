@@ -1,6 +1,6 @@
 # modules/style_engine.py
 
-_ENGLISH_ALE_MALTS  = {"fawcett_maris_otter", "pale_ale_malt"}
+_ENGLISH_ALE_MALTS  = {"fawcett_maris_otter", "pale_ale_malt", "golden_promise"}
 _ENGLISH_ALE_HOPS   = {"east_kent_goldings", "fuggles", "goldings"}
 _ENGLISH_ALE_YEASTS = {"safale_s04", "wlp002", "wlp007", "wyeast_1318", "lalbrew_london"}
 _DARK_MALT_IDS = {
@@ -8,37 +8,73 @@ _DARK_MALT_IDS = {
     "carafa_special_2", "carafa_special_3", "chocolate_wheat", "dark_wheat",
 }
 
+_HAZY_HOPS   = {"citra", "mosaic", "galaxy", "ekuanot", "sabro", "el_dorado", "azacca"}
+_HAZY_MALTS  = {"oat_malt", "flaked_oats", "flaked_wheat", "wheat_malt"}
+
+_BELGIAN_YEASTS = {
+    "wlp500", "wlp510", "wlp530", "wlp545",
+    "wyeast_3787", "wyeast_3522", "wyeast_3724",
+    "safbrew_t58", "safale_wb06",
+}
+
+_STOUT_MALTS = {"roasted_barley", "black"}
+
+_WEST_COAST_HOPS   = {"centennial", "chinook", "simcoe", "cascade", "amarillo", "columbus"}
+_WEST_COAST_YEASTS = {"safale_us_05", "wlp001", "wyeast_1056"}
+
 _ENGLISH_STYLES_BASE = {"English Bitter", "Best Bitter", "ESB / Strong Bitter"}
 _ENGLISH_STYLES_DARK = {"Robust Porter"}
 _LAGER_BOCK_STYLES   = {
     "Tysk Pilsner", "Tsjekkisk Pilsner", "Münchener Dunkel",
     "Heller Bock (Mai-Bock)", "Dunkles Bock", "Klassisk Røykøl (Rauchbier)",
 }
+_HAZY_STYLES    = {"Hazy IPA / NEIPA"}
+_BELGIAN_STYLES = {"Belgisk Witbier", "Belgisk Tripel", "Belgisk Dubbel"}
+_STOUT_STYLES   = {"Irsk Tørr Stout", "Oatmeal Stout", "Robust Porter"}
 
 _ENGLISH_ALE_BOOST  = 20
 _LAGER_BOCK_PENALTY = 20
+_SIGNATURE_BOOST    = 20
+_SIGNATURE_PENALTY  = 15
 
 
 def detect_recipe_signatures(recipe):
     malts = {m["id"] for m in recipe.get("malts", [])}
     hops  = {h["id"] for h in recipe.get("hops",  [])}
     yeast = recipe.get("yeast", "")
+
     english_ale = (
         bool(malts & _ENGLISH_ALE_MALTS) or
         bool(hops  & _ENGLISH_ALE_HOPS)  or
         yeast in _ENGLISH_ALE_YEASTS
     )
+
+    # Hazy: tropiske humler + myk malt (oats/wheat) begge må være til stede
+    hazy = bool(hops & _HAZY_HOPS) and bool(malts & _HAZY_MALTS)
+
+    belgian = yeast in _BELGIAN_YEASTS
+
+    # Stout: krever minst 150 g roasted barley eller black malt
+    stout = any(
+        m["id"] in _STOUT_MALTS and m.get("mengde", 0) >= 0.15
+        for m in recipe.get("malts", [])
+    )
+
+    west_coast = bool(hops & _WEST_COAST_HOPS) and yeast in _WEST_COAST_YEASTS
+
     return {
         "english_ale": english_ale,
-        "dark_malt": bool(malts & _DARK_MALT_IDS),
+        "dark_malt":   bool(malts & _DARK_MALT_IDS),
+        "hazy":        hazy,
+        "belgian":     belgian,
+        "stout":       stout,
+        "west_coast":  west_coast,
     }
 
 
 def analyser_stil_og_balanse(recipe):
     """
     Komplett BJCP-stilmatching og skreddersydd kategoriranking for Kvernhaug Brygghus.
-    Sorterer stilene etter din nøyaktige prioritering: 
-    Lager -> Bock -> Hveteøl -> Mørk -> Gårdsøl -> Juleøl -> Belgisk -> IPA.
     """
     stats = recipe["stats"]
     og = stats["og"]
@@ -52,7 +88,7 @@ def analyser_stil_og_balanse(recipe):
     gravity_points = (og - 1) * 1000
     bu_gu = ibu / gravity_points if gravity_points > 0 else 0.0
 
-    # 2. DET TOTALE BJCP-BIBLIOTEKET MED DIN PRIORITERTE REKKEFØLGE
+    # 2. BJCP-BIBLIOTEKET
     bjcp_stiler = {
         "Tysk Pilsner": {
             "prio": 1, "kat_navn": "🍺 Pilsner & Lys Lager",
@@ -90,7 +126,6 @@ def analyser_stil_og_balanse(recipe):
             "smak_krav": {"Fruktighet": 6, "Krydder": 3, "Brød": 4},
             "beskrivelse": "Et friskt, kremet og lyst hveteøl preget av gjærens intense noter av banan og nellik."
         },
-# modules/style_engine.py - DEL 2 (Oppdatert m/ Imperial Porter)
         "Robust Porter": {
             "prio": 4, "kat_navn": "☕ Porter, Stout & Røykøl",
             "og": (1.048, 1.065), "fg": (1.012, 1.016), "abv": (4.8, 6.5), "ibu": (25, 50), "ebc": (60, 100),
@@ -108,6 +143,12 @@ def analyser_stil_og_balanse(recipe):
             "og": (1.036, 1.044), "fg": (1.007, 1.011), "abv": (4.0, 4.5), "ibu": (25, 45), "ebc": (80, 120),
             "smak_krav": {"Kaffe": 7, "Sjokolade": 3, "Toast": 5, "Bitterhet": 4},
             "beskrivelse": "Helt sort, kremet øl preget av intens espresso-smak fra røstet bygg."
+        },
+        "Oatmeal Stout": {
+            "prio": 4, "kat_navn": "☕ Porter, Stout & Røykøl",
+            "og": (1.048, 1.065), "fg": (1.010, 1.018), "abv": (4.2, 5.9), "ibu": (20, 40), "ebc": (64, 100),
+            "smak_krav": {"Sjokolade": 6, "Kaffe": 4, "Maltfylde": 6, "Nøtter": 3},
+            "beskrivelse": "Kremet og fyldig stout med myk munnfølelse fra havre. Sjokolade og mokka i front, uten den skarpe brenttonen."
         },
         "Klassisk Røykøl (Rauchbier)": {
             "prio": 4, "kat_navn": "☕ Porter, Stout & Røykøl",
@@ -133,11 +174,23 @@ def analyser_stil_og_balanse(recipe):
             "smak_krav": {"Fruktighet": 4, "Krydder": 4, "Brød": 4},
             "beskrivelse": "Forfriskende belgisk hveteøl, krydret med korianderfrø og appelsinskall."
         },
+        "Belgisk Dubbel": {
+            "prio": 7, "kat_navn": "🇧🇪 Belgisk Gårds- & Klosterøl",
+            "og": (1.062, 1.075), "fg": (1.010, 1.018), "abv": (6.0, 7.6), "ibu": (15, 25), "ebc": (22, 44),
+            "smak_krav": {"Karamell": 6, "Maltfylde": 6, "Fruktighet": 5, "Krydder": 3},
+            "beskrivelse": "Rikt klosterøl med dype karamell- og tørket-frukt-toner (svisker, rosiner). Belgisk gjær gir mye liv."
+        },
         "Belgisk Tripel": {
             "prio": 7, "kat_navn": "🇧🇪 Belgisk Gårds- & Klosterøl",
             "og": (1.075, 1.085), "fg": (1.008, 1.014), "abv": (7.5, 9.5), "ibu": (20, 40), "ebc": (9, 14),
             "smak_krav": {"Krydder": 5, "Fruktighet": 6, "Bitterhet": 3},
             "beskrivelse": "Et lyst, sterkt klosterøl. Varmende alkohol med toner av pepper, nellik og pære."
+        },
+        "Hazy IPA / NEIPA": {
+            "prio": 8, "kat_navn": "🍋 Humledominert IPA",
+            "og": (1.060, 1.085), "fg": (1.010, 1.016), "abv": (6.0, 8.5), "ibu": (40, 70), "ebc": (6, 18),
+            "smak_krav": {"Tropisk": 7, "Fruktighet": 6, "Sitrus": 4},
+            "beskrivelse": "Saftig, tropisk og tåkete IPA med myk munnfølelse fra havre/hvete. Lav opplevd bitterhet tross høye IBU."
         },
         "Amerikansk IPA": {
             "prio": 8, "kat_navn": "🍋 Humledominert IPA",
@@ -170,42 +223,42 @@ def analyser_stil_og_balanse(recipe):
             "beskrivelse": "En liten, mørk og søtlig britisk tradisjonsstil med mild malt- og karamellsmak."
         },
     }
-# modules/style_engine.py - DEL 3
-    # --- 3. BJCP STYLE SCORING MOTOR ---
+
+    # 3. BJCP STYLE SCORING
     stil_matcher = []
-    
+
     for stil_navn, krav in bjcp_stiler.items():
         score = 100.0
         mangler = []
-        
+
         if og < krav["og"][0]:
             score -= (krav["og"][0] - og) * 400
             mangler.append(f"For lav sukkermengde (OG bør være over {krav['og'][0]:.3f})")
         elif og > krav["og"][1]:
             score -= (og - krav["og"][1]) * 400
             mangler.append(f"For høy sukkermengde (OG bør være under {krav['og'][1]:.3f})")
-            
+
         if fg < krav["fg"][0]:
             score -= (krav["fg"][0] - fg) * 400
             mangler.append(f"Gjæret for langt ned (FG bør være over {krav['fg'][0]:.3f})")
         elif fg > krav["fg"][1]:
             score -= (fg - krav["fg"][1]) * 400
             mangler.append(f"For mye restsødme (FG bør være under {krav['fg'][1]:.3f})")
-            
+
         if ibu < krav["ibu"][0]:
             score -= (krav["ibu"][0] - ibu) * 1.5
             mangler.append(f"Mangler bitterhet (Mangler {krav['ibu'][0] - ibu:.0f} IBU)")
         elif ibu > krav["ibu"][1]:
             score -= (ibu - krav["ibu"][1]) * 1.2
             mangler.append(f"For høy bitterhet ({ibu - krav['ibu'][1]:.0f} IBU for mye)")
-            
+
         if ebc < krav["ebc"][0]:
             score -= (krav["ebc"][0] - ebc) * 0.8
             mangler.append("Ølet er for lyst for stilen")
         elif ebc > krav["ebc"][1]:
             score -= (ebc - krav["ebc"][1]) * 0.5
             mangler.append("Ølet er for mørkt for stilen")
-            
+
         for smaks_navn, min_verdi in krav["smak_krav"].items():
             reell_verdi = flavor.get(smaks_navn, 0.0)
             if reell_verdi < min_verdi:
@@ -213,30 +266,48 @@ def analyser_stil_og_balanse(recipe):
                 mangler.append(f"Mangler sensorisk preg av *{smaks_navn.lower()}*")
 
         endelig_score = max(0, min(int(score), 100))
-        
+
         stil_matcher.append({
             "stil": stil_navn, "score": endelig_score, "mangler": mangler,
             "beskrivelse": krav["beskrivelse"], "prio": krav["prio"], "kat_navn": krav["kat_navn"]
         })
 
-    # --- SIGNATURJUSTERING ---
+    # 4. SIGNATURJUSTERING
     sigs = detect_recipe_signatures(recipe)
-    if sigs["english_ale"]:
-        for s in stil_matcher:
-            if s["stil"] in _ENGLISH_STYLES_BASE:
+
+    for s in stil_matcher:
+        stil = s["stil"]
+
+        if sigs["english_ale"]:
+            if stil in _ENGLISH_STYLES_BASE:
                 s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
-            elif s["stil"] in _ENGLISH_STYLES_DARK and sigs["dark_malt"]:
+            elif stil in _ENGLISH_STYLES_DARK and sigs["dark_malt"]:
                 s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
-            elif s["stil"] in _LAGER_BOCK_STYLES:
+            elif stil in _LAGER_BOCK_STYLES:
                 s["score"] = max(0, s["score"] - _LAGER_BOCK_PENALTY)
 
-    # Sorterer etter din "prio" (1 til 8)
+        if sigs["hazy"]:
+            if stil in _HAZY_STYLES:
+                s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
+            elif stil in _LAGER_BOCK_STYLES:
+                s["score"] = max(0, s["score"] - _SIGNATURE_PENALTY)
+
+        if sigs["belgian"]:
+            if stil in _BELGIAN_STYLES:
+                s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
+            elif stil in _ENGLISH_STYLES_BASE:
+                s["score"] = max(0, s["score"] - _SIGNATURE_PENALTY)
+
+        if sigs["stout"]:
+            if stil in _STOUT_STYLES:
+                s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
+
     stil_matcher = sorted(stil_matcher, key=lambda x: (x["prio"], -x["score"]))
-    
+
     topp_match_reell = max(stil_matcher, key=lambda x: x["score"])
     dominant_stil = topp_match_reell["stil"] if topp_match_reell["score"] > 40 else "Kreativt Brygg"
 
-    # --- 4. BALANSEANALYSE ---
+    # 5. BALANSEANALYSE OG ADVARSLER
     balanse_notater, problemer = [], []
 
     if bu_gu > 0.85:
@@ -253,6 +324,30 @@ def analyser_stil_og_balanse(recipe):
 
     if flavor.get("Kaffe", 0) > 6 and ebc > 80 and bu_gu > 0.8:
         problemer.append("☕ **Askeaktig finish:** Kombinasjonen av mørkt brentmalt og høy bitterhet kan skape en skarp ettersmak.")
+
+    # Juice/sirup-fare: tropisk/frukt + høy restsødme + lav bitterhet
+    if (flavor.get("Tropisk", 0) + flavor.get("Fruktighet", 0) > 8) and fg > 1.016 and ibu < 35:
+        problemer.append("🧃 **Juice/sirup-fare:** Tropisk humle, høy restsødme og lav bitterhet kan gi et søtt, sirupaktig resultat.")
+
+    # Røyk-konflikt: røykmalt og tropisk/sitrus slåss
+    if flavor.get("Røyk", 0) > 4 and (flavor.get("Sitrus", 0) > 3 or flavor.get("Tropisk", 0) > 3):
+        problemer.append("🔥 **Sensorisk konflikt:** Røykmalt og sitrus-/tropisk humle slåss mot hverandre — disse smaknuansene forsterker ikke hverandre.")
+
+    # Belgisk gjær + aggressiv humle
+    if sigs["belgian"] and (flavor.get("Tropisk", 0) + flavor.get("Sitrus", 0)) > 8:
+        problemer.append("🇧🇪 **Stilkollisjon:** Belgisk gjær og aggressive amerikanske humler kan overvelde gjærens esterprofil — vurder nøytral gjær for humledrevne stiler.")
+
+    # Signaturbekreftelser
+    if sigs["english_ale"]:
+        balanse_notater.append("🇬🇧 **Britisk ale-signatur:** Maris Otter / EKG / britisk gjær gir klassisk pub ale-karakter.")
+    if sigs["hazy"]:
+        balanse_notater.append("🌀 **Hazy-signatur:** Tropiske humler kombinert med myk malt (havre/hvete) peker mot NEIPA / Hazy IPA.")
+    if sigs["belgian"]:
+        balanse_notater.append("🇧🇪 **Belgisk signatur:** Gjæren vil dominere med krydrede fenol- og esternoter — typisk pepper, nellik og frukt.")
+    if sigs["stout"]:
+        balanse_notater.append("☕ **Stout-signatur:** Røstet bygg / sort malt gir brent espresso-karakter og sort farge.")
+    if sigs["west_coast"]:
+        balanse_notater.append("🏄 **West Coast-signatur:** Ren, tørr gjær og bittre aromatiske humler gir klassisk West Coast IPA-profil.")
 
     return {
         "stil": dominant_stil, "stil_liste": stil_matcher,
