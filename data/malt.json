@@ -172,7 +172,7 @@
     "pris_olbrygging": 0,
     "display_group": "RØSTET / MØRK"
   },
-  "cara_crystalcara_gold": {
+  "chateau_cara_crystal": {
     "display_name": "Château Cara Crystal",
     "produsent": "Castle Malting",
     "kategori": "Karamell- / Krystallmalt",
@@ -980,5 +980,524 @@
     "pris_vestbrygg": 0,
     "pris_olbrygging": 0,
     "display_group": "HVETE / RUG"
+  },
+  "jaermalt_pilsner": {
+    "display_name": "Pilsner Malt",
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "smakstags": [
+      "brød",
+      "lyst korn",
+      "mild honning",
+      "frisk"
+    ],
+    "kategorier": {
+      "Brød": 3,
+      "Honning": 2,
+      "Maltfylde": 3
+    },
+    "ebc": 3.0,
+    "potensiale": 1.037,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Pilsner",
+      "Lys Lager",
+      "Norsk Lager",
+      "Belgisk Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "NORSK MALT"
+  },
+  "jaermalt_pale_ale": {
+    "display_name": "Pale Ale Malt",
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "smakstags": [
+      "kjeks",
+      "nøtter",
+      "lyst brød",
+      "mild fruktig"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Nøtter": 2,
+      "Maltfylde": 4
+    },
+    "ebc": 5.5,
+    "potensiale": 1.038,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Pale Ale",
+      "IPA",
+      "Golden Ale",
+      "Bitter"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "NORSK MALT"
+  },
+  "jaermalt_vienna": {
+    "display_name": "Vienna Malt",
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "smakstags": [
+      "brød",
+      "honning",
+      "kjeks",
+      "mild karamell"
+    ],
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 4
+    },
+    "ebc": 8.0,
+    "potensiale": 1.036,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Vienna Lager",
+      "Märzen",
+      "Amber Lager",
+      "Altbier"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "NORSK MALT"
+  },
+  "jaermalt_munich": {
+    "display_name": "Munich Malt",
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "smakstags": [
+      "brød",
+      "honning",
+      "maltrik",
+      "mørk münchen"
+    ],
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 5
+    },
+    "ebc": 15.0,
+    "potensiale": 1.036,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Märzen",
+      "Bock",
+      "Dunkel",
+      "Oktoberfest"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "NORSK MALT"
+  },
+  "jaermalt_wheat": {
+    "display_name": "Wheat Malt",
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "smakstags": [
+      "hvete",
+      "lyst brød",
+      "myk",
+      "frisk"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Fruktig": 2,
+      "Maltfylde": 3
+    },
+    "ebc": 4.0,
+    "potensiale": 1.037,
+    "maks_prosent": 70,
+    "anbefalte_stiler": [
+      "Hefeweizen",
+      "American Wheat",
+      "Witbier",
+      "Norsk Hveteøl"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "NORSK MALT"
+  },
+  "munich_ii": {
+    "display_name": "Munich II",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "honning",
+      "mørk münchen",
+      "maltrik",
+      "nøtter"
+    ],
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 6
+    },
+    "ebc": 23.0,
+    "potensiale": 1.036,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Märzen",
+      "Bock",
+      "Dunkel",
+      "Oktoberfest"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "MUNICH / VIENNA"
+  },
+  "melanoidin": {
+    "display_name": "Melanoidin Malt",
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "brød",
+      "karamell",
+      "honning",
+      "maltrik",
+      "mellomkropp"
+    ],
+    "kategorier": {
+      "Brød": 5,
+      "Karamell": 4,
+      "Maltfylde": 5
+    },
+    "ebc": 70.0,
+    "potensiale": 1.034,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Märzen",
+      "Bock",
+      "Red Ale",
+      "Amber Lager"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "SPESIALMALT"
+  },
+  "dark_wheat": {
+    "display_name": "Dark Wheat Malt",
+    "produsent": "Weyermann",
+    "kategori": "Hvete- / Rugmalt",
+    "smakstags": [
+      "mørk hvete",
+      "brød",
+      "karamell",
+      "lett krydret"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Karamell": 3,
+      "Maltfylde": 3
+    },
+    "ebc": 15.0,
+    "potensiale": 1.036,
+    "maks_prosent": 50,
+    "anbefalte_stiler": [
+      "Dunkelweizen",
+      "Dark Wheat Beer",
+      "Weizenbock"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "HVETE / RUG"
+  },
+  "flaked_wheat": {
+    "display_name": "Flaket Hvete",
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "smakstags": [
+      "hvete",
+      "lyst",
+      "lett",
+      "umaltet"
+    ],
+    "kategorier": {
+      "Brød": 2,
+      "Maltfylde": 2
+    },
+    "ebc": 2.0,
+    "potensiale": 1.035,
+    "maks_prosent": 30,
+    "anbefalte_stiler": [
+      "Hefeweizen",
+      "Hazy IPA",
+      "Witbier",
+      "American Wheat"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "FLAKES / UMALTET"
+  },
+  "flaked_barley": {
+    "display_name": "Flaket Bygg",
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "smakstags": [
+      "nøytralt",
+      "kropp",
+      "lett",
+      "umaltet korn"
+    ],
+    "kategorier": {
+      "Maltfylde": 3,
+      "Brød": 1
+    },
+    "ebc": 2.0,
+    "potensiale": 1.032,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Stout",
+      "Irish Stout",
+      "Porter"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "FLAKES / UMALTET"
+  },
+  "pale_chocolate": {
+    "display_name": "Pale Chocolate Malt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "mild sjokolade",
+      "kakao",
+      "nøtter",
+      "toast",
+      "mild røst"
+    ],
+    "kategorier": {
+      "Sjokolade": 5,
+      "Nøtter": 4,
+      "Kaffe": 2
+    },
+    "ebc": 600.0,
+    "potensiale": 1.03,
+    "maks_prosent": 15,
+    "anbefalte_stiler": [
+      "Porter",
+      "Brown Ale",
+      "Stout",
+      "Dark Mild"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "RØSTET / MØRK"
+  },
+  "rauchmalz": {
+    "display_name": "Rauchmalz",
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "røykt",
+      "spekk",
+      "bål",
+      "campfire",
+      "malt"
+    ],
+    "kategorier": {
+      "Røyk": 8,
+      "Maltfylde": 3
+    },
+    "ebc": 5.0,
+    "potensiale": 1.037,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Rauchbier",
+      "Røykøl",
+      "Smoked Porter",
+      "Smoked Stout"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "RØSTET / MØRK"
+  },
+  "honey_malt": {
+    "display_name": "Honey Malt",
+    "produsent": "Gambrinus",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "smakstags": [
+      "honning",
+      "sødme",
+      "karamell",
+      "lett krydret"
+    ],
+    "kategorier": {
+      "Honning": 7,
+      "Karamell": 4,
+      "Maltfylde": 3
+    },
+    "ebc": 25.0,
+    "potensiale": 1.034,
+    "maks_prosent": 15,
+    "anbefalte_stiler": [
+      "Golden Ale",
+      "Blond Ale",
+      "Honey Beer",
+      "American Amber"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "SPESIALMALT"
+  },
+  "oat_malt": {
+    "display_name": "Oat Malt",
+    "produsent": "Simpson's",
+    "kategori": "Hvete- / Rugmalt",
+    "smakstags": [
+      "kremete",
+      "nøtter",
+      "silkemyk",
+      "mild sødme"
+    ],
+    "kategorier": {
+      "Kremete": 5,
+      "Nøtter": 3,
+      "Maltfylde": 3
+    },
+    "ebc": 3.0,
+    "potensiale": 1.035,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Oatmeal Stout",
+      "Hazy IPA",
+      "Porter"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "HVETE / RUG"
+  },
+  "caramalt_30": {
+    "display_name": "CaraMalt",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "lys karamell",
+      "honning",
+      "kjeks",
+      "toffee"
+    ],
+    "kategorier": {
+      "Karamell": 4,
+      "Honning": 3,
+      "Brød": 3
+    },
+    "ebc": 30.0,
+    "potensiale": 1.034,
+    "maks_prosent": 25,
+    "anbefalte_stiler": [
+      "Pale Ale",
+      "Bitter",
+      "IPA",
+      "Brown Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
+  },
+  "flaked_corn": {
+    "display_name": "Flaket Mais",
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "smakstags": [
+      "nøytral",
+      "lyst korn",
+      "lett",
+      "umaltet"
+    ],
+    "kategorier": {
+      "Maltfylde": 2,
+      "Brød": 1
+    },
+    "ebc": 1.0,
+    "potensiale": 1.037,
+    "maks_prosent": 40,
+    "anbefalte_stiler": [
+      "American Lager",
+      "Cream Ale",
+      "Light Lager"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "FLAKES / UMALTET"
+  },
+  "crystal_extra_dark": {
+    "display_name": "Extra Dark Crystal",
+    "produsent": "Thomas Fawcett",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "mørk karamell",
+      "plomme",
+      "rosiner",
+      "tørket frukt",
+      "fiken"
+    ],
+    "kategorier": {
+      "Karamell": 8,
+      "Fruktig": 5,
+      "Maltfylde": 3
+    },
+    "ebc": 350.0,
+    "potensiale": 1.03,
+    "maks_prosent": 10,
+    "anbefalte_stiler": [
+      "Barleywine",
+      "Strong Ale",
+      "Old Ale",
+      "Stout"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "KARAMELL / CRYSTAL"
+  },
+  "golden_promise": {
+    "display_name": "Golden Promise",
+    "produsent": "Simpsons",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "lys honning",
+      "kjeks",
+      "mild sødme",
+      "skotsk"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 3,
+      "Maltfylde": 4
+    },
+    "ebc": 6.0,
+    "potensiale": 1.037,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Scottish Ale",
+      "Pale Ale",
+      "IPA",
+      "80 Shilling"
+    ],
+    "knust_tilgjengelig": false,
+    "pris_vestbrygg": 0,
+    "pris_olbrygging": 0,
+    "display_group": "PALE / PILSNER"
   }
 }
