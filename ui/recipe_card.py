@@ -59,5 +59,88 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
     st.components.v1.html(html_kort, height=580, scrolling=True)
 
     if st.button("🖨️ Generer utskriftsvennlig ark (A4)", use_container_width=True):
-        st.markdown("<script>window.print();</script>", unsafe_allow_html=True)
-        st.info("💡 **Tips:** Trykk **Ctrl + P** hvis vinduet ikke åpnet seg.")
+        malt_li = "".join(
+            f"<li>{malt_database[m['id']]['display_name']}: {m['mengde']:.2f} kg</li>"
+            for m in st.session_state.valgt_malt if m["id"] in malt_database
+        )
+        humle_li = "".join(
+            f"<li>{humle_database[h['id']]['display_name']} {h['gram']}g @{h['tid']} min</li>"
+            for h in st.session_state.valgt_humle if h["id"] in humle_database
+        )
+        gjaer_print = gjaer_database.get(st.session_state.valgt_gjaer_id, {}).get(
+            "display_name", st.session_state.valgt_gjaer_id
+        )
+        smak = ctx["summary"].replace("**", "")
+
+        html_dokument = f"""<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>{ctx['name']}</title>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ font-family: Arial, Helvetica, sans-serif; font-size: 11pt;
+          color: #111; background: #fff; padding: 12mm 14mm 10mm 14mm; }}
+  h1 {{ font-size: 17pt; margin-bottom: 2px; }}
+  .sub {{ font-size: 10.5pt; color: #444; margin-bottom: 10px; }}
+  h2 {{ font-size: 10pt; font-weight: bold; text-transform: uppercase;
+        letter-spacing: 0.06em; border-bottom: 1px solid #bbb;
+        margin: 9px 0 3px 0; padding-bottom: 2px; }}
+  ul {{ padding-left: 16px; margin-bottom: 2px; }}
+  li {{ margin: 1px 0; line-height: 1.5; }}
+  .stats {{ display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 5px; margin: 6px 0 4px 0; }}
+  .stat {{ border: 1px solid #ccc; border-radius: 3px;
+           text-align: center; padding: 3px 2px; }}
+  .slabel {{ font-size: 7.5pt; color: #666; text-transform: uppercase; }}
+  .sval {{ font-size: 13pt; font-weight: bold; line-height: 1.3; }}
+  .smak {{ font-size: 9pt; color: #555; margin-top: 3px; }}
+  .notes {{ margin-top: 10px; border-top: 1px dashed #bbb; padding-top: 7px; }}
+  .nline {{ border-bottom: 1px solid #ddd; height: 20px; margin-bottom: 5px; }}
+  @media print {{
+    @page {{ size: A4; margin: 0; }}
+    body {{ padding: 10mm 12mm 8mm 12mm; }}
+  }}
+</style>
+</head>
+<body>
+  <h1>{ctx['name']}</h1>
+  <p class="sub">{ctx['volum']:.0f} L &nbsp;·&nbsp; {ctx['abv']:.1f}% ABV &nbsp;·&nbsp; {ctx['ibu']:.0f} IBU &nbsp;·&nbsp; {ctx['ebc']:.0f} EBC</p>
+
+  <h2>Malt</h2>
+  <ul>{malt_li}</ul>
+
+  <h2>Humle</h2>
+  <ul>{humle_li}</ul>
+
+  <h2>Gjær</h2>
+  <ul><li>{gjaer_print}</li></ul>
+
+  <h2>Statistikk</h2>
+  <div class="stats">
+    <div class="stat"><div class="slabel">OG</div><div class="sval">{ctx['og']:.3f}</div></div>
+    <div class="stat"><div class="slabel">FG</div><div class="sval">{ctx['fg']:.3f}</div></div>
+    <div class="stat"><div class="slabel">ABV</div><div class="sval">{ctx['abv']:.1f}%</div></div>
+    <div class="stat"><div class="slabel">IBU</div><div class="sval">{ctx['ibu']:.0f}</div></div>
+    <div class="stat"><div class="slabel">EBC</div><div class="sval">{ctx['ebc']:.0f}</div></div>
+  </div>
+  <p class="smak">&#128485; {smak}</p>
+
+  <div class="notes">
+    <strong style="font-size:9pt;">Notater:</strong>
+    <div class="nline" style="margin-top:5px;"></div>
+    <div class="nline"></div>
+    <div class="nline"></div>
+  </div>
+</body>
+</html>"""
+
+        fil_navn = ctx["name"].replace(" ", "_").replace("/", "-") + ".html"
+        st.download_button(
+            label="📥 Last ned oppskriftsark",
+            data=html_dokument,
+            file_name=fil_navn,
+            mime="text/html",
+            use_container_width=True,
+        )
+        st.info("💡 Åpne filen i nettleseren og trykk **Ctrl + P** for å skrive ut.")
