@@ -64,6 +64,8 @@ if "global_butikk" not in st.session_state:
     st.session_state.global_butikk = "Ølbrygging.no"
 if "import_versjon" not in st.session_state:
     st.session_state.import_versjon = 0
+if "batch_volum_input" not in st.session_state:
+    st.session_state.batch_volum_input = 20.0
 
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
 render_sidebar()

@@ -25,6 +25,7 @@ def render_sidebar():
             st.session_state.valgt_humle = r_data["hops"]
             st.session_state.valgt_gjaer_id = r_data["yeast"] if isinstance(r_data["yeast"], str) else r_data["yeast"].get("id", "fermentis_us05")
             st.session_state.gjeldende_navn = r_data["name"]
+            st.session_state.batch_volum_input = r_data.get("batch_size", 20.0)
             st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
             st.sidebar.success(f"Laddet: {valgt_lagret_navn}")
             st.rerun()

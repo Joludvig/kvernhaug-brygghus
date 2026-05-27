@@ -4,6 +4,13 @@ from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil
 from modules.recipe import bygg_recipe_object
 
 def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
+    # Bryggnavn og batchvolum
+    navn_col, vol_col = st.columns([3, 1.5])
+    with navn_col:
+        st.text_input("Bryggnavn", key="gjeldende_navn")
+    with vol_col:
+        st.number_input("Liter", min_value=1.0, max_value=200.0, step=1.0, key="batch_volum_input")
+
     # Knapper for å lagre og slette
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
