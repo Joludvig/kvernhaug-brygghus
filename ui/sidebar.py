@@ -18,8 +18,14 @@ def render_sidebar():
     st.sidebar.header("📁 Lagrede oppskrifter")
     lagrede_brygg = hent_alle_oppskrifter()
     if lagrede_brygg:
-        valgt_lagret_navn = st.sidebar.selectbox("Velg et brygg fra harddisken:", ["-- Velg oppskrift --"] + list(lagrede_brygg.keys()))
-        if valgt_lagret_navn != "-- Velg oppskrift --":
+        oppskrift_valg = ["-- Velg oppskrift --"] + list(lagrede_brygg.keys())
+        valgt_lagret_navn = st.sidebar.selectbox(
+            "Velg et brygg fra harddisken:",
+            oppskrift_valg,
+            key="sidebar_recipe_selector",
+        )
+        if (valgt_lagret_navn != "-- Velg oppskrift --"
+                and valgt_lagret_navn != st.session_state.get("_last_loaded_recipe")):
             r_data = lagrede_brygg[valgt_lagret_navn]
             st.session_state.valgt_malt = r_data["malts"]
             st.session_state.valgt_humle = r_data["hops"]
@@ -27,8 +33,12 @@ def render_sidebar():
             st.session_state.gjeldende_navn = r_data["name"]
             st.session_state.batch_volum_input = r_data.get("batch_size", 20.0)
             st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
+            st.session_state["_last_loaded_recipe"] = valgt_lagret_navn
+            st.session_state["_malt_pct_pending_sync"] = False
             st.sidebar.success(f"Laddet: {valgt_lagret_navn}")
             st.rerun()
+        elif valgt_lagret_navn == "-- Velg oppskrift --":
+            st.session_state.pop("_last_loaded_recipe", None)
     else:
         st.sidebar.info("Ingen oppskrifter lagret i mappen ennå.")
 
