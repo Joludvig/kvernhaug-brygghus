@@ -50,7 +50,7 @@ def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db
     
     for m in malt_valg:
         m_info = malt_db.get(m["id"], {})
-        total_pris += m["mengde"] * m_info.get(pris_nokkel, 35.0)
+        total_pris += m["mengde"] * (m_info.get(pris_nokkel) or 35.0)
     for h in humle_valg:
         h_info = humle_db.get(h["id"], {})
         total_pris += (h["gram"] * h_info.get(pris_nokkel, 99.0) / 100)

@@ -134,7 +134,7 @@ def render_malt_panel(malt_database):
                 og_bidrag_visning = f"+{og_alene:.3f}"
                 butikk_navn = st.session_state.get("global_butikk", "Ølbrygging.no")
                 pris_nokkel = "pris_olbrygging" if butikk_navn == "Ølbrygging.no" else "pris_vestbrygg"
-                pris_visning = f"{final_kg * info.get(pris_nokkel, 35.0):.1f} kr"
+                pris_visning = f"{final_kg * (info.get(pris_nokkel) or 35.0):.1f} kr"
             else:
                 pris_visning = f"{final_kg * 35.0:.1f} kr"
 
