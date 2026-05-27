@@ -88,14 +88,24 @@ def parse_recipe_text(text):
         r"^(?:batch(?:\s*size)?|volum(?:e)?|boil|kok(?:etid)?|efficiency|effektivitet|og|fg|ibu|abv)\s*:",
         re.IGNORECASE
     )
+    # Batchvolum: "Batch: 20 L" / "Batch size: 25 L" / "Volum: 20 L"
+    re_batch = re.compile(
+        r"^(?:batch(?:\s*size)?|volum(?:e)?)\s*:\s*(\d+[\.,]?\d*)\s*[Ll]?\b", re.IGNORECASE
+    )
 
     malt_liste, humle_liste, gjaer_liste, pct_malt_liste = [], [], [], []
     total_malt_kg = None
+    oppskrift_navn = None
+    batch_liter = None
     warnings = []
 
     for linje in text.split("\n"):
         linje = linje.strip()
         if not linje or linje.startswith("#"):
+            continue
+        m = re_batch.match(linje)
+        if m:
+            batch_liter = float(m.group(1).replace(",", "."))
             continue
         if re_metadata.match(linje):
             continue
@@ -141,7 +151,14 @@ def parse_recipe_text(text):
             continue
 
         # Ingen mengde — behandles som gjær
-        gjaer_liste.append({"navn": linje})
+        # Unntak: første linje uten siffer og uten ingredienser er trolig oppskriftnavn
+        if (oppskrift_navn is None
+                and not any(c.isdigit() for c in linje)
+                and len(malt_liste) + len(humle_liste) + len(pct_malt_liste) == 0):
+            m_label = re.match(r"^(?:recipe|navn|name|oppskrift)\s*:\s*(.+)$", linje, re.IGNORECASE)
+            oppskrift_navn = m_label.group(1).strip() if m_label else linje
+        else:
+            gjaer_liste.append({"navn": linje})
 
     # Konverter prosent-malt → kg etter hele teksten er skannet
     if pct_malt_liste:
@@ -161,7 +178,8 @@ def parse_recipe_text(text):
                     "mengde": round(p["pct"] / 100.0 * total_malt_kg, 3),
                 })
 
-    return {"malt": malt_liste, "humle": humle_liste, "gjaer": gjaer_liste, "warnings": warnings}
+    return {"malt": malt_liste, "humle": humle_liste, "gjaer": gjaer_liste, "warnings": warnings,
+            "navn": oppskrift_navn, "batch_liter": batch_liter}
 
 
 def match_imported_ingredients(parsed, malt_db, humle_db, gjaer_db):
@@ -227,6 +245,12 @@ def apply_import_to_session_state(import_result):
     import streamlit as st
 
     matched = import_result["matched"]
+
+    metadata = import_result.get("metadata", {})
+    if metadata.get("navn"):
+        st.session_state.gjeldende_navn = metadata["navn"]
+    if metadata.get("batch_liter"):
+        st.session_state.batch_volum_input = metadata["batch_liter"]
 
     if matched["malt"]:
         st.session_state.valgt_malt = [

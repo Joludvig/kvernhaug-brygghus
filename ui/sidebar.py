@@ -56,6 +56,7 @@ def render_sidebar():
                 master_humle = _last_master_db("master_humle_v2.json")
                 master_gjaer = _last_master_db("master_gjaer_v2.json")
                 resultat = match_imported_ingredients(parsed, master_malt, master_humle, master_gjaer)
+                resultat["metadata"] = {"navn": parsed.get("navn"), "batch_liter": parsed.get("batch_liter")}
                 st.session_state["import_preview"] = resultat
                 st.session_state["import_parsed"] = parsed
             else:
@@ -68,6 +69,11 @@ def render_sidebar():
             n_humle = len(parsed_debug.get("humle", []))
             n_gjaer = len(parsed_debug.get("gjaer", []))
             st.caption(f"Tolket: {n_malt} malt · {n_humle} humle · {n_gjaer} gjær-linje(r)")
+            meta = preview.get("metadata", {})
+            if meta.get("navn"):
+                st.caption(f"📛 Navn: **{meta['navn']}**")
+            if meta.get("batch_liter"):
+                st.caption(f"🪣 Batch: **{meta['batch_liter']:.0f} L**")
             for w in parsed_debug.get("warnings", []):
                 st.warning(w)
 
