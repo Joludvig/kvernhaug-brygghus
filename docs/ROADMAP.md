@@ -34,37 +34,31 @@ The app is a functional single-user recipe platform for home brewing.
 
 ---
 
-## V1.2 — Inventory / Pantry System
+## V1.2 — Brew Log
 
-**Goal:** Track what ingredients the user already has at home.
+**Goal:** Record actual brew results against the planned recipe. Low friction is the primary design constraint — if creating a log entry takes more than 10 seconds, it won't happen.
 
-**Features:**
-- Malt inventory in kg (per entry)
-- Hop inventory in grams (per entry)
-- Yeast inventory in packs (per entry)
-- Compare current recipe against inventory
-- Show what is already available ("you have 80% of this recipe")
-- Show what must be purchased ("missing: Rauchmalz")
-- Shopping list aware of inventory (only lists what is missing)
+**Required fields (must be filled to create an entry):**
+- Brew date
+- Measured OG
 
----
+**Optional fields (can be filled in later):**
+- Measured FG (auto-calculates actual ABV)
+- Character rating (1–10)
+- Tasting notes
+- Improvements for next batch
 
-## V1.3 — Store Comparison
+**Scope:** Linked to saved recipe. One log file per recipe (`recipes/{name}_logg.json`). Recipe stats (OG target, IBU, EBC, batch size) snapshotted at log creation so the record is self-contained.
 
-**Goal:** Side-by-side price comparison across supported stores.
+**UI:** Collapsible expander at the bottom of the recipe card. Previous log entries listed above the "New entry" form.
 
-**Features:**
-- Vestbrygg total cost for current recipe
-- Ølbrygging.no total cost for current recipe
-- Highlight cheapest option
-- Flag missing product links per store
-- Future: stock warning if a product is unavailable at selected store
+**Key principle:** Date + OG is enough. Everything else is bonus. Do not block log creation on incomplete fields.
 
 ---
 
-## V1.4 — Equipment Profile
+## V1.3 — Equipment Profile
 
-**Goal:** Replace hardcoded BrewZilla 35L defaults with user-editable equipment settings.
+**Goal:** Replace hardcoded BrewZilla 35L defaults with user-editable equipment settings. Directly improves accuracy of existing Brewday Plan water calculations.
 
 **Fields:**
 - Kettle volume (L)
@@ -75,24 +69,41 @@ The app is a functional single-user recipe platform for home brewing.
 - Preferred boil time (min)
 - Default mash temperature (°C)
 
-**Scope:** Single profile to start. Profile persists between sessions.
+**Scope:** Single profile to start. Profile persists between sessions (`data/equipment.json`). Brewday Plan reads from profile instead of `_EQ` constants.
+
+**Why before Inventory:** Brewday Plan is already in active use. Inaccurate water volumes are a real-world problem today. Inventory has a cold-start problem — it is only useful once the pantry is actually populated.
 
 ---
 
-## V1.5 — Brew Log
+## V1.4 — Inventory / Pantry System
 
-**Goal:** Record actual brew results against the planned recipe.
+**Goal:** Track what ingredients the user already has at home, to avoid buying duplicates.
 
-**Fields:**
-- Brew date
-- Measured OG
-- Measured FG (calculated ABV)
-- Fermentation temperature (actual)
-- Fermentation notes
-- Tasting notes
-- Improvements for next batch
+**Focus:** Hops and yeast first. These are exact-quantity purchases (not milled to order) where inventory genuinely prevents waste. Malt inventory is lower priority since malt is typically bought fresh per batch.
 
-**Scope:** Linked to saved recipe. Log entries stored alongside recipe JSON.
+**Features:**
+- Hop inventory in grams (per entry)
+- Yeast inventory in packs (per entry)
+- Malt inventory in kg (per entry, lower priority)
+- Compare current recipe against inventory
+- Show what is already available ("you have 80% of this recipe")
+- Show what must be purchased ("missing: Rauchmalz")
+- Shopping list aware of inventory (only lists what is missing)
+
+**Cold-start note:** Inventory has zero value until populated. Don't build until there is actual pantry data to track.
+
+---
+
+## V1.5 — Store Comparison
+
+**Goal:** Side-by-side price comparison across supported stores.
+
+**Features:**
+- Vestbrygg total cost for current recipe
+- Ølbrygging.no total cost for current recipe
+- Highlight cheapest option
+- Flag missing product links per store
+- Future: stock warning if a product is unavailable at selected store
 
 ---
 
@@ -139,6 +150,7 @@ Trigger for this refactor: adding a third store.
 - **Keep the app stable.** New features are additive, not replacements.
 - **Small commits.** One logical change per commit.
 - **Real use drives priorities.** V1.1.x polish comes from actual brewday testing, not assumptions.
+- **Low friction over completeness.** A feature that is used beats a feature that is thorough but skipped.
 - **Master DB = product knowledge.** EBC, flavor, style. Stable.
 - **Store data = commercial availability.** Price, URL, stock. Volatile.
 - **Producer data = enrichment.** Authoritative for technical specs. Does not replace curation.
