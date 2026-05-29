@@ -93,77 +93,99 @@ def render_brewday_panel(ctx, humle_database, gjaer_database):
 <title>Bryggedagsark — {ctx['name']}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt;
-          color: #111; background: #fff; padding: 12mm 14mm 10mm 14mm; }}
-  h1 {{ font-size: 15pt; margin-bottom: 2px; }}
-  .sub {{ font-size: 9.5pt; color: #444; margin-bottom: 8px; }}
-  h2 {{ font-size: 9pt; font-weight: bold; text-transform: uppercase;
-        letter-spacing: 0.07em; border-top: 1px solid #aaa;
-        border-bottom: 1px solid #aaa; padding: 2px 0; margin: 8px 0 4px 0; }}
-  ul {{ list-style: none; margin: 0 0 2px 0; }}
-  li {{ margin: 2px 0; display: flex; align-items: baseline; gap: 5px; line-height: 1.5; }}
-  .cb {{ font-size: 11pt; flex-shrink: 0; }}
-  .note {{ font-size: 8pt; color: #555; font-style: italic; }}
-  .line {{ border-bottom: 1px solid #ccc; height: 18px; margin: 3px 0 7px 0; }}
-  .lbl {{ font-size: 8.5pt; color: #555; margin-bottom: 1px; margin-top: 4px; }}
-  .two-col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }}
-  .stats-row {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 4px 0; }}
-  .stat-box {{ border: 1px solid #ccc; border-radius: 3px; padding: 3px 6px; }}
-  .slbl {{ font-size: 7.5pt; color: #666; text-transform: uppercase; }}
-  .sval {{ font-size: 10pt; font-weight: bold; min-height: 16px; }}
+  body {{ font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt;
+          color: #111; background: #fff; padding: 8mm 10mm 6mm 10mm; }}
+  h1 {{ font-size: 13pt; margin-bottom: 1px; }}
+  .sub {{ font-size: 8.5pt; color: #444; margin-bottom: 5px;
+          padding-bottom: 4px; border-bottom: 1.5px solid #333; }}
+  h2 {{ font-size: 8pt; font-weight: bold; text-transform: uppercase;
+        letter-spacing: 0.07em; border-bottom: 1px solid #888;
+        padding-bottom: 1px; margin: 5px 0 2px 0; }}
+  ul {{ list-style: none; margin: 0 0 1px 0; }}
+  li {{ margin: 1px 0; display: flex; align-items: baseline;
+        gap: 4px; line-height: 1.3; }}
+  .cb {{ font-size: 10pt; flex-shrink: 0; }}
+  .note {{ font-size: 7.5pt; color: #555; font-style: italic; }}
+  .line {{ border-bottom: 1px solid #bbb; height: 15px; margin: 2px 0 4px 0; }}
+  .lbl {{ font-size: 7.5pt; color: #555; margin: 3px 0 0 0; }}
+  /* Two-column main body */
+  .main {{ display: grid; grid-template-columns: 1fr 1fr;
+           gap: 0 8mm; margin-bottom: 4px; }}
+  /* Fermentation write-in fields: 2×2 grid */
+  .ferm-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 0 6mm; }}
+  /* Bottom strip: measurements left, notes right */
+  .bottom {{ display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm;
+             border-top: 1.5px solid #333; padding-top: 4px; margin-top: 3px; }}
+  .stats-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }}
+  .stat-box {{ border: 1px solid #bbb; border-radius: 2px; padding: 2px 4px; }}
+  .slbl {{ font-size: 7pt; color: #666; text-transform: uppercase; }}
+  .sline {{ border-bottom: 1px solid #bbb; height: 13px; margin-top: 2px; }}
   @media print {{
     @page {{ size: A4; margin: 0; }}
-    body {{ padding: 9mm 12mm 8mm 12mm; }}
+    body {{ padding: 7mm 9mm 5mm 9mm; }}
   }}
 </style>
 </head>
 <body>
   <h1>{ctx['name']}</h1>
-  <p class="sub">{ctx['volum']:.0f} L &nbsp;·&nbsp; OG {ctx['og']:.3f} &nbsp;·&nbsp; FG {ctx['fg']:.3f} &nbsp;·&nbsp; ABV {ctx['abv']:.1f}%</p>
+  <p class="sub">{ctx['volum']:.0f} L &nbsp;·&nbsp; OG {ctx['og']:.3f} &nbsp;·&nbsp; FG {ctx['fg']:.3f} &nbsp;·&nbsp; ABV {ctx['abv']:.1f}% &nbsp;·&nbsp; IBU {ctx['ibu']:.0f} &nbsp;·&nbsp; EBC {ctx['ebc']:.0f}</p>
 
-  <h2>Vann</h2>
-  <ul>
-    <li><span class="cb">☐</span> Meskevann: <strong>{w['mash_vann_l']:.1f} L</strong></li>
-    <li><span class="cb">☐</span> Skyllevann: <strong>{w['sparge_vann_l']:.1f} L</strong></li>
-    <li><span class="cb">☐</span> Pre-boil: <strong>{w['pre_boil_l']:.1f} L</strong></li>
-  </ul>
+  <div class="main">
+    <!-- LEFT: Vann · Mesking · Kok -->
+    <div>
+      <h2>Vann</h2>
+      <ul>
+        <li><span class="cb">☐</span> Meskevann: <strong>{w['mash_vann_l']:.1f} L</strong></li>
+        <li><span class="cb">☐</span> Skyllevann: <strong>{w['sparge_vann_l']:.1f} L</strong></li>
+        <li><span class="cb">☐</span> Pre-boil: <strong>{w['pre_boil_l']:.1f} L</strong></li>
+      </ul>
 
-  <h2>Mesking</h2>
-  <ul>{maskeplan_li}</ul>
+      <h2>Mesking</h2>
+      <ul>{maskeplan_li}</ul>
 
-  <h2>Kok</h2>
-  <ul><li><span class="cb">☐</span> {plan['koketid_min']} min</li></ul>
+      <h2>Kok</h2>
+      <ul><li><span class="cb">☐</span> {plan['koketid_min']} min</li></ul>
+    </div>
 
-  <h2>Humle</h2>
-  <ul>{humle_li}</ul>
+    <!-- RIGHT: Humle · Gjær · Fermentering -->
+    <div>
+      <h2>Humle</h2>
+      <ul>{humle_li}</ul>
 
-  <h2>Gjær</h2>
-  <ul>
-    <li><span class="cb">☐</span> {plan['gjaer_navn']}</li>
-    <li><span class="cb">☐</span> Anbefalt: <strong>{plan['pakker']} pakke(r)</strong></li>
-    {noter_li}
-  </ul>
+      <h2>Gjær</h2>
+      <ul>
+        <li><span class="cb">☐</span> {plan['gjaer_navn']}</li>
+        <li><span class="cb">☐</span> Anbefalt: <strong>{plan['pakker']} pakke(r)</strong></li>
+        {noter_li}
+      </ul>
 
-  <h2>Fermentering</h2>
-  <div class="two-col">
-    <div><p class="lbl">Temperatur ({plan['temp_min']}–{plan['temp_maks']}°C)</p><div class="line"></div></div>
-    <div><p class="lbl">Startdato</p><div class="line"></div></div>
-    <div><p class="lbl">Sluttdato</p><div class="line"></div></div>
-    <div><p class="lbl">Kullsyre / Spunning</p><div class="line"></div></div>
+      <h2>Fermentering</h2>
+      <div class="ferm-grid">
+        <div><p class="lbl">Temperatur ({plan['temp_min']}–{plan['temp_maks']}°C)</p><div class="line"></div></div>
+        <div><p class="lbl">Startdato</p><div class="line"></div></div>
+        <div><p class="lbl">Sluttdato</p><div class="line"></div></div>
+        <div><p class="lbl">Kullsyre / Spunning</p><div class="line"></div></div>
+      </div>
+    </div>
   </div>
 
-  <h2>Målinger</h2>
-  <div class="stats-row">
-    <div class="stat-box"><div class="slbl">OG (mål: {ctx['og']:.3f})</div><div class="sval">&nbsp;</div><div class="line" style="margin-top:3px;margin-bottom:0;"></div></div>
-    <div class="stat-box"><div class="slbl">FG (mål: {ctx['fg']:.3f})</div><div class="sval">&nbsp;</div><div class="line" style="margin-top:3px;margin-bottom:0;"></div></div>
-    <div class="stat-box"><div class="slbl">ABV (mål: {ctx['abv']:.1f}%)</div><div class="sval">&nbsp;</div><div class="line" style="margin-top:3px;margin-bottom:0;"></div></div>
+  <!-- BOTTOM: Målinger + Notater -->
+  <div class="bottom">
+    <div>
+      <h2>Målinger</h2>
+      <div class="stats-3">
+        <div class="stat-box"><div class="slbl">OG (mål: {ctx['og']:.3f})</div><div class="sline"></div></div>
+        <div class="stat-box"><div class="slbl">FG (mål: {ctx['fg']:.3f})</div><div class="sline"></div></div>
+        <div class="stat-box"><div class="slbl">ABV (mål: {ctx['abv']:.1f}%)</div><div class="sline"></div></div>
+      </div>
+    </div>
+    <div>
+      <h2>Notater</h2>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
   </div>
-
-  <h2>Notater</h2>
-  <div class="line"></div>
-  <div class="line"></div>
-  <div class="line"></div>
-  <div class="line"></div>
 </body>
 </html>"""
 
