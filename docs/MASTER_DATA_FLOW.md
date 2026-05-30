@@ -103,9 +103,39 @@ humle_database / gjaer_database (dict i minnet)
 
 | Mangel | Status | Fremtidig løsning |
 |--------|--------|-------------------|
-| `pakke_gram` mangler i `butikk_match` | Malt har ikke pakkestørrelse i masterdata | Legg til `pakke_kg` per butikk (1 kg, 5 kg, 25 kg) ved behov for handleliste-forbedring |
-| Knust/hel korn har ingen separat URL eller pris | `knust_tilgjengelig: true/false` finnes, men ingen `url_knust`/`pris_knust` | Legg til som eget felt i `butikk_match` når crushed-støtte prioriteres |
+| Malt-varianter mangler i `butikk_match` | Malt selges i flere formater og størrelser — ingen av dem er modellert per butikk | Se variant-modell nedenfor |
+| `knust_tilgjengelig: true/false` er utilstrekkelig | Booleanen sier ikke hvilke størrelser som finnes knust, eller URL/pris per variant | Erstattes av variant-liste når crushed-støtte prioriteres |
 | Ølbrygging.no malt-data er svakere enn Vestbrygg | Mange `pris_olbrygging`-verdier er satt manuelt, ikke fra scraper. Ølbrygging.no malt-URLer er ikke systematisk hentet. | Oppdater scraper til å hente ølbrygging malt-sider korrekt |
+
+#### Fremtidig variant-modell for malt
+
+Malt er ikke én SKU per butikk — det er en liste med varianter. Kjente varianter per Vestbrygg:
+
+| Format | Størrelse | Modelleres i V1? |
+|--------|-----------|-----------------|
+| Knust  | 100 g     | Ja              |
+| Knust  | 1 kg      | Ja              |
+| Hel    | 1 kg      | Ja              |
+| Hel    | 25 kg     | Nei (ignoreres) |
+
+Foreslått datastruktur (ikke implementert ennå):
+
+```json
+"butikk_match": {
+  "vestbrygg": {
+    "varianter": [
+      { "format": "knust", "pakke_gram": 100,  "pris": 0.0, "url": "" },
+      { "format": "knust", "pakke_gram": 1000, "pris": 0.0, "url": "" },
+      { "format": "hel",   "pakke_gram": 1000, "pris": 0.0, "url": "" }
+    ]
+  }
+}
+```
+
+Shopping-listen må da velge én variant per kjøp (standard: 1 kg hel, med mulighet for knust).
+Feltet `knust_tilgjengelig` i master kan fjernes når variant-modellen er på plass.
+
+---
 
 ### master_humle_v2.json / master_gjaer_v2.json
 
