@@ -142,6 +142,12 @@ LAYER 3 — App View            data/malt.json etc.
 
 Trigger for this refactor: adding a third store.
 
+**Known technical debt in current master data:**
+- `master_malt.json` is already v2-format in structure, but the filename is a legacy holdover. Future rename to `master_malt_v2.json` requires updating `store_matcher.py`, `import_panel.py`, and `app.py` — do not rename in isolation.
+- `master_malt.json` is missing `pakke_gram` per store (malt bag sizes: 1 kg, 5 kg, 25 kg).
+- No separate price or URL for crushed vs. whole grain malt (field `knust_tilgjengelig` exists but is unused beyond a boolean).
+- Ølbrygging.no malt data is weaker than Vestbrygg — many prices are set manually, not from scraper.
+
 ---
 
 ## Guiding Principles

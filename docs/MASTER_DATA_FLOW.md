@@ -32,6 +32,12 @@ data/master_*.json           ← canonical masterdata (rediger HER)
 | `data/master_humle_v2.json` | Alle humle-entries | Appen direkte |
 | `data/master_gjaer_v2.json` | Alle gjær-entries | Appen direkte |
 
+> **`master_malt.json` — filnavn vs. format:**
+> Filen er i praksis v2-format (samme struktur som `master_humle_v2.json` og `master_gjaer_v2.json`:
+> `butikk_match`, `aliases`, `verified`, nested store-data).
+> Filnavnet er gammelt og vil på et passende tidspunkt renames til `master_malt_v2.json`.
+> **Ikke rename ennå** — krever oppdatering av `store_matcher.py`, `import_panel.py`, og `app.py`.
+
 ### Runtime-fil (IKKE editer direkte)
 
 | Fil | Generert fra | Brukes av |
@@ -88,6 +94,22 @@ humle_database / gjaer_database (dict i minnet)
          ├── hop_panel.py / yeast_panel.py → dropdown
          └── recipe_context.py → IBU, ABV, flavor
 ```
+
+---
+
+## Kjente mangler og svakheter i masterdata
+
+### master_malt.json
+
+| Mangel | Status | Fremtidig løsning |
+|--------|--------|-------------------|
+| `pakke_gram` mangler i `butikk_match` | Malt har ikke pakkestørrelse i masterdata | Legg til `pakke_kg` per butikk (1 kg, 5 kg, 25 kg) ved behov for handleliste-forbedring |
+| Knust/hel korn har ingen separat URL eller pris | `knust_tilgjengelig: true/false` finnes, men ingen `url_knust`/`pris_knust` | Legg til som eget felt i `butikk_match` når crushed-støtte prioriteres |
+| Ølbrygging.no malt-data er svakere enn Vestbrygg | Mange `pris_olbrygging`-verdier er satt manuelt, ikke fra scraper. Ølbrygging.no malt-URLer er ikke systematisk hentet. | Oppdater scraper til å hente ølbrygging malt-sider korrekt |
+
+### master_humle_v2.json / master_gjaer_v2.json
+
+Ingen kjente strukturelle mangler. Ølbrygging-data for gjær (Fermentis US-05, S-04, W-34/70) er ikke tilgjengelig fra Vestbrygg og mangler URL fra ølbrygging.
 
 ---
 
