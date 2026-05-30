@@ -144,8 +144,7 @@ Trigger for this refactor: adding a third store.
 
 **Known technical debt in current master data:**
 - `master_malt.json` is already v2-format in structure, but the filename is a legacy holdover. Future rename to `master_malt_v2.json` requires updating `store_matcher.py`, `import_panel.py`, and `app.py` — do not rename in isolation.
-- `master_malt.json` has no variant model per store. Malt is sold in multiple formats and sizes: 100 g crushed, 1 kg crushed, 1 kg whole grain (25 kg exists but is out of scope for V1). These need separate URLs and prices. A `varianter` list under `butikk_match` is the planned structure — not yet implemented. The current `knust_tilgjengelig` boolean will be superseded by this.
-
+- `master_malt.json` has no variant model per store. Malt is sold in multiple formats and sizes (Vestbrygg: 100 g / 1 kg / 25 kg, knust og hel; Ølbrygging: 1 kg / 5 kg / 25 kg, knust og hel). Unlike hops, malt does not have a single canonical package size — a simple `pakke_gram` field would be misleading. No schema change is made now: today's shopping list only needs price and URL; the user chooses format at checkout. A `varianter` list under `butikk_match` is the planned structure, to be introduced when store comparison (V1.5) or a smarter shopping list actually requires it.
 - Ølbrygging.no malt data is weaker than Vestbrygg — many prices are set manually, not from scraper.
 
 ---

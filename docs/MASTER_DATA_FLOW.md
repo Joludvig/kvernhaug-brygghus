@@ -109,16 +109,27 @@ humle_database / gjaer_database (dict i minnet)
 
 #### Fremtidig variant-modell for malt
 
-Malt er ikke én SKU per butikk — det er en liste med varianter. Kjente varianter per Vestbrygg:
+Malt er ikke én SKU per butikk. Kjente varianter:
 
-| Format | Størrelse | Modelleres i V1? |
-|--------|-----------|-----------------|
-| Knust  | 100 g     | Ja              |
-| Knust  | 1 kg      | Ja              |
-| Hel    | 1 kg      | Ja              |
-| Hel    | 25 kg     | Nei (ignoreres) |
+| Butikk | Format | Størrelse |
+|--------|--------|-----------|
+| Vestbrygg | Knust | 100 g |
+| Vestbrygg | Knust | 1 kg |
+| Vestbrygg | Hel | 1 kg |
+| Vestbrygg | Knust | 25 kg |
+| Vestbrygg | Hel | 25 kg |
+| Ølbrygging | Knust | 1 kg |
+| Ølbrygging | Hel | 1 kg |
+| Ølbrygging | Knust | 5 kg |
+| Ølbrygging | Hel | 5 kg |
+| Ølbrygging | Knust | 25 kg |
+| Ølbrygging | Hel | 25 kg |
 
-Foreslått datastruktur (ikke implementert ennå):
+Malt oppfører seg ikke som humle. Humle har én typisk pakningsstørrelse (`pakke_gram: 100`) — en naturlig enhet. Malt har butikkspesifikke varianter med ulike formater, størrelser og priser. En enkel `pakke_gram`-tilnærming ville vært misvisende og måtte ryddes bort.
+
+**Ingen schema-endring gjøres nå.** Dagens shopping-liste trenger kun pris og URL per butikk — den beregner ikke antall pakker og brukeren velger selv format ved kjøp. Variantmodellen innføres først når Handleliste V2 eller Butikksammenligning (V1.5) faktisk krever det.
+
+Foreslått datastruktur når behovet oppstår:
 
 ```json
 "butikk_match": {
@@ -132,8 +143,7 @@ Foreslått datastruktur (ikke implementert ennå):
 }
 ```
 
-Shopping-listen må da velge én variant per kjøp (standard: 1 kg hel, med mulighet for knust).
-Feltet `knust_tilgjengelig` i master kan fjernes når variant-modellen er på plass.
+`knust_tilgjengelig`-booleanen beholdes inntil videre. Den skader ingenting og kan fjernes når variant-modellen erstatter den.
 
 ---
 
