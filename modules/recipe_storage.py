@@ -25,10 +25,34 @@ def lagre_oppskrift(recipe):
         json.dump(recipe, f, ensure_ascii=False, indent=2)
     return filnavn
 
+def _logg_filsti(oppskrift_navn):
+    base = generer_filnavn(oppskrift_navn).replace(".json", "_logg.json")
+    return os.path.join(MAPPE, base)
+
+def lagre_logg_entry(oppskrift_navn, entry):
+    """Legger til én loggoppføring i oppskriftens loggfil."""
+    sikre_mappe()
+    filsti = _logg_filsti(oppskrift_navn)
+    logg = hent_logg(oppskrift_navn)
+    logg.append(entry)
+    with open(filsti, "w", encoding="utf-8") as f:
+        json.dump(logg, f, ensure_ascii=False, indent=2)
+
+def hent_logg(oppskrift_navn):
+    """Henter alle loggoppføringer for en oppskrift. Returnerer tom liste hvis ingen."""
+    filsti = _logg_filsti(oppskrift_navn)
+    if not os.path.exists(filsti):
+        return []
+    try:
+        with open(filsti, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
 def hent_alle_oppskrifter():
     """Henter alle lagrede oppskrifter fra harddisken og returnerer et kart."""
     sikre_mappe()
-    filer = [f for f in os.listdir(MAPPE) if f.endswith(".json")]
+    filer = [f for f in os.listdir(MAPPE) if f.endswith(".json") and not f.endswith("_logg.json")]
     oppskrifter = {}
     
     for f in filer:

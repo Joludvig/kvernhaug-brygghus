@@ -1,7 +1,68 @@
 # ui/recipe_card.py
 import streamlit as st
-from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil
+from datetime import date
+from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil, lagre_logg_entry, hent_logg
 from modules.recipe import bygg_recipe_object
+
+def _render_brewday_result_panel(ctx):
+    if st.session_state.get("_last_loaded_recipe") != ctx["name"]:
+        return
+
+    logg = hent_logg(ctx["name"])
+
+    with st.expander(f"📓 Bryggelogg ({len(logg)} oppføringer)" if logg else "📓 Bryggelogg", expanded=False):
+        with st.form("brewday_logg_form"):
+            st.markdown("**Nytt brygg**")
+            col_og, col_fg = st.columns(2)
+            with col_og:
+                actual_og = st.number_input(
+                    "Faktisk OG",
+                    min_value=1.000, max_value=1.200, step=0.001, format="%.3f",
+                    value=float(ctx["og"]),
+                )
+            with col_fg:
+                actual_fg = st.number_input(
+                    "Faktisk FG (valgfritt)",
+                    min_value=1.000, max_value=1.200, step=0.001, format="%.3f",
+                    value=float(ctx["fg"]),
+                )
+            col_dato, col_vol = st.columns(2)
+            with col_dato:
+                brew_date = st.date_input("Bryggedato", value=date.today())
+            with col_vol:
+                actual_volume = st.number_input(
+                    "Volum til gjæring (L)",
+                    min_value=0.0, max_value=200.0, step=0.5,
+                    value=float(ctx["volum"]),
+                )
+            note = st.text_area("Notat", height=68)
+
+            if st.form_submit_button("Legg til loggoppføring", use_container_width=True):
+                entry = {
+                    "date": brew_date.isoformat(),
+                    "actual_volume_l": actual_volume,
+                    "actual_og": actual_og,
+                    "actual_fg": actual_fg,
+                    "actual_abv": round((actual_og - actual_fg) * 131.25, 1),
+                    "note": note.strip(),
+                }
+                lagre_logg_entry(ctx["name"], entry)
+                st.toast("Loggoppføring lagret!", icon="📓")
+                st.rerun()
+
+        if logg:
+            st.write("---")
+            for entry in reversed(logg):
+                abv_str = f" · ABV {entry['actual_abv']:.1f}%" if entry.get("actual_abv") else ""
+                st.markdown(
+                    f"**{entry.get('date', '-')}** · "
+                    f"{entry.get('actual_volume_l', 0):.1f} L · "
+                    f"OG {entry.get('actual_og', 1.0):.3f} · "
+                    f"FG {entry.get('actual_fg', 1.0):.3f}"
+                    f"{abv_str}"
+                )
+                if entry.get("note"):
+                    st.caption(entry["note"])
 
 def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
     # Bryggnavn og batchvolum
@@ -57,6 +118,8 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
     </div>
     """
     st.components.v1.html(html_kort, height=580, scrolling=True)
+
+    _render_brewday_result_panel(ctx)
 
     if st.button("🖨️ Generer utskriftsvennlig ark (A4)", use_container_width=True):
         malt_li = "".join(
