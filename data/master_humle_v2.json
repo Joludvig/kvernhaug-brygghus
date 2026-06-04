@@ -21,7 +21,7 @@
       "Fruktighet": 5,
       "Steinfrukt": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 11.0,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -60,7 +60,7 @@
       "Tropisk": 6,
       "Fruktighet": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 11.9,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -102,7 +102,7 @@
       "Fruktighet": 5,
       "Furunål": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 15.7,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -138,7 +138,7 @@
       "Sitrus": 6,
       "Krydder": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 9.5,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -177,7 +177,7 @@
       "Sitrus": 6,
       "Furunål": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 10.4,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -244,7 +244,7 @@
       "Sitrus": 5,
       "Krydder": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 11.1,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -285,7 +285,7 @@
       "Tropisk": 6,
       "Fruktighet": 6
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 13.9,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -354,7 +354,7 @@
       "Jordlig": 5,
       "Bitterhet": 7
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 13.9,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -390,7 +390,7 @@
     "kategorier": {
       "Krydder": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 5.8,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -459,7 +459,7 @@
       "Fruktighet": 6,
       "Steinfrukt": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 13.1,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -497,7 +497,7 @@
       "Jordlig": 4,
       "Krydder": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 6.0,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -535,7 +535,7 @@
       "Fruktighet": 6,
       "Steinfrukt": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 18.4,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -657,7 +657,7 @@
       "Jordlig": 3,
       "Krydder": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 2.4,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -696,7 +696,7 @@
       "Steinfrukt": 5,
       "Furunål": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 11.4,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -788,7 +788,7 @@
     "kategorier": {
       "Bitterhet": 8
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 13.6,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -854,7 +854,7 @@
       "Jordlig": 3,
       "Krydder": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 3.3,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -891,7 +891,7 @@
       "Fruktighet": 6,
       "Furunål": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 13.6,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1018,7 +1018,7 @@
       "Fruktighet": 6,
       "Vinøs": 6
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 9.6,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1054,7 +1054,7 @@
       "Furunål": 5,
       "Jordlig": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 7.5,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1089,7 +1089,7 @@
       "Krydder": 4,
       "Jordlig": 3
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 6.6,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1156,7 +1156,7 @@
       "Jordlig": 4,
       "Krydder": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 2.9,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1193,7 +1193,7 @@
       "Fruktighet": 6,
       "Steinfrukt": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 15.5,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1232,7 +1232,7 @@
       "Furunål": 5,
       "Jordlig": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 12.6,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1357,7 +1357,7 @@
       "Tropisk": 5,
       "Fruktighet": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 8.6,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1392,7 +1392,7 @@
       "Krydder": 4,
       "Jordlig": 3
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 3.1,
     "butikk_match": {
       "vestbrygg": {
         "search_terms": [],
@@ -1465,7 +1465,7 @@
       "Tropisk": 5,
       "Steinfrukt": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 9.5,
     "butikk_match": {
       "olbrygging": {
         "search_terms": [],
@@ -1496,7 +1496,7 @@
       "Sitrus": 4,
       "Fruktighet": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 10.0,
     "butikk_match": {
       "olbrygging": {
         "search_terms": [],
@@ -1527,7 +1527,7 @@
       "Steinfrukt": 5,
       "Fruktighet": 5
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 9.5,
     "butikk_match": {
       "olbrygging": {
         "search_terms": [],
@@ -1556,7 +1556,7 @@
       "Jordlig": 5,
       "Krydder": 4
     },
-    "alfa_typisk": null,
+    "alfa_typisk": 3.2,
     "butikk_match": {
       "olbrygging": {
         "search_terms": [],
