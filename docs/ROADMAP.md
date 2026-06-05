@@ -107,6 +107,38 @@ The app is a functional single-user recipe platform for home brewing.
 
 ---
 
+## Branding og identitet — Parallelt spor
+
+**Kilde:** `docs/branding/master_design_v1.md`  
+**Prinsipp:** Branding rulles ut gradvis — header og eksport før UI-farger. Kalkulasjoner og oppskriftslogikk røres ikke.
+
+### Gjort
+
+- Master Design V1 dokumentert som permanent sannhetskilde (`docs/branding/master_design_v1.md`)
+- App-header implementert: logo, tittel, motto og sekundærtekst (`ui/branding.py` / `render_header()`)
+- Bildefil på plass: `assets/branding/master_v1.png`
+- Merch-standard definert: brystlogo, armtekst, ryggillustrasjon (i branding-dokumentet)
+- Fargepalett med estimerte HEX-verdier dokumentert
+
+### Neste steg (i prioritert rekkefølge)
+
+1. **Test app-header visuelt** — kjør Streamlit og verifiser at layout, fonter og farger ser riktige ut på skjermen
+2. **Om Kvernhaug Brygghus-panel** — enkel informasjonsside eller expander: bryggeriets historie, Dalelva, Kvernhaug-eiendommen, motto
+3. **Oppskriftskort med branding** — legg til kompaktlogo og typografi fra Master V1 i HTML-oppskriftskortet
+4. **PDF / Brewday Plan-eksport med branding** — logo og fargepalett i topp/bunn på utskriftssider
+5. **Produksjonsklare merch-filer** — isolerte PNG/SVG-filer optimalisert for trykk:
+   - Brystlogo (rund, ca. 5–7 cm)
+   - Armtekst (vertikal, antikk gull)
+   - Ryggillustrasjon (full Master V1, høyoppløselig)
+
+### Avgrensninger
+
+- Ikke fargelegg tabeller, knapper eller grafer i oppskriftsbyggeren ennå
+- Ikke brand hele UI-et før header og eksportdokumenter er testet i bruk
+- Ikke endre kalkulasjoner, IBU-logikk eller oppskriftslagring som del av branding-arbeid
+
+---
+
 ## V2.0 — Multi-User / First-Run Setup
 
 **Goal:** Prepare the app for sharing with other brewers.
