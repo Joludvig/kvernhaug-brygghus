@@ -8,6 +8,7 @@ from modules.recipe_context import bygg_recipe_context
 
 # Importer de nye, rene UI-komponentene (Prioritet: UI-Splitting)
 from ui.sidebar import render_sidebar
+from ui.branding import render_header
 from ui.malt_panel import render_malt_panel
 from ui.hop_panel import render_hop_panel
 from ui.yeast_panel import render_yeast_panel
@@ -21,9 +22,7 @@ from ui.brewday_panel import render_brewday_panel
 # 1. Grunnleggende Streamlit-konfigurering
 st.set_page_config(page_title="Kvernhaug Brygghus", page_icon="🍺", layout="wide")
 
-st.title("🍺 Kvernhaug Brygghus")
-st.subheader("Sensorisk oppskriftsplattform for kreative hjemmebryggere")
-st.write("---")
+render_header()
 
 # Helper-funksjon for å laste råvare-JSON
 # Helper-funksjon for å laste råvare-JSON med krasjsikring
