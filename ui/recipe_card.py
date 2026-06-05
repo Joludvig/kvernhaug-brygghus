@@ -1,4 +1,5 @@
 # ui/recipe_card.py
+import re
 import streamlit as st
 from datetime import date
 from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil, lagre_logg_entry, hent_logg
@@ -114,6 +115,8 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                     for h in st.session_state.valgt_humle
                 ]
                 st.session_state.batch_volum_input = maal
+                base_navn = re.sub(r' - \d+(?:\.\d+)?L batch$', '', st.session_state.get("gjeldende_navn", ""))
+                st.session_state.gjeldende_navn = f"{base_navn} - {maal:g}L batch"
                 st.rerun()
         st.caption("💡 Endre navn før lagring for å ikke overskrive originalen.")
 
