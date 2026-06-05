@@ -34,7 +34,9 @@ def render_sidebar():
             st.session_state.batch_volum_input = r_data.get("batch_size", 20.0)
             st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
             st.session_state["_last_loaded_recipe"] = valgt_lagret_navn
+            st.session_state["_original_batch_size"] = r_data.get("batch_size", 20.0)
             st.session_state["_malt_pct_pending_sync"] = False
+            st.session_state.pop("skaler_maal_volum", None)
             st.sidebar.success(f"Laddet: {valgt_lagret_navn}")
             st.rerun()
         elif valgt_lagret_navn == "-- Velg oppskrift --":

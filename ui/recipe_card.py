@@ -90,6 +90,33 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 st.session_state.gjeldende_navn = "Kvernhaug Spesial"
                 st.rerun()
 
+    with st.expander("📐 Skaler oppskrift"):
+        original = st.session_state.get("_original_batch_size")
+        if original and abs(original - ctx["volum"]) > 0.01:
+            st.caption(f"Original: {original:.0f} L · Gjeldende: {ctx['volum']:.0f} L")
+        maal = st.number_input(
+            "Skalér til (L)",
+            min_value=1.0, max_value=200.0, step=0.5,
+            value=float(ctx["volum"]),
+            key="skaler_maal_volum",
+        )
+        if st.button("Skaler oppskrift", use_container_width=True, key="skaler_btn"):
+            if abs(maal - ctx["volum"]) < 0.01:
+                st.warning("Mål-volum er allerede lik gjeldende volum.")
+            else:
+                faktor = maal / ctx["volum"]
+                st.session_state.valgt_malt = [
+                    {**m, "mengde": round(m["mengde"] * faktor, 3)}
+                    for m in st.session_state.valgt_malt
+                ]
+                st.session_state.valgt_humle = [
+                    {**h, "gram": round(h["gram"] * faktor, 1)}
+                    for h in st.session_state.valgt_humle
+                ]
+                st.session_state.batch_volum_input = maal
+                st.rerun()
+        st.caption("💡 Endre navn før lagring for å ikke overskrive originalen.")
+
     # Formater HTML for malt og humle-linjer til arket
     malt_html = "".join([f"<tr><td style='padding:5px; color:#ffffff;'>{malt_database[m['id']]['display_name']}</td><td style='padding:5px; color:#ffffff;'>{m['mengde']:.2f} kg</td></tr>" for m in st.session_state.valgt_malt if m["id"] in malt_database])
     humle_html = "".join([f"<tr><td style='padding:5px; color:#ffffff;'>{humle_database[h['id']]['display_name']}</td><td style='padding:5px; color:#ffffff;'>{h['gram']}g</td><td style='padding:5px; color:#ffffff;'>{h['tid']} min</td></tr>" for h in st.session_state.valgt_humle if h["id"] in humle_database])
