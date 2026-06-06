@@ -36,7 +36,7 @@ def sjekk_smakskonflikter(recipe):
     }
     if flavor.get("Krydder", 0) > 3.0:
         for hop in recipe["hops"]:
-            if hop.get("id") in _FLORALE_HUMLE and hop.get("gram", 0) > 0:
+            if hop.get("id") in _FLORALE_HUMLE and hop.get("gram", 0) >= 10:
                 advarsler.append(
                     "🧼 **Parfyme-/såpefare:** Blomsterpreget humle sammen med krydret belgisk gjær "
                     "kan gi parfymeaktig preg. Vurder å bytte til nøytral gjær (US-05) eller "

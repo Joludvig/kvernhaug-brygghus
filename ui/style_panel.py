@@ -29,11 +29,42 @@ def render_style_panel(ctx, humle_database):
         st.subheader("⚠️ Sensoriske konflikter registrert:")
         for konflikt in ctx["conflicts"]: st.error(konflikt)
 
-    # Blomster-advarsel basert på aktive tags
+    # Blomster-advarsel — vektet floral_score med koketidsfaktor og maskering fra røyk/mørke malter
     _FLORALE_TAGS = {"blomst", "blomster", "floral", "parfyme", "parfymert"}
-    aktive_humle_tags = set()
+    batch_liter = max(ctx["volum"], 1.0)
+    floral_score = 0.0
     for h in st.session_state.valgt_humle:
         if h["gram"] > 0 and h["id"] in humle_database:
-            aktive_humle_tags.update(humle_database[h["id"]].get("smakstags", []))
-    if aktive_humle_tags & _FLORALE_TAGS:
-        st.error("⚠️ **ADVARSEL!** Ølet vil få en **parfymert og blomsteraktig smak**.")
+            if any(t in _FLORALE_TAGS for t in humle_database[h["id"]].get("smakstags", [])):
+                tid = h.get("tid", 0)
+                if tid == 0:
+                    tid_faktor = 1.00
+                elif tid <= 5:
+                    tid_faktor = 0.85
+                elif tid <= 15:
+                    tid_faktor = 0.35
+                else:
+                    tid_faktor = 0.05
+                floral_score += (h["gram"] / batch_liter) * tid_faktor
+
+    fp = ctx["recipe"]["flavor_profile"]
+    mask_score = fp.get("Røyk", 0) + fp.get("Kaffe", 0) * 0.6 + fp.get("Sjokolade", 0) * 0.4
+
+    if floral_score >= 0.30:
+        if mask_score >= 4.0:
+            st.warning(
+                f"🌸 **Blomsterpreg til stede** *(floral {floral_score:.2f}, demping {mask_score:.1f}):* "
+                "Humlen bidrar floral karakter, men røyk og mørke malter vil sannsynligvis overdøve dette i det ferdige ølet."
+            )
+        else:
+            st.error(
+                f"⚠️ **Sterk blomster-/parfymerisiko** *(floral {floral_score:.2f}):* "
+                "Florale humler dominerer smaksprofilen — dette ølet vil sannsynligvis smake parfymert. "
+                "Vurder nøytrale sorter (Magnum, Hallertau) eller reduser sene tilsetninger."
+            )
+    elif floral_score >= 0.10 and mask_score < 3.0:
+        st.warning(
+            f"🌸 **Mulig blomsterpreg** *(floral {floral_score:.2f}):* "
+            "En liten floral komponent er til stede. Trolig ikke dominerende, "
+            "men kan merkes av sensitive nese/gane."
+        )
