@@ -1,6 +1,9 @@
 # modules/recipe_storage.py
 import json
+import logging
 import os
+
+_log = logging.getLogger(__name__)
 
 MAPPE = "recipes"
 
@@ -9,9 +12,17 @@ def sikre_mappe():
     if not os.path.exists(MAPPE):
         os.makedirs(MAPPE)
 
+_TRANSLITERATION = {
+    ord('æ'): 'ae', ord('Æ'): 'Ae',
+    ord('ø'): 'o',  ord('Ø'): 'O',
+    ord('å'): 'a',  ord('Å'): 'A',
+    ord('ð'): 'd',  ord('Ð'): 'D',
+}
+
 def generer_filnavn(oppskrift_navn):
     """Lager et trygt, standardisert filnavn basert på oppskriftens navn."""
-    trygg_tittel = "".join([c for c in oppskrift_navn if c.isalnum() or c in (" ", "_", "-")]).rstrip()
+    translittert = oppskrift_navn.translate(_TRANSLITERATION)
+    trygg_tittel = "".join([c for c in translittert if c.isalnum() or c in (" ", "_", "-")]).rstrip()
     trygg_tittel = trygg_tittel.replace(" ", "_").lower()
     return f"{trygg_tittel}.json"
 
@@ -60,10 +71,9 @@ def hent_alle_oppskrifter():
         try:
             with open(filsti, "r", encoding="utf-8") as file_content:
                 data = json.load(file_content)
-                # Vi bruker oppskriftens visningsnavn som nøkkel
                 oppskrifter[data["name"]] = data
-        except:
-            continue
+        except (json.JSONDecodeError, OSError, KeyError) as e:
+            _log.warning("Kunne ikke lese oppskriftsfil %s: %s", f, e)
     return oppskrifter
 
 def slett_oppskrift_fil(oppskrift_navn):

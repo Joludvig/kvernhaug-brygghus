@@ -6,6 +6,7 @@ _HUMLE_FALLBACK_KR_100G = 99.0
 _GJAER_FALLBACK_KR      = 59.0
 
 
+@st.cache_data
 def _last_master_malt():
     try:
         with open("data/master_malt.json", encoding="utf-8") as f:
