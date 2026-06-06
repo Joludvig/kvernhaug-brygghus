@@ -43,8 +43,10 @@ def render_style_panel(ctx, humle_database):
                     tid_faktor = 0.85
                 elif tid <= 15:
                     tid_faktor = 0.35
-                else:
+                elif tid <= 30:
                     tid_faktor = 0.05
+                else:
+                    tid_faktor = 0.01
                 floral_score += (h["gram"] / batch_liter) * tid_faktor
 
     fp = ctx["recipe"]["flavor_profile"]
