@@ -73,6 +73,9 @@ if "_pending_batch_volum" in st.session_state:
     st.session_state.batch_volum_input = st.session_state.pop("_pending_batch_volum")
 if "_pending_gjeldende_navn" in st.session_state:
     st.session_state.gjeldende_navn = st.session_state.pop("_pending_gjeldende_navn")
+if "_pending_import_versjon_bump" in st.session_state:
+    st.session_state.pop("_pending_import_versjon_bump")
+    st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
 
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
 render_sidebar()

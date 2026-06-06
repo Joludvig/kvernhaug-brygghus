@@ -117,6 +117,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 st.session_state["_pending_batch_volum"] = maal
                 base_navn = re.sub(r' - \d+(?:\.\d+)?L batch$', '', st.session_state.get("gjeldende_navn", ""))
                 st.session_state["_pending_gjeldende_navn"] = f"{base_navn} - {maal:g}L batch"
+                st.session_state["_pending_import_versjon_bump"] = True
                 st.rerun()
         st.caption("💡 Endre navn før lagring for å ikke overskrive originalen.")
 
