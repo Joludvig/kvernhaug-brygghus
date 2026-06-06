@@ -1,26 +1,47 @@
 import streamlit as st
 
+FORETRUKKET_HUMLE_OPPRINNELSE = [
+    "Norsk", "Britisk", "Tysk", "Tsjekkisk", "Belgisk",
+    "Australsk", "Newzealandsk",
+]
+
 def render_hop_panel(humle_database):
     st.header("🌿 Humle-tilsetninger")
+
+    _default_h_id = next(
+        (hid for hid in humle_database if "east_kent" in hid),
+        next(iter(humle_database), "citra"),
+    )
     if st.button("➕ Legg til humle", key="add_hop_btn"):
-        st.session_state.valgt_humle.append({"id": "citra", "gram": 20, "tid": 5})
+        st.session_state.valgt_humle.append({"id": _default_h_id, "gram": 20, "tid": 5})
         st.rerun()
 
-    humle_id_kart, humle_meny_valg = {}, []
+    humle_id_kart = {}
+    humle_etter_opprinnelse = {}
     for h_id, info in humle_database.items():
         if info:
-            opprinnelse = info.get("opprinnelse", "")
+            opprinnelse = info.get("opprinnelse") or "Andre"
+            if opprinnelse == "Ukjent":
+                opprinnelse = "Andre"
             visnings_navn = (
                 f"{info.get('display_name', h_id)} ({opprinnelse})"
-                if opprinnelse and opprinnelse != "Ukjent"
+                if opprinnelse != "Andre"
                 else info.get("display_name", h_id)
             )
             humle_id_kart[visnings_navn] = h_id
-            humle_meny_valg.append(visnings_navn)
+            humle_etter_opprinnelse.setdefault(opprinnelse, []).append(visnings_navn)
 
-    # SKUDDSIKKER FALLBACK: Hvis humledatabasen er tom, oppretter vi et standardvalg
+    alle_oppr = set(humle_etter_opprinnelse)
+    sortert_oppr = [o for o in FORETRUKKET_HUMLE_OPPRINNELSE if o in alle_oppr]
+    sortert_oppr += sorted(o for o in alle_oppr if o not in FORETRUKKET_HUMLE_OPPRINNELSE)
+
+    humle_meny_valg = []
+    for oppr in sortert_oppr:
+        humle_meny_valg.append(f"--- {oppr.upper()} ---")
+        humle_meny_valg.extend(sorted(humle_etter_opprinnelse[oppr]))
+
     if not humle_meny_valg:
-        standard_visning = "Citra (USA)"
+        standard_visning = "Citra"
         humle_meny_valg = [standard_visning]
         humle_id_kart[standard_visning] = "citra"
 
@@ -32,17 +53,22 @@ def render_hop_panel(humle_database):
             gjeldende_h_id = h_item["id"]
             gjeldende_h_visning = next((v for v, hid in humle_id_kart.items() if hid == gjeldende_h_id), None)
             if not gjeldende_h_visning or gjeldende_h_visning not in humle_meny_valg:
-                gjeldende_h_visning = humle_meny_valg[0] if humle_meny_valg else "Citra (USA)"
+                gjeldende_h_visning = next(
+                    (v for v in humle_meny_valg if not v.startswith("---")),
+                    humle_meny_valg[0] if humle_meny_valg else "",
+                )
             standard_h_indeks = humle_meny_valg.index(gjeldende_h_visning)
 
             with h_col1:
                 valgt_h_visning = st.selectbox(f"Humle #{j+1}", humle_meny_valg, key=f"humle_ui_{j}_v{_v}", index=standard_h_indeks)
+                if valgt_h_visning and valgt_h_visning.startswith("---"):
+                    valgt_h_visning = next((v for v in humle_meny_valg if not v.startswith("---")), valgt_h_visning)
                 ny_h_id = humle_id_kart.get(valgt_h_visning, next(iter(humle_id_kart.values()), ""))
             with h_col2:
-                nytt_gram = st.number_input(f"Gram", min_value=0.0, value=float(h_item["gram"]), step=5.0, key=f"humle_gram_{j}_v{_v}")
+                nytt_gram = st.number_input("Gram", min_value=0.0, value=float(h_item["gram"]), step=5.0, key=f"humle_gram_{j}_v{_v}")
             with h_col3:
-                ny_tid = st.number_input(f"Tid (Min)", min_value=0, max_value=120, value=h_item["tid"], step=5, key=f"humle_tid_{j}_v{_v}")
-            
+                ny_tid = st.number_input("Tid (Min)", min_value=0, max_value=120, value=h_item["tid"], step=5, key=f"humle_tid_{j}_v{_v}")
+
             h_alfa, h_smak, h_pris = 0.0, "", "0.0 kr"
             if ny_h_id in humle_database:
                 h_info = humle_database[ny_h_id]
@@ -53,7 +79,6 @@ def render_hop_panel(humle_database):
                 h_pris_nokkel = "pris_olbrygging" if butikk_navn == "Ølbrygging.no" else "pris_vestbrygg"
                 h_pris = f"{(nytt_gram * h_info.get(h_pris_nokkel, 99.0) / 100):.1f} kr"
             else:
-                # Fallback hvis ID-en ikke finnes på disk ennå
                 h_alfa = 12.0
                 h_pris = f"{(nytt_gram * 99.0 / 100):.1f} kr"
 

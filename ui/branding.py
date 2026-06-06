@@ -13,6 +13,7 @@ _COLORS = {
 }
 
 
+@st.cache_data
 def _logo_base64() -> str:
     with open(_LOGO_PATH, "rb") as f:
         return base64.b64encode(f.read()).decode()

@@ -71,6 +71,7 @@ def render_malt_panel(malt_database):
         malt_meny_valg = ["Pilsner Malt (Weyermann)"]
         malt_id_kart["Pilsner Malt (Weyermann)"] = "weyermann_pilsner"
 
+    _volum_display = st.session_state.get("batch_volum_input", 20.0)
     oppdatert_malt_liste = []
     needs_rerun = False
     # Track if a pct field was edited this render (only one widget can change per rerun)
@@ -130,7 +131,7 @@ def render_malt_panel(malt_database):
                 ebc_visning = info.get("ebc", 4.0)
                 tags_visning = ", ".join(info.get("smakstags", ["maltet"]))
                 poeng_alene = final_kg * (info.get("potensiale", 1.036) - 1) * 1000
-                og_alene = (poeng_alene * 0.75) / 20.0 / 1000 if final_kg > 0 else 0.0
+                og_alene = (poeng_alene * 0.75) / _volum_display / 1000 if final_kg > 0 else 0.0
                 og_bidrag_visning = f"+{og_alene:.3f}"
                 butikk_navn = st.session_state.get("global_butikk", "Ølbrygging.no")
                 pris_nokkel = "pris_olbrygging" if butikk_navn == "Ølbrygging.no" else "pris_vestbrygg"
