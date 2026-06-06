@@ -114,7 +114,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                     {**h, "gram": round(h["gram"] * faktor, 1)}
                     for h in st.session_state.valgt_humle
                 ]
-                st.session_state.batch_volum_input = maal
+                st.session_state["_pending_batch_volum"] = maal
                 base_navn = re.sub(r' - \d+(?:\.\d+)?L batch$', '', st.session_state.get("gjeldende_navn", ""))
                 st.session_state.gjeldende_navn = f"{base_navn} - {maal:g}L batch"
                 st.rerun()

@@ -68,6 +68,10 @@ if "import_versjon" not in st.session_state:
 if "batch_volum_input" not in st.session_state:
     st.session_state.batch_volum_input = 20.0
 
+# Løs opp pending batch-volum fra skalering (må skje før widgeten instansieres)
+if "_pending_batch_volum" in st.session_state:
+    st.session_state.batch_volum_input = st.session_state.pop("_pending_batch_volum")
+
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
 render_sidebar()
 
