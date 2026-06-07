@@ -1,12 +1,5 @@
 import math
-
-# BrewZilla 35L Gen 4.1 defaults
-_EQ = {
-    "fordampning_l_per_time": 4.0,
-    "maskeforhold_l_kg":      3.2,
-    "dead_volume_l":          2.0,
-    "korn_absorpsjon_l_kg":   1.0,
-}
+from modules.equipment import last_equipment
 
 # Fermentation temperature ranges by gjaertype (Norwegian labels)
 _TEMP = {
@@ -35,22 +28,22 @@ def _plato(og):
     return (og - 1.0) * 250
 
 
-def beregn_vann(total_korn_kg, batch_volum_l, koketid_min):
-    mash_vann      = round(total_korn_kg * _EQ["maskeforhold_l_kg"], 1)
-    absorpsjon     = total_korn_kg * _EQ["korn_absorpsjon_l_kg"]
-    pre_boil       = batch_volum_l + _EQ["dead_volume_l"] + _EQ["fordampning_l_per_time"] * (koketid_min / 60)
-    wort_fra_mask  = mash_vann - absorpsjon
-    sparge         = max(0.0, pre_boil - wort_fra_mask)
+def beregn_vann(total_korn_kg, batch_volum_l, koketid_min, eq):
+    mash_vann     = round(total_korn_kg * eq["mash_ratio_l_per_kg"], 1)
+    absorpsjon    = total_korn_kg * eq["grain_absorption_l_per_kg"]
+    pre_boil      = batch_volum_l + eq["dead_space_l"] + eq["boil_off_l_per_hour"] * (koketid_min / 60)
+    wort_fra_mask = mash_vann - absorpsjon
+    sparge        = max(0.0, pre_boil - wort_fra_mask)
     return {
-        "mash_vann_l":  mash_vann,
+        "mash_vann_l":   mash_vann,
         "sparge_vann_l": round(sparge, 1),
-        "pre_boil_l":   round(pre_boil, 1),
+        "pre_boil_l":    round(pre_boil, 1),
     }
 
 
-def _koketid(malt_ider):
+def _koketid(malt_ider, default_min):
     """90 min if any pilsner base malt present (drives off DMS precursor)."""
-    return 90 if any("pilsner" in m.lower() or m in ("best_pils", "belgian_pils") for m in malt_ider) else 60
+    return 90 if any("pilsner" in m.lower() or m in ("best_pils", "belgian_pils") for m in malt_ider) else default_min
 
 
 def _gjær_type_key(gjaer_info):
@@ -65,12 +58,13 @@ def beregn_pakker(og, batch_volum_l, gjaer_type_key):
 
 
 def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volum_l, humle_database):
+    eq            = last_equipment()
     total_korn_kg = sum(m["mengde"] for m in malt_valg)
     malt_ider     = {m["id"] for m in malt_valg}
-    koketid       = _koketid(malt_ider)
+    koketid       = _koketid(malt_ider, eq["default_boil_time_min"])
     gjaer_key     = _gjær_type_key(gjaer_info)
 
-    vann = beregn_vann(total_korn_kg, batch_volum_l, koketid)
+    vann = beregn_vann(total_korn_kg, batch_volum_l, koketid, eq)
 
     maskeplan = [
         {"temp_c": 66, "varighet_min": 60, "label": "Mashing"},

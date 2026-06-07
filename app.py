@@ -18,6 +18,7 @@ from ui.supplier_panel import render_supplier_panel
 from ui.import_panel import render_import_panel
 from ui.shopping_list_panel import render_shopping_list_panel
 from ui.brewday_panel import render_brewday_panel
+from ui.equipment_panel import render_equipment_panel
 
 # 1. Grunnleggende Streamlit-konfigurering
 st.set_page_config(page_title="Kvernhaug Brygghus", page_icon="🍺", layout="wide")
@@ -127,5 +128,6 @@ with col2:
 
 render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
 render_brewday_panel(ctx, humle_database, gjaer_database)
+render_equipment_panel()
 
 render_import_panel()

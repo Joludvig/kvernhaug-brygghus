@@ -5,11 +5,12 @@ from modules.flavor_summary import generer_smakssammendrag
 from modules.style_engine import analyser_stil_og_balanse
 from modules.flavor_conflicts import sjekk_smakskonflikter
 from modules.recipe import bygg_recipe_object
+from modules.equipment import last_equipment
 import streamlit as st
 
 def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db, humle_db, gjaer_db):
     volum = st.session_state.get("batch_volum_input", 20.0) if "batch_volum_input" in st.session_state else 20.0
-    effektivitet = 0.75
+    effektivitet = last_equipment().get("efficiency", 0.75)
 
     # Flater ut biblioteker for beregninger
     flatt_malt = {info.get("display_name", k): info for k, info in malt_db.items() if info}
