@@ -129,7 +129,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
     logo_b64 = _logo_base64() if os.path.exists(_LOGO_PATH) else None
     st.components.v1.html(
         render_card_html(ctx, malt_database, humle_database, gjaer_database, logo_b64=logo_b64),
-        height=720,
+        height=880,
         scrolling=True,
     )
 

@@ -30,10 +30,32 @@ def _today_no() -> str:
     return f"{d.day}. {_MONTHS_NO[d.month - 1]} {d.year}"
 
 
-def _malt_rows_dark(ctx: dict, malt_db: dict) -> str:
-    malts = ctx["recipe"].get("malts", [])
+def _ornament() -> str:
+    return (
+        f"<div style='display:flex; align-items:center; gap:8px; margin:13px 0;'>"
+        f"<div style='flex:1; height:1px; background:{_GOLD}; opacity:0.4;'></div>"
+        f"<div style='color:{_GOLD}; font-size:0.55em; opacity:0.7;'>◆</div>"
+        f"<div style='flex:1; height:1px; background:{_GOLD}; opacity:0.4;'></div>"
+        f"</div>"
+    )
+
+
+def _section_head(label: str) -> str:
+    return (
+        f"<div style='font-size:0.60em; color:{_GOLD}; letter-spacing:0.16em; "
+        f"text-transform:uppercase; border-bottom:1px solid rgba(196,154,42,0.25); "
+        f"padding-bottom:4px; margin-bottom:7px;'>{label}</div>"
+    )
+
+
+def _ingredient_table(rows_html: str) -> str:
+    return f"<table style='width:100%; border-collapse:collapse; margin-bottom:13px;'>{rows_html}</table>"
+
+
+def _malt_rows(ctx: dict, malt_db: dict) -> str:
+    malts    = ctx["recipe"].get("malts", [])
     total_kg = sum(m.get("mengde", 0) for m in malts) or 1.0
-    rows = []
+    rows     = []
     for m in malts:
         info = malt_db.get(m["id"], {})
         navn = info.get("display_name", m["id"])
@@ -41,17 +63,17 @@ def _malt_rows_dark(ctx: dict, malt_db: dict) -> str:
         pct  = kg / total_kg * 100
         rows.append(
             f"<tr>"
-            f"<td style='padding:3px 8px 3px 0; color:{_BODY};'>{navn}</td>"
-            f"<td style='padding:3px 4px; color:{_BODY}; text-align:right; white-space:nowrap;'>{kg:.2f} kg</td>"
-            f"<td style='padding:3px 0 3px 8px; color:{_MUTED}; text-align:right; font-size:0.85em;'>{pct:.0f}%</td>"
+            f"<td style='padding:3px 8px 3px 0; color:{_BODY}; font-size:0.94em;'>{navn}</td>"
+            f"<td style='padding:3px 5px; color:{_BODY}; text-align:right; white-space:nowrap; font-size:0.94em;'>{kg:.2f} kg</td>"
+            f"<td style='padding:3px 0 3px 6px; color:{_MUTED}; text-align:right; font-size:0.80em;'>{pct:.0f}%</td>"
             f"</tr>"
         )
     return "".join(rows) if rows else (
-        f"<tr><td colspan='3' style='color:{_MUTED}; font-style:italic;'>Ingen malt valgt</td></tr>"
+        f"<tr><td colspan='3' style='color:{_MUTED}; font-style:italic; font-size:0.88em;'>Ingen malt valgt</td></tr>"
     )
 
 
-def _hop_rows_dark(ctx: dict, humle_db: dict) -> str:
+def _hop_rows(ctx: dict, humle_db: dict) -> str:
     hops = sorted(ctx["recipe"].get("hops", []), key=lambda h: h.get("tid", 0), reverse=True)
     rows = []
     for h in hops:
@@ -62,37 +84,36 @@ def _hop_rows_dark(ctx: dict, humle_db: dict) -> str:
         tid_label = "tørrhumle" if tid == 0 else f"@{tid} min"
         rows.append(
             f"<tr>"
-            f"<td style='padding:3px 8px 3px 0; color:{_BODY};'>{navn}</td>"
-            f"<td style='padding:3px 4px; color:{_BODY}; text-align:right; white-space:nowrap;'>{gram:.0f} g</td>"
-            f"<td style='padding:3px 0 3px 8px; color:{_MUTED}; text-align:right; font-size:0.85em;'>{tid_label}</td>"
+            f"<td style='padding:3px 8px 3px 0; color:{_BODY}; font-size:0.94em;'>{navn}</td>"
+            f"<td style='padding:3px 5px; color:{_BODY}; text-align:right; white-space:nowrap; font-size:0.94em;'>{gram:.0f} g</td>"
+            f"<td style='padding:3px 0 3px 6px; color:{_MUTED}; text-align:right; font-size:0.80em;'>{tid_label}</td>"
             f"</tr>"
         )
     return "".join(rows) if rows else (
-        f"<tr><td colspan='3' style='color:{_MUTED}; font-style:italic;'>Ingen humle valgt</td></tr>"
+        f"<tr><td colspan='3' style='color:{_MUTED}; font-style:italic; font-size:0.88em;'>Ingen humle valgt</td></tr>"
     )
 
 
-def _logo_header(logo_b64: str | None) -> str:
-    place = "VED DALELVA I ÅSANE"
-    if logo_b64:
-        return (
-            f"<div style='display:flex; align-items:center; justify-content:center; "
-            f"gap:12px; padding:8px 0 6px 0;'>"
-            f"<img src='data:image/png;base64,{logo_b64}' "
-            f"style='height:46px; width:auto; opacity:0.90;'>"
-            f"<div style='font-family:{_SERIF}; font-size:0.68em; color:{_GOLD}; "
-            f"letter-spacing:0.18em; text-transform:uppercase;'>{place}</div>"
-            f"</div>"
-        )
-    return (
-        f"<div style='font-family:{_SERIF}; font-size:0.68em; color:{_GOLD}; "
-        f"letter-spacing:0.18em; text-transform:uppercase; "
-        f"text-align:center; padding:10px 0 6px 0;'>{place}</div>"
+def _stat_boxes(ctx: dict) -> str:
+    stats = [
+        ("OG",  f"{ctx['og']:.3f}"),
+        ("FG",  f"{ctx['fg']:.3f}"),
+        ("ABV", f"{ctx['abv']:.1f}%"),
+        ("IBU", f"{ctx['ibu']:.0f}"),
+        ("EBC", f"{ctx['ebc']:.0f}"),
+    ]
+    boxes = "".join(
+        f"<div style='"
+        f"flex:1; border:1px solid {_GOLD}; border-radius:4px; "
+        f"background:rgba(196,154,42,0.06); text-align:center; "
+        f"padding:9px 3px 8px 3px;'>"
+        f"<div style='font-size:0.55em; color:{_GOLD}; letter-spacing:0.18em; "
+        f"text-transform:uppercase; margin-bottom:5px;'>{lbl}</div>"
+        f"<div style='font-size:1.12em; font-weight:bold; color:{_PERGAMENT}; line-height:1;'>{val}</div>"
+        f"</div>"
+        for lbl, val in stats
     )
-
-
-def _divider() -> str:
-    return f"<hr style='border:none; border-top:1px solid {_GOLD}; opacity:0.35; margin:11px 0;'>"
+    return f"<div style='display:flex; gap:6px; margin:0 0 2px 0;'>{boxes}</div>"
 
 
 def render_card_html(
@@ -108,92 +129,120 @@ def render_card_html(
     gjaer_navn = gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id)
     summary    = ctx["summary"].replace("**", "")
 
-    stat_labels = ["OG", "FG", "ABV", "IBU", "EBC"]
-    stat_values = [
-        f"{ctx['og']:.3f}",
-        f"{ctx['fg']:.3f}",
-        f"{ctx['abv']:.1f}%",
-        f"{ctx['ibu']:.0f}",
-        f"{ctx['ebc']:.0f}",
-    ]
-    stat_heads = "".join(
-        f"<th style='text-align:center; padding:2px 4px; font-size:0.63em; "
-        f"color:{_GOLD}; font-weight:normal; letter-spacing:0.14em; text-transform:uppercase;'>{l}</th>"
-        for l in stat_labels
-    )
-    stat_vals = "".join(
-        f"<td style='text-align:center; padding:4px; font-size:1.18em; "
-        f"font-weight:bold; color:{_PERGAMENT};'>{v}</td>"
-        for v in stat_values
-    )
+    logo_block = ""
+    if logo_b64:
+        logo_block = (
+            f"<img src='data:image/png;base64,{logo_b64}' "
+            f"style='height:68px; width:auto; display:block; "
+            f"margin:0 auto 8px auto; opacity:0.92;'>"
+        )
+
+    orn = _ornament()
 
     return f"""<div style="
   background:{_BG};
   border:1.5px solid {_GOLD};
   border-radius:8px;
-  padding:16px 20px 14px 20px;
+  padding:22px 22px 18px 22px;
   font-family:{_SERIF};
   color:{_BODY};
   box-sizing:border-box;
 ">
 
-  {_logo_header(logo_b64)}
-  {_divider()}
-
-  <div style="text-align:center; padding:6px 0 10px 0;">
-    <div style="color:{_PERGAMENT}; font-size:1.65em; font-weight:bold;
-      letter-spacing:0.10em; text-transform:uppercase; line-height:1.1;">{ctx['name']}</div>
-    <div style="color:{_MOSS}; font-size:0.88em; font-style:italic;
-      letter-spacing:0.04em; margin-top:5px;">{stil}</div>
+  <!-- ── BRAND HEADER ─────────────────────────────────────── -->
+  <div style="text-align:center; padding-bottom:2px;">
+    {logo_block}
+    <div style="
+      color:{_PERGAMENT}; font-weight:bold;
+      font-size:1.0em; letter-spacing:0.20em;
+      text-transform:uppercase; margin-bottom:3px;
+    ">Kvernhaug Brygghus</div>
+    <div style="
+      color:{_GOLD}; font-size:0.60em;
+      letter-spacing:0.22em; text-transform:uppercase; opacity:0.80;
+    ">Ved Dalelva i Åsane</div>
   </div>
 
-  {_divider()}
+  {orn}
 
-  <table style="width:100%; border-collapse:collapse; margin:2px 0 8px 0;">
-    <tr>{stat_heads}</tr>
-    <tr>{stat_vals}</tr>
-  </table>
-
-  {_divider()}
-
-  <div style="font-size:0.65em; color:{_GOLD}; letter-spacing:0.14em;
-    text-transform:uppercase; margin-bottom:5px;">Meskeplan</div>
-  <table style="width:100%; border-collapse:collapse; margin-bottom:12px;">
-    {_malt_rows_dark(ctx, malt_db)}
-  </table>
-
-  <div style="font-size:0.65em; color:{_GOLD}; letter-spacing:0.14em;
-    text-transform:uppercase; margin-bottom:5px;">Kokeplan</div>
-  <table style="width:100%; border-collapse:collapse; margin-bottom:12px;">
-    {_hop_rows_dark(ctx, humle_db)}
-  </table>
-
-  <div style="font-size:0.65em; color:{_GOLD}; letter-spacing:0.14em;
-    text-transform:uppercase; margin-bottom:5px;">Gjær</div>
-  <div style="color:{_BODY}; font-size:0.94em; margin-bottom:12px;">{gjaer_navn}</div>
-
-  <div style="background:{_BG_SECT}; border-left:3px solid {_COPPER};
-    padding:8px 12px; border-radius:0 4px 4px 0; margin-bottom:12px;">
-    <div style="font-size:0.65em; color:{_GOLD}; letter-spacing:0.14em;
-      text-transform:uppercase; margin-bottom:4px;">Smaksprofil</div>
-    <div style="color:{_BODY}; font-size:0.90em; line-height:1.5;
-      font-style:italic;">{summary}</div>
+  <!-- ── ØLNAVN ────────────────────────────────────────────── -->
+  <div style="text-align:center; padding:6px 0 14px 0;">
+    <div style="
+      color:{_PERGAMENT};
+      font-size:2.15em;
+      font-weight:bold;
+      letter-spacing:0.13em;
+      text-transform:uppercase;
+      line-height:1.1;
+    ">{ctx['name']}</div>
+    <div style="
+      color:{_MOSS};
+      font-size:0.87em;
+      font-style:italic;
+      letter-spacing:0.04em;
+      margin-top:7px;
+    ">{stil}</div>
   </div>
 
-  {_divider()}
+  {orn}
 
-  <div style="display:flex; justify-content:space-between; align-items:baseline;
-    font-size:0.76em; color:{_MUTED}; margin-bottom:10px;">
-    <span>{ctx['volum']:.0f} L&nbsp;&nbsp;·&nbsp;&nbsp;{_today_no()}</span>
-    <span>Estimert pris: {ctx['total_pris']:.0f} kr</span>
+  <!-- ── STATS ─────────────────────────────────────────────── -->
+  {_stat_boxes(ctx)}
+
+  {orn}
+
+  <!-- ── INGREDIENSER ──────────────────────────────────────── -->
+  {_section_head("Meskeplan")}
+  {_ingredient_table(_malt_rows(ctx, malt_db))}
+
+  {_section_head("Kokeplan")}
+  {_ingredient_table(_hop_rows(ctx, humle_db))}
+
+  {_section_head("Gjær")}
+  <div style="color:{_BODY}; font-size:0.94em; margin-bottom:4px;">{gjaer_navn}</div>
+
+  {orn}
+
+  <!-- ── SMAKSPROFIL ───────────────────────────────────────── -->
+  <div style="
+    background:linear-gradient(135deg, #1e150a 0%, #140e07 100%);
+    border:1px solid rgba(196,154,42,0.28);
+    border-left:3px solid {_GOLD};
+    padding:12px 15px 13px 15px;
+    border-radius:0 5px 5px 0;
+    margin-bottom:4px;
+  ">
+    <div style="
+      font-size:0.60em; color:{_GOLD};
+      letter-spacing:0.16em; text-transform:uppercase;
+      margin-bottom:7px;
+    ">Smaksprofil</div>
+    <div style="
+      color:{_PERGAMENT};
+      font-size:0.91em;
+      line-height:1.58;
+      font-style:italic;
+    ">{summary}</div>
   </div>
 
-  <div style="text-align:center; border-top:1px solid {_GOLD};
-    padding-top:9px; opacity:0.80;">
-    <div style="color:{_ELFENBEIN}; font-size:0.77em; font-style:italic;
-      letter-spacing:0.05em; margin-bottom:3px;">Brygg med ild. Del med ære.</div>
-    <div style="color:{_GOLD}; font-size:0.60em; letter-spacing:0.20em;
-      text-transform:uppercase;">Håndverk&nbsp;&nbsp;•&nbsp;&nbsp;Tradisjon&nbsp;&nbsp;•&nbsp;&nbsp;Karakter</div>
+  {orn}
+
+  <!-- ── FOOTER ────────────────────────────────────────────── -->
+  <div style="text-align:center;">
+    <div style="
+      color:{_MUTED}; font-size:0.72em;
+      letter-spacing:0.04em; margin-bottom:9px;
+    ">{ctx['volum']:.0f} L&nbsp;&nbsp;·&nbsp;&nbsp;{_today_no()}&nbsp;&nbsp;·&nbsp;&nbsp;{ctx['total_pris']:.0f} kr</div>
+    <div style="
+      color:{_ELFENBEIN}; font-size:0.80em;
+      font-style:italic; letter-spacing:0.05em;
+      margin-bottom:5px;
+    ">Brygg med ild. Del med ære.</div>
+    <div style="
+      color:{_GOLD}; font-size:0.58em;
+      letter-spacing:0.24em; text-transform:uppercase;
+      opacity:0.80;
+    ">Håndverk&nbsp;&nbsp;•&nbsp;&nbsp;Tradisjon&nbsp;&nbsp;•&nbsp;&nbsp;Karakter</div>
   </div>
 
 </div>"""
