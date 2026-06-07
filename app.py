@@ -68,6 +68,8 @@ if "import_versjon" not in st.session_state:
     st.session_state.import_versjon = 0
 if "batch_volum_input" not in st.session_state:
     st.session_state.batch_volum_input = 20.0
+if "brygger_stil" not in st.session_state:
+    st.session_state.brygger_stil = ""
 
 # Løs opp pending batch-volum fra skalering (må skje før widgeten instansieres)
 if "_pending_batch_volum" in st.session_state:
@@ -77,6 +79,9 @@ if "_pending_gjeldende_navn" in st.session_state:
 if "_pending_import_versjon_bump" in st.session_state:
     st.session_state.pop("_pending_import_versjon_bump")
     st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
+if "_pending_brygger_stil_reset" in st.session_state:
+    st.session_state.pop("_pending_brygger_stil_reset")
+    st.session_state.brygger_stil = ""
 
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
 render_sidebar()

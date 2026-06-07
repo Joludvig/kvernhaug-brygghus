@@ -15,6 +15,11 @@ def generer_smakshjul(valgt_malt_liste, flatt_malt_bibliotek, valgt_humle_liste,
     
     # Start alle smakspoeng på 0
     poeng = {kat: 0.0 for kat in smaks_kategorier}
+
+    # Spesialmalt-kategorier bidrar ikke-lineært: 15 % Rauchmalz gir fremdeles
+    # tydelig røykpreg selv om prosentandelen er liten. Bruker x^0.55 i stedet
+    # for x^1.0 for disse kategoriene.
+    _SPECIALTY = {"Sjokolade", "Kaffe", "Røyk", "Karamell"}
     
     # --- MALT-NORMALISERING (Prioritet 2) ---
     total_malt_vekt = sum(m["mengde"] for m in valgt_malt_liste if m["navn"] in flatt_malt_bibliotek)
@@ -30,9 +35,8 @@ def generer_smakshjul(valgt_malt_liste, flatt_malt_bibliotek, valgt_humle_liste,
                 
                 for kat, verdi in kat_data.items():
                     if kat in poeng:
-                        # Smaken vektes ut fra prosentandel, ikke rå kilo! 
-                        # Vi ganger med 1.2 for å få en fin visuell skala (0-10) på grafen
-                        poeng[kat] += verdi * prosentandel * 1.2
+                        skala = prosentandel ** 0.55 if kat in _SPECIALTY else prosentandel
+                        poeng[kat] += verdi * skala * 1.2
 
     # --- HUMLE-NORMALISERING (Prioritet 2) ---
     total_humle_gram = sum(h["gram"] for h in valgt_humle_liste if h["navn"] in humle_data)

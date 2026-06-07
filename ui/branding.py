@@ -2,7 +2,7 @@ import base64
 import os
 import streamlit as st
 
-_LOGO_PATH = os.path.join("assets", "branding", "master_v1.png")
+_LOGO_PATH = os.path.join("assets", "branding", "master_v1_transparent.png")
 
 _COLORS = {
     "antikk_gull":  "#c49a2a",

@@ -2,7 +2,7 @@
 """
 Pure HTML templates for Kvernhaug Brygghus recipe cards.
 No Streamlit imports — safe to call from any context.
-  render_card_html()  → inline div for st.components.v1.html()
+  render_card_html()  → inline div for st.markdown(unsafe_allow_html=True)
   render_a4_html()    → full HTML document for download
 """
 from __future__ import annotations
@@ -124,17 +124,39 @@ def render_card_html(
     mode:     str = "card",
     logo_b64: str | None = None,
 ) -> str:
-    stil       = ctx["style_analysis"].get("stil", "")
-    gjaer_id   = ctx["recipe"].get("yeast", "")
-    gjaer_navn = gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id)
-    summary    = ctx["summary"].replace("**", "")
+    stil        = ctx["style_analysis"].get("stil", "")
+    brygger_stil = ctx.get("brygger_stil", "").strip()
+    gjaer_id    = ctx["recipe"].get("yeast", "")
+    gjaer_navn  = gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id)
+    summary     = ctx["summary"].replace("**", "")
+
+    # BJCP-score for dominant match
+    _stil_score = next(
+        (s["score"] for s in ctx["style_analysis"].get("stil_liste", []) if s["stil"] == stil),
+        None,
+    )
+
+    # Stilblokk: bryggerstil primær + BJCP sekundær, eller bare BJCP
+    if brygger_stil:
+        _score_txt = f" · {_stil_score}%" if _stil_score is not None else ""
+        stil_html = (
+            f"<div style='color:{_MOSS}; font-size:0.95em; font-style:italic; "
+            f"letter-spacing:0.04em; margin-top:7px;'>{brygger_stil}</div>"
+            f"<div style='color:{_MUTED}; font-size:0.62em; "
+            f"letter-spacing:0.06em; margin-top:5px;'>Stilmatch: {stil}{_score_txt}</div>"
+        )
+    else:
+        stil_html = (
+            f"<div style='color:{_MOSS}; font-size:0.87em; font-style:italic; "
+            f"letter-spacing:0.04em; margin-top:7px;'>{stil}</div>"
+        )
 
     logo_block = ""
     if logo_b64:
         logo_block = (
             f"<img src='data:image/png;base64,{logo_b64}' "
-            f"style='height:68px; width:auto; display:block; "
-            f"margin:0 auto 8px auto; opacity:0.92;'>"
+            f"style='height:300px; width:auto; display:block; "
+            f"margin:6px auto 16px auto; opacity:0.95;'>"
         )
 
     orn = _ornament()
@@ -175,13 +197,7 @@ def render_card_html(
       text-transform:uppercase;
       line-height:1.1;
     ">{ctx['name']}</div>
-    <div style="
-      color:{_MOSS};
-      font-size:0.87em;
-      font-style:italic;
-      letter-spacing:0.04em;
-      margin-top:7px;
-    ">{stil}</div>
+    {stil_html}
   </div>
 
   {orn}
