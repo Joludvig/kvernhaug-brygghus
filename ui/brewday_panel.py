@@ -62,11 +62,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database):
 
         # ── UTSTYRSNOTAT ──────────────────────────────────
         st.write("")
-        st.caption(
-            "Beregnet med standard BrewZilla 35L-verdier: "
-            "3,2 L/kg maskeforhold · 1,0 L/kg kornabsorpsjon · "
-            "4,0 L/t fordampning · 2,0 L dead volume."
-        )
+        st.caption("Vannberegning basert på aktiv utstyrsprofil.")
 
         # ── PRINT-ARK ─────────────────────────────────────
         st.write("")
