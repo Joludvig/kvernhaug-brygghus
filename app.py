@@ -67,7 +67,9 @@ if "global_butikk" not in st.session_state:
 if "import_versjon" not in st.session_state:
     st.session_state.import_versjon = 0
 if "batch_volum_input" not in st.session_state:
-    st.session_state.batch_volum_input = 20.0
+    # Restore from shadow key if Streamlit cleared the widget-bound key
+    # during a mid-render st.rerun() (e.g. from malt_panel before col2 ran)
+    st.session_state.batch_volum_input = st.session_state.get("_batch_volum_preserved", 20.0)
 if "brygger_stil" not in st.session_state:
     st.session_state.brygger_stil = ""
 
@@ -82,6 +84,10 @@ if "_pending_import_versjon_bump" in st.session_state:
 if "_pending_brygger_stil_reset" in st.session_state:
     st.session_state.pop("_pending_brygger_stil_reset")
     st.session_state.brygger_stil = ""
+
+# Keep shadow key in sync before any panel can call st.rerun().
+# _batch_volum_preserved is not widget-bound so Streamlit never clears it.
+st.session_state["_batch_volum_preserved"] = st.session_state.batch_volum_input
 
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
 render_sidebar()
