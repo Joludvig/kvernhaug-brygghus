@@ -83,7 +83,23 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         placeholder="Eksempel: Imperial Nordisk Røykstaut",
     )
 
-    # Knapper for å lagre og slette
+    # Oppdater-knapp: kun når en oppskrift er aktivt lastet inn
+    if st.session_state.get("_last_loaded_recipe"):
+        if st.button("🔄 Oppdater oppskrift", use_container_width=True, key="oppdater_oppskrift_btn"):
+            ny_recipe = bygg_recipe_object(
+                ctx["name"], ctx["volum"], efficiency=ctx["effektivitet"],
+                malts=st.session_state.valgt_malt, hops=st.session_state.valgt_humle,
+                yeast=st.session_state.valgt_gjaer_id,
+                og=ctx["og"], fg=ctx["fg"], abv=ctx["abv"],
+                ibu=ctx["ibu"], ebc=ctx["ebc"], flavor_profile={},
+                brygger_stil=ctx.get("brygger_stil", ""),
+            )
+            lagre_oppskrift(ny_recipe)
+            st.session_state["_last_loaded_recipe"] = ctx["name"]
+            st.toast(f"Oppdatert: {ctx['name']}", icon="🔄")
+            st.rerun()
+
+    # Lagre som ny/kopi og slett
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
         if st.button("💾 Lagre oppskrift", use_container_width=True):

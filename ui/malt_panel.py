@@ -44,6 +44,7 @@ def render_malt_panel(malt_database):
 
     if st.button("➕ Legg til malt", key="add_malt_btn"):
         st.session_state.valgt_malt.append({"id": "weyermann_pilsner", "mengde": 0.5})
+        st.session_state["_malt_pct_pending_sync"] = True
         st.rerun()
 
     # Canonical total captured before any widget changes this render
@@ -74,10 +75,6 @@ def render_malt_panel(malt_database):
     _volum_display = st.session_state.get("batch_volum_input", 20.0)
     oppdatert_malt_liste = []
     needs_rerun = False
-    # Track if a pct field was edited this render (only one widget can change per rerun)
-    pct_edit_row = None
-    pct_edit_new_kg = None
-    pct_edit_stored_kg = None
 
     for i, m_item in enumerate(st.session_state.valgt_malt):
         with st.container():
@@ -106,24 +103,14 @@ def render_malt_panel(malt_database):
             kg_changed = abs(ny_kg - stored_kg) > 0.001
 
             if kg_changed:
-                # Kg edited — pre-seed pct widget for this row and schedule full sync
                 new_total = total_malt_vekt - stored_kg + ny_kg
                 st.session_state[pct_key] = round(ny_kg / new_total * 100, 1) if new_total > 0 else 0.0
                 needs_rerun = True
 
             with r_col3:
-                ny_pct = st.number_input("Andel %", min_value=0.0, max_value=100.0, value=old_pct, step=0.5, key=pct_key, format="%.1f")
+                st.number_input("Andel %", min_value=0.0, max_value=100.0, value=old_pct, step=0.5, key=pct_key, format="%.1f")
 
-            pct_changed = not kg_changed and total_malt_vekt > 0 and abs(ny_pct - old_pct) > 0.05
-
-            if pct_changed:
-                final_kg = round(ny_pct / 100.0 * total_malt_vekt, 3)
-                pct_edit_row = i
-                pct_edit_new_kg = final_kg
-                pct_edit_stored_kg = stored_kg
-                needs_rerun = True
-            else:
-                final_kg = ny_kg
+            final_kg = ny_kg
 
             ebc_visning, og_bidrag_visning, pris_visning, tags_visning = 0.0, "+0.000", "0.0 kr", ""
             if ny_id in malt_database:
@@ -146,6 +133,7 @@ def render_malt_panel(malt_database):
                 st.write(" ")
                 if st.button("❌", key=f"slett_malt_{i}_v{_v}"):
                     st.session_state.valgt_malt.pop(i)
+                    st.session_state["_malt_pct_pending_sync"] = True
                     st.rerun()
             if tags_visning:
                 st.caption(f"👅 *Smaksprofil:* {tags_visning}")
@@ -154,20 +142,24 @@ def render_malt_panel(malt_database):
 
     st.session_state.valgt_malt = oppdatert_malt_liste
 
-    # Redistribute other malts proportionally when pct was edited, keeping total fixed.
-    # Widget keys are NOT updated here — that happens at the top of the next render
-    # via _malt_pct_pending_sync to avoid StreamlitAPIException.
-    if pct_edit_row is not None and total_malt_vekt > 0:
-        old_other_total = total_malt_vekt - pct_edit_stored_kg
-        remaining_kg = total_malt_vekt - pct_edit_new_kg
+    # Prosentsum og eksplisitt omregning til kg
+    _pct_vals = [st.session_state.get(f"malt_pct_{i}_v{_v}", 0.0) for i in range(len(oppdatert_malt_liste))]
+    _sum_pct = sum(_pct_vals)
+    _current_total = sum(m["mengde"] for m in oppdatert_malt_liste)
 
-        if old_other_total <= 0:
-            # Single malt or all others were 0 — cancel the change
-            st.session_state.valgt_malt[pct_edit_row]["mengde"] = pct_edit_stored_kg
+    _sum_col, _btn_col = st.columns([2, 1.5])
+    with _sum_col:
+        if abs(_sum_pct - 100.0) > 0.5:
+            st.warning(f"Prosent-sum: {_sum_pct:.1f}% — ikke 100%")
         else:
-            for j, m in enumerate(st.session_state.valgt_malt):
-                if j != pct_edit_row:
-                    m["mengde"] = round(m["mengde"] * remaining_kg / old_other_total, 3)
+            st.caption(f"Prosent-sum: {_sum_pct:.1f}%")
+    with _btn_col:
+        if st.button("Bruk prosentfordeling", key="apply_pct_btn", use_container_width=True):
+            if _sum_pct > 0 and _current_total > 0:
+                for i, m in enumerate(st.session_state.valgt_malt):
+                    m["mengde"] = round(_pct_vals[i] / _sum_pct * _current_total, 3)
+            st.session_state["_malt_pct_pending_sync"] = True
+            st.rerun()
 
     if needs_rerun:
         st.session_state["_malt_pct_pending_sync"] = True
