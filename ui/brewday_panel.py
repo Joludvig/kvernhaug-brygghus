@@ -40,7 +40,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         # ── BATCH-INFO ──────────────────────────────────────
         bi1, bi2, bi3 = st.columns(3)
         with bi1:
-            st.text_input("Batchnummer", placeholder="f.eks. 42", key="bd_batchnr")
+            st.text_input("Batchnummer", placeholder="f.eks. 2026-001", key="bd_batchnr")
         with bi2:
             st.date_input("Bryggedato", key="bd_dato")
         with bi3:
@@ -52,12 +52,10 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         bd_left, bd_right = st.columns(2)
 
         with bd_left:
-            # MALT
             st.markdown(f"**🌾 Malt — {plan['total_korn_kg']:.2f} kg**")
             for i, m in enumerate(plan["malt_liste"]):
                 st.checkbox(f"{m['mengde']:.2f} kg — {m['navn']}", key=f"bd_malt_{i}")
 
-            # VANN
             st.write("")
             st.markdown("**💧 Vann**")
             w = plan["vann"]
@@ -66,21 +64,18 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             c2.metric("Skyllevann", f"{w['sparge_vann_l']:.1f} L")
             c3.metric("Pre-boil",   f"{w['pre_boil_l']:.1f} L")
 
-            # MESKING
             st.write("")
             st.markdown("**🌡️ Mesking**")
             for steg in plan["maskeplan"]:
                 st.write(f"- {steg['temp_c']}°C  ·  {steg['varighet_min']} min  —  *{steg['label']}*")
 
-            # KOK
             st.write("")
             st.markdown("**🔥 Koking**")
             st.write(f"- {plan['koketid_min']} min")
             if plan["koketid_min"] == 90:
-                st.caption("90 min anbefalt for Pilsnermalt — reduserer DMS-forstadie.")
+                st.caption("90 min anbefalt for Pilsnermalt.")
 
         with bd_right:
-            # HUMLE
             st.markdown("**🌿 Humletilsetninger**")
             if plan["humleplan"]:
                 header = "| Tid | Humle | Gram | IBU |\n|-----|-------|------|-----|"
@@ -92,17 +87,12 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             else:
                 st.caption("Ingen humle i oppskriften.")
 
-            # GJÆR
             st.write("")
-            st.markdown("**🧫 Gjær**")
+            st.markdown("**🧫 Gjær & Fermentering**")
             st.write(f"- **{plan['gjaer_navn']}** — {plan['pakker']} pakke(r)")
             st.write(f"- Temp: **{plan['temp_min']}–{plan['temp_maks']}°C**")
             for note in plan["noter"]:
                 st.info(note)
-
-            # FERMENTERING
-            st.write("")
-            st.markdown("**🌡️ Fermentering**")
             ferm1, ferm2 = st.columns(2)
             with ferm1:
                 st.date_input("Gjæringsstart", key="bd_ferm_start")
@@ -154,25 +144,43 @@ def _bygg_brewday_html(ctx, plan):
         if logo_b64 else ""
     )
 
+    # Malt list
     malt_li = "".join(
         f"<li><span class='cb'>☐</span> <strong>{m['mengde']:.2f} kg</strong> — {m['navn']}</li>"
         for m in plan["malt_liste"]
     ) or "<li>Ingen malt registrert.</li>"
 
+    # Meskeplan
     maskeplan_li = "".join(
         f"<li><span class='cb'>☐</span> {s['temp_c']}°C – {s['varighet_min']} min <em>({s['label']})</em></li>"
         for s in plan["maskeplan"]
     )
 
-    humle_rows = "".join(
+    # Hop table — minimum 5 visible rows
+    humle_data_rows = "".join(
         f"<tr><td>{h['tid']} min</td><td>{h['navn']}</td>"
         f"<td>{h['gram']:.0f} g</td><td>{h['ibu_bidrag']:.1f}</td></tr>"
         for h in plan["humleplan"]
-    ) or "<tr><td colspan='4'>Ingen humle i oppskriften.</td></tr>"
+    )
+    n_tomme = max(0, 5 - len(plan["humleplan"]))
+    humle_tomme_rows = "".join(
+        "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>"
+        for _ in range(n_tomme)
+    )
+    humle_rows = humle_data_rows + humle_tomme_rows or (
+        "<tr><td colspan='4'>Ingen humle.</td></tr>" + humle_tomme_rows
+    )
 
+    # Gjær notes
     noter_li = "".join(f"<li class='note'>ℹ️ {n}</li>" for n in plan["noter"])
-    dms_note = "<li class='note'>90 min anbefalt for Pilsnermalt</li>" if plan["koketid_min"] == 90 else ""
-    stil_line = f"<p class='recipe-stil'>{ctx['brygger_stil']}</p>" if ctx.get("brygger_stil") else ""
+    dms_note = (
+        "<li class='note'>90 min anbefalt for Pilsnermalt</li>"
+        if plan["koketid_min"] == 90 else ""
+    )
+    stil_line = (
+        f"<p class='recipe-stil'>{ctx['brygger_stil']}</p>"
+        if ctx.get("brygger_stil") else ""
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="no">
@@ -181,45 +189,186 @@ def _bygg_brewday_html(ctx, plan):
 <title>Bryggedagsark — {ctx['name']}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ font-family: Arial, Helvetica, sans-serif; font-size: 9pt;
-          color: #111; background: #fff; padding: 8mm 10mm 6mm 10mm; }}
-  .header {{ display: flex; align-items: center; gap: 6mm;
-             border-bottom: 2px solid #222; padding-bottom: 4px; margin-bottom: 4px; }}
-  .header img {{ height: 30px; }}
-  .header-text h1 {{ font-size: 13pt; font-weight: bold; letter-spacing: 0.04em; }}
-  .header-text p {{ font-size: 7.5pt; color: #555; }}
-  .recipe-title {{ font-size: 11pt; font-weight: bold; margin: 3px 0 0 0; }}
-  .recipe-stil {{ font-size: 8pt; color: #555; font-style: italic; margin: 1px 0; }}
-  .stats-bar {{ font-size: 8pt; color: #333; padding-bottom: 3px;
-                border-bottom: 1px solid #bbb; margin-bottom: 3px; }}
-  .batch-info {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm;
-                 margin: 3px 0 4px 0; padding-bottom: 3px; border-bottom: 1px solid #bbb; }}
-  .bi-field .lbl {{ font-size: 7pt; color: #555; }}
-  .bi-line {{ border-bottom: 1px solid #888; height: 13px; margin-top: 1px; }}
-  h2 {{ font-size: 7.5pt; font-weight: bold; text-transform: uppercase;
-        letter-spacing: 0.06em; border-bottom: 1px solid #aaa;
-        padding-bottom: 1px; margin: 5px 0 2px 0; }}
+  body {{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    color: #111;
+    background: #fff;
+    padding: 8mm 10mm 6mm 10mm;
+  }}
+
+  /* ── HEADER: branding sekundær ── */
+  .header {{
+    display: flex;
+    align-items: center;
+    gap: 5mm;
+    border-bottom: 2px solid #222;
+    padding-bottom: 3px;
+    margin-bottom: 4px;
+  }}
+  .header img {{ height: 24px; opacity: 0.85; }}
+  .kbh-name {{ font-size: 9.5pt; font-weight: bold; letter-spacing: 0.04em; }}
+  .kbh-sub  {{ font-size: 8pt; color: #666; margin-left: 3px; }}
+
+  /* ── OPPSKRIFTSNAVN: primær ── */
+  .recipe-title {{
+    font-size: 22pt;
+    font-weight: bold;
+    margin: 5px 0 1px 0;
+    line-height: 1.1;
+  }}
+  .recipe-stil {{
+    font-size: 10pt;
+    color: #555;
+    font-style: italic;
+    margin: 2px 0;
+  }}
+  .stats-bar {{
+    font-size: 10pt;
+    color: #333;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #bbb;
+    margin-bottom: 5px;
+  }}
+
+  /* ── BATCH-INFO ── */
+  .batch-info {{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4mm;
+    margin: 5px 0;
+  }}
+  .bi-field .lbl {{ font-size: 9pt; color: #444; font-weight: bold; }}
+  .bi-line {{
+    border-bottom: 2px solid #666;
+    height: 26px;
+    margin-top: 2px;
+  }}
+
+  /* ── SEKSJONSOVERSKRIFTER ── */
+  h2 {{
+    font-size: 12pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-bottom: 1.5px solid #555;
+    padding-bottom: 2px;
+    margin: 8px 0 4px 0;
+    color: #111;
+  }}
+
+  /* ── LISTER ── */
+  ul.cb-list {{ list-style: none; margin: 0; padding: 0; }}
+  ul.cb-list li {{
+    margin: 3px 0;
+    font-size: 11pt;
+    line-height: 1.6;
+  }}
+  .cb {{ font-size: 12pt; margin-right: 4px; }}
+  .note {{ font-size: 9pt; color: #555; font-style: italic; }}
+
+  /* ── LAYOUT ── */
   .main {{ display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm; }}
-  ul {{ list-style: none; margin: 0; padding: 0; }}
-  li {{ margin: 1.5px 0; font-size: 8.5pt; line-height: 1.25; }}
-  .cb {{ font-size: 9.5pt; margin-right: 3px; }}
-  .note {{ font-size: 7.5pt; color: #555; font-style: italic; }}
-  table.humle {{ width: 100%; border-collapse: collapse; font-size: 8pt; margin-top: 1px; }}
-  table.humle th {{ background: #f0f0f0; padding: 2px 4px; text-align: left;
-                    font-size: 7pt; text-transform: uppercase; border-bottom: 1px solid #999; }}
-  table.humle td {{ padding: 2px 4px; border-bottom: 1px dotted #ccc; }}
-  .ferm-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 1px 5mm; margin-top: 2px; }}
-  .field-lbl {{ font-size: 7pt; color: #555; margin-top: 3px; }}
-  .field-line {{ border-bottom: 1px solid #aaa; height: 13px; }}
-  .divider {{ border-top: 1.5px solid #333; margin: 5px 0 3px 0; }}
-  .checklist {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px 2mm; margin: 2px 0; }}
-  .check-item {{ font-size: 8.5pt; }}
-  .bottom {{ display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm; }}
-  .stats-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }}
-  .stat-box {{ border: 1px solid #bbb; border-radius: 2px; padding: 2px 4px; }}
-  .slbl {{ font-size: 7pt; color: #666; text-transform: uppercase; }}
-  .sline {{ border-bottom: 1px solid #bbb; height: 13px; margin-top: 2px; }}
-  .note-lines div {{ border-bottom: 1px solid #ccc; height: 16px; margin: 3px 0; }}
+  .divider {{ border-top: 2px solid #333; margin: 8px 0 5px 0; }}
+
+  /* ── HUMLETABELL ── */
+  table.humle {{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+    margin-top: 2px;
+  }}
+  table.humle th {{
+    background: #ebebeb;
+    padding: 3px 7px;
+    text-align: left;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1.5px solid #888;
+  }}
+  table.humle td {{
+    padding: 5px 7px;
+    border-bottom: 1px dotted #ccc;
+    font-size: 11pt;
+  }}
+
+  /* ── FERMENTERING (under gjær) ── */
+  .ferm-grid {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 5mm;
+    margin-top: 4px;
+  }}
+  .field-lbl {{
+    font-size: 9pt;
+    color: #555;
+    font-weight: bold;
+    margin-top: 5px;
+  }}
+  .field-line {{
+    border-bottom: 1.5px solid #888;
+    height: 22px;
+  }}
+
+  /* ── SJEKKLISTE (komprimert 1 rad) ── */
+  .checklist {{
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px 1mm;
+    margin: 3px 0;
+  }}
+  .check-item {{
+    font-size: 9pt;
+    white-space: nowrap;
+  }}
+
+  /* ── STORE MÅLEBOKSER ── */
+  .stats-3 {{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-top: 3px;
+  }}
+  .stat-box {{
+    border: 1.5px solid #888;
+    border-radius: 3px;
+    padding: 5px 8px 6px 8px;
+    min-height: 24mm;
+    display: flex;
+    flex-direction: column;
+  }}
+  .stat-label {{
+    font-size: 9pt;
+    text-transform: uppercase;
+    color: #555;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+  }}
+  .stat-maal {{
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 4px 0 0 0;
+  }}
+  .stat-faktisk-lbl {{
+    font-size: 8.5pt;
+    color: #666;
+    margin-top: auto;
+    padding-top: 6px;
+  }}
+  .stat-faktisk-line {{
+    border-bottom: 1.5px solid #777;
+    height: 20px;
+    margin-top: 3px;
+  }}
+
+  /* ── NOTATER (8 linjer) ── */
+  .note-lines div {{
+    border-bottom: 1px solid #ccc;
+    height: 22px;
+    margin: 4px 0;
+  }}
+
   @media print {{
     @page {{ size: A4; margin: 0; }}
     body {{ padding: 7mm 9mm 5mm 9mm; }}
@@ -228,100 +377,138 @@ def _bygg_brewday_html(ctx, plan):
 </head>
 <body>
 
+<!-- HEADER: KBH sekundær -->
 <div class="header">
   {logo_img}
-  <div class="header-text">
-    <h1>KVERNHAUG BRYGGHUS</h1>
-    <p>Ved Dalelva i Åsane</p>
-  </div>
+  <span class="kbh-name">KVERNHAUG BRYGGHUS</span>
+  <span class="kbh-sub">· Ved Dalelva i Åsane</span>
 </div>
 
+<!-- OPPSKRIFTSNAVN: primær -->
 <p class="recipe-title">{ctx['name']}</p>
 {stil_line}
-<p class="stats-bar">{ctx['volum']:.0f} L &nbsp;·&nbsp; OG {ctx['og']:.3f} &nbsp;·&nbsp; FG {ctx['fg']:.3f} &nbsp;·&nbsp; ABV {ctx['abv']:.1f}% &nbsp;·&nbsp; IBU {ctx['ibu']:.0f} &nbsp;·&nbsp; EBC {ctx['ebc']:.0f} &nbsp;·&nbsp; Effektivitet {ctx['effektivitet']*100:.0f}%</p>
+<p class="stats-bar">
+  {ctx['volum']:.0f} L &nbsp;·&nbsp;
+  OG {ctx['og']:.3f} &nbsp;·&nbsp;
+  FG {ctx['fg']:.3f} &nbsp;·&nbsp;
+  ABV {ctx['abv']:.1f}% &nbsp;·&nbsp;
+  IBU {ctx['ibu']:.0f} &nbsp;·&nbsp;
+  EBC {ctx['ebc']:.0f} &nbsp;·&nbsp;
+  Effektivitet {ctx['effektivitet']*100:.0f}%
+</p>
 
+<!-- BATCH-INFO -->
 <div class="batch-info">
   <div class="bi-field"><div class="lbl">Batchnummer</div><div class="bi-line"></div></div>
   <div class="bi-field"><div class="lbl">Bryggedato</div><div class="bi-line"></div></div>
   <div class="bi-field"><div class="lbl">Brygger</div><div class="bi-line"></div></div>
 </div>
 
+<div class="divider"></div>
+
+<!-- HOVED: TO KOLONNER -->
 <div class="main">
+
+  <!-- VENSTRE: Malt · Vann · Mesking · Kok -->
   <div>
     <h2>Malt — {plan['total_korn_kg']:.2f} kg</h2>
-    <ul>{malt_li}</ul>
+    <ul class="cb-list">{malt_li}</ul>
 
     <h2>Vann</h2>
-    <ul>
+    <ul class="cb-list">
       <li><span class="cb">☐</span> Meskevann: <strong>{w['mash_vann_l']:.1f} L</strong></li>
       <li><span class="cb">☐</span> Skyllevann: <strong>{w['sparge_vann_l']:.1f} L</strong></li>
       <li><span class="cb">☐</span> Pre-boil: <strong>{w['pre_boil_l']:.1f} L</strong></li>
     </ul>
 
     <h2>Mesking</h2>
-    <ul>{maskeplan_li}</ul>
+    <ul class="cb-list">{maskeplan_li}</ul>
 
     <h2>Koking</h2>
-    <ul>
+    <ul class="cb-list">
       <li><span class="cb">☐</span> {plan['koketid_min']} min kok</li>
       {dms_note}
     </ul>
   </div>
 
+  <!-- HØYRE: Humle · Gjær (inkl. fermentering) -->
   <div>
     <h2>Humle</h2>
     <table class="humle">
-      <tr><th>Tid</th><th>Humle</th><th>Gram</th><th>IBU</th></tr>
+      <tr>
+        <th>Tid</th>
+        <th>Humle</th>
+        <th>Gram</th>
+        <th>IBU</th>
+      </tr>
       {humle_rows}
     </table>
 
     <h2>Gjær</h2>
-    <ul>
+    <ul class="cb-list">
       <li><span class="cb">☐</span> <strong>{plan['gjaer_navn']}</strong></li>
       <li><span class="cb">☐</span> {plan['pakker']} pakke(r) anbefalt</li>
       <li>Fermenterer {plan['temp_min']}–{plan['temp_maks']}°C</li>
       {noter_li}
     </ul>
-
-    <h2>Fermentering</h2>
     <div class="ferm-grid">
-      <div><div class="field-lbl">Gjæringsstart</div><div class="field-line"></div></div>
-      <div><div class="field-lbl">Cold crash</div><div class="field-line"></div></div>
-      <div><div class="field-lbl">Tapping</div><div class="field-line"></div></div>
-      <div><div class="field-lbl">Kullsyre / Spunding</div><div class="field-line"></div></div>
+      <div>
+        <div class="field-lbl">Gjæringsstart</div>
+        <div class="field-line"></div>
+      </div>
+      <div>
+        <div class="field-lbl">Cold crash / tapping</div>
+        <div class="field-line"></div>
+      </div>
     </div>
   </div>
-</div>
 
+</div><!-- /main -->
+
+<!-- SJEKKLISTE: komprimert 1 rad -->
 <div class="divider"></div>
 <h2>Bryggedags-sjekkliste</h2>
 <div class="checklist">
-  <div class="check-item"><span class="cb">☐</span> Utstyr rent</div>
-  <div class="check-item"><span class="cb">☐</span> Meskevann varmt</div>
-  <div class="check-item"><span class="cb">☐</span> Skylling ferdig</div>
-  <div class="check-item"><span class="cb">☐</span> Kok startet</div>
-  <div class="check-item"><span class="cb">☐</span> Humle tilsatt</div>
-  <div class="check-item"><span class="cb">☐</span> Nedkjøling ferdig</div>
-  <div class="check-item"><span class="cb">☐</span> Gjær tilsatt</div>
-  <div class="check-item"><span class="cb">☐</span> Gjæring startet</div>
+  <div class="check-item"><span class="cb">☐</span> Utstyr</div>
+  <div class="check-item"><span class="cb">☐</span> Meskevann</div>
+  <div class="check-item"><span class="cb">☐</span> Skylling</div>
+  <div class="check-item"><span class="cb">☐</span> Kok</div>
+  <div class="check-item"><span class="cb">☐</span> Humle</div>
+  <div class="check-item"><span class="cb">☐</span> Nedkjølt</div>
+  <div class="check-item"><span class="cb">☐</span> Gjær</div>
+  <div class="check-item"><span class="cb">☐</span> Gjæring</div>
 </div>
 
+<!-- STORE MÅLEBOKSER -->
 <div class="divider"></div>
-<div class="bottom">
-  <div>
-    <h2>Målinger</h2>
-    <div class="stats-3">
-      <div class="stat-box"><div class="slbl">OG (mål: {ctx['og']:.3f})</div><div class="sline"></div></div>
-      <div class="stat-box"><div class="slbl">FG (mål: {ctx['fg']:.3f})</div><div class="sline"></div></div>
-      <div class="stat-box"><div class="slbl">ABV (mål: {ctx['abv']:.1f}%)</div><div class="sline"></div></div>
-    </div>
+<h2>Målinger</h2>
+<div class="stats-3">
+  <div class="stat-box">
+    <div class="stat-label">OG</div>
+    <div class="stat-maal">Mål: {ctx['og']:.3f}</div>
+    <div class="stat-faktisk-lbl">Faktisk:</div>
+    <div class="stat-faktisk-line"></div>
   </div>
-  <div>
-    <h2>Notater</h2>
-    <div class="note-lines">
-      <div></div><div></div><div></div>
-    </div>
+  <div class="stat-box">
+    <div class="stat-label">FG</div>
+    <div class="stat-maal">Mål: {ctx['fg']:.3f}</div>
+    <div class="stat-faktisk-lbl">Faktisk:</div>
+    <div class="stat-faktisk-line"></div>
   </div>
+  <div class="stat-box">
+    <div class="stat-label">ABV</div>
+    <div class="stat-maal">Mål: {ctx['abv']:.1f}%</div>
+    <div class="stat-faktisk-lbl">Faktisk:</div>
+    <div class="stat-faktisk-line"></div>
+  </div>
+</div>
+
+<!-- NOTATER: 8 linjer -->
+<div class="divider"></div>
+<h2>Notater</h2>
+<div class="note-lines">
+  <div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div>
 </div>
 
 </body>
