@@ -86,9 +86,23 @@ if "_pending_brygger_stil_reset" in st.session_state:
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
 render_sidebar()
 
-# 5. KJØR SENTRAL BEREGNINGS-MOTOR (Prioritet: Central Engine)
-# Her flates databaser ut, Tinseth-IBU regnes, smakshjul kalkuleres og 
-# BJCP-stiler scores ÉN enkelt gang for hele appen før UI tegnes!
+# 5. OPPRETT HOVEDLAYOUTEN (To asymmetriske spalter)
+col1, col2 = st.columns([2.0, 1.2])
+
+# ==================================================
+# === SPALTE 1: INTERAKTIV OPPSKRIFTSBYGGER =======
+# ==================================================
+# NB: Panelene settes FØRST slik at valgt_malt / valgt_humle / valgt_gjaer_id
+# i session_state reflekterer gjeldende widget-verdier FØR beregningsmotor kjøres.
+# Uten denne rekkefølgen vil IBU/OG alltid ligge én kjøring bak brukerens input.
+with col1:
+    render_malt_panel(malt_database)
+    st.write("---")
+    render_hop_panel(humle_database)
+    st.write("---")
+    render_yeast_panel(gjaer_database)
+
+# 6. KJØR SENTRAL BEREGNINGS-MOTOR etter at inputpanelene har oppdatert session_state
 ctx = bygg_recipe_context(
     oppskrift_navn=st.session_state.gjeldende_navn,
     malt_valg=st.session_state.valgt_malt,
@@ -99,36 +113,12 @@ ctx = bygg_recipe_context(
     gjaer_db=gjaer_database
 )
 
-# 6. OPPRETT HOVEDLAYOUTEN (To asymmetriske spalter)
-col1, col2 = st.columns([2.0, 1.2])
-
-# ==================================================
-# === SPALTE 1: INTERAKTIV OPPSKRIFTSBYGGER =======
-# ==================================================
-with col1:
-    # Tegner malttabellen med andeler og sensoriske tags live
-    render_malt_panel(malt_database)
-    st.write("---")
-    
-    # Tegner humleplanen med koketider og Tinseth-beregninger
-    render_hop_panel(humle_database)
-    st.write("---")
-    
-    # Tegner gjærvelgeren med utgjæringsgrader og produsenter
-    render_yeast_panel(gjaer_database)
-
-
 # ==================================================
 # === SPALTE 2: SENTRAL ANALYSE & SENSORISK KORT ====
 # ==================================================
 with col2:
-    # Tegner det mørke, lune bryggerikortet og håndterer A4-utskrift og skylagring
     render_recipe_card(ctx, malt_database, humle_database, gjaer_database)
-    
-    # Tegner stiltreffen basert på BJCP, samt balansenotater og feilmeldinger
     render_style_panel(ctx, humle_database)
-    
-    # Tegner den manuelle leverandørsjekken mot nettbutikkene
     render_supplier_panel(malt_database, humle_database, gjaer_database)
 
 render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
