@@ -47,6 +47,13 @@ def render_hop_panel(humle_database):
         humle_id_kart[standard_visning] = "citra"
 
     _v = st.session_state.get("import_versjon", 0)
+
+    # Apply pending gram update before any widget is instantiated (avoids StreamlitAPIException)
+    if "_pending_humle_gram" in st.session_state:
+        _pg = st.session_state.pop("_pending_humle_gram")
+        if _pg.get("v") == _v:
+            st.session_state[f"humle_gram_{_pg['j']}_v{_v}"] = _pg["gram"]
+
     oppdatert_humle_liste = []
     for j, h_item in enumerate(st.session_state.valgt_humle):
         with st.container():
@@ -110,7 +117,7 @@ def render_hop_panel(humle_database):
                             _volum = st.session_state.get("batch_volum_input", 20.0)
                             _gram = beregn_gram_fra_ibu(maal_ibu, h_alfa, ny_tid, _volum, _og)
                             if _gram > 0:
-                                st.session_state[f"humle_gram_{j}_v{_v}"] = _gram
+                                st.session_state["_pending_humle_gram"] = {"j": j, "v": _v, "gram": _gram}
                                 st.rerun()
                         else:
                             st.warning("Skriv inn ønsket IBU først.")
