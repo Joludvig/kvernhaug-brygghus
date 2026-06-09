@@ -61,7 +61,7 @@ if "valgt_humle" not in st.session_state:
 if "valgt_gjaer_id" not in st.session_state:
     st.session_state.valgt_gjaer_id = next(iter(gjaer_database), "safale_us_05")
 if "gjeldende_navn" not in st.session_state:
-    st.session_state.gjeldende_navn = "Kvernhaug Spesial"
+    st.session_state.gjeldende_navn = st.session_state.get("_gjeldende_navn_preserved", "Kvernhaug Spesial")
 if "global_butikk" not in st.session_state:
     st.session_state.global_butikk = "Ølbrygging.no"
 if "import_versjon" not in st.session_state:
@@ -85,9 +85,10 @@ if "_pending_brygger_stil_reset" in st.session_state:
     st.session_state.pop("_pending_brygger_stil_reset")
     st.session_state.brygger_stil = ""
 
-# Keep shadow key in sync before any panel can call st.rerun().
-# _batch_volum_preserved is not widget-bound so Streamlit never clears it.
+# Keep shadow keys in sync before any panel can call st.rerun().
+# These keys are not widget-bound so Streamlit never clears them.
 st.session_state["_batch_volum_preserved"] = st.session_state.batch_volum_input
+st.session_state["_gjeldende_navn_preserved"] = st.session_state.gjeldende_navn
 
 # 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
 render_sidebar()

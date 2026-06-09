@@ -102,6 +102,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             ny_recipe = _bygg_recipe_fra_session(ctx)
             lagre_oppskrift(ny_recipe)
             st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
+            st.session_state["_gjeldende_navn_preserved"] = ny_recipe["name"]
             st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
 
     # Lagre som ny kopi og slett
