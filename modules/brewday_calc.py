@@ -50,6 +50,19 @@ def _gjær_type_key(gjaer_info):
     return gjaer_info.get("gjaertype", "Ale").lower()
 
 
+def _bygg_humle_entry(h, humle_database, bigness, volum):
+    h_info = humle_database.get(h["id"]) or {}
+    navn   = h_info.get("display_name", h["id"])
+    alfa   = h_info.get("alfa") or h_info.get("alfa_typisk") or 5.0
+    tid, gram = h["tid"], h["gram"]
+    if tid > 0 and bigness > 0 and volum > 0:
+        times      = (1 - math.exp(-0.04 * tid)) / 4.15
+        ibu_bidrag = round((gram * 1000 * (alfa / 100.0) / volum) * bigness * times, 1)
+    else:
+        ibu_bidrag = 0.0
+    return {"navn": navn, "gram": gram, "tid": tid, "ibu_bidrag": ibu_bidrag}
+
+
 def beregn_pakker(og, batch_volum_l, gjaer_type_key):
     plato      = _plato(og)
     pitch_rate = _PITCH_RATE.get(gjaer_type_key, _PITCH_RATE_DEFAULT)
@@ -57,7 +70,7 @@ def beregn_pakker(og, batch_volum_l, gjaer_type_key):
     return max(1, math.ceil(celler_mrd / _DRY_YEAST_BILLION_CELLS))
 
 
-def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volum_l, humle_database):
+def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volum_l, humle_database, malt_database=None):
     eq            = last_equipment()
     total_korn_kg = sum(m["mengde"] for m in malt_valg)
     malt_ider     = {m["id"] for m in malt_valg}
@@ -66,20 +79,22 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
 
     vann = beregn_vann(total_korn_kg, batch_volum_l, koketid, eq)
 
+    malt_liste = [
+        {
+            "navn":   ((malt_database or {}).get(m["id"]) or {}).get("display_name", m["id"]),
+            "mengde": m["mengde"],
+        }
+        for m in sorted(malt_valg, key=lambda x: x["mengde"], reverse=True)
+    ]
+
     maskeplan = [
         {"temp_c": 66, "varighet_min": 60, "label": "Mashing"},
         {"temp_c": 78, "varighet_min": 5,  "label": "Mashout"},
     ]
 
+    bigness   = 1.65 * (0.000125 ** (og - 1)) if og > 1.000 and batch_volum_l > 0 else 0.0
     humleplan = sorted(
-        [
-            {
-                "navn": humle_database.get(h["id"], {}).get("display_name", h["id"]),
-                "gram": h["gram"],
-                "tid":  h["tid"],
-            }
-            for h in humle_valg
-        ],
+        [_bygg_humle_entry(h, humle_database, bigness, batch_volum_l) for h in humle_valg],
         key=lambda x: x["tid"],
         reverse=True,
     )
@@ -99,6 +114,7 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
 
     return {
         "total_korn_kg": round(total_korn_kg, 2),
+        "malt_liste":    malt_liste,
         "koketid_min":   koketid,
         "vann":          vann,
         "maskeplan":     maskeplan,

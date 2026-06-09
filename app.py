@@ -129,7 +129,7 @@ with col2:
     render_supplier_panel(malt_database, humle_database, gjaer_database)
 
 render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
-render_brewday_panel(ctx, humle_database, gjaer_database)
+render_brewday_panel(ctx, humle_database, gjaer_database, malt_database)
 render_equipment_panel()
 
 render_import_panel()
