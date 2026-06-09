@@ -144,9 +144,9 @@ def _bygg_brewday_html(ctx, plan):
         if logo_b64 else ""
     )
 
-    # Malt list
+    # Malt list — column-aligned, no dash separator
     malt_li = "".join(
-        f"<li><span class='cb'>☐</span> <strong>{m['mengde']:.2f} kg</strong> — {m['navn']}</li>"
+        f"<li><span class='cb'>☐</span><span class='m-kg'>{m['mengde']:.2f} kg</span>{m['navn']}</li>"
         for m in plan["malt_liste"]
     ) or "<li>Ingen malt registrert.</li>"
 
@@ -241,7 +241,7 @@ def _bygg_brewday_html(ctx, plan):
   .bi-field .lbl {{ font-size: 9pt; color: #444; font-weight: bold; }}
   .bi-line {{
     border-bottom: 2px solid #666;
-    height: 26px;
+    height: 34px;
     margin-top: 2px;
   }}
 
@@ -266,6 +266,18 @@ def _bygg_brewday_html(ctx, plan):
   }}
   .cb {{ font-size: 12pt; margin-right: 4px; }}
   .note {{ font-size: 9pt; color: #555; font-style: italic; }}
+
+  /* ── MALTLISTE: kolonnejustert ── */
+  ul.malt-list {{ list-style: none; margin: 0; padding: 0; }}
+  ul.malt-list li {{
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 2px 0;
+    font-size: 11pt;
+    line-height: 1.6;
+  }}
+  .m-kg {{ min-width: 55px; font-weight: bold; flex-shrink: 0; }}
 
   /* ── LAYOUT ── */
   .main {{ display: grid; grid-template-columns: 1fr 1fr; gap: 0 8mm; }}
@@ -333,8 +345,8 @@ def _bygg_brewday_html(ctx, plan):
   .stat-box {{
     border: 1.5px solid #888;
     border-radius: 3px;
-    padding: 5px 8px 6px 8px;
-    min-height: 24mm;
+    padding: 5px 8px 8px 8px;
+    min-height: 30mm;
     display: flex;
     flex-direction: column;
   }}
@@ -354,28 +366,47 @@ def _bygg_brewday_html(ctx, plan):
     font-size: 8.5pt;
     color: #666;
     margin-top: auto;
-    padding-top: 6px;
+    padding-top: 8px;
   }}
   .stat-faktisk-line {{
-    border-bottom: 1.5px solid #777;
-    height: 20px;
-    margin-top: 3px;
+    border-bottom: 2px solid #555;
+    height: 32px;
+    margin-top: 4px;
   }}
 
-  /* ── NOTATER (8 linjer) ── */
+  /* ── SIDE-WRAPPER: notater fyller gjenværende høyde ── */
+  .page-wrapper {{
+    display: flex;
+    flex-direction: column;
+  }}
+  .notes-section {{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }}
+  .note-lines {{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px;
+  }}
   .note-lines div {{
+    flex: 1;
     border-bottom: 1px solid #ccc;
-    height: 22px;
-    margin: 4px 0;
+    min-height: 21px;
+    max-height: 36px;
   }}
 
   @media print {{
     @page {{ size: A4; margin: 0; }}
     body {{ padding: 7mm 9mm 5mm 9mm; }}
+    .page-wrapper {{ min-height: 283mm; }}
   }}
 </style>
 </head>
 <body>
+<div class="page-wrapper">
 
 <!-- HEADER: KBH sekundær -->
 <div class="header">
@@ -412,7 +443,7 @@ def _bygg_brewday_html(ctx, plan):
   <!-- VENSTRE: Malt · Vann · Mesking · Kok -->
   <div>
     <h2>Malt — {plan['total_korn_kg']:.2f} kg</h2>
-    <ul class="cb-list">{malt_li}</ul>
+    <ul class="malt-list">{malt_li}</ul>
 
     <h2>Vann</h2>
     <ul class="cb-list">
@@ -503,13 +534,18 @@ def _bygg_brewday_html(ctx, plan):
   </div>
 </div>
 
-<!-- NOTATER: 8 linjer -->
-<div class="divider"></div>
-<h2>Notater</h2>
-<div class="note-lines">
-  <div></div><div></div><div></div><div></div>
-  <div></div><div></div><div></div><div></div>
+<!-- NOTATER: fyller gjenværende side-høyde -->
+<div class="notes-section">
+  <div class="divider"></div>
+  <h2>Notater</h2>
+  <div class="note-lines">
+    <div></div><div></div><div></div><div></div>
+    <div></div><div></div><div></div><div></div>
+    <div></div><div></div><div></div><div></div>
+    <div></div><div></div>
+  </div>
 </div>
 
+</div><!-- /page-wrapper -->
 </body>
 </html>"""
