@@ -1,4 +1,5 @@
 import streamlit as st
+from modules.calculations import beregn_gram_fra_ibu
 
 FORETRUKKET_HUMLE_OPPRINNELSE = [
     "Norsk", "Britisk", "Tysk", "Tsjekkisk", "Belgisk",
@@ -92,6 +93,28 @@ def render_hop_panel(humle_database):
                     st.rerun()
             if h_smak:
                 st.caption(f"👃 *Smak:* {h_smak}")
+
+            if ny_tid > 0:
+                ibu_col, beregn_col = st.columns([1.5, 1.5])
+                with ibu_col:
+                    maal_ibu = st.number_input(
+                        "Mål-IBU (denne tilsetningen)",
+                        min_value=0.0, value=0.0, step=1.0, format="%.1f",
+                        key=f"humle_maal_ibu_{j}_v{_v}",
+                    )
+                with beregn_col:
+                    st.write(" ")
+                    if st.button("Beregn gram", key=f"humle_beregn_{j}_v{_v}", use_container_width=True):
+                        if maal_ibu > 0:
+                            _og = st.session_state.get("_last_og", 1.050)
+                            _volum = st.session_state.get("batch_volum_input", 20.0)
+                            _gram = beregn_gram_fra_ibu(maal_ibu, h_alfa, ny_tid, _volum, _og)
+                            if _gram > 0:
+                                st.session_state[f"humle_gram_{j}_v{_v}"] = _gram
+                                st.rerun()
+                        else:
+                            st.warning("Skriv inn ønsket IBU først.")
+
             st.write("")
             oppdatert_humle_liste.append({"id": ny_h_id, "gram": nytt_gram, "tid": ny_tid})
     st.session_state.valgt_humle = oppdatert_humle_liste

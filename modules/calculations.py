@@ -39,6 +39,18 @@ def beregn_fg_og_abv(og, attenuation):
     return fg, abv
 
 
+def beregn_gram_fra_ibu(maal_ibu, alfa_prosent, tid, volum, beregnet_og):
+    """Invers Tinseth: beregner gram humle for ønsket IBU-bidrag på én tilsetning."""
+    if alfa_prosent <= 0 or volum <= 0 or beregnet_og <= 1.000 or maal_ibu <= 0 or tid <= 0:
+        return 0.0
+    bigness = 1.65 * (0.000125 ** (beregnet_og - 1))
+    times = (1 - math.exp(-0.04 * tid)) / 4.15
+    utnyttelse = bigness * times
+    if utnyttelse <= 0:
+        return 0.0
+    return round((maal_ibu * volum) / (1000 * (alfa_prosent / 100.0) * utnyttelse), 1)
+
+
 def beregn_total_ibu(valgt_humle_liste, humle_data, volum, beregnet_og):
     """
     Beregner nøyaktig bitterhet (IBU) ved bruk av Glenn Tinseths offisielle formel.

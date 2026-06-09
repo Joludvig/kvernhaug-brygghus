@@ -42,6 +42,7 @@ def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db
 
     # Beregninger (Linjen under er nå helt renset)
     og = beregn_og(malt_calc, flatt_malt, volum, effektivitet)
+    st.session_state["_last_og"] = og
     ebc = beregn_ebc(malt_calc, flatt_malt, volum)
     ibu = beregn_total_ibu(humle_calc, flatt_humle, volum, og)
     fg, abv = beregn_fg_og_abv(og, attenuation)
