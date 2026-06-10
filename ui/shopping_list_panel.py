@@ -170,6 +170,15 @@ def render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_databas
         st.markdown(f"**TOTAL: ca {total_sum:.0f} kr**")
 
         st.write("")
-        st.markdown("**📋 Kopier handleliste**")
+        st.markdown("**📋 Kopier / last ned handleliste**")
         tekst = _generer_tekst(malt_items, humle_items, gjaer_item, recipe_name, volum, butikk)
         st.code(tekst, language=None)
+        fil_navn = recipe_name.replace(" ", "_").replace("/", "-").lower() + "_handleliste.txt"
+        st.download_button(
+            label="📥 Last ned handleliste (.txt)",
+            data=tekst,
+            file_name=fil_navn,
+            mime="text/plain",
+            use_container_width=True,
+            key="handleliste_download_btn",
+        )

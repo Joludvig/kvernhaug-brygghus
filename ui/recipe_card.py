@@ -170,14 +170,16 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
 
     _render_brewday_result_panel(ctx)
 
-    if st.button("🖨️ Generer utskriftsvennlig ark (A4)", use_container_width=True):
-        html_dokument = render_a4_html(ctx, malt_database, humle_database, gjaer_database)
-        fil_navn = ctx["name"].replace(" ", "_").replace("/", "-") + ".html"
-        st.download_button(
-            label="📥 Last ned oppskriftsark",
-            data=html_dokument,
-            file_name=fil_navn,
-            mime="text/html",
-            use_container_width=True,
-        )
-        st.info("💡 Åpne filen i nettleseren og trykk **Ctrl + P** for å skrive ut.")
+    with st.expander("📐 Eksporter / arkiver oppskrift"):
+        st.caption("Lag et statisk A4-ark med ingrediensliste, stilanalyse og smaksprofil. Bryggedagsarket (under) er primær utskrift for selve bryggingen.")
+        if st.button("🖨️ Generer utskriftsvennlig ark (A4)", use_container_width=True):
+            html_dokument = render_a4_html(ctx, malt_database, humle_database, gjaer_database)
+            fil_navn = ctx["name"].replace(" ", "_").replace("/", "-") + ".html"
+            st.download_button(
+                label="📥 Last ned oppskriftsark",
+                data=html_dokument,
+                file_name=fil_navn,
+                mime="text/html",
+                use_container_width=True,
+            )
+            st.info("💡 Åpne filen i nettleseren og trykk **Ctrl + P** for å skrive ut.")
