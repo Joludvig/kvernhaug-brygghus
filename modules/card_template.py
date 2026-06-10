@@ -9,7 +9,7 @@ from __future__ import annotations
 import datetime
 from modules.export_format import (
     fmt_og, fmt_fg, fmt_abv, fmt_ibu, fmt_ebc,
-    fmt_vol, fmt_kg, fmt_gram,
+    fmt_vol, fmt_kg, fmt_gram, logo_img_tag,
 )
 
 # ── Master Design V1 palette ──────────────────────────────────────────────────
@@ -306,6 +306,8 @@ def render_a4_html(
     summary    = ctx["summary"].replace("**", "")
     gold_a4    = "#8a6a10"   # darker gold — readable on white paper
 
+    logo_img = logo_img_tag(24)
+
     return f"""<!DOCTYPE html>
 <html lang="no">
 <head>
@@ -318,6 +320,13 @@ def render_a4_html(
     font-size: 11pt; color: #111; background: #fff;
     padding: 12mm 14mm 10mm 14mm;
   }}
+  .kbh-header {{
+    display: flex; align-items: center; gap: 5mm;
+    border-bottom: 2px solid #222; padding-bottom: 3px; margin-bottom: 8px;
+  }}
+  .kbh-header img {{ height: 24px; opacity: 0.85; }}
+  .kbh-name {{ font-size: 9.5pt; font-weight: bold; letter-spacing: 0.04em; }}
+  .kbh-sub  {{ font-size: 8pt; color: #666; margin-left: 3px; }}
   h1 {{ font-size: 18pt; color: #111; letter-spacing: 0.06em; margin-bottom: 1px; }}
   .stil {{ font-size: 10pt; color: {gold_a4}; font-style: italic; margin-bottom: 2px; }}
   .sub {{ font-size: 9pt; color: #555; margin-bottom: 8px;
@@ -354,12 +363,16 @@ def render_a4_html(
 </style>
 </head>
 <body>
+  <div class="kbh-header">
+    {logo_img}
+    <span class="kbh-name">KVERNHAUG BRYGGHUS</span>
+    <span class="kbh-sub">· Ved Dalelva i Åsane</span>
+  </div>
   <h1>{ctx['name']}</h1>
   <div class="stil">{stil}</div>
   <p class="sub">
     {fmt_vol(ctx['volum'])} &nbsp;·&nbsp;
-    {_today_no()} &nbsp;·&nbsp;
-    Kvernhaug Brygghus — Ved Dalelva i Åsane
+    {_today_no()}
   </p>
 
   <h2>Statistikk</h2>

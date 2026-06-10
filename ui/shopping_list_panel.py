@@ -1,5 +1,6 @@
 import json
 import streamlit as st
+from modules.shopping_template import render_shopping_list_html
 
 _MALT_FALLBACK_KR_KG   = 35.0
 _HUMLE_FALLBACK_KR_100G = 99.0
@@ -173,12 +174,24 @@ def render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_databas
         st.markdown("**📋 Kopier / last ned handleliste**")
         tekst = _generer_tekst(malt_items, humle_items, gjaer_item, recipe_name, volum, butikk)
         st.code(tekst, language=None)
-        fil_navn = recipe_name.replace(" ", "_").replace("/", "-").lower() + "_handleliste.txt"
-        st.download_button(
-            label="📥 Last ned handleliste (.txt)",
-            data=tekst,
-            file_name=fil_navn,
-            mime="text/plain",
-            use_container_width=True,
-            key="handleliste_download_btn",
-        )
+        base_fil = recipe_name.replace(" ", "_").replace("/", "-").lower()
+        dl_col1, dl_col2 = st.columns(2)
+        with dl_col1:
+            st.download_button(
+                label="📥 Last ned handleliste (.txt)",
+                data=tekst,
+                file_name=base_fil + "_handleliste.txt",
+                mime="text/plain",
+                use_container_width=True,
+                key="handleliste_download_btn",
+            )
+        with dl_col2:
+            html_ark = render_shopping_list_html(ctx, malt_items, humle_items, gjaer_item, butikk)
+            st.download_button(
+                label="📥 Last ned handleliste som HTML",
+                data=html_ark,
+                file_name=base_fil + "_handleliste.html",
+                mime="text/html",
+                use_container_width=True,
+                key="handleliste_html_btn",
+            )
