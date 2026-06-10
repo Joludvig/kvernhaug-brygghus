@@ -1,9 +1,9 @@
-import os
 import streamlit as st
 from modules.brewday_calc import lag_brewday_plan
-from ui.branding import _logo_base64
-
-_LOGO_PATH = os.path.join("assets", "branding", "master_v1_transparent.png")
+from modules.export_format import (
+    fmt_og, fmt_fg, fmt_abv, fmt_ibu, fmt_ebc, fmt_vol, fmt_kg, fmt_gram, fmt_ibu_bid,
+    stats_linje, logo_img_tag,
+)
 
 _SJEKKLISTE = [
     "Utstyr rent", "Meskevann varmt", "Skylling ferdig", "Kok startet",
@@ -32,10 +32,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         st.subheader(ctx["name"])
         if ctx.get("brygger_stil"):
             st.caption(ctx["brygger_stil"])
-        st.caption(
-            f"{ctx['volum']:.0f} L  ·  OG {ctx['og']:.3f}  ·  FG {ctx['fg']:.3f}  ·  "
-            f"ABV {ctx['abv']:.1f}%  ·  IBU {ctx['ibu']:.0f}  ·  EBC {ctx['ebc']:.0f}"
-        )
+        st.caption(stats_linje(ctx))
 
         # ── BATCH-INFO ──────────────────────────────────────
         bi1, bi2, bi3 = st.columns(3)
@@ -111,11 +108,11 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         st.markdown("**📐 Målinger**")
         og_col, fg_col, abv_col = st.columns(3)
         with og_col:
-            st.text_input(f"OG (mål: {ctx['og']:.3f})", placeholder="Faktisk", key="bd_og")
+            st.text_input(f"OG (mål: {fmt_og(ctx['og'])})", placeholder="Faktisk", key="bd_og")
         with fg_col:
-            st.text_input(f"FG (mål: {ctx['fg']:.3f})", placeholder="Faktisk", key="bd_fg")
+            st.text_input(f"FG (mål: {fmt_fg(ctx['fg'])})", placeholder="Faktisk", key="bd_fg")
         with abv_col:
-            st.text_input(f"ABV (mål: {ctx['abv']:.1f}%)", placeholder="Faktisk", key="bd_abv")
+            st.text_input(f"ABV (mål: {fmt_abv(ctx['abv'])})", placeholder="Faktisk", key="bd_abv")
 
         st.caption("Vannberegning basert på aktiv utstyrsprofil.")
 
@@ -138,15 +135,11 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
 def _bygg_brewday_html(ctx, plan):
     w = plan["vann"]
 
-    logo_b64 = _logo_base64() if os.path.exists(_LOGO_PATH) else None
-    logo_img = (
-        f'<img src="data:image/png;base64,{logo_b64}" alt="KBH">'
-        if logo_b64 else ""
-    )
+    logo_img = logo_img_tag(24)
 
     # Malt list — column-aligned, no dash separator
     malt_li = "".join(
-        f"<li><span class='cb'>☐</span><span class='m-kg'>{m['mengde']:.2f} kg</span>{m['navn']}</li>"
+        f"<li><span class='cb'>☐</span><span class='m-kg'>{fmt_kg(m['mengde'])}</span>{m['navn']}</li>"
         for m in plan["malt_liste"]
     ) or "<li>Ingen malt registrert.</li>"
 
@@ -159,7 +152,7 @@ def _bygg_brewday_html(ctx, plan):
     # Hop table — minimum 5 visible rows
     humle_data_rows = "".join(
         f"<tr><td>{h['tid']} min</td><td>{h['navn']}</td>"
-        f"<td>{h['gram']:.0f} g</td><td>{h['ibu_bidrag']:.1f}</td></tr>"
+        f"<td>{fmt_gram(h['gram'])}</td><td>{fmt_ibu_bid(h['ibu_bidrag'])}</td></tr>"
         for h in plan["humleplan"]
     )
     n_tomme = max(0, 5 - len(plan["humleplan"]))
@@ -419,15 +412,7 @@ def _bygg_brewday_html(ctx, plan):
 <!-- OPPSKRIFTSNAVN: primær -->
 <p class="recipe-title">{ctx['name']}</p>
 {stil_line}
-<p class="stats-bar">
-  {ctx['volum']:.0f} L &nbsp;·&nbsp;
-  OG {ctx['og']:.3f} &nbsp;·&nbsp;
-  FG {ctx['fg']:.3f} &nbsp;·&nbsp;
-  ABV {ctx['abv']:.1f}% &nbsp;·&nbsp;
-  IBU {ctx['ibu']:.0f} &nbsp;·&nbsp;
-  EBC {ctx['ebc']:.0f} &nbsp;·&nbsp;
-  Effektivitet {ctx['effektivitet']*100:.0f}%
-</p>
+<p class="stats-bar">{stats_linje(ctx, html=True)}</p>
 
 <!-- BATCH-INFO -->
 <div class="batch-info">
@@ -443,7 +428,7 @@ def _bygg_brewday_html(ctx, plan):
 
   <!-- VENSTRE: Malt · Vann · Mesking · Kok -->
   <div>
-    <h2>Malt — {plan['total_korn_kg']:.2f} kg</h2>
+    <h2>Malt — {fmt_kg(plan['total_korn_kg'])}</h2>
     <ul class="malt-list">{malt_li}</ul>
 
     <h2>Vann</h2>
@@ -517,19 +502,19 @@ def _bygg_brewday_html(ctx, plan):
 <div class="stats-3">
   <div class="stat-box">
     <div class="stat-label">OG</div>
-    <div class="stat-maal">Mål: {ctx['og']:.3f}</div>
+    <div class="stat-maal">Mål: {fmt_og(ctx['og'])}</div>
     <div class="stat-faktisk-lbl">Faktisk:</div>
     <div class="stat-faktisk-line"></div>
   </div>
   <div class="stat-box">
     <div class="stat-label">FG</div>
-    <div class="stat-maal">Mål: {ctx['fg']:.3f}</div>
+    <div class="stat-maal">Mål: {fmt_fg(ctx['fg'])}</div>
     <div class="stat-faktisk-lbl">Faktisk:</div>
     <div class="stat-faktisk-line"></div>
   </div>
   <div class="stat-box">
     <div class="stat-label">ABV</div>
-    <div class="stat-maal">Mål: {ctx['abv']:.1f}%</div>
+    <div class="stat-maal">Mål: {fmt_abv(ctx['abv'])}</div>
     <div class="stat-faktisk-lbl">Faktisk:</div>
     <div class="stat-faktisk-line"></div>
   </div>
