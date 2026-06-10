@@ -346,7 +346,7 @@ def _bygg_brewday_html(ctx, plan):
     border: 1.5px solid #888;
     border-radius: 3px;
     padding: 5px 8px 8px 8px;
-    min-height: 30mm;
+    min-height: 24mm;
     display: flex;
     flex-direction: column;
   }}
@@ -384,17 +384,18 @@ def _bygg_brewday_html(ctx, plan):
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
   }}
   .note-lines {{
     flex: 1;
     display: flex;
     flex-direction: column;
     padding-top: 4px;
+    overflow: hidden;
   }}
   .note-lines div {{
     flex: 1;
     border-bottom: 1px solid #ccc;
-    min-height: 21px;
     max-height: 36px;
   }}
 
@@ -542,7 +543,6 @@ def _bygg_brewday_html(ctx, plan):
     <div></div><div></div><div></div><div></div>
     <div></div><div></div><div></div><div></div>
     <div></div><div></div><div></div><div></div>
-    <div></div><div></div>
   </div>
 </div>
 
