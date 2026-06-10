@@ -7,6 +7,10 @@ No Streamlit imports — safe to call from any context.
 """
 from __future__ import annotations
 import datetime
+from modules.export_format import (
+    fmt_og, fmt_fg, fmt_abv, fmt_ibu, fmt_ebc,
+    fmt_vol, fmt_kg, fmt_gram,
+)
 
 # ── Master Design V1 palette ──────────────────────────────────────────────────
 # Source: docs/branding/master_design_v1.md
@@ -64,7 +68,7 @@ def _malt_rows(ctx: dict, malt_db: dict) -> str:
         rows.append(
             f"<tr>"
             f"<td style='padding:3px 8px 3px 0; color:{_BODY}; font-size:0.94em;'>{navn}</td>"
-            f"<td style='padding:3px 5px; color:{_BODY}; text-align:right; white-space:nowrap; font-size:0.94em;'>{kg:.2f} kg</td>"
+            f"<td style='padding:3px 5px; color:{_BODY}; text-align:right; white-space:nowrap; font-size:0.94em;'>{fmt_kg(kg)}</td>"
             f"<td style='padding:3px 0 3px 6px; color:{_MUTED}; text-align:right; font-size:0.80em;'>{pct:.0f}%</td>"
             f"</tr>"
         )
@@ -85,7 +89,7 @@ def _hop_rows(ctx: dict, humle_db: dict) -> str:
         rows.append(
             f"<tr>"
             f"<td style='padding:3px 8px 3px 0; color:{_BODY}; font-size:0.94em;'>{navn}</td>"
-            f"<td style='padding:3px 5px; color:{_BODY}; text-align:right; white-space:nowrap; font-size:0.94em;'>{gram:.0f} g</td>"
+            f"<td style='padding:3px 5px; color:{_BODY}; text-align:right; white-space:nowrap; font-size:0.94em;'>{fmt_gram(gram)}</td>"
             f"<td style='padding:3px 0 3px 6px; color:{_MUTED}; text-align:right; font-size:0.80em;'>{tid_label}</td>"
             f"</tr>"
         )
@@ -96,11 +100,11 @@ def _hop_rows(ctx: dict, humle_db: dict) -> str:
 
 def _stat_boxes(ctx: dict) -> str:
     stats = [
-        ("OG",  f"{ctx['og']:.3f}"),
-        ("FG",  f"{ctx['fg']:.3f}"),
-        ("ABV", f"{ctx['abv']:.1f}%"),
-        ("IBU", f"{ctx['ibu']:.0f}"),
-        ("EBC", f"{ctx['ebc']:.0f}"),
+        ("OG",  fmt_og(ctx["og"])),
+        ("FG",  fmt_fg(ctx["fg"])),
+        ("ABV", fmt_abv(ctx["abv"])),
+        ("IBU", fmt_ibu(ctx["ibu"])),
+        ("EBC", fmt_ebc(ctx["ebc"])),
     ]
     boxes = "".join(
         f"<div style='"
@@ -248,7 +252,7 @@ def render_card_html(
     <div style="
       color:{_MUTED}; font-size:0.72em;
       letter-spacing:0.04em; margin-bottom:9px;
-    ">{ctx['volum']:.0f} L&nbsp;&nbsp;·&nbsp;&nbsp;{_today_no()}&nbsp;&nbsp;·&nbsp;&nbsp;{ctx['total_pris']:.0f} kr</div>
+    ">{fmt_vol(ctx['volum'])}&nbsp;&nbsp;·&nbsp;&nbsp;{_today_no()}&nbsp;&nbsp;·&nbsp;&nbsp;{ctx['total_pris']:.0f} kr</div>
     <div style="
       color:{_ELFENBEIN}; font-size:0.80em;
       font-style:italic; letter-spacing:0.05em;
@@ -273,7 +277,7 @@ def _malt_rows_a4(ctx: dict, malt_db: dict) -> str:
         info = malt_db.get(m["id"], {})
         navn = info.get("display_name", m["id"])
         kg   = m.get("mengde", 0)
-        rows.append(f"<li>{navn}: <strong>{kg:.2f} kg</strong></li>")
+        rows.append(f"<li>{navn}: <strong>{fmt_kg(kg)}</strong></li>")
     return "".join(rows) if rows else "<li>Ingen malt valgt</li>"
 
 
@@ -286,7 +290,7 @@ def _hop_rows_a4(ctx: dict, humle_db: dict) -> str:
         gram      = h.get("gram", 0)
         tid       = h.get("tid", 0)
         tid_label = "tørrhumle" if tid == 0 else f"@{tid} min"
-        rows.append(f"<li>{navn}: <strong>{gram:.0f} g</strong> {tid_label}</li>")
+        rows.append(f"<li>{navn}: <strong>{fmt_gram(gram)}</strong> {tid_label}</li>")
     return "".join(rows) if rows else "<li>Ingen humle valgt</li>"
 
 
@@ -353,18 +357,18 @@ def render_a4_html(
   <h1>{ctx['name']}</h1>
   <div class="stil">{stil}</div>
   <p class="sub">
-    {ctx['volum']:.0f} L &nbsp;·&nbsp;
+    {fmt_vol(ctx['volum'])} &nbsp;·&nbsp;
     {_today_no()} &nbsp;·&nbsp;
     Kvernhaug Brygghus — Ved Dalelva i Åsane
   </p>
 
   <h2>Statistikk</h2>
   <div class="stats">
-    <div class="stat"><div class="slabel">OG</div><div class="sval">{ctx['og']:.3f}</div></div>
-    <div class="stat"><div class="slabel">FG</div><div class="sval">{ctx['fg']:.3f}</div></div>
-    <div class="stat"><div class="slabel">ABV</div><div class="sval">{ctx['abv']:.1f}%</div></div>
-    <div class="stat"><div class="slabel">IBU</div><div class="sval">{ctx['ibu']:.0f}</div></div>
-    <div class="stat"><div class="slabel">EBC</div><div class="sval">{ctx['ebc']:.0f}</div></div>
+    <div class="stat"><div class="slabel">OG</div><div class="sval">{fmt_og(ctx['og'])}</div></div>
+    <div class="stat"><div class="slabel">FG</div><div class="sval">{fmt_fg(ctx['fg'])}</div></div>
+    <div class="stat"><div class="slabel">ABV</div><div class="sval">{fmt_abv(ctx['abv'])}</div></div>
+    <div class="stat"><div class="slabel">IBU</div><div class="sval">{fmt_ibu(ctx['ibu'])}</div></div>
+    <div class="stat"><div class="slabel">EBC</div><div class="sval">{fmt_ebc(ctx['ebc'])}</div></div>
   </div>
   <p class="smak">{summary}</p>
 
