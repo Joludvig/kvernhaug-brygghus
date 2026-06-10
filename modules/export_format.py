@@ -12,7 +12,7 @@ import base64
 import os
 
 # ── Path to shared logo asset ──────────────────────────────────────────────
-_LOGO_PATH = os.path.join("assets", "branding", "master_v1_transparent.png")
+_LOGO_PATH = os.path.join("assets", "branding", "master_v1_header_24px.png")
 
 
 # ══════════════════════════════════════════════════════════════════════════
