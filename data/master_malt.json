@@ -412,7 +412,7 @@
     "kategorier": {
       "Karamell": 5,
       "Honning": 3,
-      "Fruktig": 2
+      "Fruktighet": 2
     },
     "ebc": 90.0,
     "potensiale": 1.03,
@@ -498,7 +498,7 @@
     "kategorier": {
       "Karamell": 8,
       "Maltfylde": 6,
-      "Fruktig": 4
+      "Fruktighet": 4
     },
     "ebc": 400.0,
     "potensiale": 1.025,
@@ -794,7 +794,7 @@
     "kategorier": {
       "Karamell": 7,
       "Maltfylde": 5,
-      "Fruktig": 3
+      "Fruktighet": 3
     },
     "ebc": 150.0,
     "potensiale": 1.03,
@@ -874,8 +874,8 @@
     ],
     "kategorier": {
       "Karamell": 4,
-      "Fruktig": 5,
-      "Maltfylde": 3
+      "Maltfylde": 3,
+      "Fruktighet": 5
     },
     "ebc": 50.0,
     "potensiale": 1.034,
@@ -917,7 +917,7 @@
     "kategorier": {
       "Karamell": 6,
       "Honning": 3,
-      "Fruktig": 2
+      "Fruktighet": 2
     },
     "ebc": 150.0,
     "potensiale": 1.03,
@@ -1307,8 +1307,8 @@
     ],
     "kategorier": {
       "Brød": 4,
-      "Fruktig": 2,
-      "Maltfylde": 3
+      "Maltfylde": 3,
+      "Fruktighet": 2
     },
     "ebc": 3.0,
     "potensiale": 1.037,
@@ -1349,8 +1349,8 @@
     ],
     "kategorier": {
       "Karamell": 7,
-      "Fruktig": 6,
-      "Maltfylde": 4
+      "Maltfylde": 4,
+      "Fruktighet": 6
     },
     "ebc": 350.0,
     "potensiale": 1.03,
@@ -1613,8 +1613,8 @@
     ],
     "kategorier": {
       "Brød": 4,
-      "Fruktig": 2,
-      "Maltfylde": 3
+      "Maltfylde": 3,
+      "Fruktighet": 2
     },
     "ebc": 4.0,
     "potensiale": 1.037,
@@ -2071,8 +2071,8 @@
     ],
     "kategorier": {
       "Karamell": 8,
-      "Fruktig": 5,
-      "Maltfylde": 3
+      "Maltfylde": 3,
+      "Fruktighet": 5
     },
     "ebc": 350.0,
     "potensiale": 1.03,

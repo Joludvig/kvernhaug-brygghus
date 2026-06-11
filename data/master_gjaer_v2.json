@@ -351,7 +351,13 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "kategorier": {
+      "Sitrus": 5.0,
+      "Tropisk": 3.0,
+      "Fruktighet": 4.0,
+      "Honning": 2.0
+    }
   },
   "french_saison_m29": {
     "display_name": "French Saison M29",
@@ -376,7 +382,12 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v0_1"
+    "source": "master_seed_v0_1",
+    "kategorier": {
+      "Krydder": 4.0,
+      "Fruktighet": 3.0,
+      "Sitrus": 2.0
+    }
   },
   "belgian_tripel_m31": {
     "display_name": "Belgian Tripel M31",
@@ -494,7 +505,10 @@
       }
     },
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "kategorier": {
+      "Fruktighet": 0.5
+    }
   },
   "safale_s04": {
     "display_name": "SafAle S-04",
@@ -525,7 +539,11 @@
       }
     },
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "kategorier": {
+      "Fruktighet": 2.0,
+      "Brød": 1.0
+    }
   },
   "saflager_w3470": {
     "display_name": "SafLager W-34/70",
@@ -555,7 +573,11 @@
       }
     },
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "kategorier": {
+      "Fruktighet": 1.0,
+      "Maltfylde": 1.0
+    }
   },
   "lalbrew_voss_kveik": {
     "display_name": "LalBrew Voss Kveik",
@@ -586,7 +608,13 @@
       }
     },
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "kategorier": {
+      "Sitrus": 5.0,
+      "Tropisk": 3.0,
+      "Fruktighet": 4.0,
+      "Honning": 2.0
+    }
   },
   "lalbrew_verdant": {
     "display_name": "LalBrew Verdant IPA",
@@ -618,7 +646,12 @@
       }
     },
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "kategorier": {
+      "Fruktighet": 5.0,
+      "Tropisk": 4.0,
+      "Steinfrukt": 3.0
+    }
   },
   "wyeast_1318": {
     "display_name": "Wyeast 1318 London Ale III",
@@ -645,7 +678,12 @@
       }
     },
     "verified": true,
-    "source": "bruker_forslag_v0_1"
+    "source": "bruker_forslag_v0_1",
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Steinfrukt": 2.0,
+      "Tropisk": 1.5
+    }
   },
   "safale_be134": {
     "display_name": "SafAle BE-134",
@@ -1040,7 +1078,12 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Krydder": 4.0,
+      "Vinøs": 2.0
+    }
   },
   "wlp_550": {
     "display_name": "WLP 550 Belgian Ale",
@@ -1098,7 +1141,12 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Krydder": 5.0,
+      "Fruktighet": 4.0,
+      "Sitrus": 2.0
+    }
   },
   "wlp_566": {
     "display_name": "WLP 566 Saison Ale II",
@@ -1129,7 +1177,12 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Krydder": 5.0,
+      "Fruktighet": 4.0,
+      "Sitrus": 2.0
+    }
   },
   "wlp_618": {
     "display_name": "WLP 618 NA All Day",
@@ -1341,7 +1394,11 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Fruktighet": 1.5,
+      "Brød": 1.0
+    }
   },
   "lalbrew_philly_sour": {
     "display_name": "LalBrew Philly Sour",
@@ -1460,7 +1517,13 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Sitrus": 5.0,
+      "Tropisk": 3.0,
+      "Fruktighet": 4.0,
+      "Honning": 2.0
+    }
   },
   "liberty_bell_m36": {
     "display_name": "Liberty Bell Ale M36",
@@ -1608,7 +1671,10 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Fruktighet": 1.0
+    }
   },
   "cs_velo": {
     "display_name": "CellarScience CS Velo",
@@ -1910,7 +1976,11 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Fruktighet": 2.0,
+      "Jordlig": 1.0
+    }
   },
   "wlp_023": {
     "display_name": "WLP 023 Burton Ale",
@@ -1989,7 +2059,12 @@
       }
     },
     "verified": true,
-    "source": "master_seed_v2"
+    "source": "master_seed_v2",
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Steinfrukt": 2.0,
+      "Tropisk": 1.0
+    }
   },
   "wlp_067": {
     "display_name": "WLP 067 Coastal Haze Ale",
@@ -2420,6 +2495,11 @@
         "pris": 69.0,
         "url": "https://www.olbrygging.no/lallemand/100497/lalbrew-abbaye-belgian-ale-11g-t%c3%b8rrgj%c3%a6r-for-belgiske-%c3%b8l"
       }
+    },
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Krydder": 4.0,
+      "Vinøs": 2.0
     }
   },
   "lalbrew_farmhouse": {
@@ -2442,6 +2522,11 @@
         "pris": 59.0,
         "url": "https://www.olbrygging.no/lallemand/104202/lalbrew-farmhouse-11g-t%c3%b8rrgj%c3%a6r-for-saison-og-farmhouse-%c3%b8l"
       }
+    },
+    "kategorier": {
+      "Krydder": 4.0,
+      "Fruktighet": 3.0,
+      "Sitrus": 2.0
     }
   },
   "lalbrew_belgian_wit": {
@@ -2606,6 +2691,10 @@
         "pris": 65.0,
         "url": "https://www.olbrygging.no/fermentis/100493/safale-wb-06-11-5g-t%c3%b8rrgj%c3%a6r-for-tyske-hvete%c3%b8l"
       }
+    },
+    "kategorier": {
+      "Fruktighet": 5.0,
+      "Krydder": 4.0
     }
   },
   "safale_be256": {
