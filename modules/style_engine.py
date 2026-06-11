@@ -22,6 +22,15 @@ _STOUT_MALTS = {"roasted_barley", "black"}
 _WEST_COAST_HOPS   = {"centennial", "chinook", "simcoe", "cascade", "amarillo", "columbus"}
 _WEST_COAST_YEASTS = {"safale_us_05", "wlp001", "wyeast_1056"}
 
+_LAGER_YEASTS = {
+    "saflager_w3470", "saflager_s23", "saflager_s189", "saflager_e30",
+    "lalbrew_diamond_lager", "lalbrew_nova_lager",
+    "bohemian_lager_m84", "california_lager_m54", "bavarian_lager_m76",
+    "wlp_800", "wlp_802", "wlp_810", "wlp_820", "wlp_830",
+    "wlp_833", "wlp_838", "wlp_850", "wlp_940",
+    "versa_lager_m24",
+}
+
 _ENGLISH_STYLES_BASE = {"English Bitter", "Best Bitter", "ESB / Strong Bitter"}
 _ENGLISH_STYLES_DARK = {"Robust Porter"}
 _LAGER_BOCK_STYLES   = {
@@ -62,6 +71,8 @@ def detect_recipe_signatures(recipe):
 
     west_coast = bool(hops & _WEST_COAST_HOPS) and yeast in _WEST_COAST_YEASTS
 
+    lager = yeast in _LAGER_YEASTS
+
     return {
         "english_ale": english_ale,
         "dark_malt":   bool(malts & _DARK_MALT_IDS),
@@ -69,6 +80,7 @@ def detect_recipe_signatures(recipe):
         "belgian":     belgian,
         "stout":       stout,
         "west_coast":  west_coast,
+        "lager":       lager,
     }
 
 
@@ -279,12 +291,18 @@ def analyser_stil_og_balanse(recipe):
         stil = s["stil"]
 
         if sigs["english_ale"]:
-            if stil in _ENGLISH_STYLES_BASE:
-                s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
-            elif stil in _ENGLISH_STYLES_DARK and sigs["dark_malt"]:
-                s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
-            elif stil in _LAGER_BOCK_STYLES:
+            og_max = bjcp_stiler[stil]["og"][1]
+            if og <= og_max + 0.020:
+                if stil in _ENGLISH_STYLES_BASE:
+                    s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
+                elif stil in _ENGLISH_STYLES_DARK and sigs["dark_malt"]:
+                    s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
+            if stil in _LAGER_BOCK_STYLES:
                 s["score"] = max(0, s["score"] - _LAGER_BOCK_PENALTY)
+
+        if sigs["lager"]:
+            if stil in _LAGER_BOCK_STYLES:
+                s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
 
         if sigs["hazy"]:
             if stil in _HAZY_STYLES:
@@ -348,6 +366,8 @@ def analyser_stil_og_balanse(recipe):
         balanse_notater.append("☕ **Stout-signatur:** Røstet bygg / sort malt gir brent espresso-karakter og sort farge.")
     if sigs["west_coast"]:
         balanse_notater.append("🏄 **West Coast-signatur:** Ren, tørr gjær og bittre aromatiske humler gir klassisk West Coast IPA-profil.")
+    if sigs["lager"]:
+        balanse_notater.append("🍺 **Lager-signatur:** Lagergjær peker mot pilsner og lagerstiler.")
 
     return {
         "stil": dominant_stil, "stil_liste": stil_matcher,
