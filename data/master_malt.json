@@ -357,7 +357,7 @@
   },
   "biscuit": {
     "display_name": "Biscuit Malt",
-    "produsent": "Brewferm",
+    "produsent": "Brewferm / Castle Malting",
     "kategori": "Spesialmalt (Røstet / Andre)",
     "smakstags": [
       "kjeks",
@@ -699,7 +699,7 @@
   },
   "crystal_maple_carapils": {
     "display_name": "Carapils",
-    "produsent": "Viking Malt",
+    "produsent": "Viking / Weyermann",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
       "nøytral",
