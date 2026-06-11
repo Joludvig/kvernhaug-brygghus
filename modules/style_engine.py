@@ -271,6 +271,13 @@ def analyser_stil_og_balanse(recipe):
             score -= (ebc - krav["ebc"][1]) * 0.5
             mangler.append("Ølet er for mørkt for stilen")
 
+        if abv < krav["abv"][0]:
+            score -= (krav["abv"][0] - abv) * 7.5
+            mangler.append(f"For lav alkohol (ABV bør være over {krav['abv'][0]:.1f}%)")
+        elif abv > krav["abv"][1]:
+            score -= (abv - krav["abv"][1]) * 7.5
+            mangler.append(f"For høy alkohol (ABV bør være under {krav['abv'][1]:.1f}%)")
+
         for smaks_navn, min_verdi in krav["smak_krav"].items():
             reell_verdi = flavor.get(smaks_navn, 0.0)
             if reell_verdi < min_verdi:
