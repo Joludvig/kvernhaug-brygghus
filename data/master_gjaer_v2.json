@@ -1584,6 +1584,10 @@
         "url": "https://www.olbrygging.no/mangrove-jack-s/100520/new-world-strong-ale-m42-10g-t%c3%b8rrgj%c3%a6r-for-engelske-%c3%b8l"
       }
     },
+    "kategorier": {
+      "Fruktighet": 1.5,
+      "Maltfylde": 1.0
+    },
     "verified": true,
     "source": "master_seed_v2"
   },

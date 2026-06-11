@@ -388,7 +388,8 @@
       "mild krydder"
     ],
     "kategorier": {
-      "Krydder": 5
+      "Krydder": 5,
+      "Jordlig": 3
     },
     "alfa_typisk": 5.8,
     "butikk_match": {
