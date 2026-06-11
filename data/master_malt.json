@@ -1024,7 +1024,10 @@
     "knust_tilgjengelig": false,
     "aliases": [
       "Pilsner Malt",
-      "Weyermann Pilsner"
+      "Weyermann Pilsner",
+      "Weyermann Pilsner Malt",
+      "Lager Malt",
+      "Base Malt"
     ],
     "butikk_match": {},
     "verified": true,
@@ -1459,7 +1462,7 @@
     "canonical_style": "chocolate"
   },
   "jaermalt_pilsner": {
-    "display_name": "Pilsner Malt",
+    "display_name": "Pilsner Malt (Jærmalt)",
     "produsent": "Jærmalt",
     "kategori": "Norsk Malt",
     "smakstags": [
@@ -1495,7 +1498,7 @@
     "canonical_style": "pilsner"
   },
   "jaermalt_pale_ale": {
-    "display_name": "Pale Ale Malt",
+    "display_name": "Pale Ale Malt (Jærmalt)",
     "produsent": "Jærmalt",
     "kategori": "Norsk Malt",
     "smakstags": [
@@ -1532,7 +1535,7 @@
     "canonical_style": "pale_ale"
   },
   "jaermalt_vienna": {
-    "display_name": "Vienna Malt",
+    "display_name": "Vienna Malt (Jærmalt)",
     "produsent": "Jærmalt",
     "kategori": "Norsk Malt",
     "smakstags": [
@@ -1568,7 +1571,7 @@
     "canonical_style": "vienna"
   },
   "jaermalt_munich": {
-    "display_name": "Munich Malt",
+    "display_name": "Munich Malt (Jærmalt)",
     "produsent": "Jærmalt",
     "kategori": "Norsk Malt",
     "smakstags": [
@@ -1604,7 +1607,7 @@
     "canonical_style": "munich"
   },
   "jaermalt_wheat": {
-    "display_name": "Wheat Malt",
+    "display_name": "Wheat Malt (Jærmalt)",
     "produsent": "Jærmalt",
     "kategori": "Norsk Malt",
     "smakstags": [
@@ -1979,7 +1982,7 @@
     "canonical_style": "wheat"
   },
   "caramalt_30": {
-    "display_name": "CaraMalt",
+    "display_name": "CaraMalt (30 EBC)",
     "produsent": "Thomas Fawcett",
     "kategori": "Karamell- / Krystallmalt",
     "smakstags": [
