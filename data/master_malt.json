@@ -581,7 +581,8 @@
     "kategorier": {
       "Sjokolade": 6,
       "Kaffe": 4,
-      "Toast": 3
+      "Toast": 1,
+      "Maltfylde": 2
     },
     "ebc": 1150.0,
     "potensiale": 1.025,
@@ -1228,9 +1229,10 @@
       "mild karamell"
     ],
     "kategorier": {
-      "Brød": 5,
+      "Brød": 4,
       "Honning": 3,
-      "Maltfylde": 4
+      "Maltfylde": 4,
+      "Toast": 2
     },
     "ebc": 7.0,
     "potensiale": 1.036,
@@ -1429,6 +1431,7 @@
     "kategorier": {
       "Sjokolade": 6,
       "Kaffe": 3,
+      "Nøtter": 2,
       "Maltfylde": 2
     },
     "ebc": 650.0,

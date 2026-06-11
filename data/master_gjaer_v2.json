@@ -682,7 +682,8 @@
     "kategorier": {
       "Fruktighet": 4.0,
       "Steinfrukt": 2.0,
-      "Tropisk": 1.5
+      "Tropisk": 1.0,
+      "Maltfylde": 1.0
     }
   },
   "safale_be134": {
@@ -1396,8 +1397,7 @@
     "verified": true,
     "source": "master_seed_v2",
     "kategorier": {
-      "Fruktighet": 1.5,
-      "Brød": 1.0
+      "Fruktighet": 1.0
     }
   },
   "lalbrew_philly_sour": {
