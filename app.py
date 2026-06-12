@@ -17,6 +17,7 @@ from ui.style_panel import render_style_panel
 from ui.supplier_panel import render_supplier_panel
 from ui.import_panel import render_import_panel
 from ui.shopping_list_panel import render_shopping_list_panel
+from ui.humle_lager_panel import render_humle_lager_panel
 from ui.brewday_panel import render_brewday_panel
 from ui.equipment_panel import render_equipment_panel
 
@@ -129,6 +130,7 @@ with col2:
     render_supplier_panel(malt_database, humle_database, gjaer_database)
 
 render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
+render_humle_lager_panel(humle_database)
 render_brewday_panel(ctx, humle_database, gjaer_database, malt_database)
 render_equipment_panel()
 
