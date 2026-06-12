@@ -91,47 +91,62 @@ if "_pending_brygger_stil_reset" in st.session_state:
 st.session_state["_batch_volum_preserved"] = st.session_state.batch_volum_input
 st.session_state["_gjeldende_navn_preserved"] = st.session_state.gjeldende_navn
 
-# 4. RJØR SIDEBAR RECIPE BROWSER (Prioritet 4 & UI-splitting)
+# 4. SIDEBAR
 render_sidebar()
 
-# 5. OPPRETT HOVEDLAYOUTEN (To asymmetriske spalter)
-col1, col2 = st.columns([2.0, 1.2])
+# 5. TABS
+tab_oppskrift, tab_innkjop, tab_bryggdag, tab_verktoy = st.tabs([
+    "🍺 Oppskrift", "🛒 Innkjøp & Lager", "🧪 Bryggdag", "🔧 Verktøy"
+])
 
 # ==================================================
-# === SPALTE 1: INTERAKTIV OPPSKRIFTSBYGGER =======
+# === TAB 1: OPPSKRIFT ============================
 # ==================================================
-# NB: Panelene settes FØRST slik at valgt_malt / valgt_humle / valgt_gjaer_id
-# i session_state reflekterer gjeldende widget-verdier FØR beregningsmotor kjøres.
-# Uten denne rekkefølgen vil IBU/OG alltid ligge én kjøring bak brukerens input.
-with col1:
-    render_malt_panel(malt_database)
-    st.write("---")
-    render_hop_panel(humle_database)
-    st.write("---")
-    render_yeast_panel(gjaer_database)
+# NB: col1 (input-paneler) MÅ rendres før bygg_recipe_context() kalles.
+# Streamlit rendrer alle tab-innhold på hver kjøring, uavhengig av aktiv tab.
+with tab_oppskrift:
+    col1, col2 = st.columns([2.0, 1.2])
 
-# 6. KJØR SENTRAL BEREGNINGS-MOTOR etter at inputpanelene har oppdatert session_state
-ctx = bygg_recipe_context(
-    oppskrift_navn=st.session_state.gjeldende_navn,
-    malt_valg=st.session_state.valgt_malt,
-    humle_valg=st.session_state.valgt_humle,
-    gjaer_id=st.session_state.valgt_gjaer_id,
-    malt_db=malt_database,
-    humle_db=humle_database,
-    gjaer_db=gjaer_database
-)
+    with col1:
+        render_malt_panel(malt_database)
+        st.write("---")
+        render_hop_panel(humle_database)
+        st.write("---")
+        render_yeast_panel(gjaer_database)
 
-# ==================================================
-# === SPALTE 2: SENTRAL ANALYSE & SENSORISK KORT ====
-# ==================================================
-with col2:
-    render_recipe_card(ctx, malt_database, humle_database, gjaer_database)
+    # 6. SENTRAL BEREGNINGS-MOTOR — kjøres etter at input-panelene har rendret
+    ctx = bygg_recipe_context(
+        oppskrift_navn=st.session_state.gjeldende_navn,
+        malt_valg=st.session_state.valgt_malt,
+        humle_valg=st.session_state.valgt_humle,
+        gjaer_id=st.session_state.valgt_gjaer_id,
+        malt_db=malt_database,
+        humle_db=humle_database,
+        gjaer_db=gjaer_database
+    )
+
+    with col2:
+        render_recipe_card(ctx, malt_database, humle_database, gjaer_database)
+
     render_style_panel(ctx, humle_database)
+
+# ==================================================
+# === TAB 2: INNKJØP & LAGER =====================
+# ==================================================
+with tab_innkjop:
+    render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
+    render_humle_lager_panel(humle_database)
+
+# ==================================================
+# === TAB 3: BRYGGDAG ============================
+# ==================================================
+with tab_bryggdag:
+    render_brewday_panel(ctx, humle_database, gjaer_database, malt_database)
+    render_equipment_panel()
+
+# ==================================================
+# === TAB 4: VERKTØY =============================
+# ==================================================
+with tab_verktoy:
     render_supplier_panel(malt_database, humle_database, gjaer_database)
-
-render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
-render_humle_lager_panel(humle_database)
-render_brewday_panel(ctx, humle_database, gjaer_database, malt_database)
-render_equipment_panel()
-
-render_import_panel()
+    render_import_panel()
