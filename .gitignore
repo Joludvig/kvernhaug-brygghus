@@ -10,5 +10,27 @@ __pycache__/
 # Virtual environment
 .venv/
 
-# Generated logs
+# IDE og tool-konfig
+.vscode/
+.claude/
+
+# Utviklerverktøy og testscripts
+backup/
+tools/
 raw_data/*.txt
+
+# Private brukerdata — ikke del disse
+recipes/
+data/humle_lager.json
+data/equipment.json
+
+# Backup-artefakter
+data/*.bak
+
+# Loggfiler og temp
+*.log
+c:*
+
+# Store lokale originalfiler (ikke nødvendig for andre brukere)
+Master V1.png
+assets/branding/master_v1_crop.png

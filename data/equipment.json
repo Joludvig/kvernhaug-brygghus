@@ -1,9 +1,0 @@
-{
-  "efficiency": 0.75,
-  "boil_off_l_per_hour": 4.0,
-  "grain_absorption_l_per_kg": 1.0,
-  "dead_space_l": 2.0,
-  "mash_ratio_l_per_kg": 3.2,
-  "kettle_capacity_l": 35.0,
-  "default_boil_time_min": 60
-}
