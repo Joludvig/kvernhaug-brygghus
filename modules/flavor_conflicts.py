@@ -45,11 +45,36 @@ def sjekk_smakskonflikter(recipe):
                 break
 
     # 4. KONFLIKT: Klissete restsødme (Høy FG) krasjer med lav IBU
-    if stats["fg"] >= 1.020 and stats["ibu"] < 20:
+    _og = stats["og"]
+    _fg = stats["fg"]
+    _attenuation = (_og - _fg) / (_og - 1.0) if _og > 1.001 else 0.0
+
+    _ROAST_MALTER = {
+        "carafa_special_1", "carafa_special_2", "carafa_special_3",
+        "chocolate_malt", "chocolate_wheat", "roasted_barley",
+        "black_malt", "black_patent", "blackprinz",
+    }
+    _ROKE_MALTER = {"rauchmalz", "peated_malt", "smoked_malt"}
+
+    _total_malt = sum(m.get("mengde", 0.0) for m in recipe.get("malts", []))
+    if _total_malt > 0:
+        _roast_pct  = sum(m.get("mengde", 0.0) for m in recipe.get("malts", []) if m["id"] in _ROAST_MALTER) / _total_malt
+        _smoked_pct = sum(m.get("mengde", 0.0) for m in recipe.get("malts", []) if m["id"] in _ROKE_MALTER) / _total_malt
+    else:
+        _roast_pct = _smoked_pct = 0.0
+
+    _avvaepnet = (
+        _attenuation >= 0.70   # god utgjæring — FG er forventet, ikke et tegn på søthet
+        or stats.get("abv", 0.0) >= 7.0   # høy alkohol tørker ut avslutningen
+        or _roast_pct  >= 0.03  # ≥3% røstet malt gir tørr kaffe/sjokolade-bitterhet
+        or _smoked_pct >= 0.08  # ≥8% røykmalt maskerer opplevd sødme
+    )
+
+    if _fg >= 1.020 and stats["ibu"] < 20 and not _avvaepnet:
         advarsler.append(
-            "🥞 **Klissete profil:** Dette ølet ender med en veldig høy FG (mye uforgjærbart sukker), men har nesten ingen "
-            "bitterhet til å balansere det. Ølet vil smake som flytende vørter eller sirup. "
-            "Vurder å legge til 10-15 gram ekstra bitterhumle ved 60 minutter kok."
+            "🥞 **Klissete profil:** Dette ølet ender med høy FG og nesten ingen bitterhet til å balansere det. "
+            "Med lav alkohol og lys maltprofil risikerer du at ølet smaker som flytende vørter. "
+            "Vurder å legge til 10–15 gram bitterhumle ved 60 min, eller bruk en gjær med høyere utgjæringsgrad."
         )
 
     return advarsler
