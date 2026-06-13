@@ -3,6 +3,7 @@ import re
 import os
 import streamlit as st
 from datetime import date
+from config import DEMO_MODE
 from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil, lagre_logg_entry, hent_logg
 from modules.recipe import bygg_recipe_object
 from modules.card_template import render_card_html, render_a4_html
@@ -96,32 +97,33 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             brygger_stil=st.session_state.get("brygger_stil", ""),
         )
 
-    # Lagre endringer: overskriv aktiv oppskrift
-    if st.session_state.get("_last_loaded_recipe"):
-        if st.button("💾 Lagre endringer", use_container_width=True, key="lagre_endringer_btn"):
-            ny_recipe = _bygg_recipe_fra_session(ctx)
-            lagre_oppskrift(ny_recipe)
-            st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
-            st.session_state["_gjeldende_navn_preserved"] = ny_recipe["name"]
-            st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
+    if not DEMO_MODE:
+        # Lagre endringer: overskriv aktiv oppskrift
+        if st.session_state.get("_last_loaded_recipe"):
+            if st.button("💾 Lagre endringer", use_container_width=True, key="lagre_endringer_btn"):
+                ny_recipe = _bygg_recipe_fra_session(ctx)
+                lagre_oppskrift(ny_recipe)
+                st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
+                st.session_state["_gjeldende_navn_preserved"] = ny_recipe["name"]
+                st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
 
-    # Lagre som ny kopi og slett
-    btn_col1, btn_col2 = st.columns(2)
-    with btn_col1:
-        if st.button("💾 Lagre som ny kopi", use_container_width=True, key="lagre_ny_kopi_btn"):
-            ny_recipe = _bygg_recipe_fra_session(ctx)
-            lagre_oppskrift(ny_recipe)
-            st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
-    with btn_col2:
-        if st.button("🗑️ Slett gjeldende", use_container_width=True):
-            if slett_oppskrift_fil(ctx["name"]):
-                st.toast(f"Slettet {ctx['name']}", icon="🗑️")
-                st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
-                st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
-                st.session_state.valgt_gjaer_id = "safale_us_05"
-                st.session_state.gjeldende_navn = "Kvernhaug Spesial"
-                st.session_state["_pending_brygger_stil_reset"] = True
-                st.rerun()
+        # Lagre som ny kopi og slett
+        btn_col1, btn_col2 = st.columns(2)
+        with btn_col1:
+            if st.button("💾 Lagre som ny kopi", use_container_width=True, key="lagre_ny_kopi_btn"):
+                ny_recipe = _bygg_recipe_fra_session(ctx)
+                lagre_oppskrift(ny_recipe)
+                st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
+        with btn_col2:
+            if st.button("🗑️ Slett gjeldende", use_container_width=True):
+                if slett_oppskrift_fil(ctx["name"]):
+                    st.toast(f"Slettet {ctx['name']}", icon="🗑️")
+                    st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
+                    st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
+                    st.session_state.valgt_gjaer_id = "safale_us_05"
+                    st.session_state.gjeldende_navn = "Kvernhaug Spesial"
+                    st.session_state["_pending_brygger_stil_reset"] = True
+                    st.rerun()
 
     with st.expander("📐 Skaler oppskrift"):
         original = st.session_state.get("_original_batch_size")
@@ -168,7 +170,8 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         scrolling=False,
     )
 
-    _render_brewday_result_panel(ctx)
+    if not DEMO_MODE:
+        _render_brewday_result_panel(ctx)
 
     with st.expander("📐 Eksporter / arkiver oppskrift"):
         st.caption("Lag et statisk A4-ark med ingrediensliste, stilanalyse og smaksprofil. Bryggedagsarket (under) er primær utskrift for selve bryggingen.")

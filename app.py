@@ -48,7 +48,7 @@ def last_json_data(filnavn):
         return {}
 
 # 2. Sentral lasting av de tre råvaredatabasene
-malt_database = last_json_data("malt.json")
+malt_database = last_json_data("master_malt.json")
 humle_database = last_json_data("master_humle_v2.json")
 gjaer_database = last_json_data("master_gjaer_v2.json")
 

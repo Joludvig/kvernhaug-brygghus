@@ -3,6 +3,7 @@ import streamlit as st
 import json
 import os
 import datetime
+from config import DEMO_MODE
 from modules.store_scraper import kjor_full_skanning
 from modules.store_matcher import (
     match_store_data_to_master,
@@ -12,6 +13,9 @@ from modules.store_matcher import (
 from ui.review_panel import render_review_panel
 
 def render_import_panel():
+    if DEMO_MODE:
+        st.info("Import og scraping er deaktivert i demo-modus.")
+        return
     st.write("---")
     st.header("🧠 Kvernhaug AI: Import- & Sortimentsbygger")
     st.caption("Trål vestbrygg.no og olbrygging.no live, kjør lingvistisk AI-normalisering og oppdater master-databasene.")

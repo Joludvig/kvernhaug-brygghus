@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+from config import DEMO_MODE
 
 _log = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ def generer_filnavn(oppskrift_navn):
 
 def lagre_oppskrift(recipe):
     """Lagrer eller oppdaterer et Recipe Object som en JSON-fil."""
+    if DEMO_MODE:
+        return None
     sikre_mappe()
     filnavn = generer_filnavn(recipe["name"])
     filsti = os.path.join(MAPPE, filnavn)
@@ -42,6 +45,8 @@ def _logg_filsti(oppskrift_navn):
 
 def lagre_logg_entry(oppskrift_navn, entry):
     """Legger til én loggoppføring i oppskriftens loggfil."""
+    if DEMO_MODE:
+        return
     sikre_mappe()
     filsti = _logg_filsti(oppskrift_navn)
     logg = hent_logg(oppskrift_navn)
@@ -60,14 +65,17 @@ def hent_logg(oppskrift_navn):
     except (json.JSONDecodeError, OSError):
         return []
 
-def hent_alle_oppskrifter():
+def hent_alle_oppskrifter(mappe=MAPPE):
     """Henter alle lagrede oppskrifter fra harddisken og returnerer et kart."""
-    sikre_mappe()
-    filer = [f for f in os.listdir(MAPPE) if f.endswith(".json") and not f.endswith("_logg.json")]
+    if mappe == MAPPE:
+        sikre_mappe()
+    elif not os.path.exists(mappe):
+        return {}
+    filer = [f for f in os.listdir(mappe) if f.endswith(".json") and not f.endswith("_logg.json")]
     oppskrifter = {}
-    
+
     for f in filer:
-        filsti = os.path.join(MAPPE, f)
+        filsti = os.path.join(mappe, f)
         try:
             with open(filsti, "r", encoding="utf-8") as file_content:
                 data = json.load(file_content)
@@ -78,6 +86,8 @@ def hent_alle_oppskrifter():
 
 def slett_oppskrift_fil(oppskrift_navn):
     """Sletter oppskriftsfilen fra harddisken."""
+    if DEMO_MODE:
+        return False
     filnavn = generer_filnavn(oppskrift_navn)
     filsti = os.path.join(MAPPE, filnavn)
     if os.path.exists(filsti):

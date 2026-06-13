@@ -1,5 +1,6 @@
 import json
 import streamlit as st
+from config import DEMO_MODE
 from modules.recipe_storage import hent_alle_oppskrifter
 from modules.recipe_importer import (
     parse_recipe_text,
@@ -15,8 +16,11 @@ def _last_master_db(filnavn):
         return {}
 
 def render_sidebar():
+    if DEMO_MODE:
+        st.sidebar.warning("🍺 Demo-modus — oppskrifter lagres ikke")
+
     st.sidebar.header("📁 Lagrede oppskrifter")
-    lagrede_brygg = hent_alle_oppskrifter()
+    lagrede_brygg = hent_alle_oppskrifter(mappe="demo_recipes") if DEMO_MODE else hent_alle_oppskrifter()
     if lagrede_brygg:
         oppskrift_valg = ["-- Velg oppskrift --"] + list(lagrede_brygg.keys())
         valgt_lagret_navn = st.sidebar.selectbox(

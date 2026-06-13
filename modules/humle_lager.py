@@ -1,6 +1,7 @@
 import json
 import math
 import os
+from config import DEMO_MODE
 
 _LAGER_FIL = "data/humle_lager.json"
 _FALLBACK_PAKKE_GRAM = 100.0
@@ -18,6 +19,8 @@ def les_lager() -> dict:
 
 
 def lagre_lager(lager: dict) -> None:
+    if DEMO_MODE:
+        return
     os.makedirs("data", exist_ok=True)
     with open(_LAGER_FIL, "w", encoding="utf-8") as f:
         json.dump(lager, f, ensure_ascii=False, indent=2)

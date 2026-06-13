@@ -1,8 +1,11 @@
 import streamlit as st
+from config import DEMO_MODE
 from modules.humle_lager import les_lager, lagre_lager
 
 
 def render_humle_lager_panel(humle_database: dict) -> None:
+    if DEMO_MODE:
+        return
     st.write("---")
     with st.expander("📦 Humlelager"):
         st.caption("Registrer din beholdning av humle i gram. Lager trekkes ikke automatisk ved brygging.")

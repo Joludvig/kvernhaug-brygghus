@@ -1,0 +1,25 @@
+{
+  "name": "Kvernhaug Sommerglød",
+  "batch_size": 25.0,
+  "efficiency": 0.75,
+  "malts": [
+    {"id": "weyermann_pilsner", "mengde": 4.576},
+    {"id": "rauchmalz", "mengde": 0.364},
+    {"id": "vienna", "mengde": 0.26}
+  ],
+  "hops": [
+    {"id": "saaz", "gram": 35.0, "tid": 60},
+    {"id": "hallertau_mittelfruh", "gram": 10.0, "tid": 15},
+    {"id": "tettnang", "gram": 10.0, "tid": 5}
+  ],
+  "yeast": "saflager_w3470",
+  "brygger_stil": "Kvernhaug Hørnes-Lager",
+  "stats": {
+    "og": 1.0481045546799999,
+    "fg": 1.0086588198424,
+    "abv": 5.177252697434978,
+    "ibu": 19.68782284727053,
+    "ebc": 3.8612481566133745
+  },
+  "flavor_profile": {}
+}

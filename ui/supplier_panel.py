@@ -1,6 +1,10 @@
 import streamlit as st
+from config import DEMO_MODE
 
 def render_supplier_panel(malt_database, humle_database, gjaer_database):
+    if DEMO_MODE:
+        st.info("Leverandør-kontroll er deaktivert i demo-modus.")
+        return
     st.write("---")
     st.header("🔍 Leverandør-kontroll")
     st.caption("Verifiser om de lokale databasene dine matcher utvalget hos Vestbrygg og Ølbrygging.")
