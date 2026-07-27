@@ -1,8 +1,6 @@
 # ui/import_panel.py
 import streamlit as st
-import json
 import os
-import datetime
 from config import DEMO_MODE
 from modules.store_scraper import kjor_full_skanning
 from modules.store_matcher import (
@@ -18,10 +16,16 @@ def render_import_panel():
         return
     st.write("---")
     st.header("🧠 Kvernhaug AI: Import- & Sortimentsbygger")
-    st.caption("Trål vestbrygg.no og olbrygging.no live, kjør lingvistisk AI-normalisering og oppdater master-databasene.")
-    
-    col1, col2, col3 = st.columns(3)
-    
+    st.caption(
+        "Trål vestbrygg.no og olbrygging.no live og kjør lingvistisk AI-normalisering. "
+        "Matchede produkter (pris/URL) skrives DIREKTE til master-databasene appen faktisk "
+        "bruker (master_malt.json / master_humle_v2.json / master_gjaer_v2.json) — det finnes "
+        "ikke noe eget «importer til runtime»-steg lenger. Umatchede produkter havner i "
+        "«📋 Pending Review» under, og blir også synlige i appen med én gang de godkjennes der."
+    )
+
+    col1, col2 = st.columns(2)
+
     # === KNAPP 1: SKANN BUTIKKER ===
     with col1:
         if st.button("🔍 Trål og skann butikker", width="stretch"):
@@ -47,7 +51,7 @@ def render_import_panel():
                 try:
                     matcher_config = [
                         ("humle", match_store_data_to_master,
-                         ["raw_data/humle_raw.json", "data/master_humle_v0_1.json",
+                         ["raw_data/humle_raw.json", "data/master_humle_v2.json",
                           "raw_data/matched_hops.json", "raw_data/unmatched_hops.json"]),
                         ("malt", match_store_data_to_master_malt,
                          ["raw_data/malt_raw.json", "data/master_malt.json",
@@ -79,74 +83,17 @@ def render_import_panel():
 
                 except Exception as e:
                     st.error(f"Det skjedde en feil: {e}")
-                
-    # === KNAPP 3: LAGRE TIL MASTER DB ===
-    with col3:
-        master_finnes = os.path.exists("data/master_humle_v0_1.json")
-        if st.button("📥 Importer til Master DB", width="stretch", disabled=not master_finnes):
-            imported_count = 0
 
-            sync_config = [
-                ("humle",  "data/master_humle_v0_1.json", "data/humle.json",
-                 lambda m: {"display_name": m.get("display_name"), "kategori": m.get("kategori", "humle"),
-                             "smakstags": m.get("smakstags", []), "kategorier": m.get("kategorier", {}),
-                             "alfa": m.get("alfa_typisk") or 5.0,
-                             "pris_vestbrygg": (m.get("butikk_match") or {}).get("vestbrygg", {}).get("pris") or 0,
-                             "pris_olbrygging": (m.get("butikk_match") or {}).get("olbrygging", {}).get("pris") or 0}),
-                ("malt",   "data/master_malt.json",        "data/malt.json",
-                 lambda m: {"display_name": m.get("display_name"), "produsent": m.get("produsent", "Ukjent"),
-                             "kategori": m.get("kategori", "Basemalt"),
-                             "smakstags": m.get("smakstags", []), "kategorier": m.get("kategorier", {}),
-                             "ebc": m.get("ebc", 4.0), "potensiale": m.get("potensiale", 1.034),
-                             "maks_prosent": m.get("maks_prosent", 20),
-                             "anbefalte_stiler": m.get("anbefalte_stiler", []),
-                             "knust_tilgjengelig": m.get("knust_tilgjengelig", False),
-                             "pris_vestbrygg": (m.get("butikk_match") or {}).get("vestbrygg", {}).get("pris") or 0,
-                             "pris_olbrygging": (m.get("butikk_match") or {}).get("olbrygging", {}).get("pris") or 0,
-                             "display_group": m.get("display_group", "")}),
-                ("gjaer",  "data/master_gjaer_v2.json",  "data/gjaer.json",
-                 lambda m: {"display_name": m.get("display_name"), "produsent": m.get("produsent", "Ukjent"),
-                             "kategori": m.get("kategori", "Tørrgjær"),
-                             "gjaertype": m.get("gjaertype", "Ale"),
-                             "smakstags": m.get("smakstags", []),
-                             "attenuation": m.get("attenuation", 0.75),
-                             "pris_vestbrygg": (m.get("butikk_match") or {}).get("vestbrygg", {}).get("pris") or 0,
-                             "pris_olbrygging": (m.get("butikk_match") or {}).get("olbrygging", {}).get("pris") or 0,
-                             "pris_per_pakke": (m.get("butikk_match") or {}).get("vestbrygg", {}).get("pris") or 0}),
-            ]
-
-            for kat, master_sti, db_sti, felt_fn in sync_config:
-                if not os.path.exists(master_sti):
-                    continue
-                with open(master_sti, "r", encoding="utf-8") as f:
-                    master = json.load(f)
-
-                db = {}
-                db["_meta"] = {
-                    "generated": True,
-                    "generated_from": os.path.basename(master_sti),
-                    "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
-                    "note": "Ikke editer direkte. Synkroniser via Import-panel i appen."
-                }
-                for m_id, m_info in master.items():
-                    db[m_id] = felt_fn(m_info)
-                imported_count += len(db) - 1
-
-                with open(db_sti, "w", encoding="utf-8") as f:
-                    json.dump(db, f, ensure_ascii=False, indent=2)
-
-            if "vis_ai_suksess" in st.session_state:
-                del st.session_state["vis_ai_suksess"]
-
-            st.session_state["import_rapport_antall"] = imported_count
-            st.toast(f"📥 {imported_count} råvarer flettet inn i Master DB!", icon="💾")
-            st.rerun()
-
-    # --- STÅENDE TILBAKEMELDINGER ---
-    if "import_rapport_antall" in st.session_state:
-        antall = st.session_state["import_rapport_antall"]
-        st.success(f"💾 **Suksess!** {antall} splitter nye ingredienser ble automatisk godkjent, deduplisert og flettet inn i Master-database!")
-        del st.session_state["import_rapport_antall"]
+    # Det fantes tidligere en tredje knapp ("📥 Importer til Master DB")
+    # her som skrev flatede kopier til de separate, IKKE-brukte
+    # legacy-filene data/humle.json, data/malt.json og data/gjaer.json.
+    # app.py leser derimot master_malt.json / master_humle_v2.json /
+    # master_gjaer_v2.json DIREKTE (se app.py sin last_json_data()) --
+    # matching over og review-godkjenning under skriver allerede rett inn
+    # i akkurat de filene, så knappen importerte aldri noe appen faktisk
+    # brukte. Fjernet i stedet for å beholde en knapp som påsto å
+    # importere til runtime uten å gjøre det. De tre legacy-filene selv
+    # er IKKE slettet -- se docs/MASTER_DATA_FLOW.md for videre vurdering.
 
     if st.session_state.get("vis_ai_suksess"):
         st.success("🎉 AI-normalisering fullført! Råvarene er ferdig tolket, fargetestet og klare for review i rapporten under.")

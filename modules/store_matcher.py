@@ -2,6 +2,8 @@ import json
 import re
 from difflib import SequenceMatcher
 
+from modules.master_data_io import skriv_master_json_atomisk
+
 _SIZE_RE = re.compile(
     r"\s*\d+[\.,]?\d*\s*(?:kg|g|gr|gram)\b"
     r"|\s*\b(?:knust|crushed|hel|whole)\b",
@@ -135,8 +137,7 @@ def match_store_data_to_master(humle_raw_path, master_humle_path, output_matched
                 "pris": pris, "url": url, "status": "pending_review",
             })
 
-    with open(master_humle_path, "w", encoding="utf-8") as f:
-        json.dump(master_humle, f, ensure_ascii=False, indent=2)
+    skriv_master_json_atomisk(master_humle_path, master_humle)
     with open(output_unmatched, "w", encoding="utf-8") as f:
         json.dump(unmatched, f, ensure_ascii=False, indent=2)
 
@@ -207,8 +208,7 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
                 "ebc": raw.get("ebc"), "status": "pending_review",
             })
 
-    with open(master_malt_path, "w", encoding="utf-8") as f:
-        json.dump(master_malt, f, ensure_ascii=False, indent=2)
+    skriv_master_json_atomisk(master_malt_path, master_malt)
     with open(output_unmatched, "w", encoding="utf-8") as f:
         json.dump(unmatched, f, ensure_ascii=False, indent=2)
 
@@ -256,8 +256,7 @@ def match_store_data_to_master_gjaer(gjaer_raw_path, master_gjaer_path, output_u
                 "status": "pending_review",
             })
 
-    with open(master_gjaer_path, "w", encoding="utf-8") as f:
-        json.dump(master_gjaer, f, ensure_ascii=False, indent=2)
+    skriv_master_json_atomisk(master_gjaer_path, master_gjaer)
     with open(output_unmatched, "w", encoding="utf-8") as f:
         json.dump(unmatched, f, ensure_ascii=False, indent=2)
 

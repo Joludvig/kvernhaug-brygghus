@@ -4,8 +4,14 @@ import json
 import os
 import re
 
+from modules.master_data_io import skriv_master_json_atomisk
+
+# De TRE masterdatabasene appen faktisk laster ved oppstart (se app.py:
+# last_json_data("master_malt.json") / ("master_humle_v2.json") /
+# ("master_gjaer_v2.json")) -- en review-godkjenning her skriver derfor
+# DIREKTE til samme fil appens runtime leser, ingen separat synk-steg.
 MASTER_PATHS = {
-    "humle": "data/master_humle_v0_1.json",
+    "humle": "data/master_humle_v2.json",
     "malt":  "data/master_malt.json",
     "gjaer": "data/master_gjaer_v2.json",
 }
@@ -28,6 +34,10 @@ def _les_json(sti, default):
 
 
 def _skriv_json(sti, data):
+    """Enkel skriving for de ARBEIDSFILENE (raw_data/unmatched_*.json) som
+    ikke regnes som masterdata -- selve masterfilene skrives via
+    skriv_master_json_atomisk() i stedet (se _legg_til_alias_og_fjern og
+    _opprett_og_fjern under), som er atomisk og tar backup."""
     with open(sti, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -67,7 +77,7 @@ def _legg_til_alias_og_fjern(kat, master_id, item, index):
             bm[butikk]["pris"] = pris
         if url:
             bm[butikk]["url"] = url
-    _skriv_json(master_sti, master)
+    skriv_master_json_atomisk(master_sti, master)
     _fjern_fra_unmatched(kat, index)
 
 
@@ -75,7 +85,7 @@ def _opprett_og_fjern(kat, ny_id, ny_entry, index):
     master_sti = MASTER_PATHS[kat]
     master = _les_json(master_sti, {})
     master[ny_id] = ny_entry
-    _skriv_json(master_sti, master)
+    skriv_master_json_atomisk(master_sti, master)
     _fjern_fra_unmatched(kat, index)
 
 

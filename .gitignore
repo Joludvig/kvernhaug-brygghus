@@ -33,6 +33,10 @@ data/pantry.json.backup_*
 
 # Backup-artefakter
 data/*.bak
+# Automatiske, tidsstemplede backuper av masterdata (se
+# modules/master_data_io.py::backup_master_fil()) -- masterfilene selv ER
+# versjonskontrollerte; disse er kun et lokalt sikkerhetsnett mellom to commits.
+data/*.json.backup_*
 
 # Loggfiler og temp
 *.log
