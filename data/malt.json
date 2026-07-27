@@ -676,7 +676,8 @@
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
-      "Maltfylde": 5
+      "Maltfylde": 5,
+      "Toast": 3
     },
     "ebc": 14.5,
     "potensiale": 1.036,
@@ -818,7 +819,8 @@
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
-      "Maltfylde": 4
+      "Maltfylde": 4,
+      "Toast": 2
     },
     "ebc": 7.0,
     "potensiale": 1.036,
@@ -1052,7 +1054,8 @@
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
-      "Maltfylde": 4
+      "Maltfylde": 4,
+      "Toast": 2
     },
     "ebc": 8.0,
     "potensiale": 1.036,
@@ -1081,7 +1084,8 @@
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
-      "Maltfylde": 5
+      "Maltfylde": 5,
+      "Toast": 3
     },
     "ebc": 15.0,
     "potensiale": 1.036,
@@ -1140,7 +1144,8 @@
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
-      "Maltfylde": 6
+      "Maltfylde": 6,
+      "Toast": 5
     },
     "ebc": 23.0,
     "potensiale": 1.036,
