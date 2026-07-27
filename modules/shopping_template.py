@@ -1,4 +1,4 @@
-from modules.export_format import logo_img_tag, fmt_vol, fmt_kg, fmt_gram
+from modules.export_format import logo_img_tag, fmt_vol, fmt_kg, fmt_gram, esc
 
 
 def render_shopping_list_html(ctx: dict, malt_items: list, humle_items: list, gjaer_item: dict | None, butikk: str) -> str:
@@ -6,7 +6,13 @@ def render_shopping_list_html(ctx: dict, malt_items: list, humle_items: list, gj
 
     def _rad(navn, mengde_str, total, er_estimat, url):
         est = " <em>(estimert)</em>" if er_estimat else ""
-        lenke = f"<a href='{url}'>{navn}</a>" if url else navn
+        navn_esc = esc(navn)
+        # `url` kommer i siste instans fra skrapet butikkdata
+        # (butikk_match.*.url i masterdatabasene) -- escapes FØR den
+        # havner i et anførselstegn-omsluttet href-attributt, slik at et
+        # anførselstegn i en (kompromittert/uventet) produkt-URL aldri kan
+        # bryte ut av attributtet.
+        lenke = f"<a href='{esc(url)}'>{navn_esc}</a>" if url else navn_esc
         return (
             f"<tr>"
             f"<td>{lenke}</td>"
@@ -42,7 +48,7 @@ def render_shopping_list_html(ctx: dict, malt_items: list, humle_items: list, gj
 <html lang="no">
 <head>
 <meta charset="utf-8">
-<title>Handleliste — {ctx['name']}</title>
+<title>Handleliste — {esc(ctx['name'])}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{
@@ -92,8 +98,8 @@ def render_shopping_list_html(ctx: dict, malt_items: list, humle_items: list, gj
   <span class="kbh-sub">· Ved Dalelva i Åsane</span>
 </div>
 
-<h1>{ctx['name']}</h1>
-<p class="meta">{fmt_vol(ctx['volum'])} &nbsp;·&nbsp; Butikk: {butikk}</p>
+<h1>{esc(ctx['name'])}</h1>
+<p class="meta">{fmt_vol(ctx['volum'])} &nbsp;·&nbsp; Butikk: {esc(butikk)}</p>
 
 <h2>Malt</h2>
 <table>{malt_rows}</table>

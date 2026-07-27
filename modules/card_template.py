@@ -9,7 +9,7 @@ from __future__ import annotations
 import datetime
 from modules.export_format import (
     fmt_og, fmt_fg, fmt_abv, fmt_ibu, fmt_ebc,
-    fmt_vol, fmt_kg, fmt_gram, logo_img_tag,
+    fmt_vol, fmt_kg, fmt_gram, logo_img_tag, esc,
 )
 from modules.water_chemistry import summer_ionbidrag
 
@@ -63,7 +63,7 @@ def _malt_rows(ctx: dict, malt_db: dict) -> str:
     rows     = []
     for m in malts:
         info = malt_db.get(m["id"], {})
-        navn = info.get("display_name", m["id"])
+        navn = esc(info.get("display_name", m["id"]))
         kg   = m.get("mengde", 0)
         pct  = kg / total_kg * 100
         rows.append(
@@ -83,7 +83,7 @@ def _hop_rows(ctx: dict, humle_db: dict) -> str:
     rows = []
     for h in hops:
         info      = humle_db.get(h["id"], {})
-        navn      = info.get("display_name", h["id"])
+        navn      = esc(info.get("display_name", h["id"]))
         gram      = h.get("gram", 0)
         tid       = h.get("tid", 0)
         tid_label = "tørrhumle" if tid == 0 else f"@{tid} min"
@@ -129,11 +129,11 @@ def render_card_html(
     mode:     str = "card",
     logo_b64: str | None = None,
 ) -> str:
-    stil        = ctx["style_analysis"].get("stil", "")
-    brygger_stil = ctx.get("brygger_stil", "").strip()
+    stil        = esc(ctx["style_analysis"].get("stil", ""))
+    brygger_stil = esc(ctx.get("brygger_stil", "").strip())
     gjaer_id    = ctx["recipe"].get("yeast", "")
-    gjaer_navn  = gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id)
-    summary     = ctx["summary"].replace("**", "")
+    gjaer_navn  = esc(gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id))
+    summary     = esc(ctx["summary"].replace("**", ""))
 
     # BJCP-score for dominant match
     _stil_score = next(
@@ -201,7 +201,7 @@ def render_card_html(
       letter-spacing:0.13em;
       text-transform:uppercase;
       line-height:1.1;
-    ">{ctx['name']}</div>
+    ">{esc(ctx['name'])}</div>
     {stil_html}
   </div>
 
@@ -276,7 +276,7 @@ def _malt_rows_a4(ctx: dict, malt_db: dict) -> str:
     rows = []
     for m in malts:
         info = malt_db.get(m["id"], {})
-        navn = info.get("display_name", m["id"])
+        navn = esc(info.get("display_name", m["id"]))
         kg   = m.get("mengde", 0)
         rows.append(f"<li>{navn}: <strong>{fmt_kg(kg)}</strong></li>")
     return "".join(rows) if rows else "<li>Ingen malt valgt</li>"
@@ -287,7 +287,7 @@ def _hop_rows_a4(ctx: dict, humle_db: dict) -> str:
     rows = []
     for h in hops:
         info      = humle_db.get(h["id"], {})
-        navn      = info.get("display_name", h["id"])
+        navn      = esc(info.get("display_name", h["id"]))
         gram      = h.get("gram", 0)
         tid       = h.get("tid", 0)
         tid_label = "tørrhumle" if tid == 0 else f"@{tid} min"
@@ -301,12 +301,12 @@ def _prosess_html_a4(recipe: dict) -> str:
         return ""
     steg_li = "".join(
         f"<li>{s['temperatur']:g}°C – {s['varighet']} min"
-        + (f" <em>({s['kommentar']})</em>" if s.get("kommentar") else "")
+        + (f" <em>({esc(s['kommentar'])})</em>" if s.get("kommentar") else "")
         + "</li>"
         for s in profil.get("mash_steps", [])
     )
     return f"""
-  <h2>Bryggemåte — {profil['navn']}</h2>
+  <h2>Bryggemåte — {esc(profil['navn'])}</h2>
   <ul>{steg_li}</ul>
   <p style="font-size:8pt; color:#666; margin-top:2px;">
     Koketid: {profil.get('boil_minutes', '—')} min
@@ -341,8 +341,8 @@ def _vann_html_a4(recipe: dict) -> str:
     if not kilde and not maal and not salter:
         return ""
 
-    kilde_li = f"<li>Vannkilde: {kilde['name']}</li>" if kilde and kilde.get("name") else ""
-    maalprofil_li = f"<li>Målprofil: {(maal or {}).get('name') or 'Ikke valgt'}</li>"
+    kilde_li = f"<li>Vannkilde: {esc(kilde['name'])}</li>" if kilde and kilde.get("name") else ""
+    maalprofil_li = f"<li>Målprofil: {esc((maal or {}).get('name') or 'Ikke valgt')}</li>"
 
     sluttprofil_li = ""
     if kilde and salter:
@@ -370,10 +370,10 @@ def render_a4_html(
     humle_db: dict,
     gjaer_db: dict,
 ) -> str:
-    stil       = ctx["style_analysis"].get("stil", "")
+    stil       = esc(ctx["style_analysis"].get("stil", ""))
     gjaer_id   = ctx["recipe"].get("yeast", "")
-    gjaer_navn = gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id)
-    summary    = ctx["summary"].replace("**", "")
+    gjaer_navn = esc(gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id))
+    summary    = esc(ctx["summary"].replace("**", ""))
     gold_a4    = "#8a6a10"   # darker gold — readable on white paper
     prosess_html = _prosess_html_a4(ctx["recipe"])
     vann_html    = _vann_html_a4(ctx["recipe"])
@@ -384,7 +384,7 @@ def render_a4_html(
 <html lang="no">
 <head>
 <meta charset="utf-8">
-<title>{ctx['name']}</title>
+<title>{esc(ctx['name'])}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{
@@ -440,7 +440,7 @@ def render_a4_html(
     <span class="kbh-name">KVERNHAUG BRYGGHUS</span>
     <span class="kbh-sub">· Ved Dalelva i Åsane</span>
   </div>
-  <h1>{ctx['name']}</h1>
+  <h1>{esc(ctx['name'])}</h1>
   <div class="stil">{stil}</div>
   <p class="sub">
     {fmt_vol(ctx['volum'])} &nbsp;·&nbsp;

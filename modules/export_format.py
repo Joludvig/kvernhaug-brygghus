@@ -9,10 +9,25 @@ brewday_panel, shopping_list, etc.
 """
 
 import base64
+import html
 import os
 
 # ── Path to shared logo asset ──────────────────────────────────────────────
 _LOGO_PATH = os.path.join("assets", "branding", "master_v1_header_24px.png")
+
+
+def esc(value) -> str:
+    """HTML-escapes any dynamic text before it is interpolated into an
+    export template (card_template.py, brewday_template.py,
+    shopping_template.py) -- recipe/brewer-stil names, comments, water
+    source/target profile names, ingredient display names, product URLs,
+    and any other user- or database/scraped-controlled text. Numeric
+    values formatted by the fmt_*() functions below never need this --
+    only free text. `None` becomes an empty string rather than the
+    literal "None"."""
+    if value is None:
+        return ""
+    return html.escape(str(value), quote=True)
 
 
 # ══════════════════════════════════════════════════════════════════════════

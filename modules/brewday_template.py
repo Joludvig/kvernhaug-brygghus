@@ -1,7 +1,7 @@
 from modules.export_format import (
     fmt_kg, fmt_gram, fmt_ibu_bid,
     fmt_og, fmt_fg, fmt_abv,
-    stats_linje, logo_img_tag,
+    stats_linje, logo_img_tag, esc,
 )
 
 
@@ -14,19 +14,19 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
 
     # ── Malt list ─────────────────────────────────────────────────────────
     malt_li = "".join(
-        f"<li><span class='cb'>☐</span><span class='m-kg'>{fmt_kg(m['mengde'])}</span>{m['navn']}</li>"
+        f"<li><span class='cb'>☐</span><span class='m-kg'>{fmt_kg(m['mengde'])}</span>{esc(m['navn'])}</li>"
         for m in plan["malt_liste"]
     ) or "<li>Ingen malt registrert.</li>"
 
     # ── Maskeplan ─────────────────────────────────────────────────────────
     maskeplan_li = "".join(
-        f"<li><span class='cb'>☐</span> {s['temp_c']}°C – {s['varighet_min']} min <em>({s['label']})</em></li>"
+        f"<li><span class='cb'>☐</span> {s['temp_c']}°C – {s['varighet_min']} min <em>({esc(s['label'])})</em></li>"
         for s in plan["maskeplan"]
     )
 
     # ── Hop table — minimum 5 visible rows ────────────────────────────────
     humle_data_rows = "".join(
-        f"<tr><td>{h['tid']} min</td><td>{h.get('tilsatt_etter_min', 0)} min</td><td>{h['navn']}</td>"
+        f"<tr><td>{h['tid']} min</td><td>{h.get('tilsatt_etter_min', 0)} min</td><td>{esc(h['navn'])}</td>"
         f"<td>{fmt_gram(h['gram'])}</td><td>{fmt_ibu_bid(h['ibu_bidrag'])}</td></tr>"
         for h in plan["humleplan"]
     )
@@ -47,7 +47,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     vann_salter     = vann_behandling.get("salter") or []
 
     vannkilde_li = (
-        f"<li><span class='cb'>☐</span> Vannkilde: <strong>{vann_kilde['name']}</strong></li>"
+        f"<li><span class='cb'>☐</span> Vannkilde: <strong>{esc(vann_kilde['name'])}</strong></li>"
         if vann_kilde and vann_kilde.get("name") else ""
     )
     # Navnet hentes fra profilens EGEN "name" — aldri target_id — og fra
@@ -56,13 +56,13 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     # Et senere redigert/omdøpt bibliotek skal derfor ALDRI kunne endre
     # navnet en allerede lagret oppskrift viser fram.
     maalprofil_navn = (vann_maal or {}).get("name")
-    maalprofil_li = f"<li>Målprofil: <strong>{maalprofil_navn or 'Ikke valgt'}</strong></li>"
+    maalprofil_li = f"<li>Målprofil: <strong>{esc(maalprofil_navn or 'Ikke valgt')}</strong></li>"
     salter_mesk_li = "".join(
-        f"<li><span class='cb'>☐</span> {s['navn']} ({s['kjemisk_form']}) i meskevann: <strong>{s['gram_mesk']:.2f} g</strong></li>"
+        f"<li><span class='cb'>☐</span> {esc(s['navn'])} ({esc(s['kjemisk_form'])}) i meskevann: <strong>{s['gram_mesk']:.2f} g</strong></li>"
         for s in vann_salter if s.get("gram_mesk", 0) > 0.005
     )
     salter_skyll_li = "".join(
-        f"<li><span class='cb'>☐</span> {s['navn']} ({s['kjemisk_form']}) i skyllevann: <strong>{s['gram_skyll']:.2f} g</strong></li>"
+        f"<li><span class='cb'>☐</span> {esc(s['navn'])} ({esc(s['kjemisk_form'])}) i skyllevann: <strong>{s['gram_skyll']:.2f} g</strong></li>"
         for s in vann_salter if s.get("gram_skyll", 0) > 0.005
     )
     mash_ph_maal_li = (
@@ -73,14 +73,14 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     faktisk_ph_val = f"{faktisk_ph:.2f}" if faktisk_ph else ""
     maaletemp_val = "Romtemperatur" if vann_maalinger.get("malt_ved_romtemperatur") else ""
     syrer_tilsatt_val = ", ".join(
-        f"{s['navn']} {s['mengde_ml']:.1f} mL" + (f" ({s['prosent']:.0f}%)" if s.get("prosent") else " (konsentrasjon ikke angitt)")
+        f"{esc(s['navn'])} {s['mengde_ml']:.1f} mL" + (f" ({s['prosent']:.0f}%)" if s.get("prosent") else " (konsentrasjon ikke angitt)")
         for s in (vann_maalinger.get("syrer") or [])
     )
 
     # ── Prosessprofil / bryggemåte ──────────────────────────────────────────
     prosess_profil = plan.get("prosess_profil")
     prosess_line = (
-        f"<p class='recipe-stil'>Bryggemåte: {prosess_profil['navn']}</p>"
+        f"<p class='recipe-stil'>Bryggemåte: {esc(prosess_profil['navn'])}</p>"
         if prosess_profil else ""
     )
     dekoksjon_li = ""
@@ -104,7 +104,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     tilsetninger_html = ""
     if tilsetninger:
         rows_t = "".join(
-            f"<tr><td>{t['navn']}</td><td>{t['dose']}</td><td>{t['timing']}</td></tr>"
+            f"<tr><td>{esc(t['navn'])}</td><td>{esc(t['dose'])}</td><td>{esc(t['timing'])}</td></tr>"
             for t in tilsetninger
         )
         tilsetninger_html = f"""
@@ -115,23 +115,27 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     </table>"""
 
     # ── Gjær notes ────────────────────────────────────────────────────────
-    noter_li = "".join(f"<li class='note'>ℹ️ {n}</li>" for n in plan["noter"])
+    noter_li = "".join(f"<li class='note'>ℹ️ {esc(n)}</li>" for n in plan["noter"])
     dms_note = (
         "<li class='note'>90 min anbefalt for Pilsnermalt</li>"
         if plan["koketid_min"] == 90 else ""
     )
     stil_line = (
-        f"<p class='recipe-stil'>{ctx['brygger_stil']}</p>"
+        f"<p class='recipe-stil'>{esc(ctx['brygger_stil'])}</p>"
         if ctx.get("brygger_stil") else ""
     )
 
     # ── Log pre-fills ─────────────────────────────────────────────────────
+    # og_v/fg_v/abv_v kommer fra FRITEKST-felter (st.text_input) i
+    # ui/brewday_panel.py Steg 4/5 -- brukerinnlagt, ikke tallformatert
+    # her i Python, og må derfor escapes før de havner i det nedlastede
+    # HTML-dokumentet.
     pre_sg_v    = f"{log['pre_boil_sg']:.3f}" if log.get("pre_boil_sg", 1.000) > 1.001 else ""
     pre_vol_v   = f"{log['pre_boil_vol']:.1f} L" if log.get("pre_boil_vol", 0) > 0 else ""
     post_vol_v  = f"{log['post_boil_vol']:.1f} L" if log.get("post_boil_vol", 0) > 0 else ""
-    og_v        = log.get("og", "")
-    fg_v        = log.get("fg", "")
-    abv_v       = log.get("abv", "")
+    og_v        = esc(log.get("og", ""))
+    fg_v        = esc(log.get("fg", ""))
+    abv_v       = esc(log.get("abv", ""))
     pitch_v     = f"{log['pitch_temp']:.1f}°C" if log.get("pitch_temp", 0) > 0 else ""
     mash_eff_v  = f"{log['mash_eff'] * 100:.1f}%" if log.get("mash_eff", 0) > 0 else ""
     bh_eff_v    = f"{log['brewhouse_eff'] * 100:.1f}%" if log.get("brewhouse_eff", 0) > 0 else ""
@@ -151,7 +155,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
 <html lang="no">
 <head>
 <meta charset="utf-8">
-<title>Bryggedagsark — {ctx['name']}</title>
+<title>Bryggedagsark — {esc(ctx['name'])}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{
@@ -406,7 +410,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
 </div>
 
 <!-- RECIPE NAME -->
-<p class="recipe-title">{ctx['name']}</p>
+<p class="recipe-title">{esc(ctx['name'])}</p>
 {stil_line}
 {prosess_line}
 <p class="stats-bar">{stats_linje(ctx, html=True)}</p>
@@ -476,7 +480,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
 
     <h2>Gjær</h2>
     <ul class="cb-list">
-      <li><span class="cb">☐</span> <strong>{plan['gjaer_navn']}</strong></li>
+      <li><span class="cb">☐</span> <strong>{esc(plan['gjaer_navn'])}</strong></li>
       <li><span class="cb">☐</span> {plan['pakker']} pakke(r) anbefalt</li>
       <li>Fermenterer {plan['temp_min']}–{plan['temp_maks']}°C</li>
       {noter_li}
