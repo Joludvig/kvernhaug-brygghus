@@ -190,8 +190,8 @@ class TestNavnekollisjon(_IsolertRecipeMappeTestCase):
 
 class TestSlettingArkivererIkkeSletter(_IsolertRecipeMappeTestCase):
     def test_slett_flytter_til_archive_i_stedet_for_aa_fjerne(self):
-        recipe_storage.lagre_oppskrift(_oppskrift("Skal Arkiveres"))
-        resultat = recipe_storage.slett_oppskrift_fil("Skal Arkiveres")
+        filnavn = recipe_storage.lagre_oppskrift(_oppskrift("Skal Arkiveres"))
+        resultat = recipe_storage.slett_oppskrift_fil(filnavn)
         self.assertTrue(resultat)
 
         self.assertNotIn("skal_arkiveres.json", self._filer())
@@ -205,17 +205,101 @@ class TestSlettingArkivererIkkeSletter(_IsolertRecipeMappeTestCase):
         self.assertEqual(arkivert["name"], "Skal Arkiveres")
 
     def test_slett_arkiverer_ogsaa_tilhoerende_loggfil(self):
-        recipe_storage.lagre_oppskrift(_oppskrift("Med Logg Slett"))
+        filnavn = recipe_storage.lagre_oppskrift(_oppskrift("Med Logg Slett"))
         recipe_storage.lagre_logg_entry("Med Logg Slett", {"date": "2026-07-27", "actual_og": 1.050})
 
-        recipe_storage.slett_oppskrift_fil("Med Logg Slett")
+        recipe_storage.slett_oppskrift_fil(filnavn)
 
         self.assertNotIn("med_logg_slett_logg.json", self._filer())
         arkiv_mappe = os.path.join(self._mappe(), "_archive")
         self.assertIn("med_logg_slett_logg.json", os.listdir(arkiv_mappe))
 
     def test_slett_av_ikke_eksisterende_oppskrift_returnerer_false(self):
-        self.assertFalse(recipe_storage.slett_oppskrift_fil("Finnes Ikke"))
+        self.assertFalse(recipe_storage.slett_oppskrift_fil("finnes_ikke.json"))
+
+    def test_slett_med_ikke_kanonisk_filnavn_arkiverer_riktig_fil(self):
+        # To av de virkelige, aktive private oppskriftsfilene i denne
+        # appen har et filnavn som IKKE tilsvarer
+        # generer_filnavn(navnet i "name"-feltet) -- f.eks. etter en
+        # historisk manuell omdøping eller import. En navnebasert
+        # sletting (generer_filnavn(oppskrift_navn)) ville lete etter
+        # feil fil i akkurat dette tilfellet. Simulerer scenarioet
+        # direkte: skriv en oppskrift under et BEVISST ikke-kanonisk
+        # filnavn, og bekreft at sletting via DET filnavnet fortsatt
+        # arkiverer riktig fil.
+        ikke_kanonisk_filnavn = "en_helt_annen_fil.json"
+        with open(os.path.join(self._mappe(), ikke_kanonisk_filnavn), "w", encoding="utf-8") as f:
+            json.dump(_oppskrift("Navn Som Ikke Matcher Filnavnet"), f)
+
+        # Det KANONISKE filnavnet ("navn_som_ikke_matcher_filnavnet.json")
+        # finnes bevisst IKKE på disk -- generer_filnavn()-basert gjetting
+        # ville derfor stille returnert False, selv om oppskriften faktisk
+        # finnes under et annet filnavn.
+        self.assertFalse(recipe_storage.slett_oppskrift_fil(
+            recipe_storage.generer_filnavn("Navn Som Ikke Matcher Filnavnet")
+        ))
+        self.assertIn(ikke_kanonisk_filnavn, self._filer())
+
+        # Sletting via det FAKTISKE filnavnet arkiverer riktig fil.
+        self.assertTrue(recipe_storage.slett_oppskrift_fil(ikke_kanonisk_filnavn))
+        arkiv_mappe = os.path.join(self._mappe(), "_archive")
+        self.assertIn(ikke_kanonisk_filnavn, os.listdir(arkiv_mappe))
+        self.assertNotIn(ikke_kanonisk_filnavn, self._filer())
+
+    def test_slett_arkiverer_aldri_feil_fil_ved_navnekollisjon(self):
+        # To FORSKJELLIGE oppskrifter der den ene sin faktiske kildefil
+        # tilfeldigvis heter det samme som den andres KANONISKE,
+        # navnegenererte filnavn ville produsert -- en navnebasert
+        # sletting av "Original" kunne i et slikt scenario truffet feil
+        # fil. Bekreft at kilde_filnavn-basert sletting ALDRI arkiverer
+        # noe annet enn nøyaktig den oppgitte filen.
+        recipe_storage.lagre_oppskrift(_oppskrift("Original", mengde=1.0))
+        with open(os.path.join(self._mappe(), "en_annen_fil.json"), "w", encoding="utf-8") as f:
+            json.dump(_oppskrift("En Annen Oppskrift", mengde=2.0), f)
+
+        recipe_storage.slett_oppskrift_fil("en_annen_fil.json")
+
+        # "Original" (og dens ekte kildefil original.json) skal stå fullstendig urørt.
+        self.assertIn("original.json", self._filer())
+        gjenvaerende = recipe_storage.hent_alle_oppskrifter()
+        self.assertIn("Original", gjenvaerende)
+        self.assertEqual(gjenvaerende["Original"]["malts"][0]["mengde"], 1.0)
+        arkiv_mappe = os.path.join(self._mappe(), "_archive")
+        self.assertNotIn("original.json", os.listdir(arkiv_mappe))
+        self.assertIn("en_annen_fil.json", os.listdir(arkiv_mappe))
+
+    def test_path_traversal_i_kildefilnavn_blokkeres(self):
+        forsok = [
+            "../pantry.json",
+            "..\\..\\pantry.json",
+            "/etc/passwd",
+            "sub/mappe.json",
+            "..",
+            ".",
+            "",
+            "ikke_json.txt",
+        ]
+        for ondsinnet in forsok:
+            with self.subTest(ondsinnet=ondsinnet):
+                with self.assertRaises(recipe_storage.UgyldigKildefilnavn):
+                    recipe_storage.slett_oppskrift_fil(ondsinnet)
+
+    def test_path_traversal_forsok_roerer_ikke_faktisk_fil_utenfor_mappen(self):
+        # Konkret, ende-til-ende bevis: et forsøk på å arkivere en fil
+        # UTENFOR den isolerte oppskriftsmappen via ".." skal reise
+        # UgyldigKildefilnavn UTEN å røre filen i det hele tatt.
+        foreldre_mappe = os.path.dirname(self._mappe())
+        offer_sti = os.path.join(foreldre_mappe, "offer_utenfor_recipes.json")
+        with open(offer_sti, "w", encoding="utf-8") as f:
+            f.write('{"name": "Skal forbli urort"}')
+        try:
+            with self.assertRaises(recipe_storage.UgyldigKildefilnavn):
+                recipe_storage.slett_oppskrift_fil("../offer_utenfor_recipes.json")
+            self.assertTrue(os.path.exists(offer_sti))
+            with open(offer_sti, encoding="utf-8") as f:
+                self.assertEqual(f.read(), '{"name": "Skal forbli urort"}')
+        finally:
+            os.remove(offer_sti)
 
 
 class TestDuplikatNavnDeteksjon(_IsolertRecipeMappeTestCase):
@@ -243,8 +327,8 @@ class TestDuplikatNavnDeteksjon(_IsolertRecipeMappeTestCase):
         self.assertEqual(len(recipe_storage.hent_alle_oppskrifter()), 1)
 
     def test_arkiverte_filer_telles_ikke_som_duplikater(self):
-        recipe_storage.lagre_oppskrift(_oppskrift("Arkivtest"))
-        recipe_storage.slett_oppskrift_fil("Arkivtest")
+        filnavn = recipe_storage.lagre_oppskrift(_oppskrift("Arkivtest"))
+        recipe_storage.slett_oppskrift_fil(filnavn)
         recipe_storage.lagre_oppskrift(_oppskrift("Arkivtest", mengde=2.0))
         self.assertEqual(recipe_storage.finn_duplikate_oppskrift_navn(), [])
 
@@ -256,8 +340,8 @@ class TestFilnavnKart(_IsolertRecipeMappeTestCase):
         self.assertEqual(kart["Kvernhaug Sommerglød"], "kvernhaug_sommerglod.json")
 
     def test_arkiverte_filer_er_ikke_med_i_kartet(self):
-        recipe_storage.lagre_oppskrift(_oppskrift("Skal Bort"))
-        recipe_storage.slett_oppskrift_fil("Skal Bort")
+        filnavn = recipe_storage.lagre_oppskrift(_oppskrift("Skal Bort"))
+        recipe_storage.slett_oppskrift_fil(filnavn)
         self.assertNotIn("Skal Bort", recipe_storage.hent_oppskrift_filnavn_kart())
 
 

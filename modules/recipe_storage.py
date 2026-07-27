@@ -27,6 +27,15 @@ class OppskriftNavnKollisjon(Exception):
     pass
 
 
+class UgyldigKildefilnavn(Exception):
+    """Reist når et oppgitt kildefilnavn ikke er et trygt, rent filnavn
+    som ligger DIREKTE i den aktive oppskriftsmappen -- f.eks. et
+    path-traversal-forsøk ("../pantry.json"), en absolutt sti, eller en
+    sti inn i en undermappe. Kallestedet (ui/recipe_card.py) fanger denne
+    og viser en tydelig feilmelding i stedet for å arkivere feil fil."""
+    pass
+
+
 def _mappe():
     """Aktiv oppskriftsmappe — lest FRISKT ved hvert kall, aldri frosset
     ved modul-import.
@@ -160,6 +169,40 @@ def _arkiver_kildefil_etter_omdoeping(gammelt_filnavn, nytt_filnavn):
             _arkiver_fil(gammel_logg)
         else:
             shutil.move(gammel_logg, ny_logg)
+
+
+def _valider_kildefilnavn(kilde_filnavn):
+    """Validerer at `kilde_filnavn` er et RENT filnavn -- ingen
+    mappekomponenter, ingen ".."-traversal, ingen absolutt sti -- som
+    ligger DIREKTE i den aktive oppskriftsmappen. Reiser
+    UgyldigKildefilnavn ved ethvert brudd. Returnerer den fulle,
+    validerte filstien.
+
+    `os.path.basename(kilde_filnavn) != kilde_filnavn` fanger i praksis
+    alle traversal-varianter i ett steg: en sti med "/" eller "\\" i seg
+    (uansett OS), en "../"-prefiks, eller en absolutt sti får ALLTID et
+    kortere resultat fra basename() enn originalen. Det andre steget
+    (normalisert absoluttbane må ha oppskriftsmappen som DIREKTE
+    foreldre) er et uavhengig sikkerhetsnett i tillegg, ikke en
+    erstatning for det første."""
+    if not kilde_filnavn or not isinstance(kilde_filnavn, str):
+        raise UgyldigKildefilnavn(f"Mangler eller ugyldig kildefilnavn: {kilde_filnavn!r}")
+    if kilde_filnavn in (".", ".."):
+        raise UgyldigKildefilnavn(f"Ugyldig kildefilnavn: {kilde_filnavn!r}")
+    if os.path.basename(kilde_filnavn) != kilde_filnavn:
+        raise UgyldigKildefilnavn(
+            f"Kildefilnavnet må være et rent filnavn uten mappekomponenter: {kilde_filnavn!r}"
+        )
+    if not kilde_filnavn.endswith(".json"):
+        raise UgyldigKildefilnavn(f"Kildefilnavnet må ende på .json: {kilde_filnavn!r}")
+
+    mappe = os.path.abspath(_mappe())
+    kandidat_sti = os.path.abspath(os.path.join(mappe, kilde_filnavn))
+    if os.path.dirname(kandidat_sti) != mappe:
+        raise UgyldigKildefilnavn(
+            f"Kildefilnavnet peker utenfor den aktive oppskriftsmappen: {kilde_filnavn!r}"
+        )
+    return kandidat_sti
 
 
 _TRANSLITERATION = {
@@ -341,22 +384,36 @@ def finn_duplikate_oppskrift_navn(mappe=None):
         if len(flist) > 1
     ]
 
-def slett_oppskrift_fil(oppskrift_navn):
+def slett_oppskrift_fil(kilde_filnavn):
     """Arkiverer oppskriftsfilen (og en eventuell tilhørende loggfil) --
     flytter dem til recipes/_archive/ i stedet for å slette dem permanent.
-    Kallestedet (ui/recipe_card.py) eier selve bekreftelsesdialogen FØR
-    dette kalles; denne funksjonen utfører selve arkiveringen uten videre
-    spørsmål. Returnerer True hvis oppskriftsfilen fantes og ble
-    arkivert, False hvis den ikke fantes."""
+
+    `kilde_filnavn` MÅ være det faktiske filnavnet oppskriften ble lastet
+    fra (se ui/sidebar.py sin `_last_loaded_recipe_file`, satt fra
+    hent_oppskrift_filnavn_kart() -- den EKTE filen på disk, aldri
+    gjettet på nytt fra oppskriftens redigerbare "name"-felt via
+    generer_filnavn()). To grunner til at navnebasert gjetting er
+    utrygt: (1) et filnavn på disk kan avvike fra det oppskriften
+    nettopp ble omdøpt til i UI-et før brukeren har lagret, og (2) hvis
+    en ANNEN, ubeslektet fil tilfeldigvis allerede har det "kanoniske"
+    filnavnet generer_filnavn(navn) ville produsert, ville en
+    navnebasert sletting arkivert FEIL fil.
+
+    Reiser UgyldigKildefilnavn (se _valider_kildefilnavn) hvis
+    kilde_filnavn ikke er et rent, traversal-fritt filnavn direkte i den
+    aktive oppskriftsmappen. Kallestedet (ui/recipe_card.py) eier selve
+    bekreftelsesdialogen FØR dette kalles og fanger begge unntakstypene
+    for å vise en tydelig feil i UI-et uten å nullstille noe. Returnerer
+    True hvis oppskriftsfilen fantes og ble arkivert, False hvis den
+    ikke fantes."""
     if DEMO_MODE:
         return False
-    filnavn = generer_filnavn(oppskrift_navn)
-    filsti = os.path.join(_mappe(), filnavn)
+    filsti = _valider_kildefilnavn(kilde_filnavn)
     if not os.path.exists(filsti):
         return False
     _arkiver_fil(filsti)
 
-    logg_sti = _logg_filsti(oppskrift_navn)
+    logg_sti = os.path.join(_mappe(), kilde_filnavn.replace(".json", "_logg.json"))
     if os.path.exists(logg_sti):
         _arkiver_fil(logg_sti)
     return True

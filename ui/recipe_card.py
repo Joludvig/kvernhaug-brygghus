@@ -10,6 +10,7 @@ from modules.recipe_storage import (
     lagre_logg_entry,
     hent_logg,
     OppskriftNavnKollisjon,
+    UgyldigKildefilnavn,
 )
 from modules.recipe import bygg_recipe_object
 from modules.card_template import render_card_html, render_a4_html
@@ -153,24 +154,57 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 else:
                     st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
         with btn_col2:
+            # Arkivering skal ALLTID skje på den FAKTISKE kildefilen
+            # oppskriften ble lastet fra (_last_loaded_recipe_file, satt
+            # av ui/sidebar.py) -- ALDRI gjettet på nytt fra det
+            # redigerbare navnefeltet via generer_filnavn(). Et filnavn
+            # på disk kan avvike fra det navnet nå produserer (se
+            # modules/recipe_storage.py::slett_oppskrift_fil()).
+            _kilde_filnavn = st.session_state.get("_last_loaded_recipe_file")
             _slett_bekreft_naavaerende = st.session_state.get("_pending_slett_bekreft") == ctx["name"]
             if not _slett_bekreft_naavaerende:
-                if st.button("🗑️ Slett gjeldende", width="stretch", key="slett_gjeldende_btn"):
+                if st.button(
+                    "🗑️ Slett gjeldende", width="stretch", key="slett_gjeldende_btn",
+                    disabled=not _kilde_filnavn,
+                ):
                     st.session_state["_pending_slett_bekreft"] = ctx["name"]
                     st.rerun()
+                if not _kilde_filnavn:
+                    st.caption("Ingen lagret kildefil å arkivere ennå — lagre oppskriften først.")
             else:
                 st.warning(f"Arkivere «{ctx['name']}»? Filen flyttes til _archive/, ikke slettes permanent.")
                 bekreft_col, avbryt_col = st.columns(2)
                 with bekreft_col:
                     if st.button("✅ Bekreft", width="stretch", key="slett_bekreft_btn"):
-                        if slett_oppskrift_fil(ctx["name"]):
-                            st.toast(f"Arkivert: {ctx['name']}", icon="🗑️")
-                            st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
-                            st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
-                            st.session_state.valgt_gjaer_id = "safale_us_05"
-                            st.session_state.gjeldende_navn = "Kvernhaug Spesial"
-                            st.session_state["_pending_brygger_stil_reset"] = True
-                            st.session_state.pop("_last_loaded_recipe_file", None)
+                        try:
+                            arkivert = slett_oppskrift_fil(_kilde_filnavn) if _kilde_filnavn else False
+                        except UgyldigKildefilnavn as e:
+                            st.error(f"❌ Kunne ikke arkivere «{ctx['name']}»: {e}")
+                        else:
+                            if arkivert:
+                                st.toast(f"Arkivert: {ctx['name']}", icon="🗑️")
+                                st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
+                                st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
+                                st.session_state.valgt_gjaer_id = "safale_us_05"
+                                # "gjeldende_navn" er bundet til Bryggnavn-widgeten
+                                # (instansiert lenger opp i DENNE samme renderingen)
+                                # -- kan derfor ikke settes direkte her (Streamlit
+                                # tillater ikke å skrive til en widget-bundet nøkkel
+                                # etter at widgeten selv er opprettet). Bruker samme
+                                # "pending"-mønster som skaleringsflyten
+                                # (app.py løser den opp FØR widgeten instansieres
+                                # i neste kjøring).
+                                st.session_state["_pending_gjeldende_navn"] = "Kvernhaug Spesial"
+                                st.session_state["_pending_brygger_stil_reset"] = True
+                                st.session_state.pop("_last_loaded_recipe_file", None)
+                            else:
+                                # Aldri nullstill oppskriften i UI-et når arkiveringen
+                                # feilet -- brukeren skal fortsatt se (og kunne prøve
+                                # på nytt med) den samme, urørte oppskriften.
+                                st.error(
+                                    f"❌ Fant ikke kildefilen for «{ctx['name']}» — "
+                                    "ingenting ble arkivert. Prøv å laste oppskriften på nytt."
+                                )
                         st.session_state.pop("_pending_slett_bekreft", None)
                         st.rerun()
                 with avbryt_col:
