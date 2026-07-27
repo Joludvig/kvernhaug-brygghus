@@ -444,5 +444,62 @@ class TestKnappBevaresSomAdvisory(_ShoppingListTestCase):
         self.assertIsNone(ukjent_rad["advisory"])
 
 
+_WIESN_GJAER_DB = {
+    "saflager_w3470": {"display_name": "SafLager W-34/70", "gjaertype": "Lager", "butikk_match": {
+        "olbrygging": {"pris": 45.0, "url": "https://example.test/w3470"},
+    }},
+    "lalvin_ec1118": {"display_name": "Lalvin EC-1118", "gjaertype": "Spesialgjær"},
+}
+
+
+def _wiesn_oppskrift():
+    """Samme sammensetning som tests/fixtures/recipes/wiesn_marzen_1872.json,
+    men med 'stats'/'batch_size' fylt ut slik den ekte, kjørende appen gjør
+    (se tests/test_pantry.py sin _wiesn_oppskrift() for hvordan OG-tallet
+    1.0799906590000001 er utledet: modules.calculations.beregn_og for denne
+    malt-sammensetningen ved 20 L/75% effektivitet)."""
+    return {
+        "malts": [
+            {"id": "weyermann_munich_1", "mengde": 0.7},
+            {"id": "munich_ii", "mengde": 4.6},
+            {"id": "vienna", "mengde": 1.8},
+        ],
+        "hops": [{"id": "tettnang", "gram": 88.0, "tid": 60}],
+        "yeast": "saflager_w3470",
+        "batch_size": 20.0,
+        "stats": {"og": 1.0799906590000001},
+    }
+
+
+class TestGjaerPakkeantallFraOppskriftBrukesIHandlelisten(_ShoppingListTestCase):
+    """Regresjon 2026-07-27: Smart Handleliste viste 'Kan ikke matches
+    sikkert' for gjær i den ekte Wiesn-oppskriften, selv om bryggedagsarket
+    allerede hadde et kjent anbefalt pakkeantall (3 pakker W-34/70) for
+    nøyaktig samme oppskrift. modules.pantry.beregn_mangler() beregner nå
+    dette selv (se modules/pantry.py::_beregn_gjaer_pakker_anbefalt), og
+    Smart Handleliste arver det uendret siden den kun bygger videre på
+    beregn_mangler()."""
+
+    def test_ingen_gjaer_pa_lager_gir_eksakt_kjopsforslag(self):
+        p = pantry.last_pantry()  # tomt lager -- ingen W-34/70 registrert
+        handleliste = ssl.beregn_handleliste(_wiesn_oppskrift(), p, gjaer_db=_WIESN_GJAER_DB)
+        rad = _rad(handleliste, "gjaer", "saflager_w3470")
+
+        self.assertEqual(rad["required_base"], 3.0)
+        self.assertEqual(rad["available_base"], 0.0)
+        self.assertEqual(rad["missing_base"], 3.0)
+        self.assertEqual(rad["suggested_purchase_quantity"], 3.0)
+        self.assertEqual(rad["purchase_unit"], "pakke")
+        self.assertEqual(rad["status"], "kjop")
+
+    def test_ec1118_pa_lager_dekker_ikke_w3470_behovet(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "lalvin_ec1118", "Lalvin EC-1118", 10.0, "pakke"))
+        rad = _rad(ssl.beregn_handleliste(_wiesn_oppskrift(), p, gjaer_db=_WIESN_GJAER_DB), "gjaer", "saflager_w3470")
+        self.assertEqual(rad["available_base"], 0.0, "EC-1118 skal ikke matches mot W-34/70 -- ulik stabil ingredient_id")
+        self.assertEqual(rad["status"], "kjop")
+        self.assertEqual(rad["missing_base"], 3.0)
+
+
 if __name__ == "__main__":
     unittest.main()

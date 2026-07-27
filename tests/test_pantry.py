@@ -282,6 +282,113 @@ class Test13ManglendeIdGirUkjentMatch(_PantryTestCase):
         self.assertEqual(rad["missing_base"], 1.0)
 
 
+def _wiesn_oppskrift(yeast="saflager_w3470", og=1.0799906590000001, batch_size=20.0):
+    """Samme malt/humle/gjær-sammensetning som den committede
+    tests/fixtures/recipes/wiesn_marzen_1872.json-fixturen, men med
+    'stats'/'batch_size' faktisk fylt ut (slik den ekte, kjørende appen
+    alltid gjør via modules.recipe_context.bygg_recipe_context) -- OG-en
+    over er den ekte, beregnede OG-en for denne oppskriften ved 20 L/75%
+    effektivitet (se test_wiesn_saflager_w3470_krever_tre_pakker sin
+    docstring for hvordan tallet er utledet)."""
+    return {
+        "malts": [
+            {"id": "weyermann_munich_1", "mengde": 0.7},
+            {"id": "munich_ii", "mengde": 4.6},
+            {"id": "vienna", "mengde": 1.8},
+        ],
+        "hops": [{"id": "tettnang", "gram": 88.0, "tid": 60}],
+        "yeast": yeast,
+        "batch_size": batch_size,
+        "stats": {"og": og},
+    }
+
+
+_WIESN_GJAER_DB = {
+    "saflager_w3470": {"display_name": "SafLager W-34/70", "gjaertype": "Lager"},
+    "lalvin_ec1118": {"display_name": "Lalvin EC-1118", "gjaertype": "Spesialgjær"},
+}
+
+
+class Test26GjaerPakkeantallBrukerSammeFormelSomBryggedagsarket(_PantryTestCase):
+    """Regresjon 2026-07-27: Smart Handleliste/Pantry viste 'Kan ikke
+    matches sikkert' for gjær i den ekte Wiesn-oppskriften selv om
+    bryggedagsarket allerede regnet ut et anbefalt pakkeantall (3 pakker
+    W-34/70, se modules/brewday_calc.beregn_pakker) -- de to leste rett og
+    slett aldri fra samme kilde. required_base for gjær beregnes nå med
+    NØYAKTIG samme pitch-rate-formel som bryggedagsarket, i stedet for å
+    alltid være None."""
+
+    def test_wiesn_saflager_w3470_krever_tre_pakker(self):
+        # OG=1.0799906590000001 ved 20 L er den faktiske, beregnede OG-en
+        # for denne malt-sammensetningen (modules.calculations.beregn_og
+        # med standard 75% effektivitet) -- bekreftet uavhengig med
+        # modules.brewday_calc.beregn_pakker(og, 20.0, "lager") == 3.
+        p = pantry.last_pantry()
+        recipe = _wiesn_oppskrift()
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad["required_base"], 3.0)
+        self.assertEqual(rad["available_base"], 0.0)
+        self.assertEqual(rad["missing_base"], 3.0)
+        self.assertEqual(rad["status"], "mangler")
+
+    def test_manglende_og_gir_ukjent_match_ikke_en_gjettet_pakke(self):
+        p = pantry.last_pantry()
+        recipe = _wiesn_oppskrift()
+        recipe["stats"] = {}  # OG mangler
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
+        self.assertIsNone(rad["required_base"], "Manglende OG skal ALDRI føre til en gjettet '1 pakke'")
+        self.assertEqual(rad["status"], "ukjent_match")
+
+    def test_manglende_batch_size_gir_ukjent_match(self):
+        p = pantry.last_pantry()
+        recipe = _wiesn_oppskrift(batch_size=None)
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
+        self.assertIsNone(rad["required_base"], "Manglende batchvolum skal ALDRI føre til en gjettet '1 pakke'")
+        self.assertEqual(rad["status"], "ukjent_match")
+
+    def test_gjaer_som_ikke_finnes_i_databasen_gir_ukjent_match(self):
+        p = pantry.last_pantry()
+        recipe = _wiesn_oppskrift(yeast="finnes_ikke")
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
+        self.assertIsNone(rad["required_base"], "Uten gjærtype (ukjent gjær) skal det ikke gjettes en pakkemengde")
+        self.assertEqual(rad["status"], "ukjent_match")
+
+    def test_eksplisitt_gjaer_pakker_anbefalt_overstyrer_beregningen(self):
+        p = pantry.last_pantry()
+        recipe = _wiesn_oppskrift()
+        recipe["gjaer_pakker_anbefalt"] = 5.0
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad["required_base"], 5.0, "Et eksplisitt lagret felt skal alltid vinne over den beregnede formelen")
+
+    def test_dobling_av_batch_dobler_gjaerbehovet(self):
+        p = pantry.last_pantry()
+        rad_20l = next(r for r in pantry.beregn_mangler(_wiesn_oppskrift(batch_size=20.0), p, gjaer_db=_WIESN_GJAER_DB)
+                       if r["ingredient_type"] == "gjaer")
+        rad_40l = next(r for r in pantry.beregn_mangler(_wiesn_oppskrift(batch_size=40.0), p, gjaer_db=_WIESN_GJAER_DB)
+                       if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad_20l["required_base"], 3.0)
+        self.assertEqual(rad_40l["required_base"], 6.0, "Doblet batchvolum (samme OG) skal doble anbefalt pakkeantall")
+
+    def test_ec1118_matcher_ikke_mot_w3470_stabil_id_brukes_ved_matching(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "lalvin_ec1118", "Lalvin EC-1118", 5.0, "pakke"))
+        recipe = _wiesn_oppskrift()  # trenger saflager_w3470
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad["ingredient_id"], "saflager_w3470")
+        self.assertEqual(rad["available_base"], 0.0,
+                          "EC-1118 på lager skal IKKE dekke behovet for W-34/70 -- matching skjer på stabil ingredient_id, ikke type/navn")
+        self.assertEqual(rad["status"], "mangler")
+
+    def test_riktig_gjaer_pa_lager_dekker_behovet(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "saflager_w3470", "SafLager W-34/70", 5.0, "pakke"))
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "lalvin_ec1118", "Lalvin EC-1118", 5.0, "pakke"))
+        recipe = _wiesn_oppskrift()
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad["available_base"], 5.0, "Kun W-34/70-postene skal telles, EC-1118 skal ikke blandes inn")
+        self.assertEqual(rad["status"], "nok")
+
+
 class Test14SkalertOppskriftGirNyMangelkalkyle(_PantryTestCase):
     def test_dobling_av_batch_dobler_behovet(self):
         p = pantry.last_pantry()

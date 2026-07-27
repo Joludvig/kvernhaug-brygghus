@@ -109,11 +109,19 @@ class TestSmartHandlelisteWiesnFullFlow(_SmartShoppingListAppTestCase):
         self.assertGreaterEqual(tettnang["suggested_purchase_quantity"], tettnang["missing_base"])
         self.assertTrue(tettnang["package_size_known"] or tettnang["suggested_purchase_quantity"] == tettnang["missing_base"])
 
+        # Ingen W-34/70 registrert i Pantry i det hele tatt her -- behovet
+        # (3 pakker, samme pitch-rate-formel som bryggedagsarket) er derfor
+        # en reell mangel, ikke en "ukjent match".
         gjaer_rad = self._rad(at, "gjaer", "saflager_w3470")
-        self.assertEqual(gjaer_rad["status"], "ukjent_match", "Gjær uten lagret pakkeantall skal ikke telles som 'kjop'")
+        self.assertEqual(gjaer_rad["required_base"], 3.0)
+        self.assertEqual(gjaer_rad["available_base"], 0.0)
+        self.assertEqual(gjaer_rad["missing_base"], 3.0)
+        self.assertEqual(gjaer_rad["status"], "kjop")
+        self.assertEqual(gjaer_rad["suggested_purchase_quantity"], 3.0)
+        self.assertEqual(gjaer_rad["purchase_unit"], "pakke")
 
         sammendrag_forste = [r for r in at.session_state["_debug_handleliste"] if r["status"] == "kjop"]
-        self.assertEqual(len(sammendrag_forste), 2, "Munich II og Tettnang skal være de eneste 'kjop'-radene")
+        self.assertEqual(len(sammendrag_forste), 3, "Munich II, Tettnang og W-34/70 skal være de eneste 'kjop'-radene")
 
         # 3) Skaler batchen -- mangler og kjøpsforslag skal oppdateres live.
         at.number_input(key="skaler_maal_volum").set_value(40.0).run()
@@ -160,6 +168,10 @@ class TestSmartHandlelisteFullLagerGirIngenKjop(_SmartShoppingListAppTestCase):
         self._legg_til_vare(at, "Malt", "munich_ii", 10.0, "kg")
         self._legg_til_vare(at, "Malt", "vienna", 5.0, "kg")
         self._legg_til_vare(at, "Humle", "tettnang", 200.0, "g")
+        # W-34/70-behovet (3 pakker, se modules/brewday_calc.beregn_pakker)
+        # må også dekkes for at "full beholdning" faktisk skal bety at
+        # ingenting trengs kjøpt -- rikelig i overkant her.
+        self._legg_til_vare(at, "Gjær", "saflager_w3470", 5.0, "pakke")
 
         antall_kjop = sum(1 for r in at.session_state["_debug_handleliste"] if r["status"] == "kjop")
         self.assertEqual(antall_kjop, 0)

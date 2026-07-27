@@ -157,33 +157,33 @@ class TestFullFlowLagerStatusSkaleringOgPersistens(_PantryAppTestCase):
         original_vann = copy.deepcopy(at.session_state["aktiv_vannmaal_snapshot"])
 
         # 1) Legg inn Munich I, Munich II, Vienna, Tettnang og W-34/70,
-        # rikelig av hver -> alt skal vise "nok".
+        # rikelig av hver -> alt skal vise "nok". Wiesn-fixturen ved 20 L og
+        # denne OG-en krever 3 pakker W-34/70 (samme pitch-rate-formel som
+        # bryggedagsarket, se modules/brewday_calc.beregn_pakker) -- 3
+        # pakker på lager skal derfor gi "nok", ikke en gjettet mangel.
         self._legg_til_vare(at, "Malt", "weyermann_munich_1", 1.0, "kg")
         self._legg_til_vare(at, "Malt", "munich_ii", 5.0, "kg")
         self._legg_til_vare(at, "Malt", "vienna", 2.0, "kg")
         self._legg_til_vare(at, "Humle", "tettnang", 100.0, "g")
-        self._legg_til_vare(at, "Gjær", "saflager_w3470", 2.0, "pakke")
+        self._legg_til_vare(at, "Gjær", "saflager_w3470", 3.0, "pakke")
 
         self.assertEqual(len(at.session_state["_debug_pantry"]["items"]), 5)
 
         # 2) Eksplisitt "nok" for HVER navngitte ingrediens (ikke bare
-        # fravær av feil-melding samlet sett).
+        # fravær av feil-melding samlet sett) -- inkludert gjær, som FØR
+        # denne fiksen alltid ble vist som "må kontrolleres manuelt" selv
+        # når bryggedagsarket allerede hadde et kjent anbefalt pakkeantall.
         for ingredient_type, ingredient_id in [
             ("malt", "weyermann_munich_1"), ("malt", "munich_ii"), ("malt", "vienna"), ("humle", "tettnang"),
         ]:
             rad = self._rad(at, ingredient_type, ingredient_id)
             self.assertEqual(rad["status"], "nok", f"{ingredient_id} skulle vist 'nok', fikk {rad}")
 
-        # Gjær har ingen lagret anbefalt pakkeantall i dagens
-        # oppskriftsmodell -- skal vises som "må kontrolleres manuelt",
-        # ikke som en falsk "nok".
         gjaer_rad = self._rad(at, "gjaer", "saflager_w3470")
-        self.assertEqual(gjaer_rad["status"], "ukjent_match")
-        self.assertEqual(len(at.error), 0, "Malt og humle skulle dekke behovet -- ingen mangel-feil forventet")
-        self.assertTrue(
-            any("kontrolleres manuelt" in w.value for w in at.warning),
-            "Forventet varsel om at gjær (ukjent pakkebehov) må kontrolleres manuelt",
-        )
+        self.assertEqual(gjaer_rad["required_base"], 3.0, "W-34/70-behovet skal beregnes fra samme formel som bryggedagsarket")
+        self.assertEqual(gjaer_rad["available_base"], 3.0)
+        self.assertEqual(gjaer_rad["status"], "nok")
+        self.assertEqual(len(at.error), 0, "Malt, humle og gjær skulle dekke behovet -- ingen mangel-feil forventet")
 
         # 3) Reduser Tettnang under behovet (88 g) -> status blir "mangler".
         tettnang_item = next(
@@ -217,6 +217,14 @@ class TestFullFlowLagerStatusSkaleringOgPersistens(_PantryAppTestCase):
             "Mangelen på Tettnang skal øke etter skalering, ikke bli stående på det gamle tallet",
         )
         self.assertEqual(skalert_tettnang_rad["status"], "mangler")
+
+        # Gjærbehovet skal også oppdateres LIVE ved skalering (samme
+        # pitch-rate-formel regnet på nytt med doblet batchvolum) -- 3
+        # pakker på lager dekker ikke lenger det doblede behovet.
+        skalert_gjaer_rad = self._rad(at, "gjaer", "saflager_w3470")
+        self.assertEqual(skalert_gjaer_rad["required_base"], 6.0, "Gjærbehovet skal dobles ved dobling av batchvolum")
+        self.assertEqual(skalert_gjaer_rad["available_base"], 3.0)
+        self.assertEqual(skalert_gjaer_rad["status"], "mangler")
 
         skalert_munich_ii_rad = self._rad(at, "malt", "munich_ii")
         self.assertEqual(

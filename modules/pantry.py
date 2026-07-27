@@ -20,6 +20,7 @@ import uuid
 from datetime import date, datetime
 
 from config import DEMO_MODE
+from modules.brewday_calc import beregn_pakker
 
 SCHEMA_VERSION = 1
 
@@ -336,6 +337,33 @@ def _bygg_rad(ingredient_type, ingredient_id, required_base, tilgjengelig,
     }
 
 
+def _beregn_gjaer_pakker_anbefalt(recipe, gjaer_id, gjaer_db):
+    """Anbefalt gjærpakkeantall for en oppskrift — SAMME formel og
+    pitch-rate-tabell som bryggedagsarket (modules/brewday_calc sin
+    beregn_pakker(), brukt av lag_brewday_plan()), slik at Pantry/Smart
+    Handleliste og bryggedagsarket ALDRI kan vise to ulike anbefalte
+    pakkeantall for samme oppskrift.
+
+    Returnerer None (IKKE en gjettet "1 pakke") hvis oppskriften mangler
+    det som trengs for å beregne det pålitelig: en reell OG, et positivt
+    batchvolum, eller en gjær som faktisk finnes i databasen (uten den vet
+    vi ikke pitch-raten/gjærtypen). Et eksplisitt "gjaer_pakker_anbefalt"-
+    felt på selve oppskriften (satt av fremtidig kode) overstyrer denne
+    beregningen — se beregn_mangler()."""
+    stats = recipe.get("stats") or {}
+    og = stats.get("og")
+    batch_size = recipe.get("batch_size")
+    if not og or og <= 1.000 or not batch_size or batch_size <= 0:
+        return None
+
+    gjaer_info = (gjaer_db or {}).get(gjaer_id)
+    if gjaer_info is None:
+        return None
+
+    gjaer_type_key = gjaer_info.get("gjaertype", "Ale").lower()
+    return float(beregn_pakker(og, batch_size, gjaer_type_key))
+
+
 def _ukjent_rad(ingredient_type, navn):
     return {
         "ingredient_type": ingredient_type, "ingredient_id": None, "name": navn or "?",
@@ -357,11 +385,14 @@ def beregn_mangler(recipe, pantry, malt_db=None, humle_db=None, gjaer_db=None, m
     Recipe Object: "malts": [{"id", "mengde" (kg)}], "hops": [{"id", "gram", "tid"}],
     "yeast": <id-streng>. Malt-mengde konverteres fra kg til gram her.
 
-    Gjær har i dagens oppskriftsmodell INGEN lagret anbefalt pakkeantall —
-    "required" for gjær er derfor bevisst None (status 'ukjent_match') i
-    stedet for å anta én pakke, med mindre oppskriften selv oppgir et
-    eksplisitt "gjaer_pakker_anbefalt"-felt (støttet her for fremtidig
-    bruk, men ikke satt av noen kode i dag)."""
+    Gjær har i dagens oppskriftsmodell ikke noe eksplisitt lagret
+    "gjaer_pakker_anbefalt"-felt (støttet her hvis en fremtidig oppskrift
+    faktisk setter det), så "required" for gjær beregnes i stedet med
+    SAMME pitch-rate-formel som bryggedagsarket (se
+    _beregn_gjaer_pakker_anbefalt() / modules/brewday_calc.beregn_pakker())
+    — aldri en gjettet "1 pakke". Mangler oppskriften det formelen trenger
+    (reell OG, positivt batchvolum, gjæren finnes i databasen), forblir
+    "required" bevisst None (status 'ukjent_match')."""
     tilgjengelig = summer_beholdning_per_ingredient(pantry)
     rader = []
 
@@ -387,7 +418,9 @@ def beregn_mangler(recipe, pantry, malt_db=None, humle_db=None, gjaer_db=None, m
 
     gjaer_id = recipe.get("yeast")
     if gjaer_id:
-        required_base = recipe.get("gjaer_pakker_anbefalt")  # ikke lagret av dagens modell -> None
+        required_base = recipe.get("gjaer_pakker_anbefalt")
+        if required_base is None:
+            required_base = _beregn_gjaer_pakker_anbefalt(recipe, gjaer_id, gjaer_db)
         rader.append(_bygg_rad("gjaer", gjaer_id, required_base, tilgjengelig, malt_db, humle_db, gjaer_db, marginer))
 
     return rader
