@@ -18,6 +18,7 @@ import unittest
 
 import modules.pantry as pantry
 import modules.smart_shopping_list as ssl
+import modules.malt_packaging as malt_packaging
 
 
 class _ShoppingListTestCase(unittest.TestCase):
@@ -499,6 +500,207 @@ class TestGjaerPakkeantallFraOppskriftBrukesIHandlelisten(_ShoppingListTestCase)
         self.assertEqual(rad["available_base"], 0.0, "EC-1118 skal ikke matches mot W-34/70 -- ulik stabil ingredient_id")
         self.assertEqual(rad["status"], "kjop")
         self.assertEqual(rad["missing_base"], 3.0)
+
+
+_FIXTURES_MAPPE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "recipes")
+
+
+def _last_wiesn_23l_fixture():
+    """Den ekte, committede, sanitiserte 23 L-fixturen (se
+    tests/fixtures/recipes/wiesn_marzen_1872_23l_batch.json) -- IKKE den
+    private, ekte oppskriftsfilen i recipes/. Munich I/II/Vienna sine
+    mengder her (0.644/4.232/1.656 kg) er nøyaktig de tallene oppgaven
+    bruker som "mangler" når Pantry er tom (644/4232/1656 g)."""
+    with open(os.path.join(_FIXTURES_MAPPE, "wiesn_marzen_1872_23l_batch.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+# Malt-varianter oppgaven selv beskriver (100 g og 1 kg, "hel" -- Munich
+# I/II og Vienna er i den ekte masterdatabasen registrert med
+# knust_tilgjengelig=false, altså kun tilgjengelig hel). Dette er en
+# TEST-LOKAL, syntetisk databasekopi -- ingen ekte masterdata endres for
+# denne testen.
+_WIESN_MALT_DB_MED_VARIANTER = {
+    m_id: {
+        "display_name": m_id,
+        "butikk_match": {
+            "olbrygging": {
+                "varianter": [
+                    {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 25.0},
+                    {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 45.0},
+                ],
+            },
+        },
+    }
+    for m_id in ("weyermann_munich_1", "munich_ii", "vienna")
+}
+
+_WIESN_HUMLE_DB = {
+    "tettnang": {"display_name": "Tettnang", "alfa_typisk": 3.1, "butikk_match": {
+        "olbrygging": {"pris": 79.0, "pakke_gram": 100.0, "url": "https://example.test/tettnang"},
+    }},
+}
+
+
+class TestMaltPakningsforslagWiesn23L(_ShoppingListTestCase):
+    """Krav 7 + 8: med Munich I/II/Vienna sine ekte mangelbeløp fra den
+    committede 23 L-fixturen (644/4232/1656 g) og kun 100 g/1 kg
+    tilgjengelig, skal minst-overkjøp-kandidaten være nøyaktig 700 g /
+    4300 g / 1700 g -- og Smart Handleliste skal videreformidle dette som
+    et kg-kjøpsforslag pluss en full pakningsforslag-struktur for UI-et."""
+
+    def _handleliste(self, malt_prioritet=malt_packaging.PRIORITET_MINST_OVERKJOP):
+        p = pantry.last_pantry()  # tomt lager -- hele oppskriftens behov mangler
+        recipe = _last_wiesn_23l_fixture()
+        return ssl.beregn_handleliste(
+            recipe, p, malt_db=_WIESN_MALT_DB_MED_VARIANTER, humle_db=_WIESN_HUMLE_DB,
+            malt_prioritet=malt_prioritet,
+        )
+
+    def test_munich_i_missing_base_er_644g_og_kjop_er_700g(self):
+        rad = _rad(self._handleliste(), "malt", "weyermann_munich_1")
+        self.assertEqual(rad["missing_base"], 644.0)
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"], 0.7, places=6)
+        self.assertEqual(rad["purchase_unit"], "kg")
+
+    def test_munich_ii_missing_base_er_4232g_og_kjop_er_4300g(self):
+        rad = _rad(self._handleliste(), "malt", "munich_ii")
+        self.assertEqual(rad["missing_base"], 4232.0)
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"], 4.3, places=6)
+
+    def test_vienna_missing_base_er_1656g_og_kjop_er_1700g(self):
+        rad = _rad(self._handleliste(), "malt", "vienna")
+        self.assertEqual(rad["missing_base"], 1656.0)
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"], 1.7, places=6)
+
+    def test_malt_pakningsforslag_struktur_er_med_i_raden(self):
+        rad = _rad(self._handleliste(), "malt", "munich_ii")
+        forslag = rad["malt_pakningsforslag"]
+        self.assertIsNotNone(forslag)
+        anbefalt = forslag["anbefalt_kombinasjon"]
+        pakninger = {p["pakningsstorrelse_gram"]: p["antall"] for p in anbefalt["antall_pakninger"]}
+        self.assertEqual(pakninger, {1000: 4, 100: 3})
+        self.assertGreater(anbefalt["total_pris"], 0)
+        self.assertEqual(rad["estimated_cost"], anbefalt["total_pris"])
+
+    def test_faktisk_mangel_holdes_adskilt_fra_kjopsmengde_for_alle_tre_malt(self):
+        handleliste = self._handleliste()
+        for m_id, forventet_mangel in (
+            ("weyermann_munich_1", 644.0), ("munich_ii", 4232.0), ("vienna", 1656.0),
+        ):
+            rad = _rad(handleliste, "malt", m_id)
+            self.assertEqual(rad["missing_base"], forventet_mangel)
+            self.assertNotEqual(rad["missing_base"], rad["suggested_purchase_quantity"] * 1000.0)
+
+    def test_billigst_prioritet_kan_gi_annet_forslag_enn_minst_overkjop(self):
+        # Munich II: 5000 g (5x1kg) er billigere totalt enn 4300 g
+        # (4x1kg+3x100g) med disse variantprisene (se
+        # tests/test_malt_packaging.py sitt tilsvarende regnestykke) --
+        # "billigst" skal derfor kunne gi et ANNET forslag enn
+        # "minst_overkjop" for nøyaktig samme oppskrift/lager.
+        minst_overkjop = _rad(self._handleliste(malt_prioritet=malt_packaging.PRIORITET_MINST_OVERKJOP),
+                               "malt", "munich_ii")
+        billigst = _rad(self._handleliste(malt_prioritet=malt_packaging.PRIORITET_BILLIGST),
+                         "malt", "munich_ii")
+        self.assertNotEqual(minst_overkjop["suggested_purchase_quantity"], billigst["suggested_purchase_quantity"])
+        self.assertAlmostEqual(billigst["suggested_purchase_quantity"], 5.0, places=6)
+
+    def test_recipe_og_pantry_muteres_ikke(self):
+        p = pantry.last_pantry()
+        recipe = _last_wiesn_23l_fixture()
+        recipe_original = json.loads(json.dumps(recipe))
+        pantry_original = copy.deepcopy(p)
+        ssl.beregn_handleliste(recipe, p, malt_db=_WIESN_MALT_DB_MED_VARIANTER, humle_db=_WIESN_HUMLE_DB)
+        self.assertEqual(recipe, recipe_original)
+        self.assertEqual(p, pantry_original)
+
+
+class TestMaltformStyrerKombinasjonsvalg(_ShoppingListTestCase):
+    """Krav 6: maltform-innstillingen skal styre hvilken maltype et
+    kjøpsforslag hentes fra, og en enkelt kombinasjon skal aldri blande hel
+    og knust."""
+
+    _MALT_DB_HEL_OG_KNUST = {
+        "weyermann_munich_1": {"display_name": "Munich I", "butikk_match": {"olbrygging": {"varianter": [
+            {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0},
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 7.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 42.0},
+        ]}}},
+    }
+
+    def _rad_for_maltform(self, maltform):
+        p = pantry.last_pantry()
+        recipe = _oppskrift(malts=[{"id": "weyermann_munich_1", "mengde": 0.644}])
+        handleliste = ssl.beregn_handleliste(recipe, p, malt_db=self._MALT_DB_HEL_OG_KNUST, maltform=maltform)
+        return _rad(handleliste, "malt", "weyermann_munich_1")
+
+    def test_maltform_knust_gir_knust_forslag(self):
+        rad = self._rad_for_maltform(malt_packaging.MALTFORM_KNUST)
+        self.assertEqual(rad["malt_pakningsforslag"]["anbefalt_kombinasjon"]["malttype"], "knust")
+
+    def test_maltform_hel_gir_hel_forslag(self):
+        rad = self._rad_for_maltform(malt_packaging.MALTFORM_HEL)
+        self.assertEqual(rad["malt_pakningsforslag"]["anbefalt_kombinasjon"]["malttype"], "hel")
+
+    def test_ingen_kombinasjon_blander_hel_og_knust(self):
+        rad = self._rad_for_maltform(malt_packaging.MALTFORM_INGEN_PREFERANSE)
+        forslag = rad["malt_pakningsforslag"]
+        alle = [forslag["anbefalt_kombinasjon"]] + forslag["alternative_kombinasjoner"]
+        for kombinasjon in alle:
+            self.assertIn(kombinasjon["malttype"], ("hel", "knust"))
+
+
+class TestTettnangLitenManglAlternativ(_ShoppingListTestCase):
+    """Krav 9: oppskriften trenger 81 g Tettnang, Pantry har 80 g -- en
+    mangel på kun 1 g. Handlelisten skal fortsatt vise et ORDINÆRT
+    kjøpsforslag (rundet til 100 g-pakke), men i TILLEGG et informativt
+    alternativ ("bruk det du har") med den faktiske IBU-konsekvensen --
+    ALDRI en automatisk oppskriftsendring."""
+
+    def _rad_tettnang(self, tettnang_pa_lager=80.0):
+        p = pantry.last_pantry()
+        if tettnang_pa_lager:
+            p["items"].append(pantry.opprett_pantry_item("humle", "tettnang", "Tettnang", tettnang_pa_lager, "g"))
+        recipe = _last_wiesn_23l_fixture()
+        handleliste = ssl.beregn_handleliste(recipe, p, humle_db=_WIESN_HUMLE_DB)
+        return _rad(handleliste, "humle", "tettnang")
+
+    def test_faktisk_mangel_er_1g(self):
+        rad = self._rad_tettnang()
+        self.assertEqual(rad["missing_base"], 1.0)
+        self.assertEqual(rad["required_base"], 81.0)
+        self.assertEqual(rad["available_base"], 80.0)
+
+    def test_ordinaert_kjopsforslag_er_fortsatt_100g_pakke(self):
+        rad = self._rad_tettnang()
+        self.assertEqual(rad["status"], "kjop")
+        self.assertEqual(rad["suggested_purchase_quantity"], 100.0)
+
+    def test_liten_mangel_alternativ_viser_riktig_ibu(self):
+        rad = self._rad_tettnang()
+        alt = rad["liten_mangel_alternativ"]
+        self.assertIsNotNone(alt)
+        self.assertEqual(alt["bruk_gram"], 80.0)
+        self.assertAlmostEqual(alt["ibu_original"], 22.2, places=1)
+        self.assertAlmostEqual(alt["ibu_alternativ"], 21.9, places=1)
+        self.assertIn("80", alt["tekst"])
+        self.assertIn("21.9", alt["tekst"].replace(",", "."))
+
+    def test_alternativ_forsvinner_ikke_stille_uten_a_vaere_der_naar_mangelen_er_stor(self):
+        # Regresjonsvern mot at terskelen ved en feil blir for grov: en
+        # STOR mangel (helt tomt lager, 81 g) skal IKKE trigge "liten
+        # mangel"-alternativet -- her er hele mengden reell mangel, ikke en
+        # ørliten justering.
+        rad = self._rad_tettnang(tettnang_pa_lager=0.0)
+        self.assertIsNone(rad["liten_mangel_alternativ"])
+
+    def test_ingen_automatisk_oppskriftsendring(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("humle", "tettnang", "Tettnang", 80.0, "g"))
+        recipe = _last_wiesn_23l_fixture()
+        recipe_original = json.loads(json.dumps(recipe))
+        ssl.beregn_handleliste(recipe, p, humle_db=_WIESN_HUMLE_DB)
+        self.assertEqual(recipe, recipe_original, "beregn_handleliste skal ALDRI endre den faktiske oppskriften")
 
 
 if __name__ == "__main__":

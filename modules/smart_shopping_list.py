@@ -65,7 +65,9 @@ hvor dataene faktisk ligger i dag.
 """
 import math
 
+from modules.calculations import beregn_total_ibu
 from modules.pantry import beregn_mangler
+from modules.malt_packaging import bygg_pakningsforslag, MALTFORM_INGEN_PREFERANSE, PRIORITET_BALANSERT
 
 _MALT_FALLBACK_KR_KG = 35.0
 _HUMLE_FALLBACK_PAKKE_GRAM = 100.0
@@ -73,6 +75,15 @@ _HUMLE_FALLBACK_KR_PAKKE = 99.0
 _GJAER_FALLBACK_KR_PAKKE = 59.0
 
 _BUTIKKER = (("Vestbrygg", "vestbrygg"), ("Ølbrygging.no", "olbrygging"))
+
+# Krav 9: en "svært liten" humlemangel (f.eks. 1 g av 81 g) skal ALDRI
+# trigge et automatisk kjøpsforslag som eneste alternativ -- i stedet vises
+# et informativt alternativ ("bruk det du har, IBU blir ca. X i stedet for
+# Y") ved SIDEN AV det ordinære kjøpsforslaget. Terskelen er bevisst en
+# ANDEL av det oppskriften faktisk trenger, ikke et fast gramtall, siden
+# "svært liten" betyr noe helt annet for en 5 g tørrhumle-tilsetning enn
+# for en 300 g bittertilsetning.
+_HUMLE_LITEN_MANGEL_ANDEL = 0.05
 
 
 def _butikk_nokkel(butikk_navn):
@@ -134,6 +145,58 @@ def _supplier_options(ingredient_type, ingredient_id, db):
     return resultat
 
 
+def _humle_ibu_for_hopliste(hops, humle_db, volum, og):
+    liste = [{"navn": h.get("id"), "gram": float(h.get("gram", 0.0)), "tid": h.get("tid", 0)} for h in hops]
+    return beregn_total_ibu(liste, humle_db or {}, volum, og)
+
+
+def _humle_liten_mangel_alternativ(recipe, humle_db, humle_id, missing_base, available_base, required_base):
+    """Krav 9 (Tettnang-scenariet): når mangelen er svært liten i forhold
+    til det oppskriften faktisk trenger, foreslå IKKE bare et ordinært
+    kjøp -- vis i tillegg et informativt alternativ: bruk det du allerede
+    har, med den faktiske IBU-konsekvensen regnet ut på nytt (samme Tinseth-
+    formel som resten av appen, modules.calculations.beregn_total_ibu).
+
+    Endrer ALDRI oppskriften selv -- bygger kun en midlertidig kopi av
+    hop-listen for selve IBU-utregningen. Returnerer None når mangelen ikke
+    er "svært liten", når ingrediensen ikke faktisk er en humle i
+    oppskriftens hop-liste, eller når oppskriften mangler det som trengs
+    for å beregne IBU pålitelig (batch_size, stats.og)."""
+    if not missing_base or missing_base <= 0:
+        return None
+    if not required_base or required_base <= 0 or missing_base > required_base * _HUMLE_LITEN_MANGEL_ANDEL:
+        return None
+
+    hops = recipe.get("hops", [])
+    if not any(h.get("id") == humle_id for h in hops):
+        return None
+
+    volum = recipe.get("batch_size")
+    og = (recipe.get("stats") or {}).get("og")
+    if not volum or volum <= 0 or not og or og <= 1.000:
+        return None
+
+    skalering = available_base / required_base
+    hops_alternativ = [
+        dict(h, gram=float(h.get("gram", 0.0)) * skalering) if h.get("id") == humle_id else h
+        for h in hops
+    ]
+
+    ibu_original = _humle_ibu_for_hopliste(hops, humle_db, volum, og)
+    ibu_alternativ = _humle_ibu_for_hopliste(hops_alternativ, humle_db, volum, og)
+
+    return {
+        "bruk_gram": available_base,
+        "ibu_original": round(ibu_original, 1),
+        "ibu_alternativ": round(ibu_alternativ, 1),
+        "advarsel": "Svært liten mangel",
+        "tekst": (
+            f"Bruk {available_base:g} g – beregnet IBU ca. {round(ibu_alternativ, 1):g} "
+            f"i stedet for {round(ibu_original, 1):g}"
+        ),
+    }
+
+
 _KNAPP_ADVISORY = "Nok til oppskriften, men under anbefalt sikkerhetsmargin."
 
 
@@ -156,6 +219,8 @@ def _tom_rad_ukjent_match(mangel_rad):
         "supplier_options": [],
         "estimated_cost": None,
         "cost_is_estimate": None,
+        "malt_pakningsforslag": None,
+        "liten_mangel_alternativ": None,
     }
 
 
@@ -191,10 +256,13 @@ def _rad_naar_ikke_noe_mangler(mangel_rad, db):
         "supplier_options": _supplier_options(ingredient_type, ingredient_id, db),
         "estimated_cost": 0.0,
         "cost_is_estimate": False,
+        "malt_pakningsforslag": None,
+        "liten_mangel_alternativ": None,
     }
 
 
-def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel):
+def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel,
+                          recipe=None, maltform=MALTFORM_INGEN_PREFERANSE, malt_prioritet=PRIORITET_BALANSERT):
     ingredient_type = mangel_rad["ingredient_type"]
     ingredient_id = mangel_rad["ingredient_id"]
     required_base = mangel_rad["required_base"]
@@ -204,12 +272,13 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
 
     # 1) Kjøpsforslag i BASISENHET (gram/pakker), rundet til kjent
     # pakningsstørrelse. Gjær rundes alltid opp til hele pakker (V1-krav —
-    # ingen levedyktighets-/starterberegning). Malt har ingen registrert
-    # pakningsstørrelse i dagens data (se _malt_pakke_kg_pris_og_url) ->
-    # eksakt foreslått mengde, men bruker samme avrundingsmekanikk som
-    # humle DERSOM en pakke_kg-verdi faktisk er registrert.
+    # ingen levedyktighets-/starterberegning). Malt bruker den nye
+    # variant-/kombinasjonsmodellen (modules.malt_packaging) DERSOM
+    # butikk_match har registrerte "varianter" -- ellers samme eldre,
+    # enklere pakke_kg-avrunding som før (se _malt_pakke_kg_pris_og_url).
     pakke_gram = None
     pakke_kg = None
+    malt_pakningsforslag = None
     if ingredient_type == "gjaer":
         suggested_purchase_base = math.ceil(missing_base)
         pakningsstorrelse_kjent = True
@@ -222,25 +291,35 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
             suggested_purchase_base = missing_base
             pakningsstorrelse_kjent = False
     else:  # malt
-        pakke_kg, _, _, _ = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)
-        if pakke_kg:
-            pakke_gram_malt = pakke_kg * 1000.0
-            suggested_purchase_base = math.ceil(missing_base / pakke_gram_malt) * pakke_gram_malt
+        malt_bm = _butikk_match(ingredient_id, malt_db, butikk_nokkel)
+        malt_pakningsforslag = bygg_pakningsforslag(missing_base, malt_bm, maltform=maltform, prioritet=malt_prioritet)
+        if malt_pakningsforslag is not None:
+            suggested_purchase_base = malt_pakningsforslag["anbefalt_kombinasjon"]["total_gram"]
             pakningsstorrelse_kjent = True
         else:
-            suggested_purchase_base = missing_base
-            pakningsstorrelse_kjent = False
+            pakke_kg, _, _, _ = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)
+            if pakke_kg:
+                pakke_gram_malt = pakke_kg * 1000.0
+                suggested_purchase_base = math.ceil(missing_base / pakke_gram_malt) * pakke_gram_malt
+                pakningsstorrelse_kjent = True
+            else:
+                suggested_purchase_base = missing_base
+                pakningsstorrelse_kjent = False
 
     expected_remainder_base = max(0.0, available_base + suggested_purchase_base - required_base)
 
     # 2) Pris + menneskevennlig innkjøpsenhet. estimated_cost/er_estimat_kost
     # er alltid satt sammen, ETT sted per type — ingen etterhånds-overstyring.
     if ingredient_type == "malt":
-        _, pris_kg, er_estimat, url = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)
         purchase_unit = "kg"
         suggested_purchase_quantity = suggested_purchase_base / 1000.0
-        estimated_cost = round(suggested_purchase_quantity * pris_kg, 1)
-        er_estimat_kost = er_estimat
+        if malt_pakningsforslag is not None:
+            estimated_cost = malt_pakningsforslag["anbefalt_kombinasjon"]["total_pris"]
+            er_estimat_kost = False  # registrerte variantpriser er ikke gjettet
+        else:
+            _, pris_kg, er_estimat, url = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)
+            estimated_cost = round(suggested_purchase_quantity * pris_kg, 1)
+            er_estimat_kost = er_estimat
     elif ingredient_type == "humle":
         _, pris_pakke, er_estimat, url = _humle_pakke_gram_pris_og_url(ingredient_id, humle_db, butikk_nokkel)
         purchase_unit = "g"
@@ -262,6 +341,11 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
         estimated_cost = round(pris_pakke * suggested_purchase_base, 1)
         er_estimat_kost = er_estimat
 
+    liten_mangel_alternativ = None
+    if ingredient_type == "humle" and recipe is not None:
+        liten_mangel_alternativ = _humle_liten_mangel_alternativ(
+            recipe, humle_db, ingredient_id, missing_base, available_base, required_base)
+
     return {
         "ingredient_type": ingredient_type,
         "ingredient_id": ingredient_id,
@@ -280,11 +364,14 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
         "supplier_options": _supplier_options(ingredient_type, ingredient_id, db),
         "estimated_cost": estimated_cost,
         "cost_is_estimate": er_estimat_kost,
+        "malt_pakningsforslag": malt_pakningsforslag,
+        "liten_mangel_alternativ": liten_mangel_alternativ,
     }
 
 
 def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_db=None,
-                        butikk="Ølbrygging.no", marginer=None):
+                        butikk="Ølbrygging.no", marginer=None,
+                        maltform=MALTFORM_INGEN_PREFERANSE, malt_prioritet=PRIORITET_BALANSERT):
     """Bygger Smart Handleliste V1 for en oppskrift, gitt Pantry sin
     beregnede beholdning. Returnerer én rad per ingrediens — samme
     ingredienser som modules.pantry.beregn_mangler() ville returnert,
@@ -311,6 +398,12 @@ def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_d
         bevisst har bedt om å se varer man har nok av; raden teller aldri
         med blant "må kjøpes" og bidrar aldri til estimert kostnad.
 
+    `maltform` (modules.malt_packaging.MALTFORM_*) og `malt_prioritet`
+    (modules.malt_packaging.PRIORITET_*) styrer KUN hvordan malt-
+    pakningsforslag rangeres/velges når butikk_match har registrerte
+    "varianter" (se modules/malt_packaging.py) — uten registrerte varianter
+    er de uten virkning (samme eldre pakke_kg-oppførsel som før).
+
     Muterer ALDRI `recipe` eller `pantry_data` — kaller kun
     modules.pantry.beregn_mangler(), som selv er en ren funksjon."""
     butikk_nokkel = _butikk_nokkel(butikk)
@@ -326,7 +419,9 @@ def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_d
         if not rad["missing_base"]:
             handleliste.append(_rad_naar_ikke_noe_mangler(rad, db))
         else:
-            handleliste.append(_rad_naar_kjop_trengs(rad, malt_db, humle_db, gjaer_db, butikk_nokkel))
+            handleliste.append(_rad_naar_kjop_trengs(
+                rad, malt_db, humle_db, gjaer_db, butikk_nokkel,
+                recipe=recipe, maltform=maltform, malt_prioritet=malt_prioritet))
 
     return handleliste
 

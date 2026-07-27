@@ -1,6 +1,10 @@
 import streamlit as st
 from modules import pantry
 from modules.smart_shopping_list import beregn_handleliste, oppsummer_handleliste
+from modules.malt_packaging import (
+    MALTFORM_KNUST, MALTFORM_HEL, MALTFORM_BILLIGST, MALTFORM_INGEN_PREFERANSE,
+    PRIORITET_BILLIGST, PRIORITET_MINST_OVERKJOP, PRIORITET_BALANSERT,
+)
 
 _STATUS_VISNING = {
     "kjop": "🔴 Kjøp",
@@ -10,6 +14,52 @@ _STATUS_VISNING = {
 _TYPE_VISNING = {"malt": "🌾 Malt", "humle": "🌿 Humle", "gjaer": "🧫 Gjær"}
 _TABELL_KOLONNER = [2.2, 1.1, 1.2, 1.1, 1.5, 1.1, 1.6]
 _TABELL_OVERSKRIFTER = ["Ingrediens", "Trenger", "På lager", "Mangler", "Foreslått kjøp", "Rest", "Status"]
+
+_MALTFORM_VISNING = {
+    MALTFORM_INGEN_PREFERANSE: "Ingen preferanse",
+    MALTFORM_KNUST: "Knust",
+    MALTFORM_HEL: "Hel",
+    MALTFORM_BILLIGST: "Billigste tilgjengelige",
+}
+_PRIORITET_VISNING = {
+    PRIORITET_BALANSERT: "Balansert",
+    PRIORITET_BILLIGST: "Billigst totalt",
+    PRIORITET_MINST_OVERKJOP: "Minst overkjøp",
+}
+
+
+def _fmt_pakninger(antall_pakninger):
+    delar = []
+    for p in antall_pakninger:
+        storrelse = p["pakningsstorrelse_gram"]
+        enhet = f"{storrelse / 1000.0:g} kg" if storrelse >= 1000 else f"{storrelse:g} g"
+        delar.append(f"{p['antall']} × {enhet}")
+    return " + ".join(delar)
+
+
+def _render_malt_pakningsforslag(forslag):
+    if not forslag:
+        return
+    anbefalt = forslag["anbefalt_kombinasjon"]
+    st.markdown(
+        f"　　**Anbefalt:** {_fmt_pakninger(anbefalt['antall_pakninger'])} "
+        f"({anbefalt['total_gram']:g} g, {anbefalt['malttype']}) — "
+        f"rest {anbefalt['overkjop_gram']:g} g, ca. {anbefalt['total_pris']:.0f} kr"
+    )
+    for alt in forslag["alternative_kombinasjoner"]:
+        st.caption(
+            f"　　Alternativ: {_fmt_pakninger(alt['antall_pakninger'])} "
+            f"({alt['total_gram']:g} g, {alt['malttype']}) — "
+            f"rest {alt['overkjop_gram']:g} g, ca. {alt['total_pris']:.0f} kr"
+        )
+    if forslag.get("advarsel"):
+        st.caption(f"　　⚠️ {forslag['advarsel']}")
+
+
+def _render_liten_mangel_alternativ(alt):
+    if not alt:
+        return
+    st.caption(f"　　💡 {alt['advarsel']}: {alt['tekst']}. Oppskriften endres ikke automatisk.")
 
 
 def _fmt(verdi, enhet):
@@ -61,8 +111,22 @@ def render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_d
         return
 
     butikk = st.session_state.get("global_butikk", "Ølbrygging.no")
+
+    with st.expander("⚙️ Malt-innstillinger (pakningsforslag)", expanded=False):
+        maltform_valg = st.selectbox(
+            "Maltform", options=list(_MALTFORM_VISNING), format_func=lambda k: _MALTFORM_VISNING[k],
+            key="smart_handleliste_maltform",
+            help="Styrer kun hvilken maltype (hel/knust) pakningsforslag hentes fra. "
+                 "Ett forslag blander aldri hel og knust malt.",
+        )
+        malt_prioritet_valg = st.selectbox(
+            "Prioritet for pakningsforslag", options=list(_PRIORITET_VISNING), format_func=lambda k: _PRIORITET_VISNING[k],
+            key="smart_handleliste_malt_prioritet",
+        )
+
     handleliste = beregn_handleliste(
         recipe, pantry_data, malt_database, humle_database, gjaer_database, butikk=butikk,
+        maltform=maltform_valg, malt_prioritet=malt_prioritet_valg,
     )
     sammendrag = oppsummer_handleliste(handleliste)
 
@@ -95,6 +159,10 @@ def render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_d
             cols[6].write(_status_tekst(rad))
             if rad.get("advisory") and vis_alt:
                 st.caption(f"　　💡 {rad['advisory']}")
+            if ingredient_type == "malt" and rad["status"] == "kjop":
+                _render_malt_pakningsforslag(rad.get("malt_pakningsforslag"))
+            if ingredient_type == "humle" and rad["status"] == "kjop":
+                _render_liten_mangel_alternativ(rad.get("liten_mangel_alternativ"))
 
     if not noe_vist:
         st.caption(
