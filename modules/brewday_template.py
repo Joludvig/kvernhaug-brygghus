@@ -50,6 +50,13 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
         f"<li><span class='cb'>☐</span> Vannkilde: <strong>{vann_kilde['name']}</strong></li>"
         if vann_kilde and vann_kilde.get("name") else ""
     )
+    # Navnet hentes fra profilens EGEN "name" — aldri target_id — og fra
+    # den FROSNE snapshotten som fulgte med denne oppskriften (water_target_
+    # profile), ikke fra det gjeldende biblioteket i data/water_targets.json.
+    # Et senere redigert/omdøpt bibliotek skal derfor ALDRI kunne endre
+    # navnet en allerede lagret oppskrift viser fram.
+    maalprofil_navn = (vann_maal or {}).get("name")
+    maalprofil_li = f"<li>Målprofil: <strong>{maalprofil_navn or 'Ikke valgt'}</strong></li>"
     salter_mesk_li = "".join(
         f"<li><span class='cb'>☐</span> {s['navn']} ({s['kjemisk_form']}) i meskevann: <strong>{s['gram_mesk']:.2f} g</strong></li>"
         for s in vann_salter if s.get("gram_mesk", 0) > 0.005
@@ -424,6 +431,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     <h2>Vann</h2>
     <ul class="cb-list">
       {vannkilde_li}
+      {maalprofil_li}
       <li><span class="cb">☐</span> Meskevann: <strong>{w['mash_vann_l']:.1f} L</strong></li>
       <li><span class="cb">☐</span> Skyllevann: <strong>{w['sparge_vann_l']:.1f} L</strong></li>
       <li><span class="cb">☐</span> Pre-boil: <strong>{w['pre_boil_l']:.1f} L</strong>

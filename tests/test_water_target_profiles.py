@@ -5,9 +5,12 @@ anbefaling, redigering, lagring, og at standardprofilene aldri muteres.
 Bakgrunn: UI-et hadde til nå kun ÉN målprofil («Maltpreget tysk lager –
 Kvernhaug»). Denne testen låser fast at biblioteket er utvidet med fire nye,
 generelle profiler PLUSS «Egendefinert», UTEN å endre den eksisterende
-profilen (og dermed heller ikke Wiesn-Märzen-oppskriftens lagrede
-vannbehandling, som er en frossen SNAPSHOT tatt på lagringstidspunktet —
-se modules/recipe.py).
+profilens ØVRIGE felter (ion-grenser, meske-pH, anbefalte stiler) — kun
+visningsnavnet er senere kortet ned til «Maltpreget tysk lager» (fjernet
+«– Kvernhaug»-suffikset, eksplisitt bedt om 2026-07-27). Allerede LAGREDE
+oppskrifters egen water_target_profile-snapshot beholder uansett sitt eget,
+frosne navn fra lagringstidspunktet (se modules/recipe.py) — biblioteket i
+data/water_targets.json styrer kun NYE valg, aldri gamle snapshots.
 
 Tester som skriver til disk bruker KVERNHAUG_WATER_TARGETS_FILE for
 isolasjon — samme mønster og begrunnelse som i test_water_chemistry.py sin
@@ -31,7 +34,7 @@ _FORVENTEDE_PROFILER = {
 
 _ORIGINAL_WIESN_PROFIL = {
     "target_id": "kvernhaug_maltpreget_tysk_lager",
-    "name": "Maltpreget tysk lager – Kvernhaug",
+    "name": "Maltpreget tysk lager",
     "anbefalte_stiler": ["Historisk Wiesn-Märzen", "Märzen", "Festbier", "Vienna Lager", "Dunkel", "Bock"],
     "ca_min": 50, "ca_max": 65,
     "mg_min": 0, "mg_max": 8,

@@ -1,8 +1,12 @@
 {
   "kvernhaug_maltpreget_tysk_lager": {
     "target_id": "kvernhaug_maltpreget_tysk_lager",
-    "name": "Maltpreget tysk lager – Kvernhaug",
+    "name": "Maltpreget tysk lager",
     "description": "Kvernhaug-bryggeprofil for maltpregede tyske/østerrikske lagerstiler — IKKE en påstått historisk München-vannprofil. Historisk Wiesn-Märzen, Märzen, Festbier, Vienna Lager, Dunkel og Bock kan anbefales denne profilen, men brukeren må alltid bekrefte valget selv.",
+    "profile_type": "house_profile",
+    "origin": "Kvernhaug Brygghus",
+    "historical_profile": false,
+    "kort_hjelpetekst": "Kvernhaug-husprofil laget for maltpregede tyske lagerøl.",
     "anbefalte_stiler": [
       "Historisk Wiesn-Märzen", "Märzen", "Festbier", "Vienna Lager", "Dunkel", "Bock"
     ],
@@ -19,6 +23,10 @@
     "target_id": "lys_lager_pils",
     "name": "Lys lager og pils",
     "description": "Kvernhaug-bryggeprofil for lyse, sarte lagerstiler — mykt vann med lav alkalitet, slik at det blekeste maltet ikke må kjempe mot høy resterende alkalitet for å nå riktig meske-pH. IKKE en påstått historisk vannprofil for noe spesifikt bryggested.",
+    "profile_type": "house_profile",
+    "origin": "Kvernhaug Brygghus",
+    "historical_profile": false,
+    "kort_hjelpetekst": "Kvernhaug-husprofil laget for lyse, sarte lagerstiler.",
     "anbefalte_stiler": [
       "Tysk Pilsner", "Böhmisk Pilsner", "Helles", "Lys Lager"
     ],
@@ -35,6 +43,10 @@
     "target_id": "balansert_ale",
     "name": "Balansert ale",
     "description": "Kvernhaug-bryggeprofil som nøytralt utgangspunkt for de fleste ale-stiler — moderate ionnivåer uten sterk vekting mot klorid eller sulfat. Brukes som fallback av anbefalingsmotoren når ingen mer spesifikk profil matcher stilen.",
+    "profile_type": "house_profile",
+    "origin": "Kvernhaug Brygghus",
+    "historical_profile": false,
+    "kort_hjelpetekst": "Kvernhaug-husprofil — nøytralt utgangspunkt for de fleste ale-stiler.",
     "anbefalte_stiler": [],
     "ca_min": 50, "ca_max": 100,
     "mg_min": 0, "mg_max": 15,
@@ -49,6 +61,10 @@
     "target_id": "mork_maltol_porter_stout",
     "name": "Mørk maltøl – porter/stout",
     "description": "Kvernhaug-bryggeprofil for mørke, ristede ølstiler. Ristet malt er naturlig surt og senker meske-pH på egen hånd — denne profilen har derfor bevisst høyere resterende alkalitet (HCO3) enn de lysere profilene, for å motvirke det og unngå en for lav meske-pH. Kloridtung, moderat/lav sulfat for en rund, ikke skarp bitterhet.",
+    "profile_type": "house_profile",
+    "origin": "Kvernhaug Brygghus",
+    "historical_profile": false,
+    "kort_hjelpetekst": "Kvernhaug-husprofil laget for mørke, ristede ølstiler.",
     "anbefalte_stiler": [
       "Porter", "Stout", "Imperial Stout", "Baltic Porter", "Nordisk Røykstaut"
     ],
@@ -65,6 +81,10 @@
     "target_id": "humledrevet_ol",
     "name": "Humledrevet øl",
     "description": "Kvernhaug-bryggeprofil for humlepregede stiler — høy sulfat for å fremheve en skarp, tørr bitterhet, lav klorid og lav alkalitet for et rent, sprøtt uttrykk. Høyere kalsium støtter god gjærhelse/utfelling i sterkere, humlerike brygg.",
+    "profile_type": "house_profile",
+    "origin": "Kvernhaug Brygghus",
+    "historical_profile": false,
+    "kort_hjelpetekst": "Kvernhaug-husprofil laget for humlepregede stiler.",
     "anbefalte_stiler": [
       "IPA", "West Coast IPA", "American Pale Ale", "Pale Ale"
     ],
@@ -81,6 +101,10 @@
     "target_id": "egendefinert",
     "name": "Egendefinert målprofil",
     "description": "Fritt redigerbar målprofil — start med disse grensene eller endre dem fritt. Anbefales aldri automatisk for noen stil, og overskrives aldri av appen; dine egne grenser bevares uendret helt til du selv redigerer og lagrer på nytt.",
+    "profile_type": "custom_profile",
+    "origin": "Egendefinert",
+    "historical_profile": false,
+    "kort_hjelpetekst": "Fritt redigerbar profil — sett dine egne grenser og notér gjerne kilden selv.",
     "anbefalte_stiler": [],
     "ca_min": 50, "ca_max": 100,
     "mg_min": 0, "mg_max": 15,

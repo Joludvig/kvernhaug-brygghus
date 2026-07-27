@@ -267,7 +267,14 @@ def render_water_panel(ctx, malt_database=None):
         )
         aktiv_maal_mal = maalprofiler[valgt_maal_id]
 
-        if aktiv_maal_mal.get("description"):
+        # Kompakt hjelpetekst rett under valget — ALDRI en del av selve
+        # navnet/dropdown-teksten (den skal forbli ryddig, se format_func
+        # over) eller av eksportenes "Målprofil: <navn>"-linje. Faller
+        # tilbake til den lengre beskrivelsen for profiler som mangler
+        # den nye, korte teksten (f.eks. en eldre egendefinert profil).
+        if aktiv_maal_mal.get("kort_hjelpetekst"):
+            st.caption(aktiv_maal_mal["kort_hjelpetekst"])
+        elif aktiv_maal_mal.get("description"):
             st.caption(aktiv_maal_mal["description"])
 
         if st.session_state.get("_vann_forrige_maal_id") != valgt_maal_id:
@@ -275,6 +282,18 @@ def render_water_panel(ctx, malt_database=None):
             st.session_state["_vann_forrige_maal_id"] = valgt_maal_id
 
         with st.expander("🎯 Rediger målprofil (min/maks per ion)", expanded=False):
+            if aktiv_maal_mal.get("description"):
+                st.caption(aktiv_maal_mal["description"])
+            _herkomst_deler = []
+            if aktiv_maal_mal.get("origin"):
+                _herkomst_deler.append(f"Opprinnelse: {aktiv_maal_mal['origin']}")
+            if aktiv_maal_mal.get("profile_type"):
+                _herkomst_deler.append(f"Type: {aktiv_maal_mal['profile_type']}")
+            if aktiv_maal_mal.get("historical_profile"):
+                _herkomst_deler.append("Historisk profil")
+            if _herkomst_deler:
+                st.caption(" · ".join(_herkomst_deler))
+
             maal_verdier = {}
             for ion in IONER:
                 c1, c2 = st.columns(2)

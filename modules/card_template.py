@@ -11,6 +11,7 @@ from modules.export_format import (
     fmt_og, fmt_fg, fmt_abv, fmt_ibu, fmt_ebc,
     fmt_vol, fmt_kg, fmt_gram, logo_img_tag,
 )
+from modules.water_chemistry import summer_ionbidrag
 
 # ── Master Design V1 palette ──────────────────────────────────────────────────
 # Source: docs/branding/master_design_v1.md
@@ -313,29 +314,54 @@ def _prosess_html_a4(recipe: dict) -> str:
 
 
 def _vann_html_a4(recipe: dict) -> str:
-    """Samme behandling som bryggedagsarket (modules/brewday_template.py)
-    — se modules/water_chemistry.py. Tom streng (ingen seksjon) for eldre
-    oppskrifter uten lagret vannbehandling."""
-    kilde       = recipe.get("water_source_profile")
-    maal        = recipe.get("water_target_profile")
-    behandling  = recipe.get("water_treatment") or {}
-    salter      = behandling.get("salter") or []
-    if not kilde and not salter:
+    """Kompakt vann-oppsummering for A4-kortet — vannkilde, målprofil,
+    forventet sluttprofil for Ca/Cl/SO4 og mål meske-pH (se
+    modules/water_chemistry.py). Erstatter den tidligere per-salt gram/
+    mesk/skyll-listen (den detaljerte varianten hører hjemme på selve
+    bryggedagsarket, se modules/brewday_template.py — dette kortet skal
+    holdes kompakt).
+
+    Målprofilens NAVN hentes fra den FROSNE snapshotten som ble lagret
+    med nettopp DENNE oppskriften (recipe["water_target_profile"]) — aldri
+    fra det gjeldende biblioteket i data/water_targets.json. Redigeres/
+    omdøpes en profil i biblioteket senere, skal allerede lagrede
+    oppskrifter uansett fortsette å vise navnet de ble lagret med.
+
+    Forventet sluttprofil beregnes fra saltenes EGNE, allerede lagrede
+    ionbidrag_ppm (satt av ui/water_panel.py på lagringstidspunktet) —
+    ALDRI omregnet fra dagens utstyrsprofil/vannmengde, som kan ha endret
+    seg siden oppskriften ble lagret.
+
+    Tom streng (ingen seksjon) for eldre oppskrifter helt uten
+    vannbehandling."""
+    kilde      = recipe.get("water_source_profile")
+    maal       = recipe.get("water_target_profile")
+    behandling = recipe.get("water_treatment") or {}
+    salter     = behandling.get("salter") or []
+    if not kilde and not maal and not salter:
         return ""
 
     kilde_li = f"<li>Vannkilde: {kilde['name']}</li>" if kilde and kilde.get("name") else ""
-    salt_li = "".join(
-        f"<li>{s['navn']} ({s['kjemisk_form']}): {s['gram']:.2f} g totalt "
-        f"— {s.get('gram_mesk', 0):.2f} g mesk / {s.get('gram_skyll', 0):.2f} g skyll</li>"
-        for s in salter
-    )
+    maalprofil_li = f"<li>Målprofil: {(maal or {}).get('name') or 'Ikke valgt'}</li>"
+
+    sluttprofil_li = ""
+    if kilde and salter:
+        tilfort = summer_ionbidrag([s.get("ionbidrag_ppm") or {} for s in salter])
+        deler = [
+            f"{label} {kilde[ion] + tilfort.get(ion, 0.0):.0f}"
+            for ion, label in (("ca", "Ca"), ("cl", "Cl"), ("so4", "SO4"))
+            if kilde.get(ion) is not None
+        ]
+        if deler:
+            sluttprofil_li = f"<li>Forventet: {' · '.join(deler)} ppm</li>"
+
     ph_li = (
         f"<li>Mål meske-pH: {maal['mash_ph_min']:.2f}–{maal['mash_ph_max']:.2f}</li>"
         if maal and maal.get("mash_ph_min") is not None else ""
     )
     return f"""
   <h2>Vannbehandling</h2>
-  <ul>{kilde_li}{salt_li}{ph_li}</ul>"""
+  <ul>{kilde_li}{maalprofil_li}{sluttprofil_li}{ph_li}</ul>"""
 
 
 def render_a4_html(
