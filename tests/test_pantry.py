@@ -15,6 +15,7 @@ Ingen test her leser eller skriver den ekte data/pantry.json.
 Kjøres med:
     py -3 -m unittest discover -s tests
 """
+import copy
 import json
 import os
 import tempfile
@@ -283,13 +284,14 @@ class Test13ManglendeIdGirUkjentMatch(_PantryTestCase):
 
 
 def _wiesn_oppskrift(yeast="saflager_w3470", og=1.0799906590000001, batch_size=20.0):
-    """Samme malt/humle/gjær-sammensetning som den committede
-    tests/fixtures/recipes/wiesn_marzen_1872.json-fixturen, men med
-    'stats'/'batch_size' faktisk fylt ut (slik den ekte, kjørende appen
-    alltid gjør via modules.recipe_context.bygg_recipe_context) -- OG-en
-    over er den ekte, beregnede OG-en for denne oppskriften ved 20 L/75%
-    effektivitet (se test_wiesn_saflager_w3470_krever_tre_pakker sin
-    docstring for hvordan tallet er utledet)."""
+    """VIKTIG: dette er en SYNTETISK, selvkonsistent oppskrift til å teste
+    selve KOBLINGEN (formel-wiring, None-fallback, ID-matching) — IKKE en
+    påstand om at 20 L/denne OG-en er brukerens virkelige batchvolum for
+    Wiesn-Märzen 1872. Se Test27EkteWiesn23LBatchGjaerberegning under for
+    de FAKTISKE, verifiserte tallene fra den ekte, gjeldende 23 L-batchen
+    (tests/fixtures/recipes/wiesn_marzen_1872_23l_batch.json) — en tidligere
+    rapport feilaktig omtalte 20 L som om det var oppskriftens reelle volum,
+    noe det aldri var (det var kun en tilfeldig testverdi her)."""
     return {
         "malts": [
             {"id": "weyermann_munich_1", "mengde": 0.7},
@@ -316,12 +318,21 @@ class Test26GjaerPakkeantallBrukerSammeFormelSomBryggedagsarket(_PantryTestCase)
     W-34/70, se modules/brewday_calc.beregn_pakker) -- de to leste rett og
     slett aldri fra samme kilde. required_base for gjær beregnes nå med
     NØYAKTIG samme pitch-rate-formel som bryggedagsarket, i stedet for å
-    alltid være None."""
+    alltid være None.
+
+    NB: denne klassen bruker en SYNTETISK oppskrift (_wiesn_oppskrift()
+    over) bare for å teste selve wiringen/kant­tilfellene. De tallene
+    stemmer IKKE nødvendigvis med brukerens faktiske, gjeldende batch —
+    se Test27EkteWiesn23LBatchGjaerberegning for den ekte, verifiserte
+    23 L-batchen (OG 1.064)."""
 
     def test_wiesn_saflager_w3470_krever_tre_pakker(self):
-        # OG=1.0799906590000001 ved 20 L er den faktiske, beregnede OG-en
-        # for denne malt-sammensetningen (modules.calculations.beregn_og
-        # med standard 75% effektivitet) -- bekreftet uavhengig med
+        # Selvkonsistent, syntetisk verdi (IKKE brukerens ekte batchvolum
+        # -- se Test27 under for det): OG=1.0799906590000001 ved 20 L er
+        # bare den beregnede OG-en FOR DENNE TEST-OPPSKRIFTEN sin egen
+        # malt-sammensetning (modules.calculations.beregn_og, 75%
+        # effektivitet), brukt for å bekrefte at formelen faktisk kobles
+        # riktig sammen -- bekreftet uavhengig med
         # modules.brewday_calc.beregn_pakker(og, 20.0, "lager") == 3.
         p = pantry.last_pantry()
         recipe = _wiesn_oppskrift()
@@ -387,6 +398,138 @@ class Test26GjaerPakkeantallBrukerSammeFormelSomBryggedagsarket(_PantryTestCase)
         rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=_WIESN_GJAER_DB) if r["ingredient_type"] == "gjaer")
         self.assertEqual(rad["available_base"], 5.0, "Kun W-34/70-postene skal telles, EC-1118 skal ikke blandes inn")
         self.assertEqual(rad["status"], "nok")
+
+
+_FIXTURES_MAPPE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "recipes")
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _last_ekte_23l_wiesn_fixture():
+    """Leser den committede, saniterte kopien av brukerens FAKTISKE,
+    gjeldende Wiesn-Märzen-batch (23 L — se recipes/kvernhaug_wiesn-
+    märzen_1872_-_23l_batch.json, som denne fixturen er en sanitert kopi
+    av: kun name/batch_size/malts/hops/yeast/stats, ingen bryggelogg/dato/
+    notater). IKKE forveksle med tests/fixtures/recipes/wiesn_marzen_1872.json
+    (den ELDRE 25 L-originalen denne 23 L-batchen ble skalert ned fra)."""
+    with open(os.path.join(_FIXTURES_MAPPE, "wiesn_marzen_1872_23l_batch.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _last_ekte_gjaer_db():
+    with open(os.path.join(_REPO_ROOT, "data", "master_gjaer_v2.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+class Test27EkteWiesn23LBatchGjaerberegning(_PantryTestCase):
+    """Verifiserer eksplisitt, mot den ekte 23 L-batchen (ikke en syntetisk
+    testoppskrift), at Pantry/Smart Handleliste og bryggedagsarket alltid
+    er enige om gjærpakkeantallet — og at det faktisk er OPPSKRIFTENS EGET
+    batch_size-felt (23 L) som brukes, ikke en skjult 20 L-fallback.
+
+    Bakgrunn: en tidligere rapport fra denne fiksen omtalte oppskriften som
+    '20 L', men det var kun en tilfeldig verdi i en test-testvert
+    (tests/_pantry_full_flow_app.py sin daværende hardkodede
+    batch_volum_input) -- ALDRI noe modules/pantry.py sin formel selv
+    antok. Formelen er UENDRET av denne oppdagelsen; det som er nytt her
+    er testdekningen mot de faktiske, riktige tallene."""
+
+    def test_batch_size_23_og_1064_lager_gir_tre_pakker(self):
+        recipe = _last_ekte_23l_wiesn_fixture()
+        self.assertEqual(recipe["batch_size"], 23.0)
+        self.assertAlmostEqual(recipe["stats"]["og"], 1.064, places=3)
+
+        gjaer_db = _last_ekte_gjaer_db()
+        self.assertEqual(gjaer_db["saflager_w3470"]["gjaertype"], "Lager")
+
+        p = pantry.last_pantry()
+        rad = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=gjaer_db) if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad["required_base"], 3.0)
+
+    def test_recipe_batch_size_feltet_er_det_som_faktisk_sendes_ikke_20l(self):
+        """Beviser at det er recipe["batch_size"] -- IKKE en 20 L-fallback
+        noe sted i kjeden -- som når frem til beregn_pakker(). Siden 20 L
+        og 23 L begge (litt tilfeldig) gir 3 pakker for DENNE oppskriftens
+        OG, brukes her et eget, syntetisk OG (1.048) der 20 L og 23 L
+        beviselig gir ULIKE pakkeantall (2 mot 3) -- en ekte 20 L-fallback
+        ville derfor blitt fanget opp av denne testen, selv om den ikke
+        fanges opp av testen over."""
+        recipe = _last_ekte_23l_wiesn_fixture()
+        recipe["stats"] = {"og": 1.048}
+        gjaer_db = _last_ekte_gjaer_db()
+        p = pantry.last_pantry()
+
+        recipe["batch_size"] = 23.0
+        rad_23 = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=gjaer_db) if r["ingredient_type"] == "gjaer")
+        recipe["batch_size"] = 20.0
+        rad_20 = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=gjaer_db) if r["ingredient_type"] == "gjaer")
+
+        self.assertEqual(rad_23["required_base"], 3.0)
+        self.assertEqual(rad_20["required_base"], 2.0)
+        self.assertNotEqual(
+            rad_23["required_base"], rad_20["required_base"],
+            "20 L og 23 L MÅ gi ulikt resultat her -- hvis dette noen gang blir likt igjen, "
+            "er en skjult 20 L-fallback tilbake i koden",
+        )
+
+    def test_skalering_av_den_ekte_batchen_endrer_gjaerbehovet_over_en_terskel(self):
+        recipe = _last_ekte_23l_wiesn_fixture()
+        gjaer_db = _last_ekte_gjaer_db()
+        p = pantry.last_pantry()
+
+        rad_23l = next(r for r in pantry.beregn_mangler(recipe, p, gjaer_db=gjaer_db) if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad_23l["required_base"], 3.0)
+
+        # Dobler batchen akkurat slik "Skaler oppskrift" gjør det i appen
+        # (malt/volum skaleres proporsjonalt -> OG uendret) -- 46 L krysser
+        # en pakke-terskel (3 -> 6 pakker), ikke bare et marginalt skift.
+        skalert = copy.deepcopy(recipe)
+        skalert["batch_size"] = 46.0
+        for m in skalert["malts"]:
+            m["mengde"] *= 2.0
+        rad_46l = next(r for r in pantry.beregn_mangler(skalert, p, gjaer_db=gjaer_db) if r["ingredient_type"] == "gjaer")
+        self.assertEqual(rad_46l["required_base"], 6.0)
+        self.assertGreater(rad_46l["required_base"], rad_23l["required_base"],
+                            "Gjærbehovet skal faktisk øke ved skalering, ikke stå stille på et tilfeldig tall")
+
+    def test_bryggedagsarket_og_pantry_er_alltid_enige_om_pakkeantall(self):
+        """Kjører den EKTE modules.brewday_calc.lag_brewday_plan() (samme
+        funksjon ui/brewday_panel.py bruker for bryggedagsarket) og den ekte
+        modules.pantry.beregn_mangler()/modules.smart_shopping_list.beregn_handleliste()
+        (Smart Handleliste) på NØYAKTIG samme 23 L-oppskrift, og bekrefter at
+        alle tre viser samme pakkeantall -- de kan strukturelt ikke divergere
+        siden de nå deler samme underliggende formel, men denne testen
+        beviser det end-to-end i stedet for bare på formelnivå."""
+        from modules.brewday_calc import lag_brewday_plan
+        from modules.smart_shopping_list import beregn_handleliste
+
+        recipe = _last_ekte_23l_wiesn_fixture()
+        gjaer_db = _last_ekte_gjaer_db()
+        with open(os.path.join(_REPO_ROOT, "data", "master_malt.json"), encoding="utf-8") as f:
+            malt_db = json.load(f)
+        with open(os.path.join(_REPO_ROOT, "data", "master_humle_v2.json"), encoding="utf-8") as f:
+            humle_db = json.load(f)
+
+        gjaer_info = gjaer_db[recipe["yeast"]]
+        plan = lag_brewday_plan(
+            malt_valg=recipe["malts"], humle_valg=recipe["hops"], gjaer_id=recipe["yeast"],
+            gjaer_info=gjaer_info, og=recipe["stats"]["og"], batch_volum_l=recipe["batch_size"],
+            humle_database=humle_db, malt_database=malt_db,
+        )
+        self.assertEqual(plan["pakker"], 3)
+
+        p = pantry.last_pantry()
+        pantry_rad = next(r for r in pantry.beregn_mangler(recipe, p, malt_db, humle_db, gjaer_db)
+                           if r["ingredient_type"] == "gjaer")
+        self.assertEqual(pantry_rad["required_base"], float(plan["pakker"]),
+                          "Pantry skal vise NØYAKTIG samme pakkeantall som bryggedagsarket")
+
+        handleliste = beregn_handleliste(recipe, p, malt_db, humle_db, gjaer_db)
+        handleliste_rad = next(r for r in handleliste if r["ingredient_type"] == "gjaer")
+        self.assertEqual(handleliste_rad["required_base"], float(plan["pakker"]))
+        self.assertEqual(handleliste_rad["missing_base"], float(plan["pakker"]))
+        self.assertEqual(handleliste_rad["suggested_purchase_quantity"], float(plan["pakker"]),
+                          "Smart Handleliste skal foreslå kjøp av nøyaktig det samme pakkeantallet")
+        self.assertEqual(handleliste_rad["status"], "kjop")
 
 
 class Test14SkalertOppskriftGirNyMangelkalkyle(_PantryTestCase):

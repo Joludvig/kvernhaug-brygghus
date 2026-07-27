@@ -1,0 +1,33 @@
+{
+  "name": "Kvernhaug Wiesn-Märzen 1872 - 23L batch",
+  "batch_size": 23.0,
+  "malts": [
+    {
+      "id": "weyermann_munich_1",
+      "mengde": 0.644
+    },
+    {
+      "id": "munich_ii",
+      "mengde": 4.232
+    },
+    {
+      "id": "vienna",
+      "mengde": 1.656
+    }
+  ],
+  "hops": [
+    {
+      "id": "tettnang",
+      "gram": 81.0,
+      "tid": 60
+    }
+  ],
+  "yeast": "saflager_w3470",
+  "stats": {
+    "og": 1.0639925272000001,
+    "fg": 1.011518654896,
+    "abv": 6.887195739900018,
+    "ibu": 22.20673695710743,
+    "ebc": 15.058891555271146
+  }
+}
