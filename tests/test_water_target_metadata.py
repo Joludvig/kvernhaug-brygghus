@@ -165,7 +165,28 @@ class Test5UIViserHjelpetekstAtskiltFraDropdown(unittest.TestCase):
     """AppTest mot den EKTE app.py: hjelpeteksten skal vises som en egen
     st.caption, og dropdown-alternativenes VISTE tekst (etter format_func)
     skal IKKE inneholde hjelpeteksten — dropdown-listen skal forbli
-    ryddig."""
+    ryddig.
+
+    Oppfølging (Kvernhaug-gjennomgang 2026-07-27): denne testen kjørte
+    tidligere den ekte app.py UTEN å isolere KVERNHAUG_RECIPES_DIR — siden
+    app.py sin render_sidebar() ubetinget kaller hent_alle_oppskrifter(),
+    som oppretter mappen den leser fra hvis den mangler, etterlot en fersk
+    `git worktree`-kjøring av denne testen en tom, ekte recipes/-mappe.
+    Isolert her med samme mønster som
+    tests/test_water_target_ui_integration.py og
+    tests/test_pantry_integration.py."""
+
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self._gammel_env = os.environ.get("KVERNHAUG_RECIPES_DIR")
+        os.environ["KVERNHAUG_RECIPES_DIR"] = self._tmpdir.name
+
+    def tearDown(self):
+        if self._gammel_env is None:
+            os.environ.pop("KVERNHAUG_RECIPES_DIR", None)
+        else:
+            os.environ["KVERNHAUG_RECIPES_DIR"] = self._gammel_env
+        self._tmpdir.cleanup()
 
     def test_hjelpetekst_vises_som_egen_caption_ikke_i_dropdown(self):
         from streamlit.testing.v1 import AppTest
@@ -173,6 +194,8 @@ class Test5UIViserHjelpetekstAtskiltFraDropdown(unittest.TestCase):
 
         repo_root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
         app_py = _os.path.join(repo_root, "app.py")
+        ekte_recipes_mappe = _os.path.join(repo_root, "recipes")
+        recipes_fantes_for = _os.path.isdir(ekte_recipes_mappe)
 
         at = AppTest.from_file(app_py)
         at.run()
@@ -197,6 +220,12 @@ class Test5UIViserHjelpetekstAtskiltFraDropdown(unittest.TestCase):
             _FORVENTET_HJELPETEKST_KVERNHAUG, alle_captions,
             "Hjelpeteksten ble ikke funnet som en egen, synlig caption.",
         )
+
+        if not recipes_fantes_for:
+            self.assertFalse(
+                _os.path.isdir(ekte_recipes_mappe),
+                "Denne testen skal ikke ha opprettet den ekte recipes/-mappen",
+            )
 
 
 if __name__ == "__main__":
