@@ -11,6 +11,7 @@ from modules.recipe_storage import (
     hent_logg,
     OppskriftNavnKollisjon,
     UgyldigKildefilnavn,
+    LoggKorruptError,
 )
 from modules.recipe import bygg_recipe_object
 from modules.card_template import render_card_html, render_a4_html
@@ -22,9 +23,24 @@ def _render_brewday_result_panel(ctx):
     if st.session_state.get("_last_loaded_recipe") != ctx["name"]:
         return
 
-    logg = hent_logg(ctx["name"])
+    # En korrupt loggfil skal ALDRI stille fremstå som "ingen brygg
+    # registrert" -- det ville latt et påfølgende "Legg til
+    # loggoppføring"-klikk overskrive hele den (fortsatt bevarte, se
+    # modules/recipe_storage.py::hent_logg()) historikken med bare den
+    # ene, nye oppføringen. Vis i stedet en tydelig feil og la
+    # skjemaet stå av til filen er reparert/gjenopprettet manuelt.
+    try:
+        logg = hent_logg(ctx["name"])
+        logg_korrupt = None
+    except LoggKorruptError as e:
+        logg = []
+        logg_korrupt = e
 
     with st.expander(f"📓 Bryggelogg ({len(logg)} oppføringer)" if logg else "📓 Bryggelogg", expanded=False):
+        if logg_korrupt is not None:
+            st.error(f"❌ Bryggeloggen for «{ctx['name']}» kunne ikke leses: {logg_korrupt}")
+            return
+
         with st.form("brewday_logg_form"):
             st.markdown("**Nytt brygg**")
             col_og, col_fg = st.columns(2)
@@ -62,9 +78,13 @@ def _render_brewday_result_panel(ctx):
                     "note": note.strip(),
                     "process_profile_navn": _profil["navn"] if _profil else None,
                 }
-                lagre_logg_entry(ctx["name"], entry)
-                st.toast("Loggoppføring lagret!", icon="📓")
-                st.rerun()
+                try:
+                    lagre_logg_entry(ctx["name"], entry)
+                except LoggKorruptError as e:
+                    st.error(f"❌ Kunne ikke lagre loggoppføringen: {e}")
+                else:
+                    st.toast("Loggoppføring lagret!", icon="📓")
+                    st.rerun()
 
         if logg:
             st.write("---")

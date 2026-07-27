@@ -36,6 +36,18 @@ class UgyldigKildefilnavn(Exception):
     pass
 
 
+class LoggKorruptError(Exception):
+    """Reist når en brygglogg-fil FINNES men ikke er gyldig JSON. Filen
+    røres ALDRI når dette oppstår -- verken lest som tom liste og siden
+    stille overskrevet (som ville erstattet HELE historikken med kun én
+    ny oppføring ved neste lagre_logg_entry()-kall) eller reparert
+    automatisk. Samme etablerte mønster som
+    modules/pantry.py::PantryCorruptError/last_pantry(). Kallestedet
+    (ui/recipe_card.py) fanger dette og viser en tydelig feil i UI-et,
+    med henvisning til recipes/_backup/ for manuell gjenoppretting."""
+    pass
+
+
 def _mappe():
     """Aktiv oppskriftsmappe — lest FRISKT ved hvert kall, aldri frosset
     ved modul-import.
@@ -96,12 +108,25 @@ def _skriv_json_atomisk(filsti, data):
     """Skriver JSON til en midlertidig fil og erstatter deretter
     målfilen med os.replace (atomisk på både Windows og POSIX), slik at
     et krasj midtveis i skrivingen aldri kan etterlate en halvskrevet
-    eller korrupt oppskriftsfil. Samme mønster som
-    modules/pantry.py::lagre_pantry()."""
+    eller korrupt oppskrift-/loggfil. Samme mønster som
+    modules/pantry.py::lagre_pantry().
+
+    Feiler enten selve serialiseringen (f.eks. et ikke-JSON-serialiserbart
+    felt i `data`) eller selve os.replace()-kallet, ryddes den
+    midlertidige filen bort før unntaket kastes videre uendret -- en
+    mislykket lagring skal ALDRI etterlate en lekket .tmp_*-fil i
+    oppskriftsmappen."""
     tmp_sti = filsti + f".tmp_{uuid.uuid4().hex[:8]}"
-    with open(tmp_sti, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    os.replace(tmp_sti, filsti)
+    try:
+        with open(tmp_sti, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp_sti, filsti)
+    except Exception:
+        try:
+            os.remove(tmp_sti)
+        except OSError:
+            pass
+        raise
 
 
 def _backup_eksisterende_fil(filsti):
@@ -284,25 +309,50 @@ def _logg_filsti(oppskrift_navn):
     return os.path.join(_mappe(), base)
 
 def lagre_logg_entry(oppskrift_navn, entry):
-    """Legger til én loggoppføring i oppskriftens loggfil."""
+    """Legger til én loggoppføring i oppskriftens loggfil.
+
+    Tar automatisk en tidsstemplet backup av en EKSISTERENDE loggfil rett
+    før den overskrives (samme rullerende backup-prinsipp og terskel som
+    lagre_oppskrift() bruker for selve oppskriftsfilen -- se
+    _backup_eksisterende_fil/RECIPE_BACKUP_MAKS_ANTALL).
+
+    Leser eksisterende logg via hent_logg() FØR den nye oppføringen
+    legges til: er loggfilen korrupt, forplanter det seg som
+    LoggKorruptError HERFRA, uten at noe skrives -- i stedet for at denne
+    ene, nye oppføringen stille erstatter hele den (ellers tapte)
+    historikken."""
     if DEMO_MODE:
         return
     sikre_mappe()
     filsti = _logg_filsti(oppskrift_navn)
     logg = hent_logg(oppskrift_navn)
     logg.append(entry)
+    if os.path.exists(filsti):
+        _backup_eksisterende_fil(filsti)
     _skriv_json_atomisk(filsti, logg)
 
 def hent_logg(oppskrift_navn):
-    """Henter alle loggoppføringer for en oppskrift. Returnerer tom liste hvis ingen."""
+    """Henter alle loggoppføringer for en oppskrift.
+
+    Returnerer tom liste hvis loggfilen ikke finnes ennå -- helt normalt
+    for en oppskrift uten registrerte brygg. Kaster LoggKorruptError
+    (uten å røre filen) hvis den FINNES men ikke er gyldig JSON -- ALDRI
+    stille tom, som tidligere kunne få lagre_logg_entry() til å overskrive
+    hele historikken med bare den ene, nye oppføringen. Samme etablerte
+    mønster som modules/pantry.py::last_pantry()/PantryCorruptError."""
     filsti = _logg_filsti(oppskrift_navn)
     if not os.path.exists(filsti):
         return []
+    with open(filsti, "r", encoding="utf-8") as f:
+        raw = f.read()
     try:
-        with open(filsti, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return []
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise LoggKorruptError(
+            f"{filsti} inneholder ugyldig JSON og ble IKKE overskrevet ({e}). "
+            f"Rett filen manuelt, eller gjenopprett fra en backup i {_backup_mappe()}, "
+            "før nye loggoppføringer kan lagres."
+        ) from e
 
 
 def _skann_oppskriftsfiler(mappe):
