@@ -223,10 +223,37 @@ V1.3
 Equipment Profile
 
 V1.4
-Inventory (humle/gjær)
+Inventory (humle/gjær) — se Pantry + Smart Handleliste V1 under, FERDIG 2026-07-27
 
 V1.5
 Butikksammenligning
+
+---
+
+## Pantry + Smart Handleliste V1 (juli 2026)
+
+Status: **FERDIG OG COMMITTET** (2026-07-27).
+
+Commits:
+
+* `19d84a3` — pantry-motor (`modules/pantry.py`)
+* `8022257` — pantry-UI (`ui/pantry_panel.py`, 📦 Lager)
+* `afab6a2` — smart handleliste-motor (`modules/smart_shopping_list.py`)
+* `d977992` — smart handleliste-UI (`ui/smart_shopping_list_panel.py`, 🛒 Innkjøp & Lager)
+* `d1721a5` — enhetskontrakt, knapp-margin bevart som advisory, legacy-seksjoner samlet i én kollapset expander
+
+Testsuite: 310 tester, 0 skipped, 0 errors, 0 failures.
+
+Hva er ferdig:
+
+* Pantry (📦 Lager): registrer beholdning per ingrediens, status nok/knapp/mangler/ukjent_match, marginer per type (malt 5 %, humle 10 %, gjær 0 %)
+* Smart Handleliste (🛒 Innkjøp & Lager): beregner reell mangel, avrundet innkjøpsforslag og forventet rest atskilt — aldri sammenblandet
+* Gammel handleliste og gammelt humlelager beholdt, men tydelig merket "eldre" og samlet i én kollapset seksjon nederst i fanen — synkroniseres IKKE automatisk med Pantry
+
+Neste steg (ikke startet):
+
+* Ekte akseptansetest med brukerens faktiske Wiesn-lagerdata i produksjonsappen
+* Ingen ny feature startes før denne akseptansetesten er gjort og bekreftet
 
 ---
 
