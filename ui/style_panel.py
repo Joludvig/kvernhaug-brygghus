@@ -4,14 +4,31 @@ def render_style_panel(ctx, humle_database):
     st.plotly_chart(ctx["fig_smak"], use_container_width=True, key="kvernhaug_smakshjul")
     
     st.header("🧠 Kvernhaug AI: Stil- & Balanse")
-    st.subheader(f"Nærmeste stil: *{ctx['style_analysis']['stil']}*")
+    st.subheader(f"Numerisk nærmeste stil: *{ctx['style_analysis']['stil']}*")
+    _headline_stil = next(
+        (s for s in ctx['style_analysis']["stil_liste"] if s["stil"] == ctx['style_analysis']['stil']), None
+    )
+    if _headline_stil is not None and not _headline_stil.get("bjcp_offisiell", True):
+        st.caption("🏺 Kvernhaug/historisk kategori — ikke en offisiell BJCP-stil.")
+    # Denne headlinen bruker raw_score (tall+sensorikk FØR gjær-/malt-/
+    # humle-signaturbonus), bevisst atskilt fra den samlede, justerte scoren
+    # i listen under (krav: en gjær-signatur skal aldri kunne gjøre en
+    # dårligere-passende stil til "nærmeste stil", se style_engine.py). De to
+    # kan derfor peke på ULIKE stiler for samme oppskrift — se
+    # tests/test_style_engine.py::TestNumeriskNaermesteVsSamletTopp for et
+    # konkret eksempel. Denne bildeteksten gjør forskjellen synlig i UI-et i
+    # stedet for å la de to tallene se motstridende ut.
+    st.caption(
+        "Basert på tall og sensorikk alene, før signaturbonus fra gjær/malt/humle. "
+        "Kan avvike fra toppen av \"Samlet stiltreff\" under, som inkluderer signaturbonus."
+    )
     st.write(f"📊 **Bitterhetsindeks (BU:GU):** `{ctx['style_analysis']['bu_gu']:.2f}`")
-    
+
     for note in ctx['style_analysis']['balanse']: st.write(note)
     for problem in ctx['style_analysis']['problemer']: st.warning(problem)
 
     st.write("---")
-    st.subheader("🎯 BJCP Stil-matching (Prosentvis):")
+    st.subheader("🎯 Samlet stiltreff (inkl. signaturbonus, prosentvis):")
     relevante_stiler = sorted(
         [s for s in ctx['style_analysis']["stil_liste"] if s["score"] >= 5],
         key=lambda x: (-x["score"], x["prio"])
@@ -19,10 +36,13 @@ def render_style_panel(ctx, humle_database):
     if not relevante_stiler:
         st.caption("Ingen stiler matcher oppskriften din ennå.")
     for s_item in relevante_stiler:
-        st.write(f"🔹 **{s_item['stil']}:** `{s_item['score']}% match`")
-        if s_item["mangler"] and s_item["score"] > 20:
+        _merke = "" if s_item.get("bjcp_offisiell", True) else " 🏺 *(Kvernhaug/historisk, ikke offisiell BJCP-stil)*"
+        st.write(f"🔹 **{s_item['stil']}:** `{s_item['score']}% match`{_merke}")
+        onsket = s_item.get("onsket_sensorisk", [])
+        if (s_item["mangler"] or onsket) and s_item["score"] > 20:
             with st.expander(f"Se hva som mangler for {s_item['stil']}"):
                 for mangel in s_item["mangler"]: st.caption(f"❌ {mangel}")
+                for pref in onsket: st.caption(f"💭 {pref}")
 
     if ctx["conflicts"]:
         st.write("---")

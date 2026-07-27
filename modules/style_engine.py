@@ -33,8 +33,9 @@ _LAGER_YEASTS = {
 
 _ENGLISH_STYLES_BASE = {"English Bitter", "Best Bitter", "ESB / Strong Bitter"}
 _ENGLISH_STYLES_DARK = {"Robust Porter"}
-_LAGER_BOCK_STYLES   = {
+_LAGER_STYLES        = {
     "Tysk Pilsner", "Tsjekkisk Pilsner", "Münchener Dunkel",
+    "Vienna Lager", "Märzen", "Historisk Wiesn-Märzen", "Festbier",
     "Heller Bock (Mai-Bock)", "Dunkles Bock", "Klassisk Røykøl (Rauchbier)",
 }
 _HAZY_STYLES    = {"Hazy IPA / NEIPA"}
@@ -45,6 +46,86 @@ _ENGLISH_ALE_BOOST  = 20
 _LAGER_BOCK_PENALTY = 20
 _SIGNATURE_BOOST    = 20
 _SIGNATURE_PENALTY  = 15
+
+# Toleranser (epsilon) for numeriske BJCP-sammenligninger.
+# Beregnede oppskrift-tall (særlig IBU/EBC) er estimater med iboende
+# flyttallsstøy — uten en toleranse vil f.eks. en IBU som i visningen
+# rundes til 23, men i realiteten er 22.98, feilaktig bli rapportert som
+# "under grensen på 23" med en avvik-tekst som runder ned til "0 IBU".
+_EPS_OG   = 0.0005
+_EPS_FG   = 0.0005
+_EPS_IBU  = 0.5
+_EPS_EBC  = 0.5
+_EPS_ABV  = 0.05
+_EPS_SMAK = 0.05
+
+# Et avvik regnes som "kritisk" for et felt når det er minst halvparten av
+# stilens EGET toleransevindu utenfor grensen (f.eks. en Bock med et smalt
+# 0.008-bredt OG-vindu blir kritisk ved 0.004 avvik, mens en bredere stil
+# tåler mer i absolutte tall før den treffes). Dette er bevisst uavhengig av
+# måleenhet, slik at OG/FG/IBU/EBC/ABV kan sammenlignes med samme terskel.
+_KRITISK_NORM_TERSKEL   = 0.5
+# "Flere kritiske avvik" (krav: OG, ABV, IBU eller farge) skal gi et hardt
+# tak på totalscoren som verken normal poengsum eller signaturbonus kan løfte
+# forbi — dette er mekanismen som hindrer at f.eks. en lagergjær-bonus kan
+# gjøre en tydelig feil stil (galt OG-område, gal farge, gal ABV) om til en
+# tilsynelatende god match.
+_KRITISK_ANTALL_FOR_TAK = 2
+_TAK_KRITISK = 80
+# Selv uten et eneste "kritisk" avvik skal en stil med FLERE synlige
+# numeriske avvik (mangler-listen) ikke kunne vises som en nesten-perfekt
+# match — ellers kan signaturbonusen alene dekke over at f.eks. OG, farge
+# OG alkoholstyrke alle er utenfor stilens vindu samtidig, bare fordi ingen
+# av dem alene er stor nok til å telle som "kritisk". Terskelen er satt til
+# tre for å fange nettopp dette (se kommentaren ved bruken under), og taket
+# ligger mellom _TAK_KRITISK og _TAK_AVVIK slik at rangeringen "0-1 avvik >
+# 2 avvik > kritisk avvik" alltid gjenspeiles i den viste prosenten.
+_MANGE_AVVIK_ANTALL_FOR_TAK = 3
+_TAK_FLERE_AVVIK = 85
+# Selv uten kritiske avvik skal 100 % være forbeholdt et faktisk fullt treff:
+# enhver gjenværende mangel eller ønsket sensorisk preg trekker taket ned til
+# "svært god, men ikke perfekt" i stedet for å tillate en flat avrunding opp.
+_TAK_AVVIK = 95
+
+
+def _avvik_numerisk(verdi, lo, hi, eps, vekt_under, vekt_over, tekst_under, tekst_over):
+    """
+    Eneste stedet som sammenligner en oppskriftsverdi mot et BJCP-intervall.
+    Brukes av både scoreberegningen og "Se hva som mangler"-teksten, slik at
+    de to aldri kan komme i utakt med hverandre.
+
+    Sammenligningen skjer alltid på full flyttallspresisjon (ingen avrunding
+    før dette punktet). `eps` er en liten toleranse som absorberer avrundings-
+    og modellstøy i beregnede verdier, slik at en verdi som reelt sett ligger
+    på grensen ikke gir utslag.
+
+    Straffen normaliseres mot bredden på stilens eget intervall (hi - lo) før
+    den ganges med vekten. Uten dette straffes et gitt avvik likt uansett om
+    stilen har et smalt eller bredt toleransevindu — i praksis var f.eks. et
+    OG-avvik nesten gratis fordi OG måles i tusendeler, uansett hvor smalt
+    stilens vindu var. Med normalisering blir "halvparten av stilens eget
+    vindu utenfor grensen" like alvorlig for alle felt og alle stiler.
+
+    Returnerer (score_endring, mangel_tekst_or_None, er_kritisk).
+    """
+    bredde = max(hi - lo, 1e-9)
+    if verdi < lo - eps:
+        diff = lo - verdi
+        normalisert = diff / bredde
+        return -(normalisert * vekt_under), tekst_under(diff), normalisert >= _KRITISK_NORM_TERSKEL
+    if verdi > hi + eps:
+        diff = verdi - hi
+        normalisert = diff / bredde
+        return -(normalisert * vekt_over), tekst_over(diff), normalisert >= _KRITISK_NORM_TERSKEL
+    return 0.0, None, False
+
+
+def _avvik_sensorisk(reell_verdi, min_verdi, eps=_EPS_SMAK, vekt=5):
+    """Samme toleranseprinsipp som _avvik_numerisk, for sensoriske smak_krav."""
+    if reell_verdi < min_verdi - eps:
+        diff = min_verdi - reell_verdi
+        return -(diff * vekt), diff
+    return 0.0, None
 
 
 def detect_recipe_signatures(recipe):
@@ -119,6 +200,89 @@ def analyser_stil_og_balanse(recipe):
             "og": (1.048, 1.056), "fg": (1.010, 1.016), "abv": (4.5, 5.6), "ibu": (18, 28), "ebc": (28, 56),
             "smak_krav": {"Brød": 5, "Toast": 4, "Karamell": 3, "Nøtter": 2},
             "beskrivelse": "Klassisk mørk tysk lager med fokus på rike brødskorpe-toner, uten brentsmak."
+        },
+        # Manglet helt i biblioteket (rangvis "Amber Malty European Lager" +
+        # Vienna Lager, jf. BJCP 2021 kat. 3/6) — dette var årsaken til at
+        # Munich/Vienna-dominerte lagere aldri kunne foreslås som Märzen: det
+        # fantes ingen kandidat med det navnet å score.
+        "Vienna Lager": {
+            "prio": 1, "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+            "og": (1.046, 1.052), "fg": (1.010, 1.014), "abv": (4.5, 5.5), "ibu": (18, 30), "ebc": (12, 18),
+            "smak_krav": {"Brød": 4, "Toast": 3, "Maltfylde": 4, "Bitterhet": 3},
+            "beskrivelse": "Ravgul østerriksk/tysk lager med ren, toastet maltkarakter og edel humlebalanse."
+        },
+        # Canonical BJCP 2021 (6A Märzen): OG 1.054-1.060, FG 1.010-1.014,
+        # ABV 5.8-6.3 %, IBU 18-24, SRM 8-17 — verifisert mot bjcp.org.
+        # FG/ABV ble tidligere bevisst utvidet (til 1.016/6.5 %) for å få en
+        # spesifikk sterk oppskrift nærmere stilen. Det er nå reversert: vi
+        # utvider ikke offisielle BJCP-grenser bare for å tette gapet til én
+        # oppskrift. Den sterkere, historiske Wiesn-profilen finnes i stedet
+        # som sin egen, tydelig merkede stil rett under.
+        "Märzen": {
+            "prio": 1, "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+            "og": (1.054, 1.060), "fg": (1.010, 1.014), "abv": (5.8, 6.3), "ibu": (18, 24), "ebc": (14, 26),
+            "smak_krav": {"Brød": 5, "Toast": 3, "Maltfylde": 5, "Bitterhet": 3},
+            "beskrivelse": "Rik, ravgul Oktoberfest-lager med dominerende brødskorpe/toast fra Munich- og Vienna-malt."
+        },
+        # IKKE en BJCP-stil (verken 2021 eller eldre) — en egen, bevisst merket
+        # kategori for de sterkere, førkrigs-/"Wiesn"-inspirerte Märzen-
+        # oppskriftene. Finnes som eget valg nettopp for å unngå å måtte
+        # utvide selve Märzen-canonical-vinduet ovenfor for å dekke denne
+        # varianten.
+        #
+        # VIKTIG: da denne stilen først ble lagt til (2026-07-26) ble kun
+        # FG/ABV utvidet — OG ble ved en feil stående igjen identisk med
+        # canonical Märzen (1.054-1.060), som gjorde "historisk" meningsløst
+        # for enhver oppskrift sterkere enn moderne Märzen selv. Rettet her
+        # (2026-07-26, oppfølging): OG er nå det som faktisk gjør denne
+        # stilen "historisk" — et eget vindu sentrert rundt ca. 16 °Plato.
+        #
+        # Antakelser vinduet bygger på (dokumentert fordi dette IKKE er en
+        # offisiell guideline, kun en rimelig tolkning):
+        #  - OG: 16 °Plato tilsvarer omtrent 1.064 med samme omregning som
+        #    brukes ellers i appen (`_plato(og) = (og-1)*250` i
+        #    brewday_calc.py, dvs. og = 1 + plato/250). Vinduet (1.060-1.068)
+        #    starter der canonical Märzen slutter (1.060) og gir ca. ±0.004
+        #    margin rundt 16 °P — bredt nok til normal oppskriftsvariasjon,
+        #    men fortsatt tydelig atskilt fra moderne Märzen/Festbier.
+        #  - FG/ABV: en fyldigere, mindre gjæret historisk tolkning enn
+        #    dagens sprø 2021-stil — høyere restsødme (FG) og styrke (ABV)
+        #    ved samme OG-nivå.
+        #  - IBU: noe høyere enn canonical Märzen for å balansere den ekstra
+        #    maltsødmen, fortsatt et "edelt", ikke aggressivt bitterhetsnivå.
+        #  - EBC: eldre Wiesnbier (før pale-malt-teknologien moderniserte
+        #    Oktoberfest-ølet på 1970-tallet) regnes gjerne som mørkere/mer
+        #    ravgul-kobberfarget enn dagens lyse festbier-stil — vinduet er
+        #    derfor forskjøvet oppover fra canonical Märzens (14-26).
+        # Disse tallene er en NB: forfatterens rimelige tolkning, ikke en
+        # verifisert historisk kilde — juster gjerne hvis bedre dokumentasjon
+        # dukker opp, men ikke bare for å tette gapet til én enkelt oppskrift.
+        "Historisk Wiesn-Märzen": {
+            "prio": 1, "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+            # Eneste stilen i biblioteket som IKKE er en offisiell BJCP-stil
+            # (se forklaringen over) — flagget eksplisitt slik at UI-et kan
+            # merke den som en Kvernhaug/historisk kategori i stedet for å la
+            # den se ut som en ordinær BJCP-guideline på lik linje med de
+            # andre. Alle andre stiler i biblioteket er ekte BJCP 2021-
+            # kategorier og trenger ikke dette feltet (default True, se
+            # `krav.get("bjcp_offisiell", True)` under).
+            "bjcp_offisiell": False,
+            "og": (1.060, 1.068), "fg": (1.012, 1.018), "abv": (6.3, 7.0), "ibu": (20, 27), "ebc": (16, 32),
+            # Bitterhet-kravet er satt til å være oppnåelig innenfor STILENS
+            # EGET IBU-vindu (ikke bare på toppen av det), gitt formelen
+            # Bitterhet = IBU/8 i flavor_engine.py: ved nedre grense (IBU 20)
+            # gir det nøyaktig 2.5. Uten dette ville enhver oppskrift midt i
+            # (eller under toppen av) stilens eget IBU-område vist en falsk
+            # "mangler bitterhet"-advarsel — se undersøkelsen i
+            # 2026-07-26-oppfølgingen for detaljer.
+            "smak_krav": {"Brød": 5, "Toast": 3, "Maltfylde": 5, "Bitterhet": 2.5},
+            "beskrivelse": "Kraftigere, historisk Wiesn-stil Märzen (ikke offisiell BJCP-stil) — sterkere, fyldigere og mer ravgul enn moderne 2021-guideline. Sentrert rundt ca. 16 °Plato."
+        },
+        "Festbier": {
+            "prio": 1, "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+            "og": (1.050, 1.057), "fg": (1.008, 1.012), "abv": (5.8, 6.3), "ibu": (18, 25), "ebc": (6, 11),
+            "smak_krav": {"Brød": 4, "Maltfylde": 4, "Bitterhet": 3},
+            "beskrivelse": "Moderne, lysere og renere Oktoberfest-stil enn Märzen — samme styrke, mindre toast/farge."
         },
         "Heller Bock (Mai-Bock)": {
             "prio": 2, "kat_navn": "🐐 Bock-øl",
@@ -242,95 +406,180 @@ def analyser_stil_og_balanse(recipe):
     for stil_navn, krav in bjcp_stiler.items():
         score = 100.0
         mangler = []
+        onsket_sensorisk = []
+        kritiske_avvik = 0
 
-        if og < krav["og"][0]:
-            score -= (krav["og"][0] - og) * 400
-            mangler.append(f"For lav sukkermengde (OG bør være over {krav['og'][0]:.3f})")
-        elif og > krav["og"][1]:
-            score -= (og - krav["og"][1]) * 400
-            mangler.append(f"For høy sukkermengde (OG bør være under {krav['og'][1]:.3f})")
+        d, tekst, kritisk = _avvik_numerisk(
+            og, krav["og"][0], krav["og"][1], _EPS_OG, 30, 30,
+            lambda diff: f"For lav sukkermengde (OG bør være over {krav['og'][0]:.3f})",
+            lambda diff: f"For høy sukkermengde (OG bør være under {krav['og'][1]:.3f})",
+        )
+        score += d
+        if tekst: mangler.append(tekst)
+        if kritisk: kritiske_avvik += 1
 
-        if fg < krav["fg"][0]:
-            score -= (krav["fg"][0] - fg) * 400
-            mangler.append(f"Gjæret for langt ned (FG bør være over {krav['fg'][0]:.3f})")
-        elif fg > krav["fg"][1]:
-            score -= (fg - krav["fg"][1]) * 400
-            mangler.append(f"For mye restsødme (FG bør være under {krav['fg'][1]:.3f})")
+        d, tekst, kritisk = _avvik_numerisk(
+            fg, krav["fg"][0], krav["fg"][1], _EPS_FG, 25, 25,
+            lambda diff: f"Gjæret for langt ned (FG bør være over {krav['fg'][0]:.3f})",
+            lambda diff: f"For mye restsødme (FG bør være under {krav['fg'][1]:.3f})",
+        )
+        score += d
+        if tekst: mangler.append(tekst)
+        if kritisk: kritiske_avvik += 1
 
-        if ibu < krav["ibu"][0]:
-            score -= (krav["ibu"][0] - ibu) * 1.5
-            mangler.append(f"Mangler bitterhet (Mangler {krav['ibu'][0] - ibu:.0f} IBU)")
-        elif ibu > krav["ibu"][1]:
-            score -= (ibu - krav["ibu"][1]) * 1.2
-            mangler.append(f"For høy bitterhet ({ibu - krav['ibu'][1]:.0f} IBU for mye)")
+        # IBU-avviket vises med 1 desimal (ikke 0) slik at et reelt, men lite,
+        # avvik (f.eks. 0.6 IBU) ikke fremstår som "0 IBU" i teksten.
+        d, tekst, kritisk = _avvik_numerisk(
+            ibu, krav["ibu"][0], krav["ibu"][1], _EPS_IBU, 25, 20,
+            lambda diff: f"Mangler bitterhet (Mangler {diff:.1f} IBU)",
+            lambda diff: f"For høy bitterhet ({diff:.1f} IBU for mye)",
+        )
+        score += d
+        if tekst: mangler.append(tekst)
+        if kritisk: kritiske_avvik += 1
 
-        if ebc < krav["ebc"][0]:
-            score -= (krav["ebc"][0] - ebc) * 0.8
-            mangler.append("Ølet er for lyst for stilen")
-        elif ebc > krav["ebc"][1]:
-            score -= (ebc - krav["ebc"][1]) * 0.5
-            mangler.append("Ølet er for mørkt for stilen")
+        d, tekst, kritisk = _avvik_numerisk(
+            ebc, krav["ebc"][0], krav["ebc"][1], _EPS_EBC, 15, 12,
+            lambda diff: "Ølet er for lyst for stilen",
+            lambda diff: "Ølet er for mørkt for stilen",
+        )
+        score += d
+        if tekst: mangler.append(tekst)
+        if kritisk: kritiske_avvik += 1
 
-        if abv < krav["abv"][0]:
-            score -= (krav["abv"][0] - abv) * 7.5
-            mangler.append(f"For lav alkohol (ABV bør være over {krav['abv'][0]:.1f}%)")
-        elif abv > krav["abv"][1]:
-            score -= (abv - krav["abv"][1]) * 7.5
-            mangler.append(f"For høy alkohol (ABV bør være under {krav['abv'][1]:.1f}%)")
+        d, tekst, kritisk = _avvik_numerisk(
+            abv, krav["abv"][0], krav["abv"][1], _EPS_ABV, 25, 25,
+            lambda diff: f"For lav alkohol (ABV bør være over {krav['abv'][0]:.1f}%)",
+            lambda diff: f"For høy alkohol (ABV bør være under {krav['abv'][1]:.1f}%)",
+        )
+        score += d
+        if tekst: mangler.append(tekst)
+        if kritisk: kritiske_avvik += 1
 
+        # Sensoriske smak_krav er ønskede trekk, ikke harde grenser — de teller
+        # med i scoren på samme måte som før, men presenteres separat som
+        # "ønsket sensorisk preg" i stedet for en rød mangel (krav 7). De er
+        # alle på samme faste 0–10-skala for alle stiler, så de trenger ikke
+        # normaliseres mot et intervall slik OG/FG/IBU/EBC/ABV gjør, og teller
+        # heller ikke som "kritisk avvik" (krav 3/5 gjelder eksplisitt de
+        # numeriske feltene OG, ABV, IBU og farge/EBC).
         for smaks_navn, min_verdi in krav["smak_krav"].items():
             reell_verdi = flavor.get(smaks_navn, 0.0)
-            if reell_verdi < min_verdi:
-                score -= (min_verdi - reell_verdi) * 5
-                mangler.append(f"Mangler sensorisk preg av *{smaks_navn.lower()}*")
+            d, diff = _avvik_sensorisk(reell_verdi, min_verdi)
+            if diff is not None:
+                score += d
+                onsket_sensorisk.append(
+                    f"Ønsket sensorisk preg av *{smaks_navn.lower()}* "
+                    f"(har {reell_verdi:.1f}, stilen ber om {min_verdi:.1f}+)"
+                )
 
-        endelig_score = max(0, min(int(score), 100))
+        raw_score = max(0, min(int(score), 100))
 
         stil_matcher.append({
-            "stil": stil_navn, "score": endelig_score, "mangler": mangler,
-            "beskrivelse": krav["beskrivelse"], "prio": krav["prio"], "kat_navn": krav["kat_navn"]
+            "stil": stil_navn, "score": raw_score, "raw_score": raw_score,
+            "mangler": mangler, "onsket_sensorisk": onsket_sensorisk,
+            "kritiske_avvik": kritiske_avvik,
+            "beskrivelse": krav["beskrivelse"], "prio": krav["prio"], "kat_navn": krav["kat_navn"],
+            "bjcp_offisiell": krav.get("bjcp_offisiell", True),
         })
 
     # 4. SIGNATURJUSTERING
+    #
+    # `score` er (fortsatt) tallet som brukes til RANGERING mellom stiler —
+    # signaturbonusen skal fritt kunne endre rekkefølgen mellom plausible
+    # kandidater (krav 3). `signaturbonus` er den samme nominelle justeringen
+    # lagret som eget felt, kun til internt bruk (feilsøking/tester) — den
+    # vises ikke direkte til brukeren, men gjør det mulig å se hvor mye av
+    # `score` som faktisk kommer fra tall/sensorikk (raw_score) og hvor mye
+    # som kommer fra en gjær-/malt-/humle-signatur.
     sigs = detect_recipe_signatures(recipe)
 
     for s in stil_matcher:
         stil = s["stil"]
+        s["signaturbonus"] = 0
 
         if sigs["english_ale"]:
             og_max = bjcp_stiler[stil]["og"][1]
             if og <= og_max + 0.020:
                 if stil in _ENGLISH_STYLES_BASE:
                     s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
+                    s["signaturbonus"] += _ENGLISH_ALE_BOOST
                 elif stil in _ENGLISH_STYLES_DARK and sigs["dark_malt"]:
                     s["score"] = min(100, s["score"] + _ENGLISH_ALE_BOOST)
-            if stil in _LAGER_BOCK_STYLES:
+                    s["signaturbonus"] += _ENGLISH_ALE_BOOST
+            if stil in _LAGER_STYLES:
                 s["score"] = max(0, s["score"] - _LAGER_BOCK_PENALTY)
+                s["signaturbonus"] -= _LAGER_BOCK_PENALTY
 
         if sigs["lager"]:
-            if stil in _LAGER_BOCK_STYLES:
+            if stil in _LAGER_STYLES:
                 s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
+                s["signaturbonus"] += _SIGNATURE_BOOST
 
         if sigs["hazy"]:
             if stil in _HAZY_STYLES:
                 s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
-            elif stil in _LAGER_BOCK_STYLES:
+                s["signaturbonus"] += _SIGNATURE_BOOST
+            elif stil in _LAGER_STYLES:
                 s["score"] = max(0, s["score"] - _SIGNATURE_PENALTY)
+                s["signaturbonus"] -= _SIGNATURE_PENALTY
 
         if sigs["belgian"]:
             if stil in _BELGIAN_STYLES:
                 s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
+                s["signaturbonus"] += _SIGNATURE_BOOST
             elif stil in _ENGLISH_STYLES_BASE:
                 s["score"] = max(0, s["score"] - _SIGNATURE_PENALTY)
+                s["signaturbonus"] -= _SIGNATURE_PENALTY
 
         if sigs["stout"]:
             if stil in _STOUT_STYLES:
                 s["score"] = min(100, s["score"] + _SIGNATURE_BOOST)
+                s["signaturbonus"] += _SIGNATURE_BOOST
+
+    # Tak på totalscoren (krav: signaturbonus skal aldri kunne oppheve store
+    # avvik). Disse takene appliseres ETTER signaturbonusene over, slik at en
+    # bonus i beste fall løfter en stil opp til taket — den kan aldri løfte
+    # en stil forbi det taket, uansett hvor stor bonusen er.
+    #
+    #  - To eller flere kritiske avvik (>= halve stilens toleransevindu
+    #    utenfor grensen, i OG/FG/IBU/EBC/ABV) => maks _TAK_KRITISK.
+    #    Dette er hva som fanger f.eks. en Munich-dominert 1.062/6.7 %-øl
+    #    som blir foreslått som Tysk/Tsjekkisk Pilsner: feil OG-område, feil
+    #    farge og feil ABV samtidig er ikke en "nesten"-match uansett hvilken
+    #    gjær som er brukt.
+    #  - Ellers, hvis stilen har _MANGE_AVVIK_ANTALL_FOR_TAK eller flere
+    #    SYNLIGE numeriske avvik (mangler-listen — OG/FG/IBU/EBC/ABV utenfor
+    #    stilens vindu, uavhengig av om hvert enkelt avvik er "kritisk" i seg
+    #    selv) => maks _TAK_FLERE_AVVIK. Dette var kjernebugen: en stil med
+    #    tre reelle numeriske avvik (f.eks. Märzen: for høy OG, for lys, for
+    #    høy ABV) fikk likevel en signaturbonus stor nok til å ende på samme
+    #    _TAK_AVVIK-tak (95 %) som en stil med kun ett avvik (f.eks. Heller
+    #    Bock) — to synlig ulike raw_score (79 mot 92) ble dermed vist med
+    #    identisk prosent, og rangeringen mellom dem forsvant i UI-en.
+    #    Signaturbonusen skal kunne PÅVIRKE rangeringen (over), men skal ikke
+    #    kunne dekke over at det fortsatt er flere reelle tallavvik igjen.
+    #  - Ellers, dersom det fortsatt finnes mangler eller ønsket sensorisk
+    #    preg, er 100 % reservert et faktisk fullt treff (krav 2/8) — taket
+    #    er da _TAK_AVVIK, ikke en flat "100 -> 99"-avrunding.
+    for s in stil_matcher:
+        if s["kritiske_avvik"] >= _KRITISK_ANTALL_FOR_TAK:
+            s["score"] = min(s["score"], _TAK_KRITISK)
+        elif len(s["mangler"]) >= _MANGE_AVVIK_ANTALL_FOR_TAK:
+            s["score"] = min(s["score"], _TAK_FLERE_AVVIK)
+        elif s["mangler"] or s["onsket_sensorisk"]:
+            s["score"] = min(s["score"], _TAK_AVVIK)
 
     stil_matcher = sorted(stil_matcher, key=lambda x: (x["prio"], -x["score"]))
 
-    topp_match_reell = max(stil_matcher, key=lambda x: x["score"])
-    dominant_stil = topp_match_reell["stil"] if topp_match_reell["score"] > 40 else "Kreativt Brygg"
+    # "Nærmeste stil" (headline) og "prosentvis stiltreff" (listen under) er
+    # bevisst to forskjellige begreper (krav 5): headline bruker raw_score —
+    # den numeriske/sensoriske treffgraden FØR signaturbonus og tak — slik at
+    # en gjær-signaturbonus ikke kan gjøre en dårligere-passende stil til
+    # "nærmeste stil". Prosentlisten bruker derimot den justerte/tak-begrensede
+    # scoren, som er det brukeren faktisk skal lese som en prosentandel.
+    topp_match_reell = max(stil_matcher, key=lambda x: x["raw_score"])
+    dominant_stil = topp_match_reell["stil"] if topp_match_reell["raw_score"] > 40 else "Kreativt Brygg"
 
     # 5. BALANSEANALYSE OG ADVARSLER
     balanse_notater, problemer = [], []
