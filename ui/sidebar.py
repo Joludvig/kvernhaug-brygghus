@@ -1,7 +1,11 @@
 import json
 import streamlit as st
 from config import DEMO_MODE
-from modules.recipe_storage import hent_alle_oppskrifter
+from modules.recipe_storage import (
+    hent_alle_oppskrifter,
+    hent_oppskrift_filnavn_kart,
+    finn_duplikate_oppskrift_navn,
+)
 from modules.process_profiles import normaliser_prosessprofil
 from modules.recipe_importer import (
     parse_recipe_text,
@@ -21,7 +25,19 @@ def render_sidebar():
         st.sidebar.warning("🍺 Demo-modus — oppskrifter lagres ikke")
 
     st.sidebar.header("📁 Lagrede oppskrifter")
-    lagrede_brygg = hent_alle_oppskrifter(mappe="demo_recipes") if DEMO_MODE else hent_alle_oppskrifter()
+    _oppskrift_mappe_kwargs = {"mappe": "demo_recipes"} if DEMO_MODE else {}
+    lagrede_brygg = hent_alle_oppskrifter(**_oppskrift_mappe_kwargs)
+    filnavn_kart = hent_oppskrift_filnavn_kart(**_oppskrift_mappe_kwargs)
+
+    if not DEMO_MODE:
+        duplikater = finn_duplikate_oppskrift_navn()
+        if duplikater:
+            for dup in duplikater:
+                st.sidebar.warning(
+                    f"⚠️ Flere filer deler navnet «{dup['navn']}» "
+                    f"({', '.join(dup['filer'])}) — kun én av dem vises under."
+                )
+
     if lagrede_brygg:
         oppskrift_valg = ["-- Velg oppskrift --"] + list(lagrede_brygg.keys())
         valgt_lagret_navn = st.sidebar.selectbox(
@@ -65,6 +81,12 @@ def render_sidebar():
             st.session_state["_lastet_water_measurements"] = r_data.get("water_measurements")
             st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
             st.session_state["_last_loaded_recipe"] = valgt_lagret_navn
+            # Den FAKTISKE kildefilen (ikke bare navnet) -- se
+            # modules/recipe_storage.py::lagre_oppskrift() sin
+            # kilde_filnavn-parameter. Nødvendig for at en påfølgende
+            # omdøping arkiverer riktig gammel fil i stedet for å gjette
+            # filnavnet på nytt fra teksten i "name".
+            st.session_state["_last_loaded_recipe_file"] = filnavn_kart.get(valgt_lagret_navn)
             st.session_state["_original_batch_size"] = r_data.get("batch_size", 20.0)
             st.session_state["_malt_pct_pending_sync"] = False
             st.session_state.pop("skaler_maal_volum", None)
@@ -72,6 +94,7 @@ def render_sidebar():
             st.rerun()
         elif valgt_lagret_navn == "-- Velg oppskrift --":
             st.session_state.pop("_last_loaded_recipe", None)
+            st.session_state.pop("_last_loaded_recipe_file", None)
     else:
         st.sidebar.info("Ingen oppskrifter lagret i mappen ennå.")
 

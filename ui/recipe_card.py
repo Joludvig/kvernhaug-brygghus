@@ -4,7 +4,13 @@ import os
 import streamlit as st
 from datetime import date
 from config import DEMO_MODE
-from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil, lagre_logg_entry, hent_logg
+from modules.recipe_storage import (
+    lagre_oppskrift,
+    slett_oppskrift_fil,
+    lagre_logg_entry,
+    hent_logg,
+    OppskriftNavnKollisjon,
+)
 from modules.recipe import bygg_recipe_object
 from modules.card_template import render_card_html, render_a4_html
 from ui.branding import _logo_base64
@@ -96,7 +102,12 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             hops=st.session_state.get("valgt_humle", []),
             yeast=st.session_state.get("valgt_gjaer_id", "safale_us_05"),
             og=ctx["og"], fg=ctx["fg"], abv=ctx["abv"],
-            ibu=ctx["ibu"], ebc=ctx["ebc"], flavor_profile={},
+            ibu=ctx["ibu"], ebc=ctx["ebc"],
+            # Den faktisk BEREGNEDE smaksprofilen (ctx["recipe"] er
+            # ferskt bygget av bygg_recipe_context() for denne konteksten)
+            # -- IKKE en hardkodet tom dict, som tidligere kastet bort
+            # smakspoengene ved hver lagring.
+            flavor_profile=ctx["recipe"].get("flavor_profile", {}),
             brygger_stil=st.session_state.get("brygger_stil", ""),
             process_profile=st.session_state.get("aktiv_prosessprofil"),
             water_source_profile=st.session_state.get("aktiv_vannkilde_snapshot"),
@@ -106,32 +117,66 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         )
 
     if not DEMO_MODE:
-        # Lagre endringer: overskriv aktiv oppskrift
+        # Lagre endringer: overskriv aktiv oppskrift (i tilfelle av
+        # navneendring: skriver ny fil FØRST, arkiverer deretter den
+        # gamle kildefilen -- se
+        # modules/recipe_storage.py::lagre_oppskrift()).
         if st.session_state.get("_last_loaded_recipe"):
             if st.button("💾 Lagre endringer", width="stretch", key="lagre_endringer_btn"):
                 ny_recipe = _bygg_recipe_fra_session(ctx)
-                lagre_oppskrift(ny_recipe)
-                st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
-                st.session_state["_gjeldende_navn_preserved"] = ny_recipe["name"]
-                st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
+                try:
+                    nytt_filnavn = lagre_oppskrift(
+                        ny_recipe,
+                        kilde_filnavn=st.session_state.get("_last_loaded_recipe_file"),
+                    )
+                except OppskriftNavnKollisjon as e:
+                    st.error(f"❌ {e}")
+                else:
+                    st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
+                    st.session_state["_last_loaded_recipe_file"] = nytt_filnavn
+                    st.session_state["_gjeldende_navn_preserved"] = ny_recipe["name"]
+                    st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
 
         # Lagre som ny kopi og slett
         btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
             if st.button("💾 Lagre som ny kopi", width="stretch", key="lagre_ny_kopi_btn"):
                 ny_recipe = _bygg_recipe_fra_session(ctx)
-                lagre_oppskrift(ny_recipe)
-                st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
+                try:
+                    # kilde_filnavn=None -- en ny kopi har per definisjon
+                    # ingen kjent tidligere kildefil.
+                    # bloker_ved_navnekollisjon=True: skal ALDRI kunne
+                    # overskrive en annen eksisterende oppskrift stille.
+                    lagre_oppskrift(ny_recipe, kilde_filnavn=None, bloker_ved_navnekollisjon=True)
+                except OppskriftNavnKollisjon as e:
+                    st.error(f"❌ {e}")
+                else:
+                    st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
         with btn_col2:
-            if st.button("🗑️ Slett gjeldende", width="stretch"):
-                if slett_oppskrift_fil(ctx["name"]):
-                    st.toast(f"Slettet {ctx['name']}", icon="🗑️")
-                    st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
-                    st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
-                    st.session_state.valgt_gjaer_id = "safale_us_05"
-                    st.session_state.gjeldende_navn = "Kvernhaug Spesial"
-                    st.session_state["_pending_brygger_stil_reset"] = True
+            _slett_bekreft_naavaerende = st.session_state.get("_pending_slett_bekreft") == ctx["name"]
+            if not _slett_bekreft_naavaerende:
+                if st.button("🗑️ Slett gjeldende", width="stretch", key="slett_gjeldende_btn"):
+                    st.session_state["_pending_slett_bekreft"] = ctx["name"]
                     st.rerun()
+            else:
+                st.warning(f"Arkivere «{ctx['name']}»? Filen flyttes til _archive/, ikke slettes permanent.")
+                bekreft_col, avbryt_col = st.columns(2)
+                with bekreft_col:
+                    if st.button("✅ Bekreft", width="stretch", key="slett_bekreft_btn"):
+                        if slett_oppskrift_fil(ctx["name"]):
+                            st.toast(f"Arkivert: {ctx['name']}", icon="🗑️")
+                            st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
+                            st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
+                            st.session_state.valgt_gjaer_id = "safale_us_05"
+                            st.session_state.gjeldende_navn = "Kvernhaug Spesial"
+                            st.session_state["_pending_brygger_stil_reset"] = True
+                            st.session_state.pop("_last_loaded_recipe_file", None)
+                        st.session_state.pop("_pending_slett_bekreft", None)
+                        st.rerun()
+                with avbryt_col:
+                    if st.button("Avbryt", width="stretch", key="slett_avbryt_btn"):
+                        st.session_state.pop("_pending_slett_bekreft", None)
+                        st.rerun()
 
     with st.expander("📐 Skaler oppskrift"):
         original = st.session_state.get("_original_batch_size")
