@@ -26,6 +26,9 @@ raw_data/*.txt
 /recipes/
 data/humle_lager.json
 data/equipment.json
+data/pantry.json
+data/pantry.json.tmp
+data/pantry.json.backup_*
 
 # Backup-artefakter
 data/*.bak
