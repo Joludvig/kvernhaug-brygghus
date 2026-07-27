@@ -16,8 +16,10 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 - Pantry V1 (flere ingredienstyper, egendefinerte varer, Lalvin EC-1118)
 - Pantry backup/restore (automatisk rullerende backup + manuell gjenoppretting med forhåndsvisning)
 - Smart Handleliste V1 (Pantry som sannhetskilde, reell mangel, kjøpsforslag, rest etter kjøp)
+- Maltpakningsoptimalisering i Smart Handleliste (butikkvarianter, hel/knust, kombinasjonsforslag rangert etter billigst/minst overkjøp/balansert)
 - Felles gjærpakkeberegning — samme formel brukt av bryggedagsark, Pantry og Smart Handleliste
 - Fritekst oppskriftsimporter, leverandørpanel (pris-synk / produktlenkekontroll), scraper + normaliseringspipeline
+- Oppskriftskort — automatisk innholdshøyde (erstatter en tidligere pikselheuristikk; krever Streamlit ≥ 1.57)
 
 ## Pågår / akseptansetesting
 
@@ -28,7 +30,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 1. Fullføre Wiesn-akseptansetesten
 2. **Bryggelogg V1** — registrere faktiske bryggeresultater mot planlagt oppskrift. Lav terskel er hoveddesignkravet: obligatorisk er kun dato + målt OG; FG, karakter, smaksnotater og "neste gang" er valgfritt. Ett loggfil per oppskrift, snapshot av oppskriftsdata ved logg-opprettelse.
 3. **Equipment Profile** — erstatte hardkodede BrewZilla 35L-standardverdier med redigerbare utstyrsinnstillinger (kjelevolum, fordampning, meskeforhold, dødvolum, kornabsorpsjon), lagret i `data/equipment.json`.
-4. **Butikksammenligning og maltvariantmodell** — side-om-side prissammenligning Vestbrygg/Ølbrygging.no, samt en variantmodell for malt (knust/hel, ulike pakningsstørrelser per butikk) som forutsetning for reell maltpris-sammenligning.
+4. **Full butikksammenligning og en mer komplett maltvariantmodell** — maltpakningsoptimaliseringen i Smart Handleliste er ferdig (se «Ferdig» over); det som gjenstår er side-om-side prissammenligning på tvers av Vestbrygg/Ølbrygging.no for hele oppskriften, samt et bredere registrert variant-/pakningsdatagrunnlag (flere malttyper, ikke bare de som allerede har butikkvarianter registrert).
 5. **Migrering og avvikling av legacy-humlelager** — fase ut det gamle, ikke-Pantry-synkroniserte humlelageret og den gamle handlelisten når Smart Handleliste er fullt validert i reell bruk.
 
 ## Senere

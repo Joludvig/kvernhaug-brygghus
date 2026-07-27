@@ -1,10 +1,10 @@
 # Kvernhaug Brygghus — Prosjektstatus (Juli 2026)
 
 *Dato: 2026-07-27*
-*Gjeldende master-commit: `9bd4fe1`*
-*Testantall: 357 tester — 0 skipped, 0 errors, 0 failures*
-*Python-filer i repoet: 85*
-*Lagrede private oppskrifter: 15 (kun antall — filnavn og innhold er ikke del av denne rapporten)*
+*Gjeldende master-commit: `40edbcd`*
+*Testantall: 408 tester — 0 skipped, 0 errors, 0 failures*
+*Python-filer i repoet: 88*
+*App-synlige lagrede oppskrifter: 8 (kun antall — filnavn og innhold er ikke del av denne rapporten)*
 
 Dette dokumentet erstatter ikke `docs/PROJECT_STATUS_JUNI_2026.md`, som beholdes som historikk.
 
@@ -17,7 +17,7 @@ Dette dokumentet erstatter ikke `docs/PROJECT_STATUS_JUNI_2026.md`, som beholdes
 - **`ui/`** — én panelfil per fane-seksjon, rendrer mot `modules/`.
 - **`data/`** — kuraterte masterdatabaser (malt/humle/gjær) + private, gitignorede runtime-filer (`pantry.json`, `humle_lager.json`, `equipment.json`, vannmål).
 - **`recipes/`** — brukerens lagrede oppskrifter. Gitignoret; ikke delt i det offentlige repoet.
-- **`tests/`** — 23 testfiler, inkludert committede fixtures (sanitiserte oppskrift-kopier uten personlig innhold) slik at ingen test er avhengig av private, lokale data.
+- **`tests/`** — 25 testfiler, inkludert committede fixtures (sanitiserte oppskrift-kopier uten personlig innhold) slik at ingen test er avhengig av private, lokale data.
 
 ---
 
@@ -32,7 +32,13 @@ Dette dokumentet erstatter ikke `docs/PROJECT_STATUS_JUNI_2026.md`, som beholdes
 | Water Chemistry V1 (kildevann, målprofilbibliotek, salter, solver, full/delvis/uoppnåelig-klassifisering, mesk/skyll-fordeling, manuelt pH-felt, eksport) | Ferdig |
 | Pantry V1 (flere ingredienstyper, egendefinerte varer, EC-1118, backup/restore, sikker testisolasjon) | Ferdig |
 | Smart Handleliste V1 (Pantry som sannhetskilde, reell mangel, kjøpsforslag, rest etter kjøp, prisestimat, knapp-margin, skalering) | Ferdig |
+| Maltpakningsoptimalisering i Smart Handleliste (butikkvarianter, hel/knust, kombinasjonsforslag, billigst/minst overkjøp/balansert) | Ferdig |
 | Legacy humlelager + gammel handleliste | Beholdt, tydelig separert, ikke synkronisert med Pantry |
+
+### Ferdig UI-vedlikehold
+
+- Oppskriftskort — automatisk innholdshøyde (`st.iframe(..., height="content")`) erstatter en tidligere Python-side pikselheuristikk som kunne klippe kort med lange titler/mye innhold. Krever Streamlit **minst versjon 1.57** (se `requirements.txt`).
+- Deprecerte `use_container_width`-parametre erstattet med `width="stretch"` i hele UI-laget.
 
 ## Pågår / akseptansetesting
 
@@ -53,6 +59,9 @@ Dette dokumentet erstatter ikke `docs/PROJECT_STATUS_JUNI_2026.md`, som beholdes
 - `f67d8d1` — felles gjærpakkeformel (bryggedag/Pantry/Smart Handleliste)
 - `ec25629` — regresjonstest mot ekte 23L Wiesn-batch (ikke 20L)
 - `72e6b77`, `0887377`, `9bd4fe1` — **Pantry test isolation and backup hardening** (se eget avsnitt under)
+- `c9f2e32` — maltpakningsoptimalisering i Smart Handleliste (butikkvarianter, kombinasjonsforslag)
+- `d8935a8` — oppskriftskort tilpasser høyden automatisk til faktisk rendret innhold
+- `40edbcd` — fjernet deprecerte `use_container_width`-parametre i hele UI-laget
 
 ---
 
@@ -70,7 +79,7 @@ Som et permanent sikkerhetsnett er det i tillegg innført:
 
 - `data/pantry.json` — inneholder reelle, private lagerdata. Gitignoret.
 - `data/pantry.json.backup_*` — rullerende backupfiler av samme fil. Gitignoret.
-- `recipes/*.json` — 15 private oppskrifter. Gitignoret.
+- `recipes/*.json` — 8 app-synlige private oppskrifter. Gitignoret. (Mappen inneholder i tillegg loggfiler, en arkivmappe og enkelte eldre/duplikatfiler som ikke vises i oppskriftsvelgeren — ingen navn eller innhold er del av denne rapporten.)
 - `data/humle_lager.json`, `data/equipment.json` — private, gitignorede runtime-filer.
 
 ---
@@ -86,6 +95,7 @@ Som et permanent sikkerhetsnett er det i tillegg innført:
 - `raw_data/malt_raw.json` har en ucommittet, uavklart scrape-arbeidskopi: hovedsakelig rekkefølgeendringer, ett nytt Spraymalt-produkt, ett manglende Crystal Maple/Carapils-produkt, og én Bohemian Pilsner-side fanget med en annen variant/pakningsstørrelse enn i dagens master. Skal **ikke** committes eller reverteres før manuell butikkontroll.
 - `master_malt.json` er strukturelt v2-format, men beholder et eldre filnavn (dokumentert siden juni 2026-statusen); ingen rename planlagt før en bredere datarefaktorering.
 - `wip/gjaer-id-migrasjon` finnes som egen branch, men har en gammel base **fra før** Pantry/Smart Handleliste-arbeidet. Den må rebases og gjennomgås grundig før en eventuell merge vurderes, og skal ikke røres nå.
+- `modules/recipe_storage.py::hent_alle_oppskrifter()` bruker oppskriftens navn som nøkkel og kan stille kollapse to lagrede oppskrifter til én dersom de deler nøyaktig samme navn (ingen varsel gis i dag). Lav prioritet; foreslått fremtidig fiks er å oppdage og logge/varsle kollisjonen i stedet for å overskrive den lydløst — identitetsmodellen (filnavn/navn) endres ikke i denne runden.
 
 ## Eksplisitt parkerte funksjoner
 
@@ -101,7 +111,7 @@ Som et permanent sikkerhetsnett er det i tillegg innført:
 1. Fullføre den pågående Wiesn-akseptansetesten (registrere malt og W-34/70, bekrefte full lagerkontroll).
 2. Bryggelogg V1.
 3. Equipment Profile.
-4. Butikksammenligning og maltvariantmodell.
+4. Full butikksammenligning og en mer komplett maltvariantmodell (maltpakningsoptimaliseringen i Smart Handleliste er ferdig — dette gjelder resten: side-om-side prissammenligning på tvers av butikker og et bredere variant-/pakningsdatagrunnlag for flere malttyper).
 5. Migrering og avvikling av legacy-humlelager.
 
 Se `docs/ROADMAP.md` for full roadmap.

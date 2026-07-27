@@ -24,6 +24,7 @@ raw_data/*.txt
 # ENHVER mappe med det navnet i hele treet, inkl. tests/fixtures/recipes/ —
 # som er committede, saniterte test-fixtures og IKKE skal ignoreres.
 /recipes/
+/recipes_backup_*/
 data/humle_lager.json
 data/equipment.json
 data/pantry.json
