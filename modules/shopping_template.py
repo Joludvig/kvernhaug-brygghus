@@ -1,4 +1,4 @@
-from modules.export_format import logo_img_tag, fmt_vol, fmt_kg, fmt_gram, esc
+from modules.export_format import logo_img_tag, fmt_vol, fmt_kg, fmt_gram, esc, sanitize_url
 
 
 def render_shopping_list_html(ctx: dict, malt_items: list, humle_items: list, gjaer_item: dict | None, butikk: str) -> str:
@@ -8,11 +8,15 @@ def render_shopping_list_html(ctx: dict, malt_items: list, humle_items: list, gj
         est = " <em>(estimert)</em>" if er_estimat else ""
         navn_esc = esc(navn)
         # `url` kommer i siste instans fra skrapet butikkdata
-        # (butikk_match.*.url i masterdatabasene) -- escapes FØR den
-        # havner i et anførselstegn-omsluttet href-attributt, slik at et
-        # anførselstegn i en (kompromittert/uventet) produkt-URL aldri kan
-        # bryte ut av attributtet.
-        lenke = f"<a href='{esc(url)}'>{navn_esc}</a>" if url else navn_esc
+        # (butikk_match.*.url i masterdatabasene) -- TO uavhengige steg,
+        # i rekkefølge: sanitize_url() avviser farlige skjema
+        # (javascript:/data:/file:/vbscript:/osv., kun http/https
+        # tillates), deretter escapes det som er igjen FØR det havner i
+        # et anførselstegn-omsluttet href-attributt (hindrer attributt-
+        # utbryting via et anførselstegn i selve URL-en). En avvist URL
+        # vises som vanlig, ikke-klikkbar tekst i stedet for en lenke.
+        trygg_url = sanitize_url(url)
+        lenke = f"<a href='{esc(trygg_url)}'>{navn_esc}</a>" if trygg_url else navn_esc
         return (
             f"<tr>"
             f"<td>{lenke}</td>"

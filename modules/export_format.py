@@ -11,6 +11,7 @@ brewday_panel, shopping_list, etc.
 import base64
 import html
 import os
+import urllib.parse
 
 # ── Path to shared logo asset ──────────────────────────────────────────────
 _LOGO_PATH = os.path.join("assets", "branding", "master_v1_header_24px.png")
@@ -28,6 +29,53 @@ def esc(value) -> str:
     if value is None:
         return ""
     return html.escape(str(value), quote=True)
+
+
+# Skjema tillatt i klikkbare produktlenker i eksportene. Bevisst en
+# ALLOWLIST (ikke en blokkliste over "javascript:"/"data:"/osv.) -- en
+# blokkliste må oppdateres for hvert nytt farlig skjema noen finner på;
+# en allowlist er trygg mot alle skjema den ikke eksplisitt nevner.
+_TILLATTE_URL_SKJEMA = {"http", "https"}
+
+
+def sanitize_url(url):
+    """Validerer at en produkt-URL bruker et TRYGT skjema (kun http/https)
+    før den settes inn i en klikkbar lenke i en HTML-eksport. Returnerer
+    den rensede URL-en hvis den er trygg, ellers None -- kallestedet skal
+    da vise ingrediensnavnet uten lenke i stedet for å risikere en
+    javascript:/data:/file:/vbscript:-URL som kjører når lenken klikkes.
+
+    Dette er et EGET, TIDLIGERE steg enn esc()/html.escape(quote=True):
+    escaping hindrer HTML-/attributt-utbryting (et anførselstegn i
+    URL-en), IKKE et farlig skjema i seg selv -- en fullt escapet
+    "javascript:alert(1)" er fortsatt en javascript:-URL. Kallestedene
+    (se modules/shopping_template.py::_rad()) kjører derfor BEGGE steg i
+    rekkefølge: sanitize_url() først, så esc() på resultatet.
+
+    URL-en kommer i siste instans fra skrapet butikkdata
+    (butikk_match.*.url i masterdatabasene, se
+    modules/store_matcher.py) -- ikke direkte brukerinput, men likevel
+    ekstern, ikke-kuratert tekst appen ikke bør stole blindt på.
+    """
+    if not url or not isinstance(url, str):
+        return None
+    # Kontrolltegn (tab, linjeskift, vognretur, osv.) FJERNES -- ikke bare
+    # strippes fra start/slutt -- FØR skjemaet leses. Nettlesere har
+    # historisk ignorert nettopp slike tegn MIDT I et skjema, noe som gjør
+    # "java\tscript:alert(1)" til en reell javascript:-URL i praksis selv
+    # om en naiv understreng-sjekk ikke ville gjenkjent det.
+    renset = "".join(tegn for tegn in url if tegn.isprintable()).strip()
+    if not renset:
+        return None
+    try:
+        parsed = urllib.parse.urlsplit(renset)
+    except ValueError:
+        return None
+    if parsed.scheme.lower() not in _TILLATTE_URL_SKJEMA:
+        return None
+    if not parsed.netloc:
+        return None
+    return renset
 
 
 # ══════════════════════════════════════════════════════════════════════════

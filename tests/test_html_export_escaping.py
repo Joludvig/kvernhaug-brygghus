@@ -175,8 +175,13 @@ class TestShoppingTemplateEscaping(unittest.TestCase):
     def test_render_shopping_list_html_escaper_url_attributt_utbryting(self):
         # Klassisk attributt-utbrytingsforsøk: en URL med et anførselstegn
         # etterfulgt av et nytt attributt/tag skal ALDRI kunne bryte ut av
-        # href='...'-attributtet.
-        ond_url = "javascript:alert(1)' onmouseover='alert(2)"
+        # href='...'-attributtet. Bruker et TILLATT skjema (https) med et
+        # ondsinnet anførselstegn i selve URL-en, for å isolere ESCAPING-
+        # laget spesifikt fra skjema-validering (sanitize_url() ville
+        # ellers avvist en javascript:-URL allerede FØR escaping i det
+        # hele tatt fikk sjansen til å bli testet -- se i stedet
+        # tests/test_url_sanitization.py for skjema-avvisningstestene).
+        ond_url = "https://vestbrygg.no/produkt?x=1' onmouseover='alert(2)"
         recipe = _recipe(navn="Vanlig Navn", brygger_stil="")
         ctx = _ctx(recipe)
         malt_items = [{"navn": "Pilsner", "mengde": 5.0, "total": 100.0, "er_estimat": False, "url": ond_url}]
