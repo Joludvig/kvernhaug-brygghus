@@ -6,7 +6,7 @@ from datetime import date
 from config import DEMO_MODE
 from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil, lagre_logg_entry, hent_logg
 from modules.recipe import bygg_recipe_object
-from modules.card_template import render_card_html, render_a4_html, beregn_recipe_card_height
+from modules.card_template import render_card_html, render_a4_html
 from ui.branding import _logo_base64
 
 _LOGO_PATH = os.path.join("assets", "branding", "master_v1_transparent.png")
@@ -165,18 +165,18 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
 
     logo_b64 = _logo_base64() if os.path.exists(_LOGO_PATH) else None
 
-    # Innholdsavhengig høyde (se modules/card_template.beregn_recipe_card_height)
-    # -- kortet rendres i en FAST-høyde Streamlit-iframe (scrolling=False),
-    # så en for lav høyde klipper innhold ved iframe-kanten. En lang tittel
-    # (f.eks. "Kvernhaug Wiesn-Märzen 1872") som brytes over flere linjer
-    # gjør kortet reelt høyere enn ett med kort, én-linjes tittel — dette
-    # MÅ regnes inn, ikke bare antall malt-/humlerader.
-    _card_h = beregn_recipe_card_height(ctx["recipe"], summary_tekst=ctx.get("summary", ""))
-
-    st.components.v1.html(
+    # height="content" ber Streamlit måle kortets FAKTISKE rendrede
+    # DOM-høyde i nettleseren og sette iframen til nøyaktig den høyden --
+    # ingen Python-side pikselanslag (tittellengde, antall rader,
+    # smaksprofillengde, fontrendering, vindusbredde, ...) kan noen gang
+    # komme i utakt med det ekte innholdet, siden vi ikke lenger gjetter i
+    # det hele tatt. Bekreftet støttet i den installerte Streamlit-versjonen
+    # (se requirements.txt, hevet til å matche); ikke verifisert mot den
+    # gamle nedre grensen 1.35.
+    st.iframe(
         render_card_html(ctx, malt_database, humle_database, gjaer_database, logo_b64=logo_b64),
-        height=_card_h,
-        scrolling=False,
+        width="stretch",
+        height="content",
     )
 
     if not DEMO_MODE:
