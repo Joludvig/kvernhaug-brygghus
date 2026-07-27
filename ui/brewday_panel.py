@@ -388,11 +388,26 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
     # at avviket er sett før arket kan genereres, slik at et bryggedagsark
     # med en IBU som ikke er fysisk oppnåelig ikke presenteres som gyldig
     # uten videre.
+    #
+    # Nøkkelen til bekreftelses-checkboxen er BEVISST avledet av en
+    # signatur på gjeldende oppskrift + total koketid + akkurat HVILKE
+    # humler/tider som er i avvik -- IKKE en fast nøkkel. En fast nøkkel
+    # ville latt en bekreftelse for én oppskrift følge med "gratis" ved
+    # et direkte bytte til en ANNEN oppskrift med et helt annet (eller
+    # like ugyldig) avvik, siden Streamlit sin egen widget-state for en
+    # uendret nøkkel overlever på tvers av reruns. En endring i
+    # signaturen (annen oppskrift, endret koketid, endret humleliste) gir
+    # en NY, ubekreftet widget-instans -- samme mønster som
+    # ui/process_panel.py sin _process_widget_revision for meskestegene.
     _eksport_ok = True
     if plan["humle_over_koketid"]:
+        _avvik_signatur = (
+            f"{ctx['name']}|koketid={plan['koketid_min']}|"
+            + ",".join(f"{h['navn']}:{h['tid']}" for h in plan["humle_over_koketid"])
+        )
         _eksport_ok = st.checkbox(
             "Jeg har sett avviket mellom planlagt og faktisk mulig IBU over, og vil eksportere likevel",
-            key="bd_bekreft_humletid_avvik",
+            key=f"bd_bekreft_humletid_avvik::{_avvik_signatur}",
         )
         if not _eksport_ok:
             st.caption("🔒 Bryggedagsarket er låst til avviket over er bekreftet.")

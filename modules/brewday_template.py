@@ -25,8 +25,16 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     )
 
     # ── Hop table — minimum 5 visible rows ────────────────────────────────
+    # Rader der humlens EGEN oppgitte koketid overstiger kokens totale
+    # lengde (h["tid_over_koketid"], se
+    # modules/brewday_calc.py::_bygg_humle_entry) markeres tydelig -- IBU-
+    # kolonnen viser fortsatt oppskriftens PLANLAGTE bidrag (ibu_bidrag,
+    # uendret tid), aldri det stille klippede tallet, men raden i seg selv
+    # varsler at det ikke er fysisk oppnåelig som oppgitt.
     humle_data_rows = "".join(
-        f"<tr><td>{h['tid']} min</td><td>{h.get('tilsatt_etter_min', 0)} min</td><td>{esc(h['navn'])}</td>"
+        f"<tr{' class=\"rad-avvik\"' if h.get('tid_over_koketid') else ''}>"
+        f"<td>{'⚠️ ' if h.get('tid_over_koketid') else ''}{h['tid']} min</td>"
+        f"<td>{h.get('tilsatt_etter_min', 0)} min</td><td>{esc(h['navn'])}</td>"
         f"<td>{fmt_gram(h['gram'])}</td><td>{fmt_ibu_bid(h['ibu_bidrag'])}</td></tr>"
         for h in plan["humleplan"]
     )
@@ -38,6 +46,30 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     humle_rows = humle_data_rows + humle_tomme_rows or (
         "<tr><td colspan='5'>Ingen humle.</td></tr>" + humle_tomme_rows
     )
+
+    # Et eget, tydelig AVVIK-panel rett under tabellen -- vises KUN når
+    # det faktisk finnes en umulig humletid (plan["humle_over_koketid"]),
+    # slik at en vanlig oppskrift uten avvik beholder dagens rene layout
+    # helt uendret. Viser oppgitt tid, total koketid, OG begge IBU-tallene
+    # side om side, slik at en umulig IBU aldri kan stå alene som om den
+    # var gyldig -- heller ikke etter at siden er skrevet ut eller åpnet
+    # på nytt uten Streamlit-sesjonen som viste det opprinnelige varselet.
+    humle_avvik_html = ""
+    if plan.get("humle_over_koketid"):
+        avvik_li = "".join(
+            f"<li>{esc(h['navn'])}: oppgitt <strong>{h['tid']} min</strong> "
+            f"— total koketid er kun <strong>{plan['koketid_min']} min</strong></li>"
+            for h in plan["humle_over_koketid"]
+        )
+        humle_avvik_html = f"""
+    <div class="ibu-avvik">
+      <p class="ibu-avvik-tittel">⚠️ AVVIK: humletid overstiger total koketid — IBU under er IKKE fysisk oppnåelig som oppgitt</p>
+      <ul>{avvik_li}</ul>
+      <div class="ibu-avvik-sammenligning">
+        <div><span class="ibu-avvik-lbl">Planlagt IBU</span><span class="ibu-avvik-val">{fmt_ibu_bid(plan['ibu_planlagt'])}</span></div>
+        <div><span class="ibu-avvik-lbl">Faktisk mulig IBU</span><span class="ibu-avvik-val">{fmt_ibu_bid(plan['ibu_faktisk_prosess'])}</span></div>
+      </div>
+    </div>"""
 
     # ── Vannbehandling (se modules/water_chemistry.py) ───────────────────────
     vann_kilde      = water.get("kilde")
@@ -273,6 +305,58 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     border-bottom: 1px dotted #ccc;
     font-size: 10pt;
   }}
+  table.humle tr.rad-avvik td {{
+    background: #fdf1f1;
+    font-weight: bold;
+  }}
+
+  /* ── HUMLETID/IBU-AVVIK (se modules/brewday_calc.py sin
+     tid_over_koketid/ibu_faktisk_prosess) -- vises ALLTID på papiret når
+     en humle er tilsatt med lengre egen koketid enn selve kokens totale
+     lengde, slik at avviket ikke forsvinner sammen med Streamlit-
+     varselet når arket senere åpnes eller skrives ut. Farge ALENE er
+     bevisst ikke eneste signal (kan falle bort ved svart/hvitt-utskrift)
+     -- selve teksten i .ibu-avvik-tittel under bærer meningen uansett. */
+  .ibu-avvik {{
+    border: 2px solid #b02a2a;
+    border-radius: 3px;
+    background: #fdf1f1;
+    padding: 5px 8px 6px 8px;
+    margin-top: 4px;
+  }}
+  .ibu-avvik-tittel {{
+    font-size: 9.5pt;
+    font-weight: bold;
+    color: #8a1f1f;
+    margin-bottom: 3px;
+  }}
+  .ibu-avvik ul {{
+    margin: 0 0 4px 0;
+    padding-left: 16px;
+  }}
+  .ibu-avvik li {{
+    font-size: 9pt;
+    margin: 1px 0;
+  }}
+  .ibu-avvik-sammenligning {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 4px;
+  }}
+  .ibu-avvik-lbl {{
+    display: block;
+    font-size: 8pt;
+    color: #8a1f1f;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }}
+  .ibu-avvik-val {{
+    display: block;
+    font-size: 13pt;
+    font-weight: bold;
+    color: #8a1f1f;
+  }}
 
   /* ── FERMENTERING ── */
   .ferm-grid {{
@@ -475,6 +559,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
       <tr><th>Tid igjen</th><th>Tilsatt etter</th><th>Humle</th><th>Gram</th><th>IBU</th></tr>
       {humle_rows}
     </table>
+    {humle_avvik_html}
 
     {tilsetninger_html}
 

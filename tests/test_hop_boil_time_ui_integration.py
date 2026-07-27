@@ -25,6 +25,18 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _APP_PY = os.path.join(_REPO_ROOT, "app.py")
 
 
+def _finn_avvik_bekreftelse_checkbox(at):
+    """Bekreftelses-checkboxens nøkkel er BEVISST avledet av en signatur
+    på oppskrift + koketid + avvikende humler (se ui/brewday_panel.py),
+    ikke en fast nøkkel -- så testene finner den ved nøkkel-PREFIKS i
+    stedet for en eksakt nøkkel. Returnerer None hvis ingen slik
+    checkbox er rendret akkurat nå."""
+    for cb in at.checkbox:
+        if cb.key and cb.key.startswith("bd_bekreft_humletid_avvik::"):
+            return cb
+    return None
+
+
 class TestHumletidOverKoketidIEktApp(unittest.TestCase):
     def setUp(self):
         self._tmpdir = tempfile.TemporaryDirectory()
@@ -72,7 +84,8 @@ class TestHumletidOverKoketidIEktApp(unittest.TestCase):
         eksport_knapp = at.button(key="brewday_print_btn")
         self.assertTrue(eksport_knapp.disabled, "Eksportknappen skal være låst før avviket er bekreftet")
 
-        bekreft_checkbox = at.checkbox(key="bd_bekreft_humletid_avvik")
+        bekreft_checkbox = _finn_avvik_bekreftelse_checkbox(at)
+        self.assertIsNotNone(bekreft_checkbox, "Fant ingen bekreftelses-checkbox for avviket")
         self.assertFalse(bekreft_checkbox.value)
 
         bekreft_checkbox.check().run()
@@ -103,8 +116,72 @@ class TestHumletidOverKoketidIEktApp(unittest.TestCase):
         self.assertFalse(eksport_knapp.disabled)
         # Bekreftelses-checkboxen skal ikke engang rendres når det ikke
         # finnes noe avvik å bekrefte.
-        with self.assertRaises(KeyError):
-            at.checkbox(key="bd_bekreft_humletid_avvik")
+        self.assertIsNone(_finn_avvik_bekreftelse_checkbox(at))
+
+
+class TestBekreftelseFolgerIkkeMedVedByttMellomUgyldigePlaner(unittest.TestCase):
+    """Regresjonstest for at bekreftelses-checkboxens nøkkel er avledet av
+    oppskrift+koketid+avvikende humler, ikke fast: en bekreftelse gitt for
+    ÉN oppskrift skal ALDRI "følge med" til en ANNEN oppskrift ved et
+    direkte bytte, selv om begge har et (forskjellig) humletidsavvik."""
+
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self._gammel_env = os.environ.get("KVERNHAUG_RECIPES_DIR")
+        os.environ["KVERNHAUG_RECIPES_DIR"] = self._tmpdir.name
+
+        import modules.recipe_storage as recipe_storage
+        recipe_storage.lagre_oppskrift(bygg_recipe_object(
+            "E2E Avvik A", 20.0, 0.75,
+            [{"id": "vienna", "mengde": 5.0}],
+            [{"id": "magnum", "gram": 20, "tid": 90}],
+            "safale_us_05", 1.050, 1.012, 5.0, 20, 8, {},
+        ))
+        recipe_storage.lagre_oppskrift(bygg_recipe_object(
+            "E2E Avvik B", 20.0, 0.75,
+            [{"id": "vienna", "mengde": 5.0}],
+            [{"id": "tettnang", "gram": 20, "tid": 75}],
+            "safale_us_05", 1.050, 1.012, 5.0, 20, 8, {},
+        ))
+
+    def tearDown(self):
+        if self._gammel_env is None:
+            os.environ.pop("KVERNHAUG_RECIPES_DIR", None)
+        else:
+            os.environ["KVERNHAUG_RECIPES_DIR"] = self._gammel_env
+        self._tmpdir.cleanup()
+
+    def test_direkte_bytte_mellom_to_ugyldige_planer_krever_ny_bekreftelse(self):
+        at = AppTest.from_file(_APP_PY)
+        at.run()
+
+        # === Last A, bekreft avviket, lås opp eksport ===
+        at.sidebar.selectbox(key="sidebar_recipe_selector").select("E2E Avvik A").run()
+        self.assertFalse(at.exception)
+        cb_a = _finn_avvik_bekreftelse_checkbox(at)
+        self.assertIsNotNone(cb_a)
+        self.assertFalse(cb_a.value)
+        cb_a.check().run()
+        self.assertFalse(at.button(key="brewday_print_btn").disabled, "Eksport skal være låst opp for A etter bekreftelse")
+
+        # === Direkte bytte til B (også et avvik, men et ANNET) ===
+        at.sidebar.selectbox(key="sidebar_recipe_selector").select("E2E Avvik B").run()
+        self.assertFalse(at.exception, f"app.py kastet exception ved bytte: {at.exception}")
+
+        # B sitt avvik skal vises (annen humle, annen tid).
+        varsel_tekster = " ".join(w.value for w in at.warning)
+        self.assertIn("Tettnang", varsel_tekster)
+
+        # Eksport skal IKKE lenger være låst opp -- A sin bekreftelse må
+        # ALDRI gjelde for B sitt (forskjellige) avvik.
+        self.assertTrue(
+            at.button(key="brewday_print_btn").disabled,
+            "A sin bekreftelse fulgte feilaktig med til B",
+        )
+        cb_b = _finn_avvik_bekreftelse_checkbox(at)
+        self.assertIsNotNone(cb_b)
+        self.assertFalse(cb_b.value, "B sin bekreftelses-checkbox skal starte ubekreftet")
+        self.assertNotEqual(cb_a.key, cb_b.key, "A og B skal ha ULIKE bekreftelsesnøkler")
 
 
 if __name__ == "__main__":
