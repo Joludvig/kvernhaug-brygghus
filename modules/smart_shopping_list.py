@@ -17,16 +17,42 @@ lagerbeholdning. Det gamle humlelageret fortsetter uendret å styre
 kostnadsberegningen i den EKSISTERENDE handlelisten (ui/shopping_list_panel.py)
 inntil videre; de to er bevisst IKKE koblet sammen i V1.
 
-Enhetskonvensjon (viktig, se rapport for begrunnelse):
-  - *_base-felt (required_base/available_base/missing_base/
-    expected_remainder_base) er ALLTID i samme basisenhet som
-    modules.pantry.beregn_mangler() bruker: gram for malt/humle, pakker
-    for gjær — akkurat som Pantry sitt eget "_base"-navnekonvensjon.
-  - suggested_purchase_quantity/purchase_unit er i en menneskevennlig
-    innkjøpsenhet: kg for malt (ingen registrert pakningsstørrelse for
-    malt i dagens masterdata — Vestbrygg leverer eksakt oppgitt mengde,
-    en bevisst tidligere prosjektbeslutning, se docs/PROJECT_STATUS_JUNI_2026.md),
-    gram for humle, hele pakker for gjær.
+ENHETSKONTRAKT — to atskilte enhetssystemer, ALDRI bland dem:
+
+  1. *_base-felt (required_base, available_base, missing_base,
+     expected_remainder_base) er ALLTID i Pantry sin BASISENHET, akkurat
+     som modules.pantry.beregn_mangler() returnerer dem:
+       - malt:  gram
+       - humle: gram
+       - gjær:  pakker
+
+  2. suggested_purchase_quantity er ALLTID uttrykt i purchase_unit — en
+     menneskevennlig INNKJØPSENhet, IKKE nødvendigvis samme enhet som
+     *_base-feltene over:
+       - malt:  kg   (ingen registrert pakningsstørrelse i dagens
+                 masterdata — Vestbrygg leverer eksakt oppgitt mengde, en
+                 bevisst tidligere prosjektbeslutning, se
+                 docs/PROJECT_STATUS_JUNI_2026.md)
+       - humle: g
+       - gjær:  hele pakker
+
+  Konkret eksempel (malt, hentet fra en reell mangel på 3230 g med et
+  registrert 1 kg-sekk som pakningsstørrelse):
+
+      required_base               = 4230      # gram (Pantry-basisenhet)
+      available_base              = 1000      # gram
+      missing_base                = 3230      # gram — REELL mangel, uavrundet
+      base_unit                   = "g"
+      suggested_purchase_quantity = 4.0        # KILOGRAM (purchase_unit), ikke 4000
+      purchase_unit                = "kg"
+      expected_remainder_base     = 770       # gram: 1000 + 4000 - 4230
+
+  suggested_purchase_quantity=4.0 og purchase_unit="kg" beskriver SAMME
+  fysiske mengde som 4000 g — men skal ALDRI skrives som
+  suggested_purchase_quantity=4000 med purchase_unit="kg" (det ville vært
+  1000× for mye malt). Se
+  tests/test_smart_shopping_list.py::TestEnhetskontrakt for regresjonstester
+  som låser nøyaktig denne forvekslingen.
 
 Pris hentes fra samme butikk_match-struktur som brukes ellers i appen
 (butikk_match.{vestbrygg|olbrygging}.{pris, url, pakke_gram}) — IKKE fra de
@@ -108,6 +134,9 @@ def _supplier_options(ingredient_type, ingredient_id, db):
     return resultat
 
 
+_KNAPP_ADVISORY = "Nok til oppskriften, men under anbefalt sikkerhetsmargin."
+
+
 def _tom_rad_ukjent_match(mangel_rad):
     return {
         "ingredient_type": mangel_rad["ingredient_type"],
@@ -122,6 +151,8 @@ def _tom_rad_ukjent_match(mangel_rad):
         "package_size_known": None,
         "expected_remainder_base": None,
         "status": "ukjent_match",
+        "pantry_status": "ukjent_match",
+        "advisory": None,
         "supplier_options": [],
         "estimated_cost": None,
         "cost_is_estimate": None,
@@ -133,6 +164,15 @@ def _rad_naar_ikke_noe_mangler(mangel_rad, db):
     ingredient_id = mangel_rad["ingredient_id"]
     required_base = mangel_rad["required_base"]
     available_base = mangel_rad["available_base"]
+    # mangel_rad["status"] her er Pantry sin EGEN status (jf.
+    # modules.pantry.vurder_tilgjengelighet): "nok" eller "knapp" — begge
+    # havner i denne grenen fordi missing_base==0 for begge. Handlelistens
+    # EGEN status kollapses bevisst til "nok" for begge (ingenting er
+    # PÅKREVD å kjøpe), men Pantry sitt opprinnelige signal bevares i
+    # pantry_status/advisory i stedet for å kastes bort helt — se krav 2
+    # i oppryddingen 2026-07-27.
+    pantry_status = mangel_rad["status"]
+    advisory = _KNAPP_ADVISORY if pantry_status == "knapp" else None
     return {
         "ingredient_type": ingredient_type,
         "ingredient_id": ingredient_id,
@@ -146,6 +186,8 @@ def _rad_naar_ikke_noe_mangler(mangel_rad, db):
         "package_size_known": None,
         "expected_remainder_base": max(0.0, available_base - required_base) if required_base is not None else available_base,
         "status": "nok",
+        "pantry_status": pantry_status,
+        "advisory": advisory,
         "supplier_options": _supplier_options(ingredient_type, ingredient_id, db),
         "estimated_cost": 0.0,
         "cost_is_estimate": False,
@@ -233,6 +275,8 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
         "package_size_known": pakningsstorrelse_kjent,
         "expected_remainder_base": expected_remainder_base,
         "status": "kjop",
+        "pantry_status": "mangler",
+        "advisory": None,
         "supplier_options": _supplier_options(ingredient_type, ingredient_id, db),
         "estimated_cost": estimated_cost,
         "cost_is_estimate": er_estimat_kost,
@@ -255,6 +299,17 @@ def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_d
         obligatorisk "kjøp" ville brutt kravet om at avrundet/anbefalt
         kjøp aldri skal se ut som en faktisk mangel)
       - Pantry "ukjent_match" -> "ukjent_match" (uendret)
+
+    Pantry sitt opprinnelige, firedelte signal KASTES ikke bort når det
+    kollapses til "nok" — hver rad har i tillegg:
+      - pantry_status: Pantrys egen status ("nok"/"knapp"/"mangler"/
+        "ukjent_match"), uavhengig av handlelistens forenklede status.
+      - advisory: en kort, menneskelesbar tekst når pantry_status=="knapp"
+        (f.eks. "Nok til oppskriften, men under anbefalt sikkerhetsmargin."),
+        ellers None. UI-et bruker dette til å vise "✅ Nok – knapp margin"
+        i stedet for en udifferensiert "✅ Nok" — men KUN når brukeren
+        bevisst har bedt om å se varer man har nok av; raden teller aldri
+        med blant "må kjøpes" og bidrar aldri til estimert kostnad.
 
     Muterer ALDRI `recipe` eller `pantry_data` — kaller kun
     modules.pantry.beregn_mangler(), som selv er en ren funksjon."""

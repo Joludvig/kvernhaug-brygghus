@@ -199,78 +199,80 @@ def _humle_rad(h: dict) -> None:
 
 
 def render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database):
+    # Ikke lenger sin egen st.expander — rendres inne i den delte
+    # "Eldre handleliste og humlelager"-expanderen i app.py (Streamlit
+    # tillater ikke nestede expandere).
+    st.markdown("#### 🛒 Handleliste (eldre — full kostnadsoversikt, kopier/last ned)")
+    st.caption(
+        "Viser FULL ingrediensliste med pris/lenker for kopiering/nedlasting. Bruker det gamle "
+        "humlelageret (ikke Pantry) for humle-lagerfratrekk, og trekker ikke fra lager for malt/gjær. "
+        "Se 🧠 Smart Handleliste over for lagerbevisst kjøpsbehov basert på Pantry."
+    )
+    malt_items, humle_items, gjaer_item, butikk = _bygg_handleliste(
+        malt_database, humle_database, gjaer_database
+    )
+    humle_gruppert = _bygg_humle_gruppert(humle_items, humle_database, butikk)
+    recipe_name    = ctx["name"]
+    volum          = ctx["volum"]
+
+    st.subheader(f"{recipe_name} — {volum:.0f} L")
+    st.caption(f"Valgt butikk: **{butikk}**")
+
+    total_sum = 0.0
+
+    st.markdown("**🌾 Malt**")
+    for m in malt_items:
+        _rad(m["navn"], f"{m['mengde']:.2f} kg", m["total"], m["er_estimat"], m["url"])
+        total_sum += m["total"]
+
+    st.write("")
+    st.markdown("**🌿 Humle**")
+
+    # Kolonneoverskrifter
+    hdr_n, hdr_t, hdr_hj, hdr_k, hdr_r = st.columns([3, 1, 1, 1.5, 1])
+    with hdr_n:  st.caption("Humle")
+    with hdr_t:  st.caption("Trenger")
+    with hdr_hj: st.caption("Hjemme")
+    with hdr_k:  st.caption("Kjøp")
+    with hdr_r:  st.caption("Rest")
+
+    for h in humle_gruppert:
+        _humle_rad(h)
+        total_sum += h["kjop_kr"]
+
+    if gjaer_item:
+        g = gjaer_item
+        st.write("")
+        st.markdown("**🧫 Gjær**")
+        _rad(g["navn"], "1 pakke", g["pris"], g["er_estimat"], g["url"])
+        total_sum += g["pris"]
+
     st.write("---")
-    with st.expander("🛒 Handleliste (eldre — full kostnadsoversikt, kopier/last ned)"):
-        st.caption(
-            "Viser FULL ingrediensliste med pris/lenker for kopiering/nedlasting. Bruker det gamle "
-            "humlelageret (ikke Pantry) for humle-lagerfratrekk, og trekker ikke fra lager for malt/gjær. "
-            "Se 🧠 Smart Handleliste over for lagerbevisst kjøpsbehov basert på Pantry."
+    st.markdown(f"**TOTAL: ca {total_sum:.0f} kr**")
+    st.caption("_Humle: kun kostnad for det som kjøpes (runder opp til hel pakke). Lagerbeholdning trekkes ikke._")
+
+    st.write("")
+    st.markdown("**📋 Kopier / last ned handleliste**")
+    tekst = _generer_tekst(malt_items, humle_gruppert, gjaer_item, recipe_name, volum, butikk)
+    st.code(tekst, language=None)
+    base_fil = recipe_name.replace(" ", "_").replace("/", "-").lower()
+    dl_col1, dl_col2 = st.columns(2)
+    with dl_col1:
+        st.download_button(
+            label="📥 Last ned handleliste (.txt)",
+            data=tekst,
+            file_name=base_fil + "_handleliste.txt",
+            mime="text/plain",
+            use_container_width=True,
+            key="handleliste_download_btn",
         )
-        malt_items, humle_items, gjaer_item, butikk = _bygg_handleliste(
-            malt_database, humle_database, gjaer_database
+    with dl_col2:
+        html_ark = render_shopping_list_html(ctx, malt_items, humle_items, gjaer_item, butikk)
+        st.download_button(
+            label="📥 Last ned handleliste som HTML",
+            data=html_ark,
+            file_name=base_fil + "_handleliste.html",
+            mime="text/html",
+            use_container_width=True,
+            key="handleliste_html_btn",
         )
-        humle_gruppert = _bygg_humle_gruppert(humle_items, humle_database, butikk)
-        recipe_name    = ctx["name"]
-        volum          = ctx["volum"]
-
-        st.subheader(f"{recipe_name} — {volum:.0f} L")
-        st.caption(f"Valgt butikk: **{butikk}**")
-
-        total_sum = 0.0
-
-        st.markdown("**🌾 Malt**")
-        for m in malt_items:
-            _rad(m["navn"], f"{m['mengde']:.2f} kg", m["total"], m["er_estimat"], m["url"])
-            total_sum += m["total"]
-
-        st.write("")
-        st.markdown("**🌿 Humle**")
-
-        # Kolonneoverskrifter
-        hdr_n, hdr_t, hdr_hj, hdr_k, hdr_r = st.columns([3, 1, 1, 1.5, 1])
-        with hdr_n:  st.caption("Humle")
-        with hdr_t:  st.caption("Trenger")
-        with hdr_hj: st.caption("Hjemme")
-        with hdr_k:  st.caption("Kjøp")
-        with hdr_r:  st.caption("Rest")
-
-        for h in humle_gruppert:
-            _humle_rad(h)
-            total_sum += h["kjop_kr"]
-
-        if gjaer_item:
-            g = gjaer_item
-            st.write("")
-            st.markdown("**🧫 Gjær**")
-            _rad(g["navn"], "1 pakke", g["pris"], g["er_estimat"], g["url"])
-            total_sum += g["pris"]
-
-        st.write("---")
-        st.markdown(f"**TOTAL: ca {total_sum:.0f} kr**")
-        st.caption("_Humle: kun kostnad for det som kjøpes (runder opp til hel pakke). Lagerbeholdning trekkes ikke._")
-
-        st.write("")
-        st.markdown("**📋 Kopier / last ned handleliste**")
-        tekst = _generer_tekst(malt_items, humle_gruppert, gjaer_item, recipe_name, volum, butikk)
-        st.code(tekst, language=None)
-        base_fil = recipe_name.replace(" ", "_").replace("/", "-").lower()
-        dl_col1, dl_col2 = st.columns(2)
-        with dl_col1:
-            st.download_button(
-                label="📥 Last ned handleliste (.txt)",
-                data=tekst,
-                file_name=base_fil + "_handleliste.txt",
-                mime="text/plain",
-                use_container_width=True,
-                key="handleliste_download_btn",
-            )
-        with dl_col2:
-            html_ark = render_shopping_list_html(ctx, malt_items, humle_items, gjaer_item, butikk)
-            st.download_button(
-                label="📥 Last ned handleliste som HTML",
-                data=html_ark,
-                file_name=base_fil + "_handleliste.html",
-                mime="text/html",
-                use_container_width=True,
-                key="handleliste_html_btn",
-            )

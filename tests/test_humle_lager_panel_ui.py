@@ -12,6 +12,12 @@ modules.humle_lager.les_lager() leser (read-only) fra den ekte
 data/humle_lager.json — trygt her siden testverten aldri klikker noe som
 trigger lagre_lager(), og fila i dag er tom ({}); ingenting skrives.
 
+Oppfølging (Kvernhaug-gjennomgang 2026-07-27, "legacy-seksjonene"):
+panelet rendrer ikke lenger sin egen st.expander — det rendres nå inne i
+en delt "Eldre handleliste og humlelager"-expander i app.py (Streamlit
+tillater ikke nestede expandere). "Eldre"-merkingen vises derfor som en
+vanlig overskrift (st.markdown) i stedet for en expander-tittel.
+
 Kjøres med:
     py -3 -m unittest discover -s tests
 """
@@ -34,10 +40,10 @@ class TestGammeltHumlelagerMerketSomEldre(unittest.TestCase):
 
     def test_panel_tittel_merker_seg_som_eldre(self):
         at = self._kjor()
-        expander_titler = [e.label for e in at.expander]
+        overskrifter = [m.value for m in at.markdown]
         self.assertTrue(
-            any("eldre" in t.lower() for t in expander_titler),
-            f"Forventet 'eldre' i expander-tittelen, fant: {expander_titler}",
+            any("eldre" in t.lower() for t in overskrifter),
+            f"Forventet 'eldre' i en overskrift, fant: {overskrifter}",
         )
 
     def test_forklarer_at_det_ikke_synkroniseres_med_pantry(self):

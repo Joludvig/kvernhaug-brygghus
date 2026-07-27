@@ -141,8 +141,10 @@ with tab_innkjop:
     render_pantry_panel(ctx, malt_database, humle_database, gjaer_database)
     render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
     st.write("---")
-    render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
-    render_humle_lager_panel(humle_database)
+    with st.expander("Eldre handleliste og humlelager", expanded=False):
+        render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
+        st.write("---")
+        render_humle_lager_panel(humle_database)
 
 # ==================================================
 # === TAB 3: BRYGGDAG ============================

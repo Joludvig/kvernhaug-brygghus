@@ -165,6 +165,43 @@ class TestSmartHandlelisteFullLagerGirIngenKjop(_SmartShoppingListAppTestCase):
         self.assertEqual(antall_kjop, 0)
 
 
+class TestKnappMarginVisesIUI(_SmartShoppingListAppTestCase):
+    """Krav 2 (Kvernhaug-oppryddingen 2026-07-27): Pantry sitt "knapp"-signal
+    skal vises som «✅ Nok – knapp margin» i UI-et, men KUN når «Vis også
+    det jeg har nok av» er aktivert — og skal aldri telle med blant «må
+    kjøpes» eller påvirke estimert kostnad."""
+
+    def test_knapp_vises_kun_med_vis_alt_aktivert(self):
+        at = self._kjor()
+        # Munich I trenger 0.7 kg. 0.71 kg dekker behovet (>0.7) men er
+        # under 5%-sikkerhetsmarginen (0.735 kg) -> Pantry-status "knapp".
+        self._legg_til_vare(at, "Malt", "weyermann_munich_1", 0.71, "kg")
+
+        rad = self._rad(at, "malt", "weyermann_munich_1")
+        self.assertEqual(rad["status"], "nok")
+        self.assertEqual(rad["pantry_status"], "knapp")
+
+        # Uten "vis alt": raden skal ikke vises i det hele tatt.
+        alle_tekster_skjult = " ".join(w.value for w in at.markdown)
+        self.assertNotIn("knapp margin", alle_tekster_skjult.lower())
+
+        # Med "vis alt" aktivert: raden vises, MED den mer presise teksten.
+        at.checkbox(key="smart_handleliste_vis_alt").set_value(True).run()
+        alle_tekster_vist = " ".join(w.value for w in at.markdown)
+        self.assertIn("knapp margin", alle_tekster_vist.lower())
+
+    def test_knapp_teller_ikke_som_ma_kjopes_eller_kostnad(self):
+        at = self._kjor()
+        self._legg_til_vare(at, "Malt", "weyermann_munich_1", 0.71, "kg")
+        at.checkbox(key="smart_handleliste_vis_alt").set_value(True).run()
+
+        handleliste = at.session_state["_debug_handleliste"]
+        antall_kjop = sum(1 for r in handleliste if r["status"] == "kjop")
+        munich_i = self._rad(at, "malt", "weyermann_munich_1")
+        self.assertNotEqual(munich_i["status"], "kjop")
+        self.assertEqual(munich_i["estimated_cost"], 0.0)
+
+
 class TestGammeltHumlelagerPaavirkerIkkeSmartHandleliste(_SmartShoppingListAppTestCase):
     def test_humle_lager_data_endrer_ikke_resultatet(self):
         from unittest.mock import patch

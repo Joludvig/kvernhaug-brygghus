@@ -317,5 +317,132 @@ class TestOppsummerHandleliste(_ShoppingListTestCase):
         self.assertEqual(sammendrag["antall_ma_kjopes"], 0)
 
 
+class TestEnhetskontrakt(_ShoppingListTestCase):
+    """Krav 1 (Kvernhaug-oppryddingen 2026-07-27): *_base-felt er ALLTID i
+    Pantry sin basisenhet (gram for malt/humle, pakker for gjær),
+    suggested_purchase_quantity er ALLTID i purchase_unit (en
+    menneskevennlig innkjøpsenhet: kg for malt, g for humle, pakker for
+    gjær) — de to skal ALDRI blandes eller forveksles."""
+
+    def test_malt_eksempelet_fra_spesifikasjonen(self):
+        # Det eksakte tallgrunnlaget fra oppgaven: 3230 g reell mangel,
+        # 1 kg-pakning -> 4.0 kg foreslått kjøp (IKKE 4000).
+        malt_db_med_pakke = {"weyermann_pilsner": {"display_name": "Pilsner", "butikk_match": {
+            "olbrygging": {"pris": 40.0, "pakke_kg": 1.0, "url": "x"},
+        }}}
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        rad = _rad(ssl.beregn_handleliste(recipe, p, malt_db_med_pakke), "malt", "weyermann_pilsner")
+
+        self.assertEqual(rad["required_base"], 4230.0)
+        self.assertEqual(rad["available_base"], 1000.0)
+        self.assertEqual(rad["missing_base"], 3230.0)
+        self.assertEqual(rad["base_unit"], "g")
+
+        self.assertEqual(rad["purchase_unit"], "kg")
+        self.assertEqual(rad["suggested_purchase_quantity"], 4.0)
+        # Den eksplisitte forvekslingen kravet advarer mot: 4 kg skal ALDRI
+        # representeres som suggested_purchase_quantity=4000 (det ville
+        # vært 1000x for mye malt, siden purchase_unit="kg").
+        self.assertNotEqual(
+            rad["suggested_purchase_quantity"], 4000,
+            "suggested_purchase_quantity=4000 med purchase_unit='kg' ville betydd 4000 kg, ikke 4 kg",
+        )
+        self.assertAlmostEqual(rad["expected_remainder_base"], 770.0, places=2)
+
+    def test_missing_base_er_alltid_i_gram_uavhengig_av_kjopsenhet(self):
+        # missing_base skal ALDRI konverteres til purchase_unit -- den er
+        # og blir i base_unit (gram), uansett hva suggested_purchase_quantity
+        # er uttrykt i.
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        rad = _rad(ssl.beregn_handleliste(recipe, p, _MALT_DB), "malt", "weyermann_pilsner")
+        self.assertEqual(rad["base_unit"], "g")
+        self.assertEqual(rad["missing_base"], 3230.0, "missing_base skal være i gram, ikke i kg (3.23)")
+
+    def test_gjaer_purchase_unit_er_pakke_ikke_g_eller_kg(self):
+        p = pantry.last_pantry()
+        recipe = _oppskrift(yeast="safale_us_05")
+        recipe["gjaer_pakker_anbefalt"] = 2.0
+        rad = _rad(ssl.beregn_handleliste(recipe, p, gjaer_db=_GJAER_DB), "gjaer", "safale_us_05")
+        self.assertEqual(rad["base_unit"], "pakke")
+        self.assertEqual(rad["purchase_unit"], "pakke")
+        self.assertEqual(rad["suggested_purchase_quantity"], 2.0)
+
+    def test_humle_base_og_purchase_unit_er_begge_gram_men_uavhengig_avrundet(self):
+        # Humle er spesialtilfellet der base_unit OG purchase_unit begge er
+        # "g" -- men suggested_purchase_quantity er likevel IKKE det samme
+        # tallet som missing_base når det finnes en pakningsstørrelse å
+        # runde opp til.
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("humle", "citra", "Citra", 0.0, "g"))
+        recipe = _oppskrift(hops=[{"id": "citra", "gram": 45.0, "tid": 60}])
+        rad = _rad(ssl.beregn_handleliste(recipe, p, humle_db=_HUMLE_DB), "humle", "citra")
+        self.assertEqual(rad["base_unit"], "g")
+        self.assertEqual(rad["purchase_unit"], "g")
+        self.assertEqual(rad["missing_base"], 45.0)
+        self.assertEqual(rad["suggested_purchase_quantity"], 100.0, "Skal rundes opp til pakke_gram, ikke være lik missing_base")
+
+
+class TestKnappBevaresSomAdvisory(_ShoppingListTestCase):
+    """Krav 2: Pantry sitt "knapp"-signal skal IKKE kastes bort når det
+    kollapses til handlelistens "nok"-status."""
+
+    def _knapp_scenario(self):
+        # 4.23 kg nødvendig, 5% margin -> trygt er 4.4415 kg. 4.25 kg
+        # dekker behovet, men ikke margin-grensen -> Pantry-status "knapp".
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 4.25, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        return _rad(ssl.beregn_handleliste(recipe, p, _MALT_DB), "malt", "weyermann_pilsner")
+
+    def test_knapp_lager_gir_ingen_kjopslinje(self):
+        rad = self._knapp_scenario()
+        self.assertEqual(rad["status"], "nok", "Knapp skal IKKE kreve kjøp")
+        self.assertEqual(rad["missing_base"], 0.0)
+        self.assertEqual(rad["suggested_purchase_quantity"], 0.0)
+
+    def test_knapp_informasjon_bevares(self):
+        rad = self._knapp_scenario()
+        self.assertEqual(rad["pantry_status"], "knapp")
+        self.assertIsNotNone(rad["advisory"])
+        self.assertIn("sikkerhetsmargin", rad["advisory"].lower())
+
+    def test_ren_nok_har_ingen_advisory(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 10.0, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        rad = _rad(ssl.beregn_handleliste(recipe, p, _MALT_DB), "malt", "weyermann_pilsner")
+        self.assertEqual(rad["pantry_status"], "nok")
+        self.assertIsNone(rad["advisory"])
+
+    def test_kostnad_pavirkes_ikke_av_knapp(self):
+        rad = self._knapp_scenario()
+        self.assertEqual(rad["estimated_cost"], 0.0)
+        self.assertFalse(rad["cost_is_estimate"])
+
+    def test_knapp_telles_ikke_blant_ma_kjopes_i_sammendrag(self):
+        rad = self._knapp_scenario()
+        sammendrag = ssl.oppsummer_handleliste([rad])
+        self.assertEqual(sammendrag["antall_ma_kjopes"], 0)
+        self.assertEqual(sammendrag["estimert_totalkostnad"], 0.0)
+
+    def test_mangler_og_ukjent_match_har_egen_pantry_status(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        mangler_rad = _rad(ssl.beregn_handleliste(recipe, p, _MALT_DB), "malt", "weyermann_pilsner")
+        self.assertEqual(mangler_rad["status"], "kjop")
+        self.assertEqual(mangler_rad["pantry_status"], "mangler")
+        self.assertIsNone(mangler_rad["advisory"])
+
+        ukjent_recipe = _oppskrift(malts=[{"navn": "Uidentifisert", "mengde": 1.0}])
+        ukjent_rad = ssl.beregn_handleliste(ukjent_recipe, p, _MALT_DB)[0]
+        self.assertEqual(ukjent_rad["pantry_status"], "ukjent_match")
+        self.assertIsNone(ukjent_rad["advisory"])
+
+
 if __name__ == "__main__":
     unittest.main()

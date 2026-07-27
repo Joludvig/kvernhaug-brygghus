@@ -27,6 +27,17 @@ def _fmt_kjop(rad):
     return f"{rad['suggested_purchase_quantity']:g} {rad['purchase_unit']}{merke}"
 
 
+def _status_tekst(rad):
+    # Pantry sitt "knapp"-signal skal ikke drukne i en udifferensiert
+    # "✅ Nok" — vises kun i denne mer presise formen når raden faktisk
+    # rendres (dvs. når "Vis også det jeg har nok av" er aktivert, se
+    # rendringsløkken under). Raden teller uansett IKKE med blant "må
+    # kjøpes" og bidrar ikke til estimert kostnad.
+    if rad["status"] == "nok" and rad.get("pantry_status") == "knapp":
+        return "✅ Nok – knapp margin"
+    return _STATUS_VISNING[rad["status"]]
+
+
 def render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database):
     st.write("---")
     st.subheader("🧠 Smart Handleliste")
@@ -81,7 +92,9 @@ def render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_d
             cols[3].write(_fmt(rad["missing_base"], rad["base_unit"]))
             cols[4].write(_fmt_kjop(rad))
             cols[5].write(_fmt(rad["expected_remainder_base"], rad["base_unit"]))
-            cols[6].write(_STATUS_VISNING[rad["status"]])
+            cols[6].write(_status_tekst(rad))
+            if rad.get("advisory") and vis_alt:
+                st.caption(f"　　💡 {rad['advisory']}")
 
     if not noe_vist:
         st.caption(
