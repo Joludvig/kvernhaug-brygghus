@@ -6,7 +6,7 @@ from datetime import date
 from config import DEMO_MODE
 from modules.recipe_storage import lagre_oppskrift, slett_oppskrift_fil, lagre_logg_entry, hent_logg
 from modules.recipe import bygg_recipe_object
-from modules.card_template import render_card_html, render_a4_html
+from modules.card_template import render_card_html, render_a4_html, beregn_recipe_card_height
 from ui.branding import _logo_base64
 
 _LOGO_PATH = os.path.join("assets", "branding", "master_v1_transparent.png")
@@ -165,12 +165,13 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
 
     logo_b64 = _logo_base64() if os.path.exists(_LOGO_PATH) else None
 
-    # Dynamisk høyde: base + per rad malt/humle + ekstra for bryggerstil
-    _n_malt = len(ctx["recipe"].get("malts", []))
-    _n_humle = len(ctx["recipe"].get("hops", []))
-    _card_h = 1110 + max(0, _n_malt - 3) * 30 + max(0, _n_humle - 3) * 30
-    if ctx.get("brygger_stil", "").strip():
-        _card_h += 30
+    # Innholdsavhengig høyde (se modules/card_template.beregn_recipe_card_height)
+    # -- kortet rendres i en FAST-høyde Streamlit-iframe (scrolling=False),
+    # så en for lav høyde klipper innhold ved iframe-kanten. En lang tittel
+    # (f.eks. "Kvernhaug Wiesn-Märzen 1872") som brytes over flere linjer
+    # gjør kortet reelt høyere enn ett med kort, én-linjes tittel — dette
+    # MÅ regnes inn, ikke bare antall malt-/humlerader.
+    _card_h = beregn_recipe_card_height(ctx["recipe"], summary_tekst=ctx.get("summary", ""))
 
     st.components.v1.html(
         render_card_html(ctx, malt_database, humle_database, gjaer_database, logo_b64=logo_b64),
