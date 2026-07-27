@@ -664,17 +664,35 @@ class TestCrudOperasjoner(_PantryTestCase):
 
 class Test21TesterBrukerKunMidlertidigPantryMappe(_PantryTestCase):
     def test_ekte_data_pantry_json_er_urort(self):
+        # Sammenligner INNHOLD før/etter (samme mønster som
+        # tests/test_recipe_storage_isolation.py sin _snapshot() og
+        # TestEktAppPyRenderingPaavirkerIkkeEksisterendePantry sin
+        # sentinel-sammenligning) -- IKKE bare fravær av filen. En tidligere
+        # versjon antok at data/pantry.json aldri legitimt finnes i et
+        # utviklingsmiljø, noe som sluttet å stemme i det øyeblikket
+        # brukeren fikk ekte, gjenopprettede lagerdata der (2026-07-27).
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         ekte_fil = os.path.join(repo_root, "data", "pantry.json")
+
+        def _les():
+            if not os.path.exists(ekte_fil):
+                return None
+            with open(ekte_fil, encoding="utf-8") as f:
+                return f.read()
+
+        innhold_for = _les()
         for _ in range(3):
             p = pantry.last_pantry()
             p["items"].append(pantry.opprett_pantry_item(
                 "malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
             pantry.lagre_pantry(p)
-        self.assertFalse(
-            os.path.exists(ekte_fil),
-            "Denne testen skal ALDRI skrive til den ekte data/pantry.json — "
-            "KVERNHAUG_PANTRY_DIR-isolasjonen har sviktet hvis filen nå finnes",
+        innhold_etter = _les()
+
+        self.assertEqual(
+            innhold_for, innhold_etter,
+            "Denne testen skal ALDRI endre den ekte data/pantry.json (verken opprette den fra "
+            "ingenting eller endre en eksisterende fil) — KVERNHAUG_PANTRY_DIR-isolasjonen har "
+            "sviktet hvis innholdet er endret",
         )
 
 
