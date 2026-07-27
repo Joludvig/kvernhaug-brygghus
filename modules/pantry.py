@@ -104,22 +104,42 @@ def last_pantry():
     return migrer_pantry_schema(data)
 
 
-def lagre_pantry(pantry):
+# Standard antall backupfiler som beholdes (se lagre_pantry()/
+# _rydd_gamle_pantry_backupfiler()). Konfigurerbart per kall — sett til 0
+# eller mindre for å beholde alle (typisk kun i tester).
+PANTRY_BACKUP_MAKS_ANTALL = 20
+
+
+def lagre_pantry(pantry, maks_backup_antall=PANTRY_BACKUP_MAKS_ANTALL):
     """Lagrer pantry atomisk: skriver til en midlertidig fil og erstatter
     originalen (os.replace er atomisk på både Windows og POSIX), slik at en
     krasj midtveis i skrivingen aldri kan etterlate en halvskrevet/korrupt
     fil. No-op i DEMO_MODE, samme mønster som modules/recipe_storage.py og
-    modules/humle_lager.py."""
+    modules/humle_lager.py.
+
+    Lager AUTOMATISK en tidsstemplet backup av den EKSISTERENDE filen (hvis
+    en finnes) rett før den overskrives — dette er det ENE, felles
+    lagringspunktet ALLE reelle endringer (oppdatering, sletting av vare,
+    hurtigjustering, full overskriving, import/migrering) til slutt går
+    gjennom, så automatisk backup her dekker samtlige uten at hvert enkelt
+    kall-sted (ui/pantry_panel.py) selv må huske å be om det. Den aller
+    første lagringen (ingen eksisterende fil ennå) trenger ingen backup —
+    det finnes ingenting å miste. Beholder kun de `maks_backup_antall`
+    nyeste backupfilene etterpå (se _rydd_gamle_pantry_backupfiler)."""
     if DEMO_MODE:
         return
     mappe = _pantry_mappe()
     os.makedirs(mappe, exist_ok=True)
 
+    filsti = _pantry_fil()
+    if os.path.exists(filsti):
+        lag_pantry_backup()
+        _rydd_gamle_pantry_backupfiler(maks_backup_antall)
+
     pantry = dict(pantry)
     pantry["schema_version"] = SCHEMA_VERSION
     pantry["updated_at"] = datetime.now().isoformat(timespec="seconds")
 
-    filsti = _pantry_fil()
     tmp_sti = filsti + ".tmp"
     with open(tmp_sti, "w", encoding="utf-8") as f:
         json.dump(pantry, f, ensure_ascii=False, indent=2)
@@ -128,16 +148,90 @@ def lagre_pantry(pantry):
 
 def lag_pantry_backup():
     """Kopierer gjeldende pantry.json til en tidsstemplet backup-fil i
-    samme mappe. Brukes FØR en migrering/import appliseres (se
-    importer_humlelager_migrering). Returnerer backup-stien, eller None
-    hvis det ikke finnes noen pantry.json å sikkerhetskopiere ennå."""
+    samme mappe (mikrosekund-presisjon i tidsstempelet — sekund-presisjon
+    var ikke nok til å garantere unike filnavn nå som lagre_pantry() kaller
+    denne automatisk ved HVER reell endring, ikke bare ved migrering — en
+    kort tilfeldig hex-suffiks er lagt til i tillegg, siden datetime.now()
+    sin mikrosekund-oppløsning i praksis ikke er garantert unik mellom to
+    kjapt påfølgende lagringer på enkelte systemer/klokker).
+    Returnerer backup-stien, eller None hvis det ikke finnes noen
+    pantry.json å sikkerhetskopiere ennå."""
     kilde = _pantry_fil()
     if not os.path.exists(kilde):
         return None
-    tidsstempel = datetime.now().strftime("%Y%m%d_%H%M%S")
+    tidsstempel = datetime.now().strftime("%Y%m%d_%H%M%S_%f") + "_" + uuid.uuid4().hex[:6]
     mal = f"{kilde}.backup_{tidsstempel}"
     shutil.copy2(kilde, mal)
     return mal
+
+
+def _list_pantry_backup_stier():
+    """Sorterte (ELDST -> nyest) stier til alle pantry.json.backup_*-filer
+    i den aktive pantry-mappen. Filnavnets tidsstempel sorterer korrekt
+    kronologisk som ren tekstsortering (fast bredde, mest signifikant
+    først). Skriver og endrer ingenting."""
+    mappe = _pantry_mappe()
+    if not os.path.isdir(mappe):
+        return []
+    prefiks = os.path.basename(_pantry_fil()) + ".backup_"
+    treff = sorted(f for f in os.listdir(mappe) if f.startswith(prefiks))
+    return [os.path.join(mappe, f) for f in treff]
+
+
+def _rydd_gamle_pantry_backupfiler(maks_antall=PANTRY_BACKUP_MAKS_ANTALL):
+    """Sletter de ELDSTE backupfilene slik at kun de `maks_antall` NYESTE
+    blir igjen. `maks_antall <= 0` (eller None) betyr «behold alt» (ingen
+    opprydding) — brukt av enkelte tester som eksplisitt vil telle opp alle
+    backupfilene som noensinne er laget i en isolert testmappe."""
+    if not maks_antall or maks_antall <= 0:
+        return
+    stier = _list_pantry_backup_stier()
+    for gammel_sti in stier[:-maks_antall]:
+        try:
+            os.remove(gammel_sti)
+        except OSError:
+            pass  # en mislykket opprydding er ikke kritisk -- filen lagres uansett
+
+
+def list_pantry_backups():
+    """Liste over tilgjengelige pantry-backupfiler, NYEST FØRST — til bruk
+    i en forhåndsvisning før en eksplisitt gjenoppretting (se
+    gjenopprett_pantry_fra_backup()). Hvert element er
+    {"sti", "filnavn", "tidsstempel"}. Skriver og endrer ingenting."""
+    resultat = []
+    for sti in reversed(_list_pantry_backup_stier()):
+        filnavn = os.path.basename(sti)
+        tidsstempel = filnavn.split(".backup_", 1)[-1]
+        resultat.append({"sti": sti, "filnavn": filnavn, "tidsstempel": tidsstempel})
+    return resultat
+
+
+def les_pantry_backup_innhold(backup_sti):
+    """Laster og validerer JSON-innholdet i én spesifikk backupfil, til
+    bruk i en FORHÅNDSVISNING før brukeren eksplisitt bekrefter en
+    gjenoppretting (se ui/pantry_panel.py). Skriver ingenting selv. Kaster
+    PantryCorruptError (samme unntakstype som last_pantry() for en korrupt
+    hovedfil) hvis backupfilen mot formodning ikke er gyldig JSON."""
+    with open(backup_sti, encoding="utf-8") as f:
+        raw = f.read()
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise PantryCorruptError(f"Backupfilen {backup_sti} inneholder ugyldig JSON ({e}).") from e
+
+
+def gjenopprett_pantry_fra_backup(backup_sti):
+    """Returnerer pantry-strukturen fra en gitt backupfil, KLAR til å
+    lagres — lagrer ALDRI selv. UI-et er ansvarlig for å ha vist en
+    forhåndsvisning (les_pantry_backup_innhold/list_pantry_backups) og
+    innhentet en EKSPLISITT bekreftelse før resultatet sendes videre til
+    lagre_pantry() — ingen gjenoppretting skjer noensinne automatisk.
+    Selve gjenopprettingen er i praksis en helt vanlig lagring, så
+    lagre_pantry() sin egen automatiske backup-mekanisme tar samtidig vare
+    på tilstanden slik den var RETT FØR gjenopprettingen, uten noe eget
+    unntak her."""
+    data = les_pantry_backup_innhold(backup_sti)
+    return migrer_pantry_schema(data)
 
 
 # ── Normalisering ────────────────────────────────────────────────────────

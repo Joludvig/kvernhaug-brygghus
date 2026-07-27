@@ -62,8 +62,10 @@ def render_pantry_panel(ctx, malt_database, humle_database, gjaer_database):
         st.error(
             "📦 Lagerfilen (data/pantry.json) kunne ikke leses fordi innholdet er ugyldig JSON. "
             "Filen er IKKE overskrevet — rett den manuelt eller gjenopprett fra en backup-fil "
-            f"(data/pantry.json.backup_*) før lageret kan vises.\n\nDetaljer: {feil}"
+            f"(data/pantry.json.backup_*) under før lageret kan vises.\n\nDetaljer: {feil}"
         )
+        st.write("---")
+        _render_gjenopprett_fra_backup()
         return
 
     varsler = pantry.valider_pantry(data)
@@ -77,6 +79,8 @@ def render_pantry_panel(ctx, malt_database, humle_database, gjaer_database):
     _render_oppskriftskontroll(ctx, data, malt_database, humle_database, gjaer_database)
     st.write("---")
     _render_humlelager_migrering(data, humle_database)
+    st.write("---")
+    _render_gjenopprett_fra_backup()
 
 
 # ── 1. Oversikt ───────────────────────────────────────────────────────────
@@ -400,11 +404,88 @@ def _render_humlelager_migrering(data, humle_db):
             key="pantry_migrer_bekreft",
         )
         if st.button("Importer til Pantry", key="pantry_migrer_importer_btn", disabled=not bekreft):
-            backup_sti = pantry.lag_pantry_backup()
             nytt = pantry.importer_humlelager_migrering(data, forslag)
+            # lagre_pantry() tar automatisk en tidsstemplet backup av
+            # forrige lagerstatus før den overskrives (se
+            # modules/pantry.py) -- ingen eget backup-kall trengs her.
             pantry.lagre_pantry(nytt)
-            if backup_sti:
-                st.success(f"Importert. Backup av forrige pantry-tilstand lagret som {backup_sti}.")
+            st.success("Importert. En backup av forrige lagerstatus ble tatt automatisk (se «Gjenopprett fra backup» under).")
+            st.rerun()
+
+
+# ── Gjenopprett fra backup ────────────────────────────────────────────────
+def _backup_tidsstempel_visning(backup):
+    """Menneskelesbar dato/klokkeslett fra et backup-filnavns tidsstempel
+    («YYYYMMDD_HHMMSS» eller «YYYYMMDD_HHMMSS_mikrosekunder» — begge formene
+    forekommer, siden mikrosekund-presisjon ble lagt til i etterkant for å
+    unngå kollisjon ved hyppige, automatiske backuper). Faller tilbake til
+    det rå filnavnet hvis formatet mot formodning ikke gjenkjennes."""
+    import datetime as _dt
+
+    deler = backup["tidsstempel"].split("_")
+    if len(deler) >= 2:
+        try:
+            dato_tid = _dt.datetime.strptime(f"{deler[0]}_{deler[1]}", "%Y%m%d_%H%M%S")
+            return dato_tid.strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            pass
+    return backup["filnavn"]
+
+
+def _render_gjenopprett_fra_backup():
+    backups = pantry.list_pantry_backups()
+
+    with st.expander(f"🕐 Gjenopprett fra backup ({len(backups)} tilgjengelig)"):
+        st.caption(
+            "En backup tas automatisk hver gang lageret endres (oppdatering, sletting, "
+            "hurtigjustering, full overskriving, import). Gjenoppretting skjer ALDRI "
+            "automatisk — velg en fil under, se over innholdet, og bekreft eksplisitt."
+        )
+        if not backups:
+            st.caption("Ingen backupfiler funnet ennå.")
+            return
+
+        valgt = st.selectbox(
+            "Backupfil", options=backups, format_func=_backup_tidsstempel_visning,
+            key="pantry_backup_valgt",
+        )
+
+        try:
+            forhandsvisning = pantry.les_pantry_backup_innhold(valgt["sti"])
+        except pantry.PantryCorruptError as e:
+            st.error(f"Kunne ikke lese denne backupfilen: {e}")
+            return
+
+        poster = forhandsvisning.get("items", [])
+        st.write(
+            f"Denne backupen inneholder **{len(poster)}** lagerpost(er), "
+            f"sist oppdatert {forhandsvisning.get('updated_at') or 'ukjent tidspunkt'}."
+        )
+        for item in poster[:10]:
+            navn = item.get("name_snapshot", "?")
+            mengde = item.get("quantity")
+            enhet = item.get("unit", "")
+            if isinstance(mengde, (int, float)):
+                st.caption(f"• {navn}: {mengde:g} {enhet}")
             else:
-                st.success("Importert.")
+                st.caption(f"• {navn}")
+        if len(poster) > 10:
+            st.caption(f"… og {len(poster) - 10} til.")
+
+        st.warning("Gjenoppretting ERSTATTER hele det nåværende lageret med innholdet over.")
+        bekreft = st.checkbox(
+            "Jeg forstår at dette erstatter dagens lager med denne backupen",
+            key="pantry_backup_bekreft",
+        )
+        if st.button(
+            "Gjenopprett fra denne backupen", key="pantry_backup_gjenopprett_btn",
+            disabled=not bekreft, type="primary",
+        ):
+            gjenopprettet = pantry.gjenopprett_pantry_fra_backup(valgt["sti"])
+            # lagre_pantry() tar automatisk en ny backup av GJELDENDE
+            # tilstand (altså den akkurat FØR denne gjenopprettingen) før
+            # den overskrives — så en gjenoppretting kan selv angres.
+            pantry.lagre_pantry(gjenopprettet)
+            st.session_state.pop("pantry_backup_bekreft", None)
+            st.success("Lageret er gjenopprettet fra backup.")
             st.rerun()

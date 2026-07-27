@@ -14,6 +14,7 @@ Kjøres med:
     py -3 -m unittest discover -s tests
 """
 import copy
+import json
 import os
 import tempfile
 import unittest
@@ -353,105 +354,167 @@ class TestLalvinEc1118IGjaerdatabasen(_PantryAppTestCase):
         self.assertEqual(item["name_snapshot"], "Lalvin EC-1118")
 
 
-class TestEktAppPyRenderingSkriverIkkeTilRealPantry(unittest.TestCase):
+def _antall_backupfiler(mappe):
+    return len([f for f in os.listdir(mappe) if ".backup_" in f])
+
+
+class TestPantryBackupOgGjenopprettingIUI(_PantryAppTestCase):
+    """UI-flyt for automatisk backup + «Gjenopprett fra backup»: hurtig-
+    justering (+/-/sett i rediger-panelet) skal utløse en automatisk
+    backup akkurat som oppdatering/sletting/import gjør det på
+    motornivå (se tests/test_pantry.py::Test28PantryBackupOgGjenoppretting),
+    og gjenoppretting skal ALDRI skje uten eksplisitt bekreftelse+klikk."""
+
+    def test_hurtigjustering_lager_automatisk_backup(self):
+        at = self._kjor()
+        self._legg_til_vare(at, "Malt", "weyermann_munich_1", 1.0, "kg")
+        item_id = at.session_state["_debug_pantry"]["items"][0]["pantry_item_id"]
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 0, "Første lagring skal ikke ha laget noen backup ennå")
+
+        at.button(key=f"pantry_rediger_{item_id}").click().run()
+        at.number_input(key=f"pantry_juster_delta_{item_id}").set_value(0.5).run()
+        at.button(key=f"pantry_pluss_{item_id}").click().run()
+
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 1,
+                          "Hurtigjustering (+/-/sett) skal utløse en automatisk backup av forrige tilstand")
+
+    def test_gjenopprett_knapp_er_deaktivert_uten_bekreftelse(self):
+        at = self._kjor()
+        self._legg_til_vare(at, "Malt", "weyermann_munich_1", 1.0, "kg")
+        item_id = at.session_state["_debug_pantry"]["items"][0]["pantry_item_id"]
+        at.button(key=f"pantry_rediger_{item_id}").click().run()
+        at.number_input(key=f"pantry_rediger_mengde_{item_id}").set_value(9.0).run()
+        at.button(key=f"pantry_sett_{item_id}").click().run()
+        # Én backup finnes nå (tilstanden med 1.0 kg, fra FØR denne endringen).
+
+        knapp = at.button(key="pantry_backup_gjenopprett_btn")
+        self.assertTrue(knapp.disabled, "Gjenopprett-knappen skal være deaktivert før eksplisitt bekreftelse")
+        self.assertEqual(at.session_state["_debug_pantry"]["items"][0]["quantity"], 9.0,
+                          "Lageret skal fortsatt vise den nye mengden -- ingenting gjenopprettet uten klikk")
+
+    def test_gjenopprett_med_bekreftelse_gjenoppretter_faktisk(self):
+        at = self._kjor()
+        self._legg_til_vare(at, "Malt", "weyermann_munich_1", 1.0, "kg")
+        item_id = at.session_state["_debug_pantry"]["items"][0]["pantry_item_id"]
+        at.button(key=f"pantry_rediger_{item_id}").click().run()
+        at.number_input(key=f"pantry_rediger_mengde_{item_id}").set_value(9.0).run()
+        at.button(key=f"pantry_sett_{item_id}").click().run()
+        # Backup-innholdet er tilstanden med 1.0 kg (FØR denne endringen).
+
+        at.checkbox(key="pantry_backup_bekreft").set_value(True).run()
+        at.button(key="pantry_backup_gjenopprett_btn").click().run()
+
+        gjenopprettet_items = at.session_state["_debug_pantry"]["items"]
+        self.assertEqual(len(gjenopprettet_items), 1)
+        self.assertEqual(gjenopprettet_items[0]["quantity"], 1.0,
+                          "Lageret skal nå vise den gjenopprettede (tidligere) mengden, ikke 9.0")
+
+    def test_gjenoppretting_tar_selv_en_ny_backup(self):
+        at = self._kjor()
+        self._legg_til_vare(at, "Malt", "weyermann_munich_1", 1.0, "kg")
+        item_id = at.session_state["_debug_pantry"]["items"][0]["pantry_item_id"]
+        at.button(key=f"pantry_rediger_{item_id}").click().run()
+        at.number_input(key=f"pantry_rediger_mengde_{item_id}").set_value(9.0).run()
+        at.button(key=f"pantry_sett_{item_id}").click().run()
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 1)
+
+        at.checkbox(key="pantry_backup_bekreft").set_value(True).run()
+        at.button(key="pantry_backup_gjenopprett_btn").click().run()
+
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 2,
+                          "Selve gjenopprettingen er en lagring og skal derfor selv utløse en ny backup")
+
+
+_SENTINEL_PANTRY = {
+    "schema_version": 1,
+    "updated_at": "2026-01-01T00:00:00",
+    "items": [
+        {
+            "pantry_item_id": "11111111-1111-1111-1111-111111111111",
+            "ingredient_type": "malt",
+            "ingredient_id": "sentinel_malt_ikke_rediger",
+            "name_snapshot": "SENTINEL -- skal IKKE endres av denne testen",
+            "quantity": 42.0,
+            "unit": "kg",
+            "base_quantity": 42000.0,
+            "base_unit": "g",
+            "opened": False,
+            "best_before": None,
+            "lot_number": "",
+            "storage_location": "",
+            "notes": "",
+            "is_custom": False,
+        }
+    ],
+}
+_SENTINEL_JSON = json.dumps(_SENTINEL_PANTRY, ensure_ascii=False, indent=2)
+
+
+class TestEktAppPyRenderingPaavirkerIkkeEksisterendePantry(unittest.TestCase):
     """
-    Regresjonstest for et konkret hendelsesforløp oppdaget under utviklingen
-    av dette panelet: å koble render_pantry_panel() inn i app.py betyr at
-    ALLE andre, allerede eksisterende tester som rendrer den EKTE app.py via
-    AppTest (f.eks. tests/test_water_target_ui_integration.py,
-    tests/test_real_app_process_flow.py) nå OGSÅ render Pantry-panelet —
-    uten selv å vite om eller sette KVERNHAUG_PANTRY_DIR, siden de ble
-    skrevet før Pantry eksisterte.
+    Regresjonstest for at en vanlig rendring av den EKTE, uendrede app.py
+    (samme fil som start_app.bat starter) aldri endrer en allerede
+    eksisterende pantry.json.
 
-    modules.pantry.last_pantry() opprettet tidligere filen på disk som en
-    sideeffekt av bare å LESE (samme mønster som ble luket ut andre steder
-    i dette repoet flere ganger før) — det gjorde at en helt vanlig
-    apptest-kjøring stille skrev til den EKTE data/pantry.json. Fikset ved
-    at last_pantry() nå kun returnerer en tom struktur i minnet når filen
-    mangler, og aldri skriver noe selv (se modules/pantry.py sin egen
-    docstring og tests/test_pantry.py sin
-    test_last_pantry_skriver_ikke_til_disk_ved_en_ren_lesing).
+    SIKKERHETSHISTORIKK (2026-07-27): en tidligere versjon av denne testen
+    pekte direkte på REPOETS EKTE data/pantry.json (bevisst uten å sette
+    KVERNHAUG_PANTRY_DIR, for å teste at det er trygt å glemme den) og
+    slettet den ubetinget i en finally-blokk uansett utfall. Det viste seg
+    IKKE trygt nok i praksis — se commit 72e6b77. Denne testen rører ALDRI
+    lenger noen beregnet produksjonssti i det hele tatt:
 
-    Denne testen kjører den VIRKELIGE, uendrede app.py — bevisst UTEN å
-    sette KVERNHAUG_PANTRY_DIR — nøyaktig slik en "uvitende" eldre test
-    gjør det, og bekrefter at den ekte data/pantry.json fortsatt ikke
-    finnes etterpå. Er kun trygt å kjøre mot den ekte repo-stien fordi
-    fiksen over garanterer at en ren rendring aldri skriver noe."""
+      1. KVERNHAUG_PANTRY_DIR settes ALLTID til en fersk
+         tempfile.TemporaryDirectory() (aldri utelatt).
+      2. En kjent SENTINEL-pantry.json skrives inn i den midlertidige
+         mappen FØR app.py kjøres.
+      3. Den ekte, uendrede app.py kjøres via AppTest.
+      4. Testen bekrefter at sentinel-filen er BYTE-FOR-BYTE identisk
+         etterpå.
+      5. Cleanup består UTELUKKENDE av at TemporaryDirectory() avsluttes
+         (via `with`) — ingen os.remove() mot noen sti i det hele tatt,
+         beregnet eller ikke.
 
-    @staticmethod
-    def _snapshot(mappe):
-        # Samme mønster som tests/test_recipe_storage_isolation.py sin
-        # _snapshot(): må fungere BÅDE i en fersk worktree (recipes/ finnes
-        # ikke i det hele tatt ennå) OG i et vanlig utviklingsmiljø (der
-        # recipes/ allerede legitimt finnes, fullt av brukerens ekte,
-        # lagrede oppskrifter) — derfor sammenlignes INNHOLD før/etter,
-        # ikke bare eksistens.
-        if not os.path.isdir(mappe):
-            return frozenset()
-        return frozenset(os.listdir(mappe))
+    Denne testen leser, tester eksistensen av, oppretter og sletter ALDRI
+    prosjektets virkelige data/pantry.json."""
 
-    def test_render_av_ekte_app_py_uten_pantry_dir_satt_skriver_ingenting(self):
+    def test_render_av_ekte_app_py_endrer_ikke_sentinel_pantry(self):
         from streamlit.testing.v1 import AppTest
 
-        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        app_py = os.path.join(repo_root, "app.py")
-        ekte_pantry_fil = os.path.join(repo_root, "data", "pantry.json")
-        ekte_recipes_mappe = os.path.join(repo_root, "recipes")
+        with tempfile.TemporaryDirectory() as pantry_tmp, tempfile.TemporaryDirectory() as recipes_tmp:
+            sentinel_fil = os.path.join(pantry_tmp, "pantry.json")
+            with open(sentinel_fil, "w", encoding="utf-8") as f:
+                f.write(_SENTINEL_JSON)
 
-        # KVERNHAUG_RECIPES_DIR isoleres HER (samme mønster som
-        # tests/test_water_target_ui_integration.py) fordi app.py sin
-        # render_sidebar() ubetinget kaller hent_alle_oppskrifter() —
-        # uten isolasjon ville DENNE testen selv skrevet til/opprettet den
-        # ekte recipes/-mappen som en sideeffekt, uavhengig av Pantry.
-        # KVERNHAUG_PANTRY_DIR settes bevisst IKKE — det er nøyaktig
-        # variabelen denne testen skal bekrefte er trygg å glemme.
-        gammel_pantry_env = os.environ.pop("KVERNHAUG_PANTRY_DIR", None)
-        gammel_recipes_env = os.environ.get("KVERNHAUG_RECIPES_DIR")
-        tmp_recipes = tempfile.TemporaryDirectory()
-        os.environ["KVERNHAUG_RECIPES_DIR"] = tmp_recipes.name
-        recipes_snapshot_for = self._snapshot(ekte_recipes_mappe)
+            gammel_pantry_env = os.environ.get("KVERNHAUG_PANTRY_DIR")
+            gammel_recipes_env = os.environ.get("KVERNHAUG_RECIPES_DIR")
+            os.environ["KVERNHAUG_PANTRY_DIR"] = pantry_tmp
+            os.environ["KVERNHAUG_RECIPES_DIR"] = recipes_tmp
+            try:
+                repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                app_py = os.path.join(repo_root, "app.py")
 
-        # KRITISK SIKKERHETSSPERRE (innført 2026-07-27 etter et hendelsesforløp
-        # der en tidligere versjon av denne testen slettet en ekte,
-        # brukeropprettet data/pantry.json): finally-blokken under skal ALDRI
-        # kunne slette en fil som fantes FØR denne testen startet, uansett hva
-        # som skjer i try-blokken (assert-feil, exception, hva som helst).
-        # Fantes filen allerede, hopper testen over i stedet for å risikere
-        # ekte brukerdata — den destruktive verifiseringen er bare meningsfull
-        # i et miljø der filen garantert IKKE fantes fra før (fersk sjekk-ut/
-        # worktree), akkurat som testforutsetningen under alltid har krevd.
-        fantes_fra_for = os.path.exists(ekte_pantry_fil)
-        try:
-            if fantes_fra_for:
-                self.skipTest(
-                    "data/pantry.json finnes allerede -- hopper over denne destruktive "
-                    "regresjonstesten i stedet for å røre potensielt ekte brukerdata. "
-                    "Kjør i en fersk sjekk-ut/worktree for å faktisk teste dette scenariet."
+                at = AppTest.from_file(app_py)
+                at.run()
+                self.assertFalse(at.exception, f"app.py kastet exception: {at.exception}")
+
+                with open(sentinel_fil, encoding="utf-8") as f:
+                    innhold_etter = f.read()
+                self.assertEqual(
+                    innhold_etter, _SENTINEL_JSON,
+                    "En vanlig rendring av app.py skal la en eksisterende pantry.json stå "
+                    "byte-for-byte uendret",
                 )
-            at = AppTest.from_file(app_py)
-            at.run()
-            self.assertFalse(at.exception, f"app.py kastet exception: {at.exception}")
-            self.assertFalse(
-                os.path.exists(ekte_pantry_fil),
-                "En vanlig rendring av app.py (uten KVERNHAUG_PANTRY_DIR) skrev til den EKTE "
-                "data/pantry.json — se modules.pantry.last_pantry()",
-            )
-            self.assertEqual(
-                self._snapshot(ekte_recipes_mappe), recipes_snapshot_for,
-                "Den ekte recipes/-mappen skal være helt uendret (isolert via KVERNHAUG_RECIPES_DIR)",
-            )
-        finally:
-            if gammel_pantry_env is not None:
-                os.environ["KVERNHAUG_PANTRY_DIR"] = gammel_pantry_env
-            if gammel_recipes_env is None:
-                os.environ.pop("KVERNHAUG_RECIPES_DIR", None)
-            else:
-                os.environ["KVERNHAUG_RECIPES_DIR"] = gammel_recipes_env
-            tmp_recipes.cleanup()
-            # Slett KUN hvis filen bevislig IKKE fantes før testen startet --
-            # aldri fjern noe som kan være forhåndseksisterende ekte data.
-            if not fantes_fra_for and os.path.exists(ekte_pantry_fil):
-                os.remove(ekte_pantry_fil)
+            finally:
+                if gammel_pantry_env is None:
+                    os.environ.pop("KVERNHAUG_PANTRY_DIR", None)
+                else:
+                    os.environ["KVERNHAUG_PANTRY_DIR"] = gammel_pantry_env
+                if gammel_recipes_env is None:
+                    os.environ.pop("KVERNHAUG_RECIPES_DIR", None)
+                else:
+                    os.environ["KVERNHAUG_RECIPES_DIR"] = gammel_recipes_env
+        # `with`-blokken over har allerede ryddet opp begge midlertidige
+        # mapper (TemporaryDirectory.__exit__) -- ingen manuell filsletting.
 
 
 if __name__ == "__main__":

@@ -759,6 +759,154 @@ class Test25EgendefinerteIngredienser(_PantryTestCase):
         )
 
 
+def _antall_backupfiler(mappe):
+    return len([f for f in os.listdir(mappe) if ".backup_" in f])
+
+
+class Test28PantryBackupOgGjenoppretting(_PantryTestCase):
+    """Automatisk, rullerende backup FØR hver reell endring av en
+    eksisterende pantry.json (oppdatering, sletting, hurtigjustering, full
+    overskriving, import/migrering) — se lagre_pantry()/
+    _rydd_gamle_pantry_backupfiler() i modules/pantry.py. Alle disse
+    veiene går til slutt gjennom SAMME lagre_pantry()-kall, så det er det
+    ENE kontrollpunktet backupen henger på."""
+
+    def test_forste_lagring_uten_eksisterende_fil_lager_ingen_backup(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        pantry.lagre_pantry(p)
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 0,
+                          "Aller første lagring har ingenting å sikkerhetskopiere")
+
+    def test_oppdatering_av_eksisterende_post_lager_backup(self):
+        p = pantry.last_pantry()
+        item = pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 5.0, "kg")
+        p["items"].append(item)
+        pantry.lagre_pantry(p)  # første lagring -- ingen backup ennå
+
+        pantry.oppdater_pantry_item(p, item["pantry_item_id"], quantity=2.0)
+        pantry.lagre_pantry(p)  # oppdatering av eksisterende fil -- SKAL lage backup
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 1)
+
+    def test_sletting_av_vare_lager_backup(self):
+        p = pantry.last_pantry()
+        item = pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 5.0, "kg")
+        p["items"].append(item)
+        pantry.lagre_pantry(p)
+
+        p = pantry.slett_pantry_item(p, item["pantry_item_id"])
+        pantry.lagre_pantry(p)
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 1)
+
+    def test_full_overskriving_lager_backup(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 5.0, "kg"))
+        pantry.lagre_pantry(p)
+
+        helt_ny_data = {"schema_version": pantry.SCHEMA_VERSION, "updated_at": None, "items": []}
+        pantry.lagre_pantry(helt_ny_data)
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 1)
+
+    def test_import_migrering_lager_backup(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 5.0, "kg"))
+        pantry.lagre_pantry(p)
+
+        forslag = pantry.forhandsvis_humlelager_migrering({"citra": 100.0})
+        nytt = pantry.importer_humlelager_migrering(p, forslag)
+        pantry.lagre_pantry(nytt)
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 1)
+
+    def test_rullering_beholder_kun_konfigurert_antall(self):
+        p = pantry.last_pantry()
+        pantry.lagre_pantry(p)  # første lagring -- ingen backup
+        for i in range(5):
+            p["items"] = [pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", float(i), "kg")]
+            pantry.lagre_pantry(p, maks_backup_antall=3)
+        # 5 lagringer over en eksisterende fil -> 5 backup-forsøk, men kun
+        # de 3 NYESTE skal være igjen.
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 3)
+
+    def test_maks_antall_0_betyr_behold_alt(self):
+        p = pantry.last_pantry()
+        pantry.lagre_pantry(p)
+        for i in range(4):
+            p["items"] = [pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", float(i), "kg")]
+            pantry.lagre_pantry(p, maks_backup_antall=0)
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 4)
+
+    def test_list_pantry_backups_nyest_forst(self):
+        p = pantry.last_pantry()
+        pantry.lagre_pantry(p)
+        for i in range(3):
+            p["items"] = [pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", float(i), "kg")]
+            pantry.lagre_pantry(p, maks_backup_antall=0)
+
+        backups = pantry.list_pantry_backups()
+        self.assertEqual(len(backups), 3)
+        stier_kronologisk = sorted(b["sti"] for b in backups)
+        self.assertEqual([b["sti"] for b in backups], list(reversed(stier_kronologisk)),
+                          "list_pantry_backups() skal returnere nyest først")
+
+    def test_les_pantry_backup_innhold_matcher_det_som_ble_sikkerhetskopiert(self):
+        p = pantry.last_pantry()
+        item = pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 7.0, "kg")
+        p["items"].append(item)
+        pantry.lagre_pantry(p)  # ingen backup ennå (første lagring)
+
+        pantry.oppdater_pantry_item(p, item["pantry_item_id"], quantity=1.0)
+        pantry.lagre_pantry(p)  # backup tas HER, med quantity=7.0 (tilstanden FØR denne endringen)
+
+        backups = pantry.list_pantry_backups()
+        self.assertEqual(len(backups), 1)
+        innhold = pantry.les_pantry_backup_innhold(backups[0]["sti"])
+        self.assertEqual(innhold["items"][0]["quantity"], 7.0,
+                          "Backupen skal vise tilstanden FØR endringen, ikke etter")
+
+    def test_les_pantry_backup_innhold_korrupt_fil_gir_tydelig_feil(self):
+        korrupt_sti = os.path.join(self._tmpdir.name, "pantry.json.backup_20260101_000000_000000")
+        with open(korrupt_sti, "w", encoding="utf-8") as f:
+            f.write("{ ikke gyldig json ]")
+        with self.assertRaises(pantry.PantryCorruptError):
+            pantry.les_pantry_backup_innhold(korrupt_sti)
+
+    def test_gjenopprett_fra_backup_returnerer_men_lagrer_ikke(self):
+        p = pantry.last_pantry()
+        item = pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 7.0, "kg")
+        p["items"].append(item)
+        pantry.lagre_pantry(p)  # ingen backup ennå
+
+        pantry.oppdater_pantry_item(p, item["pantry_item_id"], quantity=1.0)
+        pantry.lagre_pantry(p)  # backup tas her (quantity=7.0)
+
+        backup_sti = pantry.list_pantry_backups()[0]["sti"]
+        gjenopprettet = pantry.gjenopprett_pantry_fra_backup(backup_sti)
+        self.assertEqual(gjenopprettet["items"][0]["quantity"], 7.0)
+
+        # Gjenoppretting skal IKKE lagre noe selv -- filen på disk er
+        # fortsatt den siste lagrede tilstanden (quantity=1.0) helt til
+        # kalleren eksplisitt kaller lagre_pantry() med resultatet.
+        fortsatt_pa_disk = pantry.last_pantry()
+        self.assertEqual(fortsatt_pa_disk["items"][0]["quantity"], 1.0)
+
+    def test_gjenoppretting_er_selv_en_lagring_som_tar_ny_backup(self):
+        p = pantry.last_pantry()
+        item = pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 7.0, "kg")
+        p["items"].append(item)
+        pantry.lagre_pantry(p)  # ingen backup ennå
+
+        pantry.oppdater_pantry_item(p, item["pantry_item_id"], quantity=1.0)
+        pantry.lagre_pantry(p)  # backup #1 (quantity=7.0)
+
+        backup_sti = pantry.list_pantry_backups()[0]["sti"]
+        gjenopprettet = pantry.gjenopprett_pantry_fra_backup(backup_sti)
+        pantry.lagre_pantry(gjenopprettet)  # dette ER en lagring -> tar backup #2 (quantity=1.0)
+
+        self.assertEqual(_antall_backupfiler(self._tmpdir.name), 2)
+        pa_disk = pantry.last_pantry()
+        self.assertEqual(pa_disk["items"][0]["quantity"], 7.0, "Lageret skal nå reflektere den gjenopprettede tilstanden")
+
+
 class Test24HumlelagerImportErEksplisitt(_PantryTestCase):
     def test_forhandsvisning_skriver_ingenting(self):
         filsti = os.path.join(self._tmpdir.name, "pantry.json")
