@@ -7,7 +7,13 @@ def render_humle_lager_panel(humle_database: dict) -> None:
     if DEMO_MODE:
         return
     st.write("---")
-    with st.expander("📦 Humlelager"):
+    with st.expander("📦 Humlelager (eldre)"):
+        st.caption(
+            "⚠️ **Eldre/legacy-lager** — brukes foreløpig KUN til kostnadsberegningen i handlelisten over. "
+            "Dette er en egen, separat datakilde fra 📦 Lager-panelet (Pantry) lenger opp — de synkroniseres "
+            "IKKE automatisk. Registrer humle her hvis du vil at handlelisten skal trekke fra det du "
+            "allerede har; registrer i Pantry for oppskriftskontroll (nok/mangler per ingrediens)."
+        )
         st.caption("Registrer din beholdning av humle i gram. Lager trekkes ikke automatisk ved brygging.")
 
         lager = les_lager()
