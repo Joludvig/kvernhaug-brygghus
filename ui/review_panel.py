@@ -23,6 +23,30 @@ UNMATCHED_PATHS = {
 }
 
 
+class TomMasterId(Exception):
+    """Reist når det innskrevne navnet gir en tom auto-generert ID (f.eks.
+    et navn som bare består av tegn _lag_kanonisk_id() strimler bort).
+    En tom streng kan ALDRI brukes som nøkkel i masterdatabasen."""
+    pass
+
+
+class MasterIdKollisjon(Exception):
+    """Reist når «Opprett i master» ville overskrevet en ALLEREDE
+    eksisterende ingrediens stille -- samme genererte ID matcher en
+    entry som finnes fra før. Siden review nå skriver DIREKTE til de
+    aktive masterdatabasene appen laster ved oppstart (se MASTER_PATHS
+    over), ville dette ellers vært en stille datatap-hendelse. Bærer den
+    kolliderende ID-en og navnet på den eksisterende ingrediensen, slik
+    at kallestedet kan vise akkurat hvilken oppføring som er i veien."""
+
+    def __init__(self, ny_id, eksisterende_navn):
+        self.ny_id = ny_id
+        self.eksisterende_navn = eksisterende_navn
+        super().__init__(
+            f"ID \"{ny_id}\" finnes allerede i master som «{eksisterende_navn}»."
+        )
+
+
 def _les_json(sti, default):
     if os.path.exists(sti) and os.path.getsize(sti) > 0:
         try:
@@ -82,8 +106,19 @@ def _legg_til_alias_og_fjern(kat, master_id, item, index):
 
 
 def _opprett_og_fjern(kat, ny_id, ny_entry, index):
+    """Oppretter en helt NY ingrediens i master. Reiser TomMasterId hvis
+    `ny_id` er tom, eller MasterIdKollisjon hvis `ny_id` allerede finnes
+    -- i BEGGE tilfeller uten å skrive noe til master OG uten å fjerne
+    pending-elementet, slik at review-elementet fortsatt står klart til
+    et nytt forsøk (f.eks. via «🔗 Match eksisterende» i stedet, eller
+    med et justert navn)."""
+    if not ny_id:
+        raise TomMasterId("Navnet gir en tom auto-generert ID.")
     master_sti = MASTER_PATHS[kat]
     master = _les_json(master_sti, {})
+    if ny_id in master:
+        eksisterende_navn = master[ny_id].get("display_name", ny_id)
+        raise MasterIdKollisjon(ny_id, eksisterende_navn)
     master[ny_id] = ny_entry
     skriv_master_json_atomisk(master_sti, master)
     _fjern_fra_unmatched(kat, index)
@@ -142,9 +177,18 @@ def _render_ny_humle(item, index):
                 "butikk_match": {butikk: {"pris": pris, "url": url}} if butikk else {},
                 "verified": True,
             }
-            _opprett_og_fjern("humle", ny_id, entry, index)
-            st.toast(f"«{display_name}» opprettet i master!", icon="✅")
-            st.rerun()
+            try:
+                _opprett_og_fjern("humle", ny_id, entry, index)
+            except TomMasterId:
+                st.error("❌ Navnet gir en tom auto-ID — skriv inn et navn med minst én bokstav eller ett tall.")
+            except MasterIdKollisjon as e:
+                st.error(
+                    f"❌ ID-en `{e.ny_id}` finnes allerede i master som «{e.eksisterende_navn}». "
+                    "Bruk «🔗 Match eksisterende» i stedet, eller endre navnet slik at det gir en annen ID."
+                )
+            else:
+                st.toast(f"«{display_name}» opprettet i master!", icon="✅")
+                st.rerun()
 
 
 def _render_ny_malt(item, index):
@@ -175,9 +219,18 @@ def _render_ny_malt(item, index):
                 "butikk_match": {butikk: {"pris": pris, "url": url}} if butikk else {},
                 "verified": True,
             }
-            _opprett_og_fjern("malt", ny_id, entry, index)
-            st.toast(f"«{display_name}» opprettet i master!", icon="✅")
-            st.rerun()
+            try:
+                _opprett_og_fjern("malt", ny_id, entry, index)
+            except TomMasterId:
+                st.error("❌ Navnet gir en tom auto-ID — skriv inn et navn med minst én bokstav eller ett tall.")
+            except MasterIdKollisjon as e:
+                st.error(
+                    f"❌ ID-en `{e.ny_id}` finnes allerede i master som «{e.eksisterende_navn}». "
+                    "Bruk «🔗 Match eksisterende» i stedet, eller endre navnet slik at det gir en annen ID."
+                )
+            else:
+                st.toast(f"«{display_name}» opprettet i master!", icon="✅")
+                st.rerun()
 
 
 def _render_ny_gjaer(item, index):
@@ -209,9 +262,18 @@ def _render_ny_gjaer(item, index):
                 "butikk_match": {butikk: {"pris": pris, "url": url}} if butikk else {},
                 "verified": True,
             }
-            _opprett_og_fjern("gjaer", ny_id, entry, index)
-            st.toast(f"«{display_name}» opprettet i master!", icon="✅")
-            st.rerun()
+            try:
+                _opprett_og_fjern("gjaer", ny_id, entry, index)
+            except TomMasterId:
+                st.error("❌ Navnet gir en tom auto-ID — skriv inn et navn med minst én bokstav eller ett tall.")
+            except MasterIdKollisjon as e:
+                st.error(
+                    f"❌ ID-en `{e.ny_id}` finnes allerede i master som «{e.eksisterende_navn}». "
+                    "Bruk «🔗 Match eksisterende» i stedet, eller endre navnet slik at det gir en annen ID."
+                )
+            else:
+                st.toast(f"«{display_name}» opprettet i master!", icon="✅")
+                st.rerun()
 
 
 _NY_FORM = {
