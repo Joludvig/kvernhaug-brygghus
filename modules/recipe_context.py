@@ -12,6 +12,10 @@ def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db
     volum = st.session_state.get("batch_volum_input", 20.0) if "batch_volum_input" in st.session_state else 20.0
     effektivitet = last_equipment().get("efficiency", 0.75)
     brygger_stil = st.session_state.get("brygger_stil", "")
+    # Bryggemåte (prosessprofil) er helt separat fra ingrediensvalget over —
+    # samme mønster som brygger_stil: lest fra session_state, satt av
+    # ui/process_panel.py, og påvirker ALDRI malt/humle/gjær-beregningene.
+    prosess_profil = st.session_state.get("aktiv_prosessprofil")
 
     # Flater ut biblioteker for beregninger
     flatt_malt = {info.get("display_name", k): info for k, info in malt_db.items() if info}
@@ -62,7 +66,7 @@ def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db
     fig_smak, poeng = generer_smakshjul(malt_calc, flatt_malt, humle_calc, flatt_humle, ibu, gjaer_navn, flatt_gjaer)
     summary = generer_smakssammendrag(poeng)
 
-    recipe_obj = bygg_recipe_object(oppskrift_navn, volum, effektivitet, malt_valg, humle_valg, gjaer_id, og, fg, abv, ibu, ebc, poeng, brygger_stil=brygger_stil)
+    recipe_obj = bygg_recipe_object(oppskrift_navn, volum, effektivitet, malt_valg, humle_valg, gjaer_id, og, fg, abv, ibu, ebc, poeng, brygger_stil=brygger_stil, process_profile=prosess_profil)
     style_analysis = analyser_stil_og_balanse(recipe_obj)
     conflicts = sjekk_smakskonflikter(recipe_obj)
 

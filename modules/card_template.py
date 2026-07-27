@@ -294,6 +294,24 @@ def _hop_rows_a4(ctx: dict, humle_db: dict) -> str:
     return "".join(rows) if rows else "<li>Ingen humle valgt</li>"
 
 
+def _prosess_html_a4(recipe: dict) -> str:
+    profil = recipe.get("process_profile")
+    if not profil:
+        return ""
+    steg_li = "".join(
+        f"<li>{s['temperatur']:g}°C – {s['varighet']} min"
+        + (f" <em>({s['kommentar']})</em>" if s.get("kommentar") else "")
+        + "</li>"
+        for s in profil.get("mash_steps", [])
+    )
+    return f"""
+  <h2>Bryggemåte — {profil['navn']}</h2>
+  <ul>{steg_li}</ul>
+  <p style="font-size:8pt; color:#666; margin-top:2px;">
+    Koketid: {profil.get('boil_minutes', '—')} min
+  </p>"""
+
+
 def render_a4_html(
     ctx:      dict,
     malt_db:  dict,
@@ -305,6 +323,7 @@ def render_a4_html(
     gjaer_navn = gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id)
     summary    = ctx["summary"].replace("**", "")
     gold_a4    = "#8a6a10"   # darker gold — readable on white paper
+    prosess_html = _prosess_html_a4(ctx["recipe"])
 
     logo_img = logo_img_tag(24)
 
@@ -393,6 +412,7 @@ def render_a4_html(
 
   <h2>Gjær</h2>
   <ul><li>{gjaer_navn}</li></ul>
+  {prosess_html}
 
   <div class="footer">
     <div class="motto">Brygg med ild. Del med ære.</div>

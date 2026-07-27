@@ -2,6 +2,7 @@ import json
 import streamlit as st
 from config import DEMO_MODE
 from modules.recipe_storage import hent_alle_oppskrifter
+from modules.process_profiles import normaliser_prosessprofil
 from modules.recipe_importer import (
     parse_recipe_text,
     match_imported_ingredients,
@@ -38,6 +39,18 @@ def render_sidebar():
             st.session_state["_gjeldende_navn_preserved"] = r_data["name"]
             st.session_state.brygger_stil = r_data.get("brygger_stil", "")
             st.session_state.batch_volum_input = r_data.get("batch_size", 20.0)
+            # Normaliser en EVENTUELT lagret prosessprofil FØR den blir
+            # aktiv — en kjent standardprofil (Hochkurz osv.) kan da
+            # ALDRI hydreres inn med en korrupt/hybrid meskeplan fra en
+            # eldre, buggy lagring. Mangler oppskriften en prosessprofil
+            # helt (f.eks. lagret før feltet eksisterte), holdes den
+            # bevisst None — det lar ui/process_panel.py sin egen,
+            # anbefaling-baserte førstegangsvisning slå inn i stedet for
+            # å tvinge fram "Enkel infusjon".
+            _lagret_profil = r_data.get("process_profile")
+            st.session_state["aktiv_prosessprofil"] = (
+                normaliser_prosessprofil(_lagret_profil) if _lagret_profil else None
+            )
             st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
             st.session_state["_last_loaded_recipe"] = valgt_lagret_navn
             st.session_state["_original_batch_size"] = r_data.get("batch_size", 20.0)

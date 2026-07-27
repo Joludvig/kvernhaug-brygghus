@@ -45,6 +45,7 @@ def _render_brewday_result_panel(ctx):
             note = st.text_area("Notat", height=68)
 
             if st.form_submit_button("Legg til loggoppføring", use_container_width=True):
+                _profil = st.session_state.get("aktiv_prosessprofil")
                 entry = {
                     "date": brew_date.isoformat(),
                     "actual_volume_l": actual_volume,
@@ -52,6 +53,7 @@ def _render_brewday_result_panel(ctx):
                     "actual_fg": actual_fg,
                     "actual_abv": round((actual_og - actual_fg) * 131.25, 1),
                     "note": note.strip(),
+                    "process_profile_navn": _profil["navn"] if _profil else None,
                 }
                 lagre_logg_entry(ctx["name"], entry)
                 st.toast("Loggoppføring lagret!", icon="📓")
@@ -61,12 +63,13 @@ def _render_brewday_result_panel(ctx):
             st.write("---")
             for entry in reversed(logg):
                 abv_str = f" · ABV {entry['actual_abv']:.1f}%" if entry.get("actual_abv") else ""
+                prosess_str = f" · {entry['process_profile_navn']}" if entry.get("process_profile_navn") else ""
                 st.markdown(
                     f"**{entry.get('date', '-')}** · "
                     f"{entry.get('actual_volume_l', 0):.1f} L · "
                     f"OG {entry.get('actual_og', 1.0):.3f} · "
                     f"FG {entry.get('actual_fg', 1.0):.3f}"
-                    f"{abv_str}"
+                    f"{abv_str}{prosess_str}"
                 )
                 if entry.get("note"):
                     st.caption(entry["note"])
@@ -95,6 +98,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             og=ctx["og"], fg=ctx["fg"], abv=ctx["abv"],
             ibu=ctx["ibu"], ebc=ctx["ebc"], flavor_profile={},
             brygger_stil=st.session_state.get("brygger_stil", ""),
+            process_profile=st.session_state.get("aktiv_prosessprofil"),
         )
 
     if not DEMO_MODE:
