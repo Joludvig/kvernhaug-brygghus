@@ -1,0 +1,321 @@
+"""
+Enhetstester for modules/smart_shopping_list.py — Smart Handleliste V1 sin
+rene Python-beregningsmodul (ingen Streamlit, ingen UI).
+
+Isolasjon: alle tester som bruker Pantry setter KVERNHAUG_PANTRY_DIR til en
+tempfile.TemporaryDirectory() — samme mønster som tests/test_pantry.py.
+Ingen test her leser eller skriver den ekte data/pantry.json eller
+data/humle_lager.json.
+
+Kjøres med:
+    py -3 -m unittest discover -s tests
+"""
+import copy
+import json
+import os
+import tempfile
+import unittest
+
+import modules.pantry as pantry
+import modules.smart_shopping_list as ssl
+
+
+class _ShoppingListTestCase(unittest.TestCase):
+    def setUp(self):
+        self._gammel_env = os.environ.get("KVERNHAUG_PANTRY_DIR")
+        self._tmpdir = tempfile.TemporaryDirectory()
+        os.environ["KVERNHAUG_PANTRY_DIR"] = self._tmpdir.name
+
+    def tearDown(self):
+        if self._gammel_env is None:
+            os.environ.pop("KVERNHAUG_PANTRY_DIR", None)
+        else:
+            os.environ["KVERNHAUG_PANTRY_DIR"] = self._gammel_env
+        self._tmpdir.cleanup()
+
+
+def _oppskrift(malts=None, hops=None, yeast=None):
+    return {"malts": malts or [], "hops": hops or [], "yeast": yeast}
+
+
+def _rad(handleliste, ingredient_type, ingredient_id):
+    return next(r for r in handleliste if r["ingredient_type"] == ingredient_type and r["ingredient_id"] == ingredient_id)
+
+
+_MALT_DB = {"weyermann_pilsner": {"display_name": "Weyermann Pilsner", "butikk_match": {
+    "olbrygging": {"pris": 40.0, "url": "https://example.test/pilsner"},
+}}}
+_HUMLE_DB = {"citra": {"display_name": "Citra", "butikk_match": {
+    "olbrygging": {"pris": 90.0, "pakke_gram": 100.0, "url": "https://example.test/citra"},
+}}}
+_GJAER_DB = {"safale_us_05": {"display_name": "US-05", "butikk_match": {
+    "olbrygging": {"pris": 55.0, "url": "https://example.test/us05"},
+}}}
+
+
+class Test1FullLagerGirTomHandleliste(_ShoppingListTestCase):
+    def test_nok_lager_gir_ingen_kjop_rader(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 10.0, "kg"))
+        p["items"].append(pantry.opprett_pantry_item("humle", "citra", "Citra", 200.0, "g"))
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "safale_us_05", "US-05", 2.0, "pakke"))
+        recipe = _oppskrift(
+            malts=[{"id": "weyermann_pilsner", "mengde": 5.0}],
+            hops=[{"id": "citra", "gram": 20.0, "tid": 60}],
+        )
+        handleliste = ssl.beregn_handleliste(recipe, p, _MALT_DB, _HUMLE_DB, _GJAER_DB)
+        sammendrag = ssl.oppsummer_handleliste(handleliste)
+        self.assertEqual(sammendrag["antall_ma_kjopes"], 0)
+        for rad in handleliste:
+            if rad["ingredient_type"] != "gjaer":  # gjær er alltid ukjent_match i V1 uten pakkeantall
+                self.assertEqual(rad["status"], "nok")
+
+
+class Test2DelvisMaltbeholdningGirKorrektFaktiskMangel(_ShoppingListTestCase):
+    def test_faktisk_mangel(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        handleliste = ssl.beregn_handleliste(recipe, p, _MALT_DB)
+        rad = _rad(handleliste, "malt", "weyermann_pilsner")
+        self.assertEqual(rad["required_base"], 4230.0)
+        self.assertEqual(rad["available_base"], 1000.0)
+        self.assertEqual(rad["missing_base"], 3230.0)
+        self.assertEqual(rad["status"], "kjop")
+
+
+class Test3MaltKjopsforslagAvrundesTilPakningsstorrelse(_ShoppingListTestCase):
+    def test_uten_registrert_pakningsstorrelse_foreslas_eksakt_mengde(self):
+        # Dagens virkelighet: malt har ingen pakke_kg i masterdata ->
+        # eksakt foreslått mengde, ikke avrundet.
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        handleliste = ssl.beregn_handleliste(recipe, p, _MALT_DB)
+        rad = _rad(handleliste, "malt", "weyermann_pilsner")
+        self.assertFalse(rad["package_size_known"])
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"], 3.23, places=2)
+        self.assertEqual(rad["purchase_unit"], "kg")
+
+    def test_med_registrert_pakningsstorrelse_avrundes_kjopsforslaget(self):
+        malt_db_med_pakke = {"weyermann_pilsner": {"display_name": "Pilsner", "butikk_match": {
+            "olbrygging": {"pris": 40.0, "pakke_kg": 1.0, "url": "x"},
+        }}}
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 4.23}])
+        handleliste = ssl.beregn_handleliste(recipe, p, malt_db_med_pakke)
+        rad = _rad(handleliste, "malt", "weyermann_pilsner")
+
+        self.assertTrue(rad["package_size_known"])
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"], 4.0, places=2)
+        self.assertEqual(rad["missing_base"], 3230.0, "Selve mangelen skal IKKE avrundes")
+        self.assertAlmostEqual(rad["expected_remainder_base"], 770.0, places=1)
+
+
+class Test4HumlemangelBeregnesFraPantry(_ShoppingListTestCase):
+    def test_humlemangel(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("humle", "citra", "Citra", 30.0, "g"))
+        recipe = _oppskrift(hops=[{"id": "citra", "gram": 88.0, "tid": 60}])
+        handleliste = ssl.beregn_handleliste(recipe, p, humle_db=_HUMLE_DB)
+        rad = _rad(handleliste, "humle", "citra")
+        self.assertEqual(rad["required_base"], 88.0)
+        self.assertEqual(rad["available_base"], 30.0)
+        self.assertEqual(rad["missing_base"], 58.0)
+        # pakke_gram=100 -> avrundes opp til 100g
+        self.assertEqual(rad["suggested_purchase_quantity"], 100.0)
+        self.assertTrue(rad["package_size_known"])
+        self.assertEqual(rad["status"], "kjop")
+
+
+class Test5GjaerRundesOppTilHelePakker(_ShoppingListTestCase):
+    def test_gjaer_avrunding(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "safale_us_05", "US-05", 0.5, "pakke"))
+        recipe = _oppskrift(yeast="safale_us_05")
+        recipe["gjaer_pakker_anbefalt"] = 2.3
+        handleliste = ssl.beregn_handleliste(recipe, p, gjaer_db=_GJAER_DB)
+        rad = _rad(handleliste, "gjaer", "safale_us_05")
+        self.assertAlmostEqual(rad["missing_base"], 1.8, places=6)  # faktisk mangel, ikke avrundet
+        self.assertEqual(rad["suggested_purchase_quantity"], 2.0)  # opp til hele pakker
+        self.assertEqual(rad["purchase_unit"], "pakke")
+
+
+class Test6FaktiskMangelOgForeslattKjopHoldesAdskilt(_ShoppingListTestCase):
+    def test_to_separate_felt(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("humle", "citra", "Citra", 0.0, "g"))
+        recipe = _oppskrift(hops=[{"id": "citra", "gram": 45.0, "tid": 60}])
+        handleliste = ssl.beregn_handleliste(recipe, p, humle_db=_HUMLE_DB)
+        rad = _rad(handleliste, "humle", "citra")
+        self.assertNotEqual(rad["missing_base"], rad["suggested_purchase_quantity"],
+                             "45g mangel skal avrundes til 100g kjøp -- de skal ikke være like")
+        self.assertEqual(rad["missing_base"], 45.0)
+        self.assertEqual(rad["suggested_purchase_quantity"], 100.0)
+
+
+class Test7ForventetRestBeregnesKorrekt(_ShoppingListTestCase):
+    def test_forventet_rest(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("humle", "citra", "Citra", 30.0, "g"))
+        recipe = _oppskrift(hops=[{"id": "citra", "gram": 88.0, "tid": 60}])
+        handleliste = ssl.beregn_handleliste(recipe, p, humle_db=_HUMLE_DB)
+        rad = _rad(handleliste, "humle", "citra")
+        # 30 (på lager) + 100 (kjøp) - 88 (trenger) = 42
+        self.assertEqual(rad["expected_remainder_base"], 42.0)
+
+
+class Test8FlerePantryposterSummeres(_ShoppingListTestCase):
+    def test_flere_malt_lots_summeres(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg", lot_number="A"))
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 2.0, "kg", lot_number="B"))
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 5.0}])
+        handleliste = ssl.beregn_handleliste(recipe, p, _MALT_DB)
+        rad = _rad(handleliste, "malt", "weyermann_pilsner")
+        self.assertEqual(rad["available_base"], 3000.0)
+        self.assertEqual(rad["missing_base"], 2000.0)
+
+
+class Test9UkjentIdGirUkjentMatch(_ShoppingListTestCase):
+    def test_manglende_id(self):
+        p = pantry.last_pantry()
+        recipe = _oppskrift(malts=[{"navn": "Uidentifisert malt", "mengde": 2.0}])
+        handleliste = ssl.beregn_handleliste(recipe, p, _MALT_DB)
+        rad = handleliste[0]
+        self.assertEqual(rad["status"], "ukjent_match")
+        self.assertIsNone(rad["suggested_purchase_quantity"])
+        self.assertIsNone(rad["purchase_unit"])
+        self.assertEqual(rad["supplier_options"], [])
+
+    def test_gjaer_uten_pakkeantall_gir_ukjent_match(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "safale_us_05", "US-05", 1.0, "pakke"))
+        recipe = _oppskrift(yeast="safale_us_05")  # ingen gjaer_pakker_anbefalt
+        handleliste = ssl.beregn_handleliste(recipe, p, gjaer_db=_GJAER_DB)
+        rad = _rad(handleliste, "gjaer", "safale_us_05")
+        self.assertEqual(rad["status"], "ukjent_match")
+
+
+class Test10OppskriftenMuteresIkke(_ShoppingListTestCase):
+    def test_recipe_uendret(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(
+            malts=[{"id": "weyermann_pilsner", "mengde": 5.0}],
+            hops=[{"id": "citra", "gram": 20.0, "tid": 60}],
+            yeast="safale_us_05",
+        )
+        original = json.loads(json.dumps(recipe))
+        ssl.beregn_handleliste(recipe, p, _MALT_DB, _HUMLE_DB, _GJAER_DB)
+        self.assertEqual(recipe, original)
+
+
+class Test11PantryMuteresIkke(_ShoppingListTestCase):
+    def test_pantry_uendret(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        original = copy.deepcopy(p)
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 5.0}])
+        ssl.beregn_handleliste(recipe, p, _MALT_DB)
+        self.assertEqual(p, original)
+
+
+class Test12SkaleringOppdatererHandlelistenLive(_ShoppingListTestCase):
+    def test_skalert_oppskrift_gir_nytt_behov(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 5.0, "kg"))
+        original = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 5.0}])
+        skalert = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 10.0}])
+
+        rad_original = _rad(ssl.beregn_handleliste(original, p, _MALT_DB), "malt", "weyermann_pilsner")
+        rad_skalert = _rad(ssl.beregn_handleliste(skalert, p, _MALT_DB), "malt", "weyermann_pilsner")
+
+        self.assertEqual(rad_original["status"], "nok")
+        self.assertEqual(rad_skalert["status"], "kjop")
+        self.assertEqual(rad_skalert["required_base"], 10000.0)
+
+
+class Test13GammeltHumlelagerPaavirkerIkkeResultatet(_ShoppingListTestCase):
+    def test_smart_shopping_list_importerer_ikke_humle_lager(self):
+        # Sjekker selve import-SETNINGENE (AST), ikke modulens forklarende
+        # docstring (som bevisst NEVNER data/humle_lager.json i løpende
+        # tekst for å forklare hvorfor den ikke brukes).
+        import ast
+        import inspect
+        tre = ast.parse(inspect.getsource(ssl))
+        importerte_moduler = [
+            node.module for node in ast.walk(tre) if isinstance(node, ast.ImportFrom)
+        ] + [
+            alias.name for node in ast.walk(tre) if isinstance(node, ast.Import) for alias in node.names
+        ]
+        self.assertFalse(
+            any(m and "humle_lager" in m for m in importerte_moduler),
+            f"Fant en import av humle_lager: {importerte_moduler}",
+        )
+        self.assertFalse(hasattr(ssl, "les_lager"), "smart_shopping_list skal ikke ha importert humle_lager sine funksjoner")
+
+    def test_endring_i_gammelt_lager_paavirker_ikke_resultatet(self):
+        from unittest.mock import patch
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("humle", "citra", "Citra", 30.0, "g"))
+        recipe = _oppskrift(hops=[{"id": "citra", "gram": 88.0, "tid": 60}])
+
+        uten_patch = ssl.beregn_handleliste(recipe, p, humle_db=_HUMLE_DB)
+        with patch("modules.humle_lager.les_lager", return_value={"citra": 100000.0}):
+            med_patch = ssl.beregn_handleliste(recipe, p, humle_db=_HUMLE_DB)
+
+        self.assertEqual(uten_patch, med_patch, "Smart Handleliste skal være helt upåvirket av humle_lager-data")
+
+
+class Test14PrisManglerHaandteresUtenKrasj(_ShoppingListTestCase):
+    def test_tom_butikk_match_gir_fallback_uten_krasj(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "ukjent_malt", "Ukjent", 0.0, "kg"))
+        p["items"].append(pantry.opprett_pantry_item("humle", "ukjent_humle", "Ukjent", 0.0, "g"))
+        p["items"].append(pantry.opprett_pantry_item("gjaer", "ukjent_gjaer", "Ukjent", 0.0, "pakke"))
+        recipe = _oppskrift(
+            malts=[{"id": "ukjent_malt", "mengde": 1.0}],
+            hops=[{"id": "ukjent_humle", "gram": 20.0, "tid": 60}],
+            yeast="ukjent_gjaer",
+        )
+        recipe["gjaer_pakker_anbefalt"] = 1.0
+        handleliste = ssl.beregn_handleliste(recipe, p, malt_db={}, humle_db={}, gjaer_db={})
+
+        malt_rad = _rad(handleliste, "malt", "ukjent_malt")
+        humle_rad = _rad(handleliste, "humle", "ukjent_humle")
+        gjaer_rad = _rad(handleliste, "gjaer", "ukjent_gjaer")
+
+        self.assertTrue(malt_rad["cost_is_estimate"])
+        self.assertTrue(humle_rad["cost_is_estimate"])
+        self.assertTrue(gjaer_rad["cost_is_estimate"])
+        self.assertGreater(malt_rad["estimated_cost"], 0)
+        self.assertGreater(humle_rad["estimated_cost"], 0)
+        self.assertGreater(gjaer_rad["estimated_cost"], 0)
+
+
+class TestOppsummerHandleliste(_ShoppingListTestCase):
+    def test_sammendrag_teller_riktig(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Pilsner", 1.0, "kg"))
+        recipe = _oppskrift(
+            malts=[{"id": "weyermann_pilsner", "mengde": 5.0}],
+            hops=[{"id": "citra", "gram": 20.0, "tid": 60}],
+        )
+        handleliste = ssl.beregn_handleliste(recipe, p, _MALT_DB, _HUMLE_DB)
+        sammendrag = ssl.oppsummer_handleliste(handleliste)
+        self.assertEqual(sammendrag["antall_ma_kjopes"], 2)  # malt (mangel) + humle (0 på lager)
+        self.assertGreater(sammendrag["estimert_totalkostnad"], 0)
+
+    def test_ukjent_match_telles_separat_fra_kjop(self):
+        p = pantry.last_pantry()
+        recipe = _oppskrift(malts=[{"navn": "Uidentifisert", "mengde": 1.0}])
+        handleliste = ssl.beregn_handleliste(recipe, p, _MALT_DB)
+        sammendrag = ssl.oppsummer_handleliste(handleliste)
+        self.assertEqual(sammendrag["antall_usikre_matcher"], 1)
+        self.assertEqual(sammendrag["antall_ma_kjopes"], 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
