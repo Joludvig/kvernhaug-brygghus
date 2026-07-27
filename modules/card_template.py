@@ -312,6 +312,32 @@ def _prosess_html_a4(recipe: dict) -> str:
   </p>"""
 
 
+def _vann_html_a4(recipe: dict) -> str:
+    """Samme behandling som bryggedagsarket (modules/brewday_template.py)
+    — se modules/water_chemistry.py. Tom streng (ingen seksjon) for eldre
+    oppskrifter uten lagret vannbehandling."""
+    kilde       = recipe.get("water_source_profile")
+    maal        = recipe.get("water_target_profile")
+    behandling  = recipe.get("water_treatment") or {}
+    salter      = behandling.get("salter") or []
+    if not kilde and not salter:
+        return ""
+
+    kilde_li = f"<li>Vannkilde: {kilde['name']}</li>" if kilde and kilde.get("name") else ""
+    salt_li = "".join(
+        f"<li>{s['navn']} ({s['kjemisk_form']}): {s['gram']:.2f} g totalt "
+        f"— {s.get('gram_mesk', 0):.2f} g mesk / {s.get('gram_skyll', 0):.2f} g skyll</li>"
+        for s in salter
+    )
+    ph_li = (
+        f"<li>Mål meske-pH: {maal['mash_ph_min']:.2f}–{maal['mash_ph_max']:.2f}</li>"
+        if maal and maal.get("mash_ph_min") is not None else ""
+    )
+    return f"""
+  <h2>Vannbehandling</h2>
+  <ul>{kilde_li}{salt_li}{ph_li}</ul>"""
+
+
 def render_a4_html(
     ctx:      dict,
     malt_db:  dict,
@@ -324,6 +350,7 @@ def render_a4_html(
     summary    = ctx["summary"].replace("**", "")
     gold_a4    = "#8a6a10"   # darker gold — readable on white paper
     prosess_html = _prosess_html_a4(ctx["recipe"])
+    vann_html    = _vann_html_a4(ctx["recipe"])
 
     logo_img = logo_img_tag(24)
 
@@ -413,6 +440,7 @@ def render_a4_html(
   <h2>Gjær</h2>
   <ul><li>{gjaer_navn}</li></ul>
   {prosess_html}
+  {vann_html}
 
   <div class="footer">
     <div class="motto">Brygg med ild. Del med ære.</div>

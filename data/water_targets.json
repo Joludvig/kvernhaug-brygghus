@@ -1,0 +1,94 @@
+{
+  "kvernhaug_maltpreget_tysk_lager": {
+    "target_id": "kvernhaug_maltpreget_tysk_lager",
+    "name": "Maltpreget tysk lager – Kvernhaug",
+    "description": "Kvernhaug-bryggeprofil for maltpregede tyske/østerrikske lagerstiler — IKKE en påstått historisk München-vannprofil. Historisk Wiesn-Märzen, Märzen, Festbier, Vienna Lager, Dunkel og Bock kan anbefales denne profilen, men brukeren må alltid bekrefte valget selv.",
+    "anbefalte_stiler": [
+      "Historisk Wiesn-Märzen", "Märzen", "Festbier", "Vienna Lager", "Dunkel", "Bock"
+    ],
+    "ca_min": 50, "ca_max": 65,
+    "mg_min": 0, "mg_max": 8,
+    "na_min": 0, "na_max": 20,
+    "cl_min": 50, "cl_max": 70,
+    "so4_min": 30, "so4_max": 45,
+    "hco3_min": 25, "hco3_max": 60,
+    "mash_ph_min": 5.30,
+    "mash_ph_max": 5.40
+  },
+  "lys_lager_pils": {
+    "target_id": "lys_lager_pils",
+    "name": "Lys lager og pils",
+    "description": "Kvernhaug-bryggeprofil for lyse, sarte lagerstiler — mykt vann med lav alkalitet, slik at det blekeste maltet ikke må kjempe mot høy resterende alkalitet for å nå riktig meske-pH. IKKE en påstått historisk vannprofil for noe spesifikt bryggested.",
+    "anbefalte_stiler": [
+      "Tysk Pilsner", "Böhmisk Pilsner", "Helles", "Lys Lager"
+    ],
+    "ca_min": 30, "ca_max": 50,
+    "mg_min": 0, "mg_max": 10,
+    "na_min": 0, "na_max": 15,
+    "cl_min": 0, "cl_max": 40,
+    "so4_min": 0, "so4_max": 50,
+    "hco3_min": 0, "hco3_max": 25,
+    "mash_ph_min": 5.20,
+    "mash_ph_max": 5.40
+  },
+  "balansert_ale": {
+    "target_id": "balansert_ale",
+    "name": "Balansert ale",
+    "description": "Kvernhaug-bryggeprofil som nøytralt utgangspunkt for de fleste ale-stiler — moderate ionnivåer uten sterk vekting mot klorid eller sulfat. Brukes som fallback av anbefalingsmotoren når ingen mer spesifikk profil matcher stilen.",
+    "anbefalte_stiler": [],
+    "ca_min": 50, "ca_max": 100,
+    "mg_min": 0, "mg_max": 15,
+    "na_min": 0, "na_max": 25,
+    "cl_min": 40, "cl_max": 80,
+    "so4_min": 40, "so4_max": 80,
+    "hco3_min": 25, "hco3_max": 80,
+    "mash_ph_min": 5.30,
+    "mash_ph_max": 5.50
+  },
+  "mork_maltol_porter_stout": {
+    "target_id": "mork_maltol_porter_stout",
+    "name": "Mørk maltøl – porter/stout",
+    "description": "Kvernhaug-bryggeprofil for mørke, ristede ølstiler. Ristet malt er naturlig surt og senker meske-pH på egen hånd — denne profilen har derfor bevisst høyere resterende alkalitet (HCO3) enn de lysere profilene, for å motvirke det og unngå en for lav meske-pH. Kloridtung, moderat/lav sulfat for en rund, ikke skarp bitterhet.",
+    "anbefalte_stiler": [
+      "Porter", "Stout", "Imperial Stout", "Baltic Porter", "Nordisk Røykstaut"
+    ],
+    "ca_min": 50, "ca_max": 100,
+    "mg_min": 0, "mg_max": 15,
+    "na_min": 0, "na_max": 25,
+    "cl_min": 60, "cl_max": 100,
+    "so4_min": 20, "so4_max": 50,
+    "hco3_min": 80, "hco3_max": 150,
+    "mash_ph_min": 5.40,
+    "mash_ph_max": 5.60
+  },
+  "humledrevet_ol": {
+    "target_id": "humledrevet_ol",
+    "name": "Humledrevet øl",
+    "description": "Kvernhaug-bryggeprofil for humlepregede stiler — høy sulfat for å fremheve en skarp, tørr bitterhet, lav klorid og lav alkalitet for et rent, sprøtt uttrykk. Høyere kalsium støtter god gjærhelse/utfelling i sterkere, humlerike brygg.",
+    "anbefalte_stiler": [
+      "IPA", "West Coast IPA", "American Pale Ale", "Pale Ale"
+    ],
+    "ca_min": 75, "ca_max": 150,
+    "mg_min": 0, "mg_max": 15,
+    "na_min": 0, "na_max": 15,
+    "cl_min": 0, "cl_max": 40,
+    "so4_min": 100, "so4_max": 250,
+    "hco3_min": 0, "hco3_max": 50,
+    "mash_ph_min": 5.20,
+    "mash_ph_max": 5.40
+  },
+  "egendefinert": {
+    "target_id": "egendefinert",
+    "name": "Egendefinert målprofil",
+    "description": "Fritt redigerbar målprofil — start med disse grensene eller endre dem fritt. Anbefales aldri automatisk for noen stil, og overskrives aldri av appen; dine egne grenser bevares uendret helt til du selv redigerer og lagrer på nytt.",
+    "anbefalte_stiler": [],
+    "ca_min": 50, "ca_max": 100,
+    "mg_min": 0, "mg_max": 15,
+    "na_min": 0, "na_max": 25,
+    "cl_min": 40, "cl_max": 80,
+    "so4_min": 40, "so4_max": 80,
+    "hco3_min": 25, "hco3_max": 80,
+    "mash_ph_min": 5.30,
+    "mash_ph_max": 5.50
+  }
+}

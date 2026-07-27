@@ -1,0 +1,19 @@
+{
+  "jordalsvatnet_2025": {
+    "water_id": "jordalsvatnet_2025",
+    "name": "Jordalsvatnet 2025",
+    "location": "Åsane / Tertnes",
+    "source_type": "municipal",
+    "source_year": 2025,
+    "ca": 20.0,
+    "mg": 0.5,
+    "na": 4.5,
+    "cl": 9.7,
+    "so4": 8.1,
+    "hco3": 43.0,
+    "alkalinity_mmol_l": 0.73,
+    "ph": 8.1,
+    "notes": "Normal vannkilde for Åsane. Distribusjonsnettet er sammenkoblet, så faktisk vannkilde kan variere.",
+    "is_default": true
+  }
+}

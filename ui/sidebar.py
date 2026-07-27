@@ -51,6 +51,18 @@ def render_sidebar():
             st.session_state["aktiv_prosessprofil"] = (
                 normaliser_prosessprofil(_lagret_profil) if _lagret_profil else None
             )
+            # Vannbehandling (se modules/water_chemistry.py) lagres KUN som
+            # en snapshot her — selve resynkroniseringen inn i panelets
+            # egne, redigerbare session_state-nøkler skjer i
+            # ui/water_panel.py (samme split som prosessprofilen: sidebaren
+            # eier LASTING, panelet eier egen widget-hydrering). Mangler
+            # oppskriften vannfelter (eldre lagring), forblir de bevisst
+            # None — Jordalsvatnet (eller noen annen kilde) settes ALDRI
+            # inn automatisk uten at brukeren selv velger det.
+            st.session_state["_lastet_water_source_profile"] = r_data.get("water_source_profile")
+            st.session_state["_lastet_water_target_profile"] = r_data.get("water_target_profile")
+            st.session_state["_lastet_water_treatment"] = r_data.get("water_treatment")
+            st.session_state["_lastet_water_measurements"] = r_data.get("water_measurements")
             st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
             st.session_state["_last_loaded_recipe"] = valgt_lagret_navn
             st.session_state["_original_batch_size"] = r_data.get("batch_size", 20.0)

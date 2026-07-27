@@ -21,6 +21,7 @@ from ui.humle_lager_panel import render_humle_lager_panel
 from ui.brewday_panel import render_brewday_panel
 from ui.equipment_panel import render_equipment_panel
 from ui.process_panel import render_process_panel
+from ui.water_panel import render_water_panel
 
 # 1. Grunnleggende Streamlit-konfigurering
 st.set_page_config(page_title="Kvernhaug Brygghus", page_icon="🍺", layout="wide")
@@ -143,6 +144,8 @@ with tab_innkjop:
 # ==================================================
 with tab_bryggdag:
     render_process_panel(ctx, malt_database)
+    st.write("---")
+    render_water_panel(ctx, malt_database)
     st.write("---")
     render_brewday_panel(ctx, humle_database, gjaer_database, malt_database)
     render_equipment_panel()

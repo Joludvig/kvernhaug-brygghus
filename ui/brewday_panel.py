@@ -370,7 +370,13 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             "mash_eff":      eff["mash_eff"],
             "brewhouse_eff": eff["brewhouse_eff"],
         }
-        html     = render_brewday_html(ctx, plan, log)
+        water = {
+            "kilde":      st.session_state.get("aktiv_vannkilde_snapshot"),
+            "maal":       st.session_state.get("aktiv_vannmaal_snapshot"),
+            "behandling": st.session_state.get("aktiv_vannbehandling"),
+            "maalinger":  st.session_state.get("aktiv_vannmaalinger"),
+        }
+        html     = render_brewday_html(ctx, plan, log, water=water)
         fil_navn = ctx["name"].replace(" ", "_").replace("/", "-") + "_bryggedag.html"
         st.download_button(
             label="📥 Last ned bryggedagsark",

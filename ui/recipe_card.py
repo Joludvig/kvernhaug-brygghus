@@ -99,6 +99,10 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             ibu=ctx["ibu"], ebc=ctx["ebc"], flavor_profile={},
             brygger_stil=st.session_state.get("brygger_stil", ""),
             process_profile=st.session_state.get("aktiv_prosessprofil"),
+            water_source_profile=st.session_state.get("aktiv_vannkilde_snapshot"),
+            water_target_profile=st.session_state.get("aktiv_vannmaal_snapshot"),
+            water_treatment=st.session_state.get("aktiv_vannbehandling"),
+            water_measurements=st.session_state.get("aktiv_vannmaalinger"),
         )
 
     if not DEMO_MODE:

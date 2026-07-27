@@ -5,8 +5,9 @@ from modules.export_format import (
 )
 
 
-def render_brewday_html(ctx: dict, plan: dict, log: dict = None) -> str:
+def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = None) -> str:
     log = log or {}
+    water = water or {}
     w   = plan["vann"]
 
     logo_img = logo_img_tag(24)
@@ -36,6 +37,37 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None) -> str:
     )
     humle_rows = humle_data_rows + humle_tomme_rows or (
         "<tr><td colspan='5'>Ingen humle.</td></tr>" + humle_tomme_rows
+    )
+
+    # ── Vannbehandling (se modules/water_chemistry.py) ───────────────────────
+    vann_kilde      = water.get("kilde")
+    vann_maal       = water.get("maal")
+    vann_behandling = water.get("behandling") or {}
+    vann_maalinger  = water.get("maalinger") or {}
+    vann_salter     = vann_behandling.get("salter") or []
+
+    vannkilde_li = (
+        f"<li><span class='cb'>☐</span> Vannkilde: <strong>{vann_kilde['name']}</strong></li>"
+        if vann_kilde and vann_kilde.get("name") else ""
+    )
+    salter_mesk_li = "".join(
+        f"<li><span class='cb'>☐</span> {s['navn']} ({s['kjemisk_form']}) i meskevann: <strong>{s['gram_mesk']:.2f} g</strong></li>"
+        for s in vann_salter if s.get("gram_mesk", 0) > 0.005
+    )
+    salter_skyll_li = "".join(
+        f"<li><span class='cb'>☐</span> {s['navn']} ({s['kjemisk_form']}) i skyllevann: <strong>{s['gram_skyll']:.2f} g</strong></li>"
+        for s in vann_salter if s.get("gram_skyll", 0) > 0.005
+    )
+    mash_ph_maal_li = (
+        f"<li>Mål meske-pH: <strong>{vann_maal['mash_ph_min']:.2f}–{vann_maal['mash_ph_max']:.2f}</strong></li>"
+        if vann_maal and vann_maal.get("mash_ph_min") is not None else ""
+    )
+    faktisk_ph = vann_maalinger.get("maalt_mash_ph")
+    faktisk_ph_val = f"{faktisk_ph:.2f}" if faktisk_ph else ""
+    maaletemp_val = "Romtemperatur" if vann_maalinger.get("malt_ved_romtemperatur") else ""
+    syrer_tilsatt_val = ", ".join(
+        f"{s['navn']} {s['mengde_ml']:.1f} mL" + (f" ({s['prosent']:.0f}%)" if s.get("prosent") else " (konsentrasjon ikke angitt)")
+        for s in (vann_maalinger.get("syrer") or [])
     )
 
     # ── Prosessprofil / bryggemåte ──────────────────────────────────────────
@@ -391,11 +423,27 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None) -> str:
 
     <h2>Vann</h2>
     <ul class="cb-list">
+      {vannkilde_li}
       <li><span class="cb">☐</span> Meskevann: <strong>{w['mash_vann_l']:.1f} L</strong></li>
       <li><span class="cb">☐</span> Skyllevann: <strong>{w['sparge_vann_l']:.1f} L</strong></li>
       <li><span class="cb">☐</span> Pre-boil: <strong>{w['pre_boil_l']:.1f} L</strong>
           &nbsp;<em style="font-size:9pt;color:#777;">(maks 30 L — BrewZilla)</em></li>
+      {salter_mesk_li}{salter_skyll_li}{mash_ph_maal_li}
     </ul>
+    <div class="ferm-grid" style="margin-top:2px;">
+      <div>
+        <div class="field-lbl">Faktisk meske-pH</div>
+        <div class="field-line">{faktisk_ph_val}</div>
+      </div>
+      <div>
+        <div class="field-lbl">Måletemperatur</div>
+        <div class="field-line">{maaletemp_val}</div>
+      </div>
+    </div>
+    <div style="margin-top:2px;">
+      <div class="field-lbl">Syrer tilsatt</div>
+      <div class="field-line">{syrer_tilsatt_val}</div>
+    </div>
 
     <h2>Mesking</h2>
     <ul class="cb-list">{maskeplan_li}{dekoksjon_li}{reiterated_li}</ul>
