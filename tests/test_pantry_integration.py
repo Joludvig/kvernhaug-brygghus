@@ -124,16 +124,31 @@ class TestFullFlowLagerStatusSkaleringOgPersistens(_PantryAppTestCase):
     skaler oppskriften, se manglene oppdateres, åpne ny sesjon, bekreft at
     lageret er bevart og oppskriften urørt."""
 
+    @staticmethod
+    def _rad(at, ingredient_type, ingredient_id):
+        return next(
+            r for r in at.session_state["_debug_mangler_rader"]
+            if r["ingredient_type"] == ingredient_type and r["ingredient_id"] == ingredient_id
+        )
+
     def test_full_flow(self):
         at = self._kjor()
 
-        # Wiesn-fixturen: weyermann_munich_1 0.7 kg, munich_ii 4.6 kg,
-        # vienna 1.8 kg, tettnang 88 g, saflager_w3470 (gjær).
+        # Wiesn-fixturen: weyermann_munich_1 (Munich I) 0.7 kg, munich_ii
+        # (Munich II) 4.6 kg, vienna (Vienna) 1.8 kg, tettnang 88 g,
+        # saflager_w3470 (W-34/70).
         recipe = at.session_state["_debug_ctx_recipe"]
         malt_ider = {m["id"] for m in recipe["malts"]}
         self.assertEqual(malt_ider, {"weyermann_munich_1", "munich_ii", "vienna"})
+        self.assertEqual(recipe["yeast"], "saflager_w3470")
+        self.assertEqual({h["id"] for h in recipe["hops"]}, {"tettnang"})
 
-        # 1) Legg inn rikelig av alt malt/humle som trengs -> "nok".
+        original_recipe = copy.deepcopy(recipe)
+        original_prosess = copy.deepcopy(at.session_state["aktiv_prosessprofil"])
+        original_vann = copy.deepcopy(at.session_state["aktiv_vannmaal_snapshot"])
+
+        # 1) Legg inn Munich I, Munich II, Vienna, Tettnang og W-34/70,
+        # rikelig av hver -> alt skal vise "nok".
         self._legg_til_vare(at, "Malt", "weyermann_munich_1", 1.0, "kg")
         self._legg_til_vare(at, "Malt", "munich_ii", 5.0, "kg")
         self._legg_til_vare(at, "Malt", "vienna", 2.0, "kg")
@@ -142,17 +157,42 @@ class TestFullFlowLagerStatusSkaleringOgPersistens(_PantryAppTestCase):
 
         self.assertEqual(len(at.session_state["_debug_pantry"]["items"]), 5)
 
-        # 2) Malt+humle skal nå vise "nok" -- ingen mangel-feil. Gjær har
-        # ingen lagret anbefalt pakkeantall i dagens oppskriftsmodell og
-        # skal derfor alltid vises som "må kontrolleres manuelt", ikke som
-        # en falsk "nok".
+        # 2) Eksplisitt "nok" for HVER navngitte ingrediens (ikke bare
+        # fravær av feil-melding samlet sett).
+        for ingredient_type, ingredient_id in [
+            ("malt", "weyermann_munich_1"), ("malt", "munich_ii"), ("malt", "vienna"), ("humle", "tettnang"),
+        ]:
+            rad = self._rad(at, ingredient_type, ingredient_id)
+            self.assertEqual(rad["status"], "nok", f"{ingredient_id} skulle vist 'nok', fikk {rad}")
+
+        # Gjær har ingen lagret anbefalt pakkeantall i dagens
+        # oppskriftsmodell -- skal vises som "må kontrolleres manuelt",
+        # ikke som en falsk "nok".
+        gjaer_rad = self._rad(at, "gjaer", "saflager_w3470")
+        self.assertEqual(gjaer_rad["status"], "ukjent_match")
         self.assertEqual(len(at.error), 0, "Malt og humle skulle dekke behovet -- ingen mangel-feil forventet")
         self.assertTrue(
             any("kontrolleres manuelt" in w.value for w in at.warning),
             "Forventet varsel om at gjær (ukjent pakkebehov) må kontrolleres manuelt",
         )
 
-        # 3) Skaler oppskriften til det dobbelte -- malt-behovet dobles.
+        # 3) Reduser Tettnang under behovet (88 g) -> status blir "mangler".
+        tettnang_item = next(
+            i for i in at.session_state["_debug_pantry"]["items"] if i["ingredient_id"] == "tettnang"
+        )
+        tettnang_id = tettnang_item["pantry_item_id"]
+        at.button(key=f"pantry_rediger_{tettnang_id}").click().run()
+        at.number_input(key=f"pantry_rediger_mengde_{tettnang_id}").set_value(10.0).run()
+        at.button(key=f"pantry_sett_{tettnang_id}").click().run()
+
+        tettnang_rad = self._rad(at, "humle", "tettnang")
+        self.assertEqual(tettnang_rad["status"], "mangler", f"Forventet 'mangler' etter reduksjon, fikk {tettnang_rad}")
+        self.assertEqual(tettnang_rad["available_base"], 10.0)
+        self.assertAlmostEqual(tettnang_rad["missing_base"], 78.0, places=2)
+        self.assertGreater(len(at.error), 0, "Skal nå vise en mangel-feil for Tettnang")
+
+        # 4) Skaler oppskriften til det dobbelte -- alt behov dobles,
+        # inkludert det allerede manglende Tettnang-behovet.
         at.number_input(key="skaler_maal_volum").set_value(40.0).run()
         at.button(key="skaler_btn").click().run()
 
@@ -161,24 +201,52 @@ class TestFullFlowLagerStatusSkaleringOgPersistens(_PantryAppTestCase):
         self.assertAlmostEqual(skalert_malt["munich_ii"], 9.2, places=2,
                                 msg="Skalering til dobbel batch skal doble malt-mengden")
 
-        # 4) Mangelen skal nå gjenspeile det NYE, doblede behovet: 5 kg
-        # munich_ii på lager dekker ikke lenger 9.2 kg behov.
+        skalert_tettnang_rad = self._rad(at, "humle", "tettnang")
+        self.assertEqual(skalert_tettnang_rad["required_base"], 176.0, "Tettnang-behovet skal også dobles (88 -> 176 g)")
         self.assertGreater(
-            len(at.error), 0,
-            "Etter skalering skal munich_ii-behovet (9.2 kg) overstige lageret (5 kg) og gi en mangel-feil",
+            skalert_tettnang_rad["missing_base"], tettnang_rad["missing_base"],
+            "Mangelen på Tettnang skal øke etter skalering, ikke bli stående på det gamle tallet",
         )
+        self.assertEqual(skalert_tettnang_rad["status"], "mangler")
 
-        # 5) Ny sesjon: lageret er bevart, oppskriften i den NYE sesjonen
-        # er den uendrede fixture-oppskriften (testverten seedes på nytt
-        # fra fixturen, ikke fra noen lagret skalert tilstand).
+        skalert_munich_ii_rad = self._rad(at, "malt", "munich_ii")
+        self.assertEqual(
+            skalert_munich_ii_rad["status"], "mangler",
+            "5 kg Munich II på lager dekker ikke lenger det doblede behovet på 9.2 kg",
+        )
+        self.assertGreater(len(at.error), 0, "Etter skalering skal minst én mangel-feil fortsatt vises")
+
+        # 5) Prosessprofilen og vannkjemien skal være urørt av ALLE
+        # Pantry-handlingene over (legg til, rediger) OG av skaleringen i
+        # steg 4 (recipe_card sin egen handling, ikke Pantry sin) — kun
+        # malt/humle-mengder og batchvolum skal ha endret seg, jf. steg 4
+        # sin bekreftelse på at Tettnang-behovet faktisk doblet seg der.
+        self.assertEqual(original_recipe["yeast"], skalert_recipe["yeast"])
+        self.assertEqual(at.session_state["aktiv_prosessprofil"], original_prosess,
+                          "Pantry-handlinger (og skalering) skal aldri røre prosessprofilen")
+        self.assertEqual(at.session_state["aktiv_vannmaal_snapshot"], original_vann,
+                          "Pantry-handlinger (og skalering) skal aldri røre vannkjemi-snapshotten")
+
+        # 6) Ny sesjon: lageret (5 poster, med redusert Tettnang) er
+        # bevart på disk. Oppskriften i DEN NYE sesjonen er den uendrede
+        # fixture-oppskriften (testverten seedes på nytt fra fixturen for
+        # hver økt, ikke fra noen lagret skalert tilstand) -- selve
+        # skaleringen var kun en in-session brukerhandling.
         at2 = self._kjor()
         self.assertEqual(len(at2.session_state["_debug_pantry"]["items"]), 5,
                           "Lageret skal være bevart på disk mellom separate økter")
+        tettnang_etter_ny_sesjon = next(
+            i for i in at2.session_state["_debug_pantry"]["items"] if i["ingredient_id"] == "tettnang"
+        )
+        self.assertEqual(tettnang_etter_ny_sesjon["quantity"], 10.0,
+                         "Den reduserte Tettnang-mengden skal også være bevart i den nye sesjonen")
         self.assertEqual(
             {m["id"] for m in at2.session_state["_debug_ctx_recipe"]["malts"]},
             {"weyermann_munich_1", "munich_ii", "vienna"},
             "Oppskriften skal fortsatt være den uendrede Wiesn-fixturen i en ny økt",
         )
+        self.assertEqual(at2.session_state["_debug_ctx_recipe"], original_recipe,
+                         "Oppskriften i en ny økt skal være byte-for-byte den samme fixture-oppskriften")
 
 
 class TestEktAppPyRenderingSkriverIkkeTilRealPantry(unittest.TestCase):

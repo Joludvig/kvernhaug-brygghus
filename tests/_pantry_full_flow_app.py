@@ -90,3 +90,6 @@ render_recipe_card(ctx, malt_database, humle_database, gjaer_database)
 render_pantry_panel(ctx, malt_database, humle_database, gjaer_database)
 
 st.session_state["_debug_pantry"] = pantry.last_pantry()
+st.session_state["_debug_mangler_rader"] = pantry.beregn_mangler(
+    ctx["recipe"], st.session_state["_debug_pantry"], malt_database, humle_database, gjaer_database,
+)
