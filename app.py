@@ -150,7 +150,7 @@ with tab_innkjop:
 # === TAB 3: BRYGGDAG ============================
 # ==================================================
 with tab_bryggdag:
-    render_process_panel(ctx, malt_database)
+    render_process_panel(ctx, malt_database, humle_database)
     st.write("---")
     render_water_panel(ctx, malt_database)
     st.write("---")

@@ -121,7 +121,7 @@ def _bygg_aktiv_profil(process_id, navn, mal):
     return profil
 
 
-def render_process_panel(ctx, malt_database=None):
+def render_process_panel(ctx, malt_database=None, humle_database=None):
     st.subheader("🧭 Bryggemåte")
     st.caption(
         "Prosessprofilen beskriver HVORDAN ølet meskes og kokes — helt "
@@ -369,6 +369,31 @@ def render_process_panel(ctx, malt_database=None):
     aktiv_profil = _bygg_aktiv_profil(valgt_id, navn_visning, mal)
     for varsel in sjekk_utstyrsbegrensninger(aktiv_profil, total_malt_kg, eq):
         st.warning(f"⚠️ {varsel}")
+
+    # ── Humletid som overstiger total koketid ───────────────────────────
+    # En humle kan ikke fysisk få lengre kontakt med kokende vørter enn
+    # selve koken varer — endres total koketid (over) eller bryggemåte
+    # til noe kortere enn en allerede valgt humles egen tid, er den
+    # tilsetningen ikke lenger gjennomførbar som oppgitt. Muterer ALDRI
+    # oppskriften automatisk — kun et varsel, brukeren avgjør selv om
+    # humletiden eller koketiden skal justeres (se også
+    # ui/brewday_panel.py, som viser konsekvensen i IBU-tallene).
+    _total_koketid = st.session_state["prosess_boil_minutes"]
+    _humle_over_koketid = [
+        h for h in st.session_state.get("valgt_humle", [])
+        if h.get("tid", 0) > _total_koketid
+    ]
+    if _humle_over_koketid:
+        _humle_navn = ", ".join(
+            f"{(humle_database or {}).get(h['id'], {}).get('display_name', h['id'])} ({h['tid']} min)"
+            for h in _humle_over_koketid
+        )
+        st.warning(
+            f"⚠️ {len(_humle_over_koketid)} humletilsetning(er) har lengre egen koketid enn "
+            f"total koketid ({_total_koketid} min): {_humle_navn}. Disse kan ikke få full "
+            "IBU-utnyttelse innenfor denne koken — se «Humletilsetninger» i Bryggedag-fanen "
+            "for oppskriftens planlagte IBU vs. prosessens faktisk mulige IBU."
+        )
 
     st.session_state["prosess_brukernotater"] = st.text_area(
         "Egne notater om denne bryggemåten", value=st.session_state["prosess_brukernotater"],

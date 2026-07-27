@@ -111,11 +111,28 @@ def _bygg_humle_entry(h, humle_database, bigness, volum, total_koketid_min):
     navn   = h_info.get("display_name", h["id"])
     alfa   = h_info.get("alfa") or h_info.get("alfa_typisk") or 5.0
     tid, gram = h["tid"], h["gram"]
-    if tid > 0 and bigness > 0 and volum > 0:
-        times      = (1 - math.exp(-0.04 * tid)) / 4.15
-        ibu_bidrag = round((gram * 1000 * (alfa / 100.0) / volum) * bigness * times, 1)
-    else:
-        ibu_bidrag = 0.0
+
+    def _ibu_for_tid(effektiv_tid):
+        if effektiv_tid > 0 and bigness > 0 and volum > 0:
+            times = (1 - math.exp(-0.04 * effektiv_tid)) / 4.15
+            return round((gram * 1000 * (alfa / 100.0) / volum) * bigness * times, 1)
+        return 0.0
+
+    # En humle kan IKKE fysisk ha lengre egen koketid enn selve kokens
+    # totale lengde -- ei heller "tilsettes ved kokestart" (0 min etter
+    # start) OG samtidig få full IBU-utnyttelse for sin fulle, stipulerte
+    # tid. `tid_over_koketid` fanger nettopp dette umulige tilfellet (en
+    # 90 min-humle valgt inn i en 60 min total kok, f.eks. etter at
+    # brukeren har byttet prosessprofil eller redusert koketiden uten å
+    # revidere humlelisten). `ibu_bidrag` beholder brukerens OPPGITTE tid
+    # uendret (dette er "oppskriftens planlagte" bidrag -- samme tall som
+    # modules/calculations.py::beregn_total_ibu() uten koketid-grense);
+    # `ibu_bidrag_faktisk` bruker i stedet tiden humlen FAKTISK kan få i
+    # DENNE prosessens kok (aldri mer enn total_koketid_min).
+    tid_over_koketid   = tid > total_koketid_min
+    tid_faktisk         = min(tid, total_koketid_min)
+    ibu_bidrag          = _ibu_for_tid(tid)
+    ibu_bidrag_faktisk  = _ibu_for_tid(tid_faktisk) if tid_over_koketid else ibu_bidrag
     # `tid` er humlens EGEN koketid (min igjen av koken når den tilsettes),
     # ikke nødvendigvis lik total koketid — skiller mellom de to slik at en
     # 60 min-humle i en 90 min total kok korrekt vises som tilsatt 30 min
@@ -124,6 +141,8 @@ def _bygg_humle_entry(h, humle_database, bigness, volum, total_koketid_min):
     return {
         "navn": navn, "gram": gram, "tid": tid, "ibu_bidrag": ibu_bidrag,
         "tilsatt_etter_min": tilsatt_etter_min,
+        "tid_over_koketid": tid_over_koketid,
+        "ibu_bidrag_faktisk": ibu_bidrag_faktisk,
     }
 
 
@@ -255,6 +274,15 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
         key=lambda x: x["tid"],
         reverse=True,
     )
+    # Humle med lengre EGEN koketid enn selve kokens totale lengde er
+    # fysisk umulig (den kan ikke få mer utnyttelse enn koken faktisk
+    # varer) -- se _bygg_humle_entry sin "tid_over_koketid"/
+    # "ibu_bidrag_faktisk". Samlet opp her slik at UI-laget
+    # (ui/process_panel.py og ui/brewday_panel.py) kan varsle uten selv å
+    # regne ut noe.
+    humle_over_koketid  = [h for h in humleplan if h["tid_over_koketid"]]
+    ibu_planlagt         = round(sum(h["ibu_bidrag"] for h in humleplan), 1)
+    ibu_faktisk_prosess  = round(sum(h["ibu_bidrag_faktisk"] for h in humleplan), 1)
 
     pakker         = beregn_pakker(og, batch_volum_l, gjaer_key)
     temp_min, temp_maks = _TEMP.get(gjaer_key, (18, 22))
@@ -284,6 +312,9 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
         "brewzilla_varsel":     brewzilla_varsel,
         "maskeplan":            maskeplan,
         "humleplan":            humleplan,
+        "humle_over_koketid":   humle_over_koketid,
+        "ibu_planlagt":         ibu_planlagt,
+        "ibu_faktisk_prosess":  ibu_faktisk_prosess,
         "gjaer_navn":           gjaer_info.get("display_name", gjaer_id),
         "pakker":               pakker,
         "temp_min":             temp_min,

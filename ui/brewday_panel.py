@@ -150,7 +150,8 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             if plan["humleplan"]:
                 header = "| Tid igjen | Tilsatt etter | Humle | Gram | IBU |\n|-----|-----|-------|------|-----|"
                 rows   = "\n".join(
-                    f"| {h['tid']} min | {h['tilsatt_etter_min']} min | {h['navn']} | {h['gram']:.0f} g | {h['ibu_bidrag']:.1f} |"
+                    f"| {'⚠️ ' if h['tid_over_koketid'] else ''}{h['tid']} min "
+                    f"| {h['tilsatt_etter_min']} min | {h['navn']} | {h['gram']:.0f} g | {h['ibu_bidrag']:.1f} |"
                     for h in plan["humleplan"]
                 )
                 st.markdown(f"{header}\n{rows}")
@@ -158,6 +159,30 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
                     "«Tid igjen» = humlens egen koketid. «Tilsatt etter» = minutter "
                     f"etter kokestart, gitt {plan['koketid_min']} min total koketid."
                 )
+
+                # Umulig humletid: en tilsetning med lengre egen koketid enn
+                # selve kokens totale lengde kan ikke fysisk oppnå IBU-en
+                # tabellen over viser (den bruker brukerens OPPGITTE tid,
+                # uendret — se modules/brewday_calc.py::_bygg_humle_entry).
+                # Muterer ALDRI oppskriften automatisk her; viser i stedet
+                # BEGGE tallene side om side og lar brukeren selv avgjøre.
+                if plan["humle_over_koketid"]:
+                    _humle_navn = ", ".join(
+                        f"{h['navn']} ({h['tid']} min)" for h in plan["humle_over_koketid"]
+                    )
+                    st.warning(
+                        f"⚠️ {len(plan['humle_over_koketid'])} humle markert over har lengre "
+                        f"egen koketid enn total koketid ({plan['koketid_min']} min): {_humle_navn}. "
+                        "IBU-tabellen over viser oppskriftens PLANLAGTE bidrag (uendret tid) — "
+                        "se sammenligningen under for hva som faktisk er oppnåelig i denne koken."
+                    )
+                    ibu_c1, ibu_c2 = st.columns(2)
+                    ibu_c1.metric("IBU — oppskriftens planlagte", f"{plan['ibu_planlagt']:.1f}")
+                    ibu_c2.metric(
+                        "IBU — prosessens faktisk mulige", f"{plan['ibu_faktisk_prosess']:.1f}",
+                        delta=f"{plan['ibu_faktisk_prosess'] - plan['ibu_planlagt']:.1f}",
+                        delta_color="inverse",
+                    )
             else:
                 st.caption("Ingen humle i oppskriften.")
 
@@ -358,7 +383,20 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
 
     # ── PRINT-ARK ───────────────────────────────────────────────────────────
     st.write("")
-    if st.button("🖨️ Generer Bryggedagsark", width="stretch", key="brewday_print_btn"):
+    # Eksport blokkeres ALDRI stille -- men ved en umulig humletid (se
+    # varselet/IBU-sammenligningen over) må brukeren eksplisitt bekrefte
+    # at avviket er sett før arket kan genereres, slik at et bryggedagsark
+    # med en IBU som ikke er fysisk oppnåelig ikke presenteres som gyldig
+    # uten videre.
+    _eksport_ok = True
+    if plan["humle_over_koketid"]:
+        _eksport_ok = st.checkbox(
+            "Jeg har sett avviket mellom planlagt og faktisk mulig IBU over, og vil eksportere likevel",
+            key="bd_bekreft_humletid_avvik",
+        )
+        if not _eksport_ok:
+            st.caption("🔒 Bryggedagsarket er låst til avviket over er bekreftet.")
+    if st.button("🖨️ Generer Bryggedagsark", width="stretch", key="brewday_print_btn", disabled=not _eksport_ok):
         log = {
             "pre_boil_sg":   st.session_state.get("bd_pre_boil_sg",  1.000),
             "pre_boil_vol":  st.session_state.get("bd_pre_boil_vol", 0.0),
