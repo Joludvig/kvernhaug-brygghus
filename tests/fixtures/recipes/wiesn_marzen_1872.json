@@ -1,0 +1,32 @@
+{
+  "name": "Kvernhaug Wiesn-Märzen 1872",
+  "stats": {
+    "og": 1.0639925272000001,
+    "fg": 1.011518654896,
+    "abv": 6.887195739900018,
+    "ibu": 22.19577066725207,
+    "ebc": 15.058891555271144
+  },
+  "malts": [
+    {
+      "id": "weyermann_munich_1",
+      "mengde": 0.7
+    },
+    {
+      "id": "munich_ii",
+      "mengde": 4.6
+    },
+    {
+      "id": "vienna",
+      "mengde": 1.8
+    }
+  ],
+  "hops": [
+    {
+      "id": "tettnang",
+      "gram": 88.0,
+      "tid": 60
+    }
+  ],
+  "yeast": "saflager_w3470"
+}

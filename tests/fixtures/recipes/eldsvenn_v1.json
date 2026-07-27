@@ -1,0 +1,48 @@
+{
+  "name": "Eldsvenn V1",
+  "stats": {
+    "og": 1.0918202634999998,
+    "fg": 1.024791471145,
+    "abv": 8.79752899659374,
+    "ibu": 9.89992102355752,
+    "ebc": 29.33326137293958
+  },
+  "malts": [
+    {
+      "id": "weyermann_pilsner",
+      "mengde": 5.0
+    },
+    {
+      "id": "rauchmalz",
+      "mengde": 1.5
+    },
+    {
+      "id": "pale_wheat",
+      "mengde": 0.5
+    },
+    {
+      "id": "flaket_havre",
+      "mengde": 0.4
+    },
+    {
+      "id": "crystal_maple_carapils",
+      "mengde": 0.3
+    },
+    {
+      "id": "chocolate_wheat",
+      "mengde": 0.2
+    },
+    {
+      "id": "carafa_special_2",
+      "mengde": 0.1
+    }
+  ],
+  "hops": [
+    {
+      "id": "east_kent_goldings",
+      "gram": 25.0,
+      "tid": 60
+    }
+  ],
+  "yeast": "wyeast_1318"
+}

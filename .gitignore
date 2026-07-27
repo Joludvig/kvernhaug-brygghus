@@ -20,7 +20,10 @@ tools/
 raw_data/*.txt
 
 # Private brukerdata — ikke del disse
-recipes/
+# Ankret til rotnivå (leading slash) med vilje: en uankret "recipes/" matcher
+# ENHVER mappe med det navnet i hele treet, inkl. tests/fixtures/recipes/ —
+# som er committede, saniterte test-fixtures og IKKE skal ignoreres.
+/recipes/
 data/humle_lager.json
 data/equipment.json
 
