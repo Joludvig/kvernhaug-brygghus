@@ -22,8 +22,10 @@ import streamlit as st
 
 from modules.recipe_context import bygg_recipe_context
 from modules import pantry
+from modules.smart_shopping_list import beregn_handleliste
 from ui.recipe_card import render_recipe_card
 from ui.pantry_panel import render_pantry_panel
+from ui.smart_shopping_list_panel import render_smart_shopping_list_panel
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -88,8 +90,13 @@ st.session_state["_debug_ctx_recipe"] = ctx["recipe"]
 
 render_recipe_card(ctx, malt_database, humle_database, gjaer_database)
 render_pantry_panel(ctx, malt_database, humle_database, gjaer_database)
+render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
 
 st.session_state["_debug_pantry"] = pantry.last_pantry()
 st.session_state["_debug_mangler_rader"] = pantry.beregn_mangler(
     ctx["recipe"], st.session_state["_debug_pantry"], malt_database, humle_database, gjaer_database,
+)
+st.session_state["_debug_handleliste"] = beregn_handleliste(
+    ctx["recipe"], st.session_state["_debug_pantry"], malt_database, humle_database, gjaer_database,
+    butikk=st.session_state.get("global_butikk", "Ølbrygging.no"),
 )

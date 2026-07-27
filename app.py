@@ -19,6 +19,7 @@ from ui.import_panel import render_import_panel
 from ui.shopping_list_panel import render_shopping_list_panel
 from ui.humle_lager_panel import render_humle_lager_panel
 from ui.pantry_panel import render_pantry_panel
+from ui.smart_shopping_list_panel import render_smart_shopping_list_panel
 from ui.brewday_panel import render_brewday_panel
 from ui.equipment_panel import render_equipment_panel
 from ui.process_panel import render_process_panel
@@ -138,6 +139,7 @@ with tab_oppskrift:
 # ==================================================
 with tab_innkjop:
     render_pantry_panel(ctx, malt_database, humle_database, gjaer_database)
+    render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
     st.write("---")
     render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database)
     render_humle_lager_panel(humle_database)

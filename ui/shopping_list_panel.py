@@ -200,7 +200,12 @@ def _humle_rad(h: dict) -> None:
 
 def render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_database):
     st.write("---")
-    with st.expander("🛒 Handleliste"):
+    with st.expander("🛒 Handleliste (eldre — full kostnadsoversikt, kopier/last ned)"):
+        st.caption(
+            "Viser FULL ingrediensliste med pris/lenker for kopiering/nedlasting. Bruker det gamle "
+            "humlelageret (ikke Pantry) for humle-lagerfratrekk, og trekker ikke fra lager for malt/gjær. "
+            "Se 🧠 Smart Handleliste over for lagerbevisst kjøpsbehov basert på Pantry."
+        )
         malt_items, humle_items, gjaer_item, butikk = _bygg_handleliste(
             malt_database, humle_database, gjaer_database
         )
