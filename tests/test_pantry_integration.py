@@ -410,11 +410,24 @@ class TestEktAppPyRenderingSkriverIkkeTilRealPantry(unittest.TestCase):
         tmp_recipes = tempfile.TemporaryDirectory()
         os.environ["KVERNHAUG_RECIPES_DIR"] = tmp_recipes.name
         recipes_snapshot_for = self._snapshot(ekte_recipes_mappe)
+
+        # KRITISK SIKKERHETSSPERRE (innført 2026-07-27 etter et hendelsesforløp
+        # der en tidligere versjon av denne testen slettet en ekte,
+        # brukeropprettet data/pantry.json): finally-blokken under skal ALDRI
+        # kunne slette en fil som fantes FØR denne testen startet, uansett hva
+        # som skjer i try-blokken (assert-feil, exception, hva som helst).
+        # Fantes filen allerede, hopper testen over i stedet for å risikere
+        # ekte brukerdata — den destruktive verifiseringen er bare meningsfull
+        # i et miljø der filen garantert IKKE fantes fra før (fersk sjekk-ut/
+        # worktree), akkurat som testforutsetningen under alltid har krevd.
+        fantes_fra_for = os.path.exists(ekte_pantry_fil)
         try:
-            self.assertFalse(
-                os.path.exists(ekte_pantry_fil),
-                "Testforutsetning: ekte data/pantry.json skal ikke finnes før denne testen kjører",
-            )
+            if fantes_fra_for:
+                self.skipTest(
+                    "data/pantry.json finnes allerede -- hopper over denne destruktive "
+                    "regresjonstesten i stedet for å røre potensielt ekte brukerdata. "
+                    "Kjør i en fersk sjekk-ut/worktree for å faktisk teste dette scenariet."
+                )
             at = AppTest.from_file(app_py)
             at.run()
             self.assertFalse(at.exception, f"app.py kastet exception: {at.exception}")
@@ -435,7 +448,9 @@ class TestEktAppPyRenderingSkriverIkkeTilRealPantry(unittest.TestCase):
             else:
                 os.environ["KVERNHAUG_RECIPES_DIR"] = gammel_recipes_env
             tmp_recipes.cleanup()
-            if os.path.exists(ekte_pantry_fil):
+            # Slett KUN hvis filen bevislig IKKE fantes før testen startet --
+            # aldri fjern noe som kan være forhåndseksisterende ekte data.
+            if not fantes_fra_for and os.path.exists(ekte_pantry_fil):
                 os.remove(ekte_pantry_fil)
 
 
