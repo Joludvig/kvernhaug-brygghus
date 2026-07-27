@@ -154,7 +154,7 @@ def render_malt_panel(malt_database):
         else:
             st.caption(f"Prosent-sum: {_sum_pct:.1f}%")
     with _btn_col:
-        if st.button("Bruk prosentfordeling", key="apply_pct_btn", use_container_width=True):
+        if st.button("Bruk prosentfordeling", key="apply_pct_btn", width="stretch"):
             if _sum_pct > 0 and _current_total > 0:
                 for i, m in enumerate(st.session_state.valgt_malt):
                     m["mengde"] = round(_pct_vals[i] / _sum_pct * _current_total, 3)

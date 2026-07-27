@@ -358,7 +358,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
 
     # ── PRINT-ARK ───────────────────────────────────────────────────────────
     st.write("")
-    if st.button("🖨️ Generer Bryggedagsark", use_container_width=True, key="brewday_print_btn"):
+    if st.button("🖨️ Generer Bryggedagsark", width="stretch", key="brewday_print_btn"):
         log = {
             "pre_boil_sg":   st.session_state.get("bd_pre_boil_sg",  1.000),
             "pre_boil_vol":  st.session_state.get("bd_pre_boil_vol", 0.0),
@@ -383,7 +383,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             data=html,
             file_name=fil_navn,
             mime="text/html",
-            use_container_width=True,
+            width="stretch",
             key="brewday_download_btn",
         )
         st.info("💡 Åpne filen i nettleseren og trykk **Ctrl + P** for å skrive ut.")

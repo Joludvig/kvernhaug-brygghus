@@ -58,7 +58,7 @@ def render_equipment_panel():
             key="eq_boil_time",
         )
 
-        if st.button("💾 Lagre utstyrsprofil", use_container_width=True, key="eq_save_btn"):
+        if st.button("💾 Lagre utstyrsprofil", width="stretch", key="eq_save_btn"):
             lagre_equipment({
                 "efficiency": efficiency / 100.0,
                 "boil_off_l_per_hour": boil_off,

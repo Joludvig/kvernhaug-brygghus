@@ -24,7 +24,7 @@ def render_import_panel():
     
     # === KNAPP 1: SKANN BUTIKKER ===
     with col1:
-        if st.button("🔍 Trål og skann butikker", use_container_width=True):
+        if st.button("🔍 Trål og skann butikker", width="stretch"):
             with st.spinner("Cravler nettbutikker side for side (delay 1s)..."):
                 # Slett gamle review-filer ved ny skanning så vi ikke ser gammel info
                 for k in ["malt", "humle", "gjaer"]:
@@ -39,7 +39,7 @@ def render_import_panel():
     # === KNAPP 2: AI NORMALISERING ===
     with col2:
         raw_finnes = os.path.exists("raw_data/malt_raw.json")
-        if st.button("🧠 Kjør AI-normalisering", use_container_width=True, disabled=not raw_finnes):
+        if st.button("🧠 Kjør AI-normalisering", width="stretch", disabled=not raw_finnes):
             status_element = st.empty()
             progress_bar = st.progress(0)
 
@@ -83,7 +83,7 @@ def render_import_panel():
     # === KNAPP 3: LAGRE TIL MASTER DB ===
     with col3:
         master_finnes = os.path.exists("data/master_humle_v0_1.json")
-        if st.button("📥 Importer til Master DB", use_container_width=True, disabled=not master_finnes):
+        if st.button("📥 Importer til Master DB", width="stretch", disabled=not master_finnes):
             imported_count = 0
 
             sync_config = [

@@ -9,7 +9,7 @@ def render_supplier_panel(malt_database, humle_database, gjaer_database):
     st.header("🔍 Leverandør-kontroll")
     st.caption("Verifiser om de lokale databasene dine matcher utvalget hos Vestbrygg og Ølbrygging.")
     
-    if st.button("🔍 Sjekk sortiment mot butikkene", use_container_width=True):
+    if st.button("🔍 Sjekk sortiment mot butikkene", width="stretch"):
         from modules.store_sync import lag_sortimentrapport
         with st.spinner("Kontakter vestbrygg.no og olbrygging.no..."):
             rapport = lag_sortimentrapport(malt_database, humle_database, gjaer_database)

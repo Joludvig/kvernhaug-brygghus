@@ -323,7 +323,7 @@ def _render_legg_til(data, malt_db, humle_db, gjaer_db):
         st.caption("Skriv inn et navn før du kan legge til en egendefinert ingrediens.")
 
     if st.button(
-        "Legg til i lager", key="pantry_legg_til_btn", use_container_width=True,
+        "Legg til i lager", key="pantry_legg_til_btn", width="stretch",
         disabled=er_egendefinert and not navn,
     ):
         if er_egendefinert:

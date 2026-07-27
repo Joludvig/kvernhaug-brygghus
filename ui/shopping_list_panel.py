@@ -263,7 +263,7 @@ def render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_databas
             data=tekst,
             file_name=base_fil + "_handleliste.txt",
             mime="text/plain",
-            use_container_width=True,
+            width="stretch",
             key="handleliste_download_btn",
         )
     with dl_col2:
@@ -273,6 +273,6 @@ def render_shopping_list_panel(ctx, malt_database, humle_database, gjaer_databas
             data=html_ark,
             file_name=base_fil + "_handleliste.html",
             mime="text/html",
-            use_container_width=True,
+            width="stretch",
             key="handleliste_html_btn",
         )

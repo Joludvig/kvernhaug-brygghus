@@ -1,7 +1,7 @@
 import streamlit as st
 
 def render_style_panel(ctx, humle_database):
-    st.plotly_chart(ctx["fig_smak"], use_container_width=True, key="kvernhaug_smakshjul")
+    st.plotly_chart(ctx["fig_smak"], width="stretch", key="kvernhaug_smakshjul")
     
     st.header("🧠 Kvernhaug AI: Stil- & Balanse")
     st.subheader(f"Numerisk nærmeste stil: *{ctx['style_analysis']['stil']}*")

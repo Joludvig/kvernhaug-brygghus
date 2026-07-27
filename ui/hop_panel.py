@@ -111,7 +111,7 @@ def render_hop_panel(humle_database):
                     )
                 with beregn_col:
                     st.write(" ")
-                    if st.button("Beregn gram", key=f"humle_beregn_{j}_v{_v}", use_container_width=True):
+                    if st.button("Beregn gram", key=f"humle_beregn_{j}_v{_v}", width="stretch"):
                         if maal_ibu > 0:
                             _og = st.session_state.get("_last_og", 1.050)
                             _volum = st.session_state.get("batch_volum_input", 20.0)

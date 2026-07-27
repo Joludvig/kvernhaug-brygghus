@@ -92,7 +92,7 @@ def render_sidebar():
         )
         import_tekst = st.text_area("Oppskrift:", height=160, key="import_tekst_input", label_visibility="collapsed")
 
-        if st.button("🔍 Analyser", key="import_analyser_btn", use_container_width=True):
+        if st.button("🔍 Analyser", key="import_analyser_btn", width="stretch"):
             if import_tekst.strip():
                 parsed = parse_recipe_text(import_tekst)
                 master_malt  = _last_master_db("master_malt.json")
@@ -144,7 +144,7 @@ def render_sidebar():
                     st.error(f"{u['kategori'].capitalize()}: {u['navn']}")
 
             if noe_matchet:
-                if st.button("✅ Importer oppskrift", key="import_bekreft_btn", use_container_width=True):
+                if st.button("✅ Importer oppskrift", key="import_bekreft_btn", width="stretch"):
                     apply_import_to_session_state(preview)
                     del st.session_state["import_preview"]
                     del st.session_state["import_parsed"]

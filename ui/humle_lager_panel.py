@@ -89,7 +89,7 @@ def render_humle_lager_panel(humle_database: dict) -> None:
                 label_visibility="collapsed",
             )
         with col_btn:
-            if st.button("Legg til", key="lager_legg_til_btn", use_container_width=True):
+            if st.button("Legg til", key="lager_legg_til_btn", width="stretch"):
                 lager[ny_id] = float(ny_gram)
                 lagre_lager(lager)
                 st.rerun()

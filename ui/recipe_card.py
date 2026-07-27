@@ -44,7 +44,7 @@ def _render_brewday_result_panel(ctx):
                 )
             note = st.text_area("Notat", height=68)
 
-            if st.form_submit_button("Legg til loggoppføring", use_container_width=True):
+            if st.form_submit_button("Legg til loggoppføring", width="stretch"):
                 _profil = st.session_state.get("aktiv_prosessprofil")
                 entry = {
                     "date": brew_date.isoformat(),
@@ -108,7 +108,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
     if not DEMO_MODE:
         # Lagre endringer: overskriv aktiv oppskrift
         if st.session_state.get("_last_loaded_recipe"):
-            if st.button("💾 Lagre endringer", use_container_width=True, key="lagre_endringer_btn"):
+            if st.button("💾 Lagre endringer", width="stretch", key="lagre_endringer_btn"):
                 ny_recipe = _bygg_recipe_fra_session(ctx)
                 lagre_oppskrift(ny_recipe)
                 st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
@@ -118,12 +118,12 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         # Lagre som ny kopi og slett
         btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
-            if st.button("💾 Lagre som ny kopi", use_container_width=True, key="lagre_ny_kopi_btn"):
+            if st.button("💾 Lagre som ny kopi", width="stretch", key="lagre_ny_kopi_btn"):
                 ny_recipe = _bygg_recipe_fra_session(ctx)
                 lagre_oppskrift(ny_recipe)
                 st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
         with btn_col2:
-            if st.button("🗑️ Slett gjeldende", use_container_width=True):
+            if st.button("🗑️ Slett gjeldende", width="stretch"):
                 if slett_oppskrift_fil(ctx["name"]):
                     st.toast(f"Slettet {ctx['name']}", icon="🗑️")
                     st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
@@ -143,7 +143,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             value=float(ctx["volum"]),
             key="skaler_maal_volum",
         )
-        if st.button("Skaler oppskrift", use_container_width=True, key="skaler_btn"):
+        if st.button("Skaler oppskrift", width="stretch", key="skaler_btn"):
             if abs(maal - ctx["volum"]) < 0.01:
                 st.warning("Mål-volum er allerede lik gjeldende volum.")
             else:
@@ -184,7 +184,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
 
     with st.expander("📐 Eksporter / arkiver oppskrift"):
         st.caption("Lag et statisk A4-ark med ingrediensliste, stilanalyse og smaksprofil. Bryggedagsarket (under) er primær utskrift for selve bryggingen.")
-        if st.button("🖨️ Generer utskriftsvennlig ark (A4)", use_container_width=True):
+        if st.button("🖨️ Generer utskriftsvennlig ark (A4)", width="stretch"):
             html_dokument = render_a4_html(ctx, malt_database, humle_database, gjaer_database)
             fil_navn = ctx["name"].replace(" ", "_").replace("/", "-") + ".html"
             st.download_button(
@@ -192,6 +192,6 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 data=html_dokument,
                 file_name=fil_navn,
                 mime="text/html",
-                use_container_width=True,
+                width="stretch",
             )
             st.info("💡 Åpne filen i nettleseren og trykk **Ctrl + P** for å skrive ut.")
