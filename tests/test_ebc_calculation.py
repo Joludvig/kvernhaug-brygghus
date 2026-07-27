@@ -1,12 +1,18 @@
 """
 Tester for modules/calculations.py::beregn_ebc() -- Morey-formelen.
 
-Bakgrunn: den gamle implementasjonen anvendte 1.97 direkte på
+Bakgrunn: den ALLERFØRSTE implementasjonen anvendte 1.97 direkte på
 MCU^0.685 og brukte maltens rå EBC-verdi som om den allerede var
 °Lovibond -- den droppet både Morey-koeffisienten 1.4922 og
-EBC->Lovibond-konverteringen. Disse testene låser den fullstendige,
-dokumenterte konverteringskjeden (EBC -> Lovibond -> MCU -> Morey SRM ->
-EBC) med hånd-regnede kontrollscenarioer, uavhengig av databasefiler.
+EBC->Lovibond-konverteringen. En senere runde rettet Morey-koeffisienten
+og enhetskonverteringene, men brukte fortsatt en FEIL EBC->Lovibond-
+konvertering for selve maltkornet (°L = °EBC / 1.97 -- dette tallet
+gjelder ferdig ØLETS SRM<->EBC-harmonisering, ikke maltets egen
+EBC<->Lovibond-skala). Denne runden retter EBC->Lovibond-konverteringen
+til °L = (°EBC + 1.2) / 2.65, verifisert direkte mot Weyermanns egne
+produktsider (se TestMaltEbcTilLovibondMotProdusentdata under -- IKKE
+bare Style Engine sitt EBC-intervall, som aldri var uavhengig
+dokumentasjon på selve konverteringsformelen).
 
 Kjøres med:
     py -3 -m unittest tests.test_ebc_calculation
@@ -14,18 +20,70 @@ Kjøres med:
 import math
 import unittest
 
-from modules.calculations import beregn_ebc
+from modules.calculations import (
+    beregn_ebc,
+    _MALT_EBC_TIL_LOVIBOND_A,
+    _MALT_EBC_TIL_LOVIBOND_B,
+)
+
+
+class TestMaltEbcTilLovibondMotProdusentdata(unittest.TestCase):
+    """Uavhengig verifisering av selve EBC->Lovibond-konstanten
+    (_MALT_EBC_TIL_LOVIBOND_A/_B) mot Weyermanns EGNE, offentlig publiserte
+    produktsider -- IKKE mot noe internt i denne appen, og IKKE mot
+    Style Engine sitt EBC-intervall (som kun sier noe om PLAUSIBEL
+    beer-farge for en stil, ikke om selve maltfarge-konverteringen er
+    riktig).
+
+    Kilder (hentet 2026-07-28):
+      https://www.weyermann.de/en-us/product/weyermann-munich-malt-type-2-2/
+        "20,0 - 25,0 EBC" / "8.0 - 9.9 Lovibond"
+      https://www.weyermann.de/en-us/product/weyermann-carafa-special-type-2-2/
+        "1100 - 1200 EBC" / "415.2 - 452.9 Lovibond"
+
+    To produkter på VIDT forskjellige fargeområder (lyst basemalt vs.
+    mørkt røstet spesialmalt) -- begge stemmer med formelen innenfor
+    < 0.2 °L avvik, som er godt innenfor det en lineær tilnærmingsformel
+    over et så stort spenn kan forventes å treffe."""
+
+    def _lovibond(self, ebc):
+        return (ebc + _MALT_EBC_TIL_LOVIBOND_A) / _MALT_EBC_TIL_LOVIBOND_B
+
+    def test_weyermann_munich_malt_type_2_nedre_grense(self):
+        self.assertAlmostEqual(self._lovibond(20.0), 8.0, delta=0.05)
+
+    def test_weyermann_munich_malt_type_2_ovre_grense(self):
+        self.assertAlmostEqual(self._lovibond(25.0), 9.9, delta=0.05)
+
+    def test_weyermann_carafa_special_type_2_nedre_grense(self):
+        self.assertAlmostEqual(self._lovibond(1100.0), 415.2, delta=0.5)
+
+    def test_weyermann_carafa_special_type_2_ovre_grense(self):
+        self.assertAlmostEqual(self._lovibond(1200.0), 452.9, delta=0.5)
+
+    def test_feil_tidligere_konvertering_1_97_stemmer_ikke_med_produsentdata(self):
+        # Regresjonsvakt mot at noen ved en feiltakelse bytter tilbake til
+        # den forrige rundens formel (°L = °EBC / 1.97): den formelen gir
+        # et tydelig FOR HØYT Lovibond-tall for begge Weyermann-produktene
+        # over -- bekreft at den IKKE lenger brukes.
+        feil_lovibond_20 = 20.0 / 1.97
+        feil_lovibond_1100 = 1100.0 / 1.97
+        self.assertNotAlmostEqual(feil_lovibond_20, 8.0, delta=0.5)
+        self.assertNotAlmostEqual(feil_lovibond_1100, 415.2, delta=5.0)
 
 
 class TestBeregnEbcHaandregnet(unittest.TestCase):
-    """Kontrollerer beregn_ebc() mot manuelt utregnede scenarioer."""
+    """Kontrollerer beregn_ebc() mot manuelt utregnede scenarioer, med den
+    NÅ korrekte EBC->Lovibond-formelen (EBC + 1.2) / 2.65 -- se
+    TestMaltEbcTilLovibondMotProdusentdata over for hvorfor akkurat disse
+    konstantene, ikke bare en speiling av implementasjonens egen kode."""
 
     def test_ett_malt_haandregnet_kontroll(self):
         # 5 kg malt @ 8.0 EBC, 20 L batch.
         malt_data = {"Test Malt": {"ebc": 8.0}}
         valgt = [{"navn": "Test Malt", "mengde": 5.0}]
 
-        lovibond = 8.0 / 1.97
+        lovibond = (8.0 + 1.2) / 2.65
         mengde_lb = 5.0 * 2.2046226218
         volum_gal = 20.0 * 0.2641720524
         mcu = (mengde_lb * lovibond) / volum_gal
@@ -34,8 +92,7 @@ class TestBeregnEbcHaandregnet(unittest.TestCase):
 
         resultat = beregn_ebc(valgt, malt_data, 20.0)
         self.assertAlmostEqual(resultat, forventet_ebc, places=6)
-        # Sanity: for et lyst malt skal EBC havne i et realistisk område,
-        # ikke i nærheten av den gamle, feilberegnede verdien.
+        # Sanity: for et lyst malt skal EBC havne i et realistisk område.
         self.assertGreater(resultat, 5.0)
         self.assertLess(resultat, 20.0)
 
@@ -54,7 +111,7 @@ class TestBeregnEbcHaandregnet(unittest.TestCase):
 
         mcu = 0.0
         for navn, mengde in (("Pils", 4.0), ("Munich", 1.0)):
-            lovibond = malt_data[navn]["ebc"] / 1.97
+            lovibond = (malt_data[navn]["ebc"] + 1.2) / 2.65
             mengde_lb = mengde * 2.2046226218
             volum_gal = volum * 0.2641720524
             mcu += (mengde_lb * lovibond) / volum_gal
@@ -68,7 +125,7 @@ class TestBeregnEbcHaandregnet(unittest.TestCase):
         # konkavheten i potensfunksjonen -- bekreft at vi IKKE gjør det.
         feil_sum_hver_for_seg = 0.0
         for navn, mengde in (("Pils", 4.0), ("Munich", 1.0)):
-            lovibond = malt_data[navn]["ebc"] / 1.97
+            lovibond = (malt_data[navn]["ebc"] + 1.2) / 2.65
             mengde_lb = mengde * 2.2046226218
             volum_gal = volum * 0.2641720524
             enkelt_mcu = (mengde_lb * lovibond) / volum_gal
@@ -115,11 +172,15 @@ class TestBeregnEbcHaandregnet(unittest.TestCase):
 
 
 class TestBeregnEbcOffentligWiesnFixture(unittest.TestCase):
-    """Rapporterer gammel vs. ny EBC for den offentlige 23 L Wiesn-fixturen
-    (tests/fixtures/recipes/wiesn_marzen_1872_23l_batch.json), og
-    bekrefter at det nye tallet fortsatt er innenfor Style Engine sitt
-    dokumenterte EBC-intervall for "Historisk Wiesn-Märzen" (16-32 EBC,
-    se modules/style_engine.py)."""
+    """Rapporterer EBC for den offentlige 23 L Wiesn-fixturen
+    (tests/fixtures/recipes/wiesn_marzen_1872_23l_batch.json) gjennom ALLE
+    TRE formel-generasjonene, og bekrefter at dagens (korrekte) tall
+    fortsatt er innenfor Style Engine sitt dokumenterte EBC-intervall for
+    "Historisk Wiesn-Märzen" (16-32 EBC, se modules/style_engine.py) --
+    men MERK: dette intervallet bekrefter bare at tallet er PLAUSIBELT
+    for stilen, ikke at selve konverteringsformelen er riktig (se
+    TestMaltEbcTilLovibondMotProdusentdata over for den uavhengige
+    dokumentasjonen)."""
 
     _MALT_EBC = {
         "Munich I": 14.5,
@@ -132,37 +193,41 @@ class TestBeregnEbcOffentligWiesnFixture(unittest.TestCase):
         {"navn": "Vienna Malt", "mengde": 1.656},
     ]
     _VOLUM = 23.0
-    _GAMMEL_EBC_I_FIXTURE = 15.058891555271146
+    # De historiske formel-generasjonenes lagrede/kjente resultat for
+    # akkurat denne fixturen -- kun til rapportering/regresjon, ikke
+    # brukt som fasit for dagens formel.
+    _EBC_ALLERFORSTE_FORMEL = 15.058891555271146  # 1.97 * MCU_rå^0.685, ingen Lovibond-steg
+    _EBC_FORRIGE_RUNDE_FORMEL = 24.327928451585546  # (EBC/1.97) som "Lovibond"
 
-    def test_gammel_vs_ny_ebc_for_wiesn_23l(self):
-        ny_ebc = beregn_ebc(self._OPPSKRIFT_MALT, self._MALT_EBC and {
-            k: {"ebc": v} for k, v in self._MALT_EBC.items()
-        }, self._VOLUM)
+    def test_ny_ebc_for_wiesn_23l(self):
+        malt_data = {k: {"ebc": v} for k, v in self._MALT_EBC.items()}
+        ny_ebc = beregn_ebc(self._OPPSKRIFT_MALT, malt_data, self._VOLUM)
 
-        # Den gamle (feilaktige) formelen matcher fixturens lagrede tall.
-        def _gammel_beregn_ebc(valgt, malt_data, volum):
-            mcu = 0
-            for m in valgt:
-                mcu += (m["mengde"] * malt_data[m["navn"]]["ebc"]) / (volum * 0.264)
-            return 1.97 * (mcu ** 0.685)
-
-        gammel_ebc = _gammel_beregn_ebc(
-            self._OPPSKRIFT_MALT,
-            {k: {"ebc": v} for k, v in self._MALT_EBC.items()},
-            self._VOLUM,
+        print(
+            f"\n[EBC-fiks, runde 2] Wiesn-Märzen 1872 - 23L batch: "
+            f"allerførste formel = {self._EBC_ALLERFORSTE_FORMEL:.2f} EBC, "
+            f"forrige rundes formel (EBC/1.97) = {self._EBC_FORRIGE_RUNDE_FORMEL:.2f} EBC, "
+            f"ny, produsentverifisert formel ((EBC+1.2)/2.65) = {ny_ebc:.2f} EBC"
         )
-        self.assertAlmostEqual(gammel_ebc, self._GAMMEL_EBC_I_FIXTURE, places=3)
 
-        print(f"\n[EBC-fiks] Wiesn-Märzen 1872 - 23L batch: "
-              f"gammel EBC = {gammel_ebc:.2f}, ny EBC = {ny_ebc:.2f}")
+        # Uavhengig utregnet forventningsverdi (se docstring/kommentarer i
+        # modules/calculations.py for kildehenvisningene) -- IKKE
+        # hardkodet blindt: dette tallet følger fra å kjøre nøyaktig den
+        # dokumenterte kjeden (EBC->Lovibond via (EBC+1.2)/2.65 -> MCU ->
+        # Morey SRM -> EBC) på fixturens egne malt-/mengde-/volumtall.
+        self.assertAlmostEqual(ny_ebc, 20.74, delta=0.05)
 
         # Style Engine sitt dokumenterte intervall for "Historisk
-        # Wiesn-Märzen" er (16, 32) -- se modules/style_engine.py. Den nye,
-        # korrekte EBC-en skal fortsatt falle innenfor dette intervallet
-        # (nærmere den øvre enden enn den gamle, undervurderte verdien).
-        self.assertGreater(ny_ebc, gammel_ebc)
+        # Wiesn-Märzen" er (16, 32) -- se modules/style_engine.py. Dette
+        # er en plausibilitetssjekk, IKKE dokumentasjon på at formelen
+        # selv er riktig (se TestMaltEbcTilLovibondMotProdusentdata).
         self.assertGreaterEqual(ny_ebc, 16.0)
         self.assertLessEqual(ny_ebc, 32.0)
+
+        # Denne rundens rettelse skal gi et ANNET tall enn forrige runde
+        # (den rettet en reell, dokumentert feil -- se
+        # TestMaltEbcTilLovibondMotProdusentdata).
+        self.assertNotAlmostEqual(ny_ebc, self._EBC_FORRIGE_RUNDE_FORMEL, delta=0.5)
 
 
 if __name__ == "__main__":

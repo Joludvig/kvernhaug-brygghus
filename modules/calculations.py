@@ -5,12 +5,25 @@ import math
 # hele konverteringskjeden og kildene til hver konstant.
 _KG_TIL_LB = 2.2046226218
 _LITER_TIL_US_GALLON = 0.2641720524
-# Anerkjent ASBC/EBC-harmoniseringsfaktor mellom SRM/°Lovibond og °EBC
-# (samme konvensjon brukt av bl.a. BeerSmith og Brewer's Friend sine
-# MCU/Morey-kalkulatorer): °EBC = 1.97 x °SRM, og for maltfarge spesifikt
-# °Lovibond = °EBC / 1.97 (°Lovibond behandles som numerisk ~= °SRM for
-# selve maltkornet, som er standardpraksisen i Morey-baserte kalkulatorer).
-_EBC_TIL_SRM_FAKTOR = 1.97
+# Ferdig ØL sin SRM<->EBC-harmonisering (IKKE det samme som maltfargens
+# EBC<->Lovibond -- se _MALT_EBC_TIL_LOVIBOND_A/_B under): °EBC = 1.97 x °SRM.
+_SRM_TIL_EBC_FAKTOR = 1.97
+# Maltfargens EBC->°Lovibond-konvertering: °L = (°EBC + 1.2) / 2.65.
+# Verifisert direkte mot Weyermanns egne produktsider (samme malt oppgitt
+# i BEGGE enheter, hentet 2026-07-28):
+#   Munich Malt Type 2:    20.0-25.0 EBC  <->  8.0-9.9 °L
+#     (20+1.2)/2.65 = 8.00   (25+1.2)/2.65 = 9.89
+#   Carafa Special Type 2: 1100-1200 EBC  <->  415.2-452.9 °L
+#     (1100+1.2)/2.65 = 415.55   (1200+1.2)/2.65 = 453.28
+# Begge < 0.1% avvik fra de publiserte Lovibond-verdiene, på svært
+# forskjellige fargeområder (lyst vs. mørkt malt) -- dette er IKKE samme
+# konvertering som "°Lovibond = °EBC / 1.97" (som gjaldt en tidligere,
+# feilaktig versjon av denne funksjonen): det tallet stemmer for
+# SRM<->EBC på FERDIG ØL, ikke for selve maltkornets fargerating, og gir
+# for Munich Malt Type 2 et Lovibond-intervall på 10.2-12.7 -- klart
+# høyere enn Weyermanns egne 8.0-9.9.
+_MALT_EBC_TIL_LOVIBOND_A = 1.2
+_MALT_EBC_TIL_LOVIBOND_B = 2.65
 
 def beregn_og(valgt_malt_liste, malt_data, volum, effektivitet):
     """Beregner Original Gravity (OG) basert på maltmengde og meskeeffektivitet."""
@@ -35,13 +48,17 @@ def beregn_ebc(valgt_malt_liste, malt_data, volum):
     CaraHell = 25.0 EBC). Morey-formelen er derimot definert i imperiale
     enheter (lb, US gallon) og °Lovibond, så hvert malt konverteres i tur:
 
-      1. °EBC -> °Lovibond:  L = EBC / 1.97
+      1. °EBC -> °Lovibond:  L = (EBC + 1.2) / 2.65   (maltfargens EGEN
+         EBC<->Lovibond-konvertering -- se _MALT_EBC_TIL_LOVIBOND_A/_B
+         over for kilder. IKKE forveksle med ferdig øls SRM<->EBC.)
       2. kg -> lb:           lb = kg * 2.2046226218
       3. liter -> US gallon: gal = L * 0.2641720524
       4. MCU (malt color units), summert over alle malttyper:
              MCU = sum( (lb_i * L_i) / gal_total )
       5. Morey: SRM = 1.4922 * MCU^0.6859
-      6. °SRM -> °EBC:       EBC = SRM * 1.97
+      6. °SRM -> °EBC:       EBC = SRM * 1.97   (dette ER riktig konstant
+         her -- dette er ferdig ØLETS SRM<->EBC-harmonisering, det siste
+         steget i Morey-formelen, en helt annen konvertering enn steg 1.)
     """
     if volum <= 0:
         return 0
@@ -52,11 +69,11 @@ def beregn_ebc(valgt_malt_liste, malt_data, volum):
         mengde_kg = m["mengde"]
         if navn in malt_data:
             malt_ebc = malt_data[navn]["ebc"]
-            malt_lovibond = malt_ebc / _EBC_TIL_SRM_FAKTOR
+            malt_lovibond = (malt_ebc + _MALT_EBC_TIL_LOVIBOND_A) / _MALT_EBC_TIL_LOVIBOND_B
             mengde_lb = mengde_kg * _KG_TIL_LB
             mcu += (mengde_lb * malt_lovibond) / volum_gal
     srm = 1.4922 * (mcu ** 0.6859)
-    return srm * _EBC_TIL_SRM_FAKTOR
+    return srm * _SRM_TIL_EBC_FAKTOR
 
 
 def beregn_fg_og_abv(og, attenuation):
