@@ -1,6 +1,6 @@
 # Kvernhaug Brygghus
 
-En lokal webapp for hjemmebryggere. Legg inn malt, humle og gjær — appen regner ut OG, IBU, EBC og ABV live, matcher oppskriften mot BJCP-stiler, og lager en komplett bryggedagsplan med vannberegninger, meskeplan og gjæranbefalinger. Alt lagres lokalt og kjøres i nettleseren via Streamlit, uten ekstern server eller database.
+En lokal webapp for hjemmebryggere. Legg inn malt, humle og gjær — appen regner ut OG, IBU, EBC og ABV live, matcher oppskriften mot BJCP-stiler, beregner vannkjemi og saltdosering, og lager en komplett bryggedagsplan med meskeplan, gjæranbefalinger og prosessprofiler (inkl. Hochkurz). Et eget Pantry-lager og en smart handleliste holder styr på hva du faktisk har hjemme. Alt lagres lokalt og kjøres i nettleseren via Streamlit, uten ekstern server eller database.
 
 ---
 
@@ -11,7 +11,7 @@ En lokal webapp for hjemmebryggere. Legg inn malt, humle og gjær — appen regn
 
 ---
 
-## Installasjon
+## Installasjon og oppstart
 
 ```bash
 # 1. Klon repoet
@@ -33,29 +33,39 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+På Windows kan `start_app.bat` brukes som snarvei for steg 4.
+
 Appen åpner seg automatisk i standardnettleseren på `http://localhost:8501`.
 
 ---
 
-## Hva er bygget
+## Viktigste funksjoner
 
-**Oppskriftsbygger**
-Malttabell med andeler (redistribuerer proporsjonalt ved endring), humleplan med Tinseth IBU-beregning, gjærvelger med utgjæringsgrad og fermenteringstemperatur. Batch-volum og oppskriftsnavn er redigerbare.
+- **Oppskriftsbygger** — malt/humle/gjær med live OG, IBU, EBC, ABV; redigerbart batch-volum
+- **Style Engine** — 22 BJCP-stiler med prosentvis matching, sensorisk smakshjul, balanseanalyse
+- **Vannkjemi** — kildevann, målprofilbibliotek, saltdosering, mesk/skyll-fordeling
+- **Bryggeplan og bryggedagsark** — prosessprofiler, meskeplan, gjæranbefaling, utskriftsvennlige A4-ark
+- **Pantry (📦 Lager)** — reell lagerbeholdning per ingrediens, inkl. egendefinerte varer, med automatisk backup og gjenoppretting
+- **Smart Handleliste** — beregner reell mangel og kjøpsforslag ut fra Pantry
+- **Datapipeline** — kuraterte masterdatabaser for malt, humle og gjær, med butikk-prissynk
 
-**Analyse og stil**
-22 BJCP-stiler med prosentvis matching. Sensorisk smakshjul basert på malt- og humlekategorier. Balanseanalyse og advarsler (underhopping, overhopping, etc.).
+Se [docs/ROADMAP.md](docs/ROADMAP.md) og [docs/PROJECT_STATUS_JULI_2026.md](docs/PROJECT_STATUS_JULI_2026.md) for hva som er ferdig, hva som pågår, og hva som er planlagt.
 
-**Humlelager**
-Registrer beholdning i gram per humle-ID. Handlelisten viser automatisk hva du har hjemme, hva du mangler, og kjøpsberegning rundet opp til hel pakke.
+---
 
-**Handleliste**
-Genereres fra gjeldende oppskrift med prisestimat og produktlenker per butikk (Vestbrygg / Ølbrygging.no). Eksport som .txt og .html.
+## Private data
 
-**Bryggeplan og utskrift**
-Bryggeplan med meskevann, skyllevann, pre-boil, meskeplan, koketid, humletilsetninger og gjæranbefalinger. To nedlastbare A4-ark: kompakt oppskriftsark og bryggedagsark med avkrysningsbokser.
+`recipes/` og alle private runtime-filer i `data/` (blant annet `pantry.json` og tilhørende backupfiler, `humle_lager.json`, `equipment.json`) er gitignoret — de opprettes automatisk lokalt og deles aldri via git.
 
-**Datapipeline**
-Tre masterfiler (`data/master_malt.json`, `data/master_humle_v2.json`, `data/master_gjaer_v2.json`) er manuelt kuratert med aliases, sensoriske tags og butikk-match. Import-panelet synkroniserer priser til runtime-filene appen leser fra.
+---
+
+## Tester
+
+```bash
+py -3 -m unittest discover -s tests
+```
+
+Ingen test skal berøre dine ekte, private filer i `recipes/` eller `data/pantry.json` — testene bruker isolerte, midlertidige kataloger.
 
 ---
 
@@ -70,21 +80,6 @@ recipes/            → Dine lagrede oppskrifter (opprettes automatisk, ikke del
 assets/             → Bilder og branding
 docs/               → Teknisk dokumentasjon og sesjonlogger
 ```
-
-### `data/` — hva er hva
-
-| Fil | Beskrivelse |
-|-----|-------------|
-| `master_humle_v2.json` | Kuratert humledatabase med sensoriske tags og butikk-match |
-| `master_gjaer_v2.json` | Kuratert gjærdatabase |
-| `master_malt.json` | Kuratert maltdatabase |
-| `humle.json` / `malt.json` / `gjaer.json` | Runtime-databaser (generert fra master, leses av appen) |
-| `humle_lager.json` | Din lokale humlebeholdning (opprettes automatisk, ikke delt) |
-| `equipment.json` | Din utstyrsprofil (opprettes automatisk, ikke delt) |
-
-### `recipes/` — dine oppskrifter
-
-Oppskrifter lagres som JSON-filer i `recipes/`. Mappen opprettes automatisk ved første kjøring og er ikke inkludert i git — oppskriftene dine deles ikke.
 
 ---
 
@@ -105,8 +100,8 @@ Appen er organisert i fire tabs:
 | Tab | Innhold |
 |-----|---------|
 | 🍺 **Oppskrift** | Ingredienser, beregninger, smakshjul, BJCP-matching |
-| 🛒 **Innkjøp & Lager** | Handleliste med lagerberegning, humlelager-registrering |
-| 🧪 **Bryggdag** | Bryggedagsark, utstyrsprofil |
+| 🛒 **Innkjøp & Lager** | Pantry, Smart Handleliste, eldre handleliste/humlelager |
+| 🧪 **Bryggdag** | Prosessprofiler, vannkjemi, bryggedagsark, utstyrsprofil |
 | 🔧 **Verktøy** | Leverandørkontroll, oppskriftsimport |
 
 ---

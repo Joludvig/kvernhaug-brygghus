@@ -1,115 +1,60 @@
 # Kvernhaug Brygghus — Roadmap
 
-## Current status
+*Sist oppdatert: 2026-07-27. Se `docs/PROJECT_STATUS_JULI_2026.md` for full status, nøkkeltall og kjent teknisk gjeld.*
 
-The app is a functional single-user recipe platform for home brewing.
-
-**What works today:**
-- Recipe builder with live OG / IBU / EBC / ABV calculations
-- Editable malt percentages (redistributes proportionally)
-- Editable batch volume and brew name
-- Fritekst recipe importer (kg, g, %, with name and batch detection)
-- Style engine — 22 BJCP styles, 6 recipe signatures (hazy, belgian, stout, west coast, english ale, dark malt)
-- Sensory flavor wheel and balance analysis
-- Save / load recipes (sidebar)
-- Shopping list V1 — prices and product links per store
-- Brewday Plan V1.1 — water volumes, mash schedule, hop schedule, yeast recommendations
-- Printable recipe sheet (compact A4, white background)
-- Printable brewday sheet (two-column A4 with checkboxes and write-in fields)
-- Supplier panel (price sync / product link check)
-- AI scraper + normalizer pipeline (Vestbrygg + Ølbrygging.no)
+Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkefølge — features flyttes mellom kategoriene etter hvert som virkelig bruk avgjør hva som trengs.
 
 ---
 
-## V1.1.x — Polish and real brewday testing
+## Ferdig
 
-**Goal:** Validate the app through real-world brewing before adding new features.
+- Oppskriftsbygger med live OG / IBU / EBC / ABV, redigerbare malt-andeler og batch-volum
+- Style Engine — 22 BJCP-stiler, epsilon-toleranser, normalisert avvik, kritiske tak, numerisk nærmeste stil, «Historisk Wiesn-Märzen» som egen Kvernhaug/historisk kategori
+- Prosessprofiler og Hochkurz
+- Bryggeplan/bryggedagsark (to-kolonne A4, utskriftsvennlig)
+- Water Chemistry V1 (kildevann, målprofilbibliotek, salter, solver, full/delvis/uoppnåelig-klassifisering, mesk/skyll-fordeling, eksport)
+- Pantry V1 (flere ingredienstyper, egendefinerte varer, Lalvin EC-1118)
+- Pantry backup/restore (automatisk rullerende backup + manuell gjenoppretting med forhåndsvisning)
+- Smart Handleliste V1 (Pantry som sannhetskilde, reell mangel, kjøpsforslag, rest etter kjøp)
+- Felles gjærpakkeberegning — samme formel brukt av bryggedagsark, Pantry og Smart Handleliste
+- Fritekst oppskriftsimporter, leverandørpanel (pris-synk / produktlenkekontroll), scraper + normaliseringspipeline
 
-- End-to-end test of Sommerglød (or similar) brew workflow
-- Fix any UI / print / import bugs discovered during real use
-- Polish shopping list (price accuracy, missing links)
-- Polish brewday sheet (layout, readability during actual brewing)
-- Avoid large architecture changes
-- Stabilize before V1.2 work begins
+## Pågår / akseptansetesting
 
----
+- **Reell Wiesn-akseptansetest** med brukerens faktiske lagerdata: teknisk lager-/handlelisteflyt er verifisert, ekte humle og EC-1118 er registrert i Pantry. Malt og den faktiske gjæren (W-34/70) gjenstår før en fullstendig lagerkontroll kan regnes som gjennomført.
 
-## V1.2 — Brew Log
+## Neste
 
-**Goal:** Record actual brew results against the planned recipe. Low friction is the primary design constraint — if creating a log entry takes more than 10 seconds, it won't happen.
+1. Fullføre Wiesn-akseptansetesten
+2. **Bryggelogg V1** — registrere faktiske bryggeresultater mot planlagt oppskrift. Lav terskel er hoveddesignkravet: obligatorisk er kun dato + målt OG; FG, karakter, smaksnotater og "neste gang" er valgfritt. Ett loggfil per oppskrift, snapshot av oppskriftsdata ved logg-opprettelse.
+3. **Equipment Profile** — erstatte hardkodede BrewZilla 35L-standardverdier med redigerbare utstyrsinnstillinger (kjelevolum, fordampning, meskeforhold, dødvolum, kornabsorpsjon), lagret i `data/equipment.json`.
+4. **Butikksammenligning og maltvariantmodell** — side-om-side prissammenligning Vestbrygg/Ølbrygging.no, samt en variantmodell for malt (knust/hel, ulike pakningsstørrelser per butikk) som forutsetning for reell maltpris-sammenligning.
+5. **Migrering og avvikling av legacy-humlelager** — fase ut det gamle, ikke-Pantry-synkroniserte humlelageret og den gamle handlelisten når Smart Handleliste er fullt validert i reell bruk.
 
-**Required fields (must be filled to create an entry):**
-- Brew date
-- Measured OG
+## Senere
 
-**Optional fields (can be filled in later):**
-- Measured FG (auto-calculates actual ABV)
-- Character rating (1–10)
-- Tasting notes
-- Improvements for next batch
+- Etikettgenerator
+- Egen PDF-eksportmotor (i stedet for dagens innebygde utskriftsvisning)
+- Avansert meske-pH-/syredosemodell (automatisk beregning — i dag er pH kun et manuelt målefelt)
+- Automatisk lagerreservasjon
+- Lagertransaksjonshistorikk
+- Multi-bruker / first-run-oppsett (butikkvalg, katalogfiltrering per butikk), delt oppskriftsbibliotek
 
-**Scope:** Linked to saved recipe. One log file per recipe (`recipes/{name}_logg.json`). Recipe stats (OG target, IBU, EBC, batch size) snapshotted at log creation so the record is self-contained.
+## Parkert / permanent avvist
 
-**UI:** Collapsible expander at the bottom of the recipe card. Previous log entries listed above the "New entry" form.
-
-**Key principle:** Date + OG is enough. Everything else is bonus. Do not block log creation on incomplete fields.
-
----
-
-## V1.3 — Equipment Profile
-
-**Goal:** Replace hardcoded BrewZilla 35L defaults with user-editable equipment settings. Directly improves accuracy of existing Brewday Plan water calculations.
-
-**Fields:**
-- Kettle volume (L)
-- Boiloff rate (L/hour)
-- Mash ratio (L/kg)
-- Dead volume / trub loss (L)
-- Grain absorption (L/kg)
-- Preferred boil time (min)
-- Default mash temperature (°C)
-
-**Scope:** Single profile to start. Profile persists between sessions (`data/equipment.json`). Brewday Plan reads from profile instead of `_EQ` constants.
-
-**Why before Inventory:** Brewday Plan is already in active use. Inaccurate water volumes are a real-world problem today. Inventory has a cold-start problem — it is only useful once the pantry is actually populated.
+- **Automatisk bestilling uten offentlig leverandør-API** — avvist i denne formen; ingen slik integrasjon planlegges med mindre leverandørene tilbyr et offentlig API.
 
 ---
 
-## V1.4 — Inventory / Pantry System
+## Kjent WIP-branch
 
-**Goal:** Track what ingredients the user already has at home, to avoid buying duplicates.
-
-**Focus:** Hops and yeast first. These are exact-quantity purchases (not milled to order) where inventory genuinely prevents waste. Malt inventory is lower priority since malt is typically bought fresh per batch.
-
-**Features:**
-- Hop inventory in grams (per entry)
-- Yeast inventory in packs (per entry)
-- Malt inventory in kg (per entry, lower priority)
-- Compare current recipe against inventory
-- Show what is already available ("you have 80% of this recipe")
-- Show what must be purchased ("missing: Rauchmalz")
-- Shopping list aware of inventory (only lists what is missing)
-
-**Cold-start note:** Inventory has zero value until populated. Don't build until there is actual pantry data to track.
-
----
-
-## V1.5 — Store Comparison
-
-**Goal:** Side-by-side price comparison across supported stores.
-
-**Features:**
-- Vestbrygg total cost for current recipe
-- Ølbrygging.no total cost for current recipe
-- Highlight cheapest option
-- Flag missing product links per store
-- Future: stock warning if a product is unavailable at selected store
+`wip/gjaer-id-migrasjon` finnes i repoet, men er gren ut fra en base **fra før** Pantry V1 og Smart Handleliste V1 ble bygget. Den er ikke et oppdatert parallelt spor og må rebases mot master og gjennomgås grundig før en eventuell merge vurderes. Den skal ikke røres eller blandes inn i annet arbeid nå.
 
 ---
 
 ## Branding og identitet — Parallelt spor
 
-**Kilde:** `docs/branding/master_design_v1.md`  
+**Kilde:** `docs/branding/master_design_v1.md`
 **Prinsipp:** Branding rulles ut gradvis — header og eksport før UI-farger. Kalkulasjoner og oppskriftslogikk røres ikke.
 
 ### Gjort
@@ -122,33 +67,17 @@ The app is a functional single-user recipe platform for home brewing.
 
 ### Neste steg (i prioritert rekkefølge)
 
-1. **Test app-header visuelt** — kjør Streamlit og verifiser at layout, fonter og farger ser riktige ut på skjermen
-2. **Om Kvernhaug Brygghus-panel** — enkel informasjonsside eller expander: bryggeriets historie, Dalelva, Kvernhaug-eiendommen, motto
-3. **Oppskriftskort med branding** — legg til kompaktlogo og typografi fra Master V1 i HTML-oppskriftskortet
-4. **PDF / Brewday Plan-eksport med branding** — logo og fargepalett i topp/bunn på utskriftssider
-5. **Produksjonsklare merch-filer** — isolerte PNG/SVG-filer optimalisert for trykk:
-   - Brystlogo (rund, ca. 5–7 cm)
-   - Armtekst (vertikal, antikk gull)
-   - Ryggillustrasjon (full Master V1, høyoppløselig)
+1. Test app-header visuelt — kjør Streamlit og verifiser at layout, fonter og farger ser riktige ut på skjermen
+2. Om Kvernhaug Brygghus-panel — enkel informasjonsside eller expander: bryggeriets historie, Dalelva, Kvernhaug-eiendommen, motto
+3. Oppskriftskort med branding — legg til kompaktlogo og typografi fra Master V1 i HTML-oppskriftskortet
+4. PDF / Brewday Plan-eksport med branding — logo og fargepalett i topp/bunn på utskriftssider
+5. Produksjonsklare merch-filer — isolerte PNG/SVG-filer optimalisert for trykk (brystlogo, armtekst, ryggillustrasjon)
 
 ### Avgrensninger
 
 - Ikke fargelegg tabeller, knapper eller grafer i oppskriftsbyggeren ennå
 - Ikke brand hele UI-et før header og eksportdokumenter er testet i bruk
 - Ikke endre kalkulasjoner, IBU-logikk eller oppskriftslagring som del av branding-arbeid
-
----
-
-## V2.0 — Multi-User / First-Run Setup
-
-**Goal:** Prepare the app for sharing with other brewers.
-
-**Features:**
-- First-run store selection (choose Vestbrygg / Ølbrygging / future stores)
-- App catalog filtered to products available at selected stores
-- Separation of product catalog from store inventory (see data architecture notes)
-- Optional: producer-data enrichment layer for EBC / potensiale / flavor data
-- Optional: shared recipe library
 
 ---
 
@@ -176,7 +105,7 @@ Trigger for this refactor: adding a third store.
 
 **Known technical debt in current master data:**
 - `master_malt.json` is already v2-format in structure, but the filename is a legacy holdover. Future rename to `master_malt_v2.json` requires updating `store_matcher.py`, `import_panel.py`, and `app.py` — do not rename in isolation.
-- `master_malt.json` has no variant model per store. Malt is sold in multiple formats and sizes (Vestbrygg: 100 g / 1 kg / 25 kg, knust og hel; Ølbrygging: 1 kg / 5 kg / 25 kg, knust og hel). Unlike hops, malt does not have a single canonical package size — a simple `pakke_gram` field would be misleading. No schema change is made now: today's shopping list only needs price and URL; the user chooses format at checkout. A `varianter` list under `butikk_match` is the planned structure, to be introduced when store comparison (V1.5) or a smarter shopping list actually requires it.
+- `master_malt.json` has no variant model per store. Malt is sold in multiple formats and sizes (Vestbrygg: 100 g / 1 kg / 25 kg, knust og hel; Ølbrygging: 1 kg / 5 kg / 25 kg, knust og hel). Unlike hops, malt does not have a single canonical package size — a simple `pakke_gram` field would be misleading. No schema change is made now: today's shopping list only needs price and URL; the user chooses format at checkout. A `varianter` list under `butikk_match` is the planned structure, to be introduced when store comparison or a smarter shopping list actually requires it.
 - Ølbrygging.no malt data is weaker than Vestbrygg — many prices are set manually, not from scraper.
 
 ---
@@ -186,8 +115,9 @@ Trigger for this refactor: adding a third store.
 - **Do not overbuild.** Each feature should come from a real brewing need.
 - **Keep the app stable.** New features are additive, not replacements.
 - **Small commits.** One logical change per commit.
-- **Real use drives priorities.** V1.1.x polish comes from actual brewday testing, not assumptions.
+- **Real use drives priorities.** Polish comes from actual brewday testing, not assumptions.
 - **Low friction over completeness.** A feature that is used beats a feature that is thorough but skipped.
 - **Master DB = product knowledge.** EBC, flavor, style. Stable.
 - **Store data = commercial availability.** Price, URL, stock. Volatile.
 - **Producer data = enrichment.** Authoritative for technical specs. Does not replace curation.
+- **Ask first:** "Løser dette et faktisk problem som oppstår under bruk?" — ikke "Ville dette vært kult å ha?"
