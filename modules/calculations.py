@@ -1,6 +1,17 @@
 # modules/calculations.py
 import math
 
+# Enhetskonstanter brukt av beregn_ebc() -- se funksjonsdokstrengen for
+# hele konverteringskjeden og kildene til hver konstant.
+_KG_TIL_LB = 2.2046226218
+_LITER_TIL_US_GALLON = 0.2641720524
+# Anerkjent ASBC/EBC-harmoniseringsfaktor mellom SRM/°Lovibond og °EBC
+# (samme konvensjon brukt av bl.a. BeerSmith og Brewer's Friend sine
+# MCU/Morey-kalkulatorer): °EBC = 1.97 x °SRM, og for maltfarge spesifikt
+# °Lovibond = °EBC / 1.97 (°Lovibond behandles som numerisk ~= °SRM for
+# selve maltkornet, som er standardpraksisen i Morey-baserte kalkulatorer).
+_EBC_TIL_SRM_FAKTOR = 1.97
+
 def beregn_og(valgt_malt_liste, malt_data, volum, effektivitet):
     """Beregner Original Gravity (OG) basert på maltmengde og meskeeffektivitet."""
     totale_poeng = 0
@@ -17,17 +28,35 @@ def beregn_og(valgt_malt_liste, malt_data, volum, effektivitet):
 
 
 def beregn_ebc(valgt_malt_liste, malt_data, volum):
-    """Beregner ølfarge i EBC ved bruk av Morey's formel."""
-    if volum == 0:
+    """Beregner ølfarge i EBC ved bruk av Morey's formel.
+
+    master_malt.json lagrer maltfarge i °EBC (verifisert mot produsentenes
+    egne datablad, f.eks. Weyermann Bohemian Pilsner Floor = 4.0 EBC,
+    CaraHell = 25.0 EBC). Morey-formelen er derimot definert i imperiale
+    enheter (lb, US gallon) og °Lovibond, så hvert malt konverteres i tur:
+
+      1. °EBC -> °Lovibond:  L = EBC / 1.97
+      2. kg -> lb:           lb = kg * 2.2046226218
+      3. liter -> US gallon: gal = L * 0.2641720524
+      4. MCU (malt color units), summert over alle malttyper:
+             MCU = sum( (lb_i * L_i) / gal_total )
+      5. Morey: SRM = 1.4922 * MCU^0.6859
+      6. °SRM -> °EBC:       EBC = SRM * 1.97
+    """
+    if volum <= 0:
         return 0
-    mcu = 0
+    mcu = 0.0
+    volum_gal = volum * _LITER_TIL_US_GALLON
     for m in valgt_malt_liste:
         navn = m["navn"]
-        mengde = m["mengde"]
+        mengde_kg = m["mengde"]
         if navn in malt_data:
-            ebc_verdi = malt_data[navn]["ebc"]
-            mcu += (mengde * ebc_verdi) / (volum * 0.264)
-    return 1.97 * (mcu ** 0.685)
+            malt_ebc = malt_data[navn]["ebc"]
+            malt_lovibond = malt_ebc / _EBC_TIL_SRM_FAKTOR
+            mengde_lb = mengde_kg * _KG_TIL_LB
+            mcu += (mengde_lb * malt_lovibond) / volum_gal
+    srm = 1.4922 * (mcu ** 0.6859)
+    return srm * _EBC_TIL_SRM_FAKTOR
 
 
 def beregn_fg_og_abv(og, attenuation):
