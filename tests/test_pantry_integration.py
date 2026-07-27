@@ -53,6 +53,15 @@ class _PantryAppTestCase(unittest.TestCase):
         at.button(key="pantry_legg_til_btn").click().run()
         return at
 
+    def _legg_til_egendefinert_vare(self, at, ingredient_type_visning, navn, mengde, enhet):
+        at.selectbox(key="pantry_ny_type").set_value(ingredient_type_visning).run()
+        at.selectbox(key="pantry_ny_ingrediens").set_value("__egendefinert__").run()
+        at.text_input(key="pantry_ny_egendefinert_navn").set_value(navn).run()
+        at.selectbox(key="pantry_ny_enhet").set_value(enhet).run()
+        at.number_input(key="pantry_ny_mengde").set_value(mengde).run()
+        at.button(key="pantry_legg_til_btn").click().run()
+        return at
+
 
 class TestOppskriftOgKontekstMuteresIkke(_PantryAppTestCase):
     """Krav 15/16/17: Pantry skal aldri endre oppskriften, prosessprofilen
@@ -247,6 +256,93 @@ class TestFullFlowLagerStatusSkaleringOgPersistens(_PantryAppTestCase):
         )
         self.assertEqual(at2.session_state["_debug_ctx_recipe"], original_recipe,
                          "Oppskriften i en ny økt skal være byte-for-byte den samme fixture-oppskriften")
+
+
+class TestEgendefinertIngrediensIUI(_PantryAppTestCase):
+    """UI-flyt for «Egendefinert ingrediens»: valget vises i selectboxen,
+    krever navn, får en custom_-ID, markeres tydelig i lagerlisten, og
+    påvirker aldri oppskriftskontrollen (Krav: ingen automatisk match)."""
+
+    def test_egendefinert_valg_finnes_i_ingrediens_selectboxen(self):
+        at = self._kjor()
+        at.selectbox(key="pantry_ny_type").set_value("Malt").run()
+        # .options gir de FORMATTERTE visningstekstene (format_func), ikke
+        # de rå master-DB-nøklene -- selve valget settes via den rå
+        # sentinelverdien (se _legg_til_egendefinert_vare).
+        options = at.selectbox(key="pantry_ny_ingrediens").options
+        self.assertTrue(any("Egendefinert" in o for o in options), f"Fant ikke egendefinert-valget i {options}")
+
+    def test_knapp_er_deaktivert_uten_navn(self):
+        at = self._kjor()
+        at.selectbox(key="pantry_ny_type").set_value("Malt").run()
+        at.selectbox(key="pantry_ny_ingrediens").set_value("__egendefinert__").run()
+        self.assertTrue(at.button(key="pantry_legg_til_btn").disabled)
+
+    def test_legg_til_egendefinert_malt_far_custom_id_og_er_merket(self):
+        at = self._kjor()
+        self._legg_til_egendefinert_vare(at, "Malt", "Restmalt fra forrige brygg", 2.0, "kg")
+
+        items = at.session_state["_debug_pantry"]["items"]
+        self.assertEqual(len(items), 1)
+        self.assertTrue(items[0]["is_custom"])
+        self.assertTrue(items[0]["ingredient_id"].startswith("custom_"))
+        self.assertEqual(items[0]["name_snapshot"], "Restmalt fra forrige brygg")
+
+    def test_egendefinert_vises_merket_i_lagerlisten(self):
+        at = self._kjor()
+        self._legg_til_egendefinert_vare(at, "Malt", "Restmalt fra forrige brygg", 2.0, "kg")
+        # Lagerlisten skriver navnet (med badge) via st.write() i en kolonne --
+        # AppTest eksponerer disse som .markdown-noder uansett kildewidget.
+        alle_tekster = " ".join(w.value for w in at.markdown)
+        self.assertIn("Restmalt fra forrige brygg", alle_tekster)
+        self.assertIn("Egendefinert", alle_tekster)
+
+    def test_egendefinert_ingrediens_teller_ikke_med_i_oppskriftskontroll(self):
+        at = self._kjor()
+        self._legg_til_egendefinert_vare(at, "Malt", "Spesialmalt uten ID", 50.0, "kg")
+
+        rader = at.session_state["_debug_mangler_rader"]
+        # Ingen av radene i oppskriftskontrollen (som alle stammer fra
+        # OPPSKRIFTENS ingredienser, ikke lagerets) skal ha en custom_-ID --
+        # den egendefinerte posten skal ikke ha "smittet over" på noen måte.
+        self.assertFalse(any(str(r.get("ingredient_id", "")).startswith("custom_") for r in rader))
+
+    def test_egendefinert_navn_kan_endres_uten_at_id_endres(self):
+        at = self._kjor()
+        self._legg_til_egendefinert_vare(at, "Gjær", "Gjenbruksgjær", 1.0, "pakke")
+        item = at.session_state["_debug_pantry"]["items"][0]
+        opprinnelig_id = item["ingredient_id"]
+        item_id = item["pantry_item_id"]
+
+        at.button(key=f"pantry_rediger_{item_id}").click().run()
+        at.text_input(key=f"pantry_rediger_navn_{item_id}").set_value("Gjenbruksgjær (omdøpt)").run()
+        at.button(key=f"pantry_lagre_endringer_{item_id}").click().run()
+
+        oppdatert = at.session_state["_debug_pantry"]["items"][0]
+        self.assertEqual(oppdatert["name_snapshot"], "Gjenbruksgjær (omdøpt)")
+        self.assertEqual(oppdatert["ingredient_id"], opprinnelig_id)
+
+
+class TestLalvinEc1118IGjaerdatabasen(_PantryAppTestCase):
+    """Regresjonstest for at Lalvin EC-1118 (vin-/champagnegjær, se
+    data/master_gjaer_v2.json) er registrert og kan legges i lageret som en
+    helt vanlig gjærpost -- IKKE som en egendefinert ingrediens, siden den nå
+    finnes i masterdatabasen."""
+
+    def test_registrer_ec1118_to_pakker(self):
+        at = self._kjor()
+        self._legg_til_vare(at, "Gjær", "lalvin_ec1118", 2.0, "pakke")
+
+        items = at.session_state["_debug_pantry"]["items"]
+        self.assertEqual(len(items), 1)
+        item = items[0]
+        self.assertEqual(item["ingredient_id"], "lalvin_ec1118")
+        self.assertEqual(item["ingredient_type"], "gjaer")
+        self.assertEqual(item["quantity"], 2.0)
+        self.assertEqual(item["unit"], "pakke")
+        self.assertEqual(item["base_quantity"], 2.0)
+        self.assertFalse(item["is_custom"], "EC-1118 er en ekte masterdatabase-gjær, ikke egendefinert")
+        self.assertEqual(item["name_snapshot"], "Lalvin EC-1118")
 
 
 class TestEktAppPyRenderingSkriverIkkeTilRealPantry(unittest.TestCase):

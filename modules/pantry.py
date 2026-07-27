@@ -170,7 +170,7 @@ def normaliser_mengde(ingredient_type, quantity, unit):
 # ── CRUD på lagerposter ──────────────────────────────────────────────────
 def opprett_pantry_item(ingredient_type, ingredient_id, name_snapshot, quantity, unit,
                          opened=False, best_before=None, lot_number="",
-                         storage_location="", notes=""):
+                         storage_location="", notes="", is_custom=False):
     """Bygger en ny, komplett lagerpost (med fersk pantry_item_id). Skriver
     IKKE til disk selv — kalleren legger den til i en pantry["items"]-liste
     og kaller lagre_pantry()."""
@@ -189,7 +189,48 @@ def opprett_pantry_item(ingredient_type, ingredient_id, name_snapshot, quantity,
         "lot_number": lot_number,
         "storage_location": storage_location,
         "notes": notes,
+        "is_custom": bool(is_custom),
     }
+
+
+def _generer_custom_ingredient_id():
+    """Stabil ID for en egendefinert (ikke-master-DB) ingrediens. Genereres
+    ÉN gang ved opprettelse og endres ALDRI senere, heller ikke når
+    brukeren redigerer visningsnavnet — «stabil» betyr her at ID-en
+    identifiserer ingrediensen for godt, uavhengig av senere redigering."""
+    return f"custom_{uuid.uuid4().hex[:12]}"
+
+
+def opprett_egendefinert_pantry_item(ingredient_type, navn, quantity, unit,
+                                      opened=False, best_before=None, lot_number="",
+                                      storage_location="", notes=""):
+    """Oppretter en lagerpost for en EGENDEFINERT ingrediens — noe brukeren
+    har hjemme som ikke finnes i master-databasen (f.eks. hjemmelaget
+    honning, en gjenbrukt gjærkake, en spesialgjær kjøpt til noe annet enn
+    øl). `ingredient_type` er fortsatt malt/humle/gjaer (styrer basisenhet
+    og sikkerhetsmargin), men får en fersk custom_-ingredient_id i stedet
+    for en ID fra masterdatabasen. Krever et ikke-tomt navn — kaster
+    ValueError ellers.
+
+    Dette er nettopp DERFOR egendefinerte varer aldri matches automatisk
+    mot en oppskrift: beregn_mangler() slår opp oppskriftens ingrediens-
+    ID-er (som alltid kommer fra malt_db/humle_db/gjaer_db) mot lagerets
+    ingredient_id-er — en custom_-ID vil aldri finnes i en oppskrift med
+    mindre brukeren en gang i fremtiden får en egen, eksplisitt
+    koblingsfunksjon (ikke bygget i V1)."""
+    navn = (navn or "").strip()
+    if not navn:
+        raise ValueError("Egendefinert ingrediens krever et navn.")
+
+    item = opprett_pantry_item(
+        ingredient_type=ingredient_type,
+        ingredient_id=_generer_custom_ingredient_id(),
+        name_snapshot=navn,
+        quantity=quantity, unit=unit, opened=opened, best_before=best_before,
+        lot_number=lot_number, storage_location=storage_location, notes=notes,
+        is_custom=True,
+    )
+    return item
 
 
 def oppdater_pantry_item(pantry, pantry_item_id, **endringer):

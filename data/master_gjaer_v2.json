@@ -2863,5 +2863,26 @@
         "url": "https://www.olbrygging.no/mangrove-jack-s/111752/mangrove-jack-s-bourbon-barrel-stout-limited-edition"
       }
     }
+  },
+  "lalvin_ec1118": {
+    "display_name": "Lalvin EC-1118",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Spesialgjær",
+    "smakstags": [
+      "nøytral",
+      "vin",
+      "sider",
+      "flaskegjæring",
+      "høy alkoholtoleranse"
+    ],
+    "attenuation": 0.95,
+    "aliases": [
+      "Lalvin EC-1118",
+      "EC-1118",
+      "Lallemand EC-1118"
+    ],
+    "beskrivelse": "Nøytral vin-/champagnegjær (tørrgjær) fra Lallemand/Lalvin. Standard pakningsstørrelse 5 g. Gjæringstemperatur 10–30 °C, alkoholtoleranse opptil 18 %. Brukes til vin, sider, flaskegjæring og eventuell restart av sterk/stoppet gjæring. IKKE anbefalt automatisk som vanlig primær ølgjær.",
+    "source": "bruker_forslag_v0_1"
   }
 }

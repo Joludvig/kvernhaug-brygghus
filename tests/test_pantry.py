@@ -436,6 +436,79 @@ class Test23PantryDataCommittesIkke(unittest.TestCase):
         self.assertIn("data/pantry.json", innhold)
 
 
+class Test25EgendefinerteIngredienser(_PantryTestCase):
+    """Egendefinerte ingredienser: brukeren velger malt/humle/gjær-bøtte,
+    men ingrediensen er ikke i masterdatabasen. Krever navn, får en stabil
+    custom_-ID, redigeres/lagres normalt, og matches ALDRI automatisk mot en
+    oppskrift siden ingen oppskrift kan referere en generert custom_-ID."""
+
+    def test_krever_ikke_tomt_navn(self):
+        with self.assertRaises(ValueError):
+            pantry.opprett_egendefinert_pantry_item("malt", "", 1.0, "kg")
+
+    def test_krever_ikke_kun_whitespace_navn(self):
+        with self.assertRaises(ValueError):
+            pantry.opprett_egendefinert_pantry_item("humle", "   ", 100.0, "g")
+
+    def test_far_stabil_custom_id_og_is_custom_flagg(self):
+        item = pantry.opprett_egendefinert_pantry_item("malt", "Hjemmelaget honning", 1.0, "kg")
+        self.assertTrue(item["ingredient_id"].startswith("custom_"))
+        self.assertTrue(item["is_custom"])
+        self.assertEqual(item["name_snapshot"], "Hjemmelaget honning")
+
+    def test_vanlige_poster_har_is_custom_false(self):
+        item = pantry.opprett_pantry_item("malt", "weyermann_pilsner", "Weyermann Pilsner", 5.0, "kg")
+        self.assertFalse(item["is_custom"])
+
+    def test_respekterer_normal_enhetsvalidering_for_valgt_type(self):
+        with self.assertRaises(ValueError):
+            pantry.opprett_egendefinert_pantry_item("humle", "Egen humle", 1.0, "kg")
+
+    def test_id_forblir_stabil_ved_omdoping(self):
+        p = pantry.last_pantry()
+        item = pantry.opprett_egendefinert_pantry_item("gjaer", "Gjenbruksgjær batch 1", 1.0, "pakke")
+        p["items"].append(item)
+        opprinnelig_id = item["ingredient_id"]
+
+        pantry.oppdater_pantry_item(p, item["pantry_item_id"], name_snapshot="Gjenbruksgjær (omdøpt)")
+
+        self.assertEqual(p["items"][0]["ingredient_id"], opprinnelig_id, "ingredient_id skal ALDRI endres av en redigering")
+        self.assertEqual(p["items"][0]["name_snapshot"], "Gjenbruksgjær (omdøpt)")
+
+    def test_to_egendefinerte_ingredienser_med_samme_navn_far_ulik_id(self):
+        a = pantry.opprett_egendefinert_pantry_item("malt", "Restmalt", 1.0, "kg")
+        b = pantry.opprett_egendefinert_pantry_item("malt", "Restmalt", 1.0, "kg")
+        self.assertNotEqual(a["ingredient_id"], b["ingredient_id"])
+
+    def test_egendefinert_ingrediens_matcher_ikke_automatisk_mot_oppskrift(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_egendefinert_pantry_item(
+            "malt", "Restmalt fra forrige brygg", 20.0, "kg"))
+        # Oppskriften trenger en helt vanlig masterdatabase-malt -- den
+        # egendefinerte posten skal IKKE telle med i "available_base" for
+        # den, siden ID-ene aldri kan være like.
+        recipe = _oppskrift(malts=[{"id": "weyermann_pilsner", "mengde": 5.0}])
+        rad = pantry.beregn_mangler(recipe, p)[0]
+        self.assertEqual(rad["available_base"], 0.0, "Egendefinert lagerpost skal ikke dekke behovet for en ekte oppskrift-ingrediens")
+        self.assertEqual(rad["status"], "mangler")
+
+    def test_egendefinert_post_summeres_for_seg_selv(self):
+        p = pantry.last_pantry()
+        item = pantry.opprett_egendefinert_pantry_item("humle", "Egendyrket humle", 50.0, "g")
+        p["items"].append(item)
+        sum_ = pantry.summer_beholdning_per_ingredient(p)
+        self.assertEqual(sum_[("humle", item["ingredient_id"])], 50.0)
+
+    def test_valider_pantry_krever_ikke_masterdata_for_egendefinert(self):
+        p = pantry.last_pantry()
+        p["items"].append(pantry.opprett_egendefinert_pantry_item("gjaer", "Restgjær", 1.0, "pakke"))
+        varsler = pantry.valider_pantry(p)
+        self.assertFalse(
+            any(v["type"] == "manglende_ingredient_id" for v in varsler),
+            "En egendefinert post HAR en (generert) ingredient_id og skal ikke flagges som manglende",
+        )
+
+
 class Test24HumlelagerImportErEksplisitt(_PantryTestCase):
     def test_forhandsvisning_skriver_ingenting(self):
         filsti = os.path.join(self._tmpdir.name, "pantry.json")

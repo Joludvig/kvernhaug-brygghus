@@ -14,14 +14,28 @@ _TYPE_VISNING = {"malt": "Malt", "humle": "Humle", "gjaer": "Gjær"}
 _STANDARD_ENHET = {"malt": "kg", "humle": "g", "gjaer": "pakke"}
 _GYLDIGE_ENHETER = {"malt": ["kg", "g"], "humle": ["g"], "gjaer": ["pakke"]}
 
+# Sentinelverdi for "Egendefinert ingrediens" i ingrediens-selectboxen —
+# skiller seg fra enhver ekte master-DB-ID.
+_EGENDEFINERT_VALG = "__egendefinert__"
+_EGENDEFINERT_VISNING = "➕ Egendefinert ingrediens…"
+
 
 def _db_for_type(ingredient_type, malt_db, humle_db, gjaer_db):
     return {"malt": malt_db, "humle": humle_db, "gjaer": gjaer_db}[ingredient_type]
 
 
-def _navn(ingredient_type, ingredient_id, malt_db, humle_db, gjaer_db):
-    db = _db_for_type(ingredient_type, malt_db, humle_db, gjaer_db)
-    return db.get(ingredient_id, {}).get("display_name", ingredient_id)
+def _navn(item, malt_db, humle_db, gjaer_db):
+    """Visningsnavn for en lagerpost. Slår først opp gjeldende display_name
+    i masterdatabasen (ekte ingredienser kan ha fått nytt navn siden posten
+    ble opprettet), men faller ALLTID tilbake til postens egen
+    name_snapshot — ikke den rå ingredient_id-en — når ID-en ikke finnes i
+    databasen. Dette er kritisk for egendefinerte ingredienser: deres
+    ingredient_id er en generert custom_-streng som naturligvis aldri
+    finnes i noen masterdatabase."""
+    db = _db_for_type(item.get("ingredient_type"), malt_db, humle_db, gjaer_db)
+    ingredient_id = item.get("ingredient_id")
+    treff = db.get(ingredient_id, {}) if ingredient_id else {}
+    return treff.get("display_name") or item.get("name_snapshot") or ingredient_id or "?"
 
 
 def _last_pantry_trygt():
@@ -132,8 +146,9 @@ def _render_lagerliste(data, malt_db, humle_db, gjaer_db):
         st.caption("Ingen lagerposter i denne visningen ennå.")
     else:
         for item in synlige:
-            navn = _navn(item["ingredient_type"], item.get("ingredient_id"), malt_db, humle_db, gjaer_db) \
-                or item.get("name_snapshot", "?")
+            navn = _navn(item, malt_db, humle_db, gjaer_db)
+            if item.get("is_custom"):
+                navn += " · 🧩 Egendefinert"
             utlop = _utlopsstatus(item)
             utlop_tekst = {"utgatt": " · 🔴 Utgått", "utloper_snart": " · 🟡 Utløper snart"}.get(utlop, "")
 
@@ -165,7 +180,7 @@ def _render_slett_bekreftelse(data, malt_db, humle_db, gjaer_db):
         st.session_state.pop("_pantry_slett_kandidat", None)
         return
 
-    navn = _navn(item["ingredient_type"], item.get("ingredient_id"), malt_db, humle_db, gjaer_db)
+    navn = _navn(item, malt_db, humle_db, gjaer_db)
     st.warning(f"Slette **{navn}** ({item['quantity']:g} {item['unit']}) fra lageret? Dette kan ikke angres.")
     col_ja, col_avbryt = st.columns(2)
     if col_ja.button("Ja, slett", key="pantry_slett_bekreft", type="primary"):
@@ -188,6 +203,12 @@ def _render_rediger_post(data):
         return
 
     with st.expander(f"Rediger: {item.get('name_snapshot')}", expanded=True):
+        nytt_navn = None
+        if item.get("is_custom"):
+            st.caption("🧩 Egendefinert ingrediens — navnet kan endres fritt, ID-en bak den er stabil.")
+            nytt_navn = st.text_input(
+                "Navn", value=item.get("name_snapshot", ""), key=f"pantry_rediger_navn_{rediger_id}",
+            )
         ny_mengde = st.number_input(
             "Ny mengde", min_value=0.0, value=float(item["quantity"]), step=0.1,
             key=f"pantry_rediger_mengde_{rediger_id}",
@@ -227,10 +248,10 @@ def _render_rediger_post(data):
         notater = st.text_area("Notater", value=item.get("notes", ""), key=f"pantry_notater_{rediger_id}")
 
         if st.button("Lagre endringer", key=f"pantry_lagre_endringer_{rediger_id}"):
-            pantry.oppdater_pantry_item(
-                data, rediger_id, opened=apnet, best_before=ny_bf,
-                storage_location=lagersted, notes=notater,
-            )
+            endringer = dict(opened=apnet, best_before=ny_bf, storage_location=lagersted, notes=notater)
+            if item.get("is_custom") and nytt_navn is not None and nytt_navn.strip():
+                endringer["name_snapshot"] = nytt_navn.strip()
+            pantry.oppdater_pantry_item(data, rediger_id, **endringer)
             pantry.lagre_pantry(data)
             st.session_state.pop("_pantry_rediger_id", None)
             st.rerun()
@@ -250,15 +271,30 @@ def _render_legg_til(data, malt_db, humle_db, gjaer_db):
     db = _db_for_type(ingredient_type, malt_db, humle_db, gjaer_db)
 
     if not db:
-        st.caption(f"Ingen {ingredient_type_visning.lower()} funnet i masterdatabasen.")
-        return
+        st.caption(f"Ingen {ingredient_type_visning.lower()} funnet i masterdatabasen — du kan fortsatt legge til en egendefinert.")
 
-    ingredient_id = st.selectbox(
-        "Ingrediens", options=sorted(db.keys()),
-        format_func=lambda k: db.get(k, {}).get("display_name", k),
+    ingredient_valg = st.selectbox(
+        "Ingrediens", options=sorted(db.keys()) + [_EGENDEFINERT_VALG],
+        format_func=lambda k: _EGENDEFINERT_VISNING if k == _EGENDEFINERT_VALG else db.get(k, {}).get("display_name", k),
         key="pantry_ny_ingrediens",
     )
-    navn = db.get(ingredient_id, {}).get("display_name", ingredient_id)
+    er_egendefinert = ingredient_valg == _EGENDEFINERT_VALG
+
+    egendefinert_navn = ""
+    if er_egendefinert:
+        egendefinert_navn = st.text_input(
+            "Navn på egendefinert ingrediens", key="pantry_ny_egendefinert_navn",
+            placeholder="F.eks. hjemmelaget honning, gjenbruksgjær fra forrige brygg …",
+        )
+        st.caption(
+            "🧩 Egendefinerte ingredienser matches IKKE automatisk mot en oppskrift — "
+            "de vises kun her i lageret som informasjon."
+        )
+        ingredient_id = None
+        navn = egendefinert_navn.strip()
+    else:
+        ingredient_id = ingredient_valg
+        navn = db.get(ingredient_id, {}).get("display_name", ingredient_id)
 
     col_mengde, col_enhet = st.columns(2)
     mengde = col_mengde.number_input("Mengde", min_value=0.0, value=1.0, step=0.1, key="pantry_ny_mengde")
@@ -279,12 +315,25 @@ def _render_legg_til(data, malt_db, humle_db, gjaer_db):
             best_before = st.date_input("Best før", value=_dt.date.today(), key="pantry_ny_bf").isoformat()
         opened = st.checkbox("Allerede åpnet", key="pantry_ny_apnet")
 
-    if st.button("Legg til i lager", key="pantry_legg_til_btn", use_container_width=True):
-        nytt_item = pantry.opprett_pantry_item(
-            ingredient_type=ingredient_type, ingredient_id=ingredient_id, name_snapshot=navn,
-            quantity=mengde, unit=enhet, opened=opened, best_before=best_before,
-            lot_number=lot_number, storage_location=storage_location, notes=notes,
-        )
+    if er_egendefinert and not navn:
+        st.caption("Skriv inn et navn før du kan legge til en egendefinert ingrediens.")
+
+    if st.button(
+        "Legg til i lager", key="pantry_legg_til_btn", use_container_width=True,
+        disabled=er_egendefinert and not navn,
+    ):
+        if er_egendefinert:
+            nytt_item = pantry.opprett_egendefinert_pantry_item(
+                ingredient_type=ingredient_type, navn=navn,
+                quantity=mengde, unit=enhet, opened=opened, best_before=best_before,
+                lot_number=lot_number, storage_location=storage_location, notes=notes,
+            )
+        else:
+            nytt_item = pantry.opprett_pantry_item(
+                ingredient_type=ingredient_type, ingredient_id=ingredient_id, name_snapshot=navn,
+                quantity=mengde, unit=enhet, opened=opened, best_before=best_before,
+                lot_number=lot_number, storage_location=storage_location, notes=notes,
+            )
         data["items"].append(nytt_item)
         pantry.lagre_pantry(data)
         st.rerun()
