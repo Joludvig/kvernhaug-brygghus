@@ -59,6 +59,10 @@ class _IsolertProsjektrotTestCase(unittest.TestCase):
         with open(review_panel.MASTER_PATHS[kat], "w", encoding="utf-8") as f:
             f.write(raw_tekst)
 
+    def _skriv_master_bytes(self, kat, raw_bytes):
+        with open(review_panel.MASTER_PATHS[kat], "wb") as f:
+            f.write(raw_bytes)
+
     def _skriv_unmatched(self, kat, innhold):
         with open(review_panel.UNMATCHED_PATHS[kat], "w", encoding="utf-8") as f:
             json.dump(innhold, f, ensure_ascii=False, indent=2)
@@ -224,6 +228,65 @@ class TestGyldigMasterFungererFortsattSomFoer(_IsolertProsjektrotTestCase):
         master = _last_json(review_panel.MASTER_PATHS["humle"])
         self.assertIn("splendour", master)
         self.assertEqual(self._unmatched_lengde("humle"), 0)
+
+
+class TestUgyldigUtf8Blokkeres(_IsolertProsjektrotTestCase):
+    """UnicodeDecodeError (en masterfil med ugyldige UTF-8-bytes) er IKKE
+    en OSError, og ble derfor tidligere IKKE fanget av
+    `except OSError` i _les_master() -- en slik fil slapp gjennom
+    denne funksjonens kontrollerte feilhåndtering og krasjet i stedet
+    for å reise MasterLesefeil. `\\xff\\xfe` er ikke gyldig UTF-8 i noen
+    posisjon (verken som BOM -- filen åpnes eksplisitt med
+    encoding="utf-8", ikke utf-16 -- eller som fortsettelsesbyte)."""
+
+    _UGYLDIG_UTF8 = b'{"cascade_us": {"display_name": "Cascade \xff\xfe Ugyldig"}}'
+
+    def test_ugyldig_utf8_blokkerer_oppretting_av_ny_ingrediens(self):
+        self._skriv_master_bytes("humle", self._UGYLDIG_UTF8)
+        self._skriv_unmatched("humle", [{"navn": "Splendour", "butikk": "vestbrygg", "pris": 75.0}])
+        original = self._les_master_bytes("humle")
+
+        with self.assertRaises(MasterLesefeil):
+            review_panel._opprett_og_fjern("humle", "splendour", {"display_name": "Splendour"}, 0)
+
+        self.assertEqual(self._les_master_bytes("humle"), original)
+        self.assertEqual(self._unmatched_lengde("humle"), 1)
+
+    def test_ugyldig_utf8_blokkerer_tillegging_av_alias(self):
+        self._skriv_master_bytes("gjaer", self._UGYLDIG_UTF8)
+        self._skriv_unmatched("gjaer", [{"navn": "Ny Gjær", "butikk": "vestbrygg", "pris": 59.0}])
+        original = self._les_master_bytes("gjaer")
+
+        with self.assertRaises(MasterLesefeil):
+            review_panel._legg_til_alias_og_fjern(
+                "gjaer", "safale_us05", {"navn": "Ny Gjær", "butikk": "vestbrygg", "pris": 59.0}, 0,
+            )
+
+        self.assertEqual(self._les_master_bytes("gjaer"), original)
+        self.assertEqual(self._unmatched_lengde("gjaer"), 1)
+
+    def test_ugyldig_utf8_gir_kontrollert_feilmelding_i_kategorirendering(self):
+        # _render_kategori() er selve UI-kallestien: kaller st.error(...)
+        # og returnerer tidlig ved MasterLesefeil, i stedet for å la
+        # UnicodeDecodeError forplante seg ukontrollert opp gjennom
+        # Streamlit. Utenfor en ekte Streamlit-scriptkjøring er
+        # st.*-kall trygge no-ops (logger bare en advarsel om manglende
+        # ScriptRunContext) -- funksjonen kan derfor kalles direkte og
+        # testen beviser at INGEN ukontrollert UnicodeDecodeError slipper
+        # ut herfra.
+        self._skriv_master_bytes("malt", self._UGYLDIG_UTF8)
+        self._skriv_unmatched("malt", [{"navn": "Nytt Malt", "butikk": "vestbrygg", "pris": 40.0}])
+        original = self._les_master_bytes("malt")
+
+        try:
+            review_panel._render_kategori("malt", "malter", "🌾")
+        except UnicodeDecodeError:
+            self.fail("UnicodeDecodeError slapp ukontrollert ut av _render_kategori()")
+
+        # Ingen endring -- render_kategori() skal bare vise en feil og
+        # returnere, aldri skrive noe.
+        self.assertEqual(self._les_master_bytes("malt"), original)
+        self.assertEqual(self._unmatched_lengde("malt"), 1)
 
 
 if __name__ == "__main__":

@@ -87,16 +87,24 @@ def _les_master(sti):
       - filen finnes men er ugyldig JSON -> MasterLesefeil
       - filen finnes og er gyldig JSON, men ikke et objekt (f.eks. en
         liste eller en streng) -> MasterLesefeil
-      - annen lesefeil (rettigheter e.l.) -> MasterLesefeil
+      - annen lesefeil (rettigheter e.l., eller ugyldige UTF-8-bytes)
+        -> MasterLesefeil
       - filen finnes og er et gyldig (ev. tomt) JSON-objekt -> selve
         dict-en, uendret (inkludert en tom {})
-    """
+
+    `UnicodeDecodeError`/`UnicodeError` (en masterfil med ugyldige
+    UTF-8-bytes) er IKKE en OSError og må fanges eksplisitt her --
+    ellers ville den sluppet forbi denne funksjonens kontrollerte
+    feilhåndtering og krasjet appen i stedet for å vises som en vanlig,
+    forståelig feil i UI-et (datasikkerheten var uansett bevart siden
+    filen aldri blir skrevet ved en lesefeil, men appen skal ikke
+    krasje)."""
     if not os.path.exists(sti):
         return {}
     try:
         with open(sti, "r", encoding="utf-8") as f:
             raw = f.read()
-    except OSError as e:
+    except (OSError, UnicodeError) as e:
         raise MasterLesefeil(f"Kunne ikke lese masterfilen {sti}: {e}") from e
     if not raw.strip():
         raise MasterLesefeil(f"Masterfilen {sti} finnes, men er tom (0 byte) -- ikke gyldig JSON.")
