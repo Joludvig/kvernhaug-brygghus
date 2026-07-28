@@ -127,8 +127,12 @@ class TestOmdoeping(_IsolertRecipeMappeTestCase):
 
         self.assertEqual(recipe_storage.hent_logg("Med Logg V2"), [{"date": "2026-07-27", "actual_og": 1.050}])
         self.assertEqual(recipe_storage.hent_logg("Med Logg"), [], "Den gamle loggnøkkelen skal ikke lenger ha noe innhold")
-        self.assertNotIn("med_logg_logg.json", self._filer())
-        self.assertIn("med_logg_v2_logg.json", self._filer())
+        # Bryggelogger skrives til en egen undermappe (recipes/_logs/),
+        # adskilt fra selve oppskriftsfilenes navnerom -- se
+        # tests/test_brewlog_logs_namespace.py for selve namespace-fiksen.
+        logs_mappe = os.path.join(self._mappe(), "_logs")
+        self.assertNotIn("med_logg_logg.json", os.listdir(logs_mappe))
+        self.assertIn("med_logg_v2_logg.json", os.listdir(logs_mappe))
 
     def test_uendret_navn_er_bare_en_vanlig_oppdatering_ingen_arkivering(self):
         recipe_storage.lagre_oppskrift(_oppskrift("Uendret Navn", mengde=5.0))

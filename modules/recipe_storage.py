@@ -11,6 +11,7 @@ _log = logging.getLogger(__name__)
 
 _ARCHIVE_UNDERMAPPE = "_archive"
 _BACKUP_UNDERMAPPE = "_backup"
+_LOGS_UNDERMAPPE = "_logs"
 
 # Standard antall backupfiler som beholdes PER kildefil (se
 # _backup_eksisterende_fil()/_rydd_gamle_recipe_backupfiler()). Samme
@@ -78,6 +79,16 @@ def _archive_mappe():
 
 def _backup_mappe():
     return os.path.join(_mappe(), _BACKUP_UNDERMAPPE)
+
+
+def _logs_mappe():
+    """Undermappe hvor NYE bryggelogger skrives -- se _logg_filsti() /
+    _legacy_logg_filsti() for bakgrunnen: oppskrifter og bryggelogger
+    delte tidligere filnavnrom direkte i oppskriftsmappens rot (en
+    oppskrift "Brygg Logg" og loggen til oppskriften "Brygg" kunne begge
+    produsere filnavnet "brygg_logg.json"). En egen undermappe fjerner
+    kollisjonen for alt som opprettes FREMOVER."""
+    return os.path.join(_mappe(), _LOGS_UNDERMAPPE)
 
 
 def _sikre_undermappe(sti):
@@ -174,26 +185,50 @@ def _arkiver_fil(kilde_sti):
     return maal_sti
 
 
+def _omdoep_logg_hvis_finnes(logg_basisnavn_gammel, logg_basisnavn_ny, logg_mappe):
+    """Flytter én loggfil (hvis den finnes) fra det gamle til det nye
+    NAVNET, uten å bytte MAPPE -- kalles separat for den nye
+    loggplasseringen (_logs_mappe()) og for den gamle, legacy-
+    plasseringen (oppskriftsmappens rot), slik at en logg ALDRI
+    implisitt migreres fra den ene navnerom-mappen til den andre bare
+    fordi oppskriften den tilhører ble omdøpt."""
+    gammel_logg = os.path.join(logg_mappe, logg_basisnavn_gammel)
+    if not os.path.exists(gammel_logg):
+        return
+    ny_logg = os.path.join(logg_mappe, logg_basisnavn_ny)
+    if os.path.exists(ny_logg):
+        # Målet har (uvanlig nok) allerede sin egen logg -- arkiver den
+        # gamle loggen i stedet for å overskrive en annen oppskrifts
+        # historikk stille.
+        _arkiver_fil(gammel_logg)
+    else:
+        shutil.move(gammel_logg, ny_logg)
+
+
 def _arkiver_kildefil_etter_omdoeping(gammelt_filnavn, nytt_filnavn):
     """Kalles ETTER at den nye oppskriftsfilen allerede er skrevet: flytter
     den gamle kildefilen til recipes/_archive/ og migrerer en eventuell
-    tilhørende _logg.json til det NYE filnavnet, slik at bryggeloggen
-    følger oppskriften videre under det nye navnet i stedet for å bli
-    stående igjen, orphan, under det gamle."""
+    tilhørende bryggelogg til det NYE filnavnet, slik at loggen følger
+    oppskriften videre under det nye navnet i stedet for å bli stående
+    igjen, orphan, under det gamle.
+
+    En logg kan i dag ligge på to steder (se _logg_filsti() /
+    _legacy_logg_filsti()): den nye plasseringen (recipes/_logs/) for
+    logger opprettet etter denne endringen, eller direkte i
+    oppskriftsmappens rot for eldre, legacy-logger. Omdøpingen sjekker
+    og omdøper i BEGGE navnerom uavhengig av hverandre -- en logg som
+    ligger i _logs/ blir værende i _logs/ under det nye navnet, en
+    legacy-logg i roten blir værende i roten under det nye navnet.
+    Ingen av dem flyttes på tvers av navnerom her -- det ville vært en
+    implisitt migrering av eksisterende data, ikke bare en omdøping."""
     mappe = _mappe()
     gammel_sti = os.path.join(mappe, gammelt_filnavn)
     _arkiver_fil(gammel_sti)
 
-    gammel_logg = os.path.join(mappe, gammelt_filnavn.replace(".json", "_logg.json"))
-    ny_logg = os.path.join(mappe, nytt_filnavn.replace(".json", "_logg.json"))
-    if os.path.exists(gammel_logg):
-        if os.path.exists(ny_logg):
-            # Målet har (uvanlig nok) allerede sin egen logg -- arkiver
-            # den gamle loggen i stedet for å overskrive en annen
-            # oppskrifts historikk stille.
-            _arkiver_fil(gammel_logg)
-        else:
-            shutil.move(gammel_logg, ny_logg)
+    gammel_logg_basis = gammelt_filnavn.replace(".json", "_logg.json")
+    ny_logg_basis = nytt_filnavn.replace(".json", "_logg.json")
+    _omdoep_logg_hvis_finnes(gammel_logg_basis, ny_logg_basis, _logs_mappe())
+    _omdoep_logg_hvis_finnes(gammel_logg_basis, ny_logg_basis, mappe)
 
 
 def _valider_kildefilnavn(kilde_filnavn):
@@ -319,8 +354,38 @@ def lagre_oppskrift(recipe, kilde_filnavn=None, bloker_ved_navnekollisjon=False)
     return nytt_filnavn
 
 def _logg_filsti(oppskrift_navn):
+    """NY plassering for bryggelogger: recipes/_logs/<generert
+    filnavn>_logg.json -- en EGEN undermappe, adskilt fra selve
+    oppskriftsfilenes navnerom i mappe-roten (se _logs_mappe())."""
+    base = generer_filnavn(oppskrift_navn).replace(".json", "_logg.json")
+    return os.path.join(_logs_mappe(), base)
+
+def _legacy_logg_filsti(oppskrift_navn):
+    """Den GAMLE loggplasseringen (direkte i oppskriftsmappens rot) --
+    brukt KUN for LESETILGANG til logger som ble opprettet FØR denne
+    endringen (se _logg_maalsti()). Nye logger skrives ALDRI hit, og en
+    eksisterende legacy-logg flyttes/migreres ALDRI automatisk til den
+    nye plasseringen som del av vanlig bruk -- kun en fremtidig,
+    eksplisitt brukerhandling skal kunne gjøre det (atomisk, med backup,
+    uten historikktap)."""
     base = generer_filnavn(oppskrift_navn).replace(".json", "_logg.json")
     return os.path.join(_mappe(), base)
+
+def _logg_maalsti(oppskrift_navn):
+    """Stien EN SKRIVING (lagre_logg_entry) skal bruke: hvis loggen
+    allerede finnes på den NYE plasseringen, fortsett å skrive der. Hvis
+    den i stedet finnes på den GAMLE, legacy-plasseringen (og ikke på
+    den nye), fortsett å skrive DER -- for å unngå at en helt vanlig
+    "legg til brygg"-handling implisitt migrerer en eksisterende legacy-
+    logg til et nytt sted. En helt NY logg (finnes ingen steder ennå)
+    går til den nye plasseringen."""
+    ny_sti = _logg_filsti(oppskrift_navn)
+    if os.path.exists(ny_sti):
+        return ny_sti
+    legacy_sti = _legacy_logg_filsti(oppskrift_navn)
+    if os.path.exists(legacy_sti):
+        return legacy_sti
+    return ny_sti
 
 def lagre_logg_entry(oppskrift_navn, entry):
     """Legger til én loggoppføring i oppskriftens loggfil.
@@ -331,14 +396,15 @@ def lagre_logg_entry(oppskrift_navn, entry):
     _backup_eksisterende_fil/RECIPE_BACKUP_MAKS_ANTALL).
 
     Leser eksisterende logg via hent_logg() FØR den nye oppføringen
-    legges til: er loggfilen korrupt, forplanter det seg som
-    LoggKorruptError HERFRA, uten at noe skrives -- i stedet for at denne
-    ene, nye oppføringen stille erstatter hele den (ellers tapte)
-    historikken."""
+    legges til: er loggfilen korrupt eller har feil schema, forplanter
+    det seg som LoggKorruptError HERFRA, uten at noe skrives -- i stedet
+    for at denne ene, nye oppføringen stille erstatter hele den (ellers
+    tapte) historikken."""
     if DEMO_MODE:
         return
     sikre_mappe()
-    filsti = _logg_filsti(oppskrift_navn)
+    filsti = _logg_maalsti(oppskrift_navn)
+    _sikre_undermappe(os.path.dirname(filsti))
     logg = hent_logg(oppskrift_navn)
     logg.append(entry)
     if os.path.exists(filsti):
@@ -348,7 +414,10 @@ def lagre_logg_entry(oppskrift_navn, entry):
 def hent_logg(oppskrift_navn):
     """Henter alle loggoppføringer for en oppskrift.
 
-    Returnerer tom liste hvis loggfilen ikke finnes ennå -- helt normalt
+    Ser først etter loggen på den NYE plasseringen (recipes/_logs/),
+    deretter -- kun for lesetilgang -- på den gamle, legacy-plasseringen
+    direkte i oppskriftsmappens rot (se _legacy_logg_filsti()).
+    Returnerer tom liste hvis loggen ikke finnes NOE sted -- helt normalt
     for en oppskrift uten registrerte brygg. Kaster LoggKorruptError
     (uten å røre filen) hvis den FINNES men ikke er gyldig JSON -- ALDRI
     stille tom, som tidligere kunne få lagre_logg_entry() til å overskrive
@@ -356,11 +425,13 @@ def hent_logg(oppskrift_navn):
     mønster som modules/pantry.py::last_pantry()/PantryCorruptError."""
     filsti = _logg_filsti(oppskrift_navn)
     if not os.path.exists(filsti):
-        return []
+        filsti = _legacy_logg_filsti(oppskrift_navn)
+        if not os.path.exists(filsti):
+            return []
     with open(filsti, "r", encoding="utf-8") as f:
         raw = f.read()
     try:
-        return json.loads(raw)
+        data = json.loads(raw)
     except json.JSONDecodeError as e:
         raise LoggKorruptError(
             f"{filsti} inneholder ugyldig JSON og ble IKKE overskrevet ({e}). "
@@ -368,23 +439,53 @@ def hent_logg(oppskrift_navn):
             "før nye loggoppføringer kan lagres."
         ) from e
 
+    # Gyldig JSON er IKKE det samme som et gyldig loggschema -- {}, "en
+    # streng", 42, null, eller en liste med ikke-objekt-elementer er alle
+    # gyldig JSON, men ville fått lagre_logg_entry() til å krasje på
+    # logg.append(entry) (en dict) eller stille produsert en liste med
+    # oppføringer appen ikke kan vise. Roten MÅ være en liste, og hver
+    # EKSISTERENDE oppføring MÅ være et objekt/dict (ui/recipe_card.py
+    # leser alltid oppføringer via entry.get(...), aldri indeksering uten
+    # en forutgående .get()-vakt -- se _render_brewday_result_panel()).
+    if not isinstance(data, list):
+        raise LoggKorruptError(
+            f"{filsti} inneholder gyldig JSON, men av feil type "
+            f"({type(data).__name__} i stedet for en liste med loggoppføringer). Filen ble IKKE endret."
+        )
+    for i, oppforing in enumerate(data):
+        if not isinstance(oppforing, dict):
+            raise LoggKorruptError(
+                f"{filsti} inneholder en ugyldig loggoppføring på indeks {i} "
+                f"({type(oppforing).__name__} i stedet for et objekt). Filen ble IKKE endret."
+            )
+    return data
+
 
 def _skann_oppskriftsfiler(mappe):
-    """Leser og parser alle oppskriftsfiler (unntatt _logg.json) direkte i
-    en gitt mappe (aldri undermapper som _archive/_backup — os.listdir()
-    er ikke rekursiv). Returnerer en liste av (filnavn, data)-par for
-    filer som lot seg lese OG som har et "name"-felt; korrupte/ufullstendige
-    filer logges og hoppes over. Delt lesehjelper for
-    hent_alle_oppskrifter(), hent_oppskrift_filnavn_kart() og
-    finn_duplikate_oppskrift_navn() — én skanning å holde konsistent."""
-    filer = [f for f in os.listdir(mappe) if f.endswith(".json") and not f.endswith("_logg.json")]
+    """Leser og parser alle .json-filer direkte i en gitt mappe (aldri
+    undermapper som _archive/_backup/_logs — os.listdir() er ikke
+    rekursiv). Returnerer en liste av (filnavn, data)-par for filer som
+    lot seg lese OG som er et JSON-objekt med et "name"-felt;
+    korrupte/ufullstendige filer logges og hoppes over. Delt
+    lesehjelper for hent_alle_oppskrifter(), hent_oppskrift_filnavn_kart()
+    og finn_duplikate_oppskrift_navn() — én skanning å holde konsistent.
+
+    MERK: filtrerer IKKE lenger bort filnavn som ender på "_logg.json" --
+    en oppskrift kan hete f.eks. "Brygg Logg" (kanonisk filnavn
+    "brygg_logg.json") og skal kunne lagres/lastes/vises helt normalt.
+    Nye bryggelogger skrives uansett til en egen undermappe (se
+    _logg_filsti()/_logs_mappe()) og havner derfor aldri her i det hele
+    tatt. En eventuell GAMMEL, legacy-loggfil som fortsatt ligger i
+    mappe-roten (et JSON-array, ikke et objekt) blir naturlig hoppet
+    over av "name"-sjekken under uansett, uten noe eget filnavn-filter."""
+    filer = [f for f in os.listdir(mappe) if f.endswith(".json")]
     resultat = []
     for f in filer:
         filsti = os.path.join(mappe, f)
         try:
             with open(filsti, "r", encoding="utf-8") as file_content:
                 data = json.load(file_content)
-            if "name" not in data:
+            if not isinstance(data, dict) or "name" not in data:
                 raise KeyError("name")
             resultat.append((f, data))
         except (json.JSONDecodeError, OSError, KeyError) as e:
@@ -477,7 +578,10 @@ def slett_oppskrift_fil(kilde_filnavn):
         return False
     _arkiver_fil(filsti)
 
-    logg_sti = os.path.join(_mappe(), kilde_filnavn.replace(".json", "_logg.json"))
-    if os.path.exists(logg_sti):
-        _arkiver_fil(logg_sti)
+    logg_basis = kilde_filnavn.replace(".json", "_logg.json")
+    # En tilhørende logg kan i dag ligge på to steder (se
+    # _logg_filsti()/_legacy_logg_filsti()) -- arkiver den uansett
+    # hvilket av de to den faktisk finnes i.
+    _arkiver_fil(os.path.join(_logs_mappe(), logg_basis))
+    _arkiver_fil(os.path.join(_mappe(), logg_basis))
     return True

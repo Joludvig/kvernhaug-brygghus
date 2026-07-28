@@ -41,7 +41,16 @@ class _IsolertRecipeMappeTestCase(unittest.TestCase):
         return set(os.listdir(self._mappe()))
 
     def _logg_sti(self, filnavn="test_brygg_logg.json"):
+        # Legacy-plassering (mappe-roten) -- brukt for å simulere en
+        # logg som ble opprettet FØR recipes/_logs/ ble innført (se
+        # tests/test_brewlog_logs_namespace.py for selve namespace-
+        # fiksen). Brukes her fortsatt for korrupt-legacy-logg-testene.
         return os.path.join(self._mappe(), filnavn)
+
+    def _ny_logg_sti(self, filnavn="test_brygg_logg.json"):
+        # Den NYE plasseringen -- der lagre_logg_entry() faktisk skriver
+        # en helt fersk logg (ingen legacy-fil finnes fra før).
+        return os.path.join(self._mappe(), "_logs", filnavn)
 
 
 class TestNormalAppend(_IsolertRecipeMappeTestCase):
@@ -122,21 +131,21 @@ class TestKorruptEksisterendeLogg(_IsolertRecipeMappeTestCase):
 class TestSkrivefeilUtenLekketTmpFil(_IsolertRecipeMappeTestCase):
     def test_os_replace_feil_rydder_tmp_og_beholder_original_byte_for_byte(self):
         recipe_storage.lagre_logg_entry("Test Brygg", {"date": "2026-07-28"})
-        with open(self._logg_sti(), "rb") as f:
+        with open(self._ny_logg_sti(), "rb") as f:
             original_bytes = f.read()
 
         with patch("modules.recipe_storage.os.replace", side_effect=OSError("simulert diskfeil")):
             with self.assertRaises(OSError):
                 recipe_storage.lagre_logg_entry("Test Brygg", {"date": "2026-08-01"})
 
-        filer = os.listdir(self._mappe())
+        filer = os.listdir(os.path.join(self._mappe(), "_logs"))
         self.assertFalse(any(".tmp_" in f for f in filer), f"Lekket midlertidig fil funnet: {filer}")
-        with open(self._logg_sti(), "rb") as f:
+        with open(self._ny_logg_sti(), "rb") as f:
             self.assertEqual(f.read(), original_bytes, "Originalfilen skal være helt uendret etter en mislykket skriving")
 
     def test_json_serialiseringsfeil_rydder_tmp_og_beholder_original(self):
         recipe_storage.lagre_logg_entry("Test Brygg", {"date": "2026-07-28"})
-        with open(self._logg_sti(), "rb") as f:
+        with open(self._ny_logg_sti(), "rb") as f:
             original_bytes = f.read()
 
         # Et ikke-JSON-serialiserbart felt (et Python-sett) i en ny
@@ -147,9 +156,9 @@ class TestSkrivefeilUtenLekketTmpFil(_IsolertRecipeMappeTestCase):
                 "Test Brygg", {"date": "2026-08-01", "userialiserbart_felt": {1, 2, 3}},
             )
 
-        filer = os.listdir(self._mappe())
+        filer = os.listdir(os.path.join(self._mappe(), "_logs"))
         self.assertFalse(any(".tmp_" in f for f in filer), f"Lekket midlertidig fil funnet: {filer}")
-        with open(self._logg_sti(), "rb") as f:
+        with open(self._ny_logg_sti(), "rb") as f:
             self.assertEqual(f.read(), original_bytes)
 
 
