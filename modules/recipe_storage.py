@@ -277,9 +277,23 @@ def lagre_oppskrift(recipe, kilde_filnavn=None, bloker_ved_navnekollisjon=False)
         lagre_oppskrift(recipe)-kall (uten kjent kildefil-sporing) beholder
         sin opprinnelige opprett-eller-oppdater-ved-navn-oppførsel.
 
-    Returnerer det nye filnavnet (eller None i DEMO_MODE)."""
+    Returnerer det nye filnavnet (eller None i DEMO_MODE).
+
+    `kilde_filnavn` valideres via _valider_kildefilnavn() FØR noe annet
+    -- før kollisjonssjekk, backup, skriving av den nye filen, eller
+    arkivering av den gamle. Et ugyldig kildefilnavn (path traversal,
+    absolutt sti, mappekomponent, ".", "..", tom streng der en kildefil
+    er oppgitt) skal ALDRI kunne føre til at koden senere prøver å
+    arkivere/flytte noe utenfor (eller feil sted i) den aktive
+    oppskriftsmappen -- se _arkiver_kildefil_etter_omdoeping(). `None`
+    er unntaket: det betyr eksplisitt "ingen kjent tidligere kildefil"
+    (ny oppskrift, eller "lagre som ny kopi") og krever ingen
+    validering, siden det aldri brukes til å peke på en fil i det hele
+    tatt."""
     if DEMO_MODE:
         return None
+    if kilde_filnavn is not None:
+        _valider_kildefilnavn(kilde_filnavn)
     sikre_mappe()
     nytt_filnavn = generer_filnavn(recipe["name"])
     filsti = os.path.join(_mappe(), nytt_filnavn)

@@ -150,7 +150,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                         ny_recipe,
                         kilde_filnavn=st.session_state.get("_last_loaded_recipe_file"),
                     )
-                except OppskriftNavnKollisjon as e:
+                except (OppskriftNavnKollisjon, UgyldigKildefilnavn) as e:
                     st.error(f"❌ {e}")
                 else:
                     st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
