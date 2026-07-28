@@ -1,9 +1,9 @@
 # Kvernhaug Brygghus — Prosjektstatus (Juli 2026)
 
-*Dato: 2026-07-27*
-*Gjeldende master-commit: `40edbcd`*
-*Testantall: 408 tester — 0 skipped, 0 errors, 0 failures*
-*Python-filer i repoet: 88*
+*Dato: 2026-07-28*
+*Gjeldende master-commit: `52333e9`*
+*Testantall: 564 tester — 0 skipped, 0 errors, 0 failures*
+*Python-filer i repoet: 105*
 *App-synlige lagrede oppskrifter: 8 (kun antall — filnavn og innhold er ikke del av denne rapporten)*
 
 Dette dokumentet erstatter ikke `docs/PROJECT_STATUS_JUNI_2026.md`, som beholdes som historikk.
@@ -17,7 +17,7 @@ Dette dokumentet erstatter ikke `docs/PROJECT_STATUS_JUNI_2026.md`, som beholdes
 - **`ui/`** — én panelfil per fane-seksjon, rendrer mot `modules/`.
 - **`data/`** — kuraterte masterdatabaser (malt/humle/gjær) + private, gitignorede runtime-filer (`pantry.json`, `humle_lager.json`, `equipment.json`, vannmål).
 - **`recipes/`** — brukerens lagrede oppskrifter. Gitignoret; ikke delt i det offentlige repoet.
-- **`tests/`** — 25 testfiler, inkludert committede fixtures (sanitiserte oppskrift-kopier uten personlig innhold) slik at ingen test er avhengig av private, lokale data.
+- **`tests/`** — 49 testfiler, inkludert committede fixtures (sanitiserte oppskrift-kopier uten personlig innhold) slik at ingen test er avhengig av private, lokale data.
 
 ---
 
