@@ -37,6 +37,21 @@ class UgyldigKildefilnavn(Exception):
     pass
 
 
+class LegacyLoggKandidatUkjent(Exception):
+    """Reist når en fil i oppskriftsmappens rot, med akkurat det
+    filnavnet en legacy-bryggelogg for oppskriften ville hatt
+    ("<navn>_logg.json"), verken lar seg lese, parse som JSON, eller
+    gjenkjennes entydig som EN AV DE TO kjente, trygge formene (en
+    gyldig legacy-logg, eller en HELT ANNEN oppskrift som ved
+    navnetilfeldighet har akkurat det filnavnet -- se
+    _klassifiser_legacy_kandidat()). Reises FØR noen sideeffekt
+    (arkivering/omdøping/backup) skjer på filen eller på oppskriften den
+    ev. tilhørende operasjonen gjelder -- filen røres ALDRI. Kallestedet
+    (ui/recipe_card.py) fanger denne og viser en tydelig feil uten å
+    nullstille den valgte oppskriften."""
+    pass
+
+
 class LoggKorruptError(Exception):
     """Reist når en brygglogg-fil FINNES men ikke er gyldig JSON. Filen
     røres ALDRI når dette oppstår -- verken lest som tom liste og siden
@@ -185,15 +200,91 @@ def _arkiver_fil(kilde_sti):
     return maal_sti
 
 
-def _omdoep_logg_hvis_finnes(logg_basisnavn_gammel, logg_basisnavn_ny, logg_mappe):
+_LEGACY_KANDIDAT_INGEN = "ingen"
+_LEGACY_KANDIDAT_LOGG = "logg"
+_LEGACY_KANDIDAT_OPPSKRIFT = "oppskrift"
+
+
+def _klassifiser_legacy_kandidat(sti):
+    """Avgjør hva en fil på `sti` i oppskriftsmappens rot FAKTISK er, FØR
+    den ev. behandles som en legacy-bryggelogg av
+    _omdoep_logg_hvis_finnes()/_logg_maalsti()/slett_oppskrift_fil().
+
+    Bakgrunn: en legacy-logg for oppskriften "X" bruker filnavnet
+    "<generer_filnavn(X)>_logg.json" -- MEN en helt ANNEN, ubeslektet
+    oppskrift kan (ved ren navnetilfeldighet, f.eks. "Brygg" og "Brygg
+    Logg") ha AKKURAT det samme filnavnet som sin egen, ekte
+    oppskriftfil. Uten denne klassifiseringen ville en operasjon på "X"
+    (omdøping, sletting, ny loggoppføring) blindt anta at enhver
+    eksisterende fil med det filnavnet var "X" sin legacy-logg, og
+    dermed kunnet flytte, arkivere, sikkerhetskopiere eller overskrive
+    den ANDRE oppskriften.
+
+    Returnerer:
+      - _LEGACY_KANDIDAT_INGEN: filen finnes ikke -- helt normalt.
+      - _LEGACY_KANDIDAT_LOGG: filen er gyldig JSON, en liste der HVERT
+        element er et objekt (inkl. en tom liste) -- en ekte
+        legacy-logg, trygg å behandle som sådan.
+      - _LEGACY_KANDIDAT_OPPSKRIFT: filen er gyldig JSON, et objekt med
+        et "name"-felt -- en ANNEN oppskrift. Skal ALDRI flyttes,
+        arkiveres, sikkerhetskopieres eller endres av en operasjon på
+        "X"; skal behandles som om "X" ikke har noen legacy-logg.
+
+    Reiser LegacyLoggKandidatUkjent (filen UENDRET, aldri rørt utover
+    denne ene lesingen) hvis filen finnes, men verken er lesbar
+    (rettighetsfeil, ugyldig tegnkoding), gyldig JSON, eller matcher
+    noen av de to kjente, trygge formene over -- feil lukket, ingen
+    gjetting om filen "sikkert nok" er den ene eller den andre."""
+    if not os.path.exists(sti):
+        return _LEGACY_KANDIDAT_INGEN
+    try:
+        with open(sti, "r", encoding="utf-8") as f:
+            raw = f.read()
+    except (OSError, UnicodeError) as e:
+        raise LegacyLoggKandidatUkjent(
+            f"Kunne ikke lese den mulige legacy-loggfilen {sti}: {e}. Filen ble IKKE endret."
+        ) from e
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise LegacyLoggKandidatUkjent(
+            f"{sti} finnes, men inneholder ugyldig JSON og kan derfor ikke sikkert "
+            f"klassifiseres som verken en legacy-logg eller en oppskrift ({e}). "
+            "Filen ble IKKE endret."
+        ) from e
+    if isinstance(data, list) and all(isinstance(x, dict) for x in data):
+        return _LEGACY_KANDIDAT_LOGG
+    if isinstance(data, dict) and "name" in data:
+        return _LEGACY_KANDIDAT_OPPSKRIFT
+    raise LegacyLoggKandidatUkjent(
+        f"{sti} finnes, men innholdet matcher verken en gyldig legacy-logg (en liste "
+        "av objekter) eller en oppskrift (et objekt med et \"name\"-felt). "
+        "Filen ble IKKE endret."
+    )
+
+
+def _omdoep_logg_hvis_finnes(logg_basisnavn_gammel, logg_basisnavn_ny, logg_mappe, klassifiser=False):
     """Flytter én loggfil (hvis den finnes) fra det gamle til det nye
     NAVNET, uten å bytte MAPPE -- kalles separat for den nye
     loggplasseringen (_logs_mappe()) og for den gamle, legacy-
     plasseringen (oppskriftsmappens rot), slik at en logg ALDRI
     implisitt migreres fra den ene navnerom-mappen til den andre bare
-    fordi oppskriften den tilhører ble omdøpt."""
+    fordi oppskriften den tilhører ble omdøpt.
+
+    `klassifiser=True` (brukt for legacy-roten, der filnavnet kan være
+    tvetydig -- se _klassifiser_legacy_kandidat()) sjekker at kandidaten
+    faktisk ER en legacy-logg før den røres i det hele tatt: en ANNEN
+    oppskrift med samme filnavn (_LEGACY_KANDIDAT_OPPSKRIFT) eller en
+    ukjent/korrupt kandidat blir stående helt urørt (sistnevnte har
+    allerede stoppet hele omdøpingen tidligere, se
+    _forhaandsvalider_omdoeping_av_logg() -- dette er kun det faktiske
+    flytte-steget). `klassifiser=False` (brukt for den ALDRI tvetydige
+    _logs_mappe()) beholder den enkle eksistens-sjekken."""
     gammel_logg = os.path.join(logg_mappe, logg_basisnavn_gammel)
-    if not os.path.exists(gammel_logg):
+    if klassifiser:
+        if _klassifiser_legacy_kandidat(gammel_logg) != _LEGACY_KANDIDAT_LOGG:
+            return
+    elif not os.path.exists(gammel_logg):
         return
     ny_logg = os.path.join(logg_mappe, logg_basisnavn_ny)
     if os.path.exists(ny_logg):
@@ -203,6 +294,18 @@ def _omdoep_logg_hvis_finnes(logg_basisnavn_gammel, logg_basisnavn_ny, logg_mapp
         _arkiver_fil(gammel_logg)
     else:
         shutil.move(gammel_logg, ny_logg)
+
+
+def _forhaandsvalider_omdoeping_av_logg(gammelt_filnavn):
+    """Klassifiserer en EVENTUELL legacy-loggkandidat for
+    `gammelt_filnavn` i oppskriftsmappens rot FØR lagre_oppskrift() gjør
+    NOEN som helst skriving (ny fil, backup, arkivering). Reiser
+    LegacyLoggKandidatUkjent tidlig, uendret fil, dersom kandidaten
+    finnes men ikke lar seg klassifisere -- slik at en omdøping ALDRI
+    kan bli halvveis gjennomført (ny fil skrevet, men gammel fil/logg
+    ikke arkivert fordi et sent, uventet unntak stoppet prosessen)."""
+    gammel_logg_basis = gammelt_filnavn.replace(".json", "_logg.json")
+    _klassifiser_legacy_kandidat(os.path.join(_mappe(), gammel_logg_basis))
 
 
 def _arkiver_kildefil_etter_omdoeping(gammelt_filnavn, nytt_filnavn):
@@ -220,7 +323,14 @@ def _arkiver_kildefil_etter_omdoeping(gammelt_filnavn, nytt_filnavn):
     ligger i _logs/ blir værende i _logs/ under det nye navnet, en
     legacy-logg i roten blir værende i roten under det nye navnet.
     Ingen av dem flyttes på tvers av navnerom her -- det ville vært en
-    implisitt migrering av eksisterende data, ikke bare en omdøping."""
+    implisitt migrering av eksisterende data, ikke bare en omdøping.
+
+    Legacy-roten klassifiseres FØR den røres (se
+    _omdoep_logg_hvis_finnes(..., klassifiser=True)) -- selve
+    forhåndsvalideringen (som ville stoppet HELE omdøpingen ved en
+    ukjent/korrupt kandidat) har allerede skjedd i
+    _forhaandsvalider_omdoeping_av_logg(), kalt av lagre_oppskrift() FØR
+    noe som helst ble skrevet."""
     mappe = _mappe()
     gammel_sti = os.path.join(mappe, gammelt_filnavn)
     _arkiver_fil(gammel_sti)
@@ -228,7 +338,7 @@ def _arkiver_kildefil_etter_omdoeping(gammelt_filnavn, nytt_filnavn):
     gammel_logg_basis = gammelt_filnavn.replace(".json", "_logg.json")
     ny_logg_basis = nytt_filnavn.replace(".json", "_logg.json")
     _omdoep_logg_hvis_finnes(gammel_logg_basis, ny_logg_basis, _logs_mappe())
-    _omdoep_logg_hvis_finnes(gammel_logg_basis, ny_logg_basis, mappe)
+    _omdoep_logg_hvis_finnes(gammel_logg_basis, ny_logg_basis, mappe, klassifiser=True)
 
 
 def _valider_kildefilnavn(kilde_filnavn):
@@ -343,6 +453,14 @@ def lagre_oppskrift(recipe, kilde_filnavn=None, bloker_ved_navnekollisjon=False)
             f"(filen {nytt_filnavn}). Velg et annet navn før lagring."
         )
 
+    if navn_endret:
+        # Klassifiser en EVENTUELL legacy-loggkandidat FØR noe som helst
+        # skrives -- se _forhaandsvalider_omdoeping_av_logg(). En
+        # ukjent/korrupt kandidat skal stoppe HELE omdøpingen her, ikke
+        # etterlate en halvveis gjennomført tilstand (ny fil skrevet,
+        # gammel fil arkivert, men loggflyttingen feilet et sted).
+        _forhaandsvalider_omdoeping_av_logg(kilde_filnavn)
+
     if os.path.exists(filsti):
         _backup_eksisterende_fil(filsti)
 
@@ -374,16 +492,23 @@ def _legacy_logg_filsti(oppskrift_navn):
 def _logg_maalsti(oppskrift_navn):
     """Stien EN SKRIVING (lagre_logg_entry) skal bruke: hvis loggen
     allerede finnes på den NYE plasseringen, fortsett å skrive der. Hvis
-    den i stedet finnes på den GAMLE, legacy-plasseringen (og ikke på
-    den nye), fortsett å skrive DER -- for å unngå at en helt vanlig
-    "legg til brygg"-handling implisitt migrerer en eksisterende legacy-
-    logg til et nytt sted. En helt NY logg (finnes ingen steder ennå)
-    går til den nye plasseringen."""
+    den GAMLE, legacy-plasseringen i stedet inneholder en EKTE legacy-
+    logg (klassifisert -- se _klassifiser_legacy_kandidat()), fortsett å
+    skrive DER, for å unngå at en helt vanlig "legg til brygg"-handling
+    implisitt migrerer en eksisterende legacy-logg til et nytt sted. Er
+    legacy-kandidaten i stedet en HELT ANNEN oppskrift (samme filnavn
+    ved ren tilfeldighet, se _klassifiser_legacy_kandidat()) eller
+    finnes ingen kandidat i det hele tatt, går en helt NY logg til den
+    nye plasseringen -- den andre oppskriften røres aldri.
+
+    Kan reise LegacyLoggKandidatUkjent hvis en eksisterende legacy-
+    kandidat ikke lar seg klassifisere (korrupt/uleselig/ukjent schema)
+    -- kallestedet (lagre_logg_entry) fanger dette."""
     ny_sti = _logg_filsti(oppskrift_navn)
     if os.path.exists(ny_sti):
         return ny_sti
     legacy_sti = _legacy_logg_filsti(oppskrift_navn)
-    if os.path.exists(legacy_sti):
+    if _klassifiser_legacy_kandidat(legacy_sti) == _LEGACY_KANDIDAT_LOGG:
         return legacy_sti
     return ny_sti
 
@@ -399,11 +524,19 @@ def lagre_logg_entry(oppskrift_navn, entry):
     legges til: er loggfilen korrupt eller har feil schema, forplanter
     det seg som LoggKorruptError HERFRA, uten at noe skrives -- i stedet
     for at denne ene, nye oppføringen stille erstatter hele den (ellers
-    tapte) historikken."""
+    tapte) historikken. En ukjent/korrupt legacy-loggKANDIDAT (se
+    _logg_maalsti()/_klassifiser_legacy_kandidat()) blokkerer på samme
+    måte, som LoggKorruptError -- fra kallerens ståsted er "kan ikke
+    avgjøre om det finnes en eksisterende logg" den samme typen feil som
+    "loggen finnes, men er korrupt", og UI-et (ui/recipe_card.py) fanger
+    allerede LoggKorruptError rundt nøyaktig dette kallet."""
     if DEMO_MODE:
         return
     sikre_mappe()
-    filsti = _logg_maalsti(oppskrift_navn)
+    try:
+        filsti = _logg_maalsti(oppskrift_navn)
+    except LegacyLoggKandidatUkjent as e:
+        raise LoggKorruptError(str(e)) from e
     _sikre_undermappe(os.path.dirname(filsti))
     logg = hent_logg(oppskrift_navn)
     logg.append(entry)
@@ -415,19 +548,33 @@ def hent_logg(oppskrift_navn):
     """Henter alle loggoppføringer for en oppskrift.
 
     Ser først etter loggen på den NYE plasseringen (recipes/_logs/),
-    deretter -- kun for lesetilgang -- på den gamle, legacy-plasseringen
-    direkte i oppskriftsmappens rot (se _legacy_logg_filsti()).
-    Returnerer tom liste hvis loggen ikke finnes NOE sted -- helt normalt
-    for en oppskrift uten registrerte brygg. Kaster LoggKorruptError
-    (uten å røre filen) hvis den FINNES men ikke er gyldig JSON -- ALDRI
-    stille tom, som tidligere kunne få lagre_logg_entry() til å overskrive
-    hele historikken med bare den ene, nye oppføringen. Samme etablerte
-    mønster som modules/pantry.py::last_pantry()/PantryCorruptError."""
+    deretter -- kun for lesetilgang, og kun hvis den faktisk klassifiseres
+    som en EKTE legacy-logg (se _klassifiser_legacy_kandidat()) -- på den
+    gamle, legacy-plasseringen direkte i oppskriftsmappens rot. En annen
+    oppskrift som ved navnetilfeldighet har samme filnavn behandles som
+    om "X" ikke har noen legacy-logg i det hele tatt (tom liste), og
+    røres ALDRI. Returnerer tom liste hvis loggen ikke finnes NOE sted --
+    helt normalt for en oppskrift uten registrerte brygg. Kaster
+    LoggKorruptError (uten å røre filen) hvis den FINNES men ikke er
+    gyldig JSON, eller hvis en legacy-kandidat ikke lar seg klassifisere
+    -- ALDRI stille tom, som tidligere kunne få lagre_logg_entry() til å
+    overskrive hele historikken med bare den ene, nye oppføringen. Samme
+    etablerte mønster som modules/pantry.py::last_pantry()/
+    PantryCorruptError."""
     filsti = _logg_filsti(oppskrift_navn)
     if not os.path.exists(filsti):
-        filsti = _legacy_logg_filsti(oppskrift_navn)
-        if not os.path.exists(filsti):
+        legacy_sti = _legacy_logg_filsti(oppskrift_navn)
+        try:
+            klassifisering = _klassifiser_legacy_kandidat(legacy_sti)
+        except LegacyLoggKandidatUkjent as e:
+            raise LoggKorruptError(str(e)) from e
+        if klassifisering != _LEGACY_KANDIDAT_LOGG:
+            # _LEGACY_KANDIDAT_INGEN (finnes ikke) eller
+            # _LEGACY_KANDIDAT_OPPSKRIFT (en ANNEN oppskrift, samme
+            # filnavn ved tilfeldighet) -- begge betyr "ingen legacy-logg
+            # for DENNE oppskriften".
             return []
+        filsti = legacy_sti
     with open(filsti, "r", encoding="utf-8") as f:
         raw = f.read()
     try:
@@ -566,22 +713,33 @@ def slett_oppskrift_fil(kilde_filnavn):
 
     Reiser UgyldigKildefilnavn (se _valider_kildefilnavn) hvis
     kilde_filnavn ikke er et rent, traversal-fritt filnavn direkte i den
-    aktive oppskriftsmappen. Kallestedet (ui/recipe_card.py) eier selve
-    bekreftelsesdialogen FØR dette kalles og fanger begge unntakstypene
-    for å vise en tydelig feil i UI-et uten å nullstille noe. Returnerer
-    True hvis oppskriftsfilen fantes og ble arkivert, False hvis den
-    ikke fantes."""
+    aktive oppskriftsmappen, eller LegacyLoggKandidatUkjent (se
+    _klassifiser_legacy_kandidat()) hvis en mulig legacy-loggkandidat i
+    mapperoten ikke lar seg klassifisere -- i BEGGE tilfeller FØR
+    oppskriftsfilen arkiveres, slik at en avvist sletting aldri kan bli
+    halvveis gjennomført. Kallestedet (ui/recipe_card.py) eier selve
+    bekreftelsesdialogen FØR dette kalles og fanger alle tre
+    unntakstypene for å vise en tydelig feil i UI-et uten å nullstille
+    noe. Returnerer True hvis oppskriftsfilen fantes og ble arkivert,
+    False hvis den ikke fantes."""
     if DEMO_MODE:
         return False
     filsti = _valider_kildefilnavn(kilde_filnavn)
     if not os.path.exists(filsti):
         return False
-    _arkiver_fil(filsti)
 
     logg_basis = kilde_filnavn.replace(".json", "_logg.json")
-    # En tilhørende logg kan i dag ligge på to steder (se
-    # _logg_filsti()/_legacy_logg_filsti()) -- arkiver den uansett
-    # hvilket av de to den faktisk finnes i.
+    # Klassifiser en EVENTUELL legacy-loggkandidat i mapperoten FØR noe
+    # arkiveres -- filnavnet kan (ved ren tilfeldighet) tilhøre en HELT
+    # ANNEN oppskrift i stedet for en legacy-logg for DENNE (se
+    # _klassifiser_legacy_kandidat()). Kandidaten i recipes/_logs/ er
+    # derimot ALDRI tvetydig -- enhver fil der er per konstruksjon en
+    # ekte logg.
+    legacy_logg_sti = os.path.join(_mappe(), logg_basis)
+    legacy_klassifisering = _klassifiser_legacy_kandidat(legacy_logg_sti)
+
+    _arkiver_fil(filsti)
     _arkiver_fil(os.path.join(_logs_mappe(), logg_basis))
-    _arkiver_fil(os.path.join(_mappe(), logg_basis))
+    if legacy_klassifisering == _LEGACY_KANDIDAT_LOGG:
+        _arkiver_fil(legacy_logg_sti)
     return True

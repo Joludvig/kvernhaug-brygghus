@@ -130,20 +130,29 @@ class TestToOppskrifterDelerAldriLogg(_IsolertRecipeMappeTestCase):
 
 
 class TestLegacyFallbackKollidererAldriMedEnAnnenOppskriftsfil(_IsolertRecipeMappeTestCase):
-    """Dokumenterer og bekrefter et bevisst, trygt "fail closed"-valg for
-    et ekstremt sjeldent grensetilfelle: en oppskrift "Brygg" sin
-    LEGACY-loggsti (mappe-roten, "brygg_logg.json") er, ren tekstlig,
-    NØYAKTIG samme filnavn som en HELT ANNEN oppskrift "Brygg Logg" sin
-    faktiske OPPSKRIFTFIL ville hatt. Dette kan bare skje for et
-    "X"/"X Logg"-navnepar der "X" ALDRI har hatt en logg fra før (ingen
-    fil i _logs/ for X) OG "Brygg Logg" faktisk finnes som lagret
-    oppskrift. Schema-valideringen i hent_logg() (se
-    tests/test_brewlog_schema_validation.py) sørger for at dette ALDRI
-    fører til datatap eller krasj -- et forsøk på å logge "Brygg" i
-    dette tilfellet reiser LoggKorruptError, og "Brygg Logg" sin
-    faktiske oppskriftfil forblir fullstendig, byte-for-byte uendret."""
+    """Dokumenterer og bekrefter håndteringen av et ekstremt sjeldent
+    grensetilfelle: en oppskrift "Brygg" sin LEGACY-loggsti
+    (mappe-roten, "brygg_logg.json") er, ren tekstlig, NØYAKTIG samme
+    filnavn som en HELT ANNEN oppskrift "Brygg Logg" sin faktiske
+    OPPSKRIFTFIL ville hatt. Dette kan bare skje for et "X"/"X
+    Logg"-navnepar der "X" ALDRI har hatt en logg fra før (ingen fil i
+    _logs/ for X) OG "Brygg Logg" faktisk finnes som lagret oppskrift.
 
-    def test_kolliderende_legacy_sti_reiser_loggkorrupt_uten_aa_roere_den_andre_oppskriften(self):
+    _klassifiser_legacy_kandidat() (se modules/recipe_storage.py)
+    gjenkjenner at "brygg_logg.json" faktisk er en OPPSKRIFT (et objekt
+    med et "name"-felt), ikke en legacy-logg, og behandler "Brygg" som
+    om den ikke har noen legacy-logg i det hele tatt: en ny logg
+    opprettes i recipes/_logs/ i stedet, og "Brygg Logg" sin egen
+    oppskriftfil forblir fullstendig, byte-for-byte uendret -- ALDRI
+    lest inn som loggdata eller overskrevet.
+
+    (En tidligere runde med kun schema-validering i hent_logg(), uten
+    denne klassifiseringen, gjorde dette trygt men reiste en forvirrende
+    LoggKorruptError her -- se historikk i
+    tests/test_brewlog_schema_validation.py. Denne testen dekker nå den
+    KORREKTE, ikke-blokkerende oppførselen.)"""
+
+    def test_kolliderende_legacy_sti_oppretter_ny_logg_uten_aa_roere_den_andre_oppskriften(self):
         recipe_storage.lagre_oppskrift(_oppskrift("Brygg"))
         recipe_storage.lagre_oppskrift(_oppskrift("Brygg Logg"))
 
@@ -151,8 +160,15 @@ class TestLegacyFallbackKollidererAldriMedEnAnnenOppskriftsfil(_IsolertRecipeMap
         with open(brygg_logg_recipe_sti, "rb") as f:
             original_bytes = f.read()
 
-        with self.assertRaises(recipe_storage.LoggKorruptError):
-            recipe_storage.lagre_logg_entry("Brygg", {"date": "2026-07-01", "note": "Skal ikke skrives"})
+        # Skal LYKKES -- ikke reise noe unntak.
+        recipe_storage.lagre_logg_entry("Brygg", {"date": "2026-07-01", "note": "Brygg sin egen logg"})
+
+        # Ny logg for "Brygg" havner i _logs/, IKKE i mapperoten.
+        self.assertEqual(
+            recipe_storage.hent_logg("Brygg"),
+            [{"date": "2026-07-01", "note": "Brygg sin egen logg"}],
+        )
+        self.assertIn("brygg_logg.json", self._logs_filer())
 
         # "Brygg Logg" sin EGEN oppskriftfil skal stå fullstendig uendret
         # -- IKKE ha blitt "sikkerhetskopiert og overskrevet" som om den

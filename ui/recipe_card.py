@@ -12,6 +12,7 @@ from modules.recipe_storage import (
     OppskriftNavnKollisjon,
     UgyldigKildefilnavn,
     LoggKorruptError,
+    LegacyLoggKandidatUkjent,
 )
 from modules.recipe import bygg_recipe_object
 from modules.card_template import render_card_html, render_a4_html
@@ -150,7 +151,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                         ny_recipe,
                         kilde_filnavn=st.session_state.get("_last_loaded_recipe_file"),
                     )
-                except (OppskriftNavnKollisjon, UgyldigKildefilnavn) as e:
+                except (OppskriftNavnKollisjon, UgyldigKildefilnavn, LegacyLoggKandidatUkjent) as e:
                     st.error(f"❌ {e}")
                 else:
                     st.session_state["_last_loaded_recipe"] = ny_recipe["name"]
@@ -198,7 +199,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                     if st.button("✅ Bekreft", width="stretch", key="slett_bekreft_btn"):
                         try:
                             arkivert = slett_oppskrift_fil(_kilde_filnavn) if _kilde_filnavn else False
-                        except UgyldigKildefilnavn as e:
+                        except (UgyldigKildefilnavn, LegacyLoggKandidatUkjent) as e:
                             st.error(f"❌ Kunne ikke arkivere «{ctx['name']}»: {e}")
                         else:
                             if arkivert:
