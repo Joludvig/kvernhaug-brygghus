@@ -47,7 +47,30 @@ class MasterIdKollisjon(Exception):
         )
 
 
+class MasterLesefeil(Exception):
+    """Reist når en EKSISTERENDE masterfil finnes på disk men ikke kan
+    leses og valideres som et gyldig dict -- tom fil (0 byte), korrupt
+    JSON, eller JSON som parser til noe annet enn et objekt (f.eks. en
+    liste eller en streng), eller en annen lesefeil (rettigheter e.l.).
+
+    Skiller seg bevisst fra "filen finnes ikke" -- det er helt normalt
+    (masteren er bare ikke opprettet ennå) og gir {} uten feil, se
+    _les_master(). En EKSISTERENDE, men uleselig fil skal derimot ALDRI
+    stille behandles som en tom master og deretter overskrives med kun
+    den ene nye/endrede ingrediensen -- det ville slettet resten av
+    databasen stille. Kallestedene (_render_kategori, _render_match_tab,
+    og de tre _render_ny_*-formene) fanger denne og viser en tydelig
+    feil i UI-et i stedet, uten å skrive noe eller fjerne pending-
+    elementet."""
+    pass
+
+
 def _les_json(sti, default):
+    """Enkel, svelgende lesing -- brukt for de ARBEIDSFILENE
+    (raw_data/unmatched_*.json) som ikke er masterdata og der en
+    lesefeil trygt kan behandles som "ingen pending review ennå". Selve
+    masterfilene MÅ leses via _les_master() i stedet, som skiller
+    lesefeil fra en reell, tom master (se MasterLesefeil)."""
     if os.path.exists(sti) and os.path.getsize(sti) > 0:
         try:
             with open(sti, "r", encoding="utf-8") as f:
@@ -55,6 +78,38 @@ def _les_json(sti, default):
         except Exception:
             pass
     return default
+
+
+def _les_master(sti):
+    """Leser en masterfil og skiller tydelig mellom:
+      - filen finnes ikke ennå -> {} (helt normalt, ingen feil)
+      - filen finnes men er 0 byte -> MasterLesefeil (ikke gyldig JSON)
+      - filen finnes men er ugyldig JSON -> MasterLesefeil
+      - filen finnes og er gyldig JSON, men ikke et objekt (f.eks. en
+        liste eller en streng) -> MasterLesefeil
+      - annen lesefeil (rettigheter e.l.) -> MasterLesefeil
+      - filen finnes og er et gyldig (ev. tomt) JSON-objekt -> selve
+        dict-en, uendret (inkludert en tom {})
+    """
+    if not os.path.exists(sti):
+        return {}
+    try:
+        with open(sti, "r", encoding="utf-8") as f:
+            raw = f.read()
+    except OSError as e:
+        raise MasterLesefeil(f"Kunne ikke lese masterfilen {sti}: {e}") from e
+    if not raw.strip():
+        raise MasterLesefeil(f"Masterfilen {sti} finnes, men er tom (0 byte) -- ikke gyldig JSON.")
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise MasterLesefeil(f"Masterfilen {sti} inneholder ugyldig JSON og ble IKKE endret ({e}).") from e
+    if not isinstance(data, dict):
+        raise MasterLesefeil(
+            f"Masterfilen {sti} inneholder gyldig JSON, men av feil type "
+            f"({type(data).__name__} i stedet for et objekt/dict). Filen ble IKKE endret."
+        )
+    return data
 
 
 def _skriv_json(sti, data):
@@ -82,8 +137,11 @@ def _fjern_fra_unmatched(kat, index):
 
 
 def _legg_til_alias_og_fjern(kat, master_id, item, index):
+    """Reiser MasterLesefeil (uten å skrive noe eller fjerne pending-
+    elementet) hvis den eksisterende masterfilen ikke kan leses og
+    valideres -- se _les_master()."""
     master_sti = MASTER_PATHS[kat]
-    master = _les_json(master_sti, {})
+    master = _les_master(master_sti)
     if master_id not in master:
         return
     navn = item.get("navn", "")
@@ -115,7 +173,7 @@ def _opprett_og_fjern(kat, ny_id, ny_entry, index):
     if not ny_id:
         raise TomMasterId("Navnet gir en tom auto-generert ID.")
     master_sti = MASTER_PATHS[kat]
-    master = _les_json(master_sti, {})
+    master = _les_master(master_sti)
     if ny_id in master:
         eksisterende_navn = master[ny_id].get("display_name", ny_id)
         raise MasterIdKollisjon(ny_id, eksisterende_navn)
@@ -136,9 +194,13 @@ def _render_match_tab(kat, item, index, master):
     )
     st.caption("Produktnavnet legges til som alias, og pris/URL oppdateres i master.")
     if st.button("Legg til alias + oppdater pris", key=f"match_btn_{kat}_{index}", type="primary"):
-        _legg_til_alias_og_fjern(kat, options[valgt], item, index)
-        st.toast(f"Matchet til «{valgt}»", icon="✅")
-        st.rerun()
+        try:
+            _legg_til_alias_og_fjern(kat, options[valgt], item, index)
+        except MasterLesefeil as e:
+            st.error(f"❌ Kunne ikke oppdatere master: {e}")
+        else:
+            st.toast(f"Matchet til «{valgt}»", icon="✅")
+            st.rerun()
 
 
 def _render_avvis_tab(kat, item, index):
@@ -186,6 +248,8 @@ def _render_ny_humle(item, index):
                     f"❌ ID-en `{e.ny_id}` finnes allerede i master som «{e.eksisterende_navn}». "
                     "Bruk «🔗 Match eksisterende» i stedet, eller endre navnet slik at det gir en annen ID."
                 )
+            except MasterLesefeil as e:
+                st.error(f"❌ Kunne ikke opprette i master: {e}")
             else:
                 st.toast(f"«{display_name}» opprettet i master!", icon="✅")
                 st.rerun()
@@ -228,6 +292,8 @@ def _render_ny_malt(item, index):
                     f"❌ ID-en `{e.ny_id}` finnes allerede i master som «{e.eksisterende_navn}». "
                     "Bruk «🔗 Match eksisterende» i stedet, eller endre navnet slik at det gir en annen ID."
                 )
+            except MasterLesefeil as e:
+                st.error(f"❌ Kunne ikke opprette i master: {e}")
             else:
                 st.toast(f"«{display_name}» opprettet i master!", icon="✅")
                 st.rerun()
@@ -271,6 +337,8 @@ def _render_ny_gjaer(item, index):
                     f"❌ ID-en `{e.ny_id}` finnes allerede i master som «{e.eksisterende_navn}». "
                     "Bruk «🔗 Match eksisterende» i stedet, eller endre navnet slik at det gir en annen ID."
                 )
+            except MasterLesefeil as e:
+                st.error(f"❌ Kunne ikke opprette i master: {e}")
             else:
                 st.toast(f"«{display_name}» opprettet i master!", icon="✅")
                 st.rerun()
@@ -285,7 +353,15 @@ _NY_FORM = {
 
 def _render_kategori(kat, label, emoji):
     unmatched = _les_json(UNMATCHED_PATHS[kat], [])
-    master = _les_json(MASTER_PATHS[kat], {})
+    try:
+        master = _les_master(MASTER_PATHS[kat])
+    except MasterLesefeil as e:
+        st.error(
+            f"❌ Masterfilen for {label} kan ikke leses ({e}). Review er midlertidig "
+            "deaktivert for denne kategorien til filen er reparert eller gjenopprettet fra "
+            "en backup i data/ -- ingen endringer skjer automatisk."
+        )
+        return
 
     if not unmatched:
         st.success(f"✅ Ingen {label} pending review.")
