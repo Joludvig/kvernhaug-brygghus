@@ -23,6 +23,7 @@ Dette dokumentet er inngangsporten — det holder seg bevisst kort og peker vide
 | [docs/development/CODING_STYLE.md](docs/development/CODING_STYLE.md) | Arkitekturgrense (`modules/` vs `ui/`), kommentarstil, selvkontroll-sjekkliste. |
 | [docs/development/TESTING.md](docs/development/TESTING.md) | Hvordan kjøre tester, isolasjonsprinsipper, `AppTest`-mønster. |
 | [docs/development/VAULT.md](docs/development/VAULT.md) | Regler for når og hvordan Obsidian Vault-en skal oppdateres. |
+| [docs/snapshots/README.md](docs/snapshots/README.md) | Project Snapshots — daterte øyeblikksbilder av hele prosjektet ved milepæler. Mal: [docs/snapshots/TEMPLATE.md](docs/snapshots/TEMPLATE.md). |
 
 Produktdokumentasjon (hva appen *kan*, status, dataflyt) ligger i `docs/` direkte: [README.md](README.md), [docs/ROADMAP.md](docs/ROADMAP.md), nyeste `docs/PROJECT_STATUS_*.md`, [docs/MASTER_DATA_FLOW.md](docs/MASTER_DATA_FLOW.md).
 
@@ -32,4 +33,5 @@ Produktdokumentasjon (hva appen *kan*, status, dataflyt) ligger i `docs/` direkt
 - **Demo Mode skal være 1:1 med fullversjonen**, unntatt permanente filer, brukerdata og masterdata. → [DEMO_MODE.md](docs/development/DEMO_MODE.md)
 - **Aldri commit eller push automatisk.** Vis endringer og foreslått melding, vent på godkjenning. → [GIT_RULES.md](docs/development/GIT_RULES.md)
 - **Analyser impact før du koder, avslutt alltid med en strukturert sluttrapport.** → [WORKFLOW.md](docs/development/WORKFLOW.md)
+- **Foreslå et Project Snapshot før store milepæler/releaser** (ny hovedmodul, arkitekturendring, brukerens eksplisitte forespørsel) — stopp og vent på svar. → [snapshots/README.md](docs/snapshots/README.md)
 - Oppdater kun det som faktisk påvirkes — i kode, dokumentasjon *og* Vault. Forklar alltid hvorfor noe *ikke* ble oppdatert.

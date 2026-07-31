@@ -84,13 +84,27 @@ Undersøk: dead code, ubrukte imports, ubrukte variabler, teknisk gjeld, TODO/FI
 
 Sjekkliste: [CODING_STYLE.md](CODING_STYLE.md#selvkontroll--kodekvalitet).
 
-### Fase 8 — Backup / Milepæl
+### Fase 8 — Backup / Milepæl (Project Snapshot)
 
-Dersom endringen er større enn en vanlig bugfix (ny modul, større refaktorering, arkitekturendring, ny arbeidsflyt): **stopp**. Anbefal å opprette et Project Snapshot før du fortsetter. Snapshotet skal inneholde:
+Anbefal et Project Snapshot — og **stopp og vent på brukerens stilling** før du fortsetter med selve endringen — når arbeidet gjelder:
 
-✓ Git-status · ✓ siste commit · ✓ teststatus · ✓ Demo-status · ✓ Vault-status · ✓ PROJECT_STATUS · ✓ eventuelle advarsler
+- større arkitekturendringer
+- nye hovedmoduler
+- større refaktoreringer
+- viktige milepæler
+- før offentlige releaser (dvs. før en push til `master` som vil trigge redeploy av den offentlige demoen — se [GIT_RULES.md](GIT_RULES.md#release-prosess))
+- når brukeren eksplisitt ber om et snapshot
 
-Ikke fortsett før brukeren har tatt stilling til dette.
+Et Project Snapshot er **ikke** en backup, en changelog eller en commit-logg — det er et frosset øyeblikksbilde av hele prosjektets tilstand på ett gitt tidspunkt (git, tester, Demo Mode, dokumentasjon, Vault, teknisk gjeld samlet). Full forklaring og skillet mot `docs/PROJECT_STATUS_*.md`: [../snapshots/README.md](../snapshots/README.md).
+
+**Slik opprettes et snapshot:**
+
+1. Kopier `docs/snapshots/TEMPLATE.md` til `docs/snapshots/YYYY-MM-DD_<kort-slug>.md`.
+2. Fyll ut hvert felt med faktisk verifisert informasjon — kjør testsuiten på nytt, sjekk git-status direkte. Ikke gjenbruk gamle tall ukritisk. Bruk "Ikke verifisert" / "Ikke undersøkt" der noe faktisk ikke er sjekket.
+3. Legg til raden i den kronologiske indeksen i `docs/snapshots/README.md`.
+4. Rediger aldri et eksisterende snapshot i ettertid — et nytt behov betyr et nytt snapshot, ikke en oppdatering av et gammelt.
+
+Ikke fortsett med selve endringen før brukeren har tatt stilling til om et snapshot skal opprettes først.
 
 ### Fase 9 — Git
 
