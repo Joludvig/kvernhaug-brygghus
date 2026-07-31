@@ -1,11 +1,21 @@
 import streamlit as st
 from config import DEMO_MODE
 from modules.humle_lager import les_lager, lagre_lager
+from ui import demo_state
+
+
+def _hent_lager():
+    return demo_state.hent_gammelt_humlelager() if DEMO_MODE else les_lager()
+
+
+def _lagre_lager(lager):
+    if DEMO_MODE:
+        demo_state.lagre_gammelt_humlelager(lager)
+    else:
+        lagre_lager(lager)
 
 
 def render_humle_lager_panel(humle_database: dict) -> None:
-    if DEMO_MODE:
-        return
     # Ikke lenger sin egen st.expander — rendres inne i den delte
     # "Eldre handleliste og humlelager"-expanderen i app.py (Streamlit
     # tillater ikke nestede expandere).
@@ -17,8 +27,10 @@ def render_humle_lager_panel(humle_database: dict) -> None:
         "allerede har; registrer i Pantry for oppskriftskontroll (nok/mangler per ingrediens)."
     )
     st.caption("Registrer din beholdning av humle i gram. Lager trekkes ikke automatisk ved brygging.")
+    if DEMO_MODE:
+        st.caption("🍺 Demo-modus — eksempeldata, lagres ikke permanent.")
 
-    lager = les_lager()
+    lager = _hent_lager()
     endret = False
     to_delete = []
 
@@ -59,7 +71,7 @@ def render_humle_lager_panel(humle_database: dict) -> None:
         endret = True
 
     if endret:
-        lagre_lager(lager)
+        _lagre_lager(lager)
         st.rerun()
 
     st.write("")
@@ -91,7 +103,7 @@ def render_humle_lager_panel(humle_database: dict) -> None:
         with col_btn:
             if st.button("Legg til", key="lager_legg_til_btn", width="stretch"):
                 lager[ny_id] = float(ny_gram)
-                lagre_lager(lager)
+                _lagre_lager(lager)
                 st.rerun()
     else:
         st.caption("Alle humler er allerede registrert i lageret.")

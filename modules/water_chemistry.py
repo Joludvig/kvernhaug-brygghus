@@ -19,6 +19,8 @@ import copy
 import json
 import os
 
+from config import DEMO_MODE
+
 # ══════════════════════════════════════════════════════════════════════════
 # KILDE- OG MÅLPROFILER PÅ DISK
 # ══════════════════════════════════════════════════════════════════════════
@@ -61,7 +63,11 @@ def last_vannkilder():
 
 def lagre_vannkilder(kilder):
     """Persisterer HELE kart av kildevannsprofiler (bruker legger til/endrer
-    én profil i kartet før kall — se ui/water_panel.py)."""
+    én profil i kartet før kall — se ui/water_panel.py). No-op i DEMO_MODE
+    -- samme mønster som modules/recipe_storage.py, modules/pantry.py,
+    modules/humle_lager.py og modules/equipment.py."""
+    if DEMO_MODE:
+        return
     _lagre_json(_vannkilder_fil(), kilder)
 
 
@@ -71,7 +77,10 @@ def last_vannmaal():
 
 
 def lagre_vannmaal(maalprofiler):
-    """Persisterer HELE kart av målprofiler."""
+    """Persisterer HELE kart av målprofiler. No-op i DEMO_MODE -- se
+    lagre_vannkilder()."""
+    if DEMO_MODE:
+        return
     _lagre_json(_vannmaal_fil(), maalprofiler)
 
 

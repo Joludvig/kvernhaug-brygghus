@@ -1,11 +1,24 @@
 import streamlit as st
+from config import DEMO_MODE
 from modules.equipment import last_equipment, lagre_equipment
+from ui import demo_state
+
+
+def _hent_equipment():
+    return demo_state.hent_equipment() if DEMO_MODE else last_equipment()
+
+
+def _lagre_equipment(data):
+    if DEMO_MODE:
+        demo_state.lagre_equipment(data)
+    else:
+        lagre_equipment(data)
 
 
 def render_equipment_panel():
     st.write("---")
     with st.expander("⚙️ Utstyrsprofil"):
-        eq = last_equipment()
+        eq = _hent_equipment()
         st.caption(
             "Standardverdier er BrewZilla 35L Gen 4.1. "
             "Endre for ditt eget utstyr — beregningene oppdateres ved neste rendering."
@@ -59,7 +72,7 @@ def render_equipment_panel():
         )
 
         if st.button("💾 Lagre utstyrsprofil", width="stretch", key="eq_save_btn"):
-            lagre_equipment({
+            _lagre_equipment({
                 "efficiency": efficiency / 100.0,
                 "boil_off_l_per_hour": boil_off,
                 "grain_absorption_l_per_kg": grain_abs,
@@ -68,5 +81,6 @@ def render_equipment_panel():
                 "kettle_capacity_l": kettle_cap,
                 "default_boil_time_min": boil_time,
             })
-            st.toast("Utstyrsprofil lagret!", icon="⚙️")
+            melding = "Utstyrsprofil lagret! (demo — ikke permanent)" if DEMO_MODE else "Utstyrsprofil lagret!"
+            st.toast(melding, icon="⚙️")
             st.rerun()

@@ -8,6 +8,13 @@ _FALLBACK_PAKKE_GRAM = 100.0
 
 
 def les_lager() -> dict:
+    """Leser data/humle_lager.json. Returnerer alltid {} i DEMO_MODE UTEN å
+    røre disken -- dette er brukerens ekte, private lagerdata og skal
+    aldri leses inn i en demo-økt (se ui/humle_lager_panel.py, som i
+    stedet bruker en egen, session-scoped demo-versjon via
+    ui/demo_state.py)."""
+    if DEMO_MODE:
+        return {}
     if not os.path.exists(_LAGER_FIL):
         return {}
     try:

@@ -7,6 +7,7 @@ uten et eksplisitt brukervalg — akkurat som ui/process_panel.py aldri
 velger bryggemåte automatisk.
 """
 import streamlit as st
+from config import DEMO_MODE
 from modules.equipment import last_equipment
 from modules.brewday_calc import beregn_vann
 from modules.process_profiles import normaliser_prosessprofil
@@ -17,6 +18,31 @@ from modules.water_chemistry import (
     generer_varsler, foreslaa_salter, anbefal_vannmaal, vurder_maaloppnaelse, bygg_syretilsetning, tomt_kildevann,
     PROPORSJONAL, ALT_I_MESK, EGENDEFINERT_FORDELING, SYRER,
 )
+from ui import demo_state
+
+_DEMO_SUFFIKS = " (demo — ikke permanent)"
+
+
+def _hent_vannkilder():
+    return demo_state.hent_vannkilder() if DEMO_MODE else last_vannkilder()
+
+
+def _lagre_vannkilder(kilder):
+    if DEMO_MODE:
+        demo_state.lagre_vannkilder(kilder)
+    else:
+        lagre_vannkilder(kilder)
+
+
+def _hent_vannmaal():
+    return demo_state.hent_vannmaal() if DEMO_MODE else last_vannmaal()
+
+
+def _lagre_vannmaal(maalprofiler):
+    if DEMO_MODE:
+        demo_state.lagre_vannmaal(maalprofiler)
+    else:
+        lagre_vannmaal(maalprofiler)
 
 _ION_LABELS = {"ca": "Ca", "mg": "Mg", "na": "Na", "cl": "Cl", "so4": "SO4", "hco3": "HCO3"}
 _UKJENT_KILDE_ID = "__ukjent__"
@@ -109,8 +135,8 @@ def render_water_panel(ctx, malt_database=None):
     _aktiv_oppskrift = st.session_state.get("_last_loaded_recipe")
     _ny_oppskrift_lastet = st.session_state.get("_vann_synced_for", "__aldri_synket__") != _aktiv_oppskrift
 
-    kilder = last_vannkilder()
-    maalprofiler = last_vannmaal()
+    kilder = _hent_vannkilder()
+    maalprofiler = _hent_vannmaal()
 
     if _ny_oppskrift_lastet:
         _lagret_kilde = st.session_state.get("_lastet_water_source_profile")
@@ -182,9 +208,12 @@ def render_water_panel(ctx, malt_database=None):
             while ny_id in kilder:
                 ny_id += "_2"
             kilder[ny_id] = _tom_kilde(nytt_navn.strip(), ny_id)
-            lagre_vannkilder(kilder)
+            _lagre_vannkilder(kilder)
             st.session_state["_vann_pending_ny_kilde_id"] = ny_id
-            st.toast(f"Opprettet kilde «{nytt_navn.strip()}» — fyll inn ionverdier under.", icon="💧")
+            melding = f"Opprettet kilde «{nytt_navn.strip()}» — fyll inn ionverdier under."
+            if DEMO_MODE:
+                melding += _DEMO_SUFFIKS
+            st.toast(melding, icon="💧")
             st.rerun()
         aktiv_kilde_full = _tom_kilde("(ny, ikke opprettet ennå)", _NY_KILDE_SENTINEL)
         aktiv_kilde_ioner = tomt_kildevann()
@@ -226,8 +255,8 @@ def render_water_panel(ctx, malt_database=None):
                     "notes": st.session_state["vann_kilde_notater_input"],
                     "is_default": kilder[valgt_kilde_id].get("is_default", False),
                 }
-                lagre_vannkilder(kilder)
-                st.toast("Kildeprofil lagret!", icon="💾")
+                _lagre_vannkilder(kilder)
+                st.toast("Kildeprofil lagret!" + (_DEMO_SUFFIKS if DEMO_MODE else ""), icon="💾")
 
         aktiv_kilde_full = kilder[valgt_kilde_id]
         aktiv_kilde_ioner = {ion: aktiv_kilde_full.get(ion) for ion in IONER}
@@ -315,8 +344,8 @@ def render_water_panel(ctx, malt_database=None):
                     "target_id": valgt_maal_id,
                     "name": aktiv_maal_mal.get("name", valgt_maal_id),
                 }
-                lagre_vannmaal(maalprofiler)
-                st.toast("Målprofil lagret!", icon="💾")
+                _lagre_vannmaal(maalprofiler)
+                st.toast("Målprofil lagret!" + (_DEMO_SUFFIKS if DEMO_MODE else ""), icon="💾")
 
         aktiv_maal = maalprofiler[valgt_maal_id]
 

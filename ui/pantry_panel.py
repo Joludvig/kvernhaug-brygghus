@@ -2,6 +2,20 @@ import streamlit as st
 from config import DEMO_MODE
 from modules import pantry
 from modules.humle_lager import les_lager as _les_gammelt_humlelager
+from ui import demo_state
+
+_DEMO_SUFFIKS = " (demo — ikke permanent)"
+
+
+def _hent_pantry():
+    return demo_state.hent_pantry() if DEMO_MODE else pantry.last_pantry()
+
+
+def _lagre_pantry(data):
+    if DEMO_MODE:
+        demo_state.lagre_pantry(data)
+    else:
+        pantry.lagre_pantry(data)
 
 _STATUS_VISNING = {
     "nok": "✅ Nok",
@@ -42,20 +56,19 @@ def _last_pantry_trygt():
     """Laster pantry og viser en tydelig feilmelding (uten å krasje resten
     av appen) hvis filen er korrupt — se modules.pantry.PantryCorruptError."""
     try:
-        return pantry.last_pantry(), None
+        return _hent_pantry(), None
     except pantry.PantryCorruptError as e:
         return None, str(e)
 
 
 def render_pantry_panel(ctx, malt_database, humle_database, gjaer_database):
-    if DEMO_MODE:
-        return
-
     st.subheader("📦 Lager")
     st.caption(
         "Svarer på ett spørsmål: har jeg nok malt, humle og gjær til å brygge denne oppskriften, "
         "og hva mangler? Priser, butikksammenligning og automatisk bestilling er ikke del av dette."
     )
+    if DEMO_MODE:
+        st.caption("🍺 Demo-modus — dette er eksempeldata. Du kan legge til/endre/slette fritt, men ingenting lagres permanent.")
 
     data, feil = _last_pantry_trygt()
     if feil:
@@ -189,7 +202,7 @@ def _render_slett_bekreftelse(data, malt_db, humle_db, gjaer_db):
     col_ja, col_avbryt = st.columns(2)
     if col_ja.button("Ja, slett", key="pantry_slett_bekreft", type="primary"):
         nytt = pantry.slett_pantry_item(data, kandidat_id)
-        pantry.lagre_pantry(nytt)
+        _lagre_pantry(nytt)
         st.session_state.pop("_pantry_slett_kandidat", None)
         st.rerun()
     if col_avbryt.button("Avbryt", key="pantry_slett_avbryt"):
@@ -223,16 +236,16 @@ def _render_rediger_post(data):
         )
         if col_pluss.button("+ Legg til", key=f"pantry_pluss_{rediger_id}"):
             pantry.oppdater_pantry_item(data, rediger_id, quantity=float(item["quantity"]) + justering)
-            pantry.lagre_pantry(data)
+            _lagre_pantry(data)
             st.rerun()
         if col_minus.button("− Trekk fra", key=f"pantry_minus_{rediger_id}"):
             ny = max(0.0, float(item["quantity"]) - justering)
             pantry.oppdater_pantry_item(data, rediger_id, quantity=ny)
-            pantry.lagre_pantry(data)
+            _lagre_pantry(data)
             st.rerun()
         if col_sett.button("Sett ny mengde", key=f"pantry_sett_{rediger_id}"):
             pantry.oppdater_pantry_item(data, rediger_id, quantity=ny_mengde)
-            pantry.lagre_pantry(data)
+            _lagre_pantry(data)
             st.rerun()
 
         apnet = st.checkbox("Åpnet", value=bool(item.get("opened")), key=f"pantry_apnet_{rediger_id}")
@@ -256,7 +269,7 @@ def _render_rediger_post(data):
             if item.get("is_custom") and nytt_navn is not None and nytt_navn.strip():
                 endringer["name_snapshot"] = nytt_navn.strip()
             pantry.oppdater_pantry_item(data, rediger_id, **endringer)
-            pantry.lagre_pantry(data)
+            _lagre_pantry(data)
             st.session_state.pop("_pantry_rediger_id", None)
             st.rerun()
         if st.button("Lukk", key=f"pantry_lukk_rediger_{rediger_id}"):
@@ -339,7 +352,7 @@ def _render_legg_til(data, malt_db, humle_db, gjaer_db):
                 lot_number=lot_number, storage_location=storage_location, notes=notes,
             )
         data["items"].append(nytt_item)
-        pantry.lagre_pantry(data)
+        _lagre_pantry(data)
         st.rerun()
 
 
@@ -408,7 +421,7 @@ def _render_humlelager_migrering(data, humle_db):
             # lagre_pantry() tar automatisk en tidsstemplet backup av
             # forrige lagerstatus før den overskrives (se
             # modules/pantry.py) -- ingen eget backup-kall trengs her.
-            pantry.lagre_pantry(nytt)
+            _lagre_pantry(nytt)
             st.success("Importert. En backup av forrige lagerstatus ble tatt automatisk (se «Gjenopprett fra backup» under).")
             st.rerun()
 
@@ -485,7 +498,7 @@ def _render_gjenopprett_fra_backup():
             # lagre_pantry() tar automatisk en ny backup av GJELDENDE
             # tilstand (altså den akkurat FØR denne gjenopprettingen) før
             # den overskrives — så en gjenoppretting kan selv angres.
-            pantry.lagre_pantry(gjenopprettet)
+            _lagre_pantry(gjenopprettet)
             st.session_state.pop("pantry_backup_bekreft", None)
             st.success("Lageret er gjenopprettet fra backup.")
             st.rerun()

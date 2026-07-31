@@ -2,6 +2,8 @@
 import json
 import os
 
+from config import DEMO_MODE
+
 _EQUIPMENT_FILE = os.path.join("data", "equipment.json")
 
 DEFAULTS = {
@@ -26,7 +28,11 @@ def last_equipment() -> dict:
 
 
 def lagre_equipment(data: dict) -> None:
-    """Persist equipment profile to disk."""
+    """Persist equipment profile to disk. No-op i DEMO_MODE -- samme
+    mønster som modules/recipe_storage.py, modules/pantry.py og
+    modules/humle_lager.py."""
+    if DEMO_MODE:
+        return
     os.makedirs("data", exist_ok=True)
     with open(_EQUIPMENT_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

@@ -1,10 +1,12 @@
 import streamlit as st
+from config import DEMO_MODE
 from modules import pantry
 from modules.smart_shopping_list import beregn_handleliste, oppsummer_handleliste
 from modules.malt_packaging import (
     MALTFORM_KNUST, MALTFORM_HEL, MALTFORM_BILLIGST, MALTFORM_INGEN_PREFERANSE,
     PRIORITET_BILLIGST, PRIORITET_MINST_OVERKJOP, PRIORITET_BALANSERT,
 )
+from ui import demo_state
 
 _STATUS_VISNING = {
     "kjop": "🔴 Kjøp",
@@ -102,7 +104,7 @@ def render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_d
         return
 
     try:
-        pantry_data = pantry.last_pantry()
+        pantry_data = demo_state.hent_pantry() if DEMO_MODE else pantry.last_pantry()
     except pantry.PantryCorruptError as e:
         st.error(
             "📦 Lagerfilen (data/pantry.json) kunne ikke leses fordi innholdet er ugyldig JSON — "

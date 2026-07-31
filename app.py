@@ -3,6 +3,8 @@ import streamlit as st
 import json
 import os
 
+from config import DEMO_MODE
+
 # Importer den nye sentrale hjernen (Prioritet: Central Engine)
 from modules.recipe_context import bygg_recipe_context
 
@@ -34,12 +36,16 @@ render_header()
 # Helper-funksjon for å laste råvare-JSON med krasjsikring
 def last_json_data(filnavn):
     filsti = os.path.join("data", filnavn)
-    
-    # Sørg for at data-mappen eksisterer
-    os.makedirs("data", exist_ok=True)
-    
-    # Hvis filen ikke finnes, eller er helt tom (0 bytes), opprett en tom database-struktur
+
+    # Hvis filen ikke finnes, eller er helt tom (0 bytes): i DEMO_MODE
+    # returneres bare en tom struktur i minnet -- masterdatabasene skal
+    # ALDRI endres eller opprettes på disk i demo-modus, selv ikke som et
+    # ufarlig "opprett tom fil"-skjelett.
     if not os.path.exists(filsti) or os.path.getsize(filsti) == 0:
+        if DEMO_MODE:
+            return {}
+        # Sørg for at data-mappen eksisterer (kun utenfor DEMO_MODE)
+        os.makedirs("data", exist_ok=True)
         with open(filsti, "w", encoding="utf-8") as f:
             json.dump({}, f, ensure_ascii=False, indent=2)
         return {}
