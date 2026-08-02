@@ -163,10 +163,60 @@ def _pris_per_kg(pris, pakke_gram, kategori):
         return round(pris * 10, 2)
     return pris
 
+_MALT_1KG_GRAM = 1000.0
+
+
+def _maltkandidat_rangeringsnokkel(kandidat):
+    """
+    Rangeringsregel for å velge én representativ rad når flere rå
+    maltprodukter (ulike pakningsstørrelser/format) matcher samme
+    (master_id, butikk). Sortert stigende — laveste nøkkel vinner:
+
+    1. En identifiserbar 1 kg-variant foretrekkes fremfor alt annet —
+       den mest kjente, sammenlignbare referanseenheten for hjemme-
+       bryggere, verken rabattert storkjøp eller en minimums-
+       fragmentpris (jf. "Fra 7,-"-funnet i rotårsaksrapporten).
+    2. Deretter minste kjente pakningsstørrelse. Ukjent størrelse
+       (pakke_gram=None) rangeres sist av de kjente, men håndteres
+       likevel stabilt — den blokkerer aldri et valg.
+    3. Hel foretrekkes fremfor knust når størrelsen er lik. Ingen
+       eksisterende prosjektlogikk bruker knust som standard (se
+       modules/malt_packaging.py sin MALTFORM_INGEN_PREFERANSE).
+    4. Normalisert URL som siste, stabile tie-break — alltid til
+       stede og unik per skrapet rad, så dette trinnet garanterer at
+       det aldri finnes en reell uavgjort situasjon.
+
+    Bruker bevisst ALDRI pris i rangeringen.
+    """
+    pakke_gram = kandidat.get("pakke_gram")
+    er_1kg = 0 if pakke_gram == _MALT_1KG_GRAM else 1
+    storrelse = pakke_gram if pakke_gram is not None else float("inf")
+    knust = 1 if kandidat.get("er_knust") else 0
+    tiebreak = (kandidat.get("url") or kandidat.get("navn") or "").lower()
+    return (er_1kg, storrelse, knust, tiebreak)
+
+
+def _velg_representativ_maltkandidat(kandidater):
+    """Velger den ene raden som skal representere (master_id, butikk) i
+    butikk_match — samme resultat uansett hvilken rekkefølge
+    `kandidater` kom i (se _maltkandidat_rangeringsnokkel)."""
+    return min(kandidater, key=_maltkandidat_rangeringsnokkel)
+
+
 def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unmatched):
     """
     Matcher scrapede malter mot master_malt aliases.
     Oppdaterer BARE pris/URL i master. Umatched → pending_review.
+
+    Flere rå rader (ulike pakningsstørrelser/format hos samme butikk)
+    kan matche samme (master_id, butikk) — se
+    _maltkandidat_rangeringsnokkel(). Alle kandidater samles først i
+    kandidater_per_slot og ÉN representativ rad velges deterministisk
+    per (master_id, butikk) FØR noe skrives — i stedet for at siste
+    behandlede rad ubetinget overskriver forrige (tidligere oppførsel,
+    som gjorde butikk_match avhengig av rå-listens rekkefølge, som
+    igjen er ustabil pga. Pythons hash-randomiserte set()-iterasjon i
+    modules/product_link_scraper.py::finn_produktsider()).
     """
     with open(malt_raw_path, "r", encoding="utf-8") as f:
         malt_raw = json.load(f)
@@ -178,6 +228,7 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
 
     unmatched = []
     matched_count = 0
+    kandidater_per_slot = {}
 
     for raw in malt_raw:
         navn = raw.get("navn", "")
@@ -193,12 +244,10 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
 
         if master_id:
             valider_url_match(master_id, master_malt[master_id].get("display_name", master_id), url)
-            if "butikk_match" not in master_malt[master_id]:
-                master_malt[master_id]["butikk_match"] = {}
-            if butikk_key not in master_malt[master_id]["butikk_match"]:
-                master_malt[master_id]["butikk_match"][butikk_key] = {"pris": None, "url": None}
-            master_malt[master_id]["butikk_match"][butikk_key]["pris"] = pris_kg
-            master_malt[master_id]["butikk_match"][butikk_key]["url"] = url
+            kandidater_per_slot.setdefault((master_id, butikk_key), []).append({
+                "navn": navn, "pris_kg": pris_kg, "url": url,
+                "pakke_gram": pakke_gram, "er_knust": raw.get("er_knust", False),
+            })
             matched_count += 1
         else:
             unmatched.append({
@@ -207,6 +256,18 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
                 "kategori": raw.get("kategori", "malt"),
                 "ebc": raw.get("ebc"), "status": "pending_review",
             })
+
+    for (master_id, butikk_key), kandidater in kandidater_per_slot.items():
+        valgt = _velg_representativ_maltkandidat(kandidater)
+        if len(kandidater) > 1:
+            print(f"[VALGT] {butikk_key}: '{valgt['navn']}' foretrukket blant "
+                  f"{len(kandidater)} pakningskandidater for '{master_id}'")
+        if "butikk_match" not in master_malt[master_id]:
+            master_malt[master_id]["butikk_match"] = {}
+        if butikk_key not in master_malt[master_id]["butikk_match"]:
+            master_malt[master_id]["butikk_match"][butikk_key] = {"pris": None, "url": None}
+        master_malt[master_id]["butikk_match"][butikk_key]["pris"] = valgt["pris_kg"]
+        master_malt[master_id]["butikk_match"][butikk_key]["url"] = valgt["url"]
 
     skriv_master_json_atomisk(master_malt_path, master_malt)
     with open(output_unmatched, "w", encoding="utf-8") as f:
