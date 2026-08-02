@@ -231,5 +231,87 @@ class Test8HentTilgjengeligeMalltyper(unittest.TestCase):
         self.assertEqual(mp.hent_tilgjengelige_malttyper([]), [])
 
 
+class Test9KjopsresultatKontrakt(unittest.TestCase):
+    """Steg B: kjopsresultat = {pris, mottatt_mengde, bestilling} skal
+    alltid beskrive NØYAKTIG samme valgte kombinasjon som
+    anbefalt_kombinasjon — lagt til VED SIDEN AV eksisterende felter, ikke
+    i stedet for dem (se modules/malt_packaging.py::bygg_pakningsforslag)."""
+
+    def setUp(self):
+        self.varianter = [
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 25.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 45.0},
+        ]
+
+    def test_1_alle_tre_fasetter_kommer_fra_samme_valgte_kombinasjon(self):
+        forslag = mp.bygg_pakningsforslag(4232.0, _bm(self.varianter), prioritet=mp.PRIORITET_MINST_OVERKJOP)
+        anbefalt = forslag["anbefalt_kombinasjon"]
+        kjopsresultat = forslag["kjopsresultat"]
+
+        self.assertEqual(kjopsresultat["pris"], anbefalt["total_pris"])
+        self.assertEqual(kjopsresultat["mottatt_mengde"], anbefalt["total_gram"])
+        self.assertEqual(kjopsresultat["bestilling"], anbefalt["antall_pakninger"])
+
+    def test_2_billigst_prioritet_gir_internt_konsistent_kjopsresultat(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 10.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 30.0},
+        ]
+        forslag = mp.bygg_pakningsforslag(350.0, _bm(varianter), prioritet=mp.PRIORITET_BILLIGST)
+        anbefalt = forslag["anbefalt_kombinasjon"]
+        kjopsresultat = forslag["kjopsresultat"]
+
+        self.assertEqual(kjopsresultat["mottatt_mengde"], 1000.0)
+        self.assertEqual(kjopsresultat["pris"], anbefalt["total_pris"])
+        self.assertEqual(kjopsresultat["bestilling"], anbefalt["antall_pakninger"])
+
+    def test_3_minst_overkjop_gir_annet_men_ogsaa_internt_konsistent_resultat(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 10.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 30.0},
+        ]
+        billigst = mp.bygg_pakningsforslag(350.0, _bm(varianter), prioritet=mp.PRIORITET_BILLIGST)
+        minst_overkjop = mp.bygg_pakningsforslag(350.0, _bm(varianter), prioritet=mp.PRIORITET_MINST_OVERKJOP)
+
+        # Ulikt valg (samme scenario som Test5) ...
+        self.assertNotEqual(
+            billigst["kjopsresultat"]["mottatt_mengde"],
+            minst_overkjop["kjopsresultat"]["mottatt_mengde"],
+        )
+        # ... men fortsatt internt konsistent for minst_overkjop sitt eget valg.
+        anbefalt = minst_overkjop["anbefalt_kombinasjon"]
+        kjopsresultat = minst_overkjop["kjopsresultat"]
+        self.assertEqual(kjopsresultat["pris"], anbefalt["total_pris"])
+        self.assertEqual(kjopsresultat["mottatt_mengde"], anbefalt["total_gram"])
+
+    def test_4_pris_stemmer_med_summen_av_pakkene_i_bestilling(self):
+        forslag = mp.bygg_pakningsforslag(4232.0, _bm(self.varianter), prioritet=mp.PRIORITET_MINST_OVERKJOP)
+        kjopsresultat = forslag["kjopsresultat"]
+        pris_per_storrelse = {100: 25.0, 1000: 45.0}
+
+        beregnet_pris = sum(
+            pris_per_storrelse[p["pakningsstorrelse_gram"]] * p["antall"]
+            for p in kjopsresultat["bestilling"]
+        )
+        self.assertAlmostEqual(kjopsresultat["pris"], beregnet_pris, places=2)
+
+    def test_5_mottatt_mengde_stemmer_med_summen_av_storrelse_ganger_antall(self):
+        forslag = mp.bygg_pakningsforslag(4232.0, _bm(self.varianter), prioritet=mp.PRIORITET_MINST_OVERKJOP)
+        kjopsresultat = forslag["kjopsresultat"]
+
+        beregnet_mengde = sum(
+            p["pakningsstorrelse_gram"] * p["antall"] for p in kjopsresultat["bestilling"]
+        )
+        self.assertEqual(kjopsresultat["mottatt_mengde"], beregnet_mengde)
+
+    def test_8_uendret_naar_ingen_varianter_finnes(self):
+        # Fallback-signalet (None) er identisk med før — kjopsresultat
+        # legges kun til INNI et faktisk forslag, ikke som en erstatning
+        # for None-signalet malt_pakke_kg-fallbacken i
+        # smart_shopping_list.py fortsatt er avhengig av.
+        self.assertIsNone(mp.bygg_pakningsforslag(4232.0, {}))
+        self.assertIsNone(mp.bygg_pakningsforslag(4232.0, {"varianter": []}))
+
+
 if __name__ == "__main__":
     unittest.main()

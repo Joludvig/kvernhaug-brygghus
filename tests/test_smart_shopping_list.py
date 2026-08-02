@@ -583,6 +583,15 @@ class TestMaltPakningsforslagWiesn23L(_ShoppingListTestCase):
         self.assertGreater(anbefalt["total_pris"], 0)
         self.assertEqual(rad["estimated_cost"], anbefalt["total_pris"])
 
+    def test_handlelisten_leser_pris_og_mengde_fra_kjopsresultatet_ikke_pa_nytt(self):
+        # Steg B: suggested_purchase_quantity/estimated_cost skal komme fra
+        # SAMME kjopsresultat-objekt malt_packaging.py produserer -- ikke en
+        # uavhengig nyberegning i smart_shopping_list.py.
+        rad = _rad(self._handleliste(), "malt", "munich_ii")
+        kjopsresultat = rad["malt_pakningsforslag"]["kjopsresultat"]
+        self.assertEqual(rad["estimated_cost"], kjopsresultat["pris"])
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"] * 1000.0, kjopsresultat["mottatt_mengde"], places=6)
+
     def test_faktisk_mangel_holdes_adskilt_fra_kjopsmengde_for_alle_tre_malt(self):
         handleliste = self._handleliste()
         for m_id, forventet_mangel in (

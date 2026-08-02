@@ -294,7 +294,10 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
         malt_bm = _butikk_match(ingredient_id, malt_db, butikk_nokkel)
         malt_pakningsforslag = bygg_pakningsforslag(missing_base, malt_bm, maltform=maltform, prioritet=malt_prioritet)
         if malt_pakningsforslag is not None:
-            suggested_purchase_base = malt_pakningsforslag["anbefalt_kombinasjon"]["total_gram"]
+            # Kjøpsresultatet (pris+mottatt_mengde+bestilling) er den
+            # autoritative kilden — begge fasettene under er alltid hentet
+            # fra SAMME valgte kombinasjon, se malt_packaging.py.
+            suggested_purchase_base = malt_pakningsforslag["kjopsresultat"]["mottatt_mengde"]
             pakningsstorrelse_kjent = True
         else:
             pakke_kg, _, _, _ = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)
@@ -314,7 +317,7 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
         purchase_unit = "kg"
         suggested_purchase_quantity = suggested_purchase_base / 1000.0
         if malt_pakningsforslag is not None:
-            estimated_cost = malt_pakningsforslag["anbefalt_kombinasjon"]["total_pris"]
+            estimated_cost = malt_pakningsforslag["kjopsresultat"]["pris"]
             er_estimat_kost = False  # registrerte variantpriser er ikke gjettet
         else:
             _, pris_kg, er_estimat, url = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)

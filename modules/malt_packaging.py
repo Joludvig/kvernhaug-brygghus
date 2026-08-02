@@ -160,6 +160,24 @@ def _fjern_dominerte(kombinasjoner):
     return beholdt
 
 
+def _kjopsresultat_fra_kombinasjon(kombinasjon):
+    """Kjøpsresultat-kontrakten — pris, mottatt_mengde, bestilling — for ÉN
+    valgt pakkekombinasjon. Alle tre fasettene hentes fra NØYAKTIG samme
+    kombinasjon (aldri regnet ut separat), slik at de garantert beskriver
+    samme fysiske kjøp.
+
+    "bestilling" er strukturert domenedata (samme form som
+    antall_pakninger: en liste av {pakningsstorrelse_gram, antall}) — IKKE
+    ferdig formattert tekst. Menneskelesbar formatering ("2 × 1 kg + 3 ×
+    100 g") er UI-ansvar, se ui/smart_shopping_list_panel.py::_fmt_pakninger().
+    """
+    return {
+        "pris": kombinasjon["total_pris"],
+        "mottatt_mengde": kombinasjon["total_gram"],
+        "bestilling": kombinasjon["antall_pakninger"],
+    }
+
+
 def _velg_etter_prioritet(kombinasjoner, prioritet):
     """Returnerer den anbefalte kombinasjonen for en gitt prioritet, eller
     None hvis listen er tom.
@@ -266,6 +284,7 @@ def bygg_pakningsforslag(missing_gram, butikk_match, maltform=MALTFORM_INGEN_PRE
         "maltform_brukt": maltform,
         "prioritet_brukt": prioritet,
         "anbefalt_kombinasjon": anbefalt,
+        "kjopsresultat": _kjopsresultat_fra_kombinasjon(anbefalt),
         "alternative_kombinasjoner": alternativer,
         "advarsel": advarsel,
     }
