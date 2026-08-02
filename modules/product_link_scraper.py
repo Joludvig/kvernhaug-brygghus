@@ -172,6 +172,74 @@ def finn_produktsider(base_url, kategori_path, kategori):
     print(f"[OK] Fant {len(produkt_lenker)} produktlenker for {kategori}")
     return list(produkt_lenker)
 
+BREADCRUMB_DENY_SEGMENTER = [
+    "ølsett", "olsett", "ekstraktsett", "utstyr", "tilbehør", "tilbehor",
+    "gavekort", "bøker", "boker", "rengjøring", "rengjoring",
+]
+
+BREADCRUMB_RAAVARE_KRAV = {
+    "malt": "råvarer/malt",
+    "humle": "råvarer/humle",
+    "gjaer": "råvarer/gjær",
+}
+
+_BREADCRUMB_DATALAYER_RE = re.compile(r"'BreadCrumb'\s*:\s*'([^']*)'")
+
+
+def _hent_breadcrumb_fra_datalayer(raw_html):
+    """Primærsignal: GTM dataLayer.push({...'BreadCrumb': 'A/B/C'...}) på produktsiden.
+
+    Identisk feltnavn/format hos både vestbrygg og olbrygging (verifisert mot
+    rå-HTML), til stede uavhengig av om siden har JSON-LD eller ikke.
+    """
+    match = _BREADCRUMB_DATALAYER_RE.search(raw_html)
+    if not match:
+        return None
+    segmenter = [s.strip() for s in match.group(1).split("/") if s.strip()]
+    return segmenter or None
+
+
+def _hent_breadcrumb_fra_dom(soup):
+    """Fallback når dataLayer mangler: synlig brødsmulesti via `.BreadCrumbLink`.
+
+    Samme CSS-klasse hos begge butikker, selv om ID-strukturen rundt
+    (ASP.NET-repeatere) er forskjellig mellom dem.
+    """
+    lenker = soup.select(".BreadCrumbLink")
+    segmenter = [a.get_text(strip=True) for a in lenker if a.get_text(strip=True)]
+    return segmenter or None
+
+
+def _brodsmule_status(raw_html, soup, kategori):
+    """
+    Avgjør om produktsiden hører hjemme i råvarekategorien `kategori`, basert
+    på butikkens egen kategori-taksonomi i stedet for nøkkelord i produktnavnet.
+
+    Returnerer (er_raavare, kilde):
+    - (True/False, "datalayer"|"dom") når en brødsmulesti ble funnet og kunne avgjøre saken
+    - (None, None) når ingen brødsmule kunne leses — kalleren faller da tilbake
+      til eksisterende nøkkelordlogikk, uendret.
+    """
+    segmenter = _hent_breadcrumb_fra_datalayer(raw_html)
+    kilde = "datalayer"
+    if segmenter is None:
+        segmenter = _hent_breadcrumb_fra_dom(soup)
+        kilde = "dom"
+    if segmenter is None:
+        return None, None
+
+    full_sti = "/".join(s.lower() for s in segmenter)
+
+    if any(deny in full_sti for deny in BREADCRUMB_DENY_SEGMENTER):
+        return False, kilde
+
+    krav = BREADCRUMB_RAAVARE_KRAV.get(kategori)
+    if krav and krav not in full_sti:
+        return False, kilde
+
+    return True, kilde
+
+
 def parse_produktside(url, kategori, butikk_navn):
     if any(bad in url.lower() for bad in URL_BLACKLIST):
         return None
@@ -214,44 +282,54 @@ def parse_produktside(url, kategori, butikk_navn):
 
         l_navn = navn.lower()
 
-        # Globale ord som blokkeres for ALLE kategorier
-        hard_block = [
-            "kolbe", "spade", "rensemiddel", "varmematte", "ølsett",
-            "allgrain", "pizzaovn", "tappetårn", "bryggeapparat",
-            "fatkobling", "co2", "regulator", "ølkit", "ølsett",
-            "brewtools", "kamado", "ooni", "gozney", "pizzaovn",
-            "hydrometer", "termometer", "pumpe", "slange", "kran",
-            "fatflak", "tappehane", "skål", "keramisk", "grill",
-            "wok", "chemsan", "omberg", "topping station"
-        ]
-        if any(x in l_navn for x in hard_block):
-            print(f"[FORKASTET] Utstyr/pakke/annet: {navn}")
+        er_raavare, brodsmule_kilde = _brodsmule_status(res.text, soup, kategori)
+        if er_raavare is False:
+            print(f"[FORKASTET] Brødsmule ({brodsmule_kilde}) er ikke råvare: {navn}")
             return None
+        if brodsmule_kilde is None:
+            print(f"[BRØDSMULE MANGLER] {url} -> faller tilbake til nøkkelordlogikk")
 
-        if kategori == "malt":
-            malt_produsenter = [
-                "weyermann", "viking", "crisp", "castle", "château",
-                "chateau", "fawcett", "bestmalz", "bonsak", "ireks",
-                "muntons", "briess", "bairds", "brewferm"
+        # Nøkkelordlogikken under er siste sikkerhetsnett — brukes kun når
+        # verken dataLayer eller synlig brødsmule kunne avgjøre kategorien.
+        if brodsmule_kilde is None:
+            # Globale ord som blokkeres for ALLE kategorier
+            hard_block = [
+                "kolbe", "spade", "rensemiddel", "varmematte", "ølsett",
+                "allgrain", "pizzaovn", "tappetårn", "bryggeapparat",
+                "fatkobling", "co2", "regulator", "ølkit", "ølsett",
+                "brewtools", "kamado", "ooni", "gozney", "pizzaovn",
+                "hydrometer", "termometer", "pumpe", "slange", "kran",
+                "fatflak", "tappehane", "skål", "keramisk", "grill",
+                "wok", "chemsan", "omberg", "topping station"
             ]
-
-            # Ekskluder liquid malt extract og beer enhancer
-            if any(x in l_navn for x in ["liquid malt", "liquid extract", "beer enhancer", "young's"]):
-                print(f"[FORKASTET] Ekstrakt/hjelpmiddel: {navn}")
+            if any(x in l_navn for x in hard_block):
+                print(f"[FORKASTET] Utstyr/pakke/annet: {navn}")
                 return None
 
-            # Tillat spraymalt, ren malt, eller kjente produsenter
-            har_malt = re.search(r"\bmalt\b|\bspraymalt\b", l_navn)
-            har_ebc = re.search(r"\d+[\.,]?\d*\s*ebc", l_navn)
-            har_produsent = any(p in l_navn for p in malt_produsenter)
+            if kategori == "malt":
+                malt_produsenter = [
+                    "weyermann", "viking", "crisp", "castle", "château",
+                    "chateau", "fawcett", "bestmalz", "bonsak", "ireks",
+                    "muntons", "briess", "bairds", "brewferm"
+                ]
 
-            if not (har_malt or har_ebc or har_produsent):
-                print(f"[FORKASTET] Ikke bryggemalt: {navn}")
-                return None
+                # Ekskluder liquid malt extract og beer enhancer
+                if any(x in l_navn for x in ["liquid malt", "liquid extract", "beer enhancer", "young's"]):
+                    print(f"[FORKASTET] Ekstrakt/hjelpmiddel: {navn}")
+                    return None
 
-            if any(x in l_navn for x in ["pizzamel", "hvetemel", "surdeig", "tomater", "mel"]):
-                print(f"[FORKASTET] Mat/pizza: {navn}")
-                return None
+                # Tillat spraymalt, ren malt, eller kjente produsenter
+                har_malt = re.search(r"\bmalt\b|\bspraymalt\b", l_navn)
+                har_ebc = re.search(r"\d+[\.,]?\d*\s*ebc", l_navn)
+                har_produsent = any(p in l_navn for p in malt_produsenter)
+
+                if not (har_malt or har_ebc or har_produsent):
+                    print(f"[FORKASTET] Ikke bryggemalt: {navn}")
+                    return None
+
+                if any(x in l_navn for x in ["pizzamel", "hvetemel", "surdeig", "tomater", "mel"]):
+                    print(f"[FORKASTET] Mat/pizza: {navn}")
+                    return None
 
         pris = 0.0
 
@@ -318,7 +396,8 @@ def parse_produktside(url, kategori, butikk_navn):
         ebc = float(ebc_match.group(1).replace(",", ".")) if ebc_match else 4.0
 
         # Gjær-spesifikk filtrering: ekskluder gjærnæring, nutrient, ølsett, utstyr
-        if kategori == "gjaer":
+        # (siste sikkerhetsnett — kun når brødsmule ikke kunne avgjøre saken, se over)
+        if kategori == "gjaer" and brodsmule_kilde is None:
             gjaer_block = [
                 "gjaernaring", "gjærnæring", "nutrient", "fermaid", "go-ferm", "yeast nutrient",
                 "ispose", "shipping", "oelsett", "ølsett", "allgrain", "kit", "extract",
