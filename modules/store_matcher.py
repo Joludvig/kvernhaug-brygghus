@@ -203,6 +203,52 @@ def _velg_representativ_maltkandidat(kandidater):
     return min(kandidater, key=_maltkandidat_rangeringsnokkel)
 
 
+def _malttype_for_kandidat(kandidat):
+    return "knust" if kandidat.get("er_knust") else "hel"
+
+
+def _bygg_ol_variantliste(kandidater):
+    """Bygger den fullstendige variantlisten for Ølbrygging — modules.malt_packaging
+    sitt eksisterende butikk_match.<butikk>.varianter-format
+    ({pakningsstorrelse_gram, malttype, pris, url}), se dens moduldokstreng.
+
+    I motsetning til _velg_representativ_maltkandidat (som velger ÉN rad)
+    bevarer denne ALLE reelle pakningsalternativer — f.eks. bevares 1 kg
+    hel, 1 kg knust, 25 kg hel og 25 kg knust som fire atskilte varianter
+    for samme (master_id, butikk) i stedet for at bare én overlever.
+
+    Kandidater uten kjent pakningsstørrelse kan ikke inngå i en
+    kjøpskombinasjon (modules.malt_packaging krever numerisk
+    pakningsstorrelse_gram) og utelates derfor — de påvirker likevel
+    fortsatt det flate representative valget som før.
+
+    "pris" her er raten PER FAKTISK PAKKE (samme tall som rå-radens
+    "pris"-felt), IKKE kr/kg som det flate butikk_match-feltet bruker —
+    modules.malt_packaging summerer pris×antall direkte for å bygge
+    totalpris per kombinasjon.
+
+    Determinisme: kandidatene sorteres på (pakningsstorrelse_gram,
+    malttype, url, pris) FØR duplikater fjernes, så resultatet er
+    identisk uansett hvilken rekkefølge kandidatene kom i, og selve
+    sorteringen blir samtidig den endelige, stabile variant-rekkefølgen.
+    Duplikater (identisk størrelse+type+url) telles kun én gang."""
+    kjente = [k for k in kandidater if k.get("pakke_gram") is not None]
+    unike = {}
+    for k in sorted(
+        kjente,
+        key=lambda k: (k["pakke_gram"], _malttype_for_kandidat(k), k.get("url") or "", k.get("pris_raw") or 0),
+    ):
+        nokkel = (k["pakke_gram"], _malttype_for_kandidat(k), k.get("url") or "")
+        if nokkel not in unike:
+            unike[nokkel] = {
+                "pakningsstorrelse_gram": k["pakke_gram"],
+                "malttype": _malttype_for_kandidat(k),
+                "pris": k.get("pris_raw"),
+                "url": k.get("url") or "",
+            }
+    return list(unike.values())
+
+
 def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unmatched):
     """
     Matcher scrapede malter mot master_malt aliases.
@@ -217,6 +263,14 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
     som gjorde butikk_match avhengig av rå-listens rekkefølge, som
     igjen er ustabil pga. Pythons hash-randomiserte set()-iterasjon i
     modules/product_link_scraper.py::finn_produktsider()).
+
+    For Ølbrygging skrives i tillegg en fullstendig "varianter"-liste
+    (se _bygg_ol_variantliste()) additivt ved siden av de flate
+    pris/url-feltene — ALLE reelle pakningsalternativer (f.eks. 1/5/25 kg,
+    hel/knust) bevares samlet slik at modules.malt_packaging kan bygge
+    kjøpskombinasjoner, i stedet for at bare den ene representative raden
+    overlever. Vestbrygg (løsvekt + 25 kg-sekk) er bevisst IKKE endret i
+    denne runden.
     """
     with open(malt_raw_path, "r", encoding="utf-8") as f:
         malt_raw = json.load(f)
@@ -245,7 +299,7 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
         if master_id:
             valider_url_match(master_id, master_malt[master_id].get("display_name", master_id), url)
             kandidater_per_slot.setdefault((master_id, butikk_key), []).append({
-                "navn": navn, "pris_kg": pris_kg, "url": url,
+                "navn": navn, "pris_kg": pris_kg, "pris_raw": pris_raw, "url": url,
                 "pakke_gram": pakke_gram, "er_knust": raw.get("er_knust", False),
             })
             matched_count += 1
@@ -268,6 +322,16 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
             master_malt[master_id]["butikk_match"][butikk_key] = {"pris": None, "url": None}
         master_malt[master_id]["butikk_match"][butikk_key]["pris"] = valgt["pris_kg"]
         master_malt[master_id]["butikk_match"][butikk_key]["url"] = valgt["url"]
+
+        # Kun Ølbrygging får den fullstendige variantlisten i denne
+        # runden (Steg D) — Vestbryggs løsvekt+sekk-modell er bevisst
+        # ikke rørt, se modules/malt_packaging.py sin moduldokstreng.
+        # Flate pris/url over forblir uendret og fungerer fortsatt som
+        # fallback for enhver butikk uten "varianter".
+        if butikk_key == "olbrygging":
+            varianter = _bygg_ol_variantliste(kandidater)
+            if varianter:
+                master_malt[master_id]["butikk_match"][butikk_key]["varianter"] = varianter
 
     skriv_master_json_atomisk(master_malt_path, master_malt)
     with open(output_unmatched, "w", encoding="utf-8") as f:
