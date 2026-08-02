@@ -309,6 +309,12 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
                 suggested_purchase_base = missing_base
                 pakningsstorrelse_kjent = False
 
+    # Resten regnes ALLTID fra suggested_purchase_base -- for pakket-malt
+    # med registrert variantdata er dette allerede nøyaktig samme tall som
+    # malt_pakningsforslag["kjopsresultat"]["mottatt_mengde"] (satt over),
+    # for humle/gjær den tilsvarende avrundede kjøpsmengden. Pris, eller et
+    # fremtidig fakturert_mengde (avrundet KUN for prisberegning ved
+    # løsvekt), skal ALDRI inngå i dette regnestykket.
     expected_remainder_base = max(0.0, available_base + suggested_purchase_base - required_base)
 
     # 2) Pris + menneskevennlig innkjøpsenhet. estimated_cost/er_estimat_kost

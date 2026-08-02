@@ -624,6 +624,82 @@ class TestMaltPakningsforslagWiesn23L(_ShoppingListTestCase):
         self.assertEqual(p, pantry_original)
 
 
+class TestSteg_CRestberegningFraKjopsresultat(_ShoppingListTestCase):
+    """Steg C: expected_remainder_base for pakket-malt skal alltid være
+    identisk med max(0, available_base + kjopsresultat["mottatt_mengde"]
+    - required_base) -- aldri påvirket av pris eller av HVORDAN
+    mottatt_mengde ble sammensatt (bestilling-strukturen)."""
+
+    def _handleliste_for(self, malt_db, missing_kg, tilgjengelig_kg=0.0):
+        p = pantry.last_pantry()
+        if tilgjengelig_kg:
+            p["items"].append(pantry.opprett_pantry_item("malt", "test_malt", "Test Malt", tilgjengelig_kg, "kg"))
+        recipe = _oppskrift(malts=[{"id": "test_malt", "mengde": missing_kg + tilgjengelig_kg}])
+        return ssl.beregn_handleliste(recipe, p, malt_db=malt_db)
+
+    def test_1_behov_123kg_mottatt_2kg_gir_rest_077kg_pa_tomt_lager(self):
+        malt_db = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"olbrygging": {
+            "varianter": [{"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 40.0}],
+        }}}}
+        handleliste = self._handleliste_for(malt_db, missing_kg=1.23)
+        rad = _rad(handleliste, "malt", "test_malt")
+        kjopsresultat = rad["malt_pakningsforslag"]["kjopsresultat"]
+
+        self.assertEqual(rad["missing_base"], 1230.0)
+        self.assertEqual(kjopsresultat["mottatt_mengde"], 2000.0)
+        self.assertEqual(rad["expected_remainder_base"], 770.0)  # 0 + 2000 - 1230
+
+    def test_2_eksisterende_pantry_bruker_available_pluss_mottatt_minus_required(self):
+        malt_db = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"olbrygging": {
+            "varianter": [{"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 40.0}],
+        }}}}
+        # 300 g på lager, oppskrift trenger 1800 g totalt -> mangel 1500 g
+        # -> pakkeforslag runder opp til 2 x 1000 g = 2000 g mottatt.
+        handleliste = self._handleliste_for(malt_db, missing_kg=1.5, tilgjengelig_kg=0.3)
+        rad = _rad(handleliste, "malt", "test_malt")
+
+        self.assertEqual(rad["available_base"], 300.0)
+        self.assertEqual(rad["missing_base"], 1500.0)
+        self.assertEqual(rad["malt_pakningsforslag"]["kjopsresultat"]["mottatt_mengde"], 2000.0)
+        self.assertEqual(rad["expected_remainder_base"], 500.0)  # 300 + 2000 - 1800
+
+    def test_3_prisendring_pavirker_ikke_restberegningen(self):
+        billig = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"olbrygging": {
+            "varianter": [{"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 10.0}],
+        }}}}
+        dyr = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"olbrygging": {
+            "varianter": [{"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 90.0}],
+        }}}}
+        rad_billig = _rad(self._handleliste_for(billig, missing_kg=1.23), "malt", "test_malt")
+        rad_dyr = _rad(self._handleliste_for(dyr, missing_kg=1.23), "malt", "test_malt")
+
+        self.assertNotEqual(rad_billig["estimated_cost"], rad_dyr["estimated_cost"])
+        self.assertEqual(rad_billig["expected_remainder_base"], rad_dyr["expected_remainder_base"])
+
+    def test_4_ulik_bestillingsstruktur_samme_mottatt_mengde_gir_samme_rest(self):
+        # To helt ulike pakningsoppsett som begge lander på 2000 g totalt
+        # for et behov på 1230 g -- ett via 2x1000g, ett via 1x2000g.
+        to_stk_1kg = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"olbrygging": {
+            "varianter": [{"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 40.0}],
+        }}}}
+        en_stk_2kg = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"olbrygging": {
+            "varianter": [{"pakningsstorrelse_gram": 2000, "malttype": "hel", "pris": 75.0}],
+        }}}}
+
+        rad_a = _rad(self._handleliste_for(to_stk_1kg, missing_kg=1.23), "malt", "test_malt")
+        rad_b = _rad(self._handleliste_for(en_stk_2kg, missing_kg=1.23), "malt", "test_malt")
+
+        self.assertNotEqual(
+            rad_a["malt_pakningsforslag"]["kjopsresultat"]["bestilling"],
+            rad_b["malt_pakningsforslag"]["kjopsresultat"]["bestilling"],
+        )
+        self.assertEqual(
+            rad_a["malt_pakningsforslag"]["kjopsresultat"]["mottatt_mengde"],
+            rad_b["malt_pakningsforslag"]["kjopsresultat"]["mottatt_mengde"],
+        )
+        self.assertEqual(rad_a["expected_remainder_base"], rad_b["expected_remainder_base"])
+
+
 class TestMaltformStyrerKombinasjonsvalg(_ShoppingListTestCase):
     """Krav 6: maltform-innstillingen skal styre hvilken maltype et
     kjøpsforslag hentes fra, og en enkelt kombinasjon skal aldri blande hel
