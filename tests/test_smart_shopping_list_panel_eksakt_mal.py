@@ -22,6 +22,7 @@ import unittest
 
 _EKSAKT_MAL_APP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_eksakt_mal_render_app.py")
 _NORMAL_APP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_normal_pakningsforslag_render_app.py")
+_SEKK_SPERRET_APP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_sekk_sperret_render_app.py")
 
 
 def _kjor(app_path):
@@ -68,6 +69,32 @@ class Test13NormalFormatteringErUendret(unittest.TestCase):
         alle_tekster = " ".join(w.value for w in list(at.markdown) + list(at.caption)).lower()
         self.assertNotIn("eksakt mål", alle_tekster)
         self.assertNotIn("salgsavdelingen", alle_tekster)
+
+
+class Test14SekkSperrerEksaktMalIUI(unittest.TestCase):
+    """Steg F5: når kjøpsresultatet kommer fra en kombinasjon som inneholder
+    en hel 25 kg-sekk, skal _render_eksakt_mal_instruks() IKKE vise noen
+    instruks om å oppgi en eksakt mengde i meldingsfeltet -- det ville
+    antydet at Vestbrygg kan levere en delmengde av en ferdigpakket sekk,
+    noe som ikke er bekreftet mulig (se modules/malt_packaging.py::
+    SEKK_STORRELSE_GRAM). Testverten (_sekk_sperret_render_app.py) sender
+    inn nøyaktig det kjøpsresultatet malt_packaging.py faktisk produserer i
+    dette tilfellet: "bestilling" som en flat liste, uten
+    "eksakt_onsket_mengde_gram"."""
+
+    def test_ingen_eksakt_mal_instruks_vises_naar_sekk_inngar(self):
+        at = _kjor(_SEKK_SPERRET_APP)
+        alle_tekster = " ".join(w.value for w in list(at.markdown) + list(at.caption)).lower()
+        self.assertNotIn("eksakt mål", alle_tekster)
+        self.assertNotIn("salgsavdelingen", alle_tekster)
+        self.assertNotIn("ønsket eksakt mengde", alle_tekster)
+
+    def test_anbefalt_kombinasjon_med_sekk_vises_fortsatt_normalt(self):
+        at = _kjor(_SEKK_SPERRET_APP)
+        alle_tekster = " ".join(w.value for w in at.markdown)
+        self.assertIn("Anbefalt", alle_tekster)
+        self.assertIn("25 kg", alle_tekster)
+        self.assertIn("700 kr", alle_tekster)
 
 
 if __name__ == "__main__":

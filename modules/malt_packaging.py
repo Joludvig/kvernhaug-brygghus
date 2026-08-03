@@ -45,6 +45,18 @@ behovet i stedet for SKU-summen) og bestilling (uttrykker i tillegg den
 eksakte ønskede mengden, se _kjopsresultat_eksakt_mal()) — selve
 kombinasjonsvalget og prisen er identisk med normalmodus.
 
+Steg F5-sperre: dersom den valgte kombinasjonen inneholder minst én hel
+SEKK_STORRELSE_GRAM (25 kg)-pakning, brukes IKKE eksakt-mål-kontrakten,
+uansett eksakt_mal-flagget — Vestbryggs opplyste eksakt-mål-tjeneste er kun
+bekreftet for SKU-er som kvernes/veies ut til bestilling, ikke for uttak av
+en delmengde fra en allerede ferdigpakket, forseglet sekk. Kjøpsresultatet
+faller i dette tilfellet tilbake til det ordinære, ikke-eksakte resultatet
+(hele SKU-summen mottas, fysisk overskudd går til Pantry som normalt) — se
+_kombinasjon_inneholder_sekk() og returfeltet "eksakt_mal_sperret_av_sekk".
+Sperren er eksplisitt gramtall-basert (25 000), IKKE "den største
+registrerte pakningsstørrelsen" — en malt uten registrert 25 kg-variant
+skal fortsatt kunne bruke eksakt-mål fullt ut.
+
 Ren Python, ingen streamlit, ingen mutasjon av input.
 """
 import math
@@ -70,6 +82,15 @@ _MAKS_RIMELIG_DEKNINGSGRAD = 2.0
 # noen titalls kilo av én malt) — holder kombinatorikken liten uten å miste
 # reelle, praktiske forslag.
 _MAKS_ENHETER_PER_STORRELSE = 60
+
+# Eksplisitt gramtall for en Vestbrygg 25 kg-sekk (Steg F5). Brukes KUN til
+# å avgjøre om en valgt kombinasjon inneholder en hel, ferdigpakket sekk —
+# aldri til å velge/utelukke kombinasjoner (se _kombinasjon_inneholder_sekk).
+# Bevisst et eksplisitt gramtall, IKKE "den største registrerte
+# pakningsstørrelsen": en malt som kun har 100 g/1 kg registrert skal
+# fortsatt kunne bruke eksakt-mål-modus fullt ut — 1 kg er da den største
+# størrelsen som finnes, men er IKKE en sekk.
+SEKK_STORRELSE_GRAM = 25_000
 
 
 def hent_tilgjengelige_malttyper(varianter):
@@ -205,6 +226,16 @@ def _kjopsresultat_fra_kombinasjon(kombinasjon):
     }
 
 
+def _kombinasjon_inneholder_sekk(kombinasjon):
+    """True hvis kombinasjonen inneholder minst én pakning på nøyaktig
+    SEKK_STORRELSE_GRAM (Steg F5). Identifiserer sekken EKSPLISITT på
+    gramtall — ALDRI som "den største registrerte pakningsstørrelsen" for
+    formen, siden en malt uten registrert 25 kg-variant ellers ville fått
+    eksakt-mål-modus feilaktig deaktivert bare fordi f.eks. 1 kg tilfeldigvis
+    er største tilgjengelige størrelse."""
+    return any(p["pakningsstorrelse_gram"] == SEKK_STORRELSE_GRAM for p in kombinasjon["antall_pakninger"])
+
+
 def _kjopsresultat_eksakt_mal(kombinasjon, eksakt_behov_gram):
     """Kjøpsresultat-kontrakten for «bestill til eksakt mål»-modus (Steg F3,
     kun Vestbrygg + knust — se bygg_pakningsforslag(..., eksakt_mal=True)).
@@ -296,7 +327,16 @@ def bygg_pakningsforslag(missing_gram, butikk_match, maltform=MALTFORM_INGEN_PRE
     alternativene og advarselen er 100 % UENDRET av dette flagget; kun selve
     kjøpsresultat-beregningen for den allerede valgte kombinasjonen endres.
     Med eksakt_mal=False (default) eller enhver annen maltform er
-    oppførselen nøyaktig som før dette flagget fantes."""
+    oppførselen nøyaktig som før dette flagget fantes.
+
+    Steg F5-unntak: selv når eksakt_mal=True og maltform==MALTFORM_KNUST,
+    brukes IKKE eksakt-mål-kontrakten dersom den valgte kombinasjonen
+    inneholder minst én hel 25 kg-sekk (SEKK_STORRELSE_GRAM) — se
+    _kombinasjon_inneholder_sekk(). Returnert dict sitt
+    "eksakt_mal_sperret_av_sekk"-felt er True nettopp i dette tilfellet,
+    ellers alltid False. Hvilken kombinasjon som velges er UENDRET av dette
+    unntaket — kun kjøpsresultat-kontrakten for den faller tilbake til det
+    ordinære, ikke-eksakte resultatet."""
     varianter = (butikk_match or {}).get("varianter") or []
     if not varianter or not missing_gram or missing_gram <= 0:
         return None
@@ -346,8 +386,20 @@ def bygg_pakningsforslag(missing_gram, butikk_match, maltform=MALTFORM_INGEN_PRE
             "\"billigste tilgjengelige\"."
         )
 
+    # Steg F5: en hel, ferdigpakket 25 kg-sekk skal ALDRI inngå i et
+    # "eksakt mål"-løfte -- Vestbryggs opplyste tjeneste (Steg E) gjelder
+    # knust malt som kvernes/veies ut TIL bestilling, ikke uttak av en
+    # delmengde fra en allerede forseglet sekk. Sperren rammer KUN selve
+    # kjøpsresultat-kontrakten for den allerede valgte kombinasjonen -- den
+    # endrer aldri HVILKEN kombinasjon som velges (se _velg_etter_prioritet,
+    # uendret av dette steget).
+    eksakt_mal_sperret_av_sekk = False
     if eksakt_mal and maltform == MALTFORM_KNUST:
-        kjopsresultat = _kjopsresultat_eksakt_mal(anbefalt, missing_gram)
+        if _kombinasjon_inneholder_sekk(anbefalt):
+            eksakt_mal_sperret_av_sekk = True
+            kjopsresultat = _kjopsresultat_fra_kombinasjon(anbefalt)
+        else:
+            kjopsresultat = _kjopsresultat_eksakt_mal(anbefalt, missing_gram)
     else:
         kjopsresultat = _kjopsresultat_fra_kombinasjon(anbefalt)
 
@@ -359,4 +411,5 @@ def bygg_pakningsforslag(missing_gram, butikk_match, maltform=MALTFORM_INGEN_PRE
         "kjopsresultat": kjopsresultat,
         "alternative_kombinasjoner": alternativer,
         "advarsel": advarsel,
+        "eksakt_mal_sperret_av_sekk": eksakt_mal_sperret_av_sekk,
     }

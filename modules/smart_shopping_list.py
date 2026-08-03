@@ -312,6 +312,16 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
             # fra SAMME valgte kombinasjon, se malt_packaging.py.
             suggested_purchase_base = malt_pakningsforslag["kjopsresultat"]["mottatt_mengde"]
             pakningsstorrelse_kjent = True
+            if malt_pakningsforslag.get("eksakt_mal_sperret_av_sekk"):
+                # Steg F5: brukeren ba om eksakt mål, men den anbefalte
+                # kombinasjonen inneholder en hel 25 kg-sekk -- kjøpsresultatet
+                # er da (se malt_packaging.py) allerede det ordinære, ikke det
+                # eksakte, men brukeren bør få vite HVORFOR avkrysningen ikke
+                # slo ut for akkurat dette forslaget.
+                advisory_kjop = (
+                    "Eksakt mål brukes ikke når kjøpsforslaget inneholder en 25 kg-sekk "
+                    "— hele sekken mottas som vanlig, og forventet rest beregnes normalt."
+                )
         elif malt_bm.get("varianter"):
             # Steg F3-sluttkontroll: registrert variantdata FINNES, men
             # bygg_pakningsforslag() kunne likevel ikke bygge noen
@@ -468,6 +478,10 @@ def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_d
     kjøpsresultatets mottatt_mengde (og dermed expected_remainder_base) til
     det eksakte behovet i stedet for SKU-summen; prisen er uendret. Se
     modules/malt_packaging.py::bygg_pakningsforslag(eksakt_mal=...).
+    Steg F5: dersom den anbefalte kombinasjonen inneholder en hel 25 kg-sekk,
+    faller kjøpsresultatet uansett tilbake til det ordinære (ikke-eksakte),
+    med en forklarende `advisory` — se
+    modules/malt_packaging.py::SEKK_STORRELSE_GRAM.
 
     Muterer ALDRI `recipe` eller `pantry_data` — kaller kun
     modules.pantry.beregn_mangler(), som selv er en ren funksjon."""
