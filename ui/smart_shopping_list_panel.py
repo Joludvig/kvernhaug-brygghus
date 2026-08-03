@@ -56,6 +56,34 @@ def _render_malt_pakningsforslag(forslag):
         )
     if forslag.get("advarsel"):
         st.caption(f"　　⚠️ {forslag['advarsel']}")
+    _render_eksakt_mal_instruks(forslag.get("kjopsresultat"))
+
+
+def _render_eksakt_mal_instruks(kjopsresultat):
+    """Vises KUN når kjøpsresultatet faktisk kommer fra eksakt-mål-modus
+    (Steg F3) — gjenkjennes på at "bestilling" er et strukturert objekt
+    med "eksakt_onsket_mengde_gram", ikke den vanlige, flate SKU-listen
+    (se modules/malt_packaging.py::_kjopsresultat_eksakt_mal()). For alle
+    andre kjøpsresultater (normalmodus, Ølbrygging, hel malt osv.) er
+    "bestilling" fortsatt en vanlig liste, og denne funksjonen gjør ingenting."""
+    if not kjopsresultat:
+        return
+    bestilling = kjopsresultat.get("bestilling")
+    if not isinstance(bestilling, dict):
+        return
+    eksakt_gram = bestilling.get("eksakt_onsket_mengde_gram")
+    if eksakt_gram is None:
+        return
+    pakninger = bestilling.get("pakninger") or []
+    eksakt_kg = eksakt_gram / 1000.0
+    st.markdown(
+        f"　　🎯 **Eksakt mål (Vestbrygg, knust):** Legg {_fmt_pakninger(pakninger)} i handlekurven "
+        f"og oppgi i meldingsfeltet: «Ønsket eksakt mengde: {eksakt_kg:g} kg»."
+    )
+    st.caption(
+        "　　Vestbrygg opplyser at knust malt kan bestilles til eksakte mål via melding til "
+        "salgsavdelingen — dette er ikke en garantert, automatisert tjeneste."
+    )
 
 
 def _render_liten_mangel_alternativ(alt):
@@ -126,9 +154,29 @@ def render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_d
             key="smart_handleliste_malt_prioritet",
         )
 
+        eksakt_mal_knust_valg = False
+        if maltform_valg == MALTFORM_KNUST:
+            eksakt_mal_knust_valg = st.checkbox(
+                "Vestbrygg: bestill knust malt til eksakt mål",
+                key="smart_handleliste_eksakt_mal_knust",
+                help=(
+                    "Kun for Vestbrygg og knust malt. Du betaler fortsatt for avrundede "
+                    "1 kg-/100 g-SKU-er, men oppgir ønsket eksakt mengde i meldingsfeltet til "
+                    "salgsavdelingen ved bestilling. Forventet rest i Pantry regnes da ut fra "
+                    "det eksakte behovet i stedet for SKU-summen."
+                ),
+            )
+            if eksakt_mal_knust_valg:
+                st.caption(
+                    "Vestbrygg opplyser at knust malt kan bestilles til eksakte mål via "
+                    "melding til salgsavdelingen — dette er ikke en garantert, automatisert "
+                    "tjeneste, og gjelder kun når du faktisk handler hos Vestbrygg."
+                )
+
     handleliste = beregn_handleliste(
         recipe, pantry_data, malt_database, humle_database, gjaer_database, butikk=butikk,
         maltform=maltform_valg, malt_prioritet=malt_prioritet_valg,
+        eksakt_mal_knust=eksakt_mal_knust_valg,
     )
     sammendrag = oppsummer_handleliste(handleliste)
 
@@ -159,7 +207,12 @@ def render_smart_shopping_list_panel(ctx, malt_database, humle_database, gjaer_d
             cols[4].write(_fmt_kjop(rad))
             cols[5].write(_fmt(rad["expected_remainder_base"], rad["base_unit"]))
             cols[6].write(_status_tekst(rad))
-            if rad.get("advisory") and vis_alt:
+            # Advisory vises alltid for "kjop"-rader (f.eks. Steg F3 sitt
+            # "ingen kjøpbar variant akkurat nå" -- en kritisk pris-/
+            # tilgjengelighetsadvarsel skal aldri gjemmes bak "vis alt", som
+            # kun er ment for å avsløre den mindre kritiske "knapp margin"-
+            # advisoryen på "nok"-rader).
+            if rad.get("advisory") and (vis_alt or rad["status"] == "kjop"):
                 st.caption(f"　　💡 {rad['advisory']}")
             if ingredient_type == "malt" and rad["status"] == "kjop":
                 _render_malt_pakningsforslag(rad.get("malt_pakningsforslag"))

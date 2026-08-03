@@ -385,5 +385,130 @@ class Test10LagerstatusFiltrering(unittest.TestCase):
         self.assertEqual(pakninger, {1000: 4, 100: 3})
 
 
+class Test11EksaktMalModus(unittest.TestCase):
+    """Steg F3: bygg_pakningsforslag(..., eksakt_mal=True), kun sammen med
+    maltform=MALTFORM_KNUST. Brukerens eget eksempel: behov 1230 g, 1000 g-
+    og 100 g-knust-SKU-er tilgjengelig -> kjøp 1×1000 g + 3×100 g (1300 g),
+    pris 69 kr, men mottatt_mengde skal være det EKSAKTE behovet (1230 g),
+    ikke SKU-summen (1300 g)."""
+
+    def setUp(self):
+        self.knust_varianter = [
+            {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0},
+        ]
+
+    def test_1_mottatt_mengde_blir_eksakt_behov_ikke_sku_summen(self):
+        forslag = mp.bygg_pakningsforslag(
+            1230.0, _bm(self.knust_varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=True,
+        )
+        self.assertIsNotNone(forslag)
+        kjopsresultat = forslag["kjopsresultat"]
+        self.assertEqual(forslag["anbefalt_kombinasjon"]["total_gram"], 1300.0)
+        self.assertEqual(kjopsresultat["mottatt_mengde"], 1230.0)
+        self.assertNotEqual(kjopsresultat["mottatt_mengde"], forslag["anbefalt_kombinasjon"]["total_gram"])
+
+    def test_2_uten_eksakt_mal_er_mottatt_mengde_fortsatt_sku_summen(self):
+        forslag = mp.bygg_pakningsforslag(
+            1230.0, _bm(self.knust_varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=False,
+        )
+        self.assertEqual(forslag["kjopsresultat"]["mottatt_mengde"], 1300.0)
+
+    def test_3_pris_er_identisk_med_og_uten_eksakt_mal_for_samme_kombinasjon(self):
+        med = mp.bygg_pakningsforslag(
+            1230.0, _bm(self.knust_varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=True,
+        )
+        uten = mp.bygg_pakningsforslag(
+            1230.0, _bm(self.knust_varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=False,
+        )
+        self.assertEqual(med["kjopsresultat"]["pris"], uten["kjopsresultat"]["pris"])
+        self.assertEqual(med["anbefalt_kombinasjon"], uten["anbefalt_kombinasjon"])
+        self.assertNotEqual(med["kjopsresultat"]["mottatt_mengde"], uten["kjopsresultat"]["mottatt_mengde"])
+
+    def test_4_bestilling_beholder_strukturert_sku_liste(self):
+        forslag = mp.bygg_pakningsforslag(
+            1230.0, _bm(self.knust_varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=True,
+        )
+        pakninger = forslag["kjopsresultat"]["bestilling"]["pakninger"]
+        self.assertEqual(
+            {(p["pakningsstorrelse_gram"], p["antall"]) for p in pakninger},
+            {(1000.0, 1), (100.0, 3)},
+        )
+
+    def test_5_bestilling_uttrykker_eksakt_onsket_mengde_separat(self):
+        forslag = mp.bygg_pakningsforslag(
+            1230.0, _bm(self.knust_varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=True,
+        )
+        bestilling = forslag["kjopsresultat"]["bestilling"]
+        self.assertEqual(bestilling["eksakt_onsket_mengde_gram"], 1230.0)
+        self.assertNotIn("fakturert_mengde", forslag["kjopsresultat"])
+
+    def test_6_hel_malt_far_ikke_eksakt_mal_modus(self):
+        hel_varianter = [
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 8.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 45.0},
+        ]
+        forslag = mp.bygg_pakningsforslag(
+            1230.0, _bm(hel_varianter), maltform=mp.MALTFORM_HEL,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=True,
+        )
+        self.assertIsNotNone(forslag)
+        # eksakt_mal=True er UTEN virkning når maltform ikke er knust --
+        # bestilling er fortsatt en vanlig, flat liste:
+        self.assertIsInstance(forslag["kjopsresultat"]["bestilling"], list)
+        self.assertEqual(forslag["kjopsresultat"]["mottatt_mengde"], forslag["anbefalt_kombinasjon"]["total_gram"])
+
+    def test_11_25kg_dekningsgradvern_gjelder_ogsaa_i_eksakt_mal_modus(self):
+        varianter_med_sekk = self.knust_varianter + [
+            {"pakningsstorrelse_gram": 25000, "malttype": "knust", "pris": 150.0},
+        ]
+        forslag = mp.bygg_pakningsforslag(
+            1230.0, _bm(varianter_med_sekk), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=True,
+        )
+        # Samme eksisterende dekningsgrad-/overkjøpsvern som ellers skal
+        # fortsatt hindre at 25 kg-sekken anbefales for et lite behov --
+        # ingen ny 25 kg-spesialregel er innført for eksakt-mål-modus.
+        self.assertEqual(forslag["anbefalt_kombinasjon"]["total_gram"], 1300.0)
+        self.assertEqual(forslag["kjopsresultat"]["mottatt_mengde"], 1230.0)
+
+    def test_9_utsolgt_variant_brukes_ikke_i_eksakt_mal_modus(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 1.0, "lagerstatus": "utsolgt"},
+            {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0, "lagerstatus": "pa_lager"},
+        ]
+        forslag = mp.bygg_pakningsforslag(
+            300.0, _bm(varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_BILLIGST, eksakt_mal=True,
+        )
+        self.assertIsNotNone(forslag)
+        storrelser = {p["pakningsstorrelse_gram"] for p in forslag["anbefalt_kombinasjon"]["antall_pakninger"]}
+        self.assertEqual(storrelser, {100.0})
+
+    def test_10_ukjent_lagerstatus_fungerer_som_pa_lager_i_eksakt_mal_modus(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0, "lagerstatus": "ukjent"},
+            {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0, "lagerstatus": "ukjent"},
+        ]
+        forslag = mp.bygg_pakningsforslag(
+            1230.0, _bm(varianter), maltform=mp.MALTFORM_KNUST,
+            prioritet=mp.PRIORITET_MINST_OVERKJOP, eksakt_mal=True,
+        )
+        self.assertIsNotNone(forslag)
+        self.assertEqual(forslag["kjopsresultat"]["mottatt_mengde"], 1230.0)
+
+    def test_manglende_varianter_gir_none_eksakt_mal_ogsaa(self):
+        self.assertIsNone(mp.bygg_pakningsforslag(
+            1230.0, _bm([]), maltform=mp.MALTFORM_KNUST, eksakt_mal=True))
+        self.assertIsNone(mp.bygg_pakningsforslag(
+            1230.0, {}, maltform=mp.MALTFORM_KNUST, eksakt_mal=True))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -36,6 +36,15 @@ knust malt. Kombinasjoner bygges separat per malttype; når flere typer
 finnes å velge mellom, avgjør maltform-innstillingen (se MALTFORM_*) hvilke
 som vurderes for selve ANBEFALINGEN — resten vises som alternativer.
 
+Valgfritt flagg (lagt til i Steg F3): eksakt_mal=True til
+bygg_pakningsforslag(). Gjelder KUN sammen med maltform=MALTFORM_KNUST
+(Vestbrygg opplyser at knust malt kan bestilles til eksakte mål via
+melding til salgsavdelingen — se Steg E-rapporten; ikke bekreftet for hel
+malt). Endrer BARE kjøpsresultatets mottatt_mengde (settes til det eksakte
+behovet i stedet for SKU-summen) og bestilling (uttrykker i tillegg den
+eksakte ønskede mengden, se _kjopsresultat_eksakt_mal()) — selve
+kombinasjonsvalget og prisen er identisk med normalmodus.
+
 Ren Python, ingen streamlit, ingen mutasjon av input.
 """
 import math
@@ -196,6 +205,36 @@ def _kjopsresultat_fra_kombinasjon(kombinasjon):
     }
 
 
+def _kjopsresultat_eksakt_mal(kombinasjon, eksakt_behov_gram):
+    """Kjøpsresultat-kontrakten for «bestill til eksakt mål»-modus (Steg F3,
+    kun Vestbrygg + knust — se bygg_pakningsforslag(..., eksakt_mal=True)).
+
+    Samme tre topplinjefelt som normalt — pris, mottatt_mengde, bestilling —
+    ALDRI et nytt fakturert_mengde-felt på toppnivå:
+
+    - "pris" er FORTSATT summen av de faktisk valgte SKU-ene (samme
+      kombinasjon som ellers) — det er hva kunden faktisk betaler for.
+    - "mottatt_mengde" settes til det EKSAKTE behovet, ikke SKU-summen —
+      Vestbrygg opplyser (produktsidetekst, se Steg E-rapporten) at knust
+      malt kan bestilles til eksakte mål via melding til salgsavdelingen.
+      Dette er IKKE en systemgarantert leveranse, kun en opplyst mulighet —
+      se ui/smart_shopping_list_panel.py for hvordan dette formidles videre.
+    - "bestilling" uttrykker her BEGGE deler kunden trenger for å faktisk
+      gjennomføre bestillingen: den strukturerte SKU-listen som skal i
+      handlekurven ("pakninger", samme form som før) OG den eksakte
+      mengden som skal oppgis i meldingsfeltet ("eksakt_onsket_mengde_gram").
+      Fortsatt strukturert domenedata, ikke ferdig tekst.
+    """
+    return {
+        "pris": kombinasjon["total_pris"],
+        "mottatt_mengde": eksakt_behov_gram,
+        "bestilling": {
+            "pakninger": kombinasjon["antall_pakninger"],
+            "eksakt_onsket_mengde_gram": eksakt_behov_gram,
+        },
+    }
+
+
 def _velg_etter_prioritet(kombinasjoner, prioritet):
     """Returnerer den anbefalte kombinasjonen for en gitt prioritet, eller
     None hvis listen er tom.
@@ -239,7 +278,7 @@ def _velg_etter_prioritet(kombinasjoner, prioritet):
 
 
 def bygg_pakningsforslag(missing_gram, butikk_match, maltform=MALTFORM_INGEN_PREFERANSE,
-                          prioritet=PRIORITET_BALANSERT):
+                          prioritet=PRIORITET_BALANSERT, eksakt_mal=False):
     """Hovedinngang: bygger alle kandidat-kjøpskombinasjoner for én malt,
     gruppert per maltform (hel/knust), og peker ut én anbefalt kombinasjon
     per gitt prioritet.
@@ -247,7 +286,17 @@ def bygg_pakningsforslag(missing_gram, butikk_match, maltform=MALTFORM_INGEN_PRE
     Returnerer None hvis ingen "varianter" er registrert i butikk_match
     (kalleren faller da tilbake til den eldre pakke_kg-modellen i
     modules/smart_shopping_list.py) eller hvis det ikke finnes noe reelt
-    mangelbeløp å dekke."""
+    mangelbeløp å dekke.
+
+    eksakt_mal (Steg F3, standard False): når True OG maltform==MALTFORM_KNUST
+    (Vestbryggs opplyste eksakt-mål-tjeneste gjelder kun knust malt, se
+    Steg E-rapporten), settes kjøpsresultatets mottatt_mengde til det
+    EKSAKTE behovet (missing_gram) i stedet for den valgte SKU-kombinasjonens
+    totalsum — se _kjopsresultat_eksakt_mal(). Prisen, kombinasjonsvalget,
+    alternativene og advarselen er 100 % UENDRET av dette flagget; kun selve
+    kjøpsresultat-beregningen for den allerede valgte kombinasjonen endres.
+    Med eksakt_mal=False (default) eller enhver annen maltform er
+    oppførselen nøyaktig som før dette flagget fantes."""
     varianter = (butikk_match or {}).get("varianter") or []
     if not varianter or not missing_gram or missing_gram <= 0:
         return None
@@ -297,12 +346,17 @@ def bygg_pakningsforslag(missing_gram, butikk_match, maltform=MALTFORM_INGEN_PRE
             "\"billigste tilgjengelige\"."
         )
 
+    if eksakt_mal and maltform == MALTFORM_KNUST:
+        kjopsresultat = _kjopsresultat_eksakt_mal(anbefalt, missing_gram)
+    else:
+        kjopsresultat = _kjopsresultat_fra_kombinasjon(anbefalt)
+
     return {
         "maltformer_tilgjengelig": tilgjengelige_former,
         "maltform_brukt": maltform,
         "prioritet_brukt": prioritet,
         "anbefalt_kombinasjon": anbefalt,
-        "kjopsresultat": _kjopsresultat_fra_kombinasjon(anbefalt),
+        "kjopsresultat": kjopsresultat,
         "alternative_kombinasjoner": alternativer,
         "advarsel": advarsel,
     }

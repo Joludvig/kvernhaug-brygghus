@@ -67,7 +67,7 @@ import math
 
 from modules.calculations import beregn_total_ibu
 from modules.pantry import beregn_mangler
-from modules.malt_packaging import bygg_pakningsforslag, MALTFORM_INGEN_PREFERANSE, PRIORITET_BALANSERT
+from modules.malt_packaging import bygg_pakningsforslag, MALTFORM_INGEN_PREFERANSE, MALTFORM_KNUST, PRIORITET_BALANSERT
 
 _MALT_FALLBACK_KR_KG = 35.0
 _HUMLE_FALLBACK_PAKKE_GRAM = 100.0
@@ -220,6 +220,7 @@ def _tom_rad_ukjent_match(mangel_rad):
         "estimated_cost": None,
         "cost_is_estimate": None,
         "malt_pakningsforslag": None,
+        "malt_ingen_relevant_variant": False,
         "liten_mangel_alternativ": None,
     }
 
@@ -257,12 +258,14 @@ def _rad_naar_ikke_noe_mangler(mangel_rad, db):
         "estimated_cost": 0.0,
         "cost_is_estimate": False,
         "malt_pakningsforslag": None,
+        "malt_ingen_relevant_variant": False,
         "liten_mangel_alternativ": None,
     }
 
 
 def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel,
-                          recipe=None, maltform=MALTFORM_INGEN_PREFERANSE, malt_prioritet=PRIORITET_BALANSERT):
+                          recipe=None, maltform=MALTFORM_INGEN_PREFERANSE, malt_prioritet=PRIORITET_BALANSERT,
+                          eksakt_mal_knust=False):
     ingredient_type = mangel_rad["ingredient_type"]
     ingredient_id = mangel_rad["ingredient_id"]
     required_base = mangel_rad["required_base"]
@@ -279,6 +282,8 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
     pakke_gram = None
     pakke_kg = None
     malt_pakningsforslag = None
+    malt_ingen_relevant_variant = False
+    advisory_kjop = None
     if ingredient_type == "gjaer":
         suggested_purchase_base = math.ceil(missing_base)
         pakningsstorrelse_kjent = True
@@ -292,13 +297,44 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
             pakningsstorrelse_kjent = False
     else:  # malt
         malt_bm = _butikk_match(ingredient_id, malt_db, butikk_nokkel)
-        malt_pakningsforslag = bygg_pakningsforslag(missing_base, malt_bm, maltform=maltform, prioritet=malt_prioritet)
+        # Steg F3: «bestill til eksakt mål» gjelder KUN Vestbrygg + knust —
+        # eksplisitt brukervalg (se ui/smart_shopping_list_panel.py), aldri
+        # automatisk for hel malt, Ølbrygging eller andre butikker. Selve
+        # gaten står her (ikke bare i UI-et) som et sikkerhetsnett — flagget
+        # sendes videre til bygg_pakningsforslag(), som i tillegg selv
+        # krever maltform==MALTFORM_KNUST før det har noen effekt.
+        bruk_eksakt_mal = eksakt_mal_knust and butikk_nokkel == "vestbrygg" and maltform == MALTFORM_KNUST
+        malt_pakningsforslag = bygg_pakningsforslag(
+            missing_base, malt_bm, maltform=maltform, prioritet=malt_prioritet, eksakt_mal=bruk_eksakt_mal)
         if malt_pakningsforslag is not None:
             # Kjøpsresultatet (pris+mottatt_mengde+bestilling) er den
             # autoritative kilden — begge fasettene under er alltid hentet
             # fra SAMME valgte kombinasjon, se malt_packaging.py.
             suggested_purchase_base = malt_pakningsforslag["kjopsresultat"]["mottatt_mengde"]
             pakningsstorrelse_kjent = True
+        elif malt_bm.get("varianter"):
+            # Steg F3-sluttkontroll: registrert variantdata FINNES, men
+            # bygg_pakningsforslag() kunne likevel ikke bygge noen
+            # kombinasjon for ønsket maltform (enten fordi ingen variant av
+            # den formen noensinne er registrert, eller — det tilfellet
+            # denne sjekken faktisk finnes for — fordi ALLE relevante
+            # varianter er eksplisitt "utsolgt", se
+            # modules/malt_packaging.py::_varianter_for_form()).
+            #
+            # Dette skal ALDRI forveksles med "ingen variantdata i det hele
+            # tatt" (den eldre, fortsatt gyldige pakke_kg-/eksakt-mengde-
+            # fallbacken under) — her VET vi presist at ingen kjøpbar
+            # kombinasjon finnes akkurat nå, og skal derfor ikke late som et
+            # kjøp kan gjennomføres via det flate butikk_match-prisfeltet
+            # (som uansett ikke skiller på maltform eller lagerstatus).
+            suggested_purchase_base = missing_base
+            pakningsstorrelse_kjent = False
+            malt_ingen_relevant_variant = True
+            advisory_kjop = (
+                "Ingen kjøpbar variant registrert for valgt maltform akkurat nå "
+                "(utsolgt, eller ingen registrert variant av denne typen). "
+                "Kostnadsestimatet under er derfor ikke tilgjengelig."
+            )
         else:
             pakke_kg, _, _, _ = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)
             if pakke_kg:
@@ -325,6 +361,15 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
         if malt_pakningsforslag is not None:
             estimated_cost = malt_pakningsforslag["kjopsresultat"]["pris"]
             er_estimat_kost = False  # registrerte variantpriser er ikke gjettet
+        elif malt_ingen_relevant_variant:
+            # Ingen pålitelig pris finnes -- det flate butikk_match-prisfeltet
+            # kan tilhøre en annen maltform eller en utsolgt variant, og skal
+            # ALDRI presenteres som et konkret kostnadstall her (se
+            # begrunnelse over). None (ikke et gjettet tall) + cost_is_estimate
+            # =True er det samme signalet UI/oppsummer_handleliste() allerede
+            # bruker for "usikkert, kan ikke beregnes" (jf. ukjent_match-raden).
+            estimated_cost = None
+            er_estimat_kost = True
         else:
             _, pris_kg, er_estimat, url = _malt_pakke_kg_pris_og_url(ingredient_id, malt_db, butikk_nokkel)
             estimated_cost = round(suggested_purchase_quantity * pris_kg, 1)
@@ -369,18 +414,20 @@ def _rad_naar_kjop_trengs(mangel_rad, malt_db, humle_db, gjaer_db, butikk_nokkel
         "expected_remainder_base": expected_remainder_base,
         "status": "kjop",
         "pantry_status": "mangler",
-        "advisory": None,
+        "advisory": advisory_kjop,
         "supplier_options": _supplier_options(ingredient_type, ingredient_id, db),
         "estimated_cost": estimated_cost,
         "cost_is_estimate": er_estimat_kost,
         "malt_pakningsforslag": malt_pakningsforslag,
+        "malt_ingen_relevant_variant": malt_ingen_relevant_variant,
         "liten_mangel_alternativ": liten_mangel_alternativ,
     }
 
 
 def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_db=None,
                         butikk="Ølbrygging.no", marginer=None,
-                        maltform=MALTFORM_INGEN_PREFERANSE, malt_prioritet=PRIORITET_BALANSERT):
+                        maltform=MALTFORM_INGEN_PREFERANSE, malt_prioritet=PRIORITET_BALANSERT,
+                        eksakt_mal_knust=False):
     """Bygger Smart Handleliste V1 for en oppskrift, gitt Pantry sin
     beregnede beholdning. Returnerer én rad per ingrediens — samme
     ingredienser som modules.pantry.beregn_mangler() ville returnert,
@@ -413,6 +460,15 @@ def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_d
     "varianter" (se modules/malt_packaging.py) — uten registrerte varianter
     er de uten virkning (samme eldre pakke_kg-oppførsel som før).
 
+    `eksakt_mal_knust` (Steg F3, standard False): eksplisitt brukervalg
+    (se ui/smart_shopping_list_panel.py) for Vestbryggs opplyste «bestill
+    til eksakt mål»-tjeneste for knust malt. Har KUN effekt når butikk er
+    Vestbrygg OG maltform==MALTFORM_KNUST samtidig — automatisk aldri for
+    hel malt, Ølbrygging, humle eller gjær. Når aktiv settes
+    kjøpsresultatets mottatt_mengde (og dermed expected_remainder_base) til
+    det eksakte behovet i stedet for SKU-summen; prisen er uendret. Se
+    modules/malt_packaging.py::bygg_pakningsforslag(eksakt_mal=...).
+
     Muterer ALDRI `recipe` eller `pantry_data` — kaller kun
     modules.pantry.beregn_mangler(), som selv er en ren funksjon."""
     butikk_nokkel = _butikk_nokkel(butikk)
@@ -430,7 +486,8 @@ def beregn_handleliste(recipe, pantry_data, malt_db=None, humle_db=None, gjaer_d
         else:
             handleliste.append(_rad_naar_kjop_trengs(
                 rad, malt_db, humle_db, gjaer_db, butikk_nokkel,
-                recipe=recipe, maltform=maltform, malt_prioritet=malt_prioritet))
+                recipe=recipe, maltform=maltform, malt_prioritet=malt_prioritet,
+                eksakt_mal_knust=eksakt_mal_knust))
 
     return handleliste
 

@@ -788,5 +788,231 @@ class TestTettnangLitenManglAlternativ(_ShoppingListTestCase):
         self.assertEqual(recipe, recipe_original, "beregn_handleliste skal ALDRI endre den faktiske oppskriften")
 
 
+_MALT_DB_VESTBRYGG_KNUST = {
+    "test_malt": {"display_name": "Test Malt", "butikk_match": {"vestbrygg": {"varianter": [
+        {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0},
+        {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0},
+    ]}}},
+}
+
+
+class TestStegF3EksaktMalKnustVestbrygg(_ShoppingListTestCase):
+    """Steg F3: eksakt_mal_knust=True i beregn_handleliste()/beregn av rad
+    for malt. Brukerens eget eksempel: behov 1,23 kg, tomt Pantry -> kjøp
+    1×1kg+3×100g (1300 g) hos Vestbrygg (knust), pris 69 kr, men
+    mottatt_mengde (og dermed expected_remainder_base) skal reflektere det
+    EKSAKTE behovet (1,23 kg), ikke SKU-summen."""
+
+    def _handleliste(self, eksakt_mal_knust, maltform=malt_packaging.MALTFORM_KNUST,
+                      butikk="Vestbrygg", malt_db=None, mengde_kg=1.23):
+        p = pantry.last_pantry()
+        recipe = _oppskrift(malts=[{"id": "test_malt", "mengde": mengde_kg}])
+        return ssl.beregn_handleliste(
+            recipe, p, malt_db=malt_db or _MALT_DB_VESTBRYGG_KNUST, butikk=butikk,
+            maltform=maltform, eksakt_mal_knust=eksakt_mal_knust,
+        )
+
+    def test_1_eksakt_mal_gir_riktig_pris_mottatt_mengde_og_null_rest(self):
+        rad = _rad(self._handleliste(eksakt_mal_knust=True), "malt", "test_malt")
+        self.assertEqual(rad["missing_base"], 1230.0)
+        self.assertEqual(rad["available_base"], 0.0)
+        self.assertEqual(rad["malt_pakningsforslag"]["anbefalt_kombinasjon"]["total_gram"], 1300.0)
+        self.assertEqual(rad["estimated_cost"], 69.0)
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"] * 1000.0, 1230.0, places=6)
+        self.assertAlmostEqual(rad["expected_remainder_base"], 0.0, places=6,
+                                msg="Tomt Pantry + eksakt mål skal gi nøyaktig 0 g forventet rest")
+
+    def test_2_uten_eksakt_mal_gir_sku_sum_og_70g_rest(self):
+        rad = _rad(self._handleliste(eksakt_mal_knust=False), "malt", "test_malt")
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"] * 1000.0, 1300.0, places=6)
+        self.assertAlmostEqual(rad["expected_remainder_base"], 70.0, places=6)
+
+    def test_3_pris_identisk_med_og_uten_eksakt_mal_men_rest_ulik(self):
+        med = _rad(self._handleliste(eksakt_mal_knust=True), "malt", "test_malt")
+        uten = _rad(self._handleliste(eksakt_mal_knust=False), "malt", "test_malt")
+        self.assertEqual(med["estimated_cost"], uten["estimated_cost"])
+        self.assertNotEqual(med["expected_remainder_base"], uten["expected_remainder_base"])
+
+    def test_4_bestilling_beholder_strukturert_sku_liste(self):
+        rad = _rad(self._handleliste(eksakt_mal_knust=True), "malt", "test_malt")
+        pakninger = rad["malt_pakningsforslag"]["kjopsresultat"]["bestilling"]["pakninger"]
+        self.assertEqual(
+            {(p["pakningsstorrelse_gram"], p["antall"]) for p in pakninger},
+            {(1000.0, 1), (100.0, 3)},
+        )
+
+    def test_5_bestilling_uttrykker_eksakt_onsket_mengde_separat(self):
+        rad = _rad(self._handleliste(eksakt_mal_knust=True), "malt", "test_malt")
+        bestilling = rad["malt_pakningsforslag"]["kjopsresultat"]["bestilling"]
+        self.assertEqual(bestilling["eksakt_onsket_mengde_gram"], 1230.0)
+
+    def test_6_hel_malt_far_ikke_eksakt_mal_selv_om_flagget_er_paa(self):
+        malt_db_hel = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"vestbrygg": {"varianter": [
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 8.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 45.0},
+        ]}}}}
+        rad = _rad(self._handleliste(
+            eksakt_mal_knust=True, maltform=malt_packaging.MALTFORM_HEL, malt_db=malt_db_hel,
+        ), "malt", "test_malt")
+        self.assertIsInstance(rad["malt_pakningsforslag"]["kjopsresultat"]["bestilling"], list)
+        self.assertAlmostEqual(
+            rad["suggested_purchase_quantity"] * 1000.0,
+            rad["malt_pakningsforslag"]["anbefalt_kombinasjon"]["total_gram"], places=6,
+        )
+
+    def test_7_olbrygging_far_ikke_eksakt_mal_selv_om_flagget_er_paa(self):
+        malt_db_ol = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"olbrygging": {"varianter": [
+            {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0},
+        ]}}}}
+        rad = _rad(self._handleliste(
+            eksakt_mal_knust=True, butikk="Ølbrygging.no", malt_db=malt_db_ol,
+        ), "malt", "test_malt")
+        self.assertIsInstance(rad["malt_pakningsforslag"]["kjopsresultat"]["bestilling"], list)
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"] * 1000.0, 1300.0, places=6)
+
+    def test_8_humle_og_gjaer_uendret_av_eksakt_mal_knust_flagget(self):
+        recipe = _oppskrift(
+            malts=[{"id": "test_malt", "mengde": 1.23}],
+            hops=[{"id": "citra", "gram": 20.0, "tid": 60}],
+            yeast="safale_us_05",
+        )
+        p = pantry.last_pantry()
+        med = ssl.beregn_handleliste(
+            recipe, p, malt_db=_MALT_DB_VESTBRYGG_KNUST, humle_db=_HUMLE_DB, gjaer_db=_GJAER_DB,
+            butikk="Vestbrygg", maltform=malt_packaging.MALTFORM_KNUST, eksakt_mal_knust=True,
+        )
+        uten = ssl.beregn_handleliste(
+            recipe, p, malt_db=_MALT_DB_VESTBRYGG_KNUST, humle_db=_HUMLE_DB, gjaer_db=_GJAER_DB,
+            butikk="Vestbrygg", maltform=malt_packaging.MALTFORM_KNUST, eksakt_mal_knust=False,
+        )
+        for type in ("humle", "gjaer"):
+            rad_med = next(r for r in med if r["ingredient_type"] == type)
+            rad_uten = next(r for r in uten if r["ingredient_type"] == type)
+            self.assertEqual(rad_med, rad_uten)
+
+    def test_9_utsolgt_variant_brukes_ikke_i_eksakt_mal_handleliste(self):
+        malt_db = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"vestbrygg": {"varianter": [
+            {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 1.0, "lagerstatus": "utsolgt"},
+            {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0, "lagerstatus": "pa_lager"},
+        ]}}}}
+        rad = _rad(self._handleliste(eksakt_mal_knust=True, malt_db=malt_db, mengde_kg=0.3), "malt", "test_malt")
+        storrelser = {p["pakningsstorrelse_gram"] for p in rad["malt_pakningsforslag"]["anbefalt_kombinasjon"]["antall_pakninger"]}
+        self.assertEqual(storrelser, {100.0})
+
+    def test_10_ukjent_lagerstatus_fungerer_som_for_i_eksakt_mal_handleliste(self):
+        malt_db = {"test_malt": {"display_name": "Test Malt", "butikk_match": {"vestbrygg": {"varianter": [
+            {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0, "lagerstatus": "ukjent"},
+            {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0, "lagerstatus": "ukjent"},
+        ]}}}}
+        rad = _rad(self._handleliste(eksakt_mal_knust=True, malt_db=malt_db), "malt", "test_malt")
+        self.assertAlmostEqual(rad["expected_remainder_base"], 0.0, places=6)
+
+    def test_11_manglende_varianter_gir_konservativ_fallback(self):
+        malt_db_uten_varianter = {"test_malt": {"display_name": "Test Malt", "butikk_match": {
+            "vestbrygg": {"pris": 40.0, "url": "https://vestbrygg.no/test"},
+        }}}
+        rad = _rad(self._handleliste(eksakt_mal_knust=True, malt_db=malt_db_uten_varianter), "malt", "test_malt")
+        self.assertIsNone(rad["malt_pakningsforslag"])
+        # Ingen pakke_kg registrert heller -> eksakt-mengde-forslaget (dagens
+        # eksisterende, konservative fallback) brukes uendret:
+        self.assertAlmostEqual(rad["suggested_purchase_quantity"], 1.23, places=2)
+        # Sluttkontroll: dette er den LEGACY/manglende-variantdata-stien,
+        # ikke "variantdata finnes, men alt utsolgt" -- de to skal ALDRI
+        # forveksles (se TestStegF3SluttkontrollAlleRelevanteVarianterUtsolgt).
+        self.assertFalse(rad["malt_ingen_relevant_variant"])
+        self.assertIsNotNone(rad["estimated_cost"])
+
+
+class TestStegF3SluttkontrollAlleRelevanteVarianterUtsolgt(_ShoppingListTestCase):
+    """Sluttkontroll (Steg F3, andre runde): variantdata som FAKTISK FINNES,
+    men der ALLE varianter for ønsket maltform er eksplisitt "utsolgt", skal
+    ALDRI forveksles med "ingen variantdata i det hele tatt". Før denne
+    rettelsen falt koden i dette tilfellet tilbake til det flate
+    butikk_match-prisfeltet og presenterte et tilsynelatende kjøpbart
+    tilbud (fast pris, cost_is_estimate=False) selv om ingen registrert
+    SKU for den ønskede maltformen faktisk var tilgjengelig."""
+
+    _MALT_DB_ALLE_UTSOLGT = {
+        "test_malt": {"display_name": "Test Malt", "butikk_match": {"vestbrygg": {
+            "pris": 40.0, "url": "https://vestbrygg.no/x",
+            "varianter": [
+                {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0, "lagerstatus": "utsolgt"},
+                {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0, "lagerstatus": "utsolgt"},
+            ],
+        }}},
+    }
+    _MALT_DB_EN_UTSOLGT_EN_PA_LAGER = {
+        "test_malt": {"display_name": "Test Malt", "butikk_match": {"vestbrygg": {
+            "pris": 40.0, "url": "https://vestbrygg.no/x",
+            "varianter": [
+                {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0, "lagerstatus": "utsolgt"},
+                {"pakningsstorrelse_gram": 100, "malttype": "knust", "pris": 8.0, "lagerstatus": "pa_lager"},
+            ],
+        }}},
+    }
+    _MALT_DB_UTEN_VARIANTDATA = {
+        "test_malt": {"display_name": "Test Malt", "butikk_match": {"vestbrygg": {
+            "pris": 40.0, "url": "https://vestbrygg.no/x",
+        }}},
+    }
+
+    def _rad(self, malt_db, eksakt_mal_knust=False, mengde_kg=1.23):
+        p = pantry.last_pantry()
+        recipe = _oppskrift(malts=[{"id": "test_malt", "mengde": mengde_kg}])
+        handleliste = ssl.beregn_handleliste(
+            recipe, p, malt_db=malt_db, butikk="Vestbrygg",
+            maltform=malt_packaging.MALTFORM_KNUST, eksakt_mal_knust=eksakt_mal_knust,
+        )
+        return _rad(handleliste, "malt", "test_malt")
+
+    def test_manglende_variantdata_beholder_legacy_flat_fallback(self):
+        rad = self._rad(self._MALT_DB_UTEN_VARIANTDATA)
+        self.assertFalse(rad["malt_ingen_relevant_variant"])
+        self.assertEqual(rad["estimated_cost"], round(1.23 * 40.0, 1))
+        self.assertFalse(rad["cost_is_estimate"])  # registrert flat pris, ikke gjettet
+        self.assertIsNone(rad["advisory"])
+
+    def test_alle_relevante_varianter_utsolgt_gir_ikke_falskt_kjopsforslag(self):
+        rad = self._rad(self._MALT_DB_ALLE_UTSOLGT)
+        self.assertIsNone(rad["malt_pakningsforslag"])
+        self.assertTrue(rad["malt_ingen_relevant_variant"])
+        self.assertIsNone(rad["estimated_cost"])
+        self.assertTrue(rad["cost_is_estimate"])
+        self.assertIsNotNone(rad["advisory"])
+        self.assertFalse(rad["package_size_known"])
+        # Fortsatt en reell mangel som må kjøpes -- status endres ikke, kun
+        # kostnadstallet/paknings-signalet blir ærlig usikkert:
+        self.assertEqual(rad["status"], "kjop")
+
+    def test_eksakt_mal_kan_ikke_vises_som_gjennomforbart_naar_alt_utsolgt(self):
+        rad = self._rad(self._MALT_DB_ALLE_UTSOLGT, eksakt_mal_knust=True)
+        # Ingen malt_pakningsforslag i det hele tatt -> UI-ets
+        # _render_malt_pakningsforslag()/_render_eksakt_mal_instruks() har
+        # ingenting å rendre, og kan derfor aldri vise eksakt-mål som
+        # gjennomførbart her:
+        self.assertIsNone(rad["malt_pakningsforslag"])
+        self.assertTrue(rad["malt_ingen_relevant_variant"])
+
+    def test_en_utsolgt_en_pa_lager_bruker_kun_den_tilgjengelige(self):
+        rad = self._rad(self._MALT_DB_EN_UTSOLGT_EN_PA_LAGER, mengde_kg=0.3)
+        self.assertFalse(rad["malt_ingen_relevant_variant"])
+        self.assertIsNotNone(rad["malt_pakningsforslag"])
+        storrelser = {
+            p["pakningsstorrelse_gram"]
+            for p in rad["malt_pakningsforslag"]["anbefalt_kombinasjon"]["antall_pakninger"]
+        }
+        self.assertEqual(storrelser, {100.0})
+
+    def test_advisory_pa_kjop_rad_krever_ikke_vis_alt(self):
+        # Selve UI-gatingen er fikset i ui/smart_shopping_list_panel.py --
+        # her bekreftes forutsetningen på domenenivå: advisory-teksten
+        # finnes på raden uansett, uavhengig av UI-ets "vis alt"-valg
+        # (som kun er en visningsdetalj, ikke noe domenelaget kjenner til).
+        rad = self._rad(self._MALT_DB_ALLE_UTSOLGT)
+        self.assertEqual(rad["status"], "kjop")
+        self.assertIsNotNone(rad["advisory"])
+
+
 if __name__ == "__main__":
     unittest.main()
