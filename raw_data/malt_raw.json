@@ -42,6 +42,20 @@
     "attenuation": 0.75
   },
   {
+    "navn": "1 Kg Spraymalt EXTRA Light (4-5 ebc)",
+    "pris": 178.0,
+    "pakke_gram": 1000.0,
+    "er_knust": false,
+    "url": "https://vestbrygg.no/ekstrakt-spraymalt/104639/1-kg-spraymalt-extra-light-4-5-ebc-1-kg-pakning",
+    "beskrivelse": "Kvalitetsråvare....",
+    "butikk": "vestbrygg",
+    "kategori": "spraymalt",
+    "produsent": "Ukjent",
+    "ebc": 5.0,
+    "alfa": 0.0,
+    "attenuation": 0.75
+  },
+  {
     "navn": "Bohemian Pilsner Floor Malt",
     "pris": 7.0,
     "pakke_gram": null,
