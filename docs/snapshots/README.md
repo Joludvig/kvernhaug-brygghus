@@ -30,5 +30,6 @@ docs/snapshots/YYYY-MM-DD_<kort-slug>.md
 | Dato | Fil | Milepæl |
 |---|---|---|
 | 2026-07-31 | [2026-07-31_KBDP_V1.md](2026-07-31_KBDP_V1.md) | KBDP etablert, CLAUDE.md restrukturert til utviklersystem, Snapshot-system innført |
+| 2026-08-03 | [2026-08-03_Vestbrygg_Variantmodell_Ferdig.md](2026-08-03_Vestbrygg_Variantmodell_Ferdig.md) | Vestbrygg-variantmodell, lagerstatus, «bestill til eksakt mål» og 25 kg-sikkerhet ferdig kodet og testet (Steg A–F6) — fryst rett før første ekte data-aktivering |
 
 *Oppdater denne tabellen (nyeste øverst eller nederst — vær konsistent) hver gang et nytt snapshot legges til. Selve snapshot-filene skal aldri redigeres i ettertid; denne indeksen er det eneste som vedlikeholdes løpende.*
