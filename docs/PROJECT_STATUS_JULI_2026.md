@@ -111,7 +111,7 @@ Som et permanent sikkerhetsnett er det i tillegg innført:
 1. Fullføre den pågående Wiesn-akseptansetesten (registrere malt og W-34/70, bekrefte full lagerkontroll).
 2. Bryggelogg V1.
 3. Equipment Profile.
-4. Full butikksammenligning og en mer komplett maltvariantmodell (maltpakningsoptimaliseringen i Smart Handleliste er ferdig — dette gjelder resten: side-om-side prissammenligning på tvers av butikker og et bredere variant-/pakningsdatagrunnlag for flere malttyper).
+4. Aktivere ekte Vestbrygg-variantdata, deretter full butikksammenligning (variantmodell, lagerstatus, «bestill til eksakt mål» og 25 kg-sekk-sperre er ferdig kodet og testet, se `docs/MASTER_DATA_FLOW.md` — gjenstår er å kjøre scraper/matcher mot ekte data og deretter side-om-side prissammenligning på tvers av butikker).
 5. Migrering og avvikling av legacy-humlelager.
 
 Se `docs/ROADMAP.md` for full roadmap.

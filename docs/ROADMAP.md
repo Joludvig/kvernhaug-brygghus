@@ -1,6 +1,6 @@
 # Kvernhaug Brygghus — Roadmap
 
-*Sist oppdatert: 2026-07-27. Se `docs/PROJECT_STATUS_JULI_2026.md` for full status, nøkkeltall og kjent teknisk gjeld.*
+*Sist oppdatert: 2026-08-03 (Steg F6 — malt-variantmodell/lagerstatus/eksakt-mål-status rettet). Se `docs/PROJECT_STATUS_JULI_2026.md` for full status, nøkkeltall og kjent teknisk gjeld.*
 
 Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkefølge — features flyttes mellom kategoriene etter hvert som virkelig bruk avgjør hva som trengs.
 
@@ -16,7 +16,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 - Pantry V1 (flere ingredienstyper, egendefinerte varer, Lalvin EC-1118)
 - Pantry backup/restore (automatisk rullerende backup + manuell gjenoppretting med forhåndsvisning)
 - Smart Handleliste V1 (Pantry som sannhetskilde, reell mangel, kjøpsforslag, rest etter kjøp)
-- Maltpakningsoptimalisering i Smart Handleliste (butikkvarianter, hel/knust, kombinasjonsforslag rangert etter billigst/minst overkjøp/balansert)
+- Maltpakningsoptimalisering i Smart Handleliste (butikkvarianter, hel/knust, kombinasjonsforslag rangert etter billigst/minst overkjøp/balansert, lagerstatusfiltrering, «bestill til eksakt mål» for knust Vestbrygg-malt, 25 kg-sekk-sperre — se `docs/MASTER_DATA_FLOW.md`. Kode og tester er ferdig; ekte Vestbrygg-variantdata er ikke aktivert i `master_malt.json` ennå)
 - Felles gjærpakkeberegning — samme formel brukt av bryggedagsark, Pantry og Smart Handleliste
 - Fritekst oppskriftsimporter, leverandørpanel (pris-synk / produktlenkekontroll), scraper + normaliseringspipeline
 - Oppskriftskort — automatisk innholdshøyde (erstatter en tidligere pikselheuristikk; krever Streamlit ≥ 1.57)
@@ -30,7 +30,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 1. Fullføre Wiesn-akseptansetesten
 2. **Bryggelogg V1** — registrere faktiske bryggeresultater mot planlagt oppskrift. Lav terskel er hoveddesignkravet: obligatorisk er kun dato + målt OG; FG, karakter, smaksnotater og "neste gang" er valgfritt. Ett loggfil per oppskrift, snapshot av oppskriftsdata ved logg-opprettelse.
 3. **Equipment Profile** — erstatte hardkodede BrewZilla 35L-standardverdier med redigerbare utstyrsinnstillinger (kjelevolum, fordampning, meskeforhold, dødvolum, kornabsorpsjon), lagret i `data/equipment.json`.
-4. **Full butikksammenligning og en mer komplett maltvariantmodell** — maltpakningsoptimaliseringen i Smart Handleliste er ferdig (se «Ferdig» over); det som gjenstår er side-om-side prissammenligning på tvers av Vestbrygg/Ølbrygging.no for hele oppskriften, samt et bredere registrert variant-/pakningsdatagrunnlag (flere malttyper, ikke bare de som allerede har butikkvarianter registrert).
+4. **Aktivere ekte Vestbrygg-variantdata, deretter full butikksammenligning** — variantmodell, lagerstatus, eksakt mål og 25 kg-sperre er ferdig kodet og testet (se «Ferdig» over); det som faktisk gjenstår er (a) å kjøre scraper/matcher mot ekte Vestbrygg-produktsider slik at `master_malt.json` får reelle varianter/lagerstatus, og (b) deretter side-om-side prissammenligning på tvers av Vestbrygg/Ølbrygging.no for hele oppskriften.
 5. **Migrering og avvikling av legacy-humlelager** — fase ut det gamle, ikke-Pantry-synkroniserte humlelageret og den gamle handlelisten når Smart Handleliste er fullt validert i reell bruk.
 
 ## Senere
@@ -107,7 +107,7 @@ Trigger for this refactor: adding a third store.
 
 **Known technical debt in current master data:**
 - `master_malt.json` is already v2-format in structure, but the filename is a legacy holdover. Future rename to `master_malt_v2.json` requires updating `store_matcher.py`, `import_panel.py`, and `app.py` — do not rename in isolation.
-- `master_malt.json` has no variant model per store. Malt is sold in multiple formats and sizes (Vestbrygg: 100 g / 1 kg / 25 kg, knust og hel; Ølbrygging: 1 kg / 5 kg / 25 kg, knust og hel). Unlike hops, malt does not have a single canonical package size — a simple `pakke_gram` field would be misleading. No schema change is made now: today's shopping list only needs price and URL; the user chooses format at checkout. A `varianter` list under `butikk_match` is the planned structure, to be introduced when store comparison or a smarter shopping list actually requires it.
+- `master_malt.json`'s variant model (`varianter` list under `butikk_match`, per size/format/price/lagerstatus) is implemented and tested in code (`modules/malt_packaging.py`) — see `docs/MASTER_DATA_FLOW.md`. What remains is activation with real data: no entry in today's `master_malt.json` has actual variants yet, so the shopping list still falls back to the older flat price/URL behavior for every real malt.
 - Ølbrygging.no malt data is weaker than Vestbrygg — many prices are set manually, not from scraper.
 
 ---

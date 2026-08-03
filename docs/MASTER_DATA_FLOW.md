@@ -108,49 +108,69 @@ malt_database / humle_database / gjaer_database (dict i minnet)
 
 ### master_malt.json
 
-| Mangel | Status | Fremtidig løsning |
-|--------|--------|-------------------|
-| Malt-varianter mangler i `butikk_match` | Malt selges i flere formater og størrelser — ingen av dem er modellert per butikk | Se variant-modell nedenfor |
-| `knust_tilgjengelig: true/false` er utilstrekkelig | Booleanen sier ikke hvilke størrelser som finnes knust, eller URL/pris per variant | Erstattes av variant-liste når crushed-støtte prioriteres |
+| Mangel | Status | Løsning |
+|--------|--------|---------|
 | Ølbrygging.no malt-data er svakere enn Vestbrygg | Mange `pris_olbrygging`-verdier er satt manuelt, ikke fra scraper. Ølbrygging.no malt-URLer er ikke systematisk hentet. | Oppdater scraper til å hente ølbrygging malt-sider korrekt |
 
-#### Fremtidig variant-modell for malt
+`knust_tilgjengelig: true/false` er erstattet av variant-listen beskrevet under (per-variant `malttype`), og beholdes ikke lenger som eneste kilde til format-informasjon.
 
-Malt er ikke én SKU per butikk. Kjente varianter:
+#### Variant-modell for malt (Steg F1–F5, 2026-08)
 
-| Butikk | Format | Størrelse |
-|--------|--------|-----------|
-| Vestbrygg | Knust | 100 g |
-| Vestbrygg | Knust | 1 kg |
-| Vestbrygg | Hel | 1 kg |
-| Vestbrygg | Knust | 25 kg |
-| Vestbrygg | Hel | 25 kg |
-| Ølbrygging | Knust | 1 kg |
-| Ølbrygging | Hel | 1 kg |
-| Ølbrygging | Knust | 5 kg |
-| Ølbrygging | Hel | 5 kg |
-| Ølbrygging | Knust | 25 kg |
-| Ølbrygging | Hel | 25 kg |
+Malt er ikke én SKU per butikk — variantmodellen som håndterer dette er
+**implementert og testet i kode** (`modules/malt_packaging.py`,
+`modules/smart_shopping_list.py`, 720 tester grønne). Det som gjenstår er
+utelukkende å **aktivere modellen med ekte data**: `data/master_malt.json`
+har i dag ingen reelle varianter, lagerstatus eller eksakt-mål-data ennå —
+scraper/matcher for Vestbryggs faktiske barn-/variantprodukter er skrevet
+(Steg F1), men ikke kjørt mot ekte butikkdata i produksjon. Se
+`docs/development/PROJECT_MAP.md`/snapshot-dokumentasjon for aktiveringsplanen.
 
-Malt oppfører seg ikke som humle. Humle har én typisk pakningsstørrelse (`pakke_gram: 100`) — en naturlig enhet. Malt har butikkspesifikke varianter med ulike formater, størrelser og priser. En enkel `pakke_gram`-tilnærming ville vært misvisende og måtte ryddes bort.
-
-**Ingen schema-endring gjøres nå.** Dagens shopping-liste trenger kun pris og URL per butikk — den beregner ikke antall pakker og brukeren velger selv format ved kjøp. Variantmodellen innføres først når Handleliste V2 eller Butikksammenligning (V1.5) faktisk krever det.
-
-Foreslått datastruktur når behovet oppstår:
+Faktisk datastruktur (skrevet av matcher, lest av `bygg_pakningsforslag()`):
 
 ```json
 "butikk_match": {
   "vestbrygg": {
     "varianter": [
-      { "format": "knust", "pakke_gram": 100,  "pris": 0.0, "url": "" },
-      { "format": "knust", "pakke_gram": 1000, "pris": 0.0, "url": "" },
-      { "format": "hel",   "pakke_gram": 1000, "pris": 0.0, "url": "" }
+      { "pakningsstorrelse_gram": 100,   "malttype": "knust", "pris": 15.0, "url": "...", "lagerstatus": "pa_lager" },
+      { "pakningsstorrelse_gram": 1000,  "malttype": "knust", "pris": 45.0, "lagerstatus": "pa_lager" },
+      { "pakningsstorrelse_gram": 1000,  "malttype": "hel",   "pris": 42.0 },
+      { "pakningsstorrelse_gram": 25000, "malttype": "hel",   "pris": 750.0, "lagerstatus": "utsolgt" }
     ]
   }
 }
 ```
 
-`knust_tilgjengelig`-booleanen beholdes inntil videre. Den skader ingenting og kan fjernes når variant-modellen erstatter den.
+Uten et `varianter`-felt (dagens virkelighet for all ekte masterdata)
+faller malt tilbake til den eldre, enklere `pakke_kg`-modellen — ingen
+regresjon for eksisterende data.
+
+Implementert og testet, men IKKE aktivert med ekte data:
+
+- **Variantmodell** — kombinasjonssøk per malttype (hel/knust), rangert
+  etter billigst/minst overkjøp/balansert, med et dekningsgrad-vern
+  (`_MAKS_RIMELIG_DEKNINGSGRAD`) som hindrer at store pakninger anbefales
+  urimelig for et lite behov.
+- **Lagerstatus** — valgfritt `lagerstatus`-felt per variant
+  (`pa_lager`/`utsolgt`/`ukjent`, kun brukt av Vestbrygg foreløpig).
+  Utsolgte varianter ekskluderes fra alle kjøpsforslag; manglende felt
+  tolkes som tilgjengelig (fravær av signal er aldri kjent utsolgt).
+- **«Bestill til eksakt mål»** — for knust Vestbrygg-malt, eksplisitt
+  brukervalg: mottatt_mengde settes til det eksakte oppskriftsbehovet i
+  stedet for SKU-summen (Vestbrygg opplyser at knust malt kan bestilles
+  til eksakte mål via melding til salgsavdelingen).
+- **25 kg-sekk-sperren** — en hel, ferdigpakket 25 kg-sekk kan aldri inngå
+  i «eksakt mål»-løftet (identifisert eksplisitt på gramtall, aldri som
+  "største registrerte pakningsstørrelse") — kjøpsresultatet faller da
+  tilbake til det ordinære, ikke-eksakte resultatet.
+
+Bevisst IKKE implementert ennå:
+
+- **Hybrid med eksakt restdel** — å la eksakt mål gjelde KUN restmengden
+  etter én eller flere hele 25 kg-sekker (i stedet for å sperre eksakt mål
+  helt for slike kombinasjoner). Venter på bekreftelse fra Vestbrygg om at
+  dette faktisk støttes for kjøp som også inkluderer hele sekker.
+- Butikksammenligning (side-om-side pris på tvers av Vestbrygg/Ølbrygging)
+  — se `docs/ROADMAP.md`.
 
 ---
 
@@ -195,4 +215,5 @@ python -m modules.validate_sync
 
 ## Historikk
 
+- **2026-08-03 (Steg F6):** Erstattet seksjonen "Fremtidig variant-modell for malt" (som beskrev en ikke-bygget, planlagt modell) med en status-seksjon: variantmodell, lagerstatus, «bestill til eksakt mål» og 25 kg-sekk-sperren er implementert og testet i kode (Steg F1–F5), men ikke aktivert med ekte data ennå. Hybrid med eksakt restdel er fortsatt bevisst ikke bygget.
 - **2026-07-28:** Fjernet "📥 Importer til Master DB"-knappen fra Import-panelet. Den skrev flatenerte kopier til `data/malt.json`/`humle.json`/`gjaer.json` — filer `app.py` aldri har lest for humle/gjær, og malt-lastingen ble på et tidspunkt endret til å lese `master_malt.json` direkte også, uten at denne knappen eller dette dokumentet ble oppdatert til å reflektere det. Rettet samtidig: humle-matching/-review pekte mot en manglende fil (`data/master_humle_v0_1.json`) i stedet for `master_humle_v2.json`.
