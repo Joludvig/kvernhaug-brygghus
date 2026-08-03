@@ -2,7 +2,10 @@
 import json
 import os
 import time
-from modules.product_link_scraper import finn_produktsider, finn_gjær_fra_sitemap, finn_humle_fra_sitemap, parse_produktside
+from modules.product_link_scraper import (
+    finn_produktsider, finn_gjær_fra_sitemap, finn_humle_fra_sitemap,
+    parse_produktside, finn_vestbrygg_malt_med_varianter,
+)
 
 def _sikre_raw_mappe():
     if not os.path.exists("raw_data"):
@@ -23,6 +26,11 @@ def kjor_full_skanning():
         print("Skanner MALT via strukturerte produktlenker...")
         print("==================================================")
         malt_lenker_vest = finn_produktsider("https://vestbrygg.no", "råvarer/malt", "malt")
+        # Vestbrygg selger mange malter som mor-side + faktiske barn-/
+        # variantprodukter (1 kg hel/knust, 100g knust, 25 kg hel/knust) —
+        # se Steg E/F1. Erstatter enhver mor-URL med sine ekte barn-URL-er
+        # (kun for Vestbrygg-malt; Ølbrygging er uendret, se linjen under).
+        malt_lenker_vest = finn_vestbrygg_malt_med_varianter(malt_lenker_vest)
         # Oppdatert til den korrekte råvarebanen hos Ølbrygging: ol/raavarer/malt
         malt_lenker_ol = finn_produktsider("https://www.olbrygging.no", "ol/ingredienser/malt", "malt")
         

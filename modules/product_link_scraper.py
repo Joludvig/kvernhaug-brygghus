@@ -172,6 +172,103 @@ def finn_produktsider(base_url, kategori_path, kategori):
     print(f"[OK] Fant {len(produkt_lenker)} produktlenker for {kategori}")
     return list(produkt_lenker)
 
+
+def _variant_barnelenker_fra_html(mor_url, raw_html):
+    """
+    Finner Vestbryggs faktiske barn-/variantlenker (f.eks. "1 kg hel",
+    "1 kg knust", "100g knust", "25 kg Sekk hel/knust") fra en mor-
+    produktsides variantvelger-widget.
+
+    Widgeten (verifisert i rå-HTML mot Weyermann- OG Thomas Fawcett-sider,
+    se Steg F1-rapporten) har konsekvent formen:
+
+        <div id="..._VariantVelgerVisuell_..."> ... </div>
+            <div class="VariantChildVisual">          <!-- ev. "...  no-stock" -->
+                <div id="..."><a href="/relativ/sti/...">...</a></div>
+                <span class="VariantChildAttribName">1 kg heil malt</span>
+            </div>
+            ... (opptil fem slike blokker, ALDRI konstruert av oss)
+
+    Bruker BeautifulSoups klasse-selector (matcher ETT klassetoken blant
+    flere), så en "no-stock"-markert variant (bekreftet observert for
+    CaraRed Malt sin manglende 25 kg-sekk) fanges opp på samme måte som en
+    ordinær variant — denne funksjonen tar IKKE stilling til lagerstatus,
+    den finner bare de faktiske lenkene som er der.
+
+    Returnerer en TOM liste dersom siden ikke har denne variantvelgeren
+    (mor-siden er da et vanlig, ikke-variantstrukturert produkt, f.eks.
+    spraymalt — kalleren beholder da mor-URL-en uendret).
+
+    Bruker ALDRI ID-aritmetikk (mor_id-6000=1kg hel osv.) — det mønsteret
+    ble observert under Steg E, men er kun verifisert på 3 av ~24 malter og
+    skal IKKE brukes som produksjonslogikk.
+    """
+    soup = BeautifulSoup(unescape(raw_html), "html.parser")
+    barn = []
+    sett = set()
+    for div in soup.select("div.VariantChildVisual"):
+        a = div.find("a", href=True)
+        if not a:
+            continue
+        full_url = urljoin(mor_url, a["href"])
+        if full_url in sett:
+            continue
+        sett.add(full_url)
+        barn.append(full_url)
+    return barn
+
+
+def finn_vestbrygg_malt_med_varianter(mor_urls):
+    """
+    Utvider en liste med Vestbrygg-malt-URL-er (typisk output fra
+    finn_produktsider()) slik at enhver mor-side med en faktisk
+    variantvelger erstattes av sine ekte barn-/variant-URL-er.
+
+    Mor-sider UTEN variantvelger (f.eks. spraymalt/ekstrakt, som ikke er
+    strukturert som mor+barn) beholdes helt uendret — eksisterende
+    oppførsel er 100 % bevart for dem.
+
+    Rekkefølgen er deterministisk: mor-URL-enes opprinnelige rekkefølge
+    bevares, og for hver mor-URL listes barna i den rekkefølgen
+    variantvelgeren faktisk viser dem i. Duplikate URL-er (uansett om de
+    kommer fra flere mor-sider eller er identiske barn) fjernes.
+
+    INGEN rekursjon: kun de opprinnelige mor_urls hentes og undersøkes for
+    varianter her — de returnerte barne-URL-ene blir aldri selv sendt inn
+    i denne funksjonen igjen (de går videre til den ordinære
+    parse_produktside()-flyten, som ikke driver lenke-oppdagelse).
+    """
+    resultat = []
+    sett = set()
+
+    def _legg_til(url):
+        if url not in sett:
+            sett.add(url)
+            resultat.append(url)
+
+    for mor_url in mor_urls:
+        try:
+            res = requests.get(mor_url, headers=HEADERS, timeout=10)
+            if res.status_code != 200:
+                _legg_til(mor_url)
+                continue
+            res.encoding = res.apparent_encoding
+            barn = _variant_barnelenker_fra_html(mor_url, res.text)
+        except Exception as e:
+            print(f"[VARIANT-FEIL] Kunne ikke hente varianter for {mor_url}: {e}")
+            barn = []
+
+        if not barn:
+            _legg_til(mor_url)
+            continue
+
+        print(f"[VARIANTER] {mor_url}: fant {len(barn)} barn-produkter")
+        for url in barn:
+            _legg_til(url)
+
+    return resultat
+
+
 BREADCRUMB_DENY_SEGMENTER = [
     "ølsett", "olsett", "ekstraktsett", "utstyr", "tilbehør", "tilbehor",
     "gavekort", "bøker", "boker", "rengjøring", "rengjoring",

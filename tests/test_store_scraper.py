@@ -51,9 +51,10 @@ class TestKjorFullSkanning(unittest.TestCase):
     @patch("modules.store_scraper.parse_produktside")
     @patch("modules.store_scraper.finn_gjær_fra_sitemap")
     @patch("modules.store_scraper.finn_humle_fra_sitemap")
+    @patch("modules.store_scraper.finn_vestbrygg_malt_med_varianter")
     @patch("modules.store_scraper.finn_produktsider")
     def test_skanning_uten_nettverk_skriver_gyldige_raw_filer(
-        self, mock_finn_produktsider, mock_finn_humle_sitemap,
+        self, mock_finn_produktsider, mock_finn_variant_utvidelse, mock_finn_humle_sitemap,
         mock_finn_gjaer_sitemap, mock_parse_produktside,
     ):
         # kjor_full_skanning() kaller finn_produktsider separat per butikk
@@ -81,6 +82,13 @@ class TestKjorFullSkanning(unittest.TestCase):
             return []  # gjaer: ingen ekstra kategori-URLer i denne fixturen
 
         mock_finn_produktsider.side_effect = _finn_produktsider
+        # Identitets-passthrough: denne testen bryr seg ikke om Vestbryggs
+        # mor-/barn-variantutvidelse (se Steg F1), bare om URL-tellingen.
+        # Uten denne mocken ville finn_vestbrygg_malt_med_varianter (som
+        # gjør ekte requests.get-kall) blitt kjørt mot "https://fixture.test/..."
+        # under testkjøring — nøyaktig det denne testfilens egen hensikt
+        # (se moduldokstreng) er å forhindre.
+        mock_finn_variant_utvidelse.side_effect = lambda urls: urls
         mock_finn_humle_sitemap.return_value = []
         mock_finn_gjaer_sitemap.return_value = []
         mock_parse_produktside.side_effect = _fake_produktside
