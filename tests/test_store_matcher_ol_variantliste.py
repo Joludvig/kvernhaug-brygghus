@@ -196,8 +196,16 @@ class Test8EnkeltVariantFungererSomFor(unittest.TestCase):
         ])
 
 
-class Test9VestbryggFarIkkeVariantmodell(unittest.TestCase):
-    def test_vestbrygg_flere_pakker_far_ingen_varianter_felt(self):
+class Test9VestbryggFikkEgenVariantmodellFraStegF2(unittest.TestCase):
+    """Steg D holdt bevisst Vestbrygg utenfor variantmodellen (denne
+    klassen het opprinnelig "...FarIkkeVariantmodell" og testet nettopp
+    det). Steg F2 ga Vestbrygg sin egen variantliste (med et ekstra
+    "lagerstatus"-felt Ølbrygging ikke har) — se
+    tests/test_store_matcher_vestbrygg_variantliste.py for full dekning
+    av selve F2-funksjonaliteten. Disse to testene er oppdatert til å
+    speile den nye, korrekte oppførselen i stedet for den gamle."""
+
+    def test_vestbrygg_flere_pakker_far_na_en_variantliste(self):
         master = _master_malt_fixture(("test_malt", "Test Malt"))
         v_1kg = {"navn": "Test Malt 1 kg hel", "butikk": "vestbrygg", "pris": 40.0,
                  "pakke_gram": 1000.0, "er_knust": False,
@@ -209,10 +217,11 @@ class Test9VestbryggFarIkkeVariantmodell(unittest.TestCase):
         resultat, _, _ = _kjor_malt([v_1kg, v_5kg], master)
         bm_vestbrygg = resultat["test_malt"]["butikk_match"]["vestbrygg"]
 
-        self.assertNotIn("varianter", bm_vestbrygg)
-        self.assertEqual(bm_vestbrygg["url"], v_1kg["url"])
+        self.assertIn("varianter", bm_vestbrygg)
+        self.assertEqual(len(bm_vestbrygg["varianter"]), 2)
+        self.assertEqual(bm_vestbrygg["url"], v_1kg["url"])  # flat fallback uendret
 
-    def test_blanding_av_butikker_gir_varianter_kun_for_olbrygging(self):
+    def test_ny_vestbrygg_variantliste_pavirker_ikke_olbryggings_egen(self):
         master = _master_malt_fixture(("test_malt", "Test Malt"))
         v_1kg = {"navn": "Test Malt 1 kg hel", "butikk": "vestbrygg", "pris": 40.0,
                  "pakke_gram": 1000.0, "er_knust": False,
@@ -221,9 +230,12 @@ class Test9VestbryggFarIkkeVariantmodell(unittest.TestCase):
         resultat, _, _ = _kjor_malt([v_1kg, OL_1KG_HEL, OL_1KG_KNUST], master)
         bm = resultat["test_malt"]["butikk_match"]
 
-        self.assertNotIn("varianter", bm["vestbrygg"])
+        self.assertIn("varianter", bm["vestbrygg"])
         self.assertIn("varianter", bm["olbrygging"])
         self.assertEqual(len(bm["olbrygging"]["varianter"]), 2)
+        # Ølbryggings variantliste er urørt av F2 og har fortsatt ikke
+        # noe lagerstatus-felt:
+        self.assertNotIn("lagerstatus", bm["olbrygging"]["varianter"][0])
 
 
 class Test10HumleOgGjaerUendret(unittest.TestCase):

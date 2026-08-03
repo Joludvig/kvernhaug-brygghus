@@ -64,6 +64,34 @@ def _extract_price(text: str) -> float:
 
     return 0.0
 
+_BODY_CLASS_RE = re.compile(r'<body[^>]*\bclass="([^"]*)"', re.IGNORECASE)
+
+
+def _lagerstatus_fra_html(raw_html):
+    """
+    Leser lagerstatus fra <body class="... in-stock|not-in-stock ...">.
+
+    Verifisert mot ekte, nedlastet rå-HTML (Steg F2) for BÅDE Weyermann- og
+    Thomas Fawcett-produkter hos Vestbrygg, med og uten lager: klassetokenet
+    er identisk og entydig i begge tilfeller, og finnes ikke i noe JSON-LD
+    eller dataLayer-datafelt (kun dette CSS-klassetokenet er et verifisert
+    signal). Returnerer "ukjent" når signalet mangler helt (f.eks. andre
+    sider/butikker der konvensjonen ikke er bekreftet) -- IKKE "utsolgt",
+    slik at et manglende signal aldri feiltolkes som en kjent status.
+
+    Returnerer én av: "pa_lager", "utsolgt", "ukjent".
+    """
+    match = _BODY_CLASS_RE.search(raw_html)
+    if not match:
+        return "ukjent"
+    klasser = match.group(1).split()
+    if "not-in-stock" in klasser:
+        return "utsolgt"
+    if "in-stock" in klasser:
+        return "pa_lager"
+    return "ukjent"
+
+
 def finn_gjær_fra_sitemap(base_url):
     """
     Henter alle gjær-produkt-URLer fra sitemap.
@@ -549,6 +577,8 @@ def parse_produktside(url, kategori, butikk_navn):
         er_spraymalt = bool(re.search(r"spraymalt|spray malt|liquid malt", l_navn))
         kategori_final = "spraymalt" if (kategori == "malt" and er_spraymalt) else kategori
 
+        lagerstatus = _lagerstatus_fra_html(res.text)
+
         print(f"[GODKJENT] {navn_clean} ({pris} kr) -> {produsent}")
 
         return {
@@ -557,6 +587,7 @@ def parse_produktside(url, kategori, butikk_navn):
             "pakke_gram": pakke_gram,
             "er_knust": er_knust,
             "url": url,
+            "lagerstatus": lagerstatus,
             "beskrivelse": beskrivelse[:150] + "...",
             "butikk": butikk_navn,
             "kategori": kategori_final,

@@ -313,5 +313,77 @@ class Test9KjopsresultatKontrakt(unittest.TestCase):
         self.assertIsNone(mp.bygg_pakningsforslag(4232.0, {"varianter": []}))
 
 
+class Test10LagerstatusFiltrering(unittest.TestCase):
+    """Steg F2: en variant markert "lagerstatus": "utsolgt" skal aldri
+    kunne inngå i noen kjøpskombinasjon — verken som anbefalt eller som
+    alternativ. Ukjent/manglende lagerstatus (Ølbrygging, eller eldre
+    Vestbrygg-data) skal fortsette å fungere akkurat som før F2."""
+
+    def test_9_utsolgt_variant_anbefales_ikke_naar_en_annen_dekker_behovet(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 1.0,
+             "lagerstatus": "utsolgt"},
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 25.0,
+             "lagerstatus": "pa_lager"},
+        ]
+        # 1000 g-varianten er kunstig mye billigere (1 kr), men er utsolgt —
+        # skulle den ha vært vurdert, ville den ALDRI tapt mot 100 g-posen
+        # på pris. At forslaget likevel må ty til 100 g-posene beviser at
+        # den utsolgte varianten er utelukket fra selve søket.
+        forslag = mp.bygg_pakningsforslag(300.0, _bm(varianter), prioritet=mp.PRIORITET_BILLIGST)
+        self.assertIsNotNone(forslag)
+        storrelser_brukt = {p["pakningsstorrelse_gram"] for p in forslag["kjopsresultat"]["bestilling"]}
+        self.assertEqual(storrelser_brukt, {100})
+
+    def test_9_utsolgt_variant_finnes_ikke_i_alternativene_heller(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 1.0,
+             "lagerstatus": "utsolgt"},
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 25.0,
+             "lagerstatus": "pa_lager"},
+        ]
+        forslag = mp.bygg_pakningsforslag(300.0, _bm(varianter), prioritet=mp.PRIORITET_BILLIGST)
+        alle_storrelser = {
+            p["pakningsstorrelse_gram"]
+            for kombo in ([forslag["anbefalt_kombinasjon"]] + forslag["alternative_kombinasjoner"])
+            for p in kombo["antall_pakninger"]
+        }
+        self.assertNotIn(1000, alle_storrelser)
+
+    def test_8_kun_utsolgte_varianter_i_en_form_gir_ingen_forslag_for_den_formen(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 1000, "malttype": "knust", "pris": 45.0,
+             "lagerstatus": "utsolgt"},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 42.0,
+             "lagerstatus": "pa_lager"},
+        ]
+        forslag = mp.bygg_pakningsforslag(500.0, _bm(varianter), maltform=mp.MALTFORM_KNUST)
+        # Eneste knust-variant er utsolgt -> ingen kombinasjon mulig når
+        # brukeren eksplisitt ber om knust:
+        self.assertIsNone(forslag)
+
+    def test_7_ukjent_lagerstatus_behandles_som_pa_lager(self):
+        varianter = [
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 8.0,
+             "lagerstatus": "ukjent"},
+        ]
+        forslag = mp.bygg_pakningsforslag(50.0, _bm(varianter))
+        self.assertIsNotNone(forslag)
+
+    def test_10_og_17_manglende_lagerstatus_felt_fungerer_uendret_som_for_steg_f2(self):
+        # Nøyaktig samme varianter som i eksisterende Ølbrygging-/Wiesn-
+        # tester (Test4WiesnEksemplerMinstOverkjop) -- INGEN "lagerstatus"-
+        # nøkkel i det hele tatt, slik ekte Ølbrygging-data og all data fra
+        # før Steg F2 ser ut. Skal gi identisk resultat som før F2.
+        varianter = [
+            {"pakningsstorrelse_gram": 100, "malttype": "hel", "pris": 25.0},
+            {"pakningsstorrelse_gram": 1000, "malttype": "hel", "pris": 45.0},
+        ]
+        forslag = mp.bygg_pakningsforslag(4232.0, _bm(varianter), prioritet=mp.PRIORITET_MINST_OVERKJOP)
+        self.assertIsNotNone(forslag)
+        pakninger = {p["pakningsstorrelse_gram"]: p["antall"] for p in forslag["anbefalt_kombinasjon"]["antall_pakninger"]}
+        self.assertEqual(pakninger, {1000: 4, 100: 3})
+
+
 if __name__ == "__main__":
     unittest.main()

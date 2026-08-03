@@ -24,6 +24,13 @@ Uten et "varianter"-felt faller malt tilbake til den eldre, enklere
 avrunding til ÉN kjent pakningsstørrelse) — denne modulen endrer ikke
 oppførselen for malt som ikke har registrerte varianter ennå.
 
+Valgfritt felt per variant (lagt til i Steg F2, kun brukt av Vestbrygg):
+"lagerstatus" — "pa_lager"/"utsolgt"/"ukjent". En variant merket "utsolgt"
+ekskluderes fra ALLE kjøpskombinasjoner (både anbefalt og alternativer),
+se _varianter_for_form(). Mangler feltet helt (Ølbrygging, eller eldre
+Vestbrygg-data), eller er det "ukjent", behandles varianten som om den var
+på lager — fravær av signal er aldri det samme som kjent utsolgt.
+
 Grunnprinsipp: en enkelt foreslått kjøpskombinasjon blander ALDRI hel og
 knust malt. Kombinasjoner bygges separat per malttype; når flere typer
 finnes å velge mellom, avgjør maltform-innstillingen (se MALTFORM_*) hvilke
@@ -63,7 +70,18 @@ def hent_tilgjengelige_malttyper(varianter):
 
 
 def _varianter_for_form(varianter, malttype):
-    return [v for v in varianter if v.get("malttype") == malttype]
+    """Kun varianter av gitt malttype som faktisk kan inngå i en
+    kjøpskombinasjon: eksplisitt utsolgte varianter ("lagerstatus":
+    "utsolgt", se Steg F2) ekskluderes her, FØR selve kombinasjons-søket,
+    slik at ingen anbefaling — eller alternativ — noensinne kan foreslå et
+    kjøp av noe som er kjent utsolgt. Varianter uten "lagerstatus"-felt i
+    det hele tatt (Ølbrygging, eller Vestbrygg-data eldre enn Steg F2) og
+    varianter markert "ukjent" behandles likt — IKKE som utsolgt, siden
+    fravær av signal aldri skal tolkes som en kjent, negativ status."""
+    return [
+        v for v in varianter
+        if v.get("malttype") == malttype and v.get("lagerstatus") != "utsolgt"
+    ]
 
 
 def _generer_kombinasjoner_for_form(missing_gram, varianter_i_form):

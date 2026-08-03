@@ -249,6 +249,35 @@ def _bygg_ol_variantliste(kandidater):
     return list(unike.values())
 
 
+def _bygg_vestbrygg_variantliste(kandidater):
+    """Speiler _bygg_ol_variantliste() for Vestbryggs faktiske barn-
+    /variantprodukter (se Steg F1/F2) — med ETT tillegg: "lagerstatus"
+    ("pa_lager"/"utsolgt"/"ukjent"), lest ved skrapetidspunktet fra
+    barn-sidens <body class="in-stock"|"not-in-stock">-signal, se
+    modules/product_link_scraper.py::_lagerstatus_fra_html().
+
+    Gruppering, deduplisering og rekkefølge er identisk med
+    _bygg_ol_variantliste(). _bygg_ol_variantliste() selv er IKKE endret
+    og får ikke noe lagerstatus-felt i denne runden — Ølbryggings egen
+    lagerstatus-konvensjon er ikke undersøkt/bekreftet."""
+    kjente = [k for k in kandidater if k.get("pakke_gram") is not None]
+    unike = {}
+    for k in sorted(
+        kjente,
+        key=lambda k: (k["pakke_gram"], _malttype_for_kandidat(k), k.get("url") or "", k.get("pris_raw") or 0),
+    ):
+        nokkel = (k["pakke_gram"], _malttype_for_kandidat(k), k.get("url") or "")
+        if nokkel not in unike:
+            unike[nokkel] = {
+                "pakningsstorrelse_gram": k["pakke_gram"],
+                "malttype": _malttype_for_kandidat(k),
+                "pris": k.get("pris_raw"),
+                "url": k.get("url") or "",
+                "lagerstatus": k.get("lagerstatus") or "ukjent",
+            }
+    return list(unike.values())
+
+
 def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unmatched):
     """
     Matcher scrapede malter mot master_malt aliases.
@@ -264,13 +293,16 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
     igjen er ustabil pga. Pythons hash-randomiserte set()-iterasjon i
     modules/product_link_scraper.py::finn_produktsider()).
 
-    For Ølbrygging skrives i tillegg en fullstendig "varianter"-liste
-    (se _bygg_ol_variantliste()) additivt ved siden av de flate
+    For Ølbrygging (Steg D) og Vestbrygg (Steg F1/F2) skrives i tillegg en
+    fullstendig "varianter"-liste additivt ved siden av de flate
     pris/url-feltene — ALLE reelle pakningsalternativer (f.eks. 1/5/25 kg,
     hel/knust) bevares samlet slik at modules.malt_packaging kan bygge
     kjøpskombinasjoner, i stedet for at bare den ene representative raden
-    overlever. Vestbrygg (løsvekt + 25 kg-sekk) er bevisst IKKE endret i
-    denne runden.
+    overlever. Vestbryggs variantliste har i tillegg et "lagerstatus"-felt
+    ("pa_lager"/"utsolgt"/"ukjent") — se _bygg_vestbrygg_variantliste() og
+    modules/product_link_scraper.py::_lagerstatus_fra_html(). Ølbryggings
+    variantliste (_bygg_ol_variantliste()) er urørt og har IKKE dette
+    feltet.
     """
     with open(malt_raw_path, "r", encoding="utf-8") as f:
         malt_raw = json.load(f)
@@ -301,6 +333,7 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
             kandidater_per_slot.setdefault((master_id, butikk_key), []).append({
                 "navn": navn, "pris_kg": pris_kg, "pris_raw": pris_raw, "url": url,
                 "pakke_gram": pakke_gram, "er_knust": raw.get("er_knust", False),
+                "lagerstatus": raw.get("lagerstatus"),
             })
             matched_count += 1
         else:
@@ -330,6 +363,16 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
         # fallback for enhver butikk uten "varianter".
         if butikk_key == "olbrygging":
             varianter = _bygg_ol_variantliste(kandidater)
+            if varianter:
+                master_malt[master_id]["butikk_match"][butikk_key]["varianter"] = varianter
+        elif butikk_key == "vestbrygg":
+            # Steg F1/F2: Vestbryggs faktiske barn-/variantprodukter (kun
+            # tilgjengelig når raw-radene faktisk stammer fra
+            # finn_vestbrygg_malt_med_varianter(), se product_link_scraper.py).
+            # Mor-sider uten variantvelger gir her naturlig 0-2 kandidater
+            # uten kjent pakke_gram → varianter blir tom, kun flate felt
+            # skrives, akkurat som før Steg F.
+            varianter = _bygg_vestbrygg_variantliste(kandidater)
             if varianter:
                 master_malt[master_id]["butikk_match"][butikk_key]["varianter"] = varianter
 

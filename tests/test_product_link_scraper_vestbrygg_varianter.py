@@ -1,16 +1,21 @@
 """
-Tester for Steg F1: oppdagelse og parsing av Vestbryggs faktiske
-barn-/variantprodukter fra maltmor-sidene
+Tester for Steg F1 og F2: oppdagelse og parsing av Vestbryggs faktiske
+barn-/variantprodukter fra maltmor-sidene, inkludert lagerstatus
 (modules/product_link_scraper.py::_variant_barnelenker_fra_html /
-finn_vestbrygg_malt_med_varianter).
+finn_vestbrygg_malt_med_varianter / _lagerstatus_fra_html).
 
-Bakgrunn (se Steg E- og F1-rapportene): Vestbrygg strukturerer mange malter
-som én mor-produktside pluss opptil fem faktiske barn-/variantprodukter
-(1 kg hel, 1 kg knust, 100g knust, 25 kg hel, 25 kg knust), lenket fra en
-"VariantVelgerVisuell"-widget i mor-sidens HTML. Mor-sidens "Fra X,-"-pris
-er ALLTID kun den billigste barnets pris, aldri en reell salgspris. Denne
-funksjonaliteten oppdager de faktiske barn-lenkene fra rå-HTML — ALDRI ved
-å konstruere URL-er/varenummer via det observerte ID-offset-mønsteret.
+Bakgrunn (se Steg E-, F1- og F2-rapportene): Vestbrygg strukturerer mange
+malter som én mor-produktside pluss opptil fem faktiske barn-/
+variantprodukter (1 kg hel, 1 kg knust, 100g knust, 25 kg hel, 25 kg
+knust), lenket fra en "VariantVelgerVisuell"-widget i mor-sidens HTML.
+Mor-sidens "Fra X,-"-pris er ALLTID kun den billigste barnets pris, aldri
+en reell salgspris. Denne funksjonaliteten oppdager de faktiske
+barn-lenkene fra rå-HTML — ALDRI ved å konstruere URL-er/varenummer via
+det observerte ID-offset-mønsteret.
+
+Steg F2 la i tillegg til lagerstatus-parsing: barn-siden sitt
+<body class="in-stock"|"not-in-stock">-signal, verifisert identisk mot
+ekte, nedlastet HTML for både Weyermann- og Thomas Fawcett-produkter.
 
 Alle nettverkskall er mocket — ingen ekte HTTP-forespørsler, ingen ekte
 raw_data/master-filer røres.
@@ -320,6 +325,68 @@ class Test14IngenRekursivLoekke(unittest.TestCase):
             # Nøyaktig ett kall -- ett per opprinnelig mor-URL, uansett hva
             # barn-lenkene i den hentede HTML-en peker til.
             self.assertEqual(mock_get.call_count, 1)
+
+
+# ------------------------------------------------------------------
+# Steg F2: lagerstatus-signalet parse_produktside() nå leser fra
+# barn-siden sitt <body class="in-stock"|"not-in-stock">-signal.
+# ------------------------------------------------------------------
+
+def _barn_html_med_body_klasse(navn, body_klasse, pris_kr=49):
+    return f"""<html><head>
+    <meta property="og:title" content="{navn}">
+    <meta property="og:description" content="Kvalitetsråvare.">
+    </head><body class="{body_klasse}">
+    <h1>{navn}</h1>
+    <span class="PriceLabel product-price-api">{pris_kr},-</span>
+    <script>dataLayer.push({{'BreadCrumb': 'Vestbrygg/Råvarer/Malt/Basemalt'}});</script>
+    </body></html>"""
+
+
+class Test5LagerstatusPaLagerParsesKorrekt(unittest.TestCase):
+    def test_in_stock_body_klasse_gir_pa_lager(self):
+        html = _barn_html_med_body_klasse(
+            "Test Malt - 1 kg Hel",
+            "body-out fav-body mode-normal in-stock body-product-info",
+        )
+        with patch("modules.product_link_scraper.requests.get") as mock_get:
+            mock_get.return_value = _FakeResponse(html)
+            resultat = parse_produktside(
+                "https://vestbrygg.no/weyermann/20110/test-1-kg-hel", "malt", "vestbrygg",
+            )
+        self.assertIsNotNone(resultat)
+        self.assertEqual(resultat["lagerstatus"], "pa_lager")
+
+
+class Test6LagerstatusUtsolgtParsesKorrekt(unittest.TestCase):
+    def test_not_in_stock_body_klasse_gir_utsolgt(self):
+        html = _barn_html_med_body_klasse(
+            "Test Malt - 25 kg Hel",
+            "body-out fav-body mode-normal not-in-stock body-product-info",
+        )
+        with patch("modules.product_link_scraper.requests.get") as mock_get:
+            mock_get.return_value = _FakeResponse(html)
+            resultat = parse_produktside(
+                "https://vestbrygg.no/weyermann/24110/test-25kg-hel", "malt", "vestbrygg",
+            )
+        self.assertIsNotNone(resultat)
+        self.assertEqual(resultat["lagerstatus"], "utsolgt")
+
+
+class Test7LagerstatusUkjentHandteresEksplisitt(unittest.TestCase):
+    def test_manglende_signal_gir_eksplisitt_ukjent_ikke_utsolgt(self):
+        html = _barn_html_med_body_klasse(
+            "Test Malt uten kjent lagerstatus",
+            "body-out fav-body mode-normal body-product-info",  # verken in-stock eller not-in-stock
+        )
+        with patch("modules.product_link_scraper.requests.get") as mock_get:
+            mock_get.return_value = _FakeResponse(html)
+            resultat = parse_produktside(
+                "https://vestbrygg.no/weyermann/29999/test-uten-signal", "malt", "vestbrygg",
+            )
+        self.assertIsNotNone(resultat)
+        self.assertEqual(resultat["lagerstatus"], "ukjent")
+        self.assertNotEqual(resultat["lagerstatus"], "utsolgt")
 
 
 if __name__ == "__main__":
