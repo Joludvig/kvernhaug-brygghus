@@ -69,18 +69,60 @@ def similarity(a, b):
     """Enkel string-likhet (0.0 til 1.0)."""
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
+_KVALIFIKATOR_TOKEN_RE = re.compile(r"[a-zæøåA-ZÆØÅ]+")
+
+# Ord-til-kvalifikator-tabell. Kun EXTRA er registrert (Steg F8F) — se
+# _produktkvalifikatorer() sin dokstreng for hvorfor øvrige adjektiver
+# (special/premium/dark/pale/super/classic/floor malted, ...) bevisst
+# ikke er tatt med uten egne, konkrete funn.
+_KVALIFIKATOR_ALIASER = {
+    "extra": "extra",
+    "ekstra": "extra",
+}
+
+def _produktkvalifikatorer(navn):
+    """
+    Finner diskriminerende produktkvalifikatorer i et produktnavn — ord
+    som skiller to ellers like produkter fra hverandre, f.eks. "Light"
+    vs. "Extra Light" (Steg F8F rotårsaksrapport: disse ble tidligere
+    feilmatchet med likhetsscore 0,821, godt over 0,7-terskelen).
+
+    Ord-/tokenbasert (\\b-avgrenset), ALDRI substreng-basert: "extract"/
+    "ekstrakt" inneholder bokstavrekken "extra"/"ekstra" som prefiks,
+    men er et annet ord og skal ikke telle som kvalifikatoren EXTRA.
+
+    Returnerer et frozenset av normaliserte kvalifikatorer (tomt hvis
+    ingen funnet), slik at to navn kan sammenlignes med enkel
+    mengdelikhet uavhengig av hvilket av de to synonyme ordene
+    ("extra"/"ekstra") som faktisk ble brukt.
+    """
+    tokens = (t.lower() for t in _KVALIFIKATOR_TOKEN_RE.findall(navn))
+    return frozenset(_KVALIFIKATOR_ALIASER[t] for t in tokens if t in _KVALIFIKATOR_ALIASER)
+
 def match_product_to_master(scaped_navn, master_humle):
     """
     Prøver å matche et scrapet produktnavn mot master_humle aliases.
     Returnerer (master_id, matched_alias) eller (None, None) hvis ikke match.
+
+    Et alias vurderes kun dersom det har nøyaktig samme sett med
+    diskriminerende kvalifikatorer (se _produktkvalifikatorer()) som det
+    skrapede navnet — symmetrisk i begge retninger. Dette hindrer at
+    f.eks. "Spraymalt Extra Light" matches mot master-aliaset "Spraymalt
+    Light" (og omvendt) selv om ren streng-likhet ligger over terskelen.
+    Sjekken er per alias, ikke per master-ID, så en master-ID med flere
+    aliases fortsatt kan matches via et hvilket som helst alias som har
+    riktig kvalifikator-signatur.
     """
     scaped_navn_lower = scaped_navn.lower().strip()
+    scaped_kvalifikatorer = _produktkvalifikatorer(scaped_navn)
     best_match = None
     best_score = 0.7  # Terskel for match
 
     for master_id, master_info in master_humle.items():
         aliases = master_info.get("aliases", [])
         for alias in aliases:
+            if _produktkvalifikatorer(alias) != scaped_kvalifikatorer:
+                continue
             alias_lower = alias.lower().strip()
             score = similarity(scaped_navn_lower, alias_lower)
             if score > best_score:
