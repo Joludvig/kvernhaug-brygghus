@@ -11,6 +11,67 @@ def _sikre_raw_mappe():
     if not os.path.exists("raw_data"):
         os.makedirs("raw_data")
 
+def _skann_maltprodukter():
+    """
+    Henter og bygger den komplette maltlisten (Vestbrygg + Ølbrygging) —
+    samme kilde brukt av både kjor_malt_skanning() (Steg F9A) og
+    malt-blokken i kjor_full_skanning(), slik at det finnes én
+    maltimplementasjon å vedlikeholde, ikke to som kan drive fra
+    hverandre over tid.
+
+    Skriver ingenting selv — kalleren avgjør når/om resultatet skrives.
+    Sprer videre enhver feil fra underliggende scraping uendret (bygger
+    hele listen i minnet før den returneres, så en feil midtveis gir
+    aldri en delvis liste tilbake til kalleren).
+    """
+    malt_lenker_vest = finn_produktsider("https://vestbrygg.no", "råvarer/malt", "malt")
+    # Vestbrygg selger mange malter som mor-side + faktiske barn-/
+    # variantprodukter (1 kg hel/knust, 100g knust, 25 kg hel/knust) —
+    # se Steg E/F1. Erstatter enhver mor-URL med sine ekte barn-URL-er
+    # (kun for Vestbrygg-malt; Ølbrygging er uendret, se linjen under).
+    malt_lenker_vest = finn_vestbrygg_malt_med_varianter(malt_lenker_vest)
+    # Oppdatert til den korrekte råvarebanen hos Ølbrygging: ol/raavarer/malt
+    malt_lenker_ol = finn_produktsider("https://www.olbrygging.no", "ol/ingredienser/malt", "malt")
+
+    malt_data = []
+    for url in malt_lenker_vest:
+        res = parse_produktside(url, "malt", "vestbrygg")
+        if res: malt_data.append(res)
+        time.sleep(1)
+
+    for url in malt_lenker_ol:
+        res = parse_produktside(url, "malt", "olbrygging")
+        if res: malt_data.append(res)
+        time.sleep(1)
+
+    return malt_data
+
+def kjor_malt_skanning():
+    """
+    Skraper KUN malt (Vestbrygg + Ølbrygging via _skann_maltprodukter())
+    og skriver KUN raw_data/malt_raw.json — se scripts/scrape_malt_only.py.
+
+    Rører aldri raw_data/humle_raw.json eller raw_data/gjaer_raw.json,
+    og kaller aldri humle-/gjærinnhenting, matcher eller
+    AI-normalisering.
+
+    I motsetning til kjor_full_skanning() (som svelger feil for å
+    garantere et trygt returverdi-triplet til Streamlit-UI-et) lar
+    denne funksjonen enhver feil fra _skann_maltprodukter() forplante
+    seg uendret til kalleren — et manuelt CLI-kjørt malt-only-scrape
+    skal vise et ekte traceback ved feil, ikke stille late som ingenting
+    skjedde. raw_data/malt_raw.json skrives først når hele
+    maltinnhentingen er fullført, så en feil midtveis etterlater alltid
+    filen urørt (aldri et delvis resultat).
+
+    Returnerer antall maltprodukter skrevet.
+    """
+    _sikre_raw_mappe()
+    malt_data = _skann_maltprodukter()
+    with open("raw_data/malt_raw.json", "w", encoding="utf-8") as f:
+        json.dump(malt_data, f, ensure_ascii=False, indent=2)
+    return len(malt_data)
+
 def kjor_full_skanning():
     """Hovedmotor som kjører den nye dype link- og produktskanning-pipelinen med krasjsikring."""
     _sikre_raw_mappe()
@@ -25,26 +86,7 @@ def kjor_full_skanning():
         print("==================================================")
         print("Skanner MALT via strukturerte produktlenker...")
         print("==================================================")
-        malt_lenker_vest = finn_produktsider("https://vestbrygg.no", "råvarer/malt", "malt")
-        # Vestbrygg selger mange malter som mor-side + faktiske barn-/
-        # variantprodukter (1 kg hel/knust, 100g knust, 25 kg hel/knust) —
-        # se Steg E/F1. Erstatter enhver mor-URL med sine ekte barn-URL-er
-        # (kun for Vestbrygg-malt; Ølbrygging er uendret, se linjen under).
-        malt_lenker_vest = finn_vestbrygg_malt_med_varianter(malt_lenker_vest)
-        # Oppdatert til den korrekte råvarebanen hos Ølbrygging: ol/raavarer/malt
-        malt_lenker_ol = finn_produktsider("https://www.olbrygging.no", "ol/ingredienser/malt", "malt")
-        
-        malt_data = []
-        for url in malt_lenker_vest:
-            res = parse_produktside(url, "malt", "vestbrygg")
-            if res: malt_data.append(res)
-            time.sleep(1)
-            
-        for url in malt_lenker_ol:
-            res = parse_produktside(url, "malt", "olbrygging")
-            if res: malt_data.append(res)
-            time.sleep(1)
-            
+        malt_data = _skann_maltprodukter()
         with open("raw_data/malt_raw.json", "w", encoding="utf-8") as f:
             json.dump(malt_data, f, ensure_ascii=False, indent=2)
         antall_malt = len(malt_data)

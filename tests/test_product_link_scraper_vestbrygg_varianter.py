@@ -291,13 +291,22 @@ class Test11MorUtenVariantvelgerUendret(unittest.TestCase):
 
 class Test12OlbryggingUendret(unittest.TestCase):
     def test_olbrygging_malt_lenker_utvides_ikke_med_variantfunksjonen(self):
-        kilde = inspect.getsource(store_scraper.kjor_full_skanning)
+        # Steg F9A: selve malt-innhentingen (både Vestbrygg og Ølbrygging)
+        # bor nå i den delte _skann_maltprodukter(), gjenbrukt av både
+        # kjor_full_skanning() og kjor_malt_skanning() — se
+        # modules/store_scraper.py sin moduldokstreng.
+        kilde = inspect.getsource(store_scraper._skann_maltprodukter)
         malt_ol_linje = next(
             linje for linje in kilde.splitlines() if "malt_lenker_ol" in linje and "finn_produktsider" in linje
         )
         self.assertNotIn("finn_vestbrygg_malt_med_varianter", malt_ol_linje)
         # Selve variant-utvidelsen skal kun stå koblet til malt_lenker_vest:
         self.assertIn("finn_vestbrygg_malt_med_varianter(malt_lenker_vest)", kilde)
+        # kjor_full_skanning() skal selv ikke lenger inneholde egen
+        # malt-lenkelogikk — den gjenbruker _skann_maltprodukter().
+        kilde_full = inspect.getsource(store_scraper.kjor_full_skanning)
+        self.assertNotIn("malt_lenker_ol", kilde_full)
+        self.assertIn("_skann_maltprodukter()", kilde_full)
 
 
 class Test13HumleOgGjaerUendret(unittest.TestCase):
