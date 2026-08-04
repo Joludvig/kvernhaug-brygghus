@@ -279,6 +279,42 @@ class TestKjorMaltSkanning(unittest.TestCase):
         # kjor_full_skanning — det kan strukturelt ikke kalle den.
         self.assertFalse(hasattr(scrape_malt_only_mod, "kjor_full_skanning"))
 
+    def test_scrape_malt_only_script_kaller_ingenting_ved_vanlig_import(self):
+        import importlib
+        import scripts.scrape_malt_only as scrape_malt_only_mod
+
+        with patch.object(scrape_malt_only_mod, "kjor_malt_skanning") as mock_fn:
+            importlib.reload(scrape_malt_only_mod)
+            mock_fn.assert_not_called()
+
+
+class TestScrapeMaltLegacyScript(unittest.TestCase):
+    """
+    Steg F9C: samme main-/import-semantikk-kontroll som
+    TestKjorMaltSkanning gjør for scrape_malt_only.py, men for det
+    gamle scripts/scrape_malt.py (kjor_full_skanning()). Selve
+    importstien (sys.path-bootstrapen) er dekket separat i
+    tests/test_scrape_entrypoints_import.py — denne klassen bekrefter
+    kun main()/import-oppførselen, ikke selve importoppløsningen.
+    """
+
+    def test_scrape_malt_script_kaller_nøyaktig_kjor_full_skanning(self):
+        import scripts.scrape_malt as scrape_malt_mod
+
+        with patch.object(scrape_malt_mod, "kjor_full_skanning", return_value=(1, 2, 3)) as mock_fn:
+            scrape_malt_mod.main()
+            mock_fn.assert_called_once()
+
+        self.assertFalse(hasattr(scrape_malt_mod, "kjor_malt_skanning"))
+
+    def test_scrape_malt_script_kaller_ingenting_ved_vanlig_import(self):
+        import importlib
+        import scripts.scrape_malt as scrape_malt_mod
+
+        with patch.object(scrape_malt_mod, "kjor_full_skanning") as mock_fn:
+            importlib.reload(scrape_malt_mod)
+            mock_fn.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

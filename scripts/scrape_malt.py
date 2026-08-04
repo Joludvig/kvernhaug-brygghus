@@ -14,6 +14,15 @@ avgrensede entrypointet:
 Kjøres fra repo-roten:
     py -3 scripts/scrape_malt.py
 """
+from pathlib import Path
+import sys
+
+# Direkte kjøring (py -3 scripts/scrape_malt.py) setter sys.path[0]
+# til scripts/, ikke repo-roten — modules/ blir da ikke funnet uten dette.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from modules.store_scraper import kjor_full_skanning
 
 
