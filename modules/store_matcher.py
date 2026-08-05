@@ -10,9 +10,18 @@ _SIZE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Pakningstype (Steg F10C) er semantisk noe annet enn størrelse/maltform
+# over — det beskriver EMBALLASJEN produktet selges i ("Sekk"/"Sack"),
+# ikke selve maltens fysiske form. Egen, separat regel fremfor å late
+# som det er samme kategori som hel/knust/whole/crushed.
+_PAKNINGSTYPE_RE = re.compile(r"\s*\b(?:sekk|sack)\b", re.IGNORECASE)
+
 def _strip_size(navn: str) -> str:
-    """Fjerner størrelsesinfo som '25 kg knust' fra produktnavn før matching."""
-    return re.sub(r"\s+", " ", _SIZE_RE.sub("", navn)).strip()
+    """Fjerner størrelses-, maltform- og pakningstype-info (f.eks.
+    "25 kg knust", "Sekk", "Sack") fra produktnavn før matching."""
+    uten_storrelse_form = _SIZE_RE.sub("", navn)
+    uten_pakningstype = _PAKNINGSTYPE_RE.sub("", uten_storrelse_form)
+    return re.sub(r"\s+", " ", uten_pakningstype).strip()
 
 _HUMLE_KERN_STOP = re.compile(
     r"(?=\s*\b\d{4}\b|\s+humle\b|\s+pellets?\b|\s+-\s|\s+\d+\s*(?:g|kg)\b|\s+\d+[\.,]\d+\s*%)",
