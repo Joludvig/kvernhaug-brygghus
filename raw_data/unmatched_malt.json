@@ -1,1 +1,83 @@
-[]
+[
+  {
+    "navn": "1 Kg Spraymalt EXTRA Light (4-5 ebc)",
+    "butikk": "vestbrygg",
+    "pris": 178.0,
+    "url": "https://vestbrygg.no/ekstrakt-spraymalt/104639/1-kg-spraymalt-extra-light-4-5-ebc-1-kg-pakning",
+    "kategori": "spraymalt",
+    "ebc": 5.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "Beer Enhancer 1 KG",
+    "butikk": "vestbrygg",
+    "pris": 129.0,
+    "url": "https://vestbrygg.no/young-s/20710/beer-enhancer-1-kg-young-s",
+    "kategori": "malt",
+    "ebc": 4.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "1.2 kg Liquid Malt Extract – Light",
+    "butikk": "vestbrygg",
+    "pris": 132.5,
+    "url": "https://vestbrygg.no/ekstrakt-spraymalt/20806/12-kg-liquid-malt-extract--light-12-kg-mangrove-jack-s",
+    "kategori": "spraymalt",
+    "ebc": 4.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "1.5 kg Liquid Malt Extract – Light",
+    "butikk": "vestbrygg",
+    "pris": 126.0,
+    "url": "https://vestbrygg.no/ekstrakt-spraymalt/20807/15-kg-liquid-malt-extract--light-15-kg-mangrove-jack-s",
+    "kategori": "spraymalt",
+    "ebc": 4.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "Caramel 400- 250 g Knust",
+    "butikk": "olbrygging",
+    "pris": 40.0,
+    "url": "https://www.olbrygging.no/viking-malt/106291/caramel-400-350-450-ebc-viking-malt",
+    "kategori": "malt",
+    "ebc": 450.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "Caramel 100 - 250 g Knust",
+    "butikk": "olbrygging",
+    "pris": 40.0,
+    "url": "https://www.olbrygging.no/viking-malt/106266/caramel-100-90-110-ebc-viking-malt",
+    "kategori": "malt",
+    "ebc": 110.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "Caramel 200 - 250 g Knust",
+    "butikk": "olbrygging",
+    "pris": 40.0,
+    "url": "https://www.olbrygging.no/viking-malt/106276/caramel-200-180-220-ebc-viking-malt",
+    "kategori": "malt",
+    "ebc": 220.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "Caramel 150 - 250 g Knust",
+    "butikk": "olbrygging",
+    "pris": 40.0,
+    "url": "https://www.olbrygging.no/viking-malt/106271/caramel-150-140-160-ebc-viking-malt",
+    "kategori": "malt",
+    "ebc": 160.0,
+    "status": "pending_review"
+  },
+  {
+    "navn": "Caramel 50 - 250 g Knust",
+    "butikk": "olbrygging",
+    "pris": 40.0,
+    "url": "https://www.olbrygging.no/viking-malt/106296/caramel-50-40-60-ebc-viking-malt",
+    "kategori": "malt",
+    "ebc": 60.0,
+    "status": "pending_review"
+  }
+]
