@@ -1,3 +1,4 @@
+import copy
 import json
 import re
 from difflib import SequenceMatcher
@@ -329,7 +330,129 @@ def _bygg_vestbrygg_variantliste(kandidater):
     return list(unike.values())
 
 
-def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unmatched):
+_GYLDIGE_MALT_BUTIKKER = {"vestbrygg", "olbrygging"}
+
+
+def _bygg_malt_matchresultat(malt_raw, master_malt, butikker):
+    """Kjører selve matcher-hovedløkken (Steg F10D) — brukt IDENTISK av
+    både den filskrivende og den lesende (dry-run) veien i
+    match_store_data_to_master_malt(), slik at de aldri kan avvike.
+
+    `master_malt` muteres ALDRI — en dyp kopi ("master_forslag") bygges
+    og returneres i stedet, slik at kallerens innlastede master forblir
+    urørt uansett om resultatet faktisk skrives til fil etterpå.
+
+    `butikker` (set[str] | None) styrer KUN hvilke butikker som får lov
+    til å skrive et forslag inn i master_forslag.butikk_match — matching,
+    kandidatinnsamling, variantbygging og statistikk kjøres uendret for
+    ALLE butikker uansett filter, slik at unmatched-lista og
+    statistikk-tallene alltid reflekterer hele rådatasettet (se Fase 4/6
+    i F10D-oppdraget). Filteret er allerede validert av kalleren.
+
+    Returnerer {"master_forslag", "unmatched", "statistikk"}."""
+    master_forslag = copy.deepcopy(master_malt)
+
+    unmatched = []
+    kandidater_per_slot = {}
+    raw_per_butikk = {}
+    matchet_per_butikk = {}
+    unmatched_per_butikk = {}
+
+    for raw in malt_raw:
+        navn = raw.get("navn", "")
+        butikk_key = _normaliser_butikk(raw.get("butikk", ""))
+        pris_raw = raw.get("pris", 0)
+        pakke_gram = raw.get("pakke_gram")
+        url = raw.get("url", "")
+
+        pris_kg = _pris_per_kg(pris_raw, pakke_gram, "malt")
+        raw_per_butikk[butikk_key] = raw_per_butikk.get(butikk_key, 0) + 1
+
+        master_id, _ = match_product_to_master(_strip_size(navn), master_forslag)
+        logg_match_resultat(navn, master_id, butikk_key)
+
+        if master_id:
+            valider_url_match(master_id, master_forslag[master_id].get("display_name", master_id), url)
+            kandidater_per_slot.setdefault((master_id, butikk_key), []).append({
+                "navn": navn, "pris_kg": pris_kg, "pris_raw": pris_raw, "url": url,
+                "pakke_gram": pakke_gram, "er_knust": raw.get("er_knust", False),
+                "lagerstatus": raw.get("lagerstatus"),
+            })
+            matchet_per_butikk[butikk_key] = matchet_per_butikk.get(butikk_key, 0) + 1
+        else:
+            unmatched.append({
+                "navn": navn, "butikk": butikk_key,
+                "pris": pris_kg, "url": url,
+                "kategori": raw.get("kategori", "malt"),
+                "ebc": raw.get("ebc"), "status": "pending_review",
+            })
+            unmatched_per_butikk[butikk_key] = unmatched_per_butikk.get(butikk_key, 0) + 1
+
+    slots_per_butikk = {}
+    varianter_per_butikk = {}
+    slots_oppdatert_per_butikk = {}
+    berorte_master_ider = set()
+
+    for (master_id, butikk_key), kandidater in kandidater_per_slot.items():
+        slots_per_butikk[butikk_key] = slots_per_butikk.get(butikk_key, 0) + 1
+
+        # Variantlisten analyseres for ALLE butikker uansett filter (ren
+        # lesing, ingen skriving) — se Fase 4/10: Ølbrygging skal fortsatt
+        # telles i statistikken selv når kun Vestbrygg aktiveres.
+        if butikk_key == "olbrygging":
+            varianter = _bygg_ol_variantliste(kandidater)
+        elif butikk_key == "vestbrygg":
+            varianter = _bygg_vestbrygg_variantliste(kandidater)
+        else:
+            varianter = []
+        varianter_per_butikk[butikk_key] = varianter_per_butikk.get(butikk_key, 0) + len(varianter)
+
+        if butikker is not None and butikk_key not in butikker:
+            continue
+
+        valgt = _velg_representativ_maltkandidat(kandidater)
+        if len(kandidater) > 1:
+            print(f"[VALGT] {butikk_key}: '{valgt['navn']}' foretrukket blant "
+                  f"{len(kandidater)} pakningskandidater for '{master_id}'")
+        if "butikk_match" not in master_forslag[master_id]:
+            master_forslag[master_id]["butikk_match"] = {}
+        if butikk_key not in master_forslag[master_id]["butikk_match"]:
+            master_forslag[master_id]["butikk_match"][butikk_key] = {"pris": None, "url": None}
+        master_forslag[master_id]["butikk_match"][butikk_key]["pris"] = valgt["pris_kg"]
+        master_forslag[master_id]["butikk_match"][butikk_key]["url"] = valgt["url"]
+
+        # Kun Ølbrygging får den fullstendige variantlisten i denne
+        # runden (Steg D) — Vestbryggs løsvekt+sekk-modell er bevisst
+        # ikke rørt, se modules/malt_packaging.py sin moduldokstreng.
+        # Flate pris/url over forblir uendret og fungerer fortsatt som
+        # fallback for enhver butikk uten "varianter".
+        if varianter:
+            master_forslag[master_id]["butikk_match"][butikk_key]["varianter"] = varianter
+
+        slots_oppdatert_per_butikk[butikk_key] = slots_oppdatert_per_butikk.get(butikk_key, 0) + 1
+        berorte_master_ider.add(master_id)
+
+    statistikk = {
+        "raw_totalt": len(malt_raw),
+        "raw_per_butikk": raw_per_butikk,
+        "matchet_per_butikk": matchet_per_butikk,
+        "unmatched_per_butikk": unmatched_per_butikk,
+        "slots_per_butikk": slots_per_butikk,
+        "varianter_per_butikk": varianter_per_butikk,
+        "slots_oppdatert_per_butikk": slots_oppdatert_per_butikk,
+        "berorte_master_ider": sorted(berorte_master_ider),
+        "matchet_totalt": sum(matchet_per_butikk.values()),
+    }
+
+    return {
+        "master_forslag": master_forslag,
+        "unmatched": unmatched,
+        "statistikk": statistikk,
+    }
+
+
+def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unmatched,
+                                     butikker=None, dry_run=False):
     """
     Matcher scrapede malter mot master_malt aliases.
     Oppdaterer BARE pris/URL i master. Umatched → pending_review.
@@ -354,7 +477,41 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
     modules/product_link_scraper.py::_lagerstatus_fra_html(). Ølbryggings
     variantliste (_bygg_ol_variantliste()) er urørt og har IKKE dette
     feltet.
+
+    butikker (Steg F10D, valgfri): set[str] med "vestbrygg" og/eller
+    "olbrygging", eller None (standard) for begge. Begrenser KUN hvilke
+    butikker som får lov til å skrive et oppdatert butikk_match-forslag
+    — matching og statistikk kjøres uansett for hele rådatasettet, og
+    unmatched inneholder alltid alle butikker. Butikker utenfor filteret
+    beholdes byte-for-byte uendret i master_forslag/masterfilen. Tomt
+    sett eller ukjent butikknavn gir ValueError (sannsynlig kallerfeil).
+
+    dry_run (Steg F10D, valgfri, standard False): når True skrives
+    verken masterfil eller unmatched-fil — funksjonen returnerer i
+    stedet et strukturert resultat i minnet:
+    {"master_forslag", "unmatched", "statistikk", "butikker", "dry_run"}.
+    Bruker NØYAKTIG samme matcher-/kandidat-/variant-/prislogikk som den
+    filskrivende veien (se _bygg_malt_matchresultat()) — kun om
+    resultatet skrives til fil og hva funksjonen returnerer skiller de
+    to modiene.
+
+    Når verken butikker eller dry_run oppgis er oppførselen og
+    returverdien (matched_count, len(unmatched)) UENDRET fra før
+    Steg F10D — eksisterende kallere (ui/import_panel.py og flere
+    tester) er avhengige av nettopp denne tuppel-kontrakten.
     """
+    if butikker is not None:
+        if not butikker:
+            raise ValueError(
+                "butikker kan ikke være et tomt sett — bruk butikker=None for å behandle alle butikker."
+            )
+        ukjente = butikker - _GYLDIGE_MALT_BUTIKKER
+        if ukjente:
+            raise ValueError(
+                f"Ukjent(e) butikk(er) i butikker-filter: {sorted(ukjente)}. "
+                f"Gyldige verdier: {sorted(_GYLDIGE_MALT_BUTIKKER)}"
+            )
+
     with open(malt_raw_path, "r", encoding="utf-8") as f:
         malt_raw = json.load(f)
     with open(master_malt_path, "r", encoding="utf-8") as f:
@@ -363,75 +520,18 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
     malt_raw = valider_raw_liste(malt_raw, "malt")
     valider_duplikat_aliaser(master_malt)
 
-    unmatched = []
-    matched_count = 0
-    kandidater_per_slot = {}
+    resultat = _bygg_malt_matchresultat(malt_raw, master_malt, butikker)
 
-    for raw in malt_raw:
-        navn = raw.get("navn", "")
-        butikk_key = _normaliser_butikk(raw.get("butikk", ""))
-        pris_raw = raw.get("pris", 0)
-        pakke_gram = raw.get("pakke_gram")
-        url = raw.get("url", "")
+    if dry_run:
+        resultat["butikker"] = sorted(butikker) if butikker is not None else sorted(_GYLDIGE_MALT_BUTIKKER)
+        resultat["dry_run"] = True
+        return resultat
 
-        pris_kg = _pris_per_kg(pris_raw, pakke_gram, "malt")
-
-        master_id, _ = match_product_to_master(_strip_size(navn), master_malt)
-        logg_match_resultat(navn, master_id, butikk_key)
-
-        if master_id:
-            valider_url_match(master_id, master_malt[master_id].get("display_name", master_id), url)
-            kandidater_per_slot.setdefault((master_id, butikk_key), []).append({
-                "navn": navn, "pris_kg": pris_kg, "pris_raw": pris_raw, "url": url,
-                "pakke_gram": pakke_gram, "er_knust": raw.get("er_knust", False),
-                "lagerstatus": raw.get("lagerstatus"),
-            })
-            matched_count += 1
-        else:
-            unmatched.append({
-                "navn": navn, "butikk": butikk_key,
-                "pris": pris_kg, "url": url,
-                "kategori": raw.get("kategori", "malt"),
-                "ebc": raw.get("ebc"), "status": "pending_review",
-            })
-
-    for (master_id, butikk_key), kandidater in kandidater_per_slot.items():
-        valgt = _velg_representativ_maltkandidat(kandidater)
-        if len(kandidater) > 1:
-            print(f"[VALGT] {butikk_key}: '{valgt['navn']}' foretrukket blant "
-                  f"{len(kandidater)} pakningskandidater for '{master_id}'")
-        if "butikk_match" not in master_malt[master_id]:
-            master_malt[master_id]["butikk_match"] = {}
-        if butikk_key not in master_malt[master_id]["butikk_match"]:
-            master_malt[master_id]["butikk_match"][butikk_key] = {"pris": None, "url": None}
-        master_malt[master_id]["butikk_match"][butikk_key]["pris"] = valgt["pris_kg"]
-        master_malt[master_id]["butikk_match"][butikk_key]["url"] = valgt["url"]
-
-        # Kun Ølbrygging får den fullstendige variantlisten i denne
-        # runden (Steg D) — Vestbryggs løsvekt+sekk-modell er bevisst
-        # ikke rørt, se modules/malt_packaging.py sin moduldokstreng.
-        # Flate pris/url over forblir uendret og fungerer fortsatt som
-        # fallback for enhver butikk uten "varianter".
-        if butikk_key == "olbrygging":
-            varianter = _bygg_ol_variantliste(kandidater)
-            if varianter:
-                master_malt[master_id]["butikk_match"][butikk_key]["varianter"] = varianter
-        elif butikk_key == "vestbrygg":
-            # Steg F1/F2: Vestbryggs faktiske barn-/variantprodukter (kun
-            # tilgjengelig når raw-radene faktisk stammer fra
-            # finn_vestbrygg_malt_med_varianter(), se product_link_scraper.py).
-            # Mor-sider uten variantvelger gir her naturlig 0-2 kandidater
-            # uten kjent pakke_gram → varianter blir tom, kun flate felt
-            # skrives, akkurat som før Steg F.
-            varianter = _bygg_vestbrygg_variantliste(kandidater)
-            if varianter:
-                master_malt[master_id]["butikk_match"][butikk_key]["varianter"] = varianter
-
-    skriv_master_json_atomisk(master_malt_path, master_malt)
+    skriv_master_json_atomisk(master_malt_path, resultat["master_forslag"])
     with open(output_unmatched, "w", encoding="utf-8") as f:
-        json.dump(unmatched, f, ensure_ascii=False, indent=2)
+        json.dump(resultat["unmatched"], f, ensure_ascii=False, indent=2)
 
-    return matched_count, len(unmatched)
+    return resultat["statistikk"]["matchet_totalt"], len(resultat["unmatched"])
 
 
 def match_store_data_to_master_gjaer(gjaer_raw_path, master_gjaer_path, output_unmatched):
