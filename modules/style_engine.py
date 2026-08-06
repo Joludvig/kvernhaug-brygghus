@@ -88,6 +88,24 @@ _TAK_FLERE_AVVIK = 85
 _TAK_AVVIK = 95
 
 
+# Norsk tallformatering for mangel-tekstene ("Se hva som mangler"). Rent
+# visningslag — påvirker aldri sammenligningen i _avvik_numerisk selv, som
+# fortsatt regner på full flyttallspresisjon. Desimaltallet rundes til et
+# fast antall desimaler FØR punktum byttes til komma, slik at flyttallsstøy
+# (f.eks. 0.0040000001) aldri når frem til brukeren.
+def _fmt_komma(verdi, desimaler):
+    return f"{verdi:.{desimaler}f}".replace(".", ",")
+
+
+# For IBU/EBC-stilgrenser, som i biblioteket er lagret som hele tall (18, 24,
+# 14, 26 osv.) — vises uten unødvendige ".0"/"0"-desimaler, men tåler også en
+# fremtidig stil med en reell desimalgrense.
+def _fmt_omrade_heltall(verdi):
+    if float(verdi) == int(verdi):
+        return str(int(verdi))
+    return _fmt_komma(verdi, 1)
+
+
 def _avvik_numerisk(verdi, lo, hi, eps, vekt_under, vekt_over, tekst_under, tekst_over):
     """
     Eneste stedet som sammenligner en oppskriftsverdi mot et BJCP-intervall.
@@ -409,10 +427,25 @@ def analyser_stil_og_balanse(recipe):
         onsket_sensorisk = []
         kritiske_avvik = 0
 
+        # Mangel-tekstene under viser, for hvert numerisk felt: hva som er
+        # for høyt/lavt, oppskriftens faktiske verdi, stilens tillatte
+        # område og det faktiske avviket fra nærmeste grense — slik at et
+        # marginalt og et stort avvik ikke lenger fremstår identiske i
+        # "Se hva som mangler" (Kvernhaug-gjennomgang 2026-08-06). Selve
+        # sammenligningen/scoringen i _avvik_numerisk er uendret; kun
+        # tekstene som bygges her er nye.
         d, tekst, kritisk = _avvik_numerisk(
             og, krav["og"][0], krav["og"][1], _EPS_OG, 30, 30,
-            lambda diff: f"For lav sukkermengde (OG bør være over {krav['og'][0]:.3f})",
-            lambda diff: f"For høy sukkermengde (OG bør være under {krav['og'][1]:.3f})",
+            lambda diff: (
+                f"For lav styrke i vørteren: OG {_fmt_komma(og, 3)} — "
+                f"stilområde {_fmt_komma(krav['og'][0], 3)}–{_fmt_komma(krav['og'][1], 3)} — "
+                f"{_fmt_komma(diff, 3)} under"
+            ),
+            lambda diff: (
+                f"For høy styrke i vørteren: OG {_fmt_komma(og, 3)} — "
+                f"stilområde {_fmt_komma(krav['og'][0], 3)}–{_fmt_komma(krav['og'][1], 3)} — "
+                f"{_fmt_komma(diff, 3)} over"
+            ),
         )
         score += d
         if tekst: mangler.append(tekst)
@@ -420,19 +453,33 @@ def analyser_stil_og_balanse(recipe):
 
         d, tekst, kritisk = _avvik_numerisk(
             fg, krav["fg"][0], krav["fg"][1], _EPS_FG, 25, 25,
-            lambda diff: f"Gjæret for langt ned (FG bør være over {krav['fg'][0]:.3f})",
-            lambda diff: f"For mye restsødme (FG bør være under {krav['fg'][1]:.3f})",
+            lambda diff: (
+                f"For lav FG: {_fmt_komma(fg, 3)} — "
+                f"stilområde {_fmt_komma(krav['fg'][0], 3)}–{_fmt_komma(krav['fg'][1], 3)} — "
+                f"{_fmt_komma(diff, 3)} under"
+            ),
+            lambda diff: (
+                f"For høy FG: {_fmt_komma(fg, 3)} — "
+                f"stilområde {_fmt_komma(krav['fg'][0], 3)}–{_fmt_komma(krav['fg'][1], 3)} — "
+                f"{_fmt_komma(diff, 3)} over"
+            ),
         )
         score += d
         if tekst: mangler.append(tekst)
         if kritisk: kritiske_avvik += 1
 
-        # IBU-avviket vises med 1 desimal (ikke 0) slik at et reelt, men lite,
-        # avvik (f.eks. 0.6 IBU) ikke fremstår som "0 IBU" i teksten.
         d, tekst, kritisk = _avvik_numerisk(
             ibu, krav["ibu"][0], krav["ibu"][1], _EPS_IBU, 25, 20,
-            lambda diff: f"Mangler bitterhet (Mangler {diff:.1f} IBU)",
-            lambda diff: f"For høy bitterhet ({diff:.1f} IBU for mye)",
+            lambda diff: (
+                f"For lav bitterhet: {_fmt_komma(ibu, 1)} IBU — "
+                f"stilområde {_fmt_omrade_heltall(krav['ibu'][0])}–{_fmt_omrade_heltall(krav['ibu'][1])} IBU — "
+                f"{_fmt_komma(diff, 1)} IBU under"
+            ),
+            lambda diff: (
+                f"For høy bitterhet: {_fmt_komma(ibu, 1)} IBU — "
+                f"stilområde {_fmt_omrade_heltall(krav['ibu'][0])}–{_fmt_omrade_heltall(krav['ibu'][1])} IBU — "
+                f"{_fmt_komma(diff, 1)} IBU over"
+            ),
         )
         score += d
         if tekst: mangler.append(tekst)
@@ -440,8 +487,16 @@ def analyser_stil_og_balanse(recipe):
 
         d, tekst, kritisk = _avvik_numerisk(
             ebc, krav["ebc"][0], krav["ebc"][1], _EPS_EBC, 15, 12,
-            lambda diff: "Ølet er for lyst for stilen",
-            lambda diff: "Ølet er for mørkt for stilen",
+            lambda diff: (
+                f"For lys farge: {_fmt_komma(ebc, 1)} EBC — "
+                f"stilområde {_fmt_omrade_heltall(krav['ebc'][0])}–{_fmt_omrade_heltall(krav['ebc'][1])} EBC — "
+                f"{_fmt_komma(diff, 1)} EBC under"
+            ),
+            lambda diff: (
+                f"For mørk farge: {_fmt_komma(ebc, 1)} EBC — "
+                f"stilområde {_fmt_omrade_heltall(krav['ebc'][0])}–{_fmt_omrade_heltall(krav['ebc'][1])} EBC — "
+                f"{_fmt_komma(diff, 1)} EBC over"
+            ),
         )
         score += d
         if tekst: mangler.append(tekst)
@@ -449,8 +504,16 @@ def analyser_stil_og_balanse(recipe):
 
         d, tekst, kritisk = _avvik_numerisk(
             abv, krav["abv"][0], krav["abv"][1], _EPS_ABV, 25, 25,
-            lambda diff: f"For lav alkohol (ABV bør være over {krav['abv'][0]:.1f}%)",
-            lambda diff: f"For høy alkohol (ABV bør være under {krav['abv'][1]:.1f}%)",
+            lambda diff: (
+                f"For lav alkohol: {_fmt_komma(abv, 2)} % — "
+                f"stilområde {_fmt_komma(krav['abv'][0], 1)}–{_fmt_komma(krav['abv'][1], 1)} % — "
+                f"{_fmt_komma(diff, 2)} prosentpoeng under"
+            ),
+            lambda diff: (
+                f"For høy alkohol: {_fmt_komma(abv, 2)} % — "
+                f"stilområde {_fmt_komma(krav['abv'][0], 1)}–{_fmt_komma(krav['abv'][1], 1)} % — "
+                f"{_fmt_komma(diff, 2)} prosentpoeng over"
+            ),
         )
         score += d
         if tekst: mangler.append(tekst)

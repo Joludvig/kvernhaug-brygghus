@@ -542,8 +542,12 @@ class TestHistoriskWiesnMarzenVindu(unittest.TestCase):
         oppskrift = self._wiesn_oppskrift(og=1.062)
         resultat = analyser_stil_og_balanse(oppskrift)
         canonical = _finn_stil(resultat, "Märzen")
+        # Teksten ble bevisst forbedret i Steg F11C (2026-08-06) til å vise
+        # oppskriftens faktiske verdi og avviksstørrelse, ikke bare grensen —
+        # sjekker derfor det nye "styrke i vørteren"-merket og
+        # komma-formatert "1,060" i stedet for det gamle "sukkermengde"/"1.060".
         self.assertTrue(
-            any("sukkermengde" in m and "1.060" in m for m in canonical["mangler"]),
+            any("styrke i vørteren" in m and "1,060" in m for m in canonical["mangler"]),
             f"Canonical Märzen sitt OG-tak ser ut til å ha endret seg: {canonical['mangler']}",
         )
 
@@ -789,6 +793,183 @@ class TestBjcpOffisiellKlassifisering(unittest.TestCase):
         resultat = analyser_stil_og_balanse(oppskrift)
         wiesn = _finn_stil(resultat, "Historisk Wiesn-Märzen")
         self.assertEqual(wiesn["mangler"], [], "OG/FG/ABV innenfor det historiske vinduet skal fortsatt gi 0 mangler")
+
+
+class TestManglerTekstformatering(unittest.TestCase):
+    """Steg F11C (2026-08-06): mangel-tekstene for numeriske avvik (OG/FG/
+    IBU/EBC/ABV) skal vise hva som er for høyt/lavt, oppskriftens faktiske
+    verdi, stilens tillatte område og avviket fra nærmeste grense — ikke
+    bare grensen, slik de gjorde før. Disse testene låser kun det NYE
+    tekstformatet; selve scoringsmatematikken (_avvik_numerisk) er ikke
+    endret og dekkes fortsatt av de eksisterende testene over."""
+
+    _FLAVOR = {"Brød": 6.0, "Sitrus": 3.0, "Bitterhet": 6.0}
+
+    def _pils(self, **overrides):
+        base = dict(og=1.047, fg=1.0105, ibu=31.0, ebc=6.0, abv=4.8,
+                    flavor_profile=self._FLAVOR, yeast="safale_us_05")
+        base.update(overrides)
+        resultat = analyser_stil_og_balanse(_lag_oppskrift(**base))
+        return _finn_stil(resultat, "Tysk Pilsner")
+
+    def test_og_rett_over_ovre_grense(self):
+        pils = self._pils(og=1.051)
+        mangel = next(m for m in pils["mangler"] if "styrke i vørteren" in m)
+        self.assertEqual(mangel, "For høy styrke i vørteren: OG 1,051 — stilområde 1,044–1,050 — 0,001 over")
+
+    def test_og_langt_over_ovre_grense_viser_storre_avvik_enn_marginalt(self):
+        # Selve poenget med F11C: et stort avvik skal IKKE se identisk ut som
+        # et marginalt et (jf. F11B punkt 14 — begge fikk samme ❌ og samme
+        # grense-tekst før denne endringen).
+        pils_marginalt = self._pils(og=1.051)
+        pils_stort = self._pils(og=1.080)
+        mangel_marginalt = next(m for m in pils_marginalt["mangler"] if "styrke i vørteren" in m)
+        mangel_stort = next(m for m in pils_stort["mangler"] if "styrke i vørteren" in m)
+        self.assertNotEqual(mangel_marginalt, mangel_stort)
+        self.assertIn("0,001 over", mangel_marginalt)
+        self.assertIn("0,030 over", mangel_stort)
+        self.assertIn("OG 1,080", mangel_stort)
+
+    def test_og_under_nedre_grense(self):
+        pils = self._pils(og=1.040)
+        mangel = next(m for m in pils["mangler"] if "styrke i vørteren" in m)
+        self.assertEqual(mangel, "For lav styrke i vørteren: OG 1,040 — stilområde 1,044–1,050 — 0,004 under")
+
+    def test_fg_over_omradet(self):
+        pils = self._pils(fg=1.017)
+        mangel = next(m for m in pils["mangler"] if m.startswith("For høy FG"))
+        self.assertEqual(mangel, "For høy FG: 1,017 — stilområde 1,008–1,013 — 0,004 over")
+
+    def test_fg_under_omradet(self):
+        pils = self._pils(fg=1.004)
+        mangel = next(m for m in pils["mangler"] if m.startswith("For lav FG"))
+        self.assertEqual(mangel, "For lav FG: 1,004 — stilområde 1,008–1,013 — 0,004 under")
+
+    def test_abv_over_omradet(self):
+        pils = self._pils(abv=5.45)
+        mangel = next(m for m in pils["mangler"] if "alkohol" in m)
+        self.assertEqual(mangel, "For høy alkohol: 5,45 % — stilområde 4,4–5,2 % — 0,25 prosentpoeng over")
+
+    def test_abv_under_omradet(self):
+        pils = self._pils(abv=4.0)
+        mangel = next(m for m in pils["mangler"] if "alkohol" in m)
+        self.assertEqual(mangel, "For lav alkohol: 4,00 % — stilområde 4,4–5,2 % — 0,40 prosentpoeng under")
+
+    def test_ibu_over_omradet(self):
+        pils = self._pils(ibu=45.0)
+        mangel = next(m for m in pils["mangler"] if "bitterhet" in m.lower())
+        self.assertEqual(mangel, "For høy bitterhet: 45,0 IBU — stilområde 22–40 IBU — 5,0 IBU over")
+
+    def test_ibu_under_omradet(self):
+        pils = self._pils(ibu=15.0)
+        mangel = next(m for m in pils["mangler"] if "bitterhet" in m.lower())
+        self.assertEqual(mangel, "For lav bitterhet: 15,0 IBU — stilområde 22–40 IBU — 7,0 IBU under")
+
+    def test_ebc_over_omradet(self):
+        pils = self._pils(ebc=20.0)
+        mangel = next(m for m in pils["mangler"] if "farge" in m)
+        self.assertEqual(mangel, "For mørk farge: 20,0 EBC — stilområde 4–8 EBC — 12,0 EBC over")
+
+    def test_ebc_under_omradet(self):
+        pils = self._pils(ebc=2.0)
+        mangel = next(m for m in pils["mangler"] if "farge" in m)
+        self.assertEqual(mangel, "For lys farge: 2,0 EBC — stilområde 4–8 EBC — 2,0 EBC under")
+
+    def test_norsk_desimalkomma_ikke_engelsk_punktum(self):
+        pils = self._pils(og=1.070)
+        mangel = next(m for m in pils["mangler"] if "styrke i vørteren" in m)
+        self.assertNotIn(".", mangel)
+        self.assertIn(",", mangel)
+
+    def test_ingen_flyttallsstoy_i_teksten(self):
+        # og=1.0644 er kjent for å gi flyttallsstøy i en rå python-subtraksjon
+        # (1.0644 - 1.050 = 0.014400000000000079) -- teksten skal likevel
+        # vise en ren, avrundet streng uten støyen.
+        pils = self._pils(og=1.0644)
+        mangel = next(m for m in pils["mangler"] if "styrke i vørteren" in m)
+        self.assertEqual(mangel, "For høy styrke i vørteren: OG 1,064 — stilområde 1,044–1,050 — 0,014 over")
+        for stoy in ("0000000", "9999999", "00001", "99999"):
+            self.assertNotIn(stoy, mangel)
+
+    def test_verdi_pa_grensen_gir_fortsatt_ingen_manglertekst(self):
+        pils = self._pils(og=1.050)
+        self.assertFalse(any("styrke i vørteren" in m for m in pils["mangler"]))
+
+    def test_verdi_innenfor_epsilon_gir_fortsatt_ingen_manglertekst(self):
+        pils = self._pils(og=1.050 + 0.0002)
+        self.assertFalse(any("styrke i vørteren" in m for m in pils["mangler"]))
+
+    def test_sensorisk_tekst_er_uendret(self):
+        # Fase 5-krav: sensoriske forklaringer ("har X, stilen ber om Y+")
+        # skal IKKE endres i dette steget.
+        pils = self._pils(flavor_profile={"Brød": 2.0, "Sitrus": 3.0, "Bitterhet": 6.0})
+        onsket = next(o for o in pils["onsket_sensorisk"] if "brød" in o.lower())
+        self.assertEqual(onsket, "Ønsket sensorisk preg av *brød* (har 2.0, stilen ber om 4.0+)")
+
+    def test_score_og_kritiske_avvik_uendret_for_isolert_abv_avvik(self):
+        # Bekrefter at selve scoringen (ikke bare teksten) er identisk med
+        # TestTydeligAvvikUtenAVaereKritisk sitt scenario (samme tall) —
+        # score/kritiske_avvik/mangler-lengde er upåvirket av tekstendringen.
+        pils = self._pils(abv=5.45)
+        self.assertEqual(len(pils["mangler"]), 1)
+        self.assertEqual(pils["kritiske_avvik"], 0)
+        self.assertEqual(pils["score"], 92)
+
+
+class TestWiesnMarzenReferansenGirFortsattRiktigProsentEtterTekstendring(unittest.TestCase):
+    """Steg F11C: bekrefter, med de samme LIVE-beregnede tallene som Steg
+    F11B verifiserte reproduserer det brukeren så i UI-et (batchvolum 25 L,
+    dagens data/master_malt.json — se F11B punkt 2/15), at 100 %/95 %/69 %-
+    resultatet er UENDRET etter tekstforbedringen, og at de nye tekstene
+    faktisk viser riktig verdi/avvik for akkurat denne oppskriften.
+
+    Bruker bevisst IKKE tests/fixtures/recipes/wiesn_marzen_1872.json — den
+    fixturens "stats"-felt er kjent utdatert (EBC 15.06 mot dagens
+    live-beregnede 20.74, se F11B punkt 15) og skal ikke røres i dette
+    steget. Tallene under er bygget direkte, slik
+    _analyser_fixture_oppskrift() i test_style_engine_recipes.py gjør det
+    internt, uten å lese eller skrive fixture-filen."""
+
+    def _oppskrift(self):
+        return _lag_oppskrift(
+            og=1.0639925272000001, fg=1.011518654896, abv=6.887195739900018,
+            ibu=22.19577066725207, ebc=20.743948714358822,
+            flavor_profile={
+                "Bitterhet": 2.7744713334065088, "Brød": 5.695774647887324,
+                "Maltfylde": 7.473239436619719, "Toast": 4.850704225352113,
+            },
+            yeast="saflager_w3470",
+            malts=[
+                {"id": "weyermann_munich_1", "mengde": 0.70},
+                {"id": "munich_ii", "mengde": 4.60},
+                {"id": "vienna", "mengde": 1.80},
+            ],
+        )
+
+    def test_prosentene_er_uendret(self):
+        resultat = analyser_stil_og_balanse(self._oppskrift())
+        self.assertEqual(resultat["stil"], "Historisk Wiesn-Märzen")
+        wiesn = _finn_stil(resultat, "Historisk Wiesn-Märzen")
+        bock = _finn_stil(resultat, "Heller Bock (Mai-Bock)")
+        marzen = _finn_stil(resultat, "Märzen")
+        self.assertEqual(wiesn["score"], 100)
+        self.assertEqual(bock["score"], 95)
+        self.assertEqual(marzen["score"], 69)
+
+    def test_marzen_forklaringen_viser_faktisk_verdi_og_avvik(self):
+        resultat = analyser_stil_og_balanse(self._oppskrift())
+        marzen = _finn_stil(resultat, "Märzen")
+        og_mangel = next(m for m in marzen["mangler"] if "styrke i vørteren" in m)
+        abv_mangel = next(m for m in marzen["mangler"] if "alkohol" in m)
+        self.assertEqual(og_mangel, "For høy styrke i vørteren: OG 1,064 — stilområde 1,054–1,060 — 0,004 over")
+        self.assertEqual(abv_mangel, "For høy alkohol: 6,89 % — stilområde 5,8–6,3 % — 0,59 prosentpoeng over")
+
+    def test_heller_bock_forklaringen_viser_ibu_avvik_uten_a_endre_scoren(self):
+        resultat = analyser_stil_og_balanse(self._oppskrift())
+        bock = _finn_stil(resultat, "Heller Bock (Mai-Bock)")
+        self.assertEqual(bock["score"], 95)
+        ibu_mangel = next(m for m in bock["mangler"] if "bitterhet" in m.lower())
+        self.assertEqual(ibu_mangel, "For lav bitterhet: 22,2 IBU — stilområde 23–35 IBU — 0,8 IBU under")
 
 
 if __name__ == "__main__":
