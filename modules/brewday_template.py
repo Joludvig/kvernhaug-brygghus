@@ -609,13 +609,13 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
   {stat_box("FG",           f"Mål: {fmt_fg(ctx['fg'])}",    fg_v)}
   {stat_box("ABV",          f"Mål: {fmt_abv(ctx['abv'])}",  abv_v)}
   {stat_box("Pitch temp",   "",                              pitch_v)}
-  {stat_box("Maskeeff",     f"Plan: {ctx['effektivitet']*100:.0f}%", mash_eff_v)}
+  {stat_box("Maskeeff",     "",                              mash_eff_v)}
 </div>
 
 <!-- EFFEKTIVITET & BH-EFF -->
 <div class="eff-row" style="margin-top:6px;">
   <div class="eff-field">
-    <div class="eff-lbl">Brygghuseffektivitet</div>
+    <div class="eff-lbl">Brygghuseffektivitet (plan: {ctx['effektivitet']*100:.0f}%)</div>
     {'<div class="eff-val">' + bh_eff_v + '</div>' if bh_eff_v else '<div class="eff-line"></div>'}
   </div>
   <div class="eff-field">

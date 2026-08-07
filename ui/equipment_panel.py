@@ -27,10 +27,15 @@ def render_equipment_panel():
         col1, col2 = st.columns(2)
         with col1:
             efficiency = st.number_input(
-                "Meskeeffektivitet (%)",
+                "Brygghuseffektivitet (%)",
                 min_value=50, max_value=100, step=1,
                 value=int(round(eq["efficiency"] * 100)),
                 key="eq_efficiency",
+                help=(
+                    "Andelen av maltets potensielle sukker som ender som "
+                    "gravity points i ferdig batch. Bruk din målte "
+                    "brygghuseffektivitet, ikke meskeeffektivitet."
+                ),
             )
             boil_off = st.number_input(
                 "Fordampning (L/time)",
