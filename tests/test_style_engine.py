@@ -16,10 +16,17 @@ from modules.style_engine import (
     analyser_stil_og_balanse,
     _avvik_numerisk,
     _avvik_sensorisk,
+    _kombiner_styrkeklynge,
     _EPS_IBU,
+    _EPS_OG,
+    _EPS_FG,
+    _EPS_ABV,
     _TAK_AVVIK,
     _TAK_FLERE_AVVIK,
+    _TAK_KRITISK,
     _MANGE_AVVIK_ANTALL_FOR_TAK,
+    _STYRKEKLYNGE_NEST_VEKT,
+    _STYRKEKLYNGE_TREDJE_VEKT,
 )
 from modules.flavor_engine import generer_smakshjul
 
@@ -307,12 +314,22 @@ class TestMunichDominertBockScenario(unittest.TestCase):
     def test_pilsnerstiler_har_flere_kritiske_avvik(self):
         # Bekrefter at det er OG/ABV/farge-avvikene (ikke en tilfeldig
         # scorejustering) som faktisk trigger taket for pilsnerstilene.
+        #
+        # Steg F11K (Modell C): terskelen senket fra >= 2 til >= 1. OG/FG/ABV
+        # er matematisk korrelerte og grupperes nå til MAKS ett kritisk avvik
+        # i stedet for opptil tre separate (se _kombiner_styrkeklynge i
+        # style_engine.py). For Tsjekkisk Pilsner i dette scenarioet er OG,
+        # FG OG ABV alle kritiske, men bidrar nå kun med 1 (ikke 3) til
+        # kritiske_avvik — testens opprinnelige ">= 2" var en direkte
+        # konsekvens av den gamle, ukorrelerte tellingen, ikke et selvstendig
+        # krav. Tysk Pilsner har fortsatt >= 2 (styrkeklyngen + kritisk EBC),
+        # så IBU/EBC sin uavhengige telling er uendret og fortsatt dekket.
         resultat = analyser_stil_og_balanse(self._oppskrift())
         for navn in ("Tysk Pilsner", "Tsjekkisk Pilsner"):
             stil = _finn_stil(resultat, navn)
             self.assertGreaterEqual(
-                stil["kritiske_avvik"], 2,
-                f"{navn} forventet >= 2 kritiske avvik, fikk {stil['kritiske_avvik']}",
+                stil["kritiske_avvik"], 1,
+                f"{navn} forventet >= 1 kritisk avvik, fikk {stil['kritiske_avvik']}",
             )
 
 
@@ -369,13 +386,32 @@ class TestMarzenIBiblioteket(unittest.TestCase):
         self.assertGreater(marzen["score"], 0)
 
     def test_marzen_rangerer_klart_over_pilsnerstilene(self):
+        # Steg F11K (Modell C): det faste "+15 poeng"-margin-kravet er
+        # fjernet. Modell C demper korrelerte OG/FG/ABV-straffer for ALLE
+        # stiler likt — inkludert Tsjekkisk Pilsner, som her også har et
+        # korrelert (om enn mindre presist) styrkeavvik og derfor får en
+        # mindre streng straff enn før (score 65 -> 80 i denne testens
+        # scenario). Marginen på 15 poeng var en tilfeldig konsekvens av den
+        # gamle uavhengige trippeltellingen, ikke et selvstendig krav.
+        #
+        # Steg F11K-R (pre-commit review): en ren `assertGreater` (>) uten
+        # noen minimumsmargin beskytter ikke lenger ordet "klart" i
+        # testnavnet — den ville bestått selv med en 1 poengs forskjell.
+        # Faktisk observert margin i dette scenarioet er 85-80=5 (mot
+        # Tsjekkisk Pilsner) og 85-20=65 (mot Tysk Pilsner). Terskelen under
+        # (>= 3) er bevisst satt LAVERE enn det faktisk observerte minimumet
+        # (5), med litt slingringsmonn, og er IKKE tunet til å treffe et
+        # eksakt tall — den skal bare utelukke en nesten-lik/sammenfallende
+        # score, som en bar `>` ikke gjør.
+        _MINSTE_MARGIN = 3
         resultat = analyser_stil_og_balanse(self._munich_vienna_oppskrift())
         marzen = _finn_stil(resultat, "Märzen")
         for navn in ("Tysk Pilsner", "Tsjekkisk Pilsner"):
             pils = _finn_stil(resultat, navn)
-            self.assertGreater(
-                marzen["score"], pils["score"] + 15,
-                f"Märzen ({marzen['score']}%) skal rangere klart over {navn} ({pils['score']}%)",
+            self.assertGreaterEqual(
+                marzen["score"] - pils["score"], _MINSTE_MARGIN,
+                f"Märzen ({marzen['score']}%) skal rangere KLART over {navn} ({pils['score']}%), "
+                f"ikke bare marginalt",
             )
 
     def test_heller_bock_kan_fortsatt_ranger_forst_naar_og_abv_tilsier_det(self):
@@ -947,6 +983,15 @@ class TestWiesnMarzenReferansenGirFortsattRiktigProsentEtterTekstendring(unittes
         )
 
     def test_prosentene_er_uendret(self):
+        # Steg F11K (Modell C, 2026-08-07): Märzen sin prosent endret seg
+        # fra 69 % til 82 % -- en TILSIKTET konsekvens av at OG- og
+        # ABV-avvikene her er korrelerte (begge uttrykker samme underliggende
+        # "for sterk vørter") og nå kun straffes fullt for ett av dem, dempet
+        # for det andre, i stedet for full uavhengig dobbeltstraff (se
+        # _kombiner_styrkeklynge i style_engine.py). Wiesn (0 avvik) og
+        # Heller Bock (kun 1 isolert IBU-avvik, ingen styrkeklynge-endring)
+        # er UPÅVIRKET og forblir 100 %/95 %, som forventet siden Modell C er
+        # bakoverkompatibel når høyst ett styrkefelt avviker.
         resultat = analyser_stil_og_balanse(self._oppskrift())
         self.assertEqual(resultat["stil"], "Historisk Wiesn-Märzen")
         wiesn = _finn_stil(resultat, "Historisk Wiesn-Märzen")
@@ -954,7 +999,7 @@ class TestWiesnMarzenReferansenGirFortsattRiktigProsentEtterTekstendring(unittes
         marzen = _finn_stil(resultat, "Märzen")
         self.assertEqual(wiesn["score"], 100)
         self.assertEqual(bock["score"], 95)
-        self.assertEqual(marzen["score"], 69)
+        self.assertEqual(marzen["score"], 82)
 
     def test_marzen_forklaringen_viser_faktisk_verdi_og_avvik(self):
         resultat = analyser_stil_og_balanse(self._oppskrift())
@@ -970,6 +1015,242 @@ class TestWiesnMarzenReferansenGirFortsattRiktigProsentEtterTekstendring(unittes
         self.assertEqual(bock["score"], 95)
         ibu_mangel = next(m for m in bock["mangler"] if "bitterhet" in m.lower())
         self.assertEqual(ibu_mangel, "For lav bitterhet: 22,2 IBU — stilområde 23–35 IBU — 0,8 IBU under")
+
+
+class TestKombinerStyrkeklyngeHelper(unittest.TestCase):
+    """Steg F11K (Modell C): direkte enhetstester av selve
+    _kombiner_styrkeklynge()-hjelperen, uavhengig av resten av
+    stilmatchingen."""
+
+    def test_konstantene_har_forventet_verdi(self):
+        self.assertEqual(_STYRKEKLYNGE_NEST_VEKT, 0.375)
+        self.assertEqual(_STYRKEKLYNGE_TREDJE_VEKT, 0.175)
+
+    def test_eksempel_fra_spesifikasjonen(self):
+        # OG=-20, FG=0, ABV=-30 -> -30 - (20*0.375) = -37.5, IKKE -50.
+        self.assertEqual(_kombiner_styrkeklynge(-20, 0, -30), -37.5)
+
+    def test_kun_ett_avvikende_felt_gir_identisk_resultat_uansett_posisjon(self):
+        self.assertEqual(_kombiner_styrkeklynge(-20, 0, 0), -20)
+        self.assertEqual(_kombiner_styrkeklynge(0, -20, 0), -20)
+        self.assertEqual(_kombiner_styrkeklynge(0, 0, -20), -20)
+
+    def test_ingen_avvik_gir_null(self):
+        self.assertEqual(_kombiner_styrkeklynge(0, 0, 0), 0)
+
+    def test_trippelavvik_folger_1_0_375_0_175_formelen(self):
+        # Størst=-30, nest=-20, tredje=-10 (rekkefølgen på argumentene skal
+        # ikke ha noe å si -- funksjonen sorterer selv etter størrelse).
+        forventet = -(30 + 20 * 0.375 + 10 * 0.175)
+        self.assertEqual(_kombiner_styrkeklynge(-20, -30, -10), forventet)
+        self.assertEqual(_kombiner_styrkeklynge(-10, -20, -30), forventet)
+
+
+class TestModellCBakoverkompatibilitetIsolerteAvvik(unittest.TestCase):
+    """Steg F11K, krav 7: dersom KUN ett av OG/FG/ABV avviker, skal
+    raw_score, kritiske_avvik og final score være bit-for-bit identiske med
+    koden slik den var før Modell C (verifisert direkte mot HEAD-versjonen
+    av style_engine.py fra Git-historikken under selve implementasjonen —
+    se F11K-sluttrapporten). Basisoppskriften er "midt i Tysk Pilsner sitt
+    vindu" (samme mønster som TestGodtInnenforStil/
+    TestTydeligAvvikUtenAVaereKritisk), med kun ett felt dratt ut av vinduet
+    om gangen."""
+
+    _FLAVOR = {"Brød": 6.0, "Sitrus": 3.0, "Bitterhet": 6.0}
+
+    def _pils(self, **overrides):
+        base = dict(og=1.047, fg=1.0105, ibu=31.0, ebc=6.0, abv=4.8,
+                    flavor_profile=self._FLAVOR, yeast="safale_us_05")
+        base.update(overrides)
+        resultat = analyser_stil_og_balanse(_lag_oppskrift(**base))
+        return _finn_stil(resultat, "Tysk Pilsner")
+
+    def test_kun_og_avviker(self):
+        pils = self._pils(og=1.055)
+        self.assertEqual(pils["raw_score"], 75)
+        self.assertEqual(pils["score"], 75)
+        self.assertEqual(pils["kritiske_avvik"], 1)
+
+    def test_kun_fg_avviker(self):
+        pils = self._pils(fg=1.016)
+        self.assertEqual(pils["raw_score"], 84)
+        self.assertEqual(pils["score"], 84)
+        self.assertEqual(pils["kritiske_avvik"], 1)
+
+    def test_kun_abv_avviker(self):
+        pils = self._pils(abv=5.6)
+        self.assertEqual(pils["raw_score"], 87)
+        self.assertEqual(pils["score"], 87)
+        self.assertEqual(pils["kritiske_avvik"], 0)
+
+
+class TestModellCKorrelerteDobbelavvik(unittest.TestCase):
+    """Steg F11K, krav 8: to av de tre styrkefeltene avviker samtidig.
+    Største straff teller fullt, nest største dempes til
+    _STYRKEKLYNGE_NEST_VEKT, og de kritiske styrkefeltene grupperes til
+    maks ett bidrag til kritiske_avvik."""
+
+    _FLAVOR = {"Brød": 6.0, "Sitrus": 3.0, "Bitterhet": 6.0}
+
+    def _pils(self, **overrides):
+        base = dict(og=1.047, fg=1.0105, ibu=31.0, ebc=6.0, abv=4.8,
+                    flavor_profile=self._FLAVOR, yeast="safale_us_05")
+        base.update(overrides)
+        resultat = analyser_stil_og_balanse(_lag_oppskrift(**base))
+        return _finn_stil(resultat, "Tysk Pilsner")
+
+    def test_a_og_pluss_abv(self):
+        # d_og=-25 (kritisk), d_abv=-12.5 (ikke kritisk) -> 25 + 12.5*0.375
+        # = 29.6875 -> raw_score 100-29.6875 = 70.3125 -> int() = 70
+        pils = self._pils(og=1.055, abv=5.6)
+        self.assertEqual(pils["raw_score"], 70)
+        self.assertEqual(pils["kritiske_avvik"], 1)
+
+    def test_b_og_pluss_fg(self):
+        # d_og=-25 (kritisk), d_fg=-15 (kritisk) -> 25 + 15*0.375 = 30.625
+        # -> raw_score 100-30.625 = 69.375 -> int() = 69
+        pils = self._pils(og=1.055, fg=1.016)
+        self.assertEqual(pils["raw_score"], 69)
+        self.assertEqual(pils["kritiske_avvik"], 1)
+
+    def test_c_fg_pluss_abv(self):
+        # d_fg=-15 (kritisk), d_abv=-12.5 (ikke kritisk) -> 15 + 12.5*0.375
+        # = 19.6875 -> raw_score 100-19.6875 = 80.3125 -> int() = 80
+        pils = self._pils(fg=1.016, abv=5.6)
+        self.assertEqual(pils["raw_score"], 80)
+        self.assertEqual(pils["kritiske_avvik"], 1)
+
+
+class TestModellCTrippelavvik(unittest.TestCase):
+    """Steg F11K, krav 9: OG, FG og ABV avviker samtidig. Bekrefter den
+    eksplisitte 1.0/0.375/0.175-formelen, og at kritiske_avvik fra
+    styrkeklyngen er <= 1 selv når alle tre enkeltfelt er kritiske."""
+
+    def test_trippelavvik_folger_formelen_og_grupperer_kritisk(self):
+        oppskrift = _lag_oppskrift(
+            og=1.055, fg=1.016, ibu=31.0, ebc=6.0, abv=5.6,
+            flavor_profile={"Brød": 6.0, "Sitrus": 3.0, "Bitterhet": 6.0},
+            yeast="safale_us_05",
+        )
+        resultat = analyser_stil_og_balanse(oppskrift)
+        pils = _finn_stil(resultat, "Tysk Pilsner")
+
+        d_og, _, k_og = _avvik_numerisk(1.055, 1.044, 1.050, _EPS_OG, 30, 30, lambda d: "u", lambda d: "o")
+        d_fg, _, k_fg = _avvik_numerisk(1.016, 1.008, 1.013, _EPS_FG, 25, 25, lambda d: "u", lambda d: "o")
+        d_abv, _, k_abv = _avvik_numerisk(5.6, 4.4, 5.2, _EPS_ABV, 25, 25, lambda d: "u", lambda d: "o")
+        self.assertTrue(k_og and k_fg)
+        self.assertFalse(k_abv)
+
+        forventet_kombinert = _kombiner_styrkeklynge(d_og, d_fg, d_abv)
+        forventet_raw = max(0, min(int(100 + forventet_kombinert), 100))
+        self.assertEqual(pils["raw_score"], forventet_raw)
+        self.assertLessEqual(pils["kritiske_avvik"], 1)
+        self.assertEqual(pils["kritiske_avvik"], 1, "OG/FG er kritiske -- styrkeklyngen skal gi nøyaktig 1")
+
+
+class TestModellCIbuEbcUavhengighet(unittest.TestCase):
+    """Steg F11K, krav 10: IBU og EBC skal fortsatt straffes FULLT og
+    UAVHENGIG av styrkeklyngen -- Modell C reduserer kun dobbelttelling
+    INNEN OG/FG/ABV, ikke den generelle strengheten i modellen."""
+
+    _STYRKE = dict(og=1.055, fg=1.016, abv=5.6)  # styrkeklynge, kritiske_avvik=1
+
+    def _pils(self, **overrides):
+        base = dict(ibu=31.0, ebc=6.0, flavor_profile={"Brød": 6.0, "Sitrus": 3.0, "Bitterhet": 6.0},
+                     yeast="safale_us_05")
+        base.update(self._STYRKE)
+        base.update(overrides)
+        resultat = analyser_stil_og_balanse(_lag_oppskrift(**base))
+        return _finn_stil(resultat, "Tysk Pilsner")
+
+    def test_a_styrkeklynge_pluss_kritisk_ebc(self):
+        pils = self._pils(ebc=25.0)
+        d_ebc, _, k_ebc = _avvik_numerisk(25.0, 4, 8, 0.5, 15, 12, lambda d: "u", lambda d: "o")
+        self.assertTrue(k_ebc)
+        self.assertEqual(pils["kritiske_avvik"], 2, "styrkeklynge (1) + kritisk EBC (1) = 2")
+        self.assertLessEqual(pils["score"], _TAK_KRITISK)
+
+    def test_b_styrkeklynge_pluss_kritisk_ibu(self):
+        pils = self._pils(ibu=5.0)
+        d_ibu, _, k_ibu = _avvik_numerisk(5.0, 22, 40, _EPS_IBU, 25, 20, lambda d: "u", lambda d: "o")
+        self.assertTrue(k_ibu)
+        self.assertEqual(pils["kritiske_avvik"], 2, "styrkeklynge (1) + kritisk IBU (1) = 2")
+        self.assertLessEqual(pils["score"], _TAK_KRITISK)
+
+    def test_c_styrkeklynge_pluss_kritisk_ibu_og_ebc(self):
+        pils = self._pils(ibu=5.0, ebc=25.0)
+        self.assertEqual(pils["kritiske_avvik"], 3, "styrkeklynge (1) + IBU (1) + EBC (1) = 3")
+        self.assertLessEqual(pils["score"], _TAK_KRITISK)
+
+    def test_signaturbonus_kan_ikke_lofte_forbi_tak_kritisk_med_ebc(self):
+        # Uten signatur ville raw+bonus (66+20=86) overskredet _TAK_KRITISK
+        # (80) -- bekrefter at taket fortsatt faktisk engasjerer seg for den
+        # NYE, grupperte kritiske_avvik-telleren, ikke bare i teorien. Merk:
+        # FG/ABV nullstilles eksplisitt til stilens midtpunkt her -- dette
+        # scenarioet skal isolere "styrkeklynge fra KUN OG" + kritisk EBC,
+        # ikke arve klassens _STYRKE-basisverdier (som også setter FG/ABV).
+        pils_uten = self._pils(og=1.055, fg=1.0105, abv=4.8, ebc=11.0, yeast="safale_us_05")
+        pils_med = self._pils(og=1.055, fg=1.0105, abv=4.8, ebc=11.0, yeast="saflager_w3470")
+        self.assertEqual(pils_uten["kritiske_avvik"], 2)
+        self.assertEqual(pils_med["kritiske_avvik"], 2)
+        self.assertGreater(pils_med["signaturbonus"], 0)
+        self.assertGreater(
+            pils_uten["raw_score"] + pils_med["signaturbonus"], _TAK_KRITISK,
+            "Testforutsetningen (bonus ville løftet forbi taket uten det) holder ikke lenger",
+        )
+        self.assertEqual(pils_med["score"], _TAK_KRITISK)
+
+    def test_signaturbonus_kan_ikke_lofte_forbi_tak_kritisk_med_ibu(self):
+        pils_uten = self._pils(og=1.055, fg=1.0105, abv=4.8, ibu=13.0, ebc=6.0, yeast="safale_us_05")
+        pils_med = self._pils(og=1.055, fg=1.0105, abv=4.8, ibu=13.0, ebc=6.0, yeast="saflager_w3470")
+        self.assertEqual(pils_uten["kritiske_avvik"], 2)
+        self.assertEqual(pils_med["kritiske_avvik"], 2)
+        self.assertGreater(
+            pils_uten["raw_score"] + pils_med["signaturbonus"], _TAK_KRITISK,
+            "Testforutsetningen (bonus ville løftet forbi taket uten det) holder ikke lenger",
+        )
+        self.assertEqual(pils_med["score"], _TAK_KRITISK)
+
+
+class TestModellCEkstremStyrkeKnusesFortsatt(unittest.TestCase):
+    """Steg F11K, krav 11: gjentar F11F sin syntetiske kontroll mot en
+    ~5 %-stil (Tysk Pilsner). Modellen skal være MONOTONT strengere når
+    styrkeavviket øker -- IKKE flate ut slik den forkastede "Modell D"
+    gjorde (som ga en fast ~50 % straff uansett hvor ekstremt avviket var).
+    FG/ABV er utledet med en fast, realistisk 75 % utgjæring, som
+    style_engine.py-formlene selv ville produsert."""
+
+    def _score_ved_og(self, og, attenuation=0.75):
+        fg = 1 + (og - 1) * (1 - attenuation)
+        abv = (og - fg) * 131.25
+        oppskrift = _lag_oppskrift(
+            og=og, fg=fg, ibu=31.0, ebc=6.0, abv=abv,
+            flavor_profile={"Brød": 6.0, "Sitrus": 3.0, "Bitterhet": 6.0},
+            yeast="safale_us_05",
+        )
+        resultat = analyser_stil_og_balanse(oppskrift)
+        return _finn_stil(resultat, "Tysk Pilsner")["score"]
+
+    def test_score_er_monotont_synkende_med_okende_styrkeavvik(self):
+        scorer = [self._score_ved_og(og) for og in (1.051, 1.060, 1.075, 1.100)]
+        for i in range(len(scorer) - 1):
+            self.assertLessEqual(
+                scorer[i + 1], scorer[i],
+                f"Score økte ved høyere OG-avvik ({scorer}) -- modellen flater ikke lenger monotont",
+            )
+        # Kvalitative krav fra F11K-spesifikasjonen:
+        self.assertGreater(scorer[0], 80, "OG 1.051 (marginalt avvik) straffet uforholdsmessig hardt")
+        self.assertLess(scorer[1], scorer[0], "OG 1.060 skal gi en tydelig straff sammenlignet med 1.051")
+        self.assertEqual(scorer[3], 0, "OG 1.100 (ekstremt avvik) skal knuses til praktisk talt 0")
+
+    def test_ekstrem_styrke_flatlinjer_ikke_slik_modell_d_gjorde(self):
+        # Modell D-feilen: en fast ~50 %-straff uansett avvikets størrelse.
+        # Bekrefter eksplisitt at et MODERAT avvik (1.060) og et EKSTREMT
+        # avvik (1.100) IKKE lander på samme (eller nær samme) score.
+        moderat = self._score_ved_og(1.060)
+        ekstrem = self._score_ved_og(1.100)
+        self.assertNotAlmostEqual(moderat, ekstrem, delta=5)
+        self.assertGreater(moderat - ekstrem, 20)
 
 
 if __name__ == "__main__":

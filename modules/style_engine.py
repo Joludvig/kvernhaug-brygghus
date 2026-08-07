@@ -87,6 +87,16 @@ _TAK_FLERE_AVVIK = 85
 # "svært god, men ikke perfekt" i stedet for å tillate en flat avrunding opp.
 _TAK_AVVIK = 95
 
+# OG, FG og ABV er matematisk korrelerte i Kvernhaugs beregningsmotor
+# (FG = f(OG, utgjæring), ABV = f(OG, FG) — se F11F/F11G) og har dermed
+# langt færre enn tre uavhengige frihetsgrader for en gitt gjær. En ren
+# summering av alle tre kan derfor straffe det samme underliggende
+# styrkeavviket flere ganger. Modell C (F11K) demper de to minste av de
+# tre straffene i stedet for å fjerne dem helt, slik at et reelt,
+# samtidig avvik i alle tre fortsatt teller mer enn ett isolert avvik.
+_STYRKEKLYNGE_NEST_VEKT = 0.375
+_STYRKEKLYNGE_TREDJE_VEKT = 0.175
+
 
 # Norsk tallformatering for mangel-tekstene ("Se hva som mangler"). Rent
 # visningslag — påvirker aldri sammenligningen i _avvik_numerisk selv, som
@@ -136,6 +146,19 @@ def _avvik_numerisk(verdi, lo, hi, eps, vekt_under, vekt_over, tekst_under, teks
         normalisert = diff / bredde
         return -(normalisert * vekt_over), tekst_over(diff), normalisert >= _KRITISK_NORM_TERSKEL
     return 0.0, None, False
+
+
+def _kombiner_styrkeklynge(d_og, d_fg, d_abv):
+    """Kombinerer de tre allerede beregnede OG/FG/ABV-score-deltaene
+    (hver <= 0) til ett samlet styrkeklynge-delta, i stedet for å
+    summere dem uavhengig. Størst straff teller fullt (100 %), nest
+    størst dempes til _STYRKEKLYNGE_NEST_VEKT, tredje til
+    _STYRKEKLYNGE_TREDJE_VEKT. Med høyst ett av de tre feltene avvikende
+    er resultatet identisk med uavhengig summering (de to dempede
+    leddene er da 0)."""
+    straffer = sorted((-d_og, -d_fg, -d_abv), reverse=True)
+    kombinert = straffer[0] + straffer[1] * _STYRKEKLYNGE_NEST_VEKT + straffer[2] * _STYRKEKLYNGE_TREDJE_VEKT
+    return -kombinert
 
 
 def _avvik_sensorisk(reell_verdi, min_verdi, eps=_EPS_SMAK, vekt=5):
@@ -434,7 +457,11 @@ def analyser_stil_og_balanse(recipe):
         # "Se hva som mangler" (Kvernhaug-gjennomgang 2026-08-06). Selve
         # sammenligningen/scoringen i _avvik_numerisk er uendret; kun
         # tekstene som bygges her er nye.
-        d, tekst, kritisk = _avvik_numerisk(
+        # OG, FG og ABV inngår i styrkeklyngen (se _kombiner_styrkeklynge)
+        # og legges derfor IKKE til `score`/`kritiske_avvik` hver for seg
+        # her — kun mangel-teksten bygges nå. Score- og kritisk-bidraget
+        # kombineres samlet lenger ned, etter at alle tre er beregnet.
+        d_og, tekst, kritisk_og = _avvik_numerisk(
             og, krav["og"][0], krav["og"][1], _EPS_OG, 30, 30,
             lambda diff: (
                 f"For lav styrke i vørteren: OG {_fmt_komma(og, 3)} — "
@@ -447,11 +474,9 @@ def analyser_stil_og_balanse(recipe):
                 f"{_fmt_komma(diff, 3)} over"
             ),
         )
-        score += d
         if tekst: mangler.append(tekst)
-        if kritisk: kritiske_avvik += 1
 
-        d, tekst, kritisk = _avvik_numerisk(
+        d_fg, tekst, kritisk_fg = _avvik_numerisk(
             fg, krav["fg"][0], krav["fg"][1], _EPS_FG, 25, 25,
             lambda diff: (
                 f"For lav FG: {_fmt_komma(fg, 3)} — "
@@ -464,9 +489,7 @@ def analyser_stil_og_balanse(recipe):
                 f"{_fmt_komma(diff, 3)} over"
             ),
         )
-        score += d
         if tekst: mangler.append(tekst)
-        if kritisk: kritiske_avvik += 1
 
         d, tekst, kritisk = _avvik_numerisk(
             ibu, krav["ibu"][0], krav["ibu"][1], _EPS_IBU, 25, 20,
@@ -502,7 +525,7 @@ def analyser_stil_og_balanse(recipe):
         if tekst: mangler.append(tekst)
         if kritisk: kritiske_avvik += 1
 
-        d, tekst, kritisk = _avvik_numerisk(
+        d_abv, tekst, kritisk_abv = _avvik_numerisk(
             abv, krav["abv"][0], krav["abv"][1], _EPS_ABV, 25, 25,
             lambda diff: (
                 f"For lav alkohol: {_fmt_komma(abv, 2)} % — "
@@ -515,9 +538,15 @@ def analyser_stil_og_balanse(recipe):
                 f"{_fmt_komma(diff, 2)} prosentpoeng over"
             ),
         )
-        score += d
         if tekst: mangler.append(tekst)
-        if kritisk: kritiske_avvik += 1
+
+        # OG/FG/ABV er matematisk korrelerte (se F11F/F11G) og kombineres
+        # derfor til ETT styrkeklynge-bidrag i stedet for tre uavhengige —
+        # se _kombiner_styrkeklynge(). Med høyst ett avvikende felt er
+        # dette tallmessig identisk med tidligere uavhengig summering.
+        score += _kombiner_styrkeklynge(d_og, d_fg, d_abv)
+        if kritisk_og or kritisk_fg or kritisk_abv:
+            kritiske_avvik += 1
 
         # Sensoriske smak_krav er ønskede trekk, ikke harde grenser — de teller
         # med i scoren på samme måte som før, men presenteres separat som

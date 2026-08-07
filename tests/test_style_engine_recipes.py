@@ -110,11 +110,34 @@ class TestWiesnMarzen1872(unittest.TestCase):
         # Bekrefter at splittet mellom canonical Märzen og den sterkere
         # historiske varianten fortsatt holder for de EKTE tallene i
         # oppskriften (OG ~1.064, ABV ~6.9 %) — ikke bare i teorien.
+        #
+        # Steg F11K (Modell C): terskelen senket fra >= 2 til >= 1. OG og ABV
+        # er her begge kritiske (samme underliggende "for sterk vørter"), men
+        # grupperes nå til MAKS ett kritisk avvik i stedet for to separate
+        # (se _kombiner_styrkeklynge i style_engine.py) — testens opprinnelige
+        # ">= 2" var en konsekvens av den gamle, ukorrelerte tellingen.
+        # Det faste "+15 poeng"-margin-kravet er også fjernet her, av samme
+        # grunn som i test_style_engine.py::test_marzen_rangerer_klart_over_
+        # pilsnerstilene: canonical Märzen sin score steg fra 69 % til 82 %
+        # under Modell C (OG/ABV-avviket er korrelert og dempes nå delvis),
+        # mens Wiesn sin 95 % er UPÅVIRKET (dens eneste mangel er et EBC-avvik
+        # fra fixturens kjent utdaterte fargeverdi — se F11B/F11G — og EBC
+        # inngår ikke i styrkeklyngen). Faktisk observert margin: 13 poeng.
+        #
+        # Steg F11K-R (pre-commit review): en ren `assertGreater` (>) uten
+        # minimumsmargin beskytter ikke ordet "klart" i testnavnet. Terskelen
+        # under (>= 8) er bevisst satt LAVERE enn det observerte minimumet
+        # (13), med slingringsmonn, og er IKKE tunet til å treffe et eksakt
+        # tall — den skal bare utelukke en nesten-lik/sammenfallende score.
+        _MINSTE_MARGIN = 8
         _, resultat = _analyser_fixture_oppskrift("wiesn_marzen_1872.json")
         wiesn = _finn_stil(resultat, "Historisk Wiesn-Märzen")
         canonical = _finn_stil(resultat, "Märzen")
-        self.assertGreaterEqual(canonical["kritiske_avvik"], 2)
-        self.assertGreater(wiesn["score"], canonical["score"] + 15)
+        self.assertGreaterEqual(canonical["kritiske_avvik"], 1)
+        self.assertGreaterEqual(
+            wiesn["score"] - canonical["score"], _MINSTE_MARGIN,
+            f"Wiesn ({wiesn['score']}%) skal rangere KLART over canonical Märzen ({canonical['score']}%)",
+        )
 
 
 class TestSommerglod(unittest.TestCase):
@@ -186,6 +209,21 @@ class TestVardeldr(unittest.TestCase):
         _, resultat = _analyser_fixture_oppskrift("vardeldr.json")
         beste = max(s["raw_score"] for s in resultat["stil_liste"])
         self.assertLessEqual(beste, 40, "En stil scoret høyt nok til å vinne over Kreativt Brygg-fallbacken")
+
+    def test_english_bitter_knuses_fortsatt_ikke_modell_d_feilen(self):
+        # Steg F11K (Modell C): regresjonsvakt mot den SPESIFIKKE feilen som
+        # diskvalifiserte den forkastede "Modell D" (gruppe-cap) i F11F — der
+        # flatet et gruppetak straffen ut rundt 50 % uansett hvor ekstremt
+        # avviket var, og ga Varðeldr et falskt høyt treff mot English
+        # Bitter. Modell C demper kun det NEST og TREDJE største avviket —
+        # det største teller alltid fullt og er ubegrenset, så en reell
+        # ekstrem avstand (her: OG 1,088 mot et 1,030-1,039-vindu, mer enn
+        # 5x vindusbredden) skal fortsatt knuse scoren til 0, ikke flate ut.
+        _, resultat = _analyser_fixture_oppskrift("vardeldr.json")
+        bitter = _finn_stil(resultat, "English Bitter")
+        self.assertEqual(bitter["score"], 0)
+        self.assertEqual(bitter["raw_score"], 0)
+        self.assertNotEqual(resultat["stil"], "English Bitter")
 
 
 class TestEldsvenn(unittest.TestCase):
