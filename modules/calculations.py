@@ -97,6 +97,20 @@ def beregn_gram_fra_ibu(maal_ibu, alfa_prosent, tid, volum, beregnet_og):
     return round((maal_ibu * volum) / (1000 * (alfa_prosent / 100.0) * utnyttelse), 1)
 
 
+def _hent_alfa(entry):
+    """Henter alfasyreverdi med riktig None-basert fallback-prioritet:
+    eksplisitt alfa (inkl. 0.0) -> alfa_typisk (inkl. 0.0) -> 5.0.
+    Bruker ikke sannhetsverdi/falsy-sjekk, siden 0.0 er en gyldig,
+    eksplisitt alfasyreverdi og ikke skal tolkes som "mangler"."""
+    alfa = entry.get("alfa")
+    if alfa is not None:
+        return alfa
+    alfa_typisk = entry.get("alfa_typisk")
+    if alfa_typisk is not None:
+        return alfa_typisk
+    return 5.0
+
+
 def beregn_total_ibu(valgt_humle_liste, humle_data, volum, beregnet_og):
     """
     Beregner nøyaktig bitterhet (IBU) ved bruk av Glenn Tinseths offisielle formel.
@@ -118,7 +132,7 @@ def beregn_total_ibu(valgt_humle_liste, humle_data, volum, beregnet_og):
         
         entry = humle_data.get(navn, {})
         if isinstance(entry, dict) and gram > 0:
-            alfa = entry.get("alfa") or entry.get("alfa_typisk") or 5.0
+            alfa = _hent_alfa(entry)
             
             # 2. Times-faktor: Beregner utnyttelseskurven basert på antall minutter i koketiden
             # Formel: (1 - e^(-0.04 * tid)) / 4.15
