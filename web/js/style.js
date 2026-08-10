@@ -77,20 +77,29 @@ function _fmtOmradeHeltall(verdi) {
   return Number.isInteger(verdi) ? String(verdi) : _fmtKomma(verdi, 1);
 }
 
-// Returnerer { d: score_endring, tekst: mangel_tekst|null, kritisk: bool }
+// Returnerer { d: score_endring, tekst: mangel_tekst|null, kritisk: bool,
+// normalisert, retning }. "normalisert"/"retning" er web-only tillegg (ikke
+// del av Python-originalen sin returverdi) -- brukes av veiledning.js til den
+// tre-nivås stilveiledningen, uten å påvirke selve scoren/rangeringen.
 function _avvikNumerisk(verdi, lo, hi, eps, vektUnder, vektOver, tekstUnder, tekstOver) {
   const bredde = Math.max(hi - lo, 1e-9);
   if (verdi < lo - eps) {
     const diff = lo - verdi;
     const normalisert = diff / bredde;
-    return { d: -(normalisert * vektUnder), tekst: tekstUnder(diff), kritisk: normalisert >= _KRITISK_NORM_TERSKEL };
+    return {
+      d: -(normalisert * vektUnder), tekst: tekstUnder(diff),
+      kritisk: normalisert >= _KRITISK_NORM_TERSKEL, normalisert, retning: "under",
+    };
   }
   if (verdi > hi + eps) {
     const diff = verdi - hi;
     const normalisert = diff / bredde;
-    return { d: -(normalisert * vektOver), tekst: tekstOver(diff), kritisk: normalisert >= _KRITISK_NORM_TERSKEL };
+    return {
+      d: -(normalisert * vektOver), tekst: tekstOver(diff),
+      kritisk: normalisert >= _KRITISK_NORM_TERSKEL, normalisert, retning: "over",
+    };
   }
-  return { d: 0.0, tekst: null, kritisk: false };
+  return { d: 0.0, tekst: null, kritisk: false, normalisert: 0, retning: null };
 }
 
 function _kombinerStyrkeklynge(dOg, dFg, dAbv) {
@@ -218,10 +227,20 @@ function analyserStilOgBalanse(recipe, bjcpStiler) {
 
     const rawScore = Math.max(0, Math.min(Math.trunc(score), 100));
 
+    // Web-only tillegg (finnes ikke i Python-originalens returverdi): per-felt
+    // normalisert avvik + retning, til bruk i den tre-nivås stilveiledningen.
+    const feltAvvik = {
+      og: { verdi: og, lo: krav.og[0], hi: krav.og[1], normalisert: ogRes.normalisert, retning: ogRes.retning },
+      fg: { verdi: fg, lo: krav.fg[0], hi: krav.fg[1], normalisert: fgRes.normalisert, retning: fgRes.retning },
+      ibu: { verdi: ibu, lo: krav.ibu[0], hi: krav.ibu[1], normalisert: ibuRes.normalisert, retning: ibuRes.retning },
+      ebc: { verdi: ebc, lo: krav.ebc[0], hi: krav.ebc[1], normalisert: ebcRes.normalisert, retning: ebcRes.retning },
+      abv: { verdi: abv, lo: krav.abv[0], hi: krav.abv[1], normalisert: abvRes.normalisert, retning: abvRes.retning },
+    };
+
     stilMatcher.push({
       stil: stilNavn, score: rawScore, raw_score: rawScore,
       mangler, onsket_sensorisk: onsketSensorisk,
-      kritiske_avvik: kritiskeAvvik,
+      kritiske_avvik: kritiskeAvvik, felt_avvik: feltAvvik,
       beskrivelse: krav.beskrivelse, prio: krav.prio, kat_navn: krav.kat_navn,
       bjcp_offisiell: krav.bjcp_offisiell !== undefined ? krav.bjcp_offisiell : true,
     });

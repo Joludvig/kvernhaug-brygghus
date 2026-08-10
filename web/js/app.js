@@ -1,24 +1,41 @@
-// UI-logikk for den forenklede web-oppskriftsbyggeren.
+// UI-logikk for Kvernhaug Brygghus sin web-oppskriftsbygger.
 // Ingen backend: ingrediens-/stildata hentes fra statiske JSON-filer,
 // oppskrifter lagres i localStorage. Beregningene selv ligger i calc.js
-// (OG/FG/ABV/IBU/EBC), flavor.js (smaksprofil) og style.js (BJCP-matching).
+// (OG/FG/ABV/IBU/EBC), flavor.js (smaksprofil), radar.js (smakshjul),
+// style.js (stilmatch) og veiledning.js (vennlig stilveiledning).
+//
+// Egendefinerte ingredienser og alfa-overstyring løses UTEN å røre calc.js/
+// flavor.js/style.js: for hver beregning bygges et "effektivt" oppslags-
+// objekt ({...biblioteket, [egen_id]: egendefinertData}) som sendes inn
+// akkurat som det vanlige biblioteket -- se _effektiveDatasett().
 
 const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
+const MODUS_NOKKEL = "kvernhaug_web_modus";
 
 let maltData = {};
 let humleData = {};
 let gjaerData = {};
 let bjcpStyles = {};
 let sisteStilAnalyse = null;
+let _egendefinertTeller = 0;
 
 const maltRaderEl = document.getElementById("malt-rader");
 const humleRaderEl = document.getElementById("humle-rader");
 const attenuationOverrideRad = document.getElementById("attenuation-override-rad");
 const attenuationOverrideInput = document.getElementById("attenuation-override");
+const gjaerEgendefinertFelt = document.getElementById("gjaer-egendefinert-felt");
+const gjaerEgNavn = document.getElementById("gjaer-eg-navn");
+const gjaerEgProdusent = document.getElementById("gjaer-eg-produsent");
+const gjaerEgGjaertype = document.getElementById("gjaer-eg-gjaertype");
 
 let gjaerCombobox = null;
 let stilCombobox = null;
 let oppdaterSmakshjul = null;
+
+function nyEgendefinertId(prefiks) {
+  _egendefinertTeller += 1;
+  return `${prefiks}_${Date.now()}_${_egendefinertTeller}`;
+}
 
 async function lastData() {
   const [malt, humle, gjaer, stiler] = await Promise.all([
@@ -67,6 +84,39 @@ function stilItems() {
     .map((navn) => ({ id: navn, label: navn }));
 }
 
+// ─── Modus: Bryggelærling / Bryggmester ──────────────────────────────────
+// Ren visningsbryter -- rører aldri oppskriftsdata, kun CSS-klasse på body.
+
+function settModus(modus) {
+  document.body.classList.toggle("modus-laerling", modus === "laerling");
+  document.body.classList.toggle("modus-mester", modus === "mester");
+  document.getElementById("modus-laerling-knapp").setAttribute("aria-pressed", String(modus === "laerling"));
+  document.getElementById("modus-mester-knapp").setAttribute("aria-pressed", String(modus === "mester"));
+  localStorage.setItem(MODUS_NOKKEL, modus);
+}
+
+function initModus() {
+  const lagret = localStorage.getItem(MODUS_NOKKEL);
+  settModus(lagret === "mester" ? "mester" : "laerling");
+  document.getElementById("modus-laerling-knapp").addEventListener("click", () => settModus("laerling"));
+  document.getElementById("modus-mester-knapp").addEventListener("click", () => settModus("mester"));
+}
+
+// ─── Egendefinert malt ────────────────────────────────────────────────────
+
+function _settMaltEgendefinert(rad, pa, eksplisittId) {
+  rad.dataset.egendefinert = pa ? "1" : "0";
+  rad.querySelector(".egendefinert-felt").hidden = !pa;
+  rad.querySelector(".combobox").style.display = pa ? "none" : "";
+  rad.querySelector(".egendefinert-knapp").style.display = pa ? "none" : "";
+  if (pa) {
+    rad.dataset.egendefinertId = eksplisittId || rad.dataset.egendefinertId || nyEgendefinertId("egen_malt");
+  } else {
+    rad._combobox.clear();
+  }
+  beregnOgVisResultat();
+}
+
 function leggTilMaltRad(forhandsutfylt) {
   const mal = document.getElementById("malt-rad-mal");
   const rad = mal.content.firstElementChild.cloneNode(true);
@@ -81,7 +131,20 @@ function leggTilMaltRad(forhandsutfylt) {
   mount.replaceWith(cb.el);
   rad._combobox = cb;
 
-  if (forhandsutfylt) {
+  rad.querySelector(".egendefinert-knapp").addEventListener("click", () => _settMaltEgendefinert(rad, true));
+  rad.querySelector(".egendefinert-tilbake-knapp").addEventListener("click", () => _settMaltEgendefinert(rad, false));
+  for (const felt of rad.querySelectorAll(".egendefinert-felt input")) {
+    felt.addEventListener("input", beregnOgVisResultat);
+  }
+
+  if (forhandsutfylt && forhandsutfylt.custom) {
+    rad.querySelector(".malt-mengde").value = forhandsutfylt.mengde;
+    _settMaltEgendefinert(rad, true, forhandsutfylt.id);
+    rad.querySelector(".eg-navn").value = forhandsutfylt.custom.navn || "";
+    rad.querySelector(".eg-produsent").value = forhandsutfylt.custom.produsent || "";
+    rad.querySelector(".eg-ebc").value = forhandsutfylt.custom.ebc ?? "";
+    rad.querySelector(".eg-potensiale").value = forhandsutfylt.custom.potensiale ?? "";
+  } else if (forhandsutfylt) {
     cb.setValue(forhandsutfylt.id);
     rad.querySelector(".malt-mengde").value = forhandsutfylt.mengde;
   }
@@ -95,24 +158,60 @@ function leggTilMaltRad(forhandsutfylt) {
   beregnOgVisResultat();
 }
 
+// ─── Egendefinert humle (+ alfa-overstyring på biblioteks-humle) ─────────
+
+function _settHumleEgendefinert(rad, pa, eksplisittId) {
+  rad.dataset.egendefinert = pa ? "1" : "0";
+  rad.querySelector(".egendefinert-felt").hidden = !pa;
+  rad.querySelector(".combobox").style.display = pa ? "none" : "";
+  rad.querySelector(".egendefinert-knapp").style.display = pa ? "none" : "";
+  if (pa) {
+    rad.dataset.egendefinertId = eksplisittId || rad.dataset.egendefinertId || nyEgendefinertId("egen_humle");
+  } else {
+    rad._combobox.clear();
+  }
+  beregnOgVisResultat();
+}
+
 function leggTilHumleRad(forhandsutfylt) {
   const mal = document.getElementById("humle-rad-mal");
   const rad = mal.content.firstElementChild.cloneNode(true);
   const mount = rad.querySelector(".humle-velger-mount");
+  const alfaInput = rad.querySelector(".humle-alfa");
 
   const cb = new Combobox({
     items: humleItems(),
     placeholder: "Søk etter humle …",
     ariaLabel: "Velg humle",
-    onSelect: beregnOgVisResultat,
+    onSelect: (id) => {
+      const info = humleData[id];
+      if (info && alfaInput.value === "") alfaInput.value = info.alfa;
+      beregnOgVisResultat();
+    },
   });
   mount.replaceWith(cb.el);
   rad._combobox = cb;
 
-  if (forhandsutfylt) {
+  rad.querySelector(".egendefinert-knapp").addEventListener("click", () => _settHumleEgendefinert(rad, true));
+  rad.querySelector(".egendefinert-tilbake-knapp").addEventListener("click", () => _settHumleEgendefinert(rad, false));
+  for (const felt of rad.querySelectorAll(".egendefinert-felt input")) {
+    felt.addEventListener("input", beregnOgVisResultat);
+  }
+
+  if (forhandsutfylt && forhandsutfylt.custom) {
+    rad.querySelector(".humle-gram").value = forhandsutfylt.gram;
+    rad.querySelector(".humle-tid").value = forhandsutfylt.tid;
+    alfaInput.value = forhandsutfylt.custom.alfa ?? "";
+    _settHumleEgendefinert(rad, true, forhandsutfylt.id);
+    rad.querySelector(".eg-navn").value = forhandsutfylt.custom.navn || "";
+    rad.querySelector(".eg-opprinnelse").value = forhandsutfylt.custom.opprinnelse || "";
+    rad.querySelector(".eg-type").value = forhandsutfylt.custom.type || "";
+  } else if (forhandsutfylt) {
     cb.setValue(forhandsutfylt.id);
     rad.querySelector(".humle-gram").value = forhandsutfylt.gram;
     rad.querySelector(".humle-tid").value = forhandsutfylt.tid;
+    if (forhandsutfylt.alfaOverride != null) alfaInput.value = forhandsutfylt.alfaOverride;
+    else if (humleData[forhandsutfylt.id]) alfaInput.value = humleData[forhandsutfylt.id].alfa;
   }
 
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
@@ -121,36 +220,102 @@ function leggTilHumleRad(forhandsutfylt) {
   });
   rad.querySelector(".humle-gram").addEventListener("input", beregnOgVisResultat);
   rad.querySelector(".humle-tid").addEventListener("input", beregnOgVisResultat);
+  alfaInput.addEventListener("input", beregnOgVisResultat);
   humleRaderEl.appendChild(rad);
   beregnOgVisResultat();
 }
 
+// ─── Lesing av radene ─────────────────────────────────────────────────────
+
 function lesMaltRader() {
   return [...maltRaderEl.querySelectorAll(".ingrediens-rad")]
-    .map((rad) => ({
-      id: rad._combobox.getValue(),
-      mengde: parseFloat(rad.querySelector(".malt-mengde").value) || 0,
-    }))
-    .filter((m) => m.id);
+    .map((rad) => {
+      const mengde = parseFloat(rad.querySelector(".malt-mengde").value) || 0;
+      if (rad.dataset.egendefinert === "1") {
+        const navn = rad.querySelector(".eg-navn").value.trim();
+        if (!navn) return null;
+        const ebc = parseFloat(rad.querySelector(".eg-ebc").value);
+        const potensiale = parseFloat(rad.querySelector(".eg-potensiale").value);
+        return {
+          id: rad.dataset.egendefinertId, mengde,
+          custom: {
+            navn,
+            produsent: rad.querySelector(".eg-produsent").value.trim() || undefined,
+            ebc: isFinite(ebc) ? ebc : 10,
+            potensiale: isFinite(potensiale) ? potensiale : 1.036,
+          },
+        };
+      }
+      return { id: rad._combobox.getValue(), mengde };
+    })
+    .filter((m) => m && m.id);
 }
 
 function lesHumleRader() {
   return [...humleRaderEl.querySelectorAll(".ingrediens-rad")]
-    .map((rad) => ({
-      id: rad._combobox.getValue(),
-      gram: parseFloat(rad.querySelector(".humle-gram").value) || 0,
-      tid: parseFloat(rad.querySelector(".humle-tid").value) || 0,
-    }))
-    .filter((h) => h.id);
+    .map((rad) => {
+      const gram = parseFloat(rad.querySelector(".humle-gram").value) || 0;
+      const tid = parseFloat(rad.querySelector(".humle-tid").value) || 0;
+      const alfaTekst = rad.querySelector(".humle-alfa").value;
+      const alfa = alfaTekst !== "" ? parseFloat(alfaTekst) : null;
+
+      if (rad.dataset.egendefinert === "1") {
+        const navn = rad.querySelector(".eg-navn").value.trim();
+        if (!navn) return null;
+        return {
+          id: rad.dataset.egendefinertId, gram, tid,
+          custom: {
+            navn,
+            opprinnelse: rad.querySelector(".eg-opprinnelse").value.trim() || undefined,
+            type: rad.querySelector(".eg-type").value.trim() || undefined,
+            alfa: isFinite(alfa) ? alfa : 5.0,
+          },
+        };
+      }
+      const id = rad._combobox.getValue();
+      return { id, gram, tid, alfaOverride: isFinite(alfa) ? alfa : null };
+    })
+    .filter((h) => h && h.id);
+}
+
+function _lesGjaerEgendefinert() {
+  if (gjaerCombobox.getValue() || gjaerEgendefinertFelt.hidden) return null;
+  return {
+    navn: gjaerEgNavn.value.trim() || "Egendefinert gjær",
+    produsent: gjaerEgProdusent.value.trim() || undefined,
+    gjaertype: gjaerEgGjaertype.value.trim() || undefined,
+    attenuation: (parseFloat(attenuationOverrideInput.value) || 75) / 100,
+  };
 }
 
 function hentUtgjaering() {
   const gjaerId = gjaerCombobox.getValue();
-  if (gjaerId && gjaerData[gjaerId]) {
-    return gjaerData[gjaerId].attenuation;
-  }
+  if (gjaerId && gjaerData[gjaerId]) return gjaerData[gjaerId].attenuation;
   const manuell = parseFloat(attenuationOverrideInput.value);
   return isFinite(manuell) ? manuell / 100 : 0.75;
+}
+
+// Bygger "effektive" oppslagsobjekter (bibliotek + egendefinerte/overstyrte
+// entries) slik at calc.js/flavor.js/style.js kan brukes helt uendret.
+function _effektiveDatasett(maltRader, humleRader) {
+  const effMalt = { ...maltData };
+  for (const m of maltRader) if (m.custom) effMalt[m.id] = m.custom;
+
+  const effHumle = { ...humleData };
+  for (const h of humleRader) {
+    if (h.custom) effHumle[h.id] = h.custom;
+    else if (h.alfaOverride != null && humleData[h.id]) effHumle[h.id] = { ...humleData[h.id], alfa: h.alfaOverride };
+  }
+
+  const effGjaer = { ...gjaerData };
+  let gjaerId = gjaerCombobox.getValue();
+  const gjaerCustom = _lesGjaerEgendefinert();
+  if (!gjaerId && gjaerCustom) {
+    gjaerId = "egendefinert_gjaer";
+    effGjaer[gjaerId] = gjaerCustom;
+  }
+
+  return { effMalt, effHumle, effGjaer, gjaerId };
 }
 
 function ebcTilFarge(ebc) {
@@ -166,12 +331,12 @@ function beregnOgVisResultat() {
 
   const maltRader = lesMaltRader();
   const humleRader = lesHumleRader();
-  const gjaerId = gjaerCombobox ? gjaerCombobox.getValue() : null;
+  const { effMalt, effHumle, effGjaer, gjaerId } = _effektiveDatasett(maltRader, humleRader);
 
-  const og = beregnOG(maltRader, maltData, volum, effektivitet);
-  const ebc = beregnEBC(maltRader, maltData, volum);
+  const og = beregnOG(maltRader, effMalt, volum, effektivitet);
+  const ebc = beregnEBC(maltRader, effMalt, volum);
   const { fg, abv } = beregnFgOgAbv(og, hentUtgjaering());
-  const ibu = beregnTotalIBU(humleRader, humleData, volum, og);
+  const ibu = beregnTotalIBU(humleRader, effHumle, volum, og);
 
   document.getElementById("res-og").textContent = og.toFixed(3);
   document.getElementById("res-fg").textContent = fg.toFixed(3);
@@ -180,7 +345,7 @@ function beregnOgVisResultat() {
   document.getElementById("res-ebc").textContent = Math.round(ebc);
   document.getElementById("ebc-swatch").style.backgroundColor = ebcTilFarge(ebc);
 
-  const flavorProfile = beregnSmaksprofil(maltRader, maltData, humleRader, humleData, ibu, gjaerId, gjaerData);
+  const flavorProfile = beregnSmaksprofil(maltRader, effMalt, humleRader, effHumle, ibu, gjaerId, effGjaer);
   if (oppdaterSmakshjul) oppdaterSmakshjul(flavorProfile);
   const recipe = {
     malts: maltRader, hops: humleRader, yeast: gjaerId,
@@ -190,7 +355,7 @@ function beregnOgVisResultat() {
   renderStilPanel();
 }
 
-// ─── Stilmatch-visning ──────────────────────────────────────────────────
+// ─── Stilmatch-visning (Bryggmester: tekniske detaljer) ──────────────────
 
 function _stilEntryFor(navn) {
   return sisteStilAnalyse.stil_liste.find((s) => s.stil === navn);
@@ -225,6 +390,25 @@ function escHtml(s) {
   return div.innerHTML;
 }
 
+// ─── Stilveiledning-visning (begge moduser: vennlig, rolig språk) ────────
+
+function _renderVeiledning(container, stilEntry, stilNavn) {
+  if (!stilEntry) {
+    container.innerHTML = "";
+    return;
+  }
+  const v = byggStilVeiledning(stilEntry, stilNavn);
+  if (v.alleInnenfor) {
+    container.innerHTML = `<p class="stil-veiledning-innenfor">✅ Oppskriften ligger innenfor det typiske området for ${escHtml(stilNavn)}.</p>`;
+    return;
+  }
+  const linjer = v.linjer
+    .map((l) => `<p class="stil-veiledning-linje niva-${l.niva}">${escHtml(l.tekst)}</p>`)
+    .join("");
+  const samlet = v.samlet ? `<p class="stil-veiledning-samlet">${escHtml(v.samlet)}</p>` : "";
+  container.innerHTML = linjer + samlet;
+}
+
 function renderStilPanel() {
   const a = sisteStilAnalyse;
   if (!a) return;
@@ -233,13 +417,16 @@ function renderStilPanel() {
   const headlineInfo = document.getElementById("stil-headline-info");
   headlineNavn.textContent = a.stil;
 
+  const autoContainer = document.getElementById("stil-veiledning-auto");
   if (a.stil === "Kreativt Brygg") {
     headlineInfo.textContent = "Ingen stil i biblioteket treffer godt nok ennå — juster ingrediensene eller se nærliggende stiler under.";
+    autoContainer.innerHTML = "";
   } else {
     const entry = _stilEntryFor(a.stil);
     headlineInfo.innerHTML = entry && entry.bjcp_offisiell === false
       ? '<span class="stil-merke">🏺 Kvernhaug/historisk kategori — ikke en offisiell BJCP-stil</span>'
       : "";
+    _renderVeiledning(autoContainer, entry, a.stil);
   }
 
   document.getElementById("bu-gu-tekst").textContent = `Bitterhetsindeks (BU:GU): ${a.bu_gu.toFixed(2)}`;
@@ -267,16 +454,19 @@ function renderStilPanel() {
 
 function renderStilManuell() {
   const resultatEl = document.getElementById("stil-manuell-resultat");
+  const veiledningEl = document.getElementById("stil-veiledning-manuell");
   const valgtNavn = stilCombobox ? stilCombobox.getValue() : null;
   if (!valgtNavn || !sisteStilAnalyse) {
     resultatEl.innerHTML = "";
+    veiledningEl.innerHTML = "";
     return;
   }
   const entry = _stilEntryFor(valgtNavn);
   resultatEl.innerHTML = entry ? _stilKortHtml(entry, { visBeskrivelse: true }) : "";
+  _renderVeiledning(veiledningEl, entry, valgtNavn);
 }
 
-// ─── Lagring / lasting ──────────────────────────────────────────────────
+// ─── Lagring / lasting / eksport / import ────────────────────────────────
 
 function samleOppskrift() {
   return {
@@ -286,6 +476,7 @@ function samleOppskrift() {
     malt: lesMaltRader(),
     humle: lesHumleRader(),
     gjaerId: gjaerCombobox.getValue() || null,
+    gjaerCustom: _lesGjaerEgendefinert(),
     attenuationOverride: gjaerCombobox.getValue() ? null : parseFloat(attenuationOverrideInput.value) || null,
     valgtStil: stilCombobox ? stilCombobox.getValue() : null,
     lagretDato: new Date().toISOString(),
@@ -317,34 +508,53 @@ function slettOppskrift(navn) {
   visLagredeOppskrifter();
 }
 
-function lastInnOppskrift(navn) {
-  const alle = hentLagredeOppskrifter();
-  const oppskrift = alle[navn];
-  if (!oppskrift) return;
-
-  document.getElementById("oppskrift-navn").value = oppskrift.navn;
+// Gjenoppretter en oppskrift (fra localStorage ELLER en importert JSON-fil)
+// inn i skjemaet -- delt av lastInnOppskrift() og importerJson().
+function _gjenopprettOppskrift(oppskrift) {
+  document.getElementById("oppskrift-navn").value = oppskrift.navn || "";
   document.getElementById("batch-volum").value = oppskrift.volum;
   document.getElementById("effektivitet").value = oppskrift.effektivitet;
 
   maltRaderEl.innerHTML = "";
-  oppskrift.malt.forEach((m) => leggTilMaltRad(m));
-  if (oppskrift.malt.length === 0) leggTilMaltRad();
+  (oppskrift.malt || []).forEach((m) => leggTilMaltRad(m));
+  if (!oppskrift.malt || oppskrift.malt.length === 0) leggTilMaltRad();
 
   humleRaderEl.innerHTML = "";
-  oppskrift.humle.forEach((h) => leggTilHumleRad(h));
-  if (oppskrift.humle.length === 0) leggTilHumleRad();
+  (oppskrift.humle || []).forEach((h) => leggTilHumleRad(h));
+  if (!oppskrift.humle || oppskrift.humle.length === 0) leggTilHumleRad();
 
-  if (oppskrift.gjaerId) gjaerCombobox.setValue(oppskrift.gjaerId);
-  else gjaerCombobox.clear();
-  attenuationOverrideRad.style.display = oppskrift.gjaerId ? "none" : "";
-  if (oppskrift.attenuationOverride) {
-    attenuationOverrideInput.value = oppskrift.attenuationOverride;
+  if (oppskrift.gjaerId) {
+    gjaerCombobox.setValue(oppskrift.gjaerId);
+    gjaerEgendefinertFelt.hidden = true;
+  } else {
+    gjaerCombobox.clear();
+    const custom = oppskrift.gjaerCustom;
+    if (custom) {
+      gjaerEgendefinertFelt.hidden = false;
+      gjaerEgNavn.value = custom.navn && custom.navn !== "Egendefinert gjær" ? custom.navn : "";
+      gjaerEgProdusent.value = custom.produsent || "";
+      gjaerEgGjaertype.value = custom.gjaertype || "";
+      attenuationOverrideInput.value = Math.round(custom.attenuation * 100);
+    } else {
+      gjaerEgendefinertFelt.hidden = true;
+      // Bakoverkompatibilitet: eldre lagrede oppskrifter (før gjaerCustom
+      // fantes) hadde kun et bart attenuationOverride-tall.
+      if (oppskrift.attenuationOverride) attenuationOverrideInput.value = oppskrift.attenuationOverride;
+    }
   }
+  attenuationOverrideRad.style.display = oppskrift.gjaerId ? "none" : "";
 
   if (oppskrift.valgtStil) stilCombobox.setValue(oppskrift.valgtStil);
   else stilCombobox.clear();
 
   beregnOgVisResultat();
+}
+
+function lastInnOppskrift(navn) {
+  const alle = hentLagredeOppskrifter();
+  const oppskrift = alle[navn];
+  if (!oppskrift) return;
+  _gjenopprettOppskrift(oppskrift);
 }
 
 function visLagredeOppskrifter() {
@@ -389,8 +599,24 @@ function eksporterJson() {
   URL.revokeObjectURL(url);
 }
 
+function importerJsonFil(fil) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const oppskrift = JSON.parse(reader.result);
+      _gjenopprettOppskrift(oppskrift);
+      document.getElementById("lagre-status").textContent = `Importerte "${oppskrift.navn || "oppskrift"}" fra fil.`;
+    } catch (e) {
+      document.getElementById("lagre-status").textContent = "Kunne ikke lese filen — er det en gyldig, eksportert oppskrift-JSON?";
+    }
+  };
+  reader.readAsText(fil);
+}
+
 async function init() {
   await lastData();
+  initModus();
+  initHjelp();
 
   oppdaterSmakshjul = initSmakshjul(document.getElementById("smakshjul-container"), SMAKS_KATEGORIER);
 
@@ -401,10 +627,20 @@ async function init() {
     ariaLabel: "Velg gjær",
     onSelect: () => {
       attenuationOverrideRad.style.display = gjaerCombobox.getValue() ? "none" : "";
+      if (gjaerCombobox.getValue()) gjaerEgendefinertFelt.hidden = true;
       beregnOgVisResultat();
     },
   });
   gjaerMount.replaceWith(gjaerCombobox.el);
+
+  document.getElementById("gjaer-egendefinert-knapp").addEventListener("click", () => {
+    gjaerEgendefinertFelt.hidden = !gjaerEgendefinertFelt.hidden;
+    attenuationOverrideRad.style.display = gjaerCombobox.getValue() ? "none" : "";
+    beregnOgVisResultat();
+  });
+  for (const felt of [gjaerEgNavn, gjaerEgProdusent, gjaerEgGjaertype]) {
+    felt.addEventListener("input", beregnOgVisResultat);
+  }
 
   const stilMount = document.getElementById("stil-velger-mount");
   stilCombobox = new Combobox({
@@ -424,6 +660,13 @@ async function init() {
   document.getElementById("lagre-knapp").addEventListener("click", lagreOppskrift);
   document.getElementById("skriv-ut-knapp").addEventListener("click", () => window.print());
   document.getElementById("eksporter-knapp").addEventListener("click", eksporterJson);
+
+  const importerFil = document.getElementById("importer-fil");
+  document.getElementById("importer-knapp").addEventListener("click", () => importerFil.click());
+  importerFil.addEventListener("change", () => {
+    if (importerFil.files[0]) importerJsonFil(importerFil.files[0]);
+    importerFil.value = "";
+  });
 
   leggTilMaltRad();
   leggTilHumleRad();

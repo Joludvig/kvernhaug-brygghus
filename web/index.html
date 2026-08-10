@@ -11,7 +11,18 @@
   <div class="brand-mark">🍺</div>
   <h1>Kvernhaug Brygghus</h1>
   <p class="motto">Brygg med ild. Del med ære.</p>
-  <p class="undertittel">Oppskriftsbygger — forenklet, offentlig versjon. Ingen innlogging, ingen database: alt lagres kun i denne nettleseren.</p>
+  <p class="undertittel">Oppskriftsbygger — offentlig versjon. Ingen innlogging, ingen database: alt lagres kun i denne nettleseren.</p>
+
+  <div class="modus-bryter" role="group" aria-label="Velg modus">
+    <button type="button" class="modus-knapp" id="modus-laerling-knapp" data-modus="laerling">
+      🎓 Bryggelærling
+      <span class="modus-undertekst">Veiledet modus – lær mens du brygger</span>
+    </button>
+    <button type="button" class="modus-knapp" id="modus-mester-knapp" data-modus="mester">
+      ⚙️ Bryggmester
+      <span class="modus-undertekst">Full kontroll – alle detaljer tilgjengelig</span>
+    </button>
+  </div>
 </header>
 
 <main>
@@ -49,30 +60,36 @@
       <label id="gjaer-label">Gjær</label>
       <div id="gjaer-velger-mount" aria-labelledby="gjaer-label"></div>
     </div>
+    <button type="button" class="egendefinert-knapp" id="gjaer-egendefinert-knapp">+ Egendefinert gjær</button>
     <div class="felt-rad" id="attenuation-override-rad">
-      <label for="attenuation-override">Forventet utgjæring (%)</label>
+      <label for="attenuation-override">Forventet utgjæring (%) <button type="button" class="hjelp-knapp" data-hjelp="utgjaering" aria-label="Hva er utgjæring?">?</button></label>
       <input type="number" id="attenuation-override" min="1" max="100" step="1" value="75">
+    </div>
+    <div class="egendefinert-felt" id="gjaer-egendefinert-felt" hidden>
+      <input type="text" id="gjaer-eg-navn" placeholder="Navn (valgfritt)">
+      <input type="text" id="gjaer-eg-produsent" placeholder="Produsent (valgfritt)">
+      <input type="text" id="gjaer-eg-gjaertype" placeholder="Gjærtype (valgfritt)">
     </div>
   </section>
 
   <section class="panel" id="resultat-panel">
     <h2>Resultat</h2>
     <div class="resultat-grid">
-      <div class="resultat-boks"><span class="resultat-tall" id="res-og">1.000</span><span class="resultat-label">OG</span></div>
-      <div class="resultat-boks"><span class="resultat-tall" id="res-fg">1.000</span><span class="resultat-label">FG</span></div>
-      <div class="resultat-boks"><span class="resultat-tall" id="res-abv">0,0 %</span><span class="resultat-label">ABV</span></div>
-      <div class="resultat-boks"><span class="resultat-tall" id="res-ibu">0</span><span class="resultat-label">IBU</span></div>
-      <div class="resultat-boks resultat-boks-ebc"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC</span><span class="ebc-swatch" id="ebc-swatch"></span></div>
+      <div class="resultat-boks"><span class="resultat-tall" id="res-og">1.000</span><span class="resultat-label">OG <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="og" aria-label="Hva er OG?">?</button></span></div>
+      <div class="resultat-boks"><span class="resultat-tall" id="res-fg">1.000</span><span class="resultat-label">FG <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="fg" aria-label="Hva er FG?">?</button></span></div>
+      <div class="resultat-boks"><span class="resultat-tall" id="res-abv">0,0 %</span><span class="resultat-label">ABV <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="abv" aria-label="Hva er ABV?">?</button></span></div>
+      <div class="resultat-boks"><span class="resultat-tall" id="res-ibu">0</span><span class="resultat-label">IBU <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ibu" aria-label="Hva er IBU?">?</button></span></div>
+      <div class="resultat-boks resultat-boks-ebc"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ebc" aria-label="Hva er EBC?">?</button></span><span class="ebc-swatch" id="ebc-swatch"></span></div>
     </div>
   </section>
 
   <section class="panel" id="smakshjul-panel">
-    <h2>Smaksprofil</h2>
+    <h2>Smaksprofil <button type="button" class="hjelp-knapp" data-hjelp="smakshjul" aria-label="Hva er smakshjulet?">?</button></h2>
     <div class="smakshjul-wrap" id="smakshjul-container"></div>
   </section>
 
   <section class="panel" id="stil-panel">
-    <h2>BJCP-stilmatch</h2>
+    <h2>Stilmatch <button type="button" class="hjelp-knapp" data-hjelp="stilmatch" aria-label="Hva er stilmatch?">?</button></h2>
 
     <div class="stil-headline" id="stil-headline">
       <div class="stil-headline-label">Numerisk nærmeste stil</div>
@@ -80,12 +97,16 @@
       <div class="stil-headline-info" id="stil-headline-info"></div>
     </div>
 
-    <p class="hjelpetekst" id="bu-gu-tekst"></p>
+    <div id="stil-veiledning-auto" class="stil-veiledning"></div>
+
     <ul class="stil-notater" id="stil-notater"></ul>
 
-    <div class="stil-alternativer">
-      <div class="stil-seksjon-tittel">Nærliggende stiler</div>
-      <div id="stil-alternativ-liste"></div>
+    <div class="mester-only">
+      <p class="hjelpetekst" id="bu-gu-tekst"></p>
+      <div class="stil-alternativer">
+        <div class="stil-seksjon-tittel">Nærliggende stiler</div>
+        <div id="stil-alternativ-liste"></div>
+      </div>
     </div>
 
     <div class="stil-manuell">
@@ -94,7 +115,8 @@
         <label id="stil-velger-label">Ølstil</label>
         <div id="stil-velger-mount" aria-labelledby="stil-velger-label"></div>
       </div>
-      <div id="stil-manuell-resultat"></div>
+      <div id="stil-veiledning-manuell" class="stil-veiledning"></div>
+      <div id="stil-manuell-resultat" class="mester-only"></div>
     </div>
   </section>
 
@@ -104,6 +126,8 @@
       <button type="button" id="lagre-knapp">💾 Lagre oppskrift</button>
       <button type="button" id="skriv-ut-knapp">🖨️ Skriv ut</button>
       <button type="button" id="eksporter-knapp">⬇️ Eksporter (JSON)</button>
+      <button type="button" id="importer-knapp">⬆️ Importer (JSON)</button>
+      <input type="file" id="importer-fil" accept="application/json" hidden>
     </div>
     <p class="hjelpetekst" id="lagre-status"></p>
   </section>
@@ -124,18 +148,35 @@
     <div class="combobox-mount malt-velger-mount"></div>
     <input type="number" class="malt-mengde" min="0" step="0.05" value="1" placeholder="kg">
     <span class="enhet">kg</span>
+    <button type="button" class="egendefinert-knapp" title="Legg til en malt som ikke finnes i biblioteket">+ Egendefinert</button>
     <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern malt">✕</button>
+    <div class="egendefinert-felt" hidden>
+      <input type="text" class="eg-navn" placeholder="Navn *">
+      <input type="text" class="eg-produsent" placeholder="Produsent (valgfritt)">
+      <input type="number" class="eg-ebc" min="0" step="0.5" placeholder="EBC *">
+      <input type="number" class="eg-potensiale" min="1" step="0.001" placeholder="Potensiale * (1.036)">
+      <button type="button" class="egendefinert-tilbake-knapp">🔍 Søk i bibliotek i stedet</button>
+    </div>
   </div>
 </template>
 
 <template id="humle-rad-mal">
   <div class="ingrediens-rad" data-type="humle">
     <div class="combobox-mount humle-velger-mount"></div>
+    <input type="number" class="humle-alfa" min="0" step="0.1" placeholder="alfa">
+    <span class="enhet">%α <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="alfasyre" aria-label="Hva er alfasyre?">?</button></span>
     <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram">
     <span class="enhet">g</span>
     <input type="number" class="humle-tid" min="0" step="1" value="60" placeholder="min">
     <span class="enhet">min</span>
+    <button type="button" class="egendefinert-knapp" title="Legg til en humle som ikke finnes i biblioteket">+ Egendefinert</button>
     <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern humle">✕</button>
+    <div class="egendefinert-felt" hidden>
+      <input type="text" class="eg-navn" placeholder="Navn *">
+      <input type="text" class="eg-opprinnelse" placeholder="Opprinnelse (valgfritt)">
+      <input type="text" class="eg-type" placeholder="Type (valgfritt)">
+      <button type="button" class="egendefinert-tilbake-knapp">🔍 Søk i bibliotek i stedet</button>
+    </div>
   </div>
 </template>
 
@@ -144,6 +185,8 @@
 <script src="js/flavor.js"></script>
 <script src="js/radar.js"></script>
 <script src="js/style.js"></script>
+<script src="js/veiledning.js"></script>
+<script src="js/help.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
