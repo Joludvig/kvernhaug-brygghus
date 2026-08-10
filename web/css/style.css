@@ -287,6 +287,51 @@ select:focus,
   margin-top: 0.5rem;
 }
 
+/* ── Smakshjul ───────────────────────────────────────────────────────── */
+
+.smakshjul-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.smakshjul-svg {
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+}
+
+.smakshjul-rutenett {
+  fill: none;
+  stroke: rgba(196, 154, 42, 0.16);
+  stroke-width: 1;
+}
+
+.smakshjul-akse {
+  stroke: rgba(196, 154, 42, 0.22);
+  stroke-width: 1;
+}
+
+.smakshjul-label {
+  font-family: var(--serif);
+  font-size: 12.5px;
+  fill: var(--muted);
+}
+
+.smakshjul-data {
+  fill: rgba(196, 154, 42, 0.22);
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.smakshjul-punkt {
+  fill: var(--pergament);
+  stroke: var(--gold);
+  stroke-width: 1;
+}
+
 /* ── Stilmatch ───────────────────────────────────────────────────────── */
 
 .stil-headline {

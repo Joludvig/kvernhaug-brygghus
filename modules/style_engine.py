@@ -374,12 +374,22 @@ def analyser_stil_og_balanse(recipe):
             "beskrivelse": "Tysk lagerstil der malten tørkes over åpen bøkebål. Smaker av røkt kjøtt."
         },
         "Tradisjonelt Norsk Gårdsøl / Kveik": {
+            # IKKE en offisiell BJCP-stil (verken 2021 eller eldre) — på
+            # samme måte som "Historisk Wiesn-Märzen" over, en egen
+            # Kvernhaug-kategori. Feilaktig stått uten dette flagget siden
+            # stilen ble lagt til; rettet 2026-08-10 (metadata-avvik
+            # oppdaget under kartlegging før web-versjonens stilmatch skulle
+            # omtales presist). Stilgrensene er IKKE endret.
+            "bjcp_offisiell": False,
             "prio": 5, "kat_navn": "🇧🇻 Tradisjonelt Norsk Gårdsøl",
             "og": (1.048, 1.060), "fg": (1.010, 1.016), "abv": (4.5, 6.5), "ibu": (15, 30), "ebc": (10, 25),
             "smak_krav": {"Fruktighet": 6, "Sitrus": 5, "Maltfylde": 4},
             "beskrivelse": "Historisk norsk ølstil brygget på kveik-gjær. Preget av saftig appelsinsmak."
         },
         "Tradisjonelt Norsk Juleøl": {
+            # IKKE en offisiell BJCP-stil — se forklaring ved "Tradisjonelt
+            # Norsk Gårdsøl / Kveik" over. Samme rettelse, samme dato.
+            "bjcp_offisiell": False,
             "prio": 6, "kat_navn": "🎄 Juleøl",
             "og": (1.060, 1.075), "fg": (1.014, 1.022), "abv": (6.0, 8.5), "ibu": (25, 35), "ebc": (40, 75),
             "smak_krav": {"Karamell": 7, "Maltfylde": 7, "Krydder": 2, "Toast": 4, "Nøtter": 3},

@@ -4,7 +4,9 @@
 
 class Combobox {
   constructor({ items, placeholder = "", ariaLabel = "", onSelect = () => {} }) {
-    this.items = items; // [{ id, label }]
+    this.items = items; // [{ id, label, search? }] -- "search" (lowercase) er valgfritt og
+    // brukes til filtrering i tillegg til/i stedet for label (f.eks. produsent/opprinnelse).
+    // Vises IKKE i listen -- kun label vises.
     this.onSelect = onSelect;
     this.selectedId = null;
     this.highlightIndex = -1;
@@ -49,7 +51,7 @@ class Combobox {
   _onInput() {
     const query = this.inputEl.value.trim().toLowerCase();
     this.filtered = query
-      ? this.items.filter((it) => it.label.toLowerCase().includes(query))
+      ? this.items.filter((it) => (it.search || it.label.toLowerCase()).includes(query))
       : this.items;
     this._renderList();
   }

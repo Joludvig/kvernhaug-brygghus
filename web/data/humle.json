@@ -2,525 +2,965 @@
   "akoya": {
     "navn": "Akoya",
     "alfa": 9.5,
+    "opprinnelse": "Norge",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Tropisk": 5,
       "Steinfrukt": 4
-    }
+    },
+    "smakstags": [
+      "tropisk",
+      "sitron",
+      "fersken"
+    ]
   },
   "alora": {
     "navn": "Alora",
     "alfa": 10.0,
+    "opprinnelse": "Norge",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 5,
       "Sitrus": 4,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "frukt"
+    ]
   },
   "amarillo": {
     "navn": "Amarillo",
     "alfa": 11.0,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Fruktighet": 5,
       "Steinfrukt": 5
-    }
+    },
+    "smakstags": [
+      "appelsin",
+      "mandarin",
+      "aprikos",
+      "blomst"
+    ]
   },
   "azacca": {
     "navn": "Azacca",
     "alfa": 11.9,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Tropisk": 6,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "appelsin",
+      "tropisk",
+      "ananas",
+      "mango"
+    ]
   },
   "bru_1": {
     "navn": "BRU-1",
     "alfa": 15.7,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Tropisk": 6,
       "Fruktighet": 5,
       "Furunål": 4
-    }
+    },
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "furu",
+      "lime"
+    ]
   },
   "cascade": {
     "navn": "Cascade",
     "alfa": 9.5,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Krydder": 5
-    }
+    },
+    "smakstags": [
+      "grapefrukt",
+      "blomst",
+      "krydder"
+    ]
   },
   "cashmere": {
     "navn": "Cashmere",
     "alfa": 9.5,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Steinfrukt": 5,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "sitron",
+      "lime",
+      "fersken"
+    ]
   },
   "celeia": {
     "navn": "Celeia",
     "alfa": 3.2,
+    "opprinnelse": "Slovenia",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 5,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "jordlig",
+      "urter",
+      "krydder"
+    ]
   },
   "centennial": {
     "navn": "Centennial",
     "alfa": 10.4,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Furunål": 5
-    }
+    },
+    "smakstags": [
+      "sitron",
+      "grapefrukt",
+      "blomst",
+      "furu"
+    ]
   },
   "challenger": {
     "navn": "Challenger",
     "alfa": null,
+    "opprinnelse": "England",
+    "type": "T90 Pellets",
     "kategorier": {
       "Krydder": 5,
       "Bitterhet": 6
-    }
+    },
+    "smakstags": [
+      "krydder",
+      "sedertre",
+      "mild bitterhet"
+    ]
   },
   "chinook": {
     "navn": "Chinook",
     "alfa": 11.1,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Furunål": 6,
       "Sitrus": 5,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "furu",
+      "grapefrukt",
+      "krydder"
+    ]
   },
   "citra": {
     "navn": "Citra",
     "alfa": 13.9,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Tropisk": 6,
       "Fruktighet": 6
-    }
+    },
+    "smakstags": [
+      "sitrus",
+      "grapefrukt",
+      "lime",
+      "pasjonsfrukt",
+      "ananas"
+    ]
   },
   "citra_lupomax": {
     "navn": "Citra LUPOMAX",
     "alfa": null,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 7,
       "Tropisk": 7,
       "Fruktighet": 6
-    }
+    },
+    "smakstags": [
+      "sitrus",
+      "grapefrukt",
+      "lime",
+      "pasjonsfrukt",
+      "ananas"
+    ]
   },
   "columbus": {
     "navn": "Columbus",
     "alfa": 13.9,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Krydder": 5,
       "Jordlig": 5,
       "Bitterhet": 7
-    }
+    },
+    "smakstags": [
+      "krydder",
+      "jordlig",
+      "svart pepper"
+    ]
   },
   "comet": {
     "navn": "Comet",
     "alfa": 9.3,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Jordlig": 3
-    }
+    },
+    "smakstags": [
+      "grapefrukt",
+      "sitrus",
+      "urter"
+    ]
   },
   "east_kent_goldings": {
     "navn": "East Kent Goldings",
     "alfa": 5.8,
+    "opprinnelse": "England",
+    "type": "T90 Pellets",
     "kategorier": {
       "Krydder": 5,
       "Jordlig": 3
-    }
+    },
+    "smakstags": [
+      "honning",
+      "urter",
+      "blomster",
+      "mild krydder"
+    ]
   },
   "eclipse_2021": {
     "navn": "Eclipse 2021",
     "alfa": 17.7,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Bitterhet": 6,
       "Furunål": 4,
       "Tropisk": 3
-    }
+    },
+    "smakstags": [
+      "resin",
+      "tropisk",
+      "furu"
+    ]
   },
   "eclipse_2024": {
     "navn": "Eclipse 2024",
     "alfa": 19.7,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Bitterhet": 6,
       "Furunål": 4,
       "Tropisk": 3
-    }
+    },
+    "smakstags": [
+      "resin",
+      "tropisk",
+      "furu"
+    ]
   },
   "ekuanot": {
     "navn": "Ekuanot",
     "alfa": null,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Tropisk": 6,
       "Fruktighet": 6
-    }
+    },
+    "smakstags": [
+      "ananas",
+      "lime",
+      "melon",
+      "tropisk"
+    ]
   },
   "el_dorado": {
     "navn": "El Dorado",
     "alfa": 13.1,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 6,
       "Fruktighet": 6,
       "Steinfrukt": 5
-    }
+    },
+    "smakstags": [
+      "vannmelon",
+      "tropisk",
+      "aprikos",
+      "candy"
+    ]
   },
   "ella": {
     "navn": "Ella",
     "alfa": 16.5,
+    "opprinnelse": "Australia",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 5,
       "Fruktighet": 5,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "tropisk",
+      "blomst",
+      "krydder"
+    ]
   },
   "fuggles": {
     "navn": "Fuggles",
     "alfa": 6.0,
+    "opprinnelse": "England",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 4,
       "Krydder": 5
-    }
+    },
+    "smakstags": [
+      "jordlig",
+      "treverk",
+      "urter"
+    ]
   },
   "galaxy": {
     "navn": "Galaxy",
     "alfa": 18.4,
+    "opprinnelse": "Australia",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Tropisk": 6,
       "Fruktighet": 6,
       "Steinfrukt": 5
-    }
+    },
+    "smakstags": [
+      "pasjonsfrukt",
+      "fersken",
+      "sitrus",
+      "tropisk"
+    ]
   },
   "goldings": {
     "navn": "Goldings",
     "alfa": null,
+    "opprinnelse": "England",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 4,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "honning",
+      "urter",
+      "blomst",
+      "krydder"
+    ]
   },
   "hbc_630": {
     "navn": "HBC 630",
     "alfa": 13.7,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 6,
       "Sitrus": 5,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "pasjonsfrukt",
+      "tropisk",
+      "sitrus"
+    ]
   },
   "hallertau_blanc": {
     "navn": "Hallertau Blanc",
     "alfa": 9.4,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Vinøs": 5,
       "Fruktighet": 4
-    }
+    },
+    "smakstags": [
+      "hvitvin",
+      "sitron",
+      "grapefrukt",
+      "blomst"
+    ]
   },
   "hallertau_mittelfruh": {
     "navn": "Hallertau Mittelfrüh",
     "alfa": 3.3,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 3,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "urter",
+      "blomst",
+      "mild krydder"
+    ]
   },
   "hallertau_tradition": {
     "navn": "Hallertau Tradition",
     "alfa": 5.6,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 3,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "urter",
+      "blomst",
+      "mild krydder"
+    ]
   },
   "harlequin": {
     "navn": "Harlequin",
     "alfa": null,
+    "opprinnelse": "England",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Fruktighet": 4
-    }
+    },
+    "smakstags": [
+      "sitron",
+      "lime",
+      "blomst"
+    ]
   },
   "herkules": {
     "navn": "Herkules",
     "alfa": null,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Bitterhet": 8,
       "Krydder": 3
-    }
+    },
+    "smakstags": [
+      "ren bitterhet",
+      "urter"
+    ]
   },
   "hersbrucker": {
     "navn": "Hersbrucker",
     "alfa": 2.4,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 3,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "urter",
+      "blomst",
+      "krydder"
+    ]
   },
   "idaho_7": {
     "navn": "Idaho-7",
     "alfa": 11.4,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Tropisk": 6,
       "Fruktighet": 6,
       "Steinfrukt": 5,
       "Furunål": 5
-    }
+    },
+    "smakstags": [
+      "tropisk frukt",
+      "aprikos",
+      "furu",
+      "sitrus"
+    ]
   },
   "jester": {
     "navn": "Jester",
     "alfa": null,
+    "opprinnelse": "England",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 5,
       "Sitrus": 5,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "blomst"
+    ]
   },
   "kohatu": {
     "navn": "Kohatu",
     "alfa": 6.0,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Furunål": 5,
       "Tropisk": 5,
       "Steinfrukt": 4
-    }
+    },
+    "smakstags": [
+      "furu",
+      "tropisk",
+      "fersken"
+    ]
   },
   "krush": {
     "navn": "Krush",
     "alfa": 13.6,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 6,
       "Sitrus": 5,
       "Fruktighet": 6
-    }
+    },
+    "smakstags": [
+      "pasjonsfrukt",
+      "tropisk",
+      "sitrus"
+    ]
   },
   "lemondrop": {
     "navn": "Lemondrop",
     "alfa": null,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 7,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "sitron",
+      "lime",
+      "melon"
+    ]
   },
   "magnum": {
     "navn": "Magnum",
     "alfa": 13.6,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Bitterhet": 8
-    }
+    },
+    "smakstags": [
+      "ren bitterhet",
+      "nøytral aroma"
+    ]
   },
   "mandarina_bavaria": {
     "navn": "Mandarina Bavaria",
     "alfa": null,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 7,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "mandarin",
+      "appelsin",
+      "sitrus"
+    ]
   },
   "mosaic": {
     "navn": "Mosaic",
     "alfa": 13.6,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 6,
       "Fruktighet": 6,
       "Furunål": 5
-    }
+    },
+    "smakstags": [
+      "mango",
+      "blåbær",
+      "tropisk frukt",
+      "furunål"
+    ]
   },
   "mosaic_lupomax": {
     "navn": "Mosaic LUPOMAX",
     "alfa": null,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 7,
       "Fruktighet": 7,
       "Furunål": 5
-    }
+    },
+    "smakstags": [
+      "mango",
+      "blåbær",
+      "tropisk frukt",
+      "furunål"
+    ]
   },
   "motueka": {
     "navn": "Motueka",
     "alfa": null,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Tropisk": 6,
       "Fruktighet": 6
-    }
+    },
+    "smakstags": [
+      "lime",
+      "sitrus",
+      "tropisk frukt"
+    ]
   },
   "moutere": {
     "navn": "Moutere",
     "alfa": 16.6,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Tropisk": 5,
       "Steinfrukt": 4
-    }
+    },
+    "smakstags": [
+      "sitrus",
+      "tropisk",
+      "fersken"
+    ]
   },
   "mystic": {
     "navn": "Mystic",
     "alfa": null,
+    "opprinnelse": "England",
+    "type": "T90 Pellets",
     "kategorier": {
       "Fruktighet": 4,
       "Krydder": 3
-    }
+    },
+    "smakstags": [
+      "blomst",
+      "frukt",
+      "urter"
+    ]
   },
   "nectaron": {
     "navn": "Nectaron",
     "alfa": 11.9,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 7,
       "Steinfrukt": 6,
       "Sitrus": 5,
       "Fruktighet": 6
-    }
+    },
+    "smakstags": [
+      "hvit fersken",
+      "tropisk",
+      "ananas",
+      "sitrus"
+    ]
   },
   "nelson_sauvin": {
     "navn": "Nelson Sauvin",
     "alfa": 9.6,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 6,
       "Fruktighet": 6,
       "Vinøs": 6
-    }
+    },
+    "smakstags": [
+      "hvitvin",
+      "stikkelsbær",
+      "druer",
+      "pasjonsfrukt"
+    ]
   },
   "northern_brewer": {
     "navn": "Northern Brewer",
     "alfa": 7.5,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Furunål": 5,
       "Jordlig": 4
-    }
+    },
+    "smakstags": [
+      "furu",
+      "urter",
+      "treverk"
+    ]
   },
   "pacific_sunrise": {
     "navn": "Pacific Sunrise",
     "alfa": 11.5,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Tropisk": 5,
       "Fruktighet": 4
-    }
+    },
+    "smakstags": [
+      "sitrus",
+      "tropisk",
+      "blomst"
+    ]
   },
   "perle": {
     "navn": "Perle",
     "alfa": 6.6,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Krydder": 4,
       "Jordlig": 3
-    }
+    },
+    "smakstags": [
+      "urter",
+      "blomst",
+      "mild krydder"
+    ]
   },
   "rakau": {
     "navn": "Rakau",
     "alfa": null,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Steinfrukt": 5,
       "Furunål": 5,
       "Tropisk": 5
-    }
+    },
+    "smakstags": [
+      "fersken",
+      "aprikos",
+      "furu",
+      "tropisk"
+    ]
   },
   "saaz": {
     "navn": "Saaz",
     "alfa": 2.9,
+    "opprinnelse": "Czech Republic",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 5,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "urter",
+      "krydder",
+      "jordlig",
+      "blomster"
+    ]
   },
   "sabro": {
     "navn": "Sabro",
     "alfa": 15.5,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 6,
       "Fruktighet": 6,
       "Steinfrukt": 5
-    }
+    },
+    "smakstags": [
+      "kokos",
+      "ananas",
+      "steinfrukt",
+      "sedertre"
+    ]
   },
   "simcoe": {
     "navn": "Simcoe",
     "alfa": 12.6,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Tropisk": 6,
       "Fruktighet": 6,
       "Furunål": 5,
       "Jordlig": 4
-    }
+    },
+    "smakstags": [
+      "furu",
+      "pasjonsfrukt",
+      "sitrus",
+      "jordlig"
+    ]
   },
   "southern_star": {
     "navn": "Southern Star",
     "alfa": 15.0,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Bitterhet": 6,
       "Sitrus": 4,
       "Tropisk": 4
-    }
+    },
+    "smakstags": [
+      "sitrus",
+      "tropisk"
+    ]
   },
   "styrian_dragon": {
     "navn": "Styrian Dragon",
     "alfa": null,
+    "opprinnelse": "Slovenia",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Tropisk": 5,
       "Fruktighet": 4
-    }
+    },
+    "smakstags": [
+      "sitrus",
+      "tropisk",
+      "blomst"
+    ]
   },
   "styrian_golding": {
     "navn": "Styrian Golding",
     "alfa": null,
+    "opprinnelse": "Slovenia",
+    "type": "T90 Pellets",
     "kategorier": {
       "Jordlig": 5,
       "Krydder": 4
-    }
+    },
+    "smakstags": [
+      "jordlig",
+      "krydder",
+      "blomst"
+    ]
   },
   "superdelic": {
     "navn": "Superdelic",
     "alfa": null,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Tropisk": 6,
       "Sitrus": 5,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "tropisk",
+      "sitrus",
+      "urter"
+    ]
   },
   "talus": {
     "navn": "Talus",
     "alfa": 8.6,
+    "opprinnelse": "USA",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 5,
       "Tropisk": 5,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "grapefrukt",
+      "tropisk",
+      "blomst"
+    ]
   },
   "tettnang": {
     "navn": "Tettnang",
     "alfa": 3.1,
+    "opprinnelse": "Germany",
+    "type": "T90 Pellets",
     "kategorier": {
       "Krydder": 4,
       "Jordlig": 3
-    }
+    },
+    "smakstags": [
+      "urter",
+      "blomst",
+      "krydder"
+    ]
   },
   "vic_secret": {
     "navn": "Vic Secret",
     "alfa": 20.4,
+    "opprinnelse": "Australia",
+    "type": "T90 Pellets",
     "kategorier": {
       "Bitterhet": 7,
       "Furunål": 5,
       "Tropisk": 5
-    }
+    },
+    "smakstags": [
+      "furu",
+      "pasjonsfrukt",
+      "tropisk"
+    ]
   },
   "waimea": {
     "navn": "Waimea",
     "alfa": null,
+    "opprinnelse": "New Zealand",
+    "type": "T90 Pellets",
     "kategorier": {
       "Sitrus": 6,
       "Furunål": 5,
       "Tropisk": 5
-    }
+    },
+    "smakstags": [
+      "sitrus",
+      "furu",
+      "tropisk frukt"
+    ]
   }
 }

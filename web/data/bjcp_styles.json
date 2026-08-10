@@ -477,6 +477,7 @@
     "bjcp_offisiell": true
   },
   "Tradisjonelt Norsk Gårdsøl / Kveik": {
+    "bjcp_offisiell": false,
     "prio": 5,
     "kat_navn": "🇧🇻 Tradisjonelt Norsk Gårdsøl",
     "og": [
@@ -504,10 +505,10 @@
       "Sitrus": 5,
       "Maltfylde": 4
     },
-    "beskrivelse": "Historisk norsk ølstil brygget på kveik-gjær. Preget av saftig appelsinsmak.",
-    "bjcp_offisiell": true
+    "beskrivelse": "Historisk norsk ølstil brygget på kveik-gjær. Preget av saftig appelsinsmak."
   },
   "Tradisjonelt Norsk Juleøl": {
+    "bjcp_offisiell": false,
     "prio": 6,
     "kat_navn": "🎄 Juleøl",
     "og": [
@@ -537,8 +538,7 @@
       "Toast": 4,
       "Nøtter": 3
     },
-    "beskrivelse": "Klassisk mørkt høytidsøl. Proppfullt av sødmefull karamell og mørk sirup.",
-    "bjcp_offisiell": true
+    "beskrivelse": "Klassisk mørkt høytidsøl. Proppfullt av sødmefull karamell og mørk sirup."
   },
   "Belgisk Witbier": {
     "prio": 7,

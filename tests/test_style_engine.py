@@ -786,13 +786,17 @@ class TestNumeriskNaermesteVsSamletTopp(unittest.TestCase):
 
 
 class TestBjcpOffisiellKlassifisering(unittest.TestCase):
-    """Regresjonstest (Kvernhaug-gjennomgang 2026-07-27, krav 2): Vienna
-    Lager, Märzen og Festbier er ekte BJCP 2021-kategorier og skal
-    behandles som ordinære stiler (bjcp_offisiell=True, standardverdien).
-    Historisk Wiesn-Märzen er en Kvernhaug-oppfunnet, ikke-offisiell
-    kategori (se forklarende kommentar i style_engine.py) og skal være
-    eksplisitt merket bjcp_offisiell=False — kun metadata/visning, IKKE
-    stilgrensene, som denne testen bevisst ikke rører."""
+    """Regresjonstest (Kvernhaug-gjennomgang 2026-07-27, krav 2, utvidet
+    2026-08-10): Vienna Lager, Märzen og Festbier er ekte BJCP 2021-
+    kategorier og skal behandles som ordinære stiler (bjcp_offisiell=True,
+    standardverdien). Historisk Wiesn-Märzen, Tradisjonelt Norsk Gårdsøl /
+    Kveik og Tradisjonelt Norsk Juleøl er alle Kvernhaug-oppfunnede,
+    ikke-offisielle kategorier (se forklarende kommentarer i
+    style_engine.py) og skal være eksplisitt merket bjcp_offisiell=False —
+    kun metadata/visning, IKKE stilgrensene, som denne testen bevisst
+    ikke rører. De to norske stilene manglet dette flagget frem til
+    2026-08-10 (oppdaget under kartlegging før web-versjonens stilmatch
+    skulle omtales presist)."""
 
     def _stil_liste(self):
         oppskrift = _lag_oppskrift(og=1.055, fg=1.012, ibu=20, ebc=15, abv=6.0)
@@ -809,18 +813,27 @@ class TestBjcpOffisiellKlassifisering(unittest.TestCase):
         wiesn = _finn_stil({"stil_liste": stiler}, "Historisk Wiesn-Märzen")
         self.assertFalse(wiesn["bjcp_offisiell"], "Historisk Wiesn-Märzen skal IKKE være merket som offisiell BJCP-stil")
 
+    def test_kveik_og_juleol_er_ikke_offisiell_bjcp(self):
+        stiler = self._stil_liste()
+        for navn in ("Tradisjonelt Norsk Gårdsøl / Kveik", "Tradisjonelt Norsk Juleøl"):
+            stil = _finn_stil({"stil_liste": stiler}, navn)
+            self.assertFalse(stil["bjcp_offisiell"], f"{navn} skal IKKE være merket som offisiell BJCP-stil")
+
     def test_de_fleste_andre_stiler_er_ogsaa_offisielle(self):
         # Stikkprøve på tvers av kategorier — bekrefter at default=True
-        # faktisk gjelder for det store flertallet, ikke bare de tre navngitte.
+        # faktisk gjelder for det store flertallet, ikke bare de navngitte.
         stiler = self._stil_liste()
         for navn in ("Tysk Pilsner", "Heller Bock (Mai-Bock)", "Robust Porter", "Belgisk Tripel", "Hazy IPA / NEIPA"):
             stil = _finn_stil({"stil_liste": stiler}, navn)
             self.assertTrue(stil["bjcp_offisiell"], f"{navn} skal være merket som offisiell BJCP-stil")
 
-    def test_kun_en_stil_i_hele_biblioteket_er_ikke_offisiell(self):
+    def test_kun_tre_stiler_i_hele_biblioteket_er_ikke_offisielle(self):
         stiler = self._stil_liste()
-        ikke_offisielle = [s["stil"] for s in stiler if not s["bjcp_offisiell"]]
-        self.assertEqual(ikke_offisielle, ["Historisk Wiesn-Märzen"])
+        ikke_offisielle = {s["stil"] for s in stiler if not s["bjcp_offisiell"]}
+        self.assertEqual(
+            ikke_offisielle,
+            {"Historisk Wiesn-Märzen", "Tradisjonelt Norsk Gårdsøl / Kveik", "Tradisjonelt Norsk Juleøl"},
+        )
 
     def test_stilgrensene_for_historisk_wiesn_marzen_er_uendret(self):
         # Bekrefter at kun metadata ble lagt til, ikke selve OG/FG/IBU/EBC/

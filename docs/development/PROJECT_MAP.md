@@ -22,10 +22,14 @@ raw_data/                → Skrapet rådata og review-filer for masterdata-pipe
 tests/                  → Testsuite (unittest + streamlit.testing.v1.AppTest)
 docs/                   → Produktdokumentasjon (denne mappen: docs/development/ = prosessdokumentasjon)
 assets/                 → Bilder og branding
+scripts/                → Frittstående vedlikeholdsskript (scraping, web-dataeksport) — kjøres manuelt,
+                          ikke del av app.py sin kjøretid.
 web/                    → Separat, frittstående statisk web-versjon (vanilla HTML/CSS/JS, ingen build-steg).
                           IKKE en del av Streamlit-appens modules/ui-arkitektur — egne JS-porter av
                           modules/calculations.py, modules/style_engine.py og modules/flavor_engine.py
-                          (kun poeng-delen). Se web/README.md.
+                          (kun poeng-delen). Ingrediens-/stildata regenereres fra data/master_*.json og
+                          style_engine.py via scripts/generate_web_data.py — ingen egen web-database.
+                          Se web/README.md.
 ```
 
 ## Den harde arkitekturgrensen: `modules/` vs. `ui/`

@@ -3,529 +3,1008 @@
     "navn": "Abbey Malt",
     "potensiale": 1.034,
     "ebc": 50.0,
+    "produsent": "Brewferm",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "SPESIALMALT",
     "kategorier": {
       "Karamell": 4,
       "Maltfylde": 3,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "karamell",
+      "fruktig",
+      "belgisk",
+      "honning"
+    ]
   },
   "acidulated": {
     "navn": "Acidulated Malt",
     "potensiale": 1.033,
     "ebc": 4.0,
+    "produsent": "Ireks",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "SPESIALMALT",
     "kategorier": {
       "Syrlig": 5,
       "Frisk": 3,
       "Maltfylde": 1
-    }
+    },
+    "smakstags": [
+      "sur",
+      "frisk",
+      "sitron",
+      "lys syrlighet"
+    ]
   },
   "amber": {
     "navn": "Amber Malt",
     "potensiale": 1.03,
     "ebc": 110.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "SPESIALMALT",
     "kategorier": {
       "Toast": 5,
       "Nøtter": 4,
       "Karamell": 3
-    }
+    },
+    "smakstags": [
+      "toast",
+      "nøtter",
+      "tørket frukt",
+      "lett karamell"
+    ]
   },
   "biscuit": {
     "navn": "Biscuit Malt",
     "potensiale": 1.034,
     "ebc": 50.0,
+    "produsent": "Brewferm / Castle Malting",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "SPESIALMALT",
     "kategorier": {
       "Brød": 5,
       "Toast": 6,
       "Nøtter": 3
-    }
+    },
+    "smakstags": [
+      "kjeks",
+      "toast",
+      "brødskorpe",
+      "nøtter"
+    ]
   },
   "black": {
     "navn": "Black Malt",
     "potensiale": 1.025,
     "ebc": 1500.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Kaffe": 8,
       "Sjokolade": 6,
       "Bitterhet": 3
-    }
+    },
+    "smakstags": [
+      "espresso",
+      "brent",
+      "kakao",
+      "bitter røst"
+    ]
   },
   "bohemian_pilsner_floor": {
     "navn": "Bohemian Pilsner Floor",
     "potensiale": 1.037,
     "ebc": 4.0,
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "display_group": "PALE / PILSNER",
     "kategorier": {
       "Brød": 4,
       "Honning": 1,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "brød",
+      "kjeks",
+      "lyst korn",
+      "honning"
+    ]
   },
   "brown": {
     "navn": "Brown Malt",
     "potensiale": 1.03,
     "ebc": 200.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Toast": 6,
       "Nøtter": 4,
       "Kaffe": 3
-    }
+    },
+    "smakstags": [
+      "toast",
+      "nøtter",
+      "tørket brød",
+      "mild kaffe"
+    ]
   },
   "caraamber": {
     "navn": "CaraAmber",
     "potensiale": 1.03,
     "ebc": 70.0,
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 5,
       "Toast": 3,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "karamell",
+      "tørket frukt",
+      "rød fruktig"
+    ]
   },
   "caraaroma": {
     "navn": "CaraAroma",
     "potensiale": 1.025,
     "ebc": 400.0,
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 8,
       "Maltfylde": 6,
       "Fruktighet": 4
-    }
+    },
+    "smakstags": [
+      "mørk karamell",
+      "plomme",
+      "rosiner",
+      "tørket frukt"
+    ]
   },
   "carahell": {
     "navn": "CaraHell",
     "potensiale": 1.034,
     "ebc": 25.0,
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 3,
       "Honning": 4,
       "Brød": 2
-    }
+    },
+    "smakstags": [
+      "lys karamell",
+      "honning",
+      "brød",
+      "mild sødme"
+    ]
   },
   "caramalt_30": {
     "navn": "CaraMalt (30 EBC)",
     "potensiale": 1.034,
     "ebc": 30.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 4,
       "Honning": 3,
       "Brød": 3
-    }
+    },
+    "smakstags": [
+      "lys karamell",
+      "honning",
+      "kjeks",
+      "toffee"
+    ]
   },
   "caramunich_1": {
     "navn": "CaraMunich I",
     "potensiale": 1.03,
     "ebc": 90.0,
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 5,
       "Honning": 3,
       "Fruktighet": 2
-    }
+    },
+    "smakstags": [
+      "lys karamell",
+      "honning",
+      "mild fruktig"
+    ]
   },
   "caramunich_2": {
     "navn": "CaraMunich II",
     "potensiale": 1.03,
     "ebc": 120.0,
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 6,
       "Honning": 2,
       "Maltfylde": 4
-    }
+    },
+    "smakstags": [
+      "karamell",
+      "mørkt sukker",
+      "tørket frukt"
+    ]
   },
   "caramunich_3": {
     "navn": "CaraMunich III",
     "potensiale": 1.03,
     "ebc": 150.0,
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 7,
       "Maltfylde": 5,
       "Fruktighet": 3
-    }
+    },
+    "smakstags": [
+      "mørk karamell",
+      "rosiner",
+      "tørket frukt",
+      "plomme"
+    ]
   },
   "carared": {
     "navn": "CaraRed",
     "potensiale": 1.034,
     "ebc": 50.0,
+    "produsent": "Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 4,
       "Brød": 3,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "lys karamell",
+      "toast",
+      "rød",
+      "lett brød"
+    ]
   },
   "carafa_special_1": {
     "navn": "Carafa Special I",
     "potensiale": 1.025,
     "ebc": 900.0,
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Sjokolade": 4,
       "Kaffe": 3,
       "Toast": 2,
       "Maltfylde": 2
-    }
+    },
+    "smakstags": [
+      "mørk kakao",
+      "kaffe",
+      "toast",
+      "myk røst"
+    ]
   },
   "carafa_special_2": {
     "navn": "Carafa Special II",
     "potensiale": 1.025,
     "ebc": 1150.0,
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Sjokolade": 6,
       "Kaffe": 4,
       "Toast": 1,
       "Maltfylde": 2
-    }
+    },
+    "smakstags": [
+      "sjokolade",
+      "kaffe",
+      "brent korn"
+    ]
   },
   "carafa_special_3": {
     "navn": "Carafa Special III",
     "potensiale": 1.025,
     "ebc": 1400.0,
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Sjokolade": 7,
       "Kaffe": 6,
       "Bitterhet": 2
-    }
+    },
+    "smakstags": [
+      "mørk sjokolade",
+      "espresso",
+      "brent",
+      "kakao"
+    ]
   },
   "crystal_maple_carapils": {
     "navn": "Carapils",
     "potensiale": 1.037,
     "ebc": 8.0,
+    "produsent": "Viking / Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Maltfylde": 4,
       "Brød": 1
-    }
+    },
+    "smakstags": [
+      "nøytral",
+      "kropp",
+      "skum",
+      "lys"
+    ]
   },
   "chocolate": {
     "navn": "Chocolate Malt",
     "potensiale": 1.025,
     "ebc": 1175.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Sjokolade": 8,
       "Kaffe": 5,
       "Toast": 4
-    }
+    },
+    "smakstags": [
+      "mørk sjokolade",
+      "kakao",
+      "røstet kaffe"
+    ]
   },
   "chocolate_wheat": {
     "navn": "Chocolate Wheat Malt",
     "potensiale": 1.03,
     "ebc": 650.0,
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "HVETE / RUG",
     "kategorier": {
       "Sjokolade": 6,
       "Kaffe": 3,
       "Nøtter": 2,
       "Maltfylde": 2
-    }
+    },
+    "smakstags": [
+      "sjokolade",
+      "kakao",
+      "mild røst",
+      "nøtter",
+      "hvete"
+    ]
   },
   "chateau_cara_crystal": {
     "navn": "Château Cara Crystal",
     "potensiale": 1.03,
     "ebc": 120.0,
+    "produsent": "Castle Malting",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 5,
       "Honning": 3,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "karamell",
+      "toffee",
+      "honning",
+      "belgisk"
+    ]
   },
   "crystal": {
     "navn": "Crystal Malt",
     "potensiale": 1.03,
     "ebc": 150.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 6,
       "Honning": 3,
       "Fruktighet": 2
-    }
+    },
+    "smakstags": [
+      "karamell",
+      "honning",
+      "fruktig",
+      "toffee"
+    ]
   },
   "dark_wheat": {
     "navn": "Dark Wheat Malt",
     "potensiale": 1.036,
     "ebc": 15.0,
+    "produsent": "Weyermann",
+    "kategori": "Hvete- / Rugmalt",
+    "display_group": "HVETE / RUG",
     "kategorier": {
       "Brød": 4,
       "Karamell": 3,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "mørk hvete",
+      "brød",
+      "karamell",
+      "lett krydret"
+    ]
   },
   "crystal_extra_dark": {
     "navn": "Extra Dark Crystal",
     "potensiale": 1.03,
     "ebc": 350.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 8,
       "Maltfylde": 3,
       "Fruktighet": 5
-    }
+    },
+    "smakstags": [
+      "mørk karamell",
+      "plomme",
+      "rosiner",
+      "tørket frukt",
+      "fiken"
+    ]
   },
   "flaked_barley": {
     "navn": "Flaket Bygg",
     "potensiale": 1.032,
     "ebc": 2.0,
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "display_group": "FLAKES / UMALTET",
     "kategorier": {
       "Maltfylde": 3,
       "Brød": 1
-    }
+    },
+    "smakstags": [
+      "nøytralt",
+      "kropp",
+      "lett",
+      "umaltet korn"
+    ]
   },
   "flaket_havre": {
     "navn": "Flaket Havre",
     "potensiale": 1.037,
     "ebc": 2.0,
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "display_group": "FLAKES / UMALTET",
     "kategorier": {
       "Maltfylde": 5
-    }
+    },
+    "smakstags": [
+      "kremete",
+      "fyldig",
+      "silkemyk",
+      "nøytralt korn"
+    ]
   },
   "flaked_wheat": {
     "navn": "Flaket Hvete",
     "potensiale": 1.035,
     "ebc": 2.0,
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "display_group": "FLAKES / UMALTET",
     "kategorier": {
       "Brød": 2,
       "Maltfylde": 2
-    }
+    },
+    "smakstags": [
+      "hvete",
+      "lyst",
+      "lett",
+      "umaltet"
+    ]
   },
   "flaked_corn": {
     "navn": "Flaket Mais",
     "potensiale": 1.037,
     "ebc": 1.0,
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "display_group": "FLAKES / UMALTET",
     "kategorier": {
       "Maltfylde": 2,
       "Brød": 1
-    }
+    },
+    "smakstags": [
+      "nøytral",
+      "lyst korn",
+      "lett",
+      "umaltet"
+    ]
   },
   "golden_promise": {
     "navn": "Golden Promise",
     "potensiale": 1.037,
     "ebc": 6.0,
+    "produsent": "Simpsons",
+    "kategori": "Basemalt",
+    "display_group": "PALE / PILSNER",
     "kategorier": {
       "Brød": 4,
       "Honning": 3,
       "Maltfylde": 4
-    }
+    },
+    "smakstags": [
+      "lys honning",
+      "kjeks",
+      "mild sødme",
+      "skotsk"
+    ]
   },
   "honey_malt": {
     "navn": "Honey Malt",
     "potensiale": 1.034,
     "ebc": 25.0,
+    "produsent": "Gambrinus",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "SPESIALMALT",
     "kategorier": {
       "Honning": 7,
       "Karamell": 4,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "honning",
+      "sødme",
+      "karamell",
+      "lett krydret"
+    ]
   },
   "fawcett_maris_otter": {
     "navn": "Maris Otter",
     "potensiale": 1.038,
     "ebc": 5.5,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Basemalt",
+    "display_group": "PALE / PILSNER",
     "kategorier": {
       "Brød": 4,
       "Nøtter": 3,
       "Maltfylde": 5
-    }
+    },
+    "smakstags": [
+      "kjeks",
+      "nøtter",
+      "lys fruktig",
+      "engelsk base"
+    ]
   },
   "melanoidin": {
     "navn": "Melanoidin Malt",
     "potensiale": 1.034,
     "ebc": 70.0,
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "SPESIALMALT",
     "kategorier": {
       "Brød": 5,
       "Karamell": 4,
       "Maltfylde": 5
-    }
+    },
+    "smakstags": [
+      "brød",
+      "karamell",
+      "honning",
+      "maltrik",
+      "mellomkropp"
+    ]
   },
   "weyermann_munich_1": {
     "navn": "Munich I",
     "potensiale": 1.036,
     "ebc": 14.5,
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "display_group": "MUNICH / VIENNA",
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
       "Maltfylde": 5,
       "Toast": 3
-    }
+    },
+    "smakstags": [
+      "brød",
+      "honning",
+      "münchenermalt",
+      "maltrik"
+    ]
   },
   "munich_ii": {
     "navn": "Munich II",
     "potensiale": 1.036,
     "ebc": 23.0,
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "display_group": "MUNICH / VIENNA",
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
       "Maltfylde": 6,
       "Toast": 5
-    }
+    },
+    "smakstags": [
+      "brød",
+      "honning",
+      "mørk münchen",
+      "maltrik",
+      "nøtter"
+    ]
   },
   "jaermalt_munich": {
     "navn": "Munich Malt (Jærmalt)",
     "potensiale": 1.036,
     "ebc": 15.0,
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "display_group": "NORSK MALT",
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
       "Maltfylde": 5,
       "Toast": 3
-    }
+    },
+    "smakstags": [
+      "brød",
+      "honning",
+      "maltrik",
+      "mørk münchen"
+    ]
   },
   "oat_malt": {
     "navn": "Oat Malt",
     "potensiale": 1.035,
     "ebc": 3.0,
+    "produsent": "Simpson's",
+    "kategori": "Hvete- / Rugmalt",
+    "display_group": "HVETE / RUG",
     "kategorier": {
       "Maltfylde": 5,
       "Nøtter": 3
-    }
+    },
+    "smakstags": [
+      "kremete",
+      "nøtter",
+      "silkemyk",
+      "mild sødme"
+    ]
   },
   "pale_ale_malt": {
     "navn": "Pale Ale Malt",
     "potensiale": 1.038,
     "ebc": 5.5,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Basemalt",
+    "display_group": "PALE / PILSNER",
     "kategorier": {
       "Brød": 4,
       "Nøtter": 2,
       "Maltfylde": 4
-    }
+    },
+    "smakstags": [
+      "kjeks",
+      "nøtter",
+      "lett brød",
+      "lys fruktighet"
+    ]
   },
   "jaermalt_pale_ale": {
     "navn": "Pale Ale Malt (Jærmalt)",
     "potensiale": 1.038,
     "ebc": 5.5,
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "display_group": "NORSK MALT",
     "kategorier": {
       "Brød": 4,
       "Nøtter": 2,
       "Maltfylde": 4
-    }
+    },
+    "smakstags": [
+      "kjeks",
+      "nøtter",
+      "lyst brød",
+      "mild fruktig"
+    ]
   },
   "pale_chocolate": {
     "navn": "Pale Chocolate Malt",
     "potensiale": 1.03,
     "ebc": 600.0,
+    "produsent": "Thomas Fawcett",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Sjokolade": 5,
       "Nøtter": 4,
       "Kaffe": 2
-    }
+    },
+    "smakstags": [
+      "mild sjokolade",
+      "kakao",
+      "nøtter",
+      "toast",
+      "mild røst"
+    ]
   },
   "pale_wheat": {
     "navn": "Pale Wheat Malt",
     "potensiale": 1.037,
     "ebc": 3.0,
+    "produsent": "Weyermann",
+    "kategori": "Hvete- / Rugmalt",
+    "display_group": "HVETE / RUG",
     "kategorier": {
       "Brød": 4,
       "Maltfylde": 3,
       "Fruktighet": 2
-    }
+    },
+    "smakstags": [
+      "hvete",
+      "lyst brød",
+      "myk",
+      "frisk"
+    ]
   },
   "weyermann_pilsner": {
     "navn": "Pilsner Malt",
     "potensiale": 1.037,
     "ebc": 3.5,
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "display_group": "PALE / PILSNER",
     "kategorier": {
       "Brød": 4,
       "Honning": 2,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "brød",
+      "korn",
+      "lys honning",
+      "mild malt"
+    ]
   },
   "jaermalt_pilsner": {
     "navn": "Pilsner Malt (Jærmalt)",
     "potensiale": 1.037,
     "ebc": 3.0,
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "display_group": "NORSK MALT",
     "kategorier": {
       "Brød": 3,
       "Honning": 2,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "brød",
+      "lyst korn",
+      "mild honning",
+      "frisk"
+    ]
   },
   "rauchmalz": {
     "navn": "Rauchmalz",
     "potensiale": 1.037,
     "ebc": 5.0,
+    "produsent": "Weyermann",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Røyk": 8,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "røykt",
+      "spekk",
+      "bål",
+      "campfire",
+      "malt"
+    ]
   },
   "bestmalz_red_x": {
     "navn": "Red X",
     "potensiale": 1.034,
     "ebc": 15.0,
+    "produsent": "BestMalz",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "SPESIALMALT",
     "kategorier": {
       "Karamell": 5,
       "Brød": 4,
       "Maltfylde": 4
-    }
+    },
+    "smakstags": [
+      "rød",
+      "karamell",
+      "brød",
+      "mild fruktig"
+    ]
   },
   "roasted_barley": {
     "navn": "Roasted Barley",
     "potensiale": 1.025,
     "ebc": 1200.0,
+    "produsent": "Diverse",
+    "kategori": "Spesialmalt (Røstet / Andre)",
+    "display_group": "RØSTET / MØRK",
     "kategorier": {
       "Kaffe": 7,
       "Sjokolade": 5,
       "Toast": 3
-    }
+    },
+    "smakstags": [
+      "kaffe",
+      "mørk sjokolade",
+      "bitter røst",
+      "tørr"
+    ]
   },
   "bonsak_rugmalt": {
     "navn": "Rugmalt",
     "potensiale": 1.033,
     "ebc": 4.0,
+    "produsent": "Bonsak",
+    "kategori": "Norsk Malt",
+    "display_group": "HVETE / RUG",
     "kategorier": {
       "Brød": 3,
       "Krydret": 4,
       "Maltfylde": 3
-    }
+    },
+    "smakstags": [
+      "rug",
+      "krydret",
+      "jordlig",
+      "kompleks"
+    ]
   },
   "special_b": {
     "navn": "Special B",
     "potensiale": 1.03,
     "ebc": 350.0,
+    "produsent": "Castle Malting",
+    "kategori": "Karamell- / Krystallmalt",
+    "display_group": "KARAMELL / CRYSTAL",
     "kategorier": {
       "Karamell": 7,
       "Maltfylde": 4,
       "Fruktighet": 6
-    }
+    },
+    "smakstags": [
+      "rosiner",
+      "plomme",
+      "mørk frukt",
+      "mørk karamell",
+      "porter"
+    ]
   },
   "spray_light_68_ebc": {
     "navn": "Spraymalt Light (6-8 EBC)",
     "potensiale": 1.036,
     "ebc": 7.0,
+    "produsent": "Ukjent",
+    "kategori": "Spraymalt",
+    "display_group": "EKSTRAKT / SPRAYMALT",
     "kategorier": {
       "Brød": 3,
       "Maltfylde": 2
-    }
+    },
+    "smakstags": [
+      "maltpreg",
+      "lyst",
+      "lett",
+      "nøytral"
+    ]
   },
   "spray_medium": {
     "navn": "Spraymalt Medium",
     "potensiale": 1.035,
     "ebc": 20.0,
+    "produsent": "Ukjent",
+    "kategori": "Spraymalt",
+    "display_group": "EKSTRAKT / SPRAYMALT",
     "kategorier": {
       "Brød": 3,
       "Karamell": 3,
       "Maltfylde": 4
-    }
+    },
+    "smakstags": [
+      "maltpreg",
+      "karamell",
+      "rund",
+      "medium"
+    ]
   },
   "vienna": {
     "navn": "Vienna Malt",
     "potensiale": 1.036,
     "ebc": 7.0,
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "display_group": "MUNICH / VIENNA",
     "kategorier": {
       "Brød": 4,
       "Honning": 3,
       "Maltfylde": 4,
       "Toast": 2
-    }
+    },
+    "smakstags": [
+      "brød",
+      "honning",
+      "kjeks",
+      "mild karamell"
+    ]
   },
   "jaermalt_vienna": {
     "navn": "Vienna Malt (Jærmalt)",
     "potensiale": 1.036,
     "ebc": 8.0,
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "display_group": "NORSK MALT",
     "kategorier": {
       "Brød": 5,
       "Honning": 3,
       "Maltfylde": 4,
       "Toast": 2
-    }
+    },
+    "smakstags": [
+      "brød",
+      "honning",
+      "kjeks",
+      "mild karamell"
+    ]
   },
   "jaermalt_wheat": {
     "navn": "Wheat Malt (Jærmalt)",
     "potensiale": 1.037,
     "ebc": 4.0,
+    "produsent": "Jærmalt",
+    "kategori": "Norsk Malt",
+    "display_group": "NORSK MALT",
     "kategorier": {
       "Brød": 4,
       "Maltfylde": 3,
       "Fruktighet": 2
-    }
+    },
+    "smakstags": [
+      "hvete",
+      "lyst brød",
+      "myk",
+      "frisk"
+    ]
   }
 }

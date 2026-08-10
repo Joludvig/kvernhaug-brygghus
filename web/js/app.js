@@ -18,6 +18,7 @@ const attenuationOverrideInput = document.getElementById("attenuation-override")
 
 let gjaerCombobox = null;
 let stilCombobox = null;
+let oppdaterSmakshjul = null;
 
 async function lastData() {
   const [malt, humle, gjaer, stiler] = await Promise.all([
@@ -32,8 +33,32 @@ async function lastData() {
   bjcpStyles = stiler;
 }
 
-function itemsFra(data) {
-  return Object.entries(data).map(([id, v]) => ({ id, label: v.navn }));
+// Søkefeltet ("search") lar brukeren finne en ingrediens på mer enn bare
+// produktnavnet -- men bevisst begrenset til noen få, presise felt
+// (produsent/opprinnelse/type/kategori) og IKKE frie smakstags, som ville
+// gjort søket for bredt (f.eks. "sitrus" ville truffet dusinvis av humler).
+function maltItems() {
+  return Object.entries(maltData).map(([id, v]) => ({
+    id,
+    label: v.navn,
+    search: [v.navn, v.produsent, v.kategori].filter(Boolean).join(" ").toLowerCase(),
+  }));
+}
+
+function humleItems() {
+  return Object.entries(humleData).map(([id, v]) => ({
+    id,
+    label: v.navn,
+    search: [v.navn, v.opprinnelse, v.type].filter(Boolean).join(" ").toLowerCase(),
+  }));
+}
+
+function gjaerItems() {
+  return Object.entries(gjaerData).map(([id, v]) => ({
+    id,
+    label: v.navn,
+    search: [v.navn, v.produsent, v.gjaertype].filter(Boolean).join(" ").toLowerCase(),
+  }));
 }
 
 function stilItems() {
@@ -48,7 +73,7 @@ function leggTilMaltRad(forhandsutfylt) {
   const mount = rad.querySelector(".malt-velger-mount");
 
   const cb = new Combobox({
-    items: itemsFra(maltData),
+    items: maltItems(),
     placeholder: "Søk etter malt …",
     ariaLabel: "Velg malt",
     onSelect: beregnOgVisResultat,
@@ -76,7 +101,7 @@ function leggTilHumleRad(forhandsutfylt) {
   const mount = rad.querySelector(".humle-velger-mount");
 
   const cb = new Combobox({
-    items: itemsFra(humleData),
+    items: humleItems(),
     placeholder: "Søk etter humle …",
     ariaLabel: "Velg humle",
     onSelect: beregnOgVisResultat,
@@ -156,6 +181,7 @@ function beregnOgVisResultat() {
   document.getElementById("ebc-swatch").style.backgroundColor = ebcTilFarge(ebc);
 
   const flavorProfile = beregnSmaksprofil(maltRader, maltData, humleRader, humleData, ibu, gjaerId, gjaerData);
+  if (oppdaterSmakshjul) oppdaterSmakshjul(flavorProfile);
   const recipe = {
     malts: maltRader, hops: humleRader, yeast: gjaerId,
     stats: { og, fg, ibu, ebc, abv }, flavor_profile: flavorProfile,
@@ -366,9 +392,11 @@ function eksporterJson() {
 async function init() {
   await lastData();
 
+  oppdaterSmakshjul = initSmakshjul(document.getElementById("smakshjul-container"), SMAKS_KATEGORIER);
+
   const gjaerMount = document.getElementById("gjaer-velger-mount");
   gjaerCombobox = new Combobox({
-    items: itemsFra(gjaerData),
+    items: gjaerItems(),
     placeholder: "Søk etter gjær …",
     ariaLabel: "Velg gjær",
     onSelect: () => {

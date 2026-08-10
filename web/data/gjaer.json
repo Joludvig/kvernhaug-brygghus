@@ -1,507 +1,1456 @@
 {
   "bavarian_lager_m76": {
     "navn": "Bavarian Lager M76",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "tradisjonell lager",
+      "bayersk"
+    ]
   },
   "bavarian_wheat_m20": {
     "navn": "Bavarian Wheat M20",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hvete",
+      "tradisjonell weizen"
+    ]
   },
   "belgian_ale_m41": {
     "navn": "Belgian Ale M41",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "fruktig",
+      "blomst",
+      "belgisk",
+      "krydret"
+    ]
   },
   "belgian_tripel_m31": {
     "navn": "Belgian Tripel M31",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "fruktig",
+      "krydret",
+      "belgisk",
+      "tørr finish"
+    ]
   },
   "belgian_wit_m21": {
     "navn": "Belgian Wit M21",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "sitrus",
+      "koriander",
+      "hvete",
+      "belgisk wit"
+    ]
   },
   "bohemian_lager_m84": {
     "navn": "Bohemian Lager M84",
-    "attenuation": 0.76
+    "attenuation": 0.76,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "krystallklar",
+      "tradisjonell lager"
+    ]
   },
   "california_lager_m54": {
     "navn": "California Lager M54",
-    "attenuation": 0.76
+    "attenuation": 0.76,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "allsidig lager",
+      "fersk"
+    ]
   },
   "cs_big_ben": {
     "navn": "CellarScience CS Big Ben",
-    "attenuation": 0.7
+    "attenuation": 0.7,
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "maltfull",
+      "ESB",
+      "lav attenuation"
+    ]
   },
   "cs_hefe": {
     "navn": "CellarScience CS Hefe",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hefeweizen",
+      "hvete"
+    ]
   },
   "cs_jungle": {
     "navn": "CellarScience CS Jungle",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "IPA",
+      "hop-forward",
+      "fruktig"
+    ]
   },
   "cs_maison": {
     "navn": "CellarScience CS Maison",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "krydret",
+      "fruktig",
+      "saison"
+    ]
   },
   "cs_ne_hazy": {
     "navn": "CellarScience CS NE Hazy",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "NEIPA",
+      "hazy",
+      "tropisk",
+      "biotransformasjon"
+    ]
   },
   "cs_rokkar": {
     "navn": "CellarScience CS Røkkar",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "CellarScience",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "norsk kveik",
+      "fruktig",
+      "varm fermentering"
+    ]
   },
   "cs_velo": {
     "navn": "CellarScience CS Velo",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "allsidig",
+      "amerikansk ale"
+    ]
   },
   "cs_west_coast": {
     "navn": "CellarScience CS West Coast",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "CellarScience",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "west coast",
+      "ren",
+      "tørr",
+      "IPA",
+      "nøytral"
+    ]
   },
   "empire_ale_m15": {
     "navn": "Empire Ale M15",
-    "attenuation": 0.72
+    "attenuation": 0.72,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "lys frukt",
+      "nøtter",
+      "tørr"
+    ]
   },
   "french_saison_m29": {
     "navn": "French Saison M29",
     "attenuation": 0.75,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Saison",
     "kategorier": {
       "Krydder": 4.0,
       "Fruktighet": 3.0,
       "Sitrus": 2.0
-    }
+    },
+    "smakstags": [
+      "pepper",
+      "krydret",
+      "tørr",
+      "saison"
+    ]
   },
   "hophead_m66": {
     "navn": "Hophead Ale M66",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "hop-forward",
+      "IPA",
+      "fruktig",
+      "tropisk",
+      "hop-forsterkende"
+    ]
   },
   "k1_voss": {
     "navn": "K.1 Voss",
     "attenuation": 0.78,
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
     "kategorier": {
       "Sitrus": 5.0,
       "Tropisk": 3.0,
       "Fruktighet": 4.0,
       "Honning": 2.0
-    }
+    },
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ]
   },
   "k14_eitrheim": {
     "navn": "K.14 Eitrheim",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "tropisk",
+      "fersken",
+      "blomst"
+    ]
   },
   "k22_stalljen": {
     "navn": "K.22 Stalljen",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "allsidig",
+      "frisk",
+      "nøytral kveik"
+    ]
   },
   "k9_ebbegarden": {
     "navn": "K.9 Ebbegarden",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "Kveik Yeastery",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "aprikos",
+      "fersken",
+      "tropisk fruktighet"
+    ]
   },
   "lalbrew_abbaye": {
     "navn": "LalBrew Abbaye Belgian Ale",
     "attenuation": 0.8,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 4.0,
       "Krydder": 4.0,
       "Vinøs": 2.0
-    }
+    },
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "krydret",
+      "estrig"
+    ]
   },
   "lalbrew_bry97": {
     "navn": "LalBrew BRY-97 American West Coast",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "humlefremmende"
+    ]
   },
   "lalbrew_belgian_wit": {
     "navn": "LalBrew Belgian Wit-Style Yeast",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "belgisk",
+      "hvete",
+      "fruktig",
+      "krydret"
+    ]
   },
   "lalbrew_cbc1": {
     "navn": "LalBrew CBC-1",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Kondisjoneringsgjær",
+    "smakstags": [
+      "nøytral",
+      "karbonering"
+    ]
   },
   "lalbrew_diamond_lager": {
     "navn": "LalBrew Diamond Lager",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "profesjonell lager",
+      "nøytral"
+    ]
   },
   "lalbrew_farmhouse": {
     "navn": "LalBrew Farmhouse",
     "attenuation": 0.78,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Krydder": 4.0,
       "Fruktighet": 3.0,
       "Sitrus": 2.0
-    }
+    },
+    "smakstags": [
+      "saison",
+      "fruktig",
+      "pepret",
+      "tørr"
+    ]
   },
   "lalbrew_house_ale": {
     "navn": "LalBrew House Ale",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "allsidig",
+      "ren",
+      "lett fruktig"
+    ]
   },
   "lalbrew_munich_classic": {
     "navn": "LalBrew Munich Classic",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "tradisjonell hvete",
+      "bayersk"
+    ]
   },
   "lalbrew_new_england": {
     "navn": "LalBrew New England",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "myk",
+      "fruktig",
+      "tykk",
+      "NEIPA",
+      "tropisk"
+    ]
   },
   "lalbrew_nottingham": {
     "navn": "LalBrew Nottingham",
     "attenuation": 0.83,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 1.0
-    }
+    },
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "allsidig",
+      "høy attenuation"
+    ]
   },
   "lalbrew_nova_lager": {
     "navn": "LalBrew Nova Lager",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "lager ved aletemperatur",
+      "nøytral",
+      "allsidig"
+    ]
   },
   "lalbrew_philly_sour": {
     "navn": "LalBrew Philly Sour",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Spesialgjær",
+    "smakstags": [
+      "sur",
+      "fruktig",
+      "fersken",
+      "laktisk",
+      "ett-steg suring"
+    ]
   },
   "lalbrew_pomona": {
     "navn": "LalBrew Pomona",
-    "attenuation": 0.76
+    "attenuation": 0.76,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "IPA",
+      "biotransformasjon",
+      "fruktig",
+      "myk"
+    ]
   },
   "lalbrew_verdant": {
     "navn": "LalBrew Verdant IPA",
     "attenuation": 0.74,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 5.0,
       "Tropisk": 4.0,
       "Steinfrukt": 3.0
-    }
+    },
+    "smakstags": [
+      "tropisk",
+      "fruktig",
+      "myk",
+      "NEIPA",
+      "pasjonsfrukt"
+    ]
   },
   "lalbrew_voss_kveik": {
     "navn": "LalBrew Voss Kveik",
     "attenuation": 0.78,
+    "produsent": "Lallemand",
+    "kategori": "Kveik",
+    "gjaertype": "Kveik",
     "kategorier": {
       "Sitrus": 5.0,
       "Tropisk": 3.0,
       "Fruktighet": 4.0,
       "Honning": 2.0
-    }
+    },
+    "smakstags": [
+      "appelsin",
+      "sitrus",
+      "kveik",
+      "varm fermentering"
+    ]
   },
   "lalbrew_windsor": {
     "navn": "LalBrew Windsor British-Style Ale",
-    "attenuation": 0.7
+    "attenuation": 0.7,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "fruktig",
+      "maltaktig",
+      "nøtteaktig"
+    ]
   },
   "lalvin_ec1118": {
     "navn": "Lalvin EC-1118",
-    "attenuation": 0.95
+    "attenuation": 0.95,
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Spesialgjær",
+    "smakstags": [
+      "nøytral",
+      "vin",
+      "sider",
+      "flaskegjæring",
+      "høy alkoholtoleranse"
+    ]
   },
   "liberty_bell_m36": {
     "navn": "Liberty Bell Ale M36",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "lett fruktig",
+      "allsidig",
+      "ren",
+      "pale ale"
+    ]
   },
   "lutra_kveik": {
     "navn": "Lutra Kveik",
     "attenuation": 0.77,
+    "produsent": "Omega Yeast",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Kveik",
     "kategorier": {
       "Fruktighet": 1.0
-    }
+    },
+    "smakstags": [
+      "kveik",
+      "nøytral",
+      "ren",
+      "varm fermentering",
+      "allsidig kveik"
+    ]
   },
   "mj_bourbon_barrel_stout": {
     "navn": "Mangrove Jack's Bourbon Barrel Stout",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "Mangrove Jacks",
+    "kategori": "Spesialprodukt",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "stout",
+      "bourbon",
+      "fat",
+      "mørk"
+    ]
   },
   "new_world_strong_m42": {
     "navn": "New World Strong Ale M42",
     "attenuation": 0.79,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 1.5,
       "Maltfylde": 1.0
-    }
+    },
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "høy alkohol",
+      "sterk ale",
+      "tørr"
+    ]
   },
   "safale_be134": {
     "navn": "SafAle BE-134",
-    "attenuation": 0.87
+    "attenuation": 0.87,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "tørr",
+      "belgisk",
+      "pepper",
+      "fruktig"
+    ]
   },
   "safale_be256": {
     "navn": "SafAle BE-256",
-    "attenuation": 0.9
+    "attenuation": 0.9,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "tørr",
+      "sterk"
+    ]
   },
   "safale_bw20": {
     "navn": "SafAle BW-20",
-    "attenuation": 0.72
+    "attenuation": 0.72,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "belgisk",
+      "hvete",
+      "fruktig",
+      "krydret"
+    ]
   },
   "safale_f2": {
     "navn": "SafAle F-2",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Kondisjoneringsgjær",
+    "smakstags": [
+      "nøytral",
+      "karbonering"
+    ]
   },
   "safale_k97": {
     "navn": "SafAle K-97",
-    "attenuation": 0.81
+    "attenuation": 0.81,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "mild",
+      "nøytral",
+      "kölsch",
+      "hvit frukt",
+      "ren"
+    ]
   },
   "safale_s04": {
     "navn": "SafAle S-04",
     "attenuation": 0.75,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 2.0,
       "Brød": 1.0
-    }
+    },
+    "smakstags": [
+      "mild frukt",
+      "engelsk",
+      "nøytral",
+      "lav gjærsmak"
+    ]
   },
   "safale_s33": {
     "navn": "SafAle S-33",
-    "attenuation": 0.72
+    "attenuation": 0.72,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "belgisk",
+      "fruktig",
+      "estrig",
+      "allsidig"
+    ]
   },
   "safale_t58": {
     "navn": "SafAle T-58",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "belgisk",
+      "krydret",
+      "pepret",
+      "fruktig"
+    ]
   },
   "safale_us_05": {
     "navn": "SafAle US-05",
     "attenuation": 0.81,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 0.5
-    }
+    },
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "allsidig"
+    ]
   },
   "safale_w68": {
     "navn": "SafAle W-68",
-    "attenuation": 0.7
+    "attenuation": 0.7,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "hvete",
+      "banan",
+      "nellik",
+      "belgisk"
+    ]
   },
   "safale_wb06": {
     "navn": "SafAle WB-06",
     "attenuation": 0.72,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 5.0,
       "Krydder": 4.0
-    }
+    },
+    "smakstags": [
+      "hveteøl",
+      "banan",
+      "nellik",
+      "tysk"
+    ]
   },
   "saflager_e30": {
     "navn": "SafLager E-30",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "fruktig",
+      "ren",
+      "lager",
+      "estery"
+    ]
   },
   "saflager_s189": {
     "navn": "SafLager S-189",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "sveitsisk lager",
+      "crisp"
+    ]
   },
   "saflager_s23": {
     "navn": "SafLager S-23",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "lett fruktig",
+      "kontinental lager",
+      "standard"
+    ]
   },
   "saflager_w3470": {
     "navn": "SafLager W-34/70",
     "attenuation": 0.82,
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
     "kategorier": {
       "Fruktighet": 1.0,
       "Maltfylde": 1.0
-    }
+    },
+    "smakstags": [
+      "ren",
+      "klar",
+      "tradisjonell lager",
+      "standard lager"
+    ]
   },
   "us_west_coast_m44": {
     "navn": "U.S. West Coast M44",
-    "attenuation": 0.81
+    "attenuation": 0.81,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "west coast",
+      "IPA",
+      "tørr",
+      "allsidig"
+    ]
   },
   "versa_lager_m24": {
     "navn": "Versa Lager Yeast M 24",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "Mangrove Jacks",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "hybrid-lager"
+    ]
   },
   "voss_kveik_m12": {
     "navn": "Voss Kveik M12",
     "attenuation": 0.78,
+    "produsent": "Mangrove Jack's",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Kveik",
     "kategorier": {
       "Sitrus": 5.0,
       "Tropisk": 3.0,
       "Fruktighet": 4.0,
       "Honning": 2.0
-    }
+    },
+    "smakstags": [
+      "kveik",
+      "appelsin",
+      "fruktig",
+      "varm fermentering",
+      "sitrus"
+    ]
   },
   "wlp_001": {
     "navn": "WLP 001 California Ale",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "allsidig",
+      "amerikansk ale"
+    ]
   },
   "wlp_002": {
     "navn": "WLP 002 English Ale",
-    "attenuation": 0.67
+    "attenuation": 0.67,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "maltfull",
+      "lav attenuation",
+      "engelsk",
+      "mild frukt",
+      "søt avslutning"
+    ]
   },
   "wlp_004": {
     "navn": "WLP 004 Irish Ale",
-    "attenuation": 0.71
+    "attenuation": 0.71,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "irsk",
+      "tørr stout",
+      "mild frukt",
+      "ren"
+    ]
   },
   "wlp_005": {
     "navn": "WLP 005 British Ale",
-    "attenuation": 0.67
+    "attenuation": 0.67,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "britisk",
+      "maltfull",
+      "mild frukt",
+      "lav attenuation"
+    ]
   },
   "wlp_007": {
     "navn": "WLP 007 Dry English Ale",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tørr",
+      "engelsk",
+      "ren",
+      "mild frukt"
+    ]
   },
   "wlp_008": {
     "navn": "WLP 008 East Coast Ale",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "east coast",
+      "allsidig"
+    ]
   },
   "wlp_013": {
     "navn": "WLP 013 London Ale",
     "attenuation": 0.67,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 2.0,
       "Jordlig": 1.0
-    }
+    },
+    "smakstags": [
+      "engelsk",
+      "maltfull",
+      "bitter",
+      "rik"
+    ]
   },
   "wlp_023": {
     "navn": "WLP 023 Burton Ale",
-    "attenuation": 0.69
+    "attenuation": 0.69,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "engelsk",
+      "mineraler",
+      "bitter",
+      "tørr"
+    ]
   },
   "wlp_028": {
     "navn": "WLP 028 Edinburgh Ale",
-    "attenuation": 0.72
+    "attenuation": 0.72,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "skotsk",
+      "maltfull",
+      "ren",
+      "mild"
+    ]
   },
   "wlp_029": {
     "navn": "WLP 029 German Ale / Kölsch",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "kölsch",
+      "ren",
+      "mild frukt",
+      "delikat",
+      "klar"
+    ]
   },
   "wlp_051": {
     "navn": "WLP 051 California Ale V",
-    "attenuation": 0.7
+    "attenuation": 0.7,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "lett fruktig",
+      "americansk"
+    ]
   },
   "wlp_066": {
     "navn": "WLP 066 London Fog Ale",
     "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 4.0,
       "Steinfrukt": 2.0,
       "Tropisk": 1.0
-    }
+    },
+    "smakstags": [
+      "hazy",
+      "tropisk",
+      "NEIPA",
+      "saftig",
+      "fruktig"
+    ]
   },
   "wlp_067": {
     "navn": "WLP 067 Coastal Haze Ale",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "hazy",
+      "saftig",
+      "fruktig",
+      "NEIPA"
+    ]
   },
   "wlp_077": {
     "navn": "WLP 077 Tropicale Yeast Blend",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "tropisk",
+      "mango",
+      "ananas",
+      "fruktig",
+      "blend"
+    ]
   },
   "wlp_080": {
     "navn": "WLP 080 Cream Ale Yeast Blend",
-    "attenuation": 0.76
+    "attenuation": 0.76,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "ren",
+      "nøytral",
+      "cream ale",
+      "lett fruktig"
+    ]
   },
   "wlp_090": {
     "navn": "WLP 090 San Diego Super",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "tørr",
+      "høy attenuation",
+      "allsidig"
+    ]
   },
   "wlp_095": {
     "navn": "WLP 095 Burlington Ale",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "NEIPA",
+      "tropisk",
+      "hazy",
+      "Vermont-stil"
+    ]
   },
   "wlp_099": {
     "navn": "WLP 099 Super High Gravity Ale",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "høy alkohol",
+      "nøytral",
+      "sterk øl",
+      "allsidig"
+    ]
   },
   "wlp_300": {
     "navn": "WLP 300 Hefeweizen",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hefeweizen",
+      "bayersk hvete"
+    ]
   },
   "wlp_380": {
     "navn": "WLP 380 Hefeweizen Ale IV",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "banan",
+      "nellik",
+      "hefeweizen",
+      "bayersk hvete"
+    ]
   },
   "wlp_400": {
     "navn": "WLP 400 Belgian Wit",
-    "attenuation": 0.76
+    "attenuation": 0.76,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Hvetegjær",
+    "smakstags": [
+      "krydret",
+      "sitrus",
+      "belgisk wit",
+      "fenolisk",
+      "tart"
+    ]
   },
   "wlp_4000": {
     "navn": "WLP 4000 Vermont Ale",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
+    "smakstags": [
+      "NEIPA",
+      "tropisk",
+      "hazy",
+      "Vermont-stil",
+      "Conan"
+    ]
   },
   "wlp_510": {
     "navn": "WLP 510 Bastogne Belgian Ale",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "tørr",
+      "krydret",
+      "saison-preg"
+    ]
   },
   "wlp_518": {
     "navn": "WLP 518 Opshaug Kveik",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "appelsin",
+      "mango",
+      "kveik",
+      "fruktig",
+      "varm fermentering"
+    ]
   },
   "wlp_521": {
     "navn": "WLP 521 Hornindal Kveik",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Kveik",
+    "smakstags": [
+      "kveik",
+      "tropisk",
+      "fersken",
+      "varm fermentering"
+    ]
   },
   "wlp_530": {
     "navn": "WLP 530 Abbey Ale",
     "attenuation": 0.78,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
     "kategorier": {
       "Fruktighet": 4.0,
       "Krydder": 4.0,
       "Vinøs": 2.0
-    }
+    },
+    "smakstags": [
+      "belgisk",
+      "tykk",
+      "frukt",
+      "plomme",
+      "klosterbrygg"
+    ]
   },
   "wlp_545": {
     "navn": "WLP 545 Belgian Strong Ale",
-    "attenuation": 0.78
+    "attenuation": 0.78,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "belgisk",
+      "sterk",
+      "fruktig",
+      "kompleks"
+    ]
   },
   "wlp_550": {
     "navn": "WLP 550 Belgian Ale",
-    "attenuation": 0.82
+    "attenuation": 0.82,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Belgisk Ale",
+    "smakstags": [
+      "krydret",
+      "frukt",
+      "belgisk",
+      "fenolisk",
+      "kompleks"
+    ]
   },
   "wlp_565": {
     "navn": "WLP 565 Saison Ale",
     "attenuation": 0.78,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Saison",
     "kategorier": {
       "Krydder": 5.0,
       "Fruktighet": 4.0,
       "Sitrus": 2.0
-    }
+    },
+    "smakstags": [
+      "saison",
+      "krydret",
+      "tørr",
+      "pepper",
+      "belgisk"
+    ]
   },
   "wlp_566": {
     "navn": "WLP 566 Saison Ale II",
     "attenuation": 0.82,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Saison",
     "kategorier": {
       "Krydder": 5.0,
       "Fruktighet": 4.0,
       "Sitrus": 2.0
-    }
+    },
+    "smakstags": [
+      "saison",
+      "fruktig",
+      "tørr",
+      "tropisk",
+      "belgisk"
+    ]
   },
   "wlp_618": {
     "navn": "WLP 618 NA All Day",
-    "attenuation": 0.35
+    "attenuation": 0.35,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Spesialgjær",
+    "smakstags": [
+      "alkoholfri",
+      "lavalkohol",
+      "ren",
+      "lett"
+    ]
   },
   "wlp_644": {
     "navn": "WLP 644 Saccharomyces bruxellensis Trois",
-    "attenuation": 0.85
+    "attenuation": 0.85,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Wild/Brett-lignende",
+    "smakstags": [
+      "tropisk",
+      "fruktig",
+      "tørr"
+    ]
   },
   "wlp_800": {
     "navn": "WLP 800 Pilsner Lager",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "bøhmisk pilsner",
+      "ren",
+      "crisp",
+      "klassisk lager",
+      "klar"
+    ]
   },
   "wlp_802": {
     "navn": "WLP 802 Czech Budejovice Lager",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "tsjekkisk lager",
+      "ren",
+      "maltfull",
+      "myk"
+    ]
   },
   "wlp_810": {
     "navn": "WLP 810 San Francisco Lager",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "hybrid"
+    ]
   },
   "wlp_820": {
     "navn": "WLP 820 Oktoberfest/Märzen Lager",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "balansert"
+    ]
   },
   "wlp_830": {
     "navn": "WLP 830 German Lager",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "tysk lager",
+      "ren",
+      "malt",
+      "klassisk",
+      "nøytral"
+    ]
   },
   "wlp_833": {
     "navn": "WLP 833 German Bock",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "bock",
+      "maltfull",
+      "tysk",
+      "rik",
+      "søt avslutning"
+    ]
   },
   "wlp_838": {
     "navn": "WLP 838 Southern German Lager",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "malt",
+      "kompleks"
+    ]
   },
   "wlp_850": {
     "navn": "WLP 850 Copenhagen Lager",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "frisk",
+      "nøytral"
+    ]
   },
   "wlp_940": {
     "navn": "WLP 940 Mexican Lager",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "crisp",
+      "lett lager",
+      "nøytral",
+      "klar"
+    ]
   },
   "wyeast_1318": {
     "navn": "Wyeast 1318 London Ale III",
     "attenuation": 0.73,
+    "produsent": "Wyeast",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Ale",
     "kategorier": {
       "Fruktighet": 4.0,
       "Steinfrukt": 2.0,
       "Tropisk": 1.0,
       "Maltfylde": 1.0
-    }
+    },
+    "smakstags": [
+      "frukt",
+      "malt",
+      "engelsk",
+      "medium attenuation"
+    ]
   }
 }
