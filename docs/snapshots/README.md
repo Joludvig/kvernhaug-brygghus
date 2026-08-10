@@ -32,5 +32,6 @@ docs/snapshots/YYYY-MM-DD_<kort-slug>.md
 | 2026-07-31 | [2026-07-31_KBDP_V1.md](2026-07-31_KBDP_V1.md) | KBDP etablert, CLAUDE.md restrukturert til utviklersystem, Snapshot-system innført |
 | 2026-08-03 | [2026-08-03_Vestbrygg_Variantmodell_Ferdig.md](2026-08-03_Vestbrygg_Variantmodell_Ferdig.md) | Vestbrygg-variantmodell, lagerstatus, «bestill til eksakt mål» og 25 kg-sikkerhet ferdig kodet og testet (Steg A–F6) — fryst rett før første ekte data-aktivering |
 | 2026-08-05 | [2026-08-05_Post-Raw_Pre-Master.md](2026-08-05_Post-Raw_Pre-Master.md) | Levende malt-rådata hentet og godkjent (Steg F9), Vestbrygg-only butikkfilter/dry-run i maltmatcheren kodet, testet og bevist trygt (Steg F10C–F10D) — fryst rett før første Vestbrygg-only-masteraktivering |
+| 2026-08-10 | [2026-08-10_Pre_Web_Versjon.md](2026-08-10_Pre_Web_Versjon.md) | Vestbrygg-maltdata aktivert, stilscoring/IBU-korrekthetsfikser, 858 tester grønt — fryst rett før oppstart av offentlig, forenklet web-versjon av oppskriftsbyggeren (`web/`) |
 
 *Oppdater denne tabellen (nyeste øverst eller nederst — vær konsistent) hver gang et nytt snapshot legges til. Selve snapshot-filene skal aldri redigeres i ettertid; denne indeksen er det eneste som vedlikeholdes løpende.*

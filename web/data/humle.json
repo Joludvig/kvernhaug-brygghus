@@ -1,0 +1,242 @@
+{
+  "akoya": {
+    "navn": "Akoya",
+    "alfa": 9.5
+  },
+  "alora": {
+    "navn": "Alora",
+    "alfa": 10.0
+  },
+  "amarillo": {
+    "navn": "Amarillo",
+    "alfa": 11.0
+  },
+  "azacca": {
+    "navn": "Azacca",
+    "alfa": 11.9
+  },
+  "bru_1": {
+    "navn": "BRU-1",
+    "alfa": 15.7
+  },
+  "cascade": {
+    "navn": "Cascade",
+    "alfa": 9.5
+  },
+  "cashmere": {
+    "navn": "Cashmere",
+    "alfa": 9.5
+  },
+  "celeia": {
+    "navn": "Celeia",
+    "alfa": 3.2
+  },
+  "centennial": {
+    "navn": "Centennial",
+    "alfa": 10.4
+  },
+  "challenger": {
+    "navn": "Challenger",
+    "alfa": null
+  },
+  "chinook": {
+    "navn": "Chinook",
+    "alfa": 11.1
+  },
+  "citra": {
+    "navn": "Citra",
+    "alfa": 13.9
+  },
+  "citra_lupomax": {
+    "navn": "Citra LUPOMAX",
+    "alfa": null
+  },
+  "columbus": {
+    "navn": "Columbus",
+    "alfa": 13.9
+  },
+  "comet": {
+    "navn": "Comet",
+    "alfa": 9.3
+  },
+  "east_kent_goldings": {
+    "navn": "East Kent Goldings",
+    "alfa": 5.8
+  },
+  "eclipse_2021": {
+    "navn": "Eclipse 2021",
+    "alfa": 17.7
+  },
+  "eclipse_2024": {
+    "navn": "Eclipse 2024",
+    "alfa": 19.7
+  },
+  "ekuanot": {
+    "navn": "Ekuanot",
+    "alfa": null
+  },
+  "el_dorado": {
+    "navn": "El Dorado",
+    "alfa": 13.1
+  },
+  "ella": {
+    "navn": "Ella",
+    "alfa": 16.5
+  },
+  "fuggles": {
+    "navn": "Fuggles",
+    "alfa": 6.0
+  },
+  "galaxy": {
+    "navn": "Galaxy",
+    "alfa": 18.4
+  },
+  "goldings": {
+    "navn": "Goldings",
+    "alfa": null
+  },
+  "hbc_630": {
+    "navn": "HBC 630",
+    "alfa": 13.7
+  },
+  "hallertau_blanc": {
+    "navn": "Hallertau Blanc",
+    "alfa": 9.4
+  },
+  "hallertau_mittelfruh": {
+    "navn": "Hallertau Mittelfrüh",
+    "alfa": 3.3
+  },
+  "hallertau_tradition": {
+    "navn": "Hallertau Tradition",
+    "alfa": 5.6
+  },
+  "harlequin": {
+    "navn": "Harlequin",
+    "alfa": null
+  },
+  "herkules": {
+    "navn": "Herkules",
+    "alfa": null
+  },
+  "hersbrucker": {
+    "navn": "Hersbrucker",
+    "alfa": 2.4
+  },
+  "idaho_7": {
+    "navn": "Idaho-7",
+    "alfa": 11.4
+  },
+  "jester": {
+    "navn": "Jester",
+    "alfa": null
+  },
+  "kohatu": {
+    "navn": "Kohatu",
+    "alfa": 6.0
+  },
+  "krush": {
+    "navn": "Krush",
+    "alfa": 13.6
+  },
+  "lemondrop": {
+    "navn": "Lemondrop",
+    "alfa": null
+  },
+  "magnum": {
+    "navn": "Magnum",
+    "alfa": 13.6
+  },
+  "mandarina_bavaria": {
+    "navn": "Mandarina Bavaria",
+    "alfa": null
+  },
+  "mosaic": {
+    "navn": "Mosaic",
+    "alfa": 13.6
+  },
+  "mosaic_lupomax": {
+    "navn": "Mosaic LUPOMAX",
+    "alfa": null
+  },
+  "motueka": {
+    "navn": "Motueka",
+    "alfa": null
+  },
+  "moutere": {
+    "navn": "Moutere",
+    "alfa": 16.6
+  },
+  "mystic": {
+    "navn": "Mystic",
+    "alfa": null
+  },
+  "nectaron": {
+    "navn": "Nectaron",
+    "alfa": 11.9
+  },
+  "nelson_sauvin": {
+    "navn": "Nelson Sauvin",
+    "alfa": 9.6
+  },
+  "northern_brewer": {
+    "navn": "Northern Brewer",
+    "alfa": 7.5
+  },
+  "pacific_sunrise": {
+    "navn": "Pacific Sunrise",
+    "alfa": 11.5
+  },
+  "perle": {
+    "navn": "Perle",
+    "alfa": 6.6
+  },
+  "rakau": {
+    "navn": "Rakau",
+    "alfa": null
+  },
+  "saaz": {
+    "navn": "Saaz",
+    "alfa": 2.9
+  },
+  "sabro": {
+    "navn": "Sabro",
+    "alfa": 15.5
+  },
+  "simcoe": {
+    "navn": "Simcoe",
+    "alfa": 12.6
+  },
+  "southern_star": {
+    "navn": "Southern Star",
+    "alfa": 15.0
+  },
+  "styrian_dragon": {
+    "navn": "Styrian Dragon",
+    "alfa": null
+  },
+  "styrian_golding": {
+    "navn": "Styrian Golding",
+    "alfa": null
+  },
+  "superdelic": {
+    "navn": "Superdelic",
+    "alfa": null
+  },
+  "talus": {
+    "navn": "Talus",
+    "alfa": 8.6
+  },
+  "tettnang": {
+    "navn": "Tettnang",
+    "alfa": 3.1
+  },
+  "vic_secret": {
+    "navn": "Vic Secret",
+    "alfa": 20.4
+  },
+  "waimea": {
+    "navn": "Waimea",
+    "alfa": null
+  }
+}

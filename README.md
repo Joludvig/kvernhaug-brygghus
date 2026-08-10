@@ -53,6 +53,12 @@ Se [docs/ROADMAP.md](docs/ROADMAP.md) og [docs/PROJECT_STATUS_JULI_2026.md](docs
 
 ---
 
+## Web-versjon (under utvikling)
+
+[web/](web/) inneholder en separat, forenklet, offentlig nettversjon av oppskriftsbyggeren — ren HTML/CSS/JS uten build-steg, ingen innlogging eller database. Se [web/README.md](web/README.md).
+
+---
+
 ## Private data
 
 `recipes/` og alle private runtime-filer i `data/` (blant annet `pantry.json` og tilhørende backupfiler, `humle_lager.json`, `equipment.json`) er gitignoret — de opprettes automatisk lokalt og deles aldri via git.
