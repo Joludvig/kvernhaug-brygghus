@@ -1,0 +1,825 @@
+{
+  "Tysk Pilsner": {
+    "prio": 1,
+    "kat_navn": "🍺 Pilsner & Lys Lager",
+    "og": [
+      1.044,
+      1.05
+    ],
+    "fg": [
+      1.008,
+      1.013
+    ],
+    "abv": [
+      4.4,
+      5.2
+    ],
+    "ibu": [
+      22,
+      40
+    ],
+    "ebc": [
+      4,
+      8
+    ],
+    "smak_krav": {
+      "Brød": 4,
+      "Sitrus": 1,
+      "Bitterhet": 4
+    },
+    "beskrivelse": "Ren, sprø, tørr og elegant tysk lagerøl med en markant bitter finish.",
+    "bjcp_offisiell": true
+  },
+  "Tsjekkisk Pilsner": {
+    "prio": 1,
+    "kat_navn": "🍺 Pilsner & Lys Lager",
+    "og": [
+      1.044,
+      1.056
+    ],
+    "fg": [
+      1.013,
+      1.017
+    ],
+    "abv": [
+      4.2,
+      5.8
+    ],
+    "ibu": [
+      30,
+      45
+    ],
+    "ebc": [
+      6,
+      14
+    ],
+    "smak_krav": {
+      "Brød": 4,
+      "Maltfylde": 4,
+      "Bitterhet": 4
+    },
+    "beskrivelse": "Rundere pilsnerstil med dypere maltsødme og rik, edel humlebitterhet.",
+    "bjcp_offisiell": true
+  },
+  "Münchener Dunkel": {
+    "prio": 1,
+    "kat_navn": "🍺 Pilsner & Lys Lager",
+    "og": [
+      1.048,
+      1.056
+    ],
+    "fg": [
+      1.01,
+      1.016
+    ],
+    "abv": [
+      4.5,
+      5.6
+    ],
+    "ibu": [
+      18,
+      28
+    ],
+    "ebc": [
+      28,
+      56
+    ],
+    "smak_krav": {
+      "Brød": 5,
+      "Toast": 4,
+      "Karamell": 3,
+      "Nøtter": 2
+    },
+    "beskrivelse": "Klassisk mørk tysk lager med fokus på rike brødskorpe-toner, uten brentsmak.",
+    "bjcp_offisiell": true
+  },
+  "Vienna Lager": {
+    "prio": 1,
+    "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+    "og": [
+      1.046,
+      1.052
+    ],
+    "fg": [
+      1.01,
+      1.014
+    ],
+    "abv": [
+      4.5,
+      5.5
+    ],
+    "ibu": [
+      18,
+      30
+    ],
+    "ebc": [
+      12,
+      18
+    ],
+    "smak_krav": {
+      "Brød": 4,
+      "Toast": 3,
+      "Maltfylde": 4,
+      "Bitterhet": 3
+    },
+    "beskrivelse": "Ravgul østerriksk/tysk lager med ren, toastet maltkarakter og edel humlebalanse.",
+    "bjcp_offisiell": true
+  },
+  "Märzen": {
+    "prio": 1,
+    "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+    "og": [
+      1.054,
+      1.06
+    ],
+    "fg": [
+      1.01,
+      1.014
+    ],
+    "abv": [
+      5.8,
+      6.3
+    ],
+    "ibu": [
+      18,
+      24
+    ],
+    "ebc": [
+      14,
+      26
+    ],
+    "smak_krav": {
+      "Brød": 5,
+      "Toast": 3,
+      "Maltfylde": 5,
+      "Bitterhet": 3
+    },
+    "beskrivelse": "Rik, ravgul Oktoberfest-lager med dominerende brødskorpe/toast fra Munich- og Vienna-malt.",
+    "bjcp_offisiell": true
+  },
+  "Historisk Wiesn-Märzen": {
+    "prio": 1,
+    "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+    "bjcp_offisiell": false,
+    "og": [
+      1.06,
+      1.068
+    ],
+    "fg": [
+      1.012,
+      1.018
+    ],
+    "abv": [
+      6.3,
+      7.0
+    ],
+    "ibu": [
+      20,
+      27
+    ],
+    "ebc": [
+      16,
+      32
+    ],
+    "smak_krav": {
+      "Brød": 5,
+      "Toast": 3,
+      "Maltfylde": 5,
+      "Bitterhet": 2.5
+    },
+    "beskrivelse": "Kraftigere, historisk Wiesn-stil Märzen (ikke offisiell BJCP-stil) — sterkere, fyldigere og mer ravgul enn moderne 2021-guideline. Sentrert rundt ca. 16 °Plato."
+  },
+  "Festbier": {
+    "prio": 1,
+    "kat_navn": "🍂 Oktoberfest & Ravgul Lager",
+    "og": [
+      1.05,
+      1.057
+    ],
+    "fg": [
+      1.008,
+      1.012
+    ],
+    "abv": [
+      5.8,
+      6.3
+    ],
+    "ibu": [
+      18,
+      25
+    ],
+    "ebc": [
+      6,
+      11
+    ],
+    "smak_krav": {
+      "Brød": 4,
+      "Maltfylde": 4,
+      "Bitterhet": 3
+    },
+    "beskrivelse": "Moderne, lysere og renere Oktoberfest-stil enn Märzen — samme styrke, mindre toast/farge.",
+    "bjcp_offisiell": true
+  },
+  "Heller Bock (Mai-Bock)": {
+    "prio": 2,
+    "kat_navn": "🐐 Bock-øl",
+    "og": [
+      1.064,
+      1.072
+    ],
+    "fg": [
+      1.011,
+      1.018
+    ],
+    "abv": [
+      6.3,
+      7.4
+    ],
+    "ibu": [
+      23,
+      35
+    ],
+    "ebc": [
+      12,
+      22
+    ],
+    "smak_krav": {
+      "Maltfylde": 6,
+      "Brød": 5,
+      "Toast": 2,
+      "Bitterhet": 2
+    },
+    "beskrivelse": "Et kraftig, lyst bock-øl som kombinerer solid alkoholstyrke med rik maltsmak.",
+    "bjcp_offisiell": true
+  },
+  "Dunkles Bock": {
+    "prio": 2,
+    "kat_navn": "🐐 Bock-øl",
+    "og": [
+      1.064,
+      1.072
+    ],
+    "fg": [
+      1.013,
+      1.019
+    ],
+    "abv": [
+      6.3,
+      7.2
+    ],
+    "ibu": [
+      20,
+      27
+    ],
+    "ebc": [
+      44,
+      60
+    ],
+    "smak_krav": {
+      "Karamell": 6,
+      "Maltfylde": 7,
+      "Toast": 4,
+      "Nøtter": 3
+    },
+    "beskrivelse": "Et mørkt tysk tradisjonsøl med store smaker av karamell og knekk.",
+    "bjcp_offisiell": true
+  },
+  "Tysk Weissbier / Hefeweizen": {
+    "prio": 3,
+    "kat_navn": "🌾 Tyske Hveteøl",
+    "og": [
+      1.044,
+      1.052
+    ],
+    "fg": [
+      1.01,
+      1.014
+    ],
+    "abv": [
+      4.3,
+      5.6
+    ],
+    "ibu": [
+      8,
+      15
+    ],
+    "ebc": [
+      4,
+      12
+    ],
+    "smak_krav": {
+      "Fruktighet": 6,
+      "Krydder": 3,
+      "Brød": 4
+    },
+    "beskrivelse": "Et friskt, kremet og lyst hveteøl preget av gjærens intense noter av banan og nellik.",
+    "bjcp_offisiell": true
+  },
+  "Robust Porter": {
+    "prio": 4,
+    "kat_navn": "☕ Porter, Stout & Røykøl",
+    "og": [
+      1.048,
+      1.065
+    ],
+    "fg": [
+      1.012,
+      1.016
+    ],
+    "abv": [
+      4.8,
+      6.5
+    ],
+    "ibu": [
+      25,
+      50
+    ],
+    "ebc": [
+      60,
+      100
+    ],
+    "smak_krav": {
+      "Sjokolade": 5,
+      "Kaffe": 3,
+      "Toast": 4,
+      "Maltfylde": 4
+    },
+    "beskrivelse": "Et moderat mørkt øl preget av røstet korn, kakao og rund sjokoladesmak.",
+    "bjcp_offisiell": true
+  },
+  "Imperial Porter / Baltic Porter": {
+    "prio": 4,
+    "kat_navn": "☕ Porter, Stout & Røykøl",
+    "og": [
+      1.06,
+      1.09
+    ],
+    "fg": [
+      1.016,
+      1.024
+    ],
+    "abv": [
+      7.0,
+      9.5
+    ],
+    "ibu": [
+      20,
+      40
+    ],
+    "ebc": [
+      60,
+      120
+    ],
+    "smak_krav": {
+      "Maltfylde": 8,
+      "Karamell": 6,
+      "Sjokolade": 7,
+      "Nøtter": 4,
+      "Toast": 4
+    },
+    "beskrivelse": "Et mektig, mørkt og fløyelsmykt luksusøl. Enorm maltsødme med dype smaker av lakris, mørk sjokolade og tørket frukt.",
+    "bjcp_offisiell": true
+  },
+  "Irsk Tørr Stout": {
+    "prio": 4,
+    "kat_navn": "☕ Porter, Stout & Røykøl",
+    "og": [
+      1.036,
+      1.044
+    ],
+    "fg": [
+      1.007,
+      1.011
+    ],
+    "abv": [
+      4.0,
+      4.5
+    ],
+    "ibu": [
+      25,
+      45
+    ],
+    "ebc": [
+      80,
+      120
+    ],
+    "smak_krav": {
+      "Kaffe": 7,
+      "Sjokolade": 3,
+      "Toast": 5,
+      "Bitterhet": 4
+    },
+    "beskrivelse": "Helt sort, kremet øl preget av intens espresso-smak fra røstet bygg.",
+    "bjcp_offisiell": true
+  },
+  "Oatmeal Stout": {
+    "prio": 4,
+    "kat_navn": "☕ Porter, Stout & Røykøl",
+    "og": [
+      1.048,
+      1.065
+    ],
+    "fg": [
+      1.01,
+      1.018
+    ],
+    "abv": [
+      4.2,
+      5.9
+    ],
+    "ibu": [
+      20,
+      40
+    ],
+    "ebc": [
+      64,
+      100
+    ],
+    "smak_krav": {
+      "Sjokolade": 6,
+      "Kaffe": 4,
+      "Maltfylde": 6,
+      "Nøtter": 3
+    },
+    "beskrivelse": "Kremet og fyldig stout med myk munnfølelse fra havre. Sjokolade og mokka i front, uten den skarpe brenttonen.",
+    "bjcp_offisiell": true
+  },
+  "Klassisk Røykøl (Rauchbier)": {
+    "prio": 4,
+    "kat_navn": "☕ Porter, Stout & Røykøl",
+    "og": [
+      1.05,
+      1.058
+    ],
+    "fg": [
+      1.012,
+      1.016
+    ],
+    "abv": [
+      4.8,
+      6.0
+    ],
+    "ibu": [
+      20,
+      30
+    ],
+    "ebc": [
+      24,
+      44
+    ],
+    "smak_krav": {
+      "Røyk": 7,
+      "Brød": 4,
+      "Toast": 4,
+      "Maltfylde": 5
+    },
+    "beskrivelse": "Tysk lagerstil der malten tørkes over åpen bøkebål. Smaker av røkt kjøtt.",
+    "bjcp_offisiell": true
+  },
+  "Tradisjonelt Norsk Gårdsøl / Kveik": {
+    "prio": 5,
+    "kat_navn": "🇧🇻 Tradisjonelt Norsk Gårdsøl",
+    "og": [
+      1.048,
+      1.06
+    ],
+    "fg": [
+      1.01,
+      1.016
+    ],
+    "abv": [
+      4.5,
+      6.5
+    ],
+    "ibu": [
+      15,
+      30
+    ],
+    "ebc": [
+      10,
+      25
+    ],
+    "smak_krav": {
+      "Fruktighet": 6,
+      "Sitrus": 5,
+      "Maltfylde": 4
+    },
+    "beskrivelse": "Historisk norsk ølstil brygget på kveik-gjær. Preget av saftig appelsinsmak.",
+    "bjcp_offisiell": true
+  },
+  "Tradisjonelt Norsk Juleøl": {
+    "prio": 6,
+    "kat_navn": "🎄 Juleøl",
+    "og": [
+      1.06,
+      1.075
+    ],
+    "fg": [
+      1.014,
+      1.022
+    ],
+    "abv": [
+      6.0,
+      8.5
+    ],
+    "ibu": [
+      25,
+      35
+    ],
+    "ebc": [
+      40,
+      75
+    ],
+    "smak_krav": {
+      "Karamell": 7,
+      "Maltfylde": 7,
+      "Krydder": 2,
+      "Toast": 4,
+      "Nøtter": 3
+    },
+    "beskrivelse": "Klassisk mørkt høytidsøl. Proppfullt av sødmefull karamell og mørk sirup.",
+    "bjcp_offisiell": true
+  },
+  "Belgisk Witbier": {
+    "prio": 7,
+    "kat_navn": "🇧🇪 Belgisk Gårds- & Klosterøl",
+    "og": [
+      1.044,
+      1.052
+    ],
+    "fg": [
+      1.008,
+      1.012
+    ],
+    "abv": [
+      4.5,
+      5.5
+    ],
+    "ibu": [
+      10,
+      20
+    ],
+    "ebc": [
+      4,
+      8
+    ],
+    "smak_krav": {
+      "Fruktighet": 4,
+      "Krydder": 4,
+      "Brød": 4
+    },
+    "beskrivelse": "Forfriskende belgisk hveteøl, krydret med korianderfrø og appelsinskall.",
+    "bjcp_offisiell": true
+  },
+  "Belgisk Dubbel": {
+    "prio": 7,
+    "kat_navn": "🇧🇪 Belgisk Gårds- & Klosterøl",
+    "og": [
+      1.062,
+      1.075
+    ],
+    "fg": [
+      1.01,
+      1.018
+    ],
+    "abv": [
+      6.0,
+      7.6
+    ],
+    "ibu": [
+      15,
+      25
+    ],
+    "ebc": [
+      22,
+      44
+    ],
+    "smak_krav": {
+      "Karamell": 6,
+      "Maltfylde": 6,
+      "Fruktighet": 5,
+      "Krydder": 3
+    },
+    "beskrivelse": "Rikt klosterøl med dype karamell- og tørket-frukt-toner (svisker, rosiner). Belgisk gjær gir mye liv.",
+    "bjcp_offisiell": true
+  },
+  "Belgisk Tripel": {
+    "prio": 7,
+    "kat_navn": "🇧🇪 Belgisk Gårds- & Klosterøl",
+    "og": [
+      1.075,
+      1.085
+    ],
+    "fg": [
+      1.008,
+      1.014
+    ],
+    "abv": [
+      7.5,
+      9.5
+    ],
+    "ibu": [
+      20,
+      40
+    ],
+    "ebc": [
+      9,
+      14
+    ],
+    "smak_krav": {
+      "Krydder": 5,
+      "Fruktighet": 6,
+      "Bitterhet": 3
+    },
+    "beskrivelse": "Et lyst, sterkt klosterøl. Varmende alkohol med toner av pepper, nellik og pære.",
+    "bjcp_offisiell": true
+  },
+  "Hazy IPA / NEIPA": {
+    "prio": 8,
+    "kat_navn": "🍋 Humledominert IPA",
+    "og": [
+      1.06,
+      1.085
+    ],
+    "fg": [
+      1.01,
+      1.016
+    ],
+    "abv": [
+      6.0,
+      8.5
+    ],
+    "ibu": [
+      40,
+      70
+    ],
+    "ebc": [
+      6,
+      18
+    ],
+    "smak_krav": {
+      "Tropisk": 7,
+      "Fruktighet": 6,
+      "Sitrus": 4
+    },
+    "beskrivelse": "Saftig, tropisk og tåkete IPA med myk munnfølelse fra havre/hvete. Lav opplevd bitterhet tross høye IBU.",
+    "bjcp_offisiell": true
+  },
+  "Amerikansk IPA": {
+    "prio": 8,
+    "kat_navn": "🍋 Humledominert IPA",
+    "og": [
+      1.056,
+      1.07
+    ],
+    "fg": [
+      1.008,
+      1.014
+    ],
+    "abv": [
+      5.5,
+      7.5
+    ],
+    "ibu": [
+      40,
+      70
+    ],
+    "ebc": [
+      12,
+      30
+    ],
+    "smak_krav": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 4
+    },
+    "beskrivelse": "Moderne, overhumlet stil der maltkarakteren skyves helt til side.",
+    "bjcp_offisiell": true
+  },
+  "English Bitter": {
+    "prio": 9,
+    "kat_navn": "🇬🇧 Engelsk Ale",
+    "og": [
+      1.03,
+      1.039
+    ],
+    "fg": [
+      1.007,
+      1.011
+    ],
+    "abv": [
+      3.2,
+      3.8
+    ],
+    "ibu": [
+      25,
+      35
+    ],
+    "ebc": [
+      12,
+      36
+    ],
+    "smak_krav": {
+      "Brød": 4,
+      "Maltfylde": 3,
+      "Bitterhet": 3
+    },
+    "beskrivelse": "Lett, tørr britisk øl. Ren maltsødme balansert av fin jordlig humlebitterhet.",
+    "bjcp_offisiell": true
+  },
+  "Best Bitter": {
+    "prio": 9,
+    "kat_navn": "🇬🇧 Engelsk Ale",
+    "og": [
+      1.04,
+      1.048
+    ],
+    "fg": [
+      1.008,
+      1.012
+    ],
+    "abv": [
+      3.8,
+      4.6
+    ],
+    "ibu": [
+      25,
+      40
+    ],
+    "ebc": [
+      12,
+      32
+    ],
+    "smak_krav": {
+      "Brød": 4,
+      "Maltfylde": 4,
+      "Nøtter": 2,
+      "Bitterhet": 3
+    },
+    "beskrivelse": "Klassisk britisk fatøl med god maltbalanse og jordlig EKG-karakter.",
+    "bjcp_offisiell": true
+  },
+  "ESB / Strong Bitter": {
+    "prio": 9,
+    "kat_navn": "🇬🇧 Engelsk Ale",
+    "og": [
+      1.048,
+      1.06
+    ],
+    "fg": [
+      1.01,
+      1.016
+    ],
+    "abv": [
+      4.6,
+      6.2
+    ],
+    "ibu": [
+      30,
+      50
+    ],
+    "ebc": [
+      12,
+      44
+    ],
+    "smak_krav": {
+      "Brød": 5,
+      "Maltfylde": 5,
+      "Nøtter": 2,
+      "Bitterhet": 4
+    },
+    "beskrivelse": "Kraftig britisk bitter med rik maltsødme, nøtteaktige toner og markant bitterhet.",
+    "bjcp_offisiell": true
+  },
+  "English Dark Mild": {
+    "prio": 9,
+    "kat_navn": "🇬🇧 Engelsk Ale",
+    "og": [
+      1.03,
+      1.038
+    ],
+    "fg": [
+      1.008,
+      1.013
+    ],
+    "abv": [
+      3.0,
+      3.8
+    ],
+    "ibu": [
+      10,
+      25
+    ],
+    "ebc": [
+      24,
+      100
+    ],
+    "smak_krav": {
+      "Brød": 3,
+      "Maltfylde": 3,
+      "Karamell": 2
+    },
+    "beskrivelse": "En liten, mørk og søtlig britisk tradisjonsstil med mild malt- og karamellsmak.",
+    "bjcp_offisiell": true
+  }
+}

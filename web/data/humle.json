@@ -1,242 +1,526 @@
 {
   "akoya": {
     "navn": "Akoya",
-    "alfa": 9.5
+    "alfa": 9.5,
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Steinfrukt": 4
+    }
   },
   "alora": {
     "navn": "Alora",
-    "alfa": 10.0
+    "alfa": 10.0,
+    "kategorier": {
+      "Tropisk": 5,
+      "Sitrus": 4,
+      "Fruktighet": 5
+    }
   },
   "amarillo": {
     "navn": "Amarillo",
-    "alfa": 11.0
+    "alfa": 11.0,
+    "kategorier": {
+      "Sitrus": 6,
+      "Fruktighet": 5,
+      "Steinfrukt": 5
+    }
   },
   "azacca": {
     "navn": "Azacca",
-    "alfa": 11.9
+    "alfa": 11.9,
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 5
+    }
   },
   "bru_1": {
     "navn": "BRU-1",
-    "alfa": 15.7
+    "alfa": 15.7,
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 6,
+      "Fruktighet": 5,
+      "Furunål": 4
+    }
   },
   "cascade": {
     "navn": "Cascade",
-    "alfa": 9.5
+    "alfa": 9.5,
+    "kategorier": {
+      "Sitrus": 6,
+      "Krydder": 5
+    }
   },
   "cashmere": {
     "navn": "Cashmere",
-    "alfa": 9.5
+    "alfa": 9.5,
+    "kategorier": {
+      "Sitrus": 6,
+      "Steinfrukt": 5,
+      "Fruktighet": 5
+    }
   },
   "celeia": {
     "navn": "Celeia",
-    "alfa": 3.2
+    "alfa": 3.2,
+    "kategorier": {
+      "Jordlig": 5,
+      "Krydder": 4
+    }
   },
   "centennial": {
     "navn": "Centennial",
-    "alfa": 10.4
+    "alfa": 10.4,
+    "kategorier": {
+      "Sitrus": 6,
+      "Furunål": 5
+    }
   },
   "challenger": {
     "navn": "Challenger",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Krydder": 5,
+      "Bitterhet": 6
+    }
   },
   "chinook": {
     "navn": "Chinook",
-    "alfa": 11.1
+    "alfa": 11.1,
+    "kategorier": {
+      "Furunål": 6,
+      "Sitrus": 5,
+      "Krydder": 4
+    }
   },
   "citra": {
     "navn": "Citra",
-    "alfa": 13.9
+    "alfa": 13.9,
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    }
   },
   "citra_lupomax": {
     "navn": "Citra LUPOMAX",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 7,
+      "Tropisk": 7,
+      "Fruktighet": 6
+    }
   },
   "columbus": {
     "navn": "Columbus",
-    "alfa": 13.9
+    "alfa": 13.9,
+    "kategorier": {
+      "Krydder": 5,
+      "Jordlig": 5,
+      "Bitterhet": 7
+    }
   },
   "comet": {
     "navn": "Comet",
-    "alfa": 9.3
+    "alfa": 9.3,
+    "kategorier": {
+      "Sitrus": 5,
+      "Jordlig": 3
+    }
   },
   "east_kent_goldings": {
     "navn": "East Kent Goldings",
-    "alfa": 5.8
+    "alfa": 5.8,
+    "kategorier": {
+      "Krydder": 5,
+      "Jordlig": 3
+    }
   },
   "eclipse_2021": {
     "navn": "Eclipse 2021",
-    "alfa": 17.7
+    "alfa": 17.7,
+    "kategorier": {
+      "Bitterhet": 6,
+      "Furunål": 4,
+      "Tropisk": 3
+    }
   },
   "eclipse_2024": {
     "navn": "Eclipse 2024",
-    "alfa": 19.7
+    "alfa": 19.7,
+    "kategorier": {
+      "Bitterhet": 6,
+      "Furunål": 4,
+      "Tropisk": 3
+    }
   },
   "ekuanot": {
     "navn": "Ekuanot",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    }
   },
   "el_dorado": {
     "navn": "El Dorado",
-    "alfa": 13.1
+    "alfa": 13.1,
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    }
   },
   "ella": {
     "navn": "Ella",
-    "alfa": 16.5
+    "alfa": 16.5,
+    "kategorier": {
+      "Tropisk": 5,
+      "Fruktighet": 5,
+      "Krydder": 4
+    }
   },
   "fuggles": {
     "navn": "Fuggles",
-    "alfa": 6.0
+    "alfa": 6.0,
+    "kategorier": {
+      "Jordlig": 4,
+      "Krydder": 5
+    }
   },
   "galaxy": {
     "navn": "Galaxy",
-    "alfa": 18.4
+    "alfa": 18.4,
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    }
   },
   "goldings": {
     "navn": "Goldings",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Jordlig": 4,
+      "Krydder": 4
+    }
   },
   "hbc_630": {
     "navn": "HBC 630",
-    "alfa": 13.7
+    "alfa": 13.7,
+    "kategorier": {
+      "Tropisk": 6,
+      "Sitrus": 5,
+      "Fruktighet": 5
+    }
   },
   "hallertau_blanc": {
     "navn": "Hallertau Blanc",
-    "alfa": 9.4
+    "alfa": 9.4,
+    "kategorier": {
+      "Sitrus": 5,
+      "Vinøs": 5,
+      "Fruktighet": 4
+    }
   },
   "hallertau_mittelfruh": {
     "navn": "Hallertau Mittelfrüh",
-    "alfa": 3.3
+    "alfa": 3.3,
+    "kategorier": {
+      "Jordlig": 3,
+      "Krydder": 4
+    }
   },
   "hallertau_tradition": {
     "navn": "Hallertau Tradition",
-    "alfa": 5.6
+    "alfa": 5.6,
+    "kategorier": {
+      "Jordlig": 3,
+      "Krydder": 4
+    }
   },
   "harlequin": {
     "navn": "Harlequin",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 5,
+      "Fruktighet": 4
+    }
   },
   "herkules": {
     "navn": "Herkules",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Bitterhet": 8,
+      "Krydder": 3
+    }
   },
   "hersbrucker": {
     "navn": "Hersbrucker",
-    "alfa": 2.4
+    "alfa": 2.4,
+    "kategorier": {
+      "Jordlig": 3,
+      "Krydder": 4
+    }
   },
   "idaho_7": {
     "navn": "Idaho-7",
-    "alfa": 11.4
+    "alfa": 11.4,
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5,
+      "Furunål": 5
+    }
   },
   "jester": {
     "navn": "Jester",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Tropisk": 5,
+      "Sitrus": 5,
+      "Fruktighet": 5
+    }
   },
   "kohatu": {
     "navn": "Kohatu",
-    "alfa": 6.0
+    "alfa": 6.0,
+    "kategorier": {
+      "Furunål": 5,
+      "Tropisk": 5,
+      "Steinfrukt": 4
+    }
   },
   "krush": {
     "navn": "Krush",
-    "alfa": 13.6
+    "alfa": 13.6,
+    "kategorier": {
+      "Tropisk": 6,
+      "Sitrus": 5,
+      "Fruktighet": 6
+    }
   },
   "lemondrop": {
     "navn": "Lemondrop",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 7,
+      "Fruktighet": 5
+    }
   },
   "magnum": {
     "navn": "Magnum",
-    "alfa": 13.6
+    "alfa": 13.6,
+    "kategorier": {
+      "Bitterhet": 8
+    }
   },
   "mandarina_bavaria": {
     "navn": "Mandarina Bavaria",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 7,
+      "Fruktighet": 5
+    }
   },
   "mosaic": {
     "navn": "Mosaic",
-    "alfa": 13.6
+    "alfa": 13.6,
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Furunål": 5
+    }
   },
   "mosaic_lupomax": {
     "navn": "Mosaic LUPOMAX",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Tropisk": 7,
+      "Fruktighet": 7,
+      "Furunål": 5
+    }
   },
   "motueka": {
     "navn": "Motueka",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6
+    }
   },
   "moutere": {
     "navn": "Moutere",
-    "alfa": 16.6
+    "alfa": 16.6,
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Steinfrukt": 4
+    }
   },
   "mystic": {
     "navn": "Mystic",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Fruktighet": 4,
+      "Krydder": 3
+    }
   },
   "nectaron": {
     "navn": "Nectaron",
-    "alfa": 11.9
+    "alfa": 11.9,
+    "kategorier": {
+      "Tropisk": 7,
+      "Steinfrukt": 6,
+      "Sitrus": 5,
+      "Fruktighet": 6
+    }
   },
   "nelson_sauvin": {
     "navn": "Nelson Sauvin",
-    "alfa": 9.6
+    "alfa": 9.6,
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Vinøs": 6
+    }
   },
   "northern_brewer": {
     "navn": "Northern Brewer",
-    "alfa": 7.5
+    "alfa": 7.5,
+    "kategorier": {
+      "Furunål": 5,
+      "Jordlig": 4
+    }
   },
   "pacific_sunrise": {
     "navn": "Pacific Sunrise",
-    "alfa": 11.5
+    "alfa": 11.5,
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Fruktighet": 4
+    }
   },
   "perle": {
     "navn": "Perle",
-    "alfa": 6.6
+    "alfa": 6.6,
+    "kategorier": {
+      "Krydder": 4,
+      "Jordlig": 3
+    }
   },
   "rakau": {
     "navn": "Rakau",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Steinfrukt": 5,
+      "Furunål": 5,
+      "Tropisk": 5
+    }
   },
   "saaz": {
     "navn": "Saaz",
-    "alfa": 2.9
+    "alfa": 2.9,
+    "kategorier": {
+      "Jordlig": 5,
+      "Krydder": 4
+    }
   },
   "sabro": {
     "navn": "Sabro",
-    "alfa": 15.5
+    "alfa": 15.5,
+    "kategorier": {
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Steinfrukt": 5
+    }
   },
   "simcoe": {
     "navn": "Simcoe",
-    "alfa": 12.6
+    "alfa": 12.6,
+    "kategorier": {
+      "Sitrus": 6,
+      "Tropisk": 6,
+      "Fruktighet": 6,
+      "Furunål": 5,
+      "Jordlig": 4
+    }
   },
   "southern_star": {
     "navn": "Southern Star",
-    "alfa": 15.0
+    "alfa": 15.0,
+    "kategorier": {
+      "Bitterhet": 6,
+      "Sitrus": 4,
+      "Tropisk": 4
+    }
   },
   "styrian_dragon": {
     "navn": "Styrian Dragon",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Fruktighet": 4
+    }
   },
   "styrian_golding": {
     "navn": "Styrian Golding",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Jordlig": 5,
+      "Krydder": 4
+    }
   },
   "superdelic": {
     "navn": "Superdelic",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Tropisk": 6,
+      "Sitrus": 5,
+      "Fruktighet": 5
+    }
   },
   "talus": {
     "navn": "Talus",
-    "alfa": 8.6
+    "alfa": 8.6,
+    "kategorier": {
+      "Sitrus": 5,
+      "Tropisk": 5,
+      "Fruktighet": 5
+    }
   },
   "tettnang": {
     "navn": "Tettnang",
-    "alfa": 3.1
+    "alfa": 3.1,
+    "kategorier": {
+      "Krydder": 4,
+      "Jordlig": 3
+    }
   },
   "vic_secret": {
     "navn": "Vic Secret",
-    "alfa": 20.4
+    "alfa": 20.4,
+    "kategorier": {
+      "Bitterhet": 7,
+      "Furunål": 5,
+      "Tropisk": 5
+    }
   },
   "waimea": {
     "navn": "Waimea",
-    "alfa": null
+    "alfa": null,
+    "kategorier": {
+      "Sitrus": 6,
+      "Furunål": 5,
+      "Tropisk": 5
+    }
   }
 }

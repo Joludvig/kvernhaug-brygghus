@@ -65,7 +65,12 @@
   },
   "french_saison_m29": {
     "navn": "French Saison M29",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "kategorier": {
+      "Krydder": 4.0,
+      "Fruktighet": 3.0,
+      "Sitrus": 2.0
+    }
   },
   "hophead_m66": {
     "navn": "Hophead Ale M66",
@@ -73,7 +78,13 @@
   },
   "k1_voss": {
     "navn": "K.1 Voss",
-    "attenuation": 0.78
+    "attenuation": 0.78,
+    "kategorier": {
+      "Sitrus": 5.0,
+      "Tropisk": 3.0,
+      "Fruktighet": 4.0,
+      "Honning": 2.0
+    }
   },
   "k14_eitrheim": {
     "navn": "K.14 Eitrheim",
@@ -89,7 +100,12 @@
   },
   "lalbrew_abbaye": {
     "navn": "LalBrew Abbaye Belgian Ale",
-    "attenuation": 0.8
+    "attenuation": 0.8,
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Krydder": 4.0,
+      "Vinøs": 2.0
+    }
   },
   "lalbrew_bry97": {
     "navn": "LalBrew BRY-97 American West Coast",
@@ -109,7 +125,12 @@
   },
   "lalbrew_farmhouse": {
     "navn": "LalBrew Farmhouse",
-    "attenuation": 0.78
+    "attenuation": 0.78,
+    "kategorier": {
+      "Krydder": 4.0,
+      "Fruktighet": 3.0,
+      "Sitrus": 2.0
+    }
   },
   "lalbrew_house_ale": {
     "navn": "LalBrew House Ale",
@@ -125,7 +146,10 @@
   },
   "lalbrew_nottingham": {
     "navn": "LalBrew Nottingham",
-    "attenuation": 0.83
+    "attenuation": 0.83,
+    "kategorier": {
+      "Fruktighet": 1.0
+    }
   },
   "lalbrew_nova_lager": {
     "navn": "LalBrew Nova Lager",
@@ -141,11 +165,22 @@
   },
   "lalbrew_verdant": {
     "navn": "LalBrew Verdant IPA",
-    "attenuation": 0.74
+    "attenuation": 0.74,
+    "kategorier": {
+      "Fruktighet": 5.0,
+      "Tropisk": 4.0,
+      "Steinfrukt": 3.0
+    }
   },
   "lalbrew_voss_kveik": {
     "navn": "LalBrew Voss Kveik",
-    "attenuation": 0.78
+    "attenuation": 0.78,
+    "kategorier": {
+      "Sitrus": 5.0,
+      "Tropisk": 3.0,
+      "Fruktighet": 4.0,
+      "Honning": 2.0
+    }
   },
   "lalbrew_windsor": {
     "navn": "LalBrew Windsor British-Style Ale",
@@ -161,7 +196,10 @@
   },
   "lutra_kveik": {
     "navn": "Lutra Kveik",
-    "attenuation": 0.77
+    "attenuation": 0.77,
+    "kategorier": {
+      "Fruktighet": 1.0
+    }
   },
   "mj_bourbon_barrel_stout": {
     "navn": "Mangrove Jack's Bourbon Barrel Stout",
@@ -169,7 +207,11 @@
   },
   "new_world_strong_m42": {
     "navn": "New World Strong Ale M42",
-    "attenuation": 0.79
+    "attenuation": 0.79,
+    "kategorier": {
+      "Fruktighet": 1.5,
+      "Maltfylde": 1.0
+    }
   },
   "safale_be134": {
     "navn": "SafAle BE-134",
@@ -193,7 +235,11 @@
   },
   "safale_s04": {
     "navn": "SafAle S-04",
-    "attenuation": 0.75
+    "attenuation": 0.75,
+    "kategorier": {
+      "Fruktighet": 2.0,
+      "Brød": 1.0
+    }
   },
   "safale_s33": {
     "navn": "SafAle S-33",
@@ -205,7 +251,10 @@
   },
   "safale_us_05": {
     "navn": "SafAle US-05",
-    "attenuation": 0.81
+    "attenuation": 0.81,
+    "kategorier": {
+      "Fruktighet": 0.5
+    }
   },
   "safale_w68": {
     "navn": "SafAle W-68",
@@ -213,7 +262,11 @@
   },
   "safale_wb06": {
     "navn": "SafAle WB-06",
-    "attenuation": 0.72
+    "attenuation": 0.72,
+    "kategorier": {
+      "Fruktighet": 5.0,
+      "Krydder": 4.0
+    }
   },
   "saflager_e30": {
     "navn": "SafLager E-30",
@@ -229,7 +282,11 @@
   },
   "saflager_w3470": {
     "navn": "SafLager W-34/70",
-    "attenuation": 0.82
+    "attenuation": 0.82,
+    "kategorier": {
+      "Fruktighet": 1.0,
+      "Maltfylde": 1.0
+    }
   },
   "us_west_coast_m44": {
     "navn": "U.S. West Coast M44",
@@ -241,7 +298,13 @@
   },
   "voss_kveik_m12": {
     "navn": "Voss Kveik M12",
-    "attenuation": 0.78
+    "attenuation": 0.78,
+    "kategorier": {
+      "Sitrus": 5.0,
+      "Tropisk": 3.0,
+      "Fruktighet": 4.0,
+      "Honning": 2.0
+    }
   },
   "wlp_001": {
     "navn": "WLP 001 California Ale",
@@ -269,7 +332,11 @@
   },
   "wlp_013": {
     "navn": "WLP 013 London Ale",
-    "attenuation": 0.67
+    "attenuation": 0.67,
+    "kategorier": {
+      "Fruktighet": 2.0,
+      "Jordlig": 1.0
+    }
   },
   "wlp_023": {
     "navn": "WLP 023 Burton Ale",
@@ -289,7 +356,12 @@
   },
   "wlp_066": {
     "navn": "WLP 066 London Fog Ale",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Steinfrukt": 2.0,
+      "Tropisk": 1.0
+    }
   },
   "wlp_067": {
     "navn": "WLP 067 Coastal Haze Ale",
@@ -345,7 +417,12 @@
   },
   "wlp_530": {
     "navn": "WLP 530 Abbey Ale",
-    "attenuation": 0.78
+    "attenuation": 0.78,
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Krydder": 4.0,
+      "Vinøs": 2.0
+    }
   },
   "wlp_545": {
     "navn": "WLP 545 Belgian Strong Ale",
@@ -357,11 +434,21 @@
   },
   "wlp_565": {
     "navn": "WLP 565 Saison Ale",
-    "attenuation": 0.78
+    "attenuation": 0.78,
+    "kategorier": {
+      "Krydder": 5.0,
+      "Fruktighet": 4.0,
+      "Sitrus": 2.0
+    }
   },
   "wlp_566": {
     "navn": "WLP 566 Saison Ale II",
-    "attenuation": 0.82
+    "attenuation": 0.82,
+    "kategorier": {
+      "Krydder": 5.0,
+      "Fruktighet": 4.0,
+      "Sitrus": 2.0
+    }
   },
   "wlp_618": {
     "navn": "WLP 618 NA All Day",
@@ -409,6 +496,12 @@
   },
   "wyeast_1318": {
     "navn": "Wyeast 1318 London Ale III",
-    "attenuation": 0.73
+    "attenuation": 0.73,
+    "kategorier": {
+      "Fruktighet": 4.0,
+      "Steinfrukt": 2.0,
+      "Tropisk": 1.0,
+      "Maltfylde": 1.0
+    }
   }
 }

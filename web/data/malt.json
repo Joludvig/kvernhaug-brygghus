@@ -2,266 +2,530 @@
   "abbey": {
     "navn": "Abbey Malt",
     "potensiale": 1.034,
-    "ebc": 50.0
+    "ebc": 50.0,
+    "kategorier": {
+      "Karamell": 4,
+      "Maltfylde": 3,
+      "Fruktighet": 5
+    }
   },
   "acidulated": {
     "navn": "Acidulated Malt",
     "potensiale": 1.033,
-    "ebc": 4.0
+    "ebc": 4.0,
+    "kategorier": {
+      "Syrlig": 5,
+      "Frisk": 3,
+      "Maltfylde": 1
+    }
   },
   "amber": {
     "navn": "Amber Malt",
     "potensiale": 1.03,
-    "ebc": 110.0
+    "ebc": 110.0,
+    "kategorier": {
+      "Toast": 5,
+      "Nøtter": 4,
+      "Karamell": 3
+    }
   },
   "biscuit": {
     "navn": "Biscuit Malt",
     "potensiale": 1.034,
-    "ebc": 50.0
+    "ebc": 50.0,
+    "kategorier": {
+      "Brød": 5,
+      "Toast": 6,
+      "Nøtter": 3
+    }
   },
   "black": {
     "navn": "Black Malt",
     "potensiale": 1.025,
-    "ebc": 1500.0
+    "ebc": 1500.0,
+    "kategorier": {
+      "Kaffe": 8,
+      "Sjokolade": 6,
+      "Bitterhet": 3
+    }
   },
   "bohemian_pilsner_floor": {
     "navn": "Bohemian Pilsner Floor",
     "potensiale": 1.037,
-    "ebc": 4.0
+    "ebc": 4.0,
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 1,
+      "Maltfylde": 3
+    }
   },
   "brown": {
     "navn": "Brown Malt",
     "potensiale": 1.03,
-    "ebc": 200.0
+    "ebc": 200.0,
+    "kategorier": {
+      "Toast": 6,
+      "Nøtter": 4,
+      "Kaffe": 3
+    }
   },
   "caraamber": {
     "navn": "CaraAmber",
     "potensiale": 1.03,
-    "ebc": 70.0
+    "ebc": 70.0,
+    "kategorier": {
+      "Karamell": 5,
+      "Toast": 3,
+      "Maltfylde": 3
+    }
   },
   "caraaroma": {
     "navn": "CaraAroma",
     "potensiale": 1.025,
-    "ebc": 400.0
+    "ebc": 400.0,
+    "kategorier": {
+      "Karamell": 8,
+      "Maltfylde": 6,
+      "Fruktighet": 4
+    }
   },
   "carahell": {
     "navn": "CaraHell",
     "potensiale": 1.034,
-    "ebc": 25.0
+    "ebc": 25.0,
+    "kategorier": {
+      "Karamell": 3,
+      "Honning": 4,
+      "Brød": 2
+    }
   },
   "caramalt_30": {
     "navn": "CaraMalt (30 EBC)",
     "potensiale": 1.034,
-    "ebc": 30.0
+    "ebc": 30.0,
+    "kategorier": {
+      "Karamell": 4,
+      "Honning": 3,
+      "Brød": 3
+    }
   },
   "caramunich_1": {
     "navn": "CaraMunich I",
     "potensiale": 1.03,
-    "ebc": 90.0
+    "ebc": 90.0,
+    "kategorier": {
+      "Karamell": 5,
+      "Honning": 3,
+      "Fruktighet": 2
+    }
   },
   "caramunich_2": {
     "navn": "CaraMunich II",
     "potensiale": 1.03,
-    "ebc": 120.0
+    "ebc": 120.0,
+    "kategorier": {
+      "Karamell": 6,
+      "Honning": 2,
+      "Maltfylde": 4
+    }
   },
   "caramunich_3": {
     "navn": "CaraMunich III",
     "potensiale": 1.03,
-    "ebc": 150.0
+    "ebc": 150.0,
+    "kategorier": {
+      "Karamell": 7,
+      "Maltfylde": 5,
+      "Fruktighet": 3
+    }
   },
   "carared": {
     "navn": "CaraRed",
     "potensiale": 1.034,
-    "ebc": 50.0
+    "ebc": 50.0,
+    "kategorier": {
+      "Karamell": 4,
+      "Brød": 3,
+      "Maltfylde": 3
+    }
   },
   "carafa_special_1": {
     "navn": "Carafa Special I",
     "potensiale": 1.025,
-    "ebc": 900.0
+    "ebc": 900.0,
+    "kategorier": {
+      "Sjokolade": 4,
+      "Kaffe": 3,
+      "Toast": 2,
+      "Maltfylde": 2
+    }
   },
   "carafa_special_2": {
     "navn": "Carafa Special II",
     "potensiale": 1.025,
-    "ebc": 1150.0
+    "ebc": 1150.0,
+    "kategorier": {
+      "Sjokolade": 6,
+      "Kaffe": 4,
+      "Toast": 1,
+      "Maltfylde": 2
+    }
   },
   "carafa_special_3": {
     "navn": "Carafa Special III",
     "potensiale": 1.025,
-    "ebc": 1400.0
+    "ebc": 1400.0,
+    "kategorier": {
+      "Sjokolade": 7,
+      "Kaffe": 6,
+      "Bitterhet": 2
+    }
   },
   "crystal_maple_carapils": {
     "navn": "Carapils",
     "potensiale": 1.037,
-    "ebc": 8.0
+    "ebc": 8.0,
+    "kategorier": {
+      "Maltfylde": 4,
+      "Brød": 1
+    }
   },
   "chocolate": {
     "navn": "Chocolate Malt",
     "potensiale": 1.025,
-    "ebc": 1175.0
+    "ebc": 1175.0,
+    "kategorier": {
+      "Sjokolade": 8,
+      "Kaffe": 5,
+      "Toast": 4
+    }
   },
   "chocolate_wheat": {
     "navn": "Chocolate Wheat Malt",
     "potensiale": 1.03,
-    "ebc": 650.0
+    "ebc": 650.0,
+    "kategorier": {
+      "Sjokolade": 6,
+      "Kaffe": 3,
+      "Nøtter": 2,
+      "Maltfylde": 2
+    }
   },
   "chateau_cara_crystal": {
     "navn": "Château Cara Crystal",
     "potensiale": 1.03,
-    "ebc": 120.0
+    "ebc": 120.0,
+    "kategorier": {
+      "Karamell": 5,
+      "Honning": 3,
+      "Maltfylde": 3
+    }
   },
   "crystal": {
     "navn": "Crystal Malt",
     "potensiale": 1.03,
-    "ebc": 150.0
+    "ebc": 150.0,
+    "kategorier": {
+      "Karamell": 6,
+      "Honning": 3,
+      "Fruktighet": 2
+    }
   },
   "dark_wheat": {
     "navn": "Dark Wheat Malt",
     "potensiale": 1.036,
-    "ebc": 15.0
+    "ebc": 15.0,
+    "kategorier": {
+      "Brød": 4,
+      "Karamell": 3,
+      "Maltfylde": 3
+    }
   },
   "crystal_extra_dark": {
     "navn": "Extra Dark Crystal",
     "potensiale": 1.03,
-    "ebc": 350.0
+    "ebc": 350.0,
+    "kategorier": {
+      "Karamell": 8,
+      "Maltfylde": 3,
+      "Fruktighet": 5
+    }
   },
   "flaked_barley": {
     "navn": "Flaket Bygg",
     "potensiale": 1.032,
-    "ebc": 2.0
+    "ebc": 2.0,
+    "kategorier": {
+      "Maltfylde": 3,
+      "Brød": 1
+    }
   },
   "flaket_havre": {
     "navn": "Flaket Havre",
     "potensiale": 1.037,
-    "ebc": 2.0
+    "ebc": 2.0,
+    "kategorier": {
+      "Maltfylde": 5
+    }
   },
   "flaked_wheat": {
     "navn": "Flaket Hvete",
     "potensiale": 1.035,
-    "ebc": 2.0
+    "ebc": 2.0,
+    "kategorier": {
+      "Brød": 2,
+      "Maltfylde": 2
+    }
   },
   "flaked_corn": {
     "navn": "Flaket Mais",
     "potensiale": 1.037,
-    "ebc": 1.0
+    "ebc": 1.0,
+    "kategorier": {
+      "Maltfylde": 2,
+      "Brød": 1
+    }
   },
   "golden_promise": {
     "navn": "Golden Promise",
     "potensiale": 1.037,
-    "ebc": 6.0
+    "ebc": 6.0,
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 3,
+      "Maltfylde": 4
+    }
   },
   "honey_malt": {
     "navn": "Honey Malt",
     "potensiale": 1.034,
-    "ebc": 25.0
+    "ebc": 25.0,
+    "kategorier": {
+      "Honning": 7,
+      "Karamell": 4,
+      "Maltfylde": 3
+    }
   },
   "fawcett_maris_otter": {
     "navn": "Maris Otter",
     "potensiale": 1.038,
-    "ebc": 5.5
+    "ebc": 5.5,
+    "kategorier": {
+      "Brød": 4,
+      "Nøtter": 3,
+      "Maltfylde": 5
+    }
   },
   "melanoidin": {
     "navn": "Melanoidin Malt",
     "potensiale": 1.034,
-    "ebc": 70.0
+    "ebc": 70.0,
+    "kategorier": {
+      "Brød": 5,
+      "Karamell": 4,
+      "Maltfylde": 5
+    }
   },
   "weyermann_munich_1": {
     "navn": "Munich I",
     "potensiale": 1.036,
-    "ebc": 14.5
+    "ebc": 14.5,
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 5,
+      "Toast": 3
+    }
   },
   "munich_ii": {
     "navn": "Munich II",
     "potensiale": 1.036,
-    "ebc": 23.0
+    "ebc": 23.0,
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 6,
+      "Toast": 5
+    }
   },
   "jaermalt_munich": {
     "navn": "Munich Malt (Jærmalt)",
     "potensiale": 1.036,
-    "ebc": 15.0
+    "ebc": 15.0,
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 5,
+      "Toast": 3
+    }
   },
   "oat_malt": {
     "navn": "Oat Malt",
     "potensiale": 1.035,
-    "ebc": 3.0
+    "ebc": 3.0,
+    "kategorier": {
+      "Maltfylde": 5,
+      "Nøtter": 3
+    }
   },
   "pale_ale_malt": {
     "navn": "Pale Ale Malt",
     "potensiale": 1.038,
-    "ebc": 5.5
+    "ebc": 5.5,
+    "kategorier": {
+      "Brød": 4,
+      "Nøtter": 2,
+      "Maltfylde": 4
+    }
   },
   "jaermalt_pale_ale": {
     "navn": "Pale Ale Malt (Jærmalt)",
     "potensiale": 1.038,
-    "ebc": 5.5
+    "ebc": 5.5,
+    "kategorier": {
+      "Brød": 4,
+      "Nøtter": 2,
+      "Maltfylde": 4
+    }
   },
   "pale_chocolate": {
     "navn": "Pale Chocolate Malt",
     "potensiale": 1.03,
-    "ebc": 600.0
+    "ebc": 600.0,
+    "kategorier": {
+      "Sjokolade": 5,
+      "Nøtter": 4,
+      "Kaffe": 2
+    }
   },
   "pale_wheat": {
     "navn": "Pale Wheat Malt",
     "potensiale": 1.037,
-    "ebc": 3.0
+    "ebc": 3.0,
+    "kategorier": {
+      "Brød": 4,
+      "Maltfylde": 3,
+      "Fruktighet": 2
+    }
   },
   "weyermann_pilsner": {
     "navn": "Pilsner Malt",
     "potensiale": 1.037,
-    "ebc": 3.5
+    "ebc": 3.5,
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 2,
+      "Maltfylde": 3
+    }
   },
   "jaermalt_pilsner": {
     "navn": "Pilsner Malt (Jærmalt)",
     "potensiale": 1.037,
-    "ebc": 3.0
+    "ebc": 3.0,
+    "kategorier": {
+      "Brød": 3,
+      "Honning": 2,
+      "Maltfylde": 3
+    }
   },
   "rauchmalz": {
     "navn": "Rauchmalz",
     "potensiale": 1.037,
-    "ebc": 5.0
+    "ebc": 5.0,
+    "kategorier": {
+      "Røyk": 8,
+      "Maltfylde": 3
+    }
   },
   "bestmalz_red_x": {
     "navn": "Red X",
     "potensiale": 1.034,
-    "ebc": 15.0
+    "ebc": 15.0,
+    "kategorier": {
+      "Karamell": 5,
+      "Brød": 4,
+      "Maltfylde": 4
+    }
   },
   "roasted_barley": {
     "navn": "Roasted Barley",
     "potensiale": 1.025,
-    "ebc": 1200.0
+    "ebc": 1200.0,
+    "kategorier": {
+      "Kaffe": 7,
+      "Sjokolade": 5,
+      "Toast": 3
+    }
   },
   "bonsak_rugmalt": {
     "navn": "Rugmalt",
     "potensiale": 1.033,
-    "ebc": 4.0
+    "ebc": 4.0,
+    "kategorier": {
+      "Brød": 3,
+      "Krydret": 4,
+      "Maltfylde": 3
+    }
   },
   "special_b": {
     "navn": "Special B",
     "potensiale": 1.03,
-    "ebc": 350.0
+    "ebc": 350.0,
+    "kategorier": {
+      "Karamell": 7,
+      "Maltfylde": 4,
+      "Fruktighet": 6
+    }
   },
   "spray_light_68_ebc": {
     "navn": "Spraymalt Light (6-8 EBC)",
     "potensiale": 1.036,
-    "ebc": 7.0
+    "ebc": 7.0,
+    "kategorier": {
+      "Brød": 3,
+      "Maltfylde": 2
+    }
   },
   "spray_medium": {
     "navn": "Spraymalt Medium",
     "potensiale": 1.035,
-    "ebc": 20.0
+    "ebc": 20.0,
+    "kategorier": {
+      "Brød": 3,
+      "Karamell": 3,
+      "Maltfylde": 4
+    }
   },
   "vienna": {
     "navn": "Vienna Malt",
     "potensiale": 1.036,
-    "ebc": 7.0
+    "ebc": 7.0,
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 3,
+      "Maltfylde": 4,
+      "Toast": 2
+    }
   },
   "jaermalt_vienna": {
     "navn": "Vienna Malt (Jærmalt)",
     "potensiale": 1.036,
-    "ebc": 8.0
+    "ebc": 8.0,
+    "kategorier": {
+      "Brød": 5,
+      "Honning": 3,
+      "Maltfylde": 4,
+      "Toast": 2
+    }
   },
   "jaermalt_wheat": {
     "navn": "Wheat Malt (Jærmalt)",
     "potensiale": 1.037,
-    "ebc": 4.0
+    "ebc": 4.0,
+    "kategorier": {
+      "Brød": 4,
+      "Maltfylde": 3,
+      "Fruktighet": 2
+    }
   }
 }

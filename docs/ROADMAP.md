@@ -24,7 +24,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 ## Pågår / akseptansetesting
 
 - **Reell Wiesn-akseptansetest** med brukerens faktiske lagerdata: teknisk lager-/handlelisteflyt er verifisert, ekte humle og EC-1118 er registrert i Pantry. Malt og den faktiske gjæren (W-34/70) gjenstår før en fullstendig lagerkontroll kan regnes som gjennomført.
-- **Web-versjon V1** (`web/`) — separat, offentlig, forenklet nettversjon av oppskriftsbyggeren (OG/FG/ABV/IBU/EBC, lokal lagring i nettleser, print/eksport). Førsteversjon bygget 2026-08-10, ikke committet eller deployet ennå. Se [../web/README.md](../web/README.md).
+- **Web-versjon V1** (`web/`) — separat, offentlig, forenklet nettversjon av oppskriftsbyggeren: OG/FG/ABV/IBU/EBC, søkbare dropdown-felt for malt/humle/gjær/stil, full BJCP-stilmatch (port av Style/Flavor Engine), lokal lagring i nettleser, print/eksport. Bygget og test-/polish-rundet 2026-08-10 (reell nettleser-testing inkl. responsivt design på PC/nettbrett/mobil), committet men ikke deployet ennå. Se [../web/README.md](../web/README.md).
 
 ## Neste
 

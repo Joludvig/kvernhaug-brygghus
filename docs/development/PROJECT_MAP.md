@@ -23,8 +23,9 @@ tests/                  → Testsuite (unittest + streamlit.testing.v1.AppTest)
 docs/                   → Produktdokumentasjon (denne mappen: docs/development/ = prosessdokumentasjon)
 assets/                 → Bilder og branding
 web/                    → Separat, frittstående statisk web-versjon (vanilla HTML/CSS/JS, ingen build-steg).
-                          IKKE en del av Streamlit-appens modules/ui-arkitektur — egen liten JS-port av
-                          utvalgte formler fra modules/calculations.py. Se web/README.md.
+                          IKKE en del av Streamlit-appens modules/ui-arkitektur — egne JS-porter av
+                          modules/calculations.py, modules/style_engine.py og modules/flavor_engine.py
+                          (kun poeng-delen). Se web/README.md.
 ```
 
 ## Den harde arkitekturgrensen: `modules/` vs. `ui/`

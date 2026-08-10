@@ -1,60 +1,71 @@
 // UI-logikk for den forenklede web-oppskriftsbyggeren.
-// Ingen backend: ingrediensdata hentes fra statiske JSON-filer, oppskrifter
-// lagres i localStorage. Beregningene selv ligger i calc.js.
+// Ingen backend: ingrediens-/stildata hentes fra statiske JSON-filer,
+// oppskrifter lagres i localStorage. Beregningene selv ligger i calc.js
+// (OG/FG/ABV/IBU/EBC), flavor.js (smaksprofil) og style.js (BJCP-matching).
 
 const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
 
 let maltData = {};
 let humleData = {};
 let gjaerData = {};
+let bjcpStyles = {};
+let sisteStilAnalyse = null;
 
 const maltRaderEl = document.getElementById("malt-rader");
 const humleRaderEl = document.getElementById("humle-rader");
-const gjaerSelectEl = document.getElementById("gjaer-select");
 const attenuationOverrideRad = document.getElementById("attenuation-override-rad");
 const attenuationOverrideInput = document.getElementById("attenuation-override");
 
-async function lastIngrediensdata() {
-  const [malt, humle, gjaer] = await Promise.all([
+let gjaerCombobox = null;
+let stilCombobox = null;
+
+async function lastData() {
+  const [malt, humle, gjaer, stiler] = await Promise.all([
     fetch("data/malt.json").then((r) => r.json()),
     fetch("data/humle.json").then((r) => r.json()),
     fetch("data/gjaer.json").then((r) => r.json()),
+    fetch("data/bjcp_styles.json").then((r) => r.json()),
   ]);
   maltData = malt;
   humleData = humle;
   gjaerData = gjaer;
+  bjcpStyles = stiler;
 }
 
-function fyllVelger(selectEl, data, forsteValgTekst) {
-  selectEl.innerHTML = "";
-  if (forsteValgTekst !== undefined) {
-    const opt = document.createElement("option");
-    opt.value = "";
-    opt.textContent = forsteValgTekst;
-    selectEl.appendChild(opt);
-  }
-  for (const [id, entry] of Object.entries(data)) {
-    const opt = document.createElement("option");
-    opt.value = id;
-    opt.textContent = entry.navn;
-    selectEl.appendChild(opt);
-  }
+function itemsFra(data) {
+  return Object.entries(data).map(([id, v]) => ({ id, label: v.navn }));
+}
+
+function stilItems() {
+  return Object.keys(bjcpStyles)
+    .sort((a, b) => a.localeCompare(b, "no"))
+    .map((navn) => ({ id: navn, label: navn }));
 }
 
 function leggTilMaltRad(forhandsutfylt) {
   const mal = document.getElementById("malt-rad-mal");
   const rad = mal.content.firstElementChild.cloneNode(true);
-  const velger = rad.querySelector(".malt-velger");
-  fyllVelger(velger, maltData);
+  const mount = rad.querySelector(".malt-velger-mount");
+
+  const cb = new Combobox({
+    items: itemsFra(maltData),
+    placeholder: "Søk etter malt …",
+    ariaLabel: "Velg malt",
+    onSelect: beregnOgVisResultat,
+  });
+  mount.replaceWith(cb.el);
+  rad._combobox = cb;
+
   if (forhandsutfylt) {
-    velger.value = forhandsutfylt.id;
+    cb.setValue(forhandsutfylt.id);
     rad.querySelector(".malt-mengde").value = forhandsutfylt.mengde;
   }
+
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
     rad.remove();
     beregnOgVisResultat();
   });
-  rad.addEventListener("input", beregnOgVisResultat);
+  rad.querySelector(".malt-mengde").addEventListener("input", beregnOgVisResultat);
   maltRaderEl.appendChild(rad);
   beregnOgVisResultat();
 }
@@ -62,18 +73,29 @@ function leggTilMaltRad(forhandsutfylt) {
 function leggTilHumleRad(forhandsutfylt) {
   const mal = document.getElementById("humle-rad-mal");
   const rad = mal.content.firstElementChild.cloneNode(true);
-  const velger = rad.querySelector(".humle-velger");
-  fyllVelger(velger, humleData);
+  const mount = rad.querySelector(".humle-velger-mount");
+
+  const cb = new Combobox({
+    items: itemsFra(humleData),
+    placeholder: "Søk etter humle …",
+    ariaLabel: "Velg humle",
+    onSelect: beregnOgVisResultat,
+  });
+  mount.replaceWith(cb.el);
+  rad._combobox = cb;
+
   if (forhandsutfylt) {
-    velger.value = forhandsutfylt.id;
+    cb.setValue(forhandsutfylt.id);
     rad.querySelector(".humle-gram").value = forhandsutfylt.gram;
     rad.querySelector(".humle-tid").value = forhandsutfylt.tid;
   }
+
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
     rad.remove();
     beregnOgVisResultat();
   });
-  rad.addEventListener("input", beregnOgVisResultat);
+  rad.querySelector(".humle-gram").addEventListener("input", beregnOgVisResultat);
+  rad.querySelector(".humle-tid").addEventListener("input", beregnOgVisResultat);
   humleRaderEl.appendChild(rad);
   beregnOgVisResultat();
 }
@@ -81,7 +103,7 @@ function leggTilHumleRad(forhandsutfylt) {
 function lesMaltRader() {
   return [...maltRaderEl.querySelectorAll(".ingrediens-rad")]
     .map((rad) => ({
-      id: rad.querySelector(".malt-velger").value,
+      id: rad._combobox.getValue(),
       mengde: parseFloat(rad.querySelector(".malt-mengde").value) || 0,
     }))
     .filter((m) => m.id);
@@ -90,7 +112,7 @@ function lesMaltRader() {
 function lesHumleRader() {
   return [...humleRaderEl.querySelectorAll(".ingrediens-rad")]
     .map((rad) => ({
-      id: rad.querySelector(".humle-velger").value,
+      id: rad._combobox.getValue(),
       gram: parseFloat(rad.querySelector(".humle-gram").value) || 0,
       tid: parseFloat(rad.querySelector(".humle-tid").value) || 0,
     }))
@@ -98,7 +120,7 @@ function lesHumleRader() {
 }
 
 function hentUtgjaering() {
-  const gjaerId = gjaerSelectEl.value;
+  const gjaerId = gjaerCombobox.getValue();
   if (gjaerId && gjaerData[gjaerId]) {
     return gjaerData[gjaerId].attenuation;
   }
@@ -119,6 +141,7 @@ function beregnOgVisResultat() {
 
   const maltRader = lesMaltRader();
   const humleRader = lesHumleRader();
+  const gjaerId = gjaerCombobox ? gjaerCombobox.getValue() : null;
 
   const og = beregnOG(maltRader, maltData, volum, effektivitet);
   const ebc = beregnEBC(maltRader, maltData, volum);
@@ -131,7 +154,103 @@ function beregnOgVisResultat() {
   document.getElementById("res-ibu").textContent = Math.round(ibu);
   document.getElementById("res-ebc").textContent = Math.round(ebc);
   document.getElementById("ebc-swatch").style.backgroundColor = ebcTilFarge(ebc);
+
+  const flavorProfile = beregnSmaksprofil(maltRader, maltData, humleRader, humleData, ibu, gjaerId, gjaerData);
+  const recipe = {
+    malts: maltRader, hops: humleRader, yeast: gjaerId,
+    stats: { og, fg, ibu, ebc, abv }, flavor_profile: flavorProfile,
+  };
+  sisteStilAnalyse = analyserStilOgBalanse(recipe, bjcpStyles);
+  renderStilPanel();
 }
+
+// ─── Stilmatch-visning ──────────────────────────────────────────────────
+
+function _stilEntryFor(navn) {
+  return sisteStilAnalyse.stil_liste.find((s) => s.stil === navn);
+}
+
+function _stilKortHtml(s, { visBeskrivelse = false } = {}) {
+  const merke = s.bjcp_offisiell === false
+    ? '<span class="stil-merke" title="Kvernhaug/historisk kategori, ikke offisiell BJCP-stil">🏺 ikke offisiell BJCP</span>'
+    : "";
+  const detaljer = [];
+  for (const m of s.mangler) detaljer.push(`<li class="mangel">❌ ${escHtml(m)}</li>`);
+  for (const o of s.onsket_sensorisk) detaljer.push(`<li class="onsket">💭 ${escHtml(o)}</li>`);
+  const detaljerHtml = detaljer.length
+    ? `<details class="stil-detaljer"><summary>Se hva som mangler</summary><ul>${detaljer.join("")}</ul></details>`
+    : `<p class="stil-full-match">✅ Innenfor alle stilens numeriske grenser.</p>`;
+
+  return `
+    <div class="stil-kort">
+      <div class="stil-kort-topp">
+        <span class="stil-kort-navn">${escHtml(s.stil)}</span>
+        <span class="stil-kort-score">${s.score}%</span>
+      </div>
+      ${merke}
+      ${visBeskrivelse && s.beskrivelse ? `<p class="stil-beskrivelse">${escHtml(s.beskrivelse)}</p>` : ""}
+      ${detaljerHtml}
+    </div>`;
+}
+
+function escHtml(s) {
+  const div = document.createElement("div");
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function renderStilPanel() {
+  const a = sisteStilAnalyse;
+  if (!a) return;
+
+  const headlineNavn = document.getElementById("stil-headline-navn");
+  const headlineInfo = document.getElementById("stil-headline-info");
+  headlineNavn.textContent = a.stil;
+
+  if (a.stil === "Kreativt Brygg") {
+    headlineInfo.textContent = "Ingen stil i biblioteket treffer godt nok ennå — juster ingrediensene eller se nærliggende stiler under.";
+  } else {
+    const entry = _stilEntryFor(a.stil);
+    headlineInfo.innerHTML = entry && entry.bjcp_offisiell === false
+      ? '<span class="stil-merke">🏺 Kvernhaug/historisk kategori — ikke en offisiell BJCP-stil</span>'
+      : "";
+  }
+
+  document.getElementById("bu-gu-tekst").textContent = `Bitterhetsindeks (BU:GU): ${a.bu_gu.toFixed(2)}`;
+
+  const notatEl = document.getElementById("stil-notater");
+  notatEl.innerHTML = "";
+  for (const note of [...a.balanse, ...a.problemer]) {
+    const li = document.createElement("li");
+    li.textContent = note;
+    if (a.problemer.includes(note)) li.classList.add("stil-notat-advarsel");
+    notatEl.appendChild(li);
+  }
+
+  const alternativer = [...a.stil_liste]
+    .filter((s) => s.score >= 5)
+    .sort((x, y) => y.score - x.score || x.prio - y.prio)
+    .slice(0, 5);
+  const altEl = document.getElementById("stil-alternativ-liste");
+  altEl.innerHTML = alternativer.length
+    ? alternativer.map((s) => _stilKortHtml(s)).join("")
+    : '<p class="hjelpetekst">Ingen stiler matcher oppskriften din ennå.</p>';
+
+  renderStilManuell();
+}
+
+function renderStilManuell() {
+  const resultatEl = document.getElementById("stil-manuell-resultat");
+  const valgtNavn = stilCombobox ? stilCombobox.getValue() : null;
+  if (!valgtNavn || !sisteStilAnalyse) {
+    resultatEl.innerHTML = "";
+    return;
+  }
+  const entry = _stilEntryFor(valgtNavn);
+  resultatEl.innerHTML = entry ? _stilKortHtml(entry, { visBeskrivelse: true }) : "";
+}
+
+// ─── Lagring / lasting ──────────────────────────────────────────────────
 
 function samleOppskrift() {
   return {
@@ -140,8 +259,9 @@ function samleOppskrift() {
     effektivitet: parseFloat(document.getElementById("effektivitet").value) || 0,
     malt: lesMaltRader(),
     humle: lesHumleRader(),
-    gjaerId: gjaerSelectEl.value || null,
-    attenuationOverride: gjaerSelectEl.value ? null : parseFloat(attenuationOverrideInput.value) || null,
+    gjaerId: gjaerCombobox.getValue() || null,
+    attenuationOverride: gjaerCombobox.getValue() ? null : parseFloat(attenuationOverrideInput.value) || null,
+    valgtStil: stilCombobox ? stilCombobox.getValue() : null,
     lagretDato: new Date().toISOString(),
   };
 }
@@ -188,11 +308,15 @@ function lastInnOppskrift(navn) {
   oppskrift.humle.forEach((h) => leggTilHumleRad(h));
   if (oppskrift.humle.length === 0) leggTilHumleRad();
 
-  gjaerSelectEl.value = oppskrift.gjaerId || "";
+  if (oppskrift.gjaerId) gjaerCombobox.setValue(oppskrift.gjaerId);
+  else gjaerCombobox.clear();
   attenuationOverrideRad.style.display = oppskrift.gjaerId ? "none" : "";
   if (oppskrift.attenuationOverride) {
     attenuationOverrideInput.value = oppskrift.attenuationOverride;
   }
+
+  if (oppskrift.valgtStil) stilCombobox.setValue(oppskrift.valgtStil);
+  else stilCombobox.clear();
 
   beregnOgVisResultat();
 }
@@ -240,13 +364,28 @@ function eksporterJson() {
 }
 
 async function init() {
-  await lastIngrediensdata();
+  await lastData();
 
-  fyllVelger(gjaerSelectEl, gjaerData, "— egendefinert utgjæring —");
-  gjaerSelectEl.addEventListener("change", () => {
-    attenuationOverrideRad.style.display = gjaerSelectEl.value ? "none" : "";
-    beregnOgVisResultat();
+  const gjaerMount = document.getElementById("gjaer-velger-mount");
+  gjaerCombobox = new Combobox({
+    items: itemsFra(gjaerData),
+    placeholder: "Søk etter gjær …",
+    ariaLabel: "Velg gjær",
+    onSelect: () => {
+      attenuationOverrideRad.style.display = gjaerCombobox.getValue() ? "none" : "";
+      beregnOgVisResultat();
+    },
   });
+  gjaerMount.replaceWith(gjaerCombobox.el);
+
+  const stilMount = document.getElementById("stil-velger-mount");
+  stilCombobox = new Combobox({
+    items: stilItems(),
+    placeholder: "Søk etter ølstil …",
+    ariaLabel: "Velg ølstil å sjekke mot",
+    onSelect: renderStilManuell,
+  });
+  stilMount.replaceWith(stilCombobox.el);
 
   document.getElementById("legg-til-malt").addEventListener("click", () => leggTilMaltRad());
   document.getElementById("legg-til-humle").addEventListener("click", () => leggTilHumleRad());

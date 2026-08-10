@@ -8,7 +8,9 @@
 </head>
 <body>
 <header>
-  <h1>🍺 Kvernhaug Brygghus</h1>
+  <div class="brand-mark">🍺</div>
+  <h1>Kvernhaug Brygghus</h1>
+  <p class="motto">Brygg med ild. Del med ære.</p>
   <p class="undertittel">Oppskriftsbygger — forenklet, offentlig versjon. Ingen innlogging, ingen database: alt lagres kun i denne nettleseren.</p>
 </header>
 
@@ -43,11 +45,9 @@
 
   <section class="panel" id="gjaer-panel">
     <h2>Gjær</h2>
-    <div class="felt-rad">
-      <label for="gjaer-select">Gjær</label>
-      <select id="gjaer-select">
-        <option value="">— egendefinert utgjæring —</option>
-      </select>
+    <div class="felt-rad felt-rad-combobox">
+      <label id="gjaer-label">Gjær</label>
+      <div id="gjaer-velger-mount" aria-labelledby="gjaer-label"></div>
     </div>
     <div class="felt-rad" id="attenuation-override-rad">
       <label for="attenuation-override">Forventet utgjæring (%)</label>
@@ -62,7 +62,34 @@
       <div class="resultat-boks"><span class="resultat-tall" id="res-fg">1.000</span><span class="resultat-label">FG</span></div>
       <div class="resultat-boks"><span class="resultat-tall" id="res-abv">0,0 %</span><span class="resultat-label">ABV</span></div>
       <div class="resultat-boks"><span class="resultat-tall" id="res-ibu">0</span><span class="resultat-label">IBU</span></div>
-      <div class="resultat-boks"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC</span><span class="ebc-svatch" id="ebc-swatch"></span></div>
+      <div class="resultat-boks resultat-boks-ebc"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC</span><span class="ebc-swatch" id="ebc-swatch"></span></div>
+    </div>
+  </section>
+
+  <section class="panel" id="stil-panel">
+    <h2>BJCP-stilmatch</h2>
+
+    <div class="stil-headline" id="stil-headline">
+      <div class="stil-headline-label">Numerisk nærmeste stil</div>
+      <div class="stil-headline-navn" id="stil-headline-navn">—</div>
+      <div class="stil-headline-info" id="stil-headline-info"></div>
+    </div>
+
+    <p class="hjelpetekst" id="bu-gu-tekst"></p>
+    <ul class="stil-notater" id="stil-notater"></ul>
+
+    <div class="stil-alternativer">
+      <div class="stil-seksjon-tittel">Nærliggende stiler</div>
+      <div id="stil-alternativ-liste"></div>
+    </div>
+
+    <div class="stil-manuell">
+      <div class="stil-seksjon-tittel">Sjekk mot en valgt stil</div>
+      <div class="felt-rad felt-rad-combobox">
+        <label id="stil-velger-label">Ølstil</label>
+        <div id="stil-velger-mount" aria-labelledby="stil-velger-label"></div>
+      </div>
+      <div id="stil-manuell-resultat"></div>
     </div>
   </section>
 
@@ -84,30 +111,33 @@
 </main>
 
 <footer class="no-print">
-  <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server. Full versjon med pantry, vannkjemi og stilmatch: se hovedappen.</p>
+  <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server. Full versjon med pantry, vannkjemi og full sensorisk analyse: se hovedappen.</p>
 </footer>
 
 <template id="malt-rad-mal">
   <div class="ingrediens-rad" data-type="malt">
-    <select class="malt-velger"></select>
+    <div class="combobox-mount malt-velger-mount"></div>
     <input type="number" class="malt-mengde" min="0" step="0.05" value="1" placeholder="kg">
     <span class="enhet">kg</span>
-    <button type="button" class="fjern-knapp no-print" title="Fjern">✕</button>
+    <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern malt">✕</button>
   </div>
 </template>
 
 <template id="humle-rad-mal">
   <div class="ingrediens-rad" data-type="humle">
-    <select class="humle-velger"></select>
+    <div class="combobox-mount humle-velger-mount"></div>
     <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram">
     <span class="enhet">g</span>
     <input type="number" class="humle-tid" min="0" step="1" value="60" placeholder="min">
     <span class="enhet">min</span>
-    <button type="button" class="fjern-knapp no-print" title="Fjern">✕</button>
+    <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern humle">✕</button>
   </div>
 </template>
 
+<script src="js/combobox.js"></script>
 <script src="js/calc.js"></script>
+<script src="js/flavor.js"></script>
+<script src="js/style.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
