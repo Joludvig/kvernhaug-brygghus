@@ -11,6 +11,7 @@
 
 const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
 const MODUS_NOKKEL = "kvernhaug_web_modus";
+const IDENTITET_NOKKEL = "kvernhaug_web_identitet";
 
 let maltData = {};
 let humleData = {};
@@ -35,6 +36,33 @@ let oppdaterSmakshjul = null;
 function nyEgendefinertId(prefiks) {
   _egendefinertTeller += 1;
   return `${prefiks}_${Date.now()}_${_egendefinertTeller}`;
+}
+
+// ─── Brukeridentitet (brygger/bryggeri) ──────────────────────────────────
+// Oppskriften er brukerens, ikke Kvernhaug sin: brygger/bryggeri lagres på
+// selve oppskriften (localStorage + JSON), OG som en egen, lett
+// brukerpreferanse som kun brukes til å forhåndsutfylle NYE oppskrifter --
+// den overstyrer aldri en allerede lastet eller importert oppskrift.
+
+function lagreIdentitetsPreferanse() {
+  const brygger = document.getElementById("brygger-navn").value.trim();
+  const bryggeri = document.getElementById("bryggeri-navn").value.trim();
+  if (!brygger && !bryggeri) {
+    localStorage.removeItem(IDENTITET_NOKKEL);
+    return;
+  }
+  localStorage.setItem(IDENTITET_NOKKEL, JSON.stringify({ brygger, bryggeri }));
+}
+
+function forhandsutfyllIdentitetsPreferanse() {
+  try {
+    const lagret = JSON.parse(localStorage.getItem(IDENTITET_NOKKEL));
+    if (!lagret) return;
+    if (lagret.brygger) document.getElementById("brygger-navn").value = lagret.brygger;
+    if (lagret.bryggeri) document.getElementById("bryggeri-navn").value = lagret.bryggeri;
+  } catch {
+    // Korrupt/manglende preferanse -- ufarlig å ignorere, feltene forblir tomme.
+  }
 }
 
 async function lastData() {
@@ -471,6 +499,9 @@ function renderStilManuell() {
 function samleOppskrift() {
   return {
     navn: document.getElementById("oppskrift-navn").value.trim() || "Uten navn",
+    brygger: document.getElementById("brygger-navn").value.trim(),
+    bryggeri: document.getElementById("bryggeri-navn").value.trim(),
+    notater: document.getElementById("oppskrift-notater").value.trim(),
     volum: parseFloat(document.getElementById("batch-volum").value) || 0,
     effektivitet: parseFloat(document.getElementById("effektivitet").value) || 0,
     malt: lesMaltRader(),
@@ -512,6 +543,9 @@ function slettOppskrift(navn) {
 // inn i skjemaet -- delt av lastInnOppskrift() og importerJson().
 function _gjenopprettOppskrift(oppskrift) {
   document.getElementById("oppskrift-navn").value = oppskrift.navn || "";
+  document.getElementById("brygger-navn").value = oppskrift.brygger || "";
+  document.getElementById("bryggeri-navn").value = oppskrift.bryggeri || "";
+  document.getElementById("oppskrift-notater").value = oppskrift.notater || "";
   document.getElementById("batch-volum").value = oppskrift.volum;
   document.getElementById("effektivitet").value = oppskrift.effektivitet;
 
@@ -657,9 +691,13 @@ async function init() {
   document.getElementById("effektivitet").addEventListener("input", beregnOgVisResultat);
   attenuationOverrideInput.addEventListener("input", beregnOgVisResultat);
 
+  document.getElementById("brygger-navn").addEventListener("input", lagreIdentitetsPreferanse);
+  document.getElementById("bryggeri-navn").addEventListener("input", lagreIdentitetsPreferanse);
+  forhandsutfyllIdentitetsPreferanse();
+
   document.getElementById("lagre-knapp").addEventListener("click", lagreOppskrift);
-  document.getElementById("skriv-ut-knapp").addEventListener("click", () => window.print());
   document.getElementById("eksporter-knapp").addEventListener("click", eksporterJson);
+  initUtskrift();
 
   const importerFil = document.getElementById("importer-fil");
   document.getElementById("importer-knapp").addEventListener("click", () => importerFil.click());

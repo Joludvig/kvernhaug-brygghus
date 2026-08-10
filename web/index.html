@@ -23,14 +23,24 @@
       <span class="modus-undertekst">Full kontroll – alle detaljer tilgjengelig</span>
     </button>
   </div>
+
+  <a class="hjelp-lenke no-print" href="hjelp/index.html" target="_blank" rel="noopener">📖 Hjelp &amp; bryggehåndbok</a>
 </header>
 
 <main>
   <section class="panel" id="grunndata-panel">
     <h2>Grunndata</h2>
     <div class="felt-rad">
-      <label for="oppskrift-navn">Oppskriftsnavn</label>
+      <label for="oppskrift-navn">Ølnavn</label>
       <input type="text" id="oppskrift-navn" placeholder="F.eks. Sommerglød">
+    </div>
+    <div class="felt-rad">
+      <label for="brygger-navn">Brygger</label>
+      <input type="text" id="brygger-navn" placeholder="Ditt navn">
+    </div>
+    <div class="felt-rad">
+      <label for="bryggeri-navn">Bryggeri (valgfritt)</label>
+      <input type="text" id="bryggeri-navn" placeholder="F.eks. Olas Garasjebryggeri">
     </div>
     <div class="felt-rad">
       <label for="batch-volum">Batchvolum (liter)</label>
@@ -39,6 +49,10 @@
     <div class="felt-rad">
       <label for="effektivitet">Brygghuseffektivitet (%)</label>
       <input type="number" id="effektivitet" min="1" max="100" step="1" value="72">
+    </div>
+    <div class="felt-rad mester-only">
+      <label for="oppskrift-notater">Notater (valgfritt)</label>
+      <textarea id="oppskrift-notater" rows="2" placeholder="F.eks. planlagte justeringer, tips til deg selv …"></textarea>
     </div>
   </section>
 
@@ -124,12 +138,22 @@
     <h2>Lagre og eksporter</h2>
     <div class="knapperad">
       <button type="button" id="lagre-knapp">💾 Lagre oppskrift</button>
-      <button type="button" id="skriv-ut-knapp">🖨️ Skriv ut</button>
       <button type="button" id="eksporter-knapp">⬇️ Eksporter (JSON)</button>
       <button type="button" id="importer-knapp">⬆️ Importer (JSON)</button>
       <input type="file" id="importer-fil" accept="application/json" hidden>
     </div>
     <p class="hjelpetekst" id="lagre-status"></p>
+  </section>
+
+  <section class="panel no-print" id="utskrift-panel">
+    <h2>Skriv ut</h2>
+    <p class="hjelpetekst">Hvert ark er sin egen, utskriftsvennlige side — ikke bare et utskrift av denne skjermen.</p>
+    <div class="knapperad">
+      <button type="button" id="print-oppskriftsark-knapp">🖨️ Oppskriftsark</button>
+      <button type="button" id="print-handleliste-knapp">🖨️ Handleliste</button>
+      <button type="button" id="print-bryggedagsark-knapp">🖨️ Bryggedagsark</button>
+      <button type="button" id="print-bryggelogg-knapp">🖨️ Bryggelogg</button>
+    </div>
   </section>
 
   <section class="panel no-print" id="mine-oppskrifter-panel">
@@ -142,6 +166,11 @@
 <footer class="no-print">
   <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server. Full versjon med pantry, vannkjemi og full sensorisk analyse: se hovedappen.</p>
 </footer>
+
+<div id="utskrift-oppskriftsark" class="utskrift-dokument"></div>
+<div id="utskrift-handleliste" class="utskrift-dokument"></div>
+<div id="utskrift-bryggedagsark" class="utskrift-dokument"></div>
+<div id="utskrift-bryggelogg" class="utskrift-dokument"></div>
 
 <template id="malt-rad-mal">
   <div class="ingrediens-rad" data-type="malt">
@@ -187,6 +216,7 @@
 <script src="js/style.js"></script>
 <script src="js/veiledning.js"></script>
 <script src="js/help.js"></script>
+<script src="js/print.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -879,3 +879,406 @@ footer {
     font-size: 1.5em;
   }
 }
+
+/* ── Hjelp-lenke (header) og "Les mer"-lenke i hjelp-popover ────────────── */
+
+.hjelp-lenke {
+  display: inline-block;
+  margin-top: 0.9rem;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1px solid rgba(196, 154, 42, 0.4);
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  min-height: 44px;
+  line-height: 1.6;
+}
+
+.hjelp-lenke:hover,
+.hjelp-lenke:focus-visible {
+  background: rgba(196, 154, 42, 0.12);
+}
+
+.hjelp-les-mer {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: var(--gold);
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.hjelp-les-mer:hover {
+  text-decoration: underline;
+}
+
+/* ── Utskriftsdokumenter (oppskriftsark/handleliste/bryggedagsark/bryggelogg) ──
+   Egne dokumentmaler, IKKE et print av byggerskjermen. Skjult på skjerm;
+   vises kun via body[data-utskrift="..."] i @media print (satt av print.js
+   rett før window.print()). Lys bakgrunn/mørk tekst uansett skjermtema,
+   siden disse alltid havner på hvitt papir. */
+
+.utskrift-dokument {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body[data-utskrift] > header,
+  body[data-utskrift] > main,
+  body[data-utskrift] > footer {
+    display: none !important;
+  }
+
+  body[data-utskrift="oppskriftsark"] #utskrift-oppskriftsark,
+  body[data-utskrift="handleliste"] #utskrift-handleliste,
+  body[data-utskrift="bryggedagsark"] #utskrift-bryggedagsark,
+  body[data-utskrift="bryggelogg"] #utskrift-bryggelogg {
+    display: block !important;
+  }
+
+  .doc-a4 {
+    font-family: var(--serif);
+    color: #111;
+    background: #fff;
+  }
+
+  .doc-header {
+    border-bottom: 2px solid #8a6a10;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .doc-header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #111;
+  }
+
+  .doc-undertittel {
+    margin: 0.1rem 0 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #6a5310;
+  }
+
+  .doc-brygger {
+    margin: 0.2rem 0 0;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #111;
+  }
+
+  .doc-meta,
+  .doc-stil {
+    color: #444;
+    margin: 0.2rem 0;
+  }
+
+  .doc-stats {
+    display: flex;
+    gap: 1rem;
+    margin: 0.8rem 0;
+    flex-wrap: wrap;
+  }
+
+  .doc-stats div {
+    border: 1px solid #999;
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    text-align: center;
+  }
+
+  .doc-stats span {
+    display: block;
+    font-size: 0.7rem;
+    color: #666;
+  }
+
+  .doc-stats strong {
+    font-size: 1.1rem;
+  }
+
+  .doc-a4 h2 {
+    font-size: 1rem;
+    border-bottom: 1px solid #ccc;
+    margin: 1rem 0 0.3rem;
+    color: #111;
+  }
+
+  .doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .doc-table th,
+  .doc-table td {
+    border-bottom: 1px solid #ddd;
+    padding: 0.25rem 0.4rem;
+    text-align: left;
+  }
+
+  .doc-checkbox {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .doc-maal td {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .doc-blank {
+    border-bottom: 1px solid #999;
+    min-width: 5rem;
+  }
+
+  .doc-blank-inline {
+    display: inline-block;
+    min-width: 8rem;
+  }
+
+  .doc-notater {
+    white-space: pre-wrap;
+  }
+
+  .doc-notatfelt {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 2.6rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .doc-notatfelt-liten {
+    min-height: 1.6rem;
+  }
+
+  .doc-sjekkliste {
+    list-style: none;
+    padding: 0;
+    columns: 2;
+  }
+
+  .doc-sjekkliste li {
+    margin-bottom: 0.3rem;
+  }
+
+  .doc-smakshjul svg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .doc-footer {
+    margin-top: 1.2rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid #ccc;
+    font-size: 0.75rem;
+    color: #888;
+    text-align: center;
+  }
+}
+
+/* ── Hjelpesider (web/hjelp/*.html) ──────────────────────────────────────
+   Deler style.css med byggeren for samme visuelle identitet, men er egne,
+   frittstående sider (åpnes i ny fane) -- ikke en del av oppskriftsbyggeren. */
+
+.hjelp-side-main {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 1.5rem 1.2rem 4rem;
+}
+
+.hjelp-side-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 1rem 1rem 0;
+}
+
+.hjelp-side-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid rgba(196, 154, 42, 0.3);
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.hjelp-side-nav a.aktiv,
+.hjelp-side-nav a:hover,
+.hjelp-side-nav a:focus-visible {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.hjelp-tilbake {
+  display: block;
+  text-align: center;
+  margin: 0.8rem 0 0.4rem;
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.hjelp-tilbake:hover {
+  text-decoration: underline;
+}
+
+.hjelp-innledning {
+  text-align: center;
+  color: var(--muted);
+  max-width: 620px;
+  margin: 0 auto 1rem;
+  line-height: 1.6;
+}
+
+.hjelp-seksjon {
+  margin-top: 2.4rem;
+}
+
+.hjelp-seksjon > h2 {
+  color: var(--pergament);
+  border-bottom: 1px solid rgba(196, 154, 42, 0.3);
+  padding-bottom: 0.35rem;
+}
+
+.hjelp-artikkel {
+  background: var(--bg-sect);
+  border: 1px solid rgba(196, 154, 42, 0.18);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  scroll-margin-top: 1rem;
+}
+
+.hjelp-artikkel h3 {
+  margin-top: 0;
+  color: var(--gold);
+}
+
+.hjelp-artikkel p {
+  line-height: 1.65;
+  color: var(--body);
+}
+
+.hjelp-artikkel .hjelp-hvorfor {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.hjelp-faq-sporsmal {
+  color: var(--gold);
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.hjelp-steg {
+  background: var(--bg-sect);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  scroll-margin-top: 1rem;
+}
+
+.hjelp-steg h3 {
+  margin-top: 0;
+  color: var(--pergament);
+}
+
+.hjelp-steg-nr {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  color: var(--bg);
+  border-radius: 50%;
+  width: 1.7rem;
+  height: 1.7rem;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.hjelp-steg dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.6rem;
+}
+
+.hjelp-steg dd {
+  margin: 0.15rem 0 0;
+  line-height: 1.55;
+}
+
+.hjelp-advarsel {
+  background: rgba(192, 96, 90, 0.12);
+  border: 1px solid rgba(192, 96, 90, 0.4);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.88rem;
+}
+
+.hjelp-uverifisert {
+  background: rgba(196, 154, 42, 0.1);
+  border: 1px dashed var(--gold);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.hjelp-metode-kort {
+  background: var(--bg-sect);
+  border: 1px solid rgba(196, 154, 42, 0.18);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.hjelp-metode-kort h3 {
+  color: var(--gold);
+  margin-top: 0;
+}
+
+.hjelp-kildeliste {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.hjelp-tabell {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.6rem 0 1rem;
+  font-size: 0.92rem;
+}
+
+.hjelp-tabell th,
+.hjelp-tabell td {
+  text-align: left;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid rgba(196, 154, 42, 0.25);
+  color: var(--body);
+}
+
+.hjelp-tabell th {
+  color: var(--gold);
+  font-weight: bold;
+}
+
+@media (max-width: 640px) {
+  .hjelp-side-main {
+    padding: 1rem 0.9rem 3rem;
+  }
+}
