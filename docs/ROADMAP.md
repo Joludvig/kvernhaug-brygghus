@@ -56,8 +56,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 - Web: oppskriftsskalering i Bryggmester (desktop-appen har dette allerede via `ui/recipe_card.py`s «Skaler oppskrift»; ikke portert til web ennå)
 - Web: stilbasert ingrediensveiledning ("hvilke ingredienser gir denne stilen") — krever bedre/rikere ingrediensdata enn det som finnes i dag før dette kan gjøres godt
 - Portabel `.kbhrecipe`-fil — et eget, delbart oppskriftsformat (i dag kun rå JSON-eksport/import)
-- Eget lite kompakt-ikon: kråke + pils + møllestein — en ny, bevisst komponert mikrovariant (ikke en automatisk beskjæring av Master V1, se `web/README.md` sitt "Logo"-avsnitt). Dagens `kvernhaug_logo_kompakt.png` er en midlertidig løsning frem til dette er designet.
-- Favicon (og eventuell mikrovariant for andre små flater) — venter på samme kompakt-ikon-arbeid som punktet over
+- Favicon og andre ekstremt små (16–24px) branding-plasseringer — KBH Icon v1 (se «Branding og identitet» under) er vurdert og funnet for detaljert til å være lesbar så langt ned; krever en egen, bevisst forenklet mikrovariant. Desktopens 24px eksport-ikon (`master_v1_header_24px.png`) beholdes uendret til dette er laget.
 
 ## Parkert / permanent avvist
 
@@ -84,6 +83,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 - Merch-standard definert: brystlogo, armtekst, ryggillustrasjon (i branding-dokumentet)
 - Fargepalett med estimerte HEX-verdier dokumentert
 - **Nytt KBH Emblem** (2026-08-12) — brukerlevert, transparensrensket emblem etablert som felles master-asset (`assets/branding/kbh_emblem_master.png`, 1024×1536) for både web og desktop. Erstattet det gamle `master_v1_transparent.png` i web sin identitetsblokk (Runde 11B) og i desktop sitt recipe card (`ui/branding.py`, `ui/recipe_card.py`, `modules/card_template.py`). Ingen ny illustrasjon — kun rensket alfakanal fra den leverte filen. `docs/branding/master_design_v1.md` beskriver fortsatt det opprinnelige Master V1-motivet og er **ikke** oppdatert til å referere det nye emblemet ennå.
+- **KBH Icon v1** (2026-08-12, Runde 12, visuelt godkjent) — brukerlevert, godkjent kompaktikon (kråke + pils + møllestein, transparent bakgrunn) etablert som autoritativ kompakt-logo, atskilt fra det fulle emblemet over. Master: `assets/branding/kbh_icon_v1.png` (1024×1536, urørt original). Brukes i web drawer (`.sidemeny-logo`) og kompakt sticky-nav (`.kompaktnav-logo`) på alle 8 sider, via web-derivatet `web/assets/branding/kbh_icon_v1.png` (260×390). `object-fit` byttet fra `cover` til `contain` på begge CSS-klasser siden det nye motivet er en uklippet, stroende komposisjon (ikke en forhåndsbeskåret sirkel som forgjengeren). Erstattet og fjernet `assets/branding/kompaktlogo_kraake_kvern.png`/`web/assets/branding/kvernhaug_logo_kompakt.png` (ingen gjenværende referanser). Ikke brukt på desktop — appen har ingen tilsvarende kompakt-nav-rolle i dag. Branding-systemet er nå: HERO = stedet, FULLT EMBLEM = `kbh_emblem_master.png`, KOMPAKT IKON = `kbh_icon_v1.png`.
 
 ### Neste steg (i prioritert rekkefølge)
 

@@ -246,7 +246,11 @@ textarea {
   height: 40px;
   border-radius: 50%;
   border: 2px solid var(--gold);
-  object-fit: cover;
+  /* KBH Icon v1 (Runde 12) er en stående, uklippet komposisjon (kråke +
+     pilsglass + møllestein), ikke lenger et forhåndsbeskåret sirkelmotiv --
+     object-fit:cover ville kappet vekk deler av motivet i den runde
+     32-40px badgen. contain viser hele ikonet uklippet inni sirkelen. */
+  object-fit: contain;
 }
 
 .kompaktnav-navn {
@@ -358,7 +362,8 @@ textarea {
   height: 42px;
   border-radius: 50%;
   border: 1.5px solid var(--gold);
-  object-fit: cover;
+  /* Se kommentar i .kompaktnav-logo -- samme begrunnelse for contain. */
+  object-fit: contain;
   flex: 0 0 auto;
 }
 
