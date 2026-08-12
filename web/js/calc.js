@@ -37,6 +37,22 @@ function beregnEBC(valgtMaltListe, maltData, volum) {
   return srm * SRM_TIL_EBC_FAKTOR;
 }
 
+// Invers Tinseth -- portert fra modules/calculations.py::beregn_gram_fra_ibu().
+// Beregner gram humle for et ønsket IBU-bidrag fra ÉN tilsetning, gitt
+// alfasyre, koketid og oppskriftens (allerede beregnede) OG/volum. Brukes
+// KUN via en eksplisitt "Beregn gram"-handling (Bryggmester) -- aldri live
+// på hvert tastetrykk, for å unngå en feedback-loop med den vanlige
+// gram->IBU-beregningen over.
+function beregnGramFraIBU(maalIbu, alfaProsent, tid, volum, beregnetOg) {
+  if (alfaProsent <= 0 || volum <= 0 || beregnetOg <= 1.0 || maalIbu <= 0 || tid <= 0) return 0.0;
+  const bigness = 1.65 * Math.pow(0.000125, beregnetOg - 1);
+  const times = (1 - Math.exp(-0.04 * tid)) / 4.15;
+  const utnyttelse = bigness * times;
+  if (utnyttelse <= 0) return 0.0;
+  const gram = (maalIbu * volum) / (1000 * (alfaProsent / 100.0) * utnyttelse);
+  return Math.round(gram * 10) / 10;
+}
+
 function beregnFgOgAbv(og, attenuation) {
   if (og <= 1.0) return { fg: 1.0, abv: 0.0 };
   const fg = 1 + (og - 1) * (1 - attenuation);

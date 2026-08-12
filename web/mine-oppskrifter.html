@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mine oppskrifter — Kvernhaug Brygghus</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="hero">
+  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel">📂 Mine oppskrifter</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe no-print"></div>
+<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+  </div>
+  <a href="index.html" class="sidemeny-lenke">🍺 Oppskriftsbygger</a>
+  <a href="mine-oppskrifter.html" class="sidemeny-lenke aktiv">📂 Mine oppskrifter</a>
+  <a href="importer.html" class="sidemeny-lenke">📥 Importer oppskrift</a>
+  <a href="utskrift.html" class="sidemeny-lenke">🖨️ Utskrift</a>
+  <hr class="sidemeny-skille">
+  <a href="hjelp/index.html" class="sidemeny-lenke">📖 Hjelp / Bryggehåndbok</a>
+</nav>
+
+<main>
+  <section class="panel">
+    <h2>Mine lagrede oppskrifter</h2>
+    <p class="hjelpetekst">Lagres kun i denne nettleseren (localStorage) — ingenting sendes til noen server.</p>
+    <ul id="oppskrift-liste"></ul>
+    <p class="hjelpetekst" id="ingen-oppskrifter-melding">Ingen lagrede oppskrifter ennå. Bygg en oppskrift og trykk "Lagre oppskrift" i Oppskriftsbyggeren.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Importere en oppskrift?</h2>
+    <p class="hjelpetekst">Fil- og tekstimport har flyttet til en egen side i menyen: <a href="importer.html">📥 Importer oppskrift</a>.</p>
+  </section>
+</main>
+
+<footer class="no-print">
+  <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server.</p>
+</footer>
+
+<script src="js/chrome.js"></script>
+<script src="js/mine_oppskrifter_page.js"></script>
+</body>
+</html>

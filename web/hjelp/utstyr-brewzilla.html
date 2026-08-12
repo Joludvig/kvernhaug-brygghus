@@ -22,11 +22,44 @@
 <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-<header>
-  <div class="brand-mark">🍺</div>
-  <h1>Utstyr: BrewZilla</h1>
-  <p class="motto">Brygg med ild. Del med ære.</p>
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel">🛠️ Utstyr: BrewZilla</h1>
+  </div>
 </header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke">🍺 Oppskriftsbygger</a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke">📂 Mine oppskrifter</a>
+  <a href="../importer.html" class="sidemeny-lenke">📥 Importer oppskrift</a>
+  <a href="../utskrift.html" class="sidemeny-lenke">🖨️ Utskrift</a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv">📖 Hjelp / Bryggehåndbok</a>
+</nav>
 
 <nav class="hjelp-side-nav">
   <a href="index.html">📖 Hjelp &amp; FAQ</a>
@@ -34,15 +67,27 @@
   <a href="bryggemetoder.html">⚗️ Bryggemetoder</a>
   <a href="utstyr-brewzilla.html" class="aktiv">🛠️ Utstyr: BrewZilla</a>
 </nav>
-<a class="hjelp-tilbake" href="../index.html">← Tilbake til oppskriftsbyggeren</a>
 
-<main class="hjelp-side-main">
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden">
+    <a href="#brewzilla-tekniske-data">Tekniske data</a>
+    <a href="#brewzilla-alt-i-ett">Alt-i-ett-prinsippet</a>
+    <a href="#brewzilla-ikke-verifisert">Ikke verifisert ennå</a>
+  </nav>
+
+  <main class="hjelp-side-main">
   <p class="hjelp-innledning">
-    Den første av flere planlagte utstyrsspesifikke guider (se
+    Dette er en <strong>referanseguide</strong> for BrewZilla — først av
+    flere planlagte utstyrsspesifikke guider — ikke en antakelse om at du
+    selv eier én. Kvernhaug Brygghus har én intern utstyrsprofil kalibrert
+    mot BrewZilla 35L Gen 4.1 (se <a href="../index.html">Oppskriftsbyggeren</a>),
+    og denne siden dokumenterer akkurat hvilke tall i den profilen som
+    stammer fra produktet selv, og hvilke som er Kvernhaugs egne
+    beregningsvalg. Bruker du annet utstyr, gjelder de generelle
+    bryggeforutsetningene lenger ned uansett — de er ikke
+    BrewZilla-spesifikke. Se også
     <a href="bryggemetoder.html#alt-i-ett">alt-i-ett bryggemaskin</a> for
-    den generelle metoden). BrewZilla er valgt som første kandidat siden
-    det allerede er utstyret Kvernhaug Brygghus' egen bryggedagsberegning
-    er kalibrert mot.
+    den generelle metoden BrewZilla er ett eksempel på.
   </p>
 
   <article class="hjelp-artikkel" id="brewzilla-tekniske-data">
@@ -99,6 +144,9 @@
     er ikke koblet til denne guiden ennå — det er en egen, større
     funksjon planlagt lenger fram (se Equipment Profile i roadmapen).
   </p>
-</main>
+  </main>
+</div>
+
+<script src="../js/chrome.js"></script>
 </body>
 </html>

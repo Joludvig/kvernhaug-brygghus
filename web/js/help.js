@@ -48,6 +48,11 @@ const HJELP_TEKSTER = {
     tekst: "Viser en forventet smaksprofil basert på malt, humle og gjær. Jo lenger ut mot kanten en akse strekker seg, jo mer fremtredende er den smaken ventet å bli.",
     lesMer: "hjelp/index.html#smakshjulet",
   },
+  effektivitet: {
+    tittel: "Brygghuseffektivitet",
+    tekst: "Hvor stor andel av maltens sukkerpotensial du faktisk får ut i vørteren på ditt eget utstyr. 75 % er et vanlig, dokumentert utgangspunkt — men det er et estimat, ikke en fasit. Juster gjerne tallet etter egne, målte brygg når du kjenner ditt eget oppsett bedre.",
+    lesMer: "hjelp/index.html#effektivitet",
+  },
 };
 
 let _hjelpPopover = null;
@@ -109,6 +114,10 @@ function initHjelp() {
   document.addEventListener("click", (e) => {
     const knapp = e.target.closest(".hjelp-knapp");
     if (knapp) {
+      // preventDefault: en hjelp-knapp kan ligge inni en <summary>
+      // (Stilanalyse-seksjonen) -- uten dette ville klikket ÅPNE/LUKKE
+      // hele den sammenleggbare seksjonen i tillegg til hjelpe-popoveren.
+      e.preventDefault();
       e.stopPropagation();
       if (_hjelpApenKnapp === knapp) {
         _lukkHjelp();

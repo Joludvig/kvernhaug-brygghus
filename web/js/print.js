@@ -1,15 +1,37 @@
 // Egne utskriftsvennlige dokumentmaler -- IKKE bare et print av byggerskjermen.
-// Hvert ark (oppskriftsark/handleliste/bryggedagsark/bryggelogg) bygges fra
-// live oppskriftsdata rett før utskrift og injiseres i sin egen skjulte
-// .utskrift-dokument-container. body[data-utskrift="..."] + @media print i
-// style.css sørger for at KUN valgt ark vises på papiret -- resten av siden
-// (header/main/footer) skjules automatisk for den utskriften.
+// Denne filen er ren presentasjonslogikk: hver bygg-funksjon tar et allerede
+// FERDIG BEREGNET "dokumentkontekst"-objekt (se buildDokumentKontekst() under)
+// og returnerer en HTML-streng. Den leser ALDRI live DOM-globaler selv --
+// det gjør den brukbar fra både Oppskriftsbyggeren (utskrift.html, som henter
+// aktiv kladd eller en lagret oppskrift) uten at print.js trenger å vite noe
+// om hvor oppskriften kom fra.
 //
 // Bevisst nøytral handleliste: ingen butikk, pris, URL, lagerstatus eller
 // pantry -- kun det oppskriften faktisk består av.
 //
 // Branding-prinsipp: brukerens ølnavn/brygger/bryggeri er hoveddokumentets
 // identitet. Kvernhaug Brygghus vises kun diskret i _dokFooter().
+
+// Bygger dokumentkonteksten fra en oppskrift + resultatet av
+// recipe_engine.js sin beregnOppskrift(), pluss en ferdig smakshjul-SVG
+// (bygget av kalleren via radar.js, siden print.js selv ikke initialiserer
+// noe smakshjul -- den kan gjenbruke ett som allerede finnes på siden).
+function byggDokumentKontekst(oppskrift, beregning, smakshjulSvgOuterHtml) {
+  return {
+    oppskrift,
+    og: beregning.og, fg: beregning.fg, abv: beregning.abv, ibu: beregning.ibu, ebc: beregning.ebc,
+    maltRader: beregning.maltRader, humleRader: beregning.humleRader,
+    effMalt: beregning.effMalt, effHumle: beregning.effHumle, effGjaer: beregning.effGjaer,
+    gjaerId: beregning.gjaerId, stilAnalyse: beregning.stilAnalyse,
+    smakshjulSvgOuterHtml: smakshjulSvgOuterHtml || null,
+  };
+}
+
+function _fmtOg(v) { return v.toFixed(3); }
+function _fmtFg(v) { return v.toFixed(3); }
+function _fmtAbv(v) { return v.toFixed(1).replace(".", ",") + " %"; }
+function _fmtIbu(v) { return String(Math.round(v)); }
+function _fmtEbc(v) { return String(Math.round(v)); }
 
 function _dokHeader(undertittel, oppskrift) {
   const brygger = [oppskrift.brygger, oppskrift.bryggeri].filter(Boolean).join(" · ");
@@ -25,20 +47,12 @@ function _dokFooter() {
   return `<div class="doc-footer">Laget med Kvernhaug Brygghus Oppskriftsbygger</div>`;
 }
 
-function _hentLiveDokumentdata() {
-  const maltRader = lesMaltRader();
-  const humleRader = lesHumleRader();
-  const { effMalt, effHumle, effGjaer, gjaerId } = _effektiveDatasett(maltRader, humleRader);
-  const oppskrift = samleOppskrift();
-  return { maltRader, humleRader, effMalt, effHumle, effGjaer, gjaerId, oppskrift };
-}
-
 // ─── A. Oppskriftsark ─────────────────────────────────────────────────────
 
-function byggOppskriftsarkHtml() {
-  const { maltRader, humleRader, effMalt, effHumle, effGjaer, gjaerId, oppskrift } = _hentLiveDokumentdata();
+function byggOppskriftsarkHtml(ctx) {
+  const { oppskrift, maltRader, humleRader, effMalt, effHumle, effGjaer, gjaerId, stilAnalyse } = ctx;
 
-  const stilNavn = sisteStilAnalyse ? sisteStilAnalyse.stil : null;
+  const stilNavn = stilAnalyse ? stilAnalyse.stil : null;
   const visStilNavn = oppskrift.valgtStil || (stilNavn && stilNavn !== "Kreativt Brygg" ? stilNavn : null);
   const stilLinje = visStilNavn
     ? `<p class="doc-stil">Ølstil: <strong>${escHtml(visStilNavn)}</strong></p>`
@@ -55,16 +69,18 @@ function byggOppskriftsarkHtml() {
   }).join("");
 
   const gjaerInfo = gjaerId ? effGjaer[gjaerId] : null;
+  const utgjaering = gjaerInfo ? gjaerInfo.attenuation : (parseFloat(oppskrift.attenuationOverride) || 75) / 100;
   const gjaerHtml = gjaerInfo
-    ? `<p>${escHtml(gjaerInfo.navn || "Gjær")}${gjaerInfo.produsent ? " · " + escHtml(gjaerInfo.produsent) : ""} — forventet utgjæring ${(hentUtgjaering() * 100).toFixed(0)} %</p>`
+    ? `<p>${escHtml(gjaerInfo.navn || "Gjær")}${gjaerInfo.produsent ? " · " + escHtml(gjaerInfo.produsent) : ""} — forventet utgjæring ${(utgjaering * 100).toFixed(0)} %</p>`
     : `<p class="hjelpetekst">Ingen gjær valgt.</p>`;
 
   const notaterHtml = oppskrift.notater
     ? `<h2>Notater</h2><p class="doc-notater">${escHtml(oppskrift.notater)}</p>`
     : "";
 
-  const svg = document.querySelector("#smakshjul-container svg");
-  const smakshjulHtml = svg ? `<h2>Smaksprofil</h2><div class="doc-smakshjul">${svg.outerHTML}</div>` : "";
+  const smakshjulHtml = ctx.smakshjulSvgOuterHtml
+    ? `<h2>Smaksprofil</h2><div class="doc-smakshjul">${ctx.smakshjulSvgOuterHtml}</div>`
+    : "";
 
   return `
     <div class="doc-a4">
@@ -72,11 +88,11 @@ function byggOppskriftsarkHtml() {
       <p class="doc-meta">${oppskrift.volum} L · ${oppskrift.effektivitet}% brygghuseffektivitet</p>
       ${stilLinje}
       <div class="doc-stats">
-        <div><span>OG</span><strong>${document.getElementById("res-og").textContent}</strong></div>
-        <div><span>FG</span><strong>${document.getElementById("res-fg").textContent}</strong></div>
-        <div><span>ABV</span><strong>${document.getElementById("res-abv").textContent}</strong></div>
-        <div><span>IBU</span><strong>${document.getElementById("res-ibu").textContent}</strong></div>
-        <div><span>EBC</span><strong>${document.getElementById("res-ebc").textContent}</strong></div>
+        <div><span>OG</span><strong>${_fmtOg(ctx.og)}</strong></div>
+        <div><span>FG</span><strong>${_fmtFg(ctx.fg)}</strong></div>
+        <div><span>ABV</span><strong>${_fmtAbv(ctx.abv)}</strong></div>
+        <div><span>IBU</span><strong>${_fmtIbu(ctx.ibu)}</strong></div>
+        <div><span>EBC</span><strong>${_fmtEbc(ctx.ebc)}</strong></div>
       </div>
       <h2>Malt</h2>
       <table class="doc-table"><thead><tr><th>Navn</th><th>Produsent</th><th>Mengde</th></tr></thead>
@@ -96,8 +112,8 @@ function byggOppskriftsarkHtml() {
 // Bevisst nøytral: kun navn/mengde/alfasyre (for riktig humlepose) --
 // ALDRI butikk, pris, URL, lagerstatus eller pantry.
 
-function byggHandlelisteHtml() {
-  const { maltRader, humleRader, effMalt, effHumle, effGjaer, gjaerId, oppskrift } = _hentLiveDokumentdata();
+function byggHandlelisteHtml(ctx) {
+  const { oppskrift, maltRader, humleRader, effMalt, effHumle, effGjaer, gjaerId } = ctx;
 
   const maltRows = maltRader.map((m) => {
     const info = effMalt[m.id] || {};
@@ -131,8 +147,8 @@ function byggHandlelisteHtml() {
 
 // ─── C. Bryggedagsark ─────────────────────────────────────────────────────
 
-function byggBryggedagsarkHtml() {
-  const { maltRader, humleRader, effMalt, effHumle, oppskrift } = _hentLiveDokumentdata();
+function byggBryggedagsarkHtml(ctx) {
+  const { oppskrift, maltRader, humleRader, effMalt, effHumle } = ctx;
 
   const maltRows = maltRader.map((m) => {
     const info = effMalt[m.id] || {};
@@ -155,7 +171,7 @@ function byggBryggedagsarkHtml() {
         <tbody>${humleRows || '<tr><td colspan="3">Ingen humle.</td></tr>'}</tbody></table>
       <h2>Planlagte tall</h2>
       <table class="doc-table doc-maal">
-        <tr><td>Planlagt OG</td><td>${document.getElementById("res-og").textContent}</td><td>Faktisk OG</td><td class="doc-blank"></td></tr>
+        <tr><td>Planlagt OG</td><td>${_fmtOg(ctx.og)}</td><td>Faktisk OG</td><td class="doc-blank"></td></tr>
         <tr><td>Planlagt volum</td><td>${oppskrift.volum} L</td><td>Faktisk volum</td><td class="doc-blank"></td></tr>
       </table>
       <h2>Sjekkliste</h2>
@@ -179,11 +195,10 @@ function byggBryggedagsarkHtml() {
 
 // ─── D. Bryggelogg ────────────────────────────────────────────────────────
 // Rent papirskjema -- ingen digital lagring av loggdata denne runden, kun
-// et praktisk ark å fylle ut med penn (se product-runden sitt eksplisitte
-// "ikke gjør det til et skjema med 100 felter").
+// et praktisk ark å fylle ut med penn.
 
-function byggBryggeloggHtml() {
-  const { oppskrift } = _hentLiveDokumentdata();
+function byggBryggeloggHtml(ctx) {
+  const { oppskrift } = ctx;
   return `
     <div class="doc-a4">
       ${_dokHeader("Bryggelogg", oppskrift)}
@@ -215,23 +230,15 @@ function byggBryggeloggHtml() {
     </div>`;
 }
 
-// ─── Utskrift-trigger ─────────────────────────────────────────────────────
+// ─── Utskrift-trigger (kalt fra utskrift_page.js) ────────────────────────
 
-function _skrivUtDokument(byggFn, dokumentType) {
+function _skrivUtDokument(byggFn, ctx, dokumentType) {
   const container = document.getElementById(`utskrift-${dokumentType}`);
-  container.innerHTML = byggFn();
+  container.innerHTML = byggFn(ctx);
   document.body.dataset.utskrift = dokumentType;
   window.print();
 }
 
 function _tilbakestillEtterPrint() {
   delete document.body.dataset.utskrift;
-}
-
-function initUtskrift() {
-  document.getElementById("print-oppskriftsark-knapp").addEventListener("click", () => _skrivUtDokument(byggOppskriftsarkHtml, "oppskriftsark"));
-  document.getElementById("print-handleliste-knapp").addEventListener("click", () => _skrivUtDokument(byggHandlelisteHtml, "handleliste"));
-  document.getElementById("print-bryggedagsark-knapp").addEventListener("click", () => _skrivUtDokument(byggBryggedagsarkHtml, "bryggedagsark"));
-  document.getElementById("print-bryggelogg-knapp").addEventListener("click", () => _skrivUtDokument(byggBryggeloggHtml, "bryggelogg"));
-  window.addEventListener("afterprint", _tilbakestillEtterPrint);
 }

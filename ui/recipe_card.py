@@ -18,7 +18,7 @@ from modules.recipe import bygg_recipe_object
 from modules.card_template import render_card_html, render_a4_html
 from ui.branding import _logo_base64
 
-_LOGO_PATH = os.path.join("assets", "branding", "master_v1_transparent.png")
+_LOGO_PATH = os.path.join("assets", "branding", "kbh_emblem_master.png")
 
 def _render_brewday_result_panel(ctx):
     if st.session_state.get("_last_loaded_recipe") != ctx["name"]:

@@ -4,9 +4,11 @@
 
 class Combobox {
   constructor({ items, placeholder = "", ariaLabel = "", onSelect = () => {} }) {
-    this.items = items; // [{ id, label, search? }] -- "search" (lowercase) er valgfritt og
-    // brukes til filtrering i tillegg til/i stedet for label (f.eks. produsent/opprinnelse).
-    // Vises IKKE i listen -- kun label vises.
+    this.items = items; // [{ id, label, search?, group? }] -- "search" (lowercase) er
+    // valgfritt og brukes til filtrering i tillegg til/i stedet for label (f.eks.
+    // produsent/opprinnelse). Vises IKKE i listen -- kun label vises. "group" (valgfritt)
+    // grupperer listen med overskrifter -- søket går uansett på tvers av alle grupper,
+    // grupperingen er kun visuell organisering av den allerede filtrerte listen.
     this.onSelect = onSelect;
     this.selectedId = null;
     this.highlightIndex = -1;
@@ -64,7 +66,16 @@ class Combobox {
       this.inputEl.setAttribute("aria-expanded", "false");
       return;
     }
+    let forrigeGruppe = undefined;
     for (const item of this.filtered) {
+      if (item.group !== undefined && item.group !== forrigeGruppe) {
+        const header = document.createElement("li");
+        header.className = "combobox-gruppe-header";
+        header.textContent = item.group;
+        header.setAttribute("aria-hidden", "true");
+        this.listEl.appendChild(header);
+        forrigeGruppe = item.group;
+      }
       const li = document.createElement("li");
       li.className = "combobox-option";
       li.textContent = item.label;
@@ -99,7 +110,7 @@ class Combobox {
   }
 
   _move(delta) {
-    const opts = [...this.listEl.children];
+    const opts = [...this.listEl.querySelectorAll(".combobox-option")];
     if (opts.length === 0) return;
     if (this.highlightIndex >= 0) opts[this.highlightIndex].classList.remove("is-active");
     this.highlightIndex = (this.highlightIndex + delta + opts.length) % opts.length;

@@ -1,6 +1,6 @@
 # Kvernhaug Brygghus — Roadmap
 
-*Sist oppdatert: 2026-08-03 (Steg F6 — malt-variantmodell/lagerstatus/eksakt-mål-status rettet). Se `docs/PROJECT_STATUS_JULI_2026.md` for full status, nøkkeltall og kjent teknisk gjeld.*
+*Sist oppdatert: 2026-08-12 (Web/Desktop Runde 11B-checkpoint — IA-redesign, reelle Lærling/Mester-moduser, nytt KBH Emblem). Se `docs/PROJECT_STATUS_JULI_2026.md` for full status, nøkkeltall og kjent teknisk gjeld.*
 
 Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkefølge — features flyttes mellom kategoriene etter hvert som virkelig bruk avgjør hva som trengs.
 
@@ -24,7 +24,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 ## Pågår / akseptansetesting
 
 - **Reell Wiesn-akseptansetest** med brukerens faktiske lagerdata: teknisk lager-/handlelisteflyt er verifisert, ekte humle og EC-1118 er registrert i Pantry. Malt og den faktiske gjæren (W-34/70) gjenstår før en fullstendig lagerkontroll kan regnes som gjennomført.
-- **Web-versjon** (`web/`, HEAD `14668af`) — separat, offentlig, forenklet nettversjon av oppskriftsbyggeren. **Runde 1–5 (kjernefunksjonalitet, gjennomført):** OG/FG/ABV/IBU/EBC, smakshjul (vanilla SVG), søkbare dropdown-felt (malt/humle/gjær/stil — søkbart på bl.a. produsent/opprinnelse/type) og stilmatching mot Kvernhaug Brygghus sitt eget 26-stils bibliotek (**ikke** hele det offisielle BJCP-heftet — se [../web/README.md](../web/README.md) for presis dekning), lokal lagring i nettleser, JSON-eksport/import, to visningsmoduser (**Bryggelærling**/**Bryggmester**, samme oppskrift og beregningsmotor), vennlig tre-nivås stilveiledning, egendefinerte ingredienser inkl. alfa-overstyring, deterministisk generert ingrediens-/stildata (`scripts/generate_web_data.py`, ingen egen web-database). **Runde 6 (gjennomført):** egen **Hjelp & bryggehåndbok** (`hjelp/`: kom i gang, begrepsforklaringer, ingredienser, FAQ, 15-stegs bryggedagsguide, bryggemetoder, første utstyrsguide/BrewZilla med et eksplisitt proveniensskille mellom faktiske produktegenskaper, Kvernhaug-standardverdier for beregning, Kvernhaug-praktiske anbefalinger, generelle bryggeforutsetninger og ikke-verifisert informasjon) med "? → Les mer"-lenker fra hjelpepopoverne; brukeridentitet (ølnavn/brygger/valgfritt bryggeri/notater) på selve oppskriften; fire egne, nøytrale A4-utskriftsdokumenter (oppskriftsark/handleliste/bryggedagsark/bryggelogg — bryggeloggen foreløpig et papirskjema, ikke en digital logg) i stedet for et rått sideprint, brukerens identitet foran diskret Kvernhaug-branding. Committet, men **ikke deployet ennå** — gjenstår en egen pre-deploy-vurdering, se punkt 6 under «Neste».
+- **Web-versjon** (`web/`) — separat, offentlig, forenklet nettversjon av oppskriftsbyggeren. **Runde 1–5 (kjernefunksjonalitet, gjennomført):** OG/FG/ABV/IBU/EBC, smakshjul (vanilla SVG), søkbare dropdown-felt (malt/humle/gjær/stil — søkbart på bl.a. produsent/opprinnelse/type) og stilmatching mot Kvernhaug Brygghus sitt eget 26-stils bibliotek (**ikke** hele det offisielle BJCP-heftet — se [../web/README.md](../web/README.md) for presis dekning), lokal lagring i nettleser, JSON-eksport/import, to visningsmoduser (**Bryggelærling**/**Bryggmester**, samme oppskrift og beregningsmotor), vennlig tre-nivås stilveiledning, egendefinerte ingredienser inkl. alfa-overstyring, deterministisk generert ingrediens-/stildata (`scripts/generate_web_data.py`, ingen egen web-database). **Runde 6 (gjennomført, HEAD `14668af`):** egen **Hjelp & bryggehåndbok** (`hjelp/`: kom i gang, begrepsforklaringer, ingredienser, FAQ, 15-stegs bryggedagsguide, bryggemetoder, første utstyrsguide/BrewZilla med et eksplisitt proveniensskille mellom faktiske produktegenskaper, Kvernhaug-standardverdier for beregning, Kvernhaug-praktiske anbefalinger, generelle bryggeforutsetninger og ikke-verifisert informasjon) med "? → Les mer"-lenker fra hjelpepopoverne; brukeridentitet (ølnavn/brygger/valgfritt bryggeri/notater) på selve oppskriften; fire egne, nøytrale A4-utskriftsdokumenter (oppskriftsark/handleliste/bryggedagsark/bryggelogg — bryggeloggen foreløpig et papirskjema, ikke en digital logg) i stedet for et rått sideprint, brukerens identitet foran diskret Kvernhaug-branding. **Runde 7–11B (gjennomført, visuelt godkjent 2026-08-12 — se `docs/snapshots/2026-08-12_Web_Desktop_Runde_11B_Checkpoint.md`):** fullbredde IA-redesign (Mine oppskrifter-/Importer-/Utskrift-sider, `recipe_engine.js`-orkestrering delt mellom bygger og utskrift, egen `chrome.js` for masthead/drawer), bredere app-lignende Oppskriftsbygger-layout, nytt recipe card-oppsett med alltid synlig Smaksprofil + sammenleggbar Stilanalyse (erstatter tidligere fane-navigasjon), Bryggelærling/Bryggmester gjort til **reelle** modi (førstegangsvalg + drawer-bryter, ikke lenger en ren CSS-visningsbryter) med Bryggmesters faktiske malt kg↔%-arbeidsflyt (portert fra `ui/malt_panel.py`) og mål-IBU→gram via portert inverse Tinseth (`modules/calculations.py::beregn_gram_fra_ibu`), samt et nytt **KBH Emblem** som felles master-asset for web og desktop (se «Branding og identitet» under). Tilsvarende desktop-endringer (hero-header, nytt emblem i recipe card) er del av samme godkjente milepæl. **Fortsatt ikke deployet** — gjenstår en egen pre-deploy-vurdering, se punkt 6 under «Neste».
 
 ## Neste
 
@@ -33,11 +33,17 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 3. **Equipment Profile** — erstatte hardkodede BrewZilla 35L-standardverdier med redigerbare utstyrsinnstillinger (kjelevolum, fordampning, meskeforhold, dødvolum, kornabsorpsjon), lagret i `data/equipment.json`.
 4. **Aktivere ekte Vestbrygg-variantdata, deretter full butikksammenligning** — variantmodell, lagerstatus, eksakt mål og 25 kg-sperre er ferdig kodet og testet (se «Ferdig» over); det som faktisk gjenstår er (a) å kjøre scraper/matcher mot ekte Vestbrygg-produktsider slik at `master_malt.json` får reelle varianter/lagerstatus, og (b) deretter side-om-side prissammenligning på tvers av Vestbrygg/Ølbrygging.no for hele oppskriften.
 5. **Migrering og avvikling av legacy-humlelager** — fase ut det gamle, ikke-Pantry-synkroniserte humlelageret og den gamle handlelisten når Smart Handleliste er fullt validert i reell bruk.
-6. **Web-versjon — Pre-deploy / lanseringsklar-runde** (før publisering på `KvernhaugBrygghus.no`, ikke påbegynt): vurdere endelig funksjonsomfang for første offentlige versjon, innholdskvalitet i Hjelp/bryggehåndbok, datakvalitet for malt/humle/gjær, stilbibliotek/dekning, visuell sluttpolish på mobil/desktop, utskriftskontroll med ekte oppskrifter, en eventuell personvern-/cookievurdering ut fra faktisk funksjonalitet, hosting/opplasting, kobling til `KvernhaugBrygghus.no`, og en produksjonstest etter deploy.
+6. **Web-versjon — Pre-deploy / lanseringsklar-runde** (før publisering på `KvernhaugBrygghus.no`, ikke påbegynt): vurdere endelig funksjonsomfang for første offentlige versjon, innholdskvalitet i Hjelp/bryggehåndbok, datakvalitet for malt/humle/gjær, stilbibliotek/dekning, visuell sluttpolish på mobil/desktop, utskriftskontroll med ekte oppskrifter, hosting/opplasting, kobling til `KvernhaugBrygghus.no`, og en produksjonstest etter deploy. Kjente delkrav som ikke må forsvinne før lansering:
+   - **Norsk + engelsk er must-have** — i dag kun norsk.
+   - SEO-grunnarbeid (meta-tagger, sitemap, o.l.) — ikke gjort ennå.
+   - Kontakt-e-post — mangler et sted brukere kan nå Kvernhaug Brygghus.
+   - Personvern-/cookieside eller -tekst — mangler, avhenger av faktisk funksjonalitet ved lansering.
 
 ## Senere
 
 - Etikettgenerator
+- Forskningsbatch (dedikert liten-skala/eksperimentell brygg-modus)
+- Eksempeloppskrifter (ferdige, kuraterte oppskrifter for nye brukere — web og/eller desktop)
 - Egen PDF-eksportmotor (i stedet for dagens innebygde utskriftsvisning)
 - Avansert meske-pH-/syredosemodell (automatisk beregning — i dag er pH kun et manuelt målefelt)
 - Automatisk lagerreservasjon
@@ -47,6 +53,11 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 - Web: kobling mellom en fremtidig Equipment Profile og riktig utstyrsguide (ingen kobling bygget ennå)
 - Web: et eventuelt lett, lokalt gjenbruksbibliotek for egendefinerte ingredienser (bevisst utelatt som "nice-to-have")
 - Web: digital Bryggelogg-funksjon (i dag kun et utskrivbart papirskjema — se Bryggelogg V1-punktet over, som gjelder desktop-appen)
+- Web: oppskriftsskalering i Bryggmester (desktop-appen har dette allerede via `ui/recipe_card.py`s «Skaler oppskrift»; ikke portert til web ennå)
+- Web: stilbasert ingrediensveiledning ("hvilke ingredienser gir denne stilen") — krever bedre/rikere ingrediensdata enn det som finnes i dag før dette kan gjøres godt
+- Portabel `.kbhrecipe`-fil — et eget, delbart oppskriftsformat (i dag kun rå JSON-eksport/import)
+- Eget lite kompakt-ikon: kråke + pils + møllestein — en ny, bevisst komponert mikrovariant (ikke en automatisk beskjæring av Master V1, se `web/README.md` sitt "Logo"-avsnitt). Dagens `kvernhaug_logo_kompakt.png` er en midlertidig løsning frem til dette er designet.
+- Favicon (og eventuell mikrovariant for andre små flater) — venter på samme kompakt-ikon-arbeid som punktet over
 
 ## Parkert / permanent avvist
 
@@ -72,6 +83,7 @@ Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkef�
 - Bildefil på plass: `assets/branding/master_v1.png`
 - Merch-standard definert: brystlogo, armtekst, ryggillustrasjon (i branding-dokumentet)
 - Fargepalett med estimerte HEX-verdier dokumentert
+- **Nytt KBH Emblem** (2026-08-12) — brukerlevert, transparensrensket emblem etablert som felles master-asset (`assets/branding/kbh_emblem_master.png`, 1024×1536) for både web og desktop. Erstattet det gamle `master_v1_transparent.png` i web sin identitetsblokk (Runde 11B) og i desktop sitt recipe card (`ui/branding.py`, `ui/recipe_card.py`, `modules/card_template.py`). Ingen ny illustrasjon — kun rensket alfakanal fra den leverte filen. `docs/branding/master_design_v1.md` beskriver fortsatt det opprinnelige Master V1-motivet og er **ikke** oppdatert til å referere det nye emblemet ennå.
 
 ### Neste steg (i prioritert rekkefølge)
 

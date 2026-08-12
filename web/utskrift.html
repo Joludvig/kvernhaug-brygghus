@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Utskrift — Kvernhaug Brygghus</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="hero no-print">
+  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel">🖨️ Utskrift</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe no-print"></div>
+<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+  </div>
+  <a href="index.html" class="sidemeny-lenke">🍺 Oppskriftsbygger</a>
+  <a href="mine-oppskrifter.html" class="sidemeny-lenke">📂 Mine oppskrifter</a>
+  <a href="importer.html" class="sidemeny-lenke">📥 Importer oppskrift</a>
+  <a href="utskrift.html" class="sidemeny-lenke aktiv">🖨️ Utskrift</a>
+  <hr class="sidemeny-skille">
+  <a href="hjelp/index.html" class="sidemeny-lenke">📖 Hjelp / Bryggehåndbok</a>
+</nav>
+
+<main class="no-print">
+  <section class="panel" id="utskrift-tom-tilstand" hidden>
+    <h2>Utskrift</h2>
+    <div class="utskrift-tom-tilstand">
+      <p>Du har ingen oppskrift å skrive ut ennå.</p>
+      <p class="hjelpetekst">Gå til <a href="index.html">Oppskriftsbyggeren</a> og lag en, eller åpne en lagret oppskrift under <a href="mine-oppskrifter.html">Mine oppskrifter</a>.</p>
+    </div>
+  </section>
+
+  <div id="utskrift-innhold">
+    <section class="panel">
+      <h2>Velg oppskrift</h2>
+      <div class="felt-rad">
+        <label for="utskrift-oppskrift-velger">Oppskrift</label>
+        <select id="utskrift-oppskrift-velger"></select>
+      </div>
+      <div class="utskrift-info">
+        <div class="utskrift-info-navn" id="utskrift-info-navn"></div>
+        <div class="utskrift-info-tall" id="utskrift-info-tall"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Skriv ut</h2>
+      <p class="hjelpetekst">Hvert ark er sin egen, utskriftsvennlige side — ikke bare et utskrift av denne skjermen.</p>
+      <div class="knapperad">
+        <button type="button" id="print-oppskriftsark-knapp">🖨️ Oppskriftsark</button>
+        <button type="button" id="print-handleliste-knapp">🖨️ Handleliste</button>
+        <button type="button" id="print-bryggedagsark-knapp">🖨️ Bryggedagsark</button>
+        <button type="button" id="print-bryggelogg-knapp">🖨️ Bryggelogg</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="smakshjul-container" hidden></div>
+
+<footer class="no-print">
+  <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server.</p>
+</footer>
+
+<div id="utskrift-oppskriftsark" class="utskrift-dokument"></div>
+<div id="utskrift-handleliste" class="utskrift-dokument"></div>
+<div id="utskrift-bryggedagsark" class="utskrift-dokument"></div>
+<div id="utskrift-bryggelogg" class="utskrift-dokument"></div>
+
+<script src="js/chrome.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/flavor.js"></script>
+<script src="js/radar.js"></script>
+<script src="js/style.js"></script>
+<script src="js/veiledning.js"></script>
+<script src="js/recipe_engine.js"></script>
+<script src="js/print.js"></script>
+<script src="js/utskrift_page.js"></script>
+</body>
+</html>

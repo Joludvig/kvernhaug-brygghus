@@ -1,21 +1,55 @@
-/* Kvernhaug Brygghus — web. Palett og typografi fra
-   docs/branding/master_design_v1.md / modules/card_template.py.
-   Bevisst fast mørkt uttrykk (ingen lyst tema) — branding-reglene
-   forbyr lys bakgrunn for primærmerket. */
+/* Kvernhaug Brygghus — web. To-lags palett, kontrollert direkte mot
+   desktop-appens FAKTISKE kjøretidsutseende 2026-08-10 (ikke bare
+   branding-dokumentet):
+
+   1) APP-KROM (standard, kald skifer/slate) — desktop-appen har INGEN
+      .streamlit/config.toml og bruker dermed Streamlits egen
+      standard mørke tema for alt vanlig UI (bakgrunn, paneler, inputs,
+      sidebar) — kaldt skifer-svart, ikke det varme brune fra
+      oppskriftskortet. --bg/--bg-sect/--bg-sect-2/--body/--muted under
+      er derfor kalde som standard og brukes av venstre arbeidsområde,
+      Hjelp-sidene, meny/drawer osv.
+
+   2) MERKEVARE-SONE (varm, gravyr-følelse) — KUN header/masthead og
+      høyre identitets-/resultatkort (samt utskriftsdokumentene) skal
+      se ut som modules/card_template.py / ui/branding.py: varmt
+      nær-sort, gull, pergament. --warm-* under holder disse verdiene;
+      .bygger-hoyre og .masthead skriver LOKALT over --bg-sect/--bg-sect-2/
+      --body/--muted til de varme variantene, slik at alle vanlige regler
+      (.resultat-boks, .stil-kort, .identitet-*, smakshjul-tekst osv.)
+      automatisk arver riktig varme uten at hver regel må dupliseres.
+
+   Font-prinsipp (uendret): --sans er standard for all vanlig UI (nav,
+   skjema, knapper) — desktop setter ALDRI egen font-family på vanlige
+   Streamlit-widgets. --serif er forbeholdt header/masthead, identitets-/
+   resultatkortet og stilpanelet til høyre, samt utskriftsdokumentene. */
 
 :root {
-  --bg: #0f0c07;
-  --bg-sect: #1a1208;
-  --bg-sect-2: #140e07;
+  /* App-krom: kald skifer (Streamlits standard mørke tema) */
+  --bg: #0d0f15;
+  --bg-sect: #171a22;
+  --bg-sect-2: #12141b;
+  --body: #f0f1f4;
+  --muted: #adb5c4;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
+
+  /* Merkevare-sone: varm gravyr-følelse (header, høyrekort, utskrift) */
+  --warm-bg: #100b06;
+  --warm-bg-sect: #1a1208;
+  --warm-bg-sect-2: #140e07;
+  --warm-body: #f2ede0;
+  --warm-muted: #b7ad9c;
+
+  /* Aksentfarger — samme i begge soner, brukes til gull-aksent/lenker/status */
   --gold: #c49a2a;
   --pergament: #dfd0a0;
   --moss: #3d6b2a;
   --copper: #9e6030;
   --elfenbein: #c8b882;
-  --body: #e8e0d0;
-  --muted: #9a9080;
   --danger: #c0605a;
   --serif: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Source Sans Pro', Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -24,45 +58,365 @@
 
 body {
   margin: 0;
-  font-family: var(--serif);
-  background: radial-gradient(ellipse at top, #171008 0%, var(--bg) 55%);
+  font-family: var(--sans);
+  background: radial-gradient(ellipse at top, #171b24 0%, var(--bg) 55%);
   color: var(--body);
 }
 
-header {
-  padding: 2.2rem 1.5rem 1.4rem;
-  text-align: center;
-  border-bottom: 1px solid var(--gold);
+a {
+  color: var(--gold);
+  text-decoration-color: rgba(196, 154, 42, 0.5);
 }
 
-.brand-mark {
-  font-size: 2.2rem;
-  margin-bottom: 0.2rem;
-}
-
-header h1 {
-  margin: 0 0 0.35rem;
+a:hover,
+a:focus-visible {
   color: var(--pergament);
-  font-size: 2.1em;
-  font-weight: bold;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6);
+  text-decoration-color: var(--pergament);
 }
 
-.motto {
-  margin: 0 0 0.6rem;
+a:visited {
+  color: var(--copper);
+}
+
+/* Vanlig skjema-UI (knapper, felt, nav) er sans-serif -- se font-prinsippet
+   i toppen av filen. Serif brukes kun der en spesifikk regel under
+   eksplisitt setter --serif igjen (header, høyre resultatpanel/stilpanel,
+   utskriftsdokumenter). */
+input,
+select,
+button,
+textarea {
+  font-family: var(--sans);
+}
+
+/* ── Hero-banner (ekte fullbredde header-bilde) ──────────────────────────
+   Runde 10A: bildet valgt av bruker (kvernhaug_brygghus_i_gyllen_fjelldal)
+   er selve headeren -- ikke et bakgrunnsbilde presset bak en gammel
+   logo+tekst-stripe. Boksens aspect-ratio matcher bildets EGNE forhold
+   (7416:2072) opp til en makshøyde, slik at komposisjonen får vises hel
+   på vanlige desktop-bredder i stedet for å bli beskåret i toppen -- se
+   docs-avvik forklart i web/README.md. IKKE sticky -- den skal rulle bort
+   som vanlig sideinnhold. En helt separat, alltid-lav .kompaktnav (under)
+   overtar navigasjonsrollen som fast bjelke når man har scrollet forbi. */
+
+.hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 7416 / 2072;
+  max-height: 460px;
+  min-height: 240px;
+  overflow: hidden;
+  border-bottom: 2px solid var(--gold);
+  background: var(--warm-bg);
+}
+
+.hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  display: block;
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8, 5, 3, 0.85) 0%, rgba(8, 5, 3, 0.5) 20%, rgba(8, 5, 3, 0.08) 46%, rgba(8, 5, 3, 0) 62%);
+}
+
+.hero-topprad {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1.2rem;
+}
+
+.hero-topprad .meny-knapp {
+  background: rgba(8, 5, 3, 0.55);
+}
+
+.hero-tekst {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1.7rem 1.9rem;
+  font-family: var(--serif);
+  max-width: 56rem;
+}
+
+.hero-navn {
+  margin: 0;
+  color: var(--pergament);
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  text-shadow: 1px 2px 12px rgba(0, 0, 0, 0.85);
+}
+
+.hero-motto {
+  margin: 0.5rem 0 0;
   color: var(--gold);
   font-style: italic;
-  letter-spacing: 0.04em;
+  font-size: clamp(0.92rem, 1.5vw, 1.2rem);
+  letter-spacing: 0.02em;
+  text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.85);
 }
 
-.undertittel {
-  margin: 0;
+.hero-sidetittel {
+  margin: 0.55rem 0 0;
+  color: var(--pergament);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: clamp(0.88rem, 1.3vw, 1.05rem);
+  text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.85);
+}
+
+.meny-knapp {
+  flex: 0 0 auto;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(196, 154, 42, 0.4);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.meny-knapp:hover,
+.meny-knapp:focus-visible {
+  border-color: var(--gold);
+  background: rgba(196, 154, 42, 0.15);
+}
+
+.meny-knapp span {
+  display: block;
+  width: 1.3rem;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* ── Kompakt sticky navigasjon ────────────────────────────────────────────
+   Helt separat element fra .hero -- skjult (transform+opacity) til
+   web/js/chrome.js viser den idet hero-banneret har rullet forbi. Ligger
+   ALDRI oppå hero-banneret ved sideinnlasting. */
+
+.kompaktnav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--warm-bg);
+  border-bottom: 2px solid var(--gold);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  padding: 0.6rem 1.5rem;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.kompaktnav.synlig {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.kompaktnav-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.kompaktnav-logo {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  object-fit: cover;
+}
+
+.kompaktnav-navn {
+  font-family: var(--serif);
+  color: var(--pergament);
+  font-size: 1.15rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    min-height: 210px;
+    max-height: 320px;
+  }
+
+  .hero-img {
+    object-position: 42% 55%;
+  }
+
+  .hero-topprad {
+    padding: 0.9rem;
+  }
+
+  .meny-knapp {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .hero-tekst {
+    padding: 1.1rem 1.1rem 1.3rem;
+  }
+
+  .kompaktnav {
+    padding: 0.55rem 1rem;
+  }
+
+  .kompaktnav-inner {
+    gap: 0.7rem;
+  }
+
+  .kompaktnav-logo {
+    width: 34px;
+    height: 34px;
+  }
+
+  .kompaktnav-navn {
+    font-size: 1rem;
+  }
+}
+
+/* ── Uttrekkbar venstremeny (drawer) ─────────────────────────────────────
+   Speiler desktop-appens st.sidebar (ui/sidebar.py) som hovednavigasjon --
+   samme komponent/markup på alle sider, åpnet fra .meny-knapp i masthead. */
+
+.sidemeny-bakteppe {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 45;
+}
+
+.sidemeny-bakteppe.apen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidemeny {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 82vw;
+  background: var(--bg-sect);
+  border-right: 1px solid var(--line-strong);
+  padding: 0.9rem 0.8rem 1.5rem;
+  transform: translateX(-100%);
+  transition: transform 0.22s ease;
+  z-index: 46;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.sidemeny.apen {
+  transform: translateX(0);
+}
+
+.sidemeny-topp {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem 1rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 0.6rem;
+}
+
+.sidemeny-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.sidemeny-tittel {
+  font-family: var(--serif);
+  color: var(--pergament);
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.sidemeny-lukk {
+  margin-left: auto;
+  background: none;
+  border: none;
   color: var(--muted);
-  font-size: 0.88rem;
-  max-width: 32rem;
-  margin-inline: auto;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+.sidemeny-lukk:hover {
+  color: var(--gold);
+}
+
+.sidemeny-lenke {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--body);
+  text-decoration: none;
+  padding: 0.75rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.94rem;
+  min-height: 44px;
+}
+
+.sidemeny-lenke:hover,
+.sidemeny-lenke:focus-visible {
+  background: rgba(196, 154, 42, 0.1);
+  color: var(--pergament);
+}
+
+.sidemeny-lenke.aktiv {
+  background: rgba(196, 154, 42, 0.14);
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.sidemeny-skille {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 0.5rem 0.3rem;
+}
+
+body.sidemeny-aktiv {
+  overflow: hidden;
 }
 
 main {
@@ -74,22 +428,47 @@ main {
   gap: 1.4rem;
 }
 
+/* Bevisst flat -- IKKE et bordet kort. Seksjoner i venstre arbeidsområde er
+   atskilt med en tynn nøytral toppstrek + en liten gul seksjonsetikett
+   (under), ikke en boks-i-boks. Se tilbakemelding 2026-08-10: venstresiden
+   så ut som "web-kort inni web-kort" da hver seksjon var sin egen
+   gullkantede, skyggelagte boks oppå en allerede boksete layout. */
 .panel {
-  background: var(--bg-sect);
-  border: 1.5px solid var(--gold);
-  border-radius: 10px;
-  padding: 1.35rem 1.35rem 1.15rem;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: 1.15rem 0 1.25rem;
+  box-shadow: none;
+}
+
+.bygger-venstre > .panel:first-child {
+  border-top: none;
+  padding-top: 0;
 }
 
 .panel h2 {
   margin: 0 0 1rem;
-  font-size: 0.72em;
+  font-size: 0.88em;
+  font-weight: 700;
   color: var(--gold);
-  letter-spacing: 0.16em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   border-bottom: 1px solid rgba(196, 154, 42, 0.25);
   padding-bottom: 0.5rem;
+}
+
+/* Runde 10B: KUN i Oppskriftsbyggeren (.byggerlayout) -- matcher desktop-
+   appens st.header()-seksjoner (ui/malt_panel.py "🌾 Meskekaret",
+   ui/hop_panel.py "🌿 Humle-tilsetninger" osv.): ekte store overskrifter,
+   ikke en liten gull-eyebrow. Bevisst scopet til byggeren (ikke en global
+   .panel h2-endring) -- Mine oppskrifter/Importer/Utskrift bruker samme
+   .panel-klasse og skal IKKE endres denne runden. */
+.byggerlayout .panel h2 {
+  font-size: 1.55rem;
+  letter-spacing: 0.005em;
+  text-transform: none;
+  padding-bottom: 0.6rem;
 }
 
 .felt-rad {
@@ -105,8 +484,9 @@ main {
 }
 
 .felt-rad label {
-  color: var(--muted);
-  font-size: 0.9rem;
+  color: var(--body);
+  font-size: 0.96rem;
+  font-weight: 500;
   flex: 0 0 auto;
   padding-top: 0.5rem;
 }
@@ -122,20 +502,78 @@ main {
   max-width: 20rem;
 }
 
+/* Runde 10B: KUN i Oppskriftsbyggeren (.byggerlayout) -- label rett over
+   feltet (Streamlits egen widget-konvensjon: st.text_input()/
+   st.number_input() rendrer alltid label OVER feltet, ikke ved siden av)
+   i stedet for en bred rad med "justify-content:space-between" som dro
+   label og felt til hver sin kant og etterlot et dødt tomrom mellom dem
+   så snart venstrekolonnen ble bredere. Bevisst scopet -- Utskrift-siden
+   sin ene .felt-rad (oppskrift-velgeren) skal IKKE endres denne runden. */
+.byggerlayout .felt-rad {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-bottom: 0.95rem;
+}
+
+.byggerlayout .felt-rad label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  flex: none;
+  padding-top: 0;
+}
+
+.byggerlayout .felt-rad input,
+.byggerlayout .felt-rad select {
+  flex: none;
+  width: 100%;
+  max-width: 22rem;
+}
+
+.byggerlayout .felt-rad input[type="number"] {
+  max-width: 10rem;
+}
+
+.byggerlayout .felt-rad-combobox .combobox {
+  /* .combobox sin egen "flex: 1 1 12rem" (skrevet for en horisontal
+     flex-rad) satte en 12rem flex-basis langs HOVEDAKSEN -- som nå er
+     VERTIKAL i byggerens kolonne-variant. Uten "flex:none" her arvet
+     boksen en 12rem/192px HØYDE den aldri skulle hatt, og etterlot et
+     stort dødt tomrom under Ølstil/Gjær-søket. */
+  flex: none;
+  width: 100%;
+  max-width: 22rem;
+}
+
+/* Spesifisitetsfiks: ".felt-rad input" (0,1,1) slo ellers ".combobox-input"
+   sin egen width:100% (0,1,0) og klemte gjær-/stilsøket ned til 9rem --
+   usynlig i den gamle, smale ettkolonnes-layouten, men tydelig nå som
+   venstrekolonnen faktisk har plass til et bredere søkefelt. */
+.felt-rad-combobox .combobox-input {
+  width: 100%;
+}
+
 input,
-select {
+select,
+textarea {
   padding: 0.55rem 0.6rem;
-  border: 1px solid rgba(196, 154, 42, 0.4);
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  font-family: var(--serif);
   font-size: 1rem;
-  background: #140e07;
+  background: var(--bg-sect-2);
   color: var(--body);
   min-height: 2.75rem;
 }
 
+textarea {
+  width: 100%;
+  resize: vertical;
+  line-height: 1.5;
+}
+
 input:focus,
 select:focus,
+textarea:focus,
 .combobox-input:focus {
   outline: none;
   border-color: var(--gold);
@@ -165,8 +603,8 @@ select:focus,
   margin: 0;
   padding: 0.3rem;
   list-style: none;
-  background: #17110a;
-  border: 1px solid var(--gold);
+  background: var(--bg-sect);
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
@@ -188,28 +626,43 @@ select:focus,
   color: var(--pergament);
 }
 
+.combobox-gruppe-header {
+  padding: 0.5rem 0.7rem 0.25rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.85;
+}
+
+.combobox-gruppe-header:not(:first-child) {
+  margin-top: 0.3rem;
+  border-top: 1px solid rgba(196, 154, 42, 0.15);
+  padding-top: 0.5rem;
+}
+
 /* ── Ingrediensrader ─────────────────────────────────────────────────── */
 
 .ingrediens-rad {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.6rem;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
   flex-wrap: wrap;
 }
 
 .ingrediens-rad input[type="number"] {
-  width: 5.5rem;
+  width: 6.25rem;
 }
 
 .enhet {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .fjern-knapp {
   background: none;
-  border: 1px solid rgba(196, 154, 42, 0.4);
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
   cursor: pointer;
   color: var(--muted);
@@ -232,7 +685,6 @@ select:focus,
   padding: 0.6rem 1rem;
   min-height: 2.6rem;
   cursor: pointer;
-  font-family: var(--serif);
   font-size: 0.95rem;
 }
 
@@ -240,12 +692,94 @@ select:focus,
   background: rgba(196, 154, 42, 0.1);
 }
 
+/* ── Malt: kg ↔ % (kun Bryggmester) ─────────────────────────────────────
+   Runde 11: portert fra ui/malt_panel.py -- se oppdaterMaltProsent()/
+   brukMaltProsentfordeling() i app.js for selve logikken. */
+
+.malt-prosent-rad {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+
+.malt-prosent-sum {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.malt-prosent-advarsel {
+  color: #e0a89a;
+}
+
+.malt-prosent-knapp {
+  background: none;
+  border: 1px solid var(--line-strong);
+  color: var(--body);
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  min-height: 2.5rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.malt-prosent-knapp:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ── Humle: gram ↔ mål-IBU (kun Bryggmester) ────────────────────────────
+   Runde 11: portert fra ui/hop_panel.py -- egen underrad (flex-basis:100%
+   tvinger den til å bryte til egen linje inni den wrappende
+   .ingrediens-rad) i stedet for enda et felt i hovedraden, som ville blitt
+   for trangt sammen med alfa/gram/tid. Skjult for tørrhumle (tid=0), se
+   oppdaterHumleMaalIbuSynlighet() i app.js. */
+
+.humle-maal-ibu-rad {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  flex-basis: 100%;
+  margin-top: -0.15rem;
+}
+
+.humle-maal-ibu-rad label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.humle-maal-ibu-rad input[type="number"] {
+  width: 5.5rem;
+}
+
+.humle-beregn-knapp {
+  background: none;
+  border: 1px solid var(--line-strong);
+  color: var(--body);
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  min-height: 2.3rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.humle-beregn-knapp:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
 /* ── Resultat ────────────────────────────────────────────────────────── */
 
 .resultat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  gap: 0.85rem;
 }
 
 .resultat-boks {
@@ -254,9 +788,9 @@ select:focus,
   align-items: center;
   justify-content: center;
   border: 1px solid var(--gold);
-  border-radius: 6px;
+  border-radius: 5px;
   background: rgba(196, 154, 42, 0.06);
-  padding: 0.9rem 0.5rem;
+  padding: 0.8rem 0.45rem;
   position: relative;
 }
 
@@ -267,8 +801,9 @@ select:focus,
 }
 
 .resultat-label {
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gold);
   margin-top: 0.35rem;
@@ -342,8 +877,9 @@ select:focus,
 }
 
 .stil-headline-label {
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 0.3rem;
@@ -392,8 +928,9 @@ select:focus,
 }
 
 .stil-seksjon-tittel {
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gold);
   border-bottom: 1px solid rgba(196, 154, 42, 0.25);
@@ -490,7 +1027,6 @@ select:focus,
   padding: 0.65rem 1.1rem;
   min-height: 2.8rem;
   cursor: pointer;
-  font-family: var(--serif);
   font-size: 0.92rem;
   letter-spacing: 0.02em;
 }
@@ -502,7 +1038,8 @@ select:focus,
 
 .hjelpetekst {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
   margin: 0.7rem 0 0;
 }
 
@@ -534,7 +1071,6 @@ select:focus,
   flex: 1;
   cursor: pointer;
   color: var(--body);
-  font-family: var(--serif);
   font-size: 0.92rem;
   padding: 0.5rem 0.2rem;
   min-height: 2.4rem;
@@ -620,13 +1156,99 @@ footer {
   }
 }
 
-/* ── Modusbryter (Bryggelærling / Bryggmester) ──────────────────────────── */
+/* ── Modusbryter (Bryggelærling / Bryggmester) ────────────────────────────
+   Runde 11: ikke lenger en permanent rad i arbeidsflaten -- kun et lite
+   status+bytte i hamburger-menyen (.sidemeny-modus) og et engangs
+   førstegangsvalg (.modus-forstegang). .modus-knapp er nå primært en
+   JS-krok (settModus() finner ALLE modus-knapper via denne klassen,
+   samme flertall-trigger-mønster som .meny-knapp/chrome.js) -- selve
+   *utseendet* eies fullt og helt av hvor knappen faktisk bor
+   (.sidemeny-modus-knapp overstyrer eksplisitt alt boks-relatert under). */
+
+.sidemeny-modus {
+  padding: 0.3rem 0.7rem 0.6rem;
+}
+
+.sidemeny-modus-status {
+  display: block;
+  color: var(--gold);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.sidemeny-modus-bytt {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.sidemeny-modus-knapp {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--muted);
+  padding: 0.45rem 0.3rem;
+  min-height: 2.4rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.sidemeny-modus-knapp[aria-pressed="true"] {
+  border-color: var(--gold);
+  color: var(--pergament);
+  background: rgba(196, 154, 42, 0.1);
+}
+
+/* Førstegangsvalg -- modal med bakteppe, samme lag-mønster som
+   .sidemeny-bakteppe/.sidemeny over, men sentrert i vinduet. */
+
+.modus-forstegang-bakteppe {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 55;
+}
+
+.modus-forstegang {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 56;
+  width: min(28rem, 90vw);
+  background: var(--bg-sect);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  padding: 1.6rem 1.5rem;
+  text-align: center;
+}
+
+.modus-forstegang h2 {
+  margin: 0 0 0.5rem;
+  color: var(--pergament);
+  font-family: var(--serif);
+  font-size: 1.3rem;
+}
+
+.modus-forstegang-intro {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 1rem;
+}
 
 .modus-bryter {
   display: flex;
   justify-content: center;
   gap: 0.6rem;
-  margin-top: 1.1rem;
+  margin-top: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -636,13 +1258,12 @@ footer {
   align-items: center;
   gap: 0.2rem;
   background: transparent;
-  border: 1.5px solid rgba(196, 154, 42, 0.4);
+  border: 1.5px solid var(--line-strong);
   border-radius: 8px;
   color: var(--muted);
   padding: 0.5rem 1rem;
   min-height: 2.8rem;
   cursor: pointer;
-  font-family: var(--serif);
   font-size: 0.92rem;
 }
 
@@ -681,7 +1302,6 @@ footer {
   background: none;
   color: var(--gold);
   font-size: 0.7rem;
-  font-family: var(--serif);
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -704,7 +1324,7 @@ footer {
   position: fixed;
   z-index: 100;
   max-width: 19rem;
-  background: #17110a;
+  background: var(--bg-sect);
   border: 1.5px solid var(--gold);
   border-radius: 8px;
   padding: 0.8rem 0.9rem;
@@ -746,13 +1366,12 @@ footer {
 
 .egendefinert-knapp {
   background: none;
-  border: 1px dashed rgba(196, 154, 42, 0.5);
+  border: 1px dashed var(--line-strong);
   color: var(--muted);
   border-radius: 6px;
   padding: 0.35rem 0.65rem;
   min-height: 2.2rem;
   cursor: pointer;
-  font-family: var(--serif);
   font-size: 0.78rem;
   white-space: nowrap;
 }
@@ -769,8 +1388,8 @@ footer {
   gap: 0.5rem;
   margin-top: 0.5rem;
   padding: 0.7rem 0.7rem 0.5rem;
-  background: rgba(196, 154, 42, 0.05);
-  border: 1px dashed rgba(196, 154, 42, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--line-strong);
   border-radius: 6px;
 }
 
@@ -793,7 +1412,6 @@ footer {
   color: var(--muted);
   text-decoration: underline;
   cursor: pointer;
-  font-family: var(--serif);
   font-size: 0.78rem;
   padding: 0.3rem 0;
   text-align: left;
@@ -867,6 +1485,16 @@ footer {
     max-width: none;
   }
 
+  /* Byggeren sin egen (høyere-spesifisitet) desktop-bredde fra runde 10B
+     ("max-width: 22rem") må også kanselleres her på mobil -- ellers vinner
+     den over regelen rett over, og feltene i byggeren slutter å være
+     fullbredde på mobil. */
+  .byggerlayout .felt-rad input,
+  .byggerlayout .felt-rad select,
+  .byggerlayout .felt-rad-combobox .combobox {
+    max-width: none;
+  }
+
   .ingrediens-rad {
     gap: 0.5rem 0.6rem;
   }
@@ -880,25 +1508,7 @@ footer {
   }
 }
 
-/* ── Hjelp-lenke (header) og "Les mer"-lenke i hjelp-popover ────────────── */
-
-.hjelp-lenke {
-  display: inline-block;
-  margin-top: 0.9rem;
-  color: var(--gold);
-  text-decoration: none;
-  border: 1px solid rgba(196, 154, 42, 0.4);
-  border-radius: 8px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.85rem;
-  min-height: 44px;
-  line-height: 1.6;
-}
-
-.hjelp-lenke:hover,
-.hjelp-lenke:focus-visible {
-  background: rgba(196, 154, 42, 0.12);
-}
+/* ── "Les mer"-lenke i hjelp-popover ─────────────────────────────────────── */
 
 .hjelp-les-mer {
   display: inline-block;
@@ -1088,12 +1698,6 @@ footer {
    Deler style.css med byggeren for samme visuelle identitet, men er egne,
    frittstående sider (åpnes i ny fane) -- ikke en del av oppskriftsbyggeren. */
 
-.hjelp-side-main {
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 1.5rem 1.2rem 4rem;
-}
-
 .hjelp-side-nav {
   display: flex;
   flex-wrap: wrap;
@@ -1105,7 +1709,7 @@ footer {
 .hjelp-side-nav a {
   color: var(--muted);
   text-decoration: none;
-  border: 1px solid rgba(196, 154, 42, 0.3);
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
   padding: 0.45rem 0.9rem;
   font-size: 0.85rem;
@@ -1121,25 +1725,91 @@ footer {
   border-color: var(--gold);
 }
 
-.hjelp-tilbake {
-  display: block;
-  text-align: center;
-  margin: 0.8rem 0 0.4rem;
-  color: var(--gold);
-  text-decoration: none;
-  font-size: 0.88rem;
+/* ── Lokal innholdsmeny (TOC) + hovedinnhold, side ved side på desktop ──
+   Erstatter den gamle, smale, sentrerte ettkolonnes hjelpesiden -- bedre
+   bruk av bredden, ryddige seksjoner i stedet for én lang kortstabel. På
+   mobil (under 900px) blir TOC-en en enkel horisontal chip-rad øverst. */
+
+.hjelp-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 1.2rem 4rem;
 }
 
-.hjelp-tilbake:hover {
-  text-decoration: underline;
+.hjelp-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.hjelp-toc a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.hjelp-toc a:hover,
+.hjelp-toc a:focus-visible {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.hjelp-side-main {
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .hjelp-layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 2.8rem;
+    align-items: start;
+  }
+
+  .hjelp-toc {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0.15rem;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+    position: sticky;
+    top: 1rem;
+  }
+
+  .hjelp-toc a {
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 0.6rem;
+    justify-content: flex-start;
+  }
+
+  .hjelp-toc a:hover,
+  .hjelp-toc a:focus-visible {
+    background: rgba(196, 154, 42, 0.08);
+  }
+
+  .hjelp-side-main {
+    max-width: 920px;
+  }
 }
 
 .hjelp-innledning {
-  text-align: center;
+  text-align: left;
   color: var(--muted);
-  max-width: 620px;
-  margin: 0 auto 1rem;
-  line-height: 1.6;
+  font-size: 1.02rem;
+  max-width: 46rem;
+  margin: 0 0 1.3rem;
+  line-height: 1.65;
 }
 
 .hjelp-seksjon {
@@ -1154,7 +1824,7 @@ footer {
 
 .hjelp-artikkel {
   background: var(--bg-sect);
-  border: 1px solid rgba(196, 154, 42, 0.18);
+  border: 1px solid var(--line);
   border-radius: 10px;
   padding: 1rem 1.2rem;
   margin-bottom: 1rem;
@@ -1182,10 +1852,12 @@ footer {
   margin-bottom: 0.3rem;
 }
 
+/* Ingen venstre gullstrek (fjernet etter tilbakemelding 2026-08-10) --
+   det tallmerkede rundmerket (.hjelp-steg-nr) er visuelt anker nok. */
 .hjelp-steg {
   background: var(--bg-sect);
-  border-left: 3px solid var(--gold);
-  border-radius: 0 8px 8px 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
   padding: 0.9rem 1.1rem;
   margin-bottom: 1rem;
   scroll-margin-top: 1rem;
@@ -1241,7 +1913,7 @@ footer {
 
 .hjelp-metode-kort {
   background: var(--bg-sect);
-  border: 1px solid rgba(196, 154, 42, 0.18);
+  border: 1px solid var(--line);
   border-radius: 10px;
   padding: 1rem 1.2rem;
   margin-bottom: 1rem;
@@ -1268,7 +1940,7 @@ footer {
 .hjelp-tabell td {
   text-align: left;
   padding: 0.35rem 0.6rem;
-  border-bottom: 1px solid rgba(196, 154, 42, 0.25);
+  border-bottom: 1px solid var(--line);
   color: var(--body);
 }
 
@@ -1278,7 +1950,436 @@ footer {
 }
 
 @media (max-width: 640px) {
-  .hjelp-side-main {
+  .hjelp-layout {
     padding: 1rem 0.9rem 3rem;
   }
+}
+
+/* ── Byggerens to-kolonne desktop-layout ─────────────────────────────────
+   Bruddpunktet (1000px) er satt ut fra faktisk plassbehov, ikke en vilkårlig
+   antakelse: venstre kolonnes ingrediensrader trenger ca. 640-680px for ikke
+   å bli trange, høyre kolonnes statbokser/kort trenger ca. 300-340px, pluss
+   mellomrom og sidemarger -- til sammen ca. 1000px før to kolonner faktisk
+   har plass til å puste. Under det: én kolonne, ingen sticky (gir ikke
+   mening uten en fast høyrekolonne ved siden av). */
+
+.byggerlayout {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.75rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.bygger-venstre {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  min-width: 0;
+}
+
+/* ── Høyre kolonne = "recipe card" ────────────────────────────────────────
+   Egen, varm, LOKAL merkevaresone -- speiler modules/card_template.py sitt
+   oppskriftskort (varmt nær-sort, gull-kant, pergament-serif), i motsetning
+   til venstresidens kalde app-krom. Overskriver --bg-sect/--bg-sect-2/
+   --body/--muted lokalt inne i denne blokka, slik at .resultat-boks,
+   .stil-kort, .identitet-*, smakshjul-tekst osv. automatisk arver riktig
+   varme uten at hver regel må dupliseres. Alltid read-only -- inneholder
+   ALDRI stilvelgeren (den bor i #stilvalg-panel i venstre kolonne). */
+
+.bygger-hoyre {
+  --bg-sect: var(--warm-bg-sect);
+  --bg-sect-2: var(--warm-bg-sect-2);
+  --body: var(--warm-body);
+  --muted: var(--warm-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-family: var(--serif);
+  min-width: 0;
+  background: linear-gradient(160deg, var(--warm-bg-sect) 0%, var(--warm-bg) 100%);
+  border: 1px solid rgba(196, 154, 42, 0.35);
+  border-radius: 14px;
+  padding: 1.4rem 1.3rem 1.3rem;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 1000px) {
+  .byggerlayout {
+    /* Runde 10B: desktop-appen (app.py: st.columns([2.0, 1.2])) bruker
+       bredden langt mer offensivt enn den forrige, smalere webbredden --
+       1180px så ut som en mobilapp midtstilt på en stor skjerm. 1440px
+       (og videre opp mot 1680px på ≥1500px, se under) gir arbeidsflaten
+       faktisk pusterom uten å endre selve 62,5/37,5-forholdet. */
+    max-width: 1440px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(340px, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .bygger-hoyre {
+    position: sticky;
+    /* --kompaktnav-h settes av web/js/chrome.js til .kompaktnav sin høyde
+       NÅR den er synlig, ellers 0px -- .hero selv er ikke sticky, så det
+       er kun når den faste kompaktnav-bjelken faktisk vises (etter at
+       hero-banneret er scrollet forbi) at høyrekortet trenger en offset
+       for å ikke havne under den. */
+    top: calc(var(--kompaktnav-h, 0px) + 1rem);
+    z-index: 1;
+  }
+}
+
+@media (min-width: 1500px) {
+  .byggerlayout {
+    max-width: 1680px;
+    gap: 2.4rem;
+  }
+}
+
+/* ── Identitets-/resultatkort (høyre kolonne, toppen) ────────────────────
+   Speiler recipe-card-følelsen fra modules/card_template.py -- ølnavnet er
+   hovedidentiteten, ikke Kvernhaug, men Kvernhaug-emblemet signerer kortet
+   øverst slik det gjør i ui/branding.py/modules/card_template.py. */
+
+.identitet-kort {
+  text-align: center;
+}
+
+/* Runde 10B-10E: emblem-behandlingen i identitetsområdet (se historikk i
+   git). Runde 11B: byttet til det nye, autoritative "KBH Emblem"-motivet
+   (assets/branding/kbh_emblem.png / web/assets/branding/kbh_emblem.png)
+   -- samme fil ren transparent-behandlet, ingen ny illustrasjon. Dette
+   motivet er PORTRETT (1024x1536 = 2:3), ikke landskap som forrige
+   emblem (1125x900), så styringen er snudd fra bredde- til HØYDE-basert:
+   å beholde samme bredde-tall som før ville gjort emblemet ~2x så høyt
+   og forlenget hele kortet vesentlig (mot runde 10E sitt kompakthetsmål).
+   Høyde-clamp er skalert ned proporsjonalt fra 10E sine breddetall, slik
+   at emblemet fortsatt fyller omtrent samme VERTIKALE plass som før --
+   det blir naturlig smalere, ikke mindre viktig. */
+.identitet-logo {
+  display: block;
+  height: clamp(140px, 27vw, 310px);
+  width: auto;
+  max-width: 92%;
+  aspect-ratio: 1024 / 1536;
+  margin: 0 auto 0.6rem;
+  opacity: 0.96;
+}
+
+/* Runde 10D: speiler card_template.py sin BRAND HEADER (logo_block +
+   "Kvernhaug Brygghus" + "Ved Dalelva i Åsane") -- emblemet inneholder
+   ordmerket visuelt, men fasiten viser likevel denne tekstblokken under
+   emblemet sitt eget, så web skal ikke droppe den. */
+.identitet-merke-navn {
+  font-weight: bold;
+  font-size: 0.95rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pergament);
+  margin-bottom: 0.2rem;
+}
+
+.identitet-merke-motto {
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.8;
+}
+
+/* Runde 10C: løftet nærmere card_template.py sin ølnavn-behandling
+   (2.15em, bold, uppercase, letter-spacing 0.13em) -- store/gull-aksent
+   bokstaver kun her, ikke på løpende tekst (jf. fargehierarki-regelen).
+   Runde 10D: løftet videre (1.75rem -> 2.1rem, bokstavavstand nærmere
+   fasitens 0.13em) nå som emblemet gir mer luft å spille på. */
+.identitet-navn {
+  font-size: 2.1rem;
+  font-weight: bold;
+  color: var(--pergament);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.12;
+  margin-bottom: 0.2rem;
+  overflow-wrap: break-word;
+}
+
+/* Runde 10D: speiler card_template.py sin stil_html (moss-grønn, kursiv)
+   -- vises rett under ølnavnet, akkurat som på desktop-kortet.
+   Runde 10E: retter semantikken -- viser nå brukerens VALGTE ølstil
+   (oppskrift.valgtStil, satt i beregnOgVisResultat() i app.js), ikke den
+   automatiske stilmatchen (som fortsatt vises separat i Stilanalyse).
+   Skjult kun når ingen stil er valgt -- vises uansett om resten av
+   oppskriften er tom. */
+.identitet-stil {
+  font-size: 1.02rem;
+  font-style: italic;
+  letter-spacing: 0.03em;
+  color: var(--moss);
+  margin-top: 0.35rem;
+}
+
+/* Runde 10C: brygger/bryggeri er ordinær metadata (som _MUTED-footeren på
+   desktop-kortet), ikke identitet -- demotet fra gull til dempet farge. */
+.identitet-brygger {
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  margin-top: 0.22rem;
+}
+
+/* Runde 10C: gull strek + diamant, speiler card_template.py::_ornament() --
+   brukes til å dele identitetsblokk / statistikk / faner slik desktop-
+   kortet deler brand-header / ølnavn / stats / seksjoner.
+   Runde 10E: strammet inn (1rem -> 0.7rem) som del av å gjøre hele kortet
+   mer kompakt/vertikalt likt fasiten. */
+.kbh-ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.7rem 0;
+}
+
+.kbh-ornament::before,
+.kbh-ornament::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.4;
+}
+
+.kbh-ornament span {
+  color: var(--gold);
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+.kbh-ornament-hoyre {
+  margin: 0.85rem 0;
+}
+
+/* Høyrekortet bruker IKKE .panel (den klassen er nå forbeholdt venstre
+   kolonnes flate seksjonsstrek-mønster) -- egen, enkel h2-stil i stedet,
+   samme visuelle "gull-etikett"-følelse uten venstresidens toppstrek.
+   Runde 10E: strammet inn (kompakthet er en del av denne rundens mål). */
+.bygger-hoyre h2 {
+  margin: 0 0 0.8rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.005em;
+  border-bottom: 1px solid rgba(196, 154, 42, 0.25);
+  padding-bottom: 0.45rem;
+}
+
+/* ── Høyre panel: Smaksprofil / Stilanalyse ───────────────────────────────
+   Runde 10E: erstatter de gamle Smak/Stil-fanene -- Smaksprofil er alltid
+   synlig (smakshjulet er hovedinnholdet), Stilanalyse er en native
+   <details>/<summary> rett under, lukket som standard slik at kortet
+   forblir kompakt. Ingen JS trengs for åpen/lukket-tilstand. */
+
+.smaksprofil-seksjon {
+  margin-top: 0;
+}
+
+.stilanalyse-seksjon {
+  margin-top: 1.1rem;
+}
+
+.stilanalyse-seksjon summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  margin: 0 0 0.8rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.005em;
+  border-bottom: 1px solid rgba(196, 154, 42, 0.25);
+  padding-bottom: 0.45rem;
+}
+
+.stilanalyse-seksjon summary::-webkit-details-marker {
+  display: none;
+}
+
+.stilanalyse-tittel::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.4rem;
+  color: var(--gold);
+  transition: transform 0.15s ease;
+}
+
+.stilanalyse-seksjon[open] .stilanalyse-tittel::before {
+  transform: rotate(90deg);
+}
+
+.stilanalyse-seksjon summary .hjelp-knapp {
+  margin-left: auto;
+}
+
+/* ── Tomt stilmatch (ingen ingredienser lagt til ennå) ───────────────────
+   Robust, datadrevet sjekk (harNokDataForStilmatch() i recipe_engine.js) --
+   IKKE bare et alltid-skjult/vist element. */
+
+.stil-tom-tilstand {
+  text-align: center;
+  padding: 1.6rem 0.5rem 1rem;
+}
+
+.stil-tom-tilstand-tittel {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--pergament);
+  margin-bottom: 0.4rem;
+}
+
+.stil-tom-tilstand-tekst {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+/* ── Mine oppskrifter-siden ───────────────────────────────────────────── */
+
+.oppskrift-listeelement {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(196, 154, 42, 0.15);
+}
+
+.oppskrift-listeelement-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.oppskrift-listeelement-navn {
+  color: var(--pergament);
+  font-weight: bold;
+  overflow-wrap: break-word;
+}
+
+.oppskrift-listeelement-dato {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* ── Importer oppskrift-siden ─────────────────────────────────────────────
+   To metoder (fil / tekst), speiler ui/sidebar.py sin "📥 Importer
+   oppskrift fra tekst"-kontrakt for tekstimport (modules/recipe_importer.py,
+   porte til web/js/recipe_importer.js). */
+
+.importer-fane-panel[hidden] {
+  display: none;
+}
+
+.import-format-hjelp {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.6;
+  background: var(--bg-sect);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  margin: 0.6rem 0 1rem;
+}
+
+.import-format-hjelp code {
+  color: var(--pergament);
+}
+
+.import-tellinger {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.8rem 0 0.4rem;
+}
+
+.import-resultat-tittel {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 1rem 0 0.5rem;
+}
+
+.import-resultat-liste {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.import-resultat-liste li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.import-resultat-liste li.treff {
+  background: rgba(61, 107, 42, 0.14);
+  color: var(--body);
+}
+
+.import-resultat-liste li.uklart {
+  background: rgba(192, 96, 90, 0.14);
+  color: var(--body);
+}
+
+.import-resultat-liste code {
+  color: var(--gold);
+}
+
+.import-dropzone {
+  border: 1px dashed var(--line-strong);
+  border-radius: 8px;
+  padding: 1.6rem 1rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ── Utskrift-siden ───────────────────────────────────────────────────── */
+
+.utskrift-info {
+  text-align: center;
+  padding: 0.6rem 0 0.2rem;
+}
+
+.utskrift-info-navn {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  color: var(--pergament);
+}
+
+.utskrift-info-tall {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+.utskrift-tom-tilstand {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem 1rem;
+}
+
+#utskrift-oppskrift-velger {
+  flex: 1 1 auto;
+  width: auto;
+  max-width: 24rem;
 }

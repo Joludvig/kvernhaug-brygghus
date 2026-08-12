@@ -158,9 +158,15 @@ def render_card_html(
 
     logo_block = ""
     if logo_b64:
+        # Emblemet byttet fra liggende (1125:900) til stående (1024:1536)
+        # sideforhold i KBH Emblem-runden -- ved uendret height:300px ville
+        # bredden (dermed visuell dominans) krympet fra ~375px til ~200px.
+        # Height løftet til 400px for å bevare tilsvarende dominans
+        # (~267px bredde), samme prinsipp som web/css/style.css
+        # .identitet-logo (height-styrt sizing for det stående emblemet).
         logo_block = (
             f"<img src='data:image/png;base64,{logo_b64}' "
-            f"style='height:300px; width:auto; display:block; "
+            f"style='height:400px; width:auto; display:block; "
             f"margin:6px auto 16px auto; opacity:0.95;'>"
         )
 

@@ -7,11 +7,44 @@
 <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-<header>
-  <div class="brand-mark">🍺</div>
-  <h1>Hjelp &amp; bryggehåndbok</h1>
-  <p class="motto">Brygg med ild. Del med ære.</p>
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel">📖 Hjelp &amp; bryggehåndbok</h1>
+  </div>
 </header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kvernhaug_logo_kompakt.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke">🍺 Oppskriftsbygger</a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke">📂 Mine oppskrifter</a>
+  <a href="../importer.html" class="sidemeny-lenke">📥 Importer oppskrift</a>
+  <a href="../utskrift.html" class="sidemeny-lenke">🖨️ Utskrift</a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv">📖 Hjelp / Bryggehåndbok</a>
+</nav>
 
 <nav class="hjelp-side-nav">
   <a href="index.html" class="aktiv">📖 Hjelp &amp; FAQ</a>
@@ -19,13 +52,21 @@
   <a href="bryggemetoder.html">⚗️ Bryggemetoder</a>
   <a href="utstyr-brewzilla.html">🛠️ Utstyr: BrewZilla</a>
 </nav>
-<a class="hjelp-tilbake" href="../index.html">← Tilbake til oppskriftsbyggeren</a>
 
-<main class="hjelp-side-main">
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden">
+    <a href="#kom-i-gang">A. Kom i gang</a>
+    <a href="#forsta-oppskriften">B. Forstå oppskriften</a>
+    <a href="#ingredienser">C. Ingredienser</a>
+    <a href="#bryggeprosess">D. Bryggeprosess</a>
+    <a href="#faq">E. Spørsmål &amp; svar</a>
+  </nav>
+
+  <main class="hjelp-side-main">
   <p class="hjelp-innledning">
     Et oppslagsverk for deg som bygger en oppskrift i Kvernhaug Brygghus.
     Alt her er skrevet for å svare på to spørsmål: hva betyr dette, og
-    hvorfor bryr jeg meg? Bruk navigasjonen over til å hoppe rundt, eller
+    hvorfor bryr jeg meg? Bruk innholdsmenyen til å hoppe rundt, eller
     bla nedover som en vanlig håndbok.
   </p>
 
@@ -52,7 +93,7 @@
 
     <article class="hjelp-artikkel" id="aapne-importere">
       <h3>Åpne eller importere en oppskrift</h3>
-      <p>Klikk navnet på en lagret oppskrift under "Mine lagrede oppskrifter" for å laste den inn. Har du en oppskrift eksportert som JSON-fil (fra denne siden, eller fra noen andre), bruk "⬆️ Importer (JSON)" for å laste den inn i skjemaet — inkludert eventuelle egendefinerte ingredienser.</p>
+      <p>Klikk "Åpne i byggeren" på en lagret oppskrift under "Mine oppskrifter" for å laste den inn. Har du en oppskrift som JSON-fil, eller bare limt inn som ren tekst (f.eks. "5 kg Maris Otter", "20 g Magnum 60 min"), bruk "📥 Importer oppskrift" i menyen — inkludert eventuelle egendefinerte ingredienser.</p>
     </article>
 
     <article class="hjelp-artikkel" id="skrive-ut-intro">
@@ -110,6 +151,12 @@
       <h3>Alfasyre</h3>
       <p>Alfasyre (α-syre) er prosentandelen bitterstoffer i humlen. Høyere alfasyre gir mer bitterhet per gram humle.</p>
       <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Alfasyre-innholdet i en gitt humlesort varierer normalt noe fra sesong til sesong og pose til pose — det som faktisk står trykt på <em>din</em> pose kan avvike fra bibliotekets typiske verdi. Juster gjerne alfa-feltet til det som faktisk står på posen din for et mer presist IBU-anslag; se <a href="#faq-produsentdata">FAQ</a>.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="effektivitet">
+      <h3>Brygghuseffektivitet</h3>
+      <p>Effektivitet er hvor stor andel av maltens sukkerpotensial du faktisk får ut i vørteren på ditt eget utstyr og med din egen teknikk — 75 % er et vanlig utgangspunkt, men det varierer fra bryggeri til bryggeri.</p>
+      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Effektiviteten går rett inn i <a href="#og">OG</a>-beregningen. Bryggelærling skjuler feltet og bruker 75 % som estimat, slik at du kan komme i gang uten å måtte vite dette først. I Bryggmester kan du justere det etter egne, målte brygg — se også <a href="#faq-traff-ikke-og">FAQ</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="maltpotensial">
@@ -302,6 +349,9 @@
   <p class="hjelp-innledning">
     Fant du ikke svar på det du lurte på? Håndboken utvides fortløpende.
   </p>
-</main>
+  </main>
+</div>
+
+<script src="../js/chrome.js"></script>
 </body>
 </html>
