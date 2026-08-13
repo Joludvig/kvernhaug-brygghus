@@ -9,7 +9,26 @@ const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
 let maltData = {}, humleData = {}, gjaerData = {};
 let sisteTreff = null;
 
+// Runde 13A -- samme beskyttelse som byggerens "Åpne oppskriftsfil"
+// (app.js::apneOppskriftsfil): bekreft før en eksisterende, meningsfull
+// aktiv kladd overskrives. Leser AKTIV_KLADD_NOKKEL direkte (denne siden
+// har ingen egen live DOM-oppskrift) -- samme objektform som
+// samleOppskrift() alltid skriver dit, se oppskriftHarInnhold() i
+// kbhrecipe.js. Gjelder BÅDE fil- og tekstimport, som begge går via
+// denne ene hand-off-funksjonen.
+function _aktivKladdHarInnhold() {
+  try {
+    return oppskriftHarInnhold(JSON.parse(localStorage.getItem(AKTIV_KLADD_NOKKEL)));
+  } catch {
+    return false;
+  }
+}
+
 function apneIByggeren(oppskrift) {
+  if (_aktivKladdHarInnhold()) {
+    const ok = confirm("Åpne denne oppskriften? Den aktive oppskriften blir erstattet.");
+    if (!ok) return;
+  }
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
   window.location.href = "index.html";
 }
@@ -17,14 +36,18 @@ function apneIByggeren(oppskrift) {
 // ─── Fil-import ─────────────────────────────────────────────────────────
 
 function importerJsonFil(fil) {
+  const status = document.getElementById("importer-fil-status");
   const reader = new FileReader();
   reader.onload = () => {
-    try {
-      const oppskrift = JSON.parse(reader.result);
-      apneIByggeren(oppskrift);
-    } catch {
-      document.getElementById("importer-fil-status").textContent = "Kunne ikke lese filen — er det en gyldig, eksportert oppskrift-JSON?";
+    const resultat = parseKbhRecipeInnhold(reader.result);
+    if (!resultat.ok) {
+      status.textContent = resultat.melding;
+      return;
     }
+    apneIByggeren(resultat.oppskrift);
+  };
+  reader.onerror = () => {
+    status.textContent = "Kunne ikke lese filen.";
   };
   reader.readAsText(fil);
 }

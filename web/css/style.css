@@ -1022,6 +1022,24 @@ textarea:focus,
   color: var(--moss);
 }
 
+/* Runde 13 -- "Avansert: rå JSON" nedgradert til en lukket, sammenleggbar
+   seksjon under den primære .kbhrecipe-flyten (samme visuelle mønster
+   som .stil-detaljer summary), i stedet for en likeverdig hovedknapp. */
+.avansert-eksport {
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.avansert-eksport summary {
+  cursor: pointer;
+  color: var(--gold);
+  padding: 0.3rem 0;
+}
+
+.avansert-eksport .knapperad {
+  margin-top: 0.5rem;
+}
+
 /* ── Knapper ─────────────────────────────────────────────────────────── */
 
 .knapperad {

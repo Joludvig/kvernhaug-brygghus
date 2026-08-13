@@ -150,10 +150,22 @@
     <section class="panel no-print" id="handling-panel">
       <h2>💾 Lagre og eksporter</h2>
       <div class="knapperad">
+        <button type="button" id="ny-oppskrift-knapp">🆕 Ny oppskrift</button>
         <button type="button" id="lagre-knapp">💾 Lagre oppskrift</button>
-        <button type="button" id="eksporter-knapp">⬇️ Eksporter (JSON)</button>
+        <button type="button" id="lagre-fil-knapp">📄 Lagre oppskriftsfil (.kbhrecipe)</button>
+        <button type="button" id="apne-fil-knapp">📂 Åpne oppskriftsfil</button>
+        <input type="file" id="apne-fil-input" accept=".kbhrecipe,.json,application/json" hidden>
       </div>
-      <p class="hjelpetekst" id="lagre-status"></p>
+      <p class="hjelpetekst" id="lagre-status" aria-live="polite"></p>
+      <p class="hjelpetekst">Lagrede oppskrifter ligger lokalt i denne nettleseren. Vil du ta backup eller flytte en oppskrift til en annen enhet, kan du lagre den som en <code>.kbhrecipe</code>-fil og åpne den igjen her eller under «📥 Importer oppskrift».</p>
+
+      <details class="avansert-eksport">
+        <summary>Avansert: rå JSON</summary>
+        <div class="knapperad">
+          <button type="button" id="eksporter-knapp">⬇️ Eksporter rå JSON</button>
+        </div>
+        <p class="hjelpetekst">Kun til debugging/videre bearbeiding — bruk «Lagre oppskriftsfil» over til vanlig lagring og backup.</p>
+      </details>
 
       <div class="skaler-rad mester-only" id="skaler-rad">
         <span class="skaler-naavaerende" id="skaler-naavaerende">Nåværende batch: 20 L</span>
@@ -296,6 +308,7 @@
 <script src="js/veiledning.js"></script>
 <script src="js/help.js"></script>
 <script src="js/recipe_engine.js"></script>
+<script src="js/kbhrecipe.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

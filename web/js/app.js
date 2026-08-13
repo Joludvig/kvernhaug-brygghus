@@ -953,6 +953,74 @@ function eksporterJson() {
   URL.revokeObjectURL(url);
 }
 
+// ─── Portabel .kbhrecipe-fil (Runde 13) ──────────────────────────────────
+// Primær lagrings-/delingsflyt for vanlige brukere -- se js/kbhrecipe.js
+// for selve filformatet/parsingen. Rå JSON (eksporterJson over) er kun
+// beholdt som et nedgradert "Avansert"-alternativ i markup-et.
+
+function lagreOppskriftsfil() {
+  const oppskrift = samleOppskrift();
+  lastNedKbhRecipeFil(oppskrift);
+  document.getElementById("lagre-status").textContent =
+    `Lastet ned "${tryggFilnavn(oppskrift.navn)}.kbhrecipe". Bruk denne filen som backup eller for å flytte oppskriften til en annen enhet.`;
+}
+
+// Blank oppskrift -- SAMME autoritative default-form som init() sin
+// "ingen aktiv kladd"-oppstart (leggTilMaltRad()/leggTilHumleRad() med
+// tomme rader, batch-volum 20 L, effektivitet 75 %, ingen gjær/stil).
+// Ingen parallell "tom oppskrift"-modell -- kun et eksplisitt kall til
+// den eksisterende _gjenopprettOppskrift()-kontrakten.
+function _blankOppskrift() {
+  return {
+    navn: "", brygger: "", bryggeri: "", notater: "",
+    volum: 20, effektivitet: 75,
+    malt: [], humle: [],
+    gjaerId: null, gjaerCustom: null, attenuationOverride: 75,
+    valgtStil: null,
+  };
+}
+
+// Runde 13A -- eksplisitt "start på nytt"-handling. Brygger/bryggeri er
+// brukerpreferanser (se forhandsutfyllIdentitetsPreferanse()), ikke
+// oppskriftsdata -- de nullstilles derfor av _gjenopprettOppskrift()
+// (som _blankOppskrift() ber om) og fylles umiddelbart inn igjen fra
+// IDENTITET_NOKKEL, akkurat som ved en helt fersk sideinnlasting uten
+// aktiv kladd. Bekrefter kun dersom aktiv oppskrift faktisk har
+// meningsfullt innhold (oppskriftHarInnhold(), se kbhrecipe.js).
+function nyOppskrift() {
+  if (oppskriftHarInnhold(samleOppskrift())) {
+    const ok = confirm("Vil du starte en ny oppskrift? Endringer i den aktive oppskriften som ikke er lagret eller eksportert vil forsvinne.");
+    if (!ok) return;
+  }
+  _gjenopprettOppskrift(_blankOppskrift());
+  forhandsutfyllIdentitetsPreferanse();
+  beregnOgVisResultat();
+  document.getElementById("skaler-maal-volum").value = document.getElementById("batch-volum").value;
+  document.getElementById("lagre-status").textContent = "Ny, tom oppskrift.";
+}
+
+function apneOppskriftsfil(fil) {
+  const status = document.getElementById("lagre-status");
+  const reader = new FileReader();
+  reader.onload = () => {
+    const resultat = parseKbhRecipeInnhold(reader.result);
+    if (!resultat.ok) {
+      status.textContent = resultat.melding;
+      return;
+    }
+    if (oppskriftHarInnhold(samleOppskrift())) {
+      const ok = confirm("Åpne denne oppskriften? Den aktive oppskriften blir erstattet.");
+      if (!ok) return;
+    }
+    _gjenopprettOppskrift(resultat.oppskrift);
+    status.textContent = "Oppskriften er åpnet.";
+  };
+  reader.onerror = () => {
+    status.textContent = "Kunne ikke lese filen.";
+  };
+  reader.readAsText(fil);
+}
+
 async function init() {
   await lastData();
   initModus();
@@ -1009,8 +1077,16 @@ async function init() {
   });
   forhandsutfyllIdentitetsPreferanse();
 
+  document.getElementById("ny-oppskrift-knapp").addEventListener("click", nyOppskrift);
   document.getElementById("lagre-knapp").addEventListener("click", lagreOppskrift);
   document.getElementById("eksporter-knapp").addEventListener("click", eksporterJson);
+  document.getElementById("lagre-fil-knapp").addEventListener("click", lagreOppskriftsfil);
+  const apneFilInput = document.getElementById("apne-fil-input");
+  document.getElementById("apne-fil-knapp").addEventListener("click", () => apneFilInput.click());
+  apneFilInput.addEventListener("change", () => {
+    if (apneFilInput.files[0]) apneOppskriftsfil(apneFilInput.files[0]);
+    apneFilInput.value = "";
+  });
   document.getElementById("skaler-knapp").addEventListener("click", skalerOppskrift);
   document.getElementById("malt-bruk-prosent-knapp").addEventListener("click", brukMaltProsentfordeling);
 

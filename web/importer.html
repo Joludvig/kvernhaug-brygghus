@@ -59,14 +59,14 @@
 
   <section class="panel importer-fane-panel" id="import-fane-fil">
     <h2>Åpne oppskriftsfil</h2>
-    <p class="hjelpetekst">Har du en oppskrift eksportert som JSON — fra denne siden eller fra noen andre? Importer den her, så åpnes den direkte i byggeren.</p>
+    <p class="hjelpetekst">Har du en <code>.kbhrecipe</code>-fil — fra denne siden, fra Oppskriftsbyggerens "Lagre oppskriftsfil", eller fra noen andre? Velg den her, så åpnes den direkte i byggeren. Eldre, rå oppskrifts-JSON støttes fortsatt.</p>
     <div class="import-dropzone">
       <div class="knapperad">
-        <button type="button" id="importer-fil-knapp">⬆️ Velg fil (JSON)</button>
+        <button type="button" id="importer-fil-knapp">⬆️ Velg en .kbhrecipe-fil</button>
       </div>
-      <input type="file" id="importer-fil" accept="application/json" hidden>
+      <input type="file" id="importer-fil" accept=".kbhrecipe,.json,application/json" hidden>
     </div>
-    <p class="hjelpetekst" id="importer-fil-status"></p>
+    <p class="hjelpetekst" id="importer-fil-status" aria-live="polite"></p>
   </section>
 
   <section class="panel importer-fane-panel" id="import-fane-tekst" hidden>
@@ -107,6 +107,7 @@
 
 <script src="js/chrome.js"></script>
 <script src="js/recipe_engine.js"></script>
+<script src="js/kbhrecipe.js"></script>
 <script src="js/recipe_importer.js"></script>
 <script src="js/importer_page.js"></script>
 </body>
