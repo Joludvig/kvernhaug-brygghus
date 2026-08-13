@@ -4,6 +4,18 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 14 — Norsk/engelsk UI (2026-08-14)
+
+Vanilla NO/EN-støtte (`js/i18n.js`) på tvers av hele app-UI-et — bygger, Mine oppskrifter, Importer, Utskrift, de fire print-dokumentene, first-run modusdialog og hjelpeknapper/tooltips. Ingen npm, ingen build-steg, ingen tredjeparts i18n-bibliotek. Norsk er fortsatt primærspråk/default; språkbytte skjer live (ingen reload) via en delt `kvernhaug:sprakendret`-hendelse, og lagres i en egen `kvernhaug_web_sprak`-nøkkel som aldri er del av selve oppskriftsdataen — se README "Språk (NO/EN)" for full arkitektur.
+
+Viktigste designbeslutning: stilnavnene i `data/bjcp_styles.json` bruker det norske displaynavnet som eneste, stabile identitet (ingen egen id-kolonne, hverken i web eller `modules/style_engine.py`). I stedet for en risikabel schema-migrering (som ville brutt bakoverkompatibilitet med allerede lagrede oppskrifter/`.kbhrecipe`-filer) ble dette løst som et rent visningslag — `valgtStil` og malt-/smakskategori-nøklene forblir norske og uendret i logikk/lagring/eksport; kun rendering (combobox, resultatpanel, stilmatch-tekst, smakshjul-akser, print) går gjennom en NO→EN-oppslagstabell.
+
+URL-strategi: klientside språkbytte på samme URL (ingen `/en/`), valgt fordi web ikke har noe build-steg — en egen `/en/`-filstruktur ville krevd enten manuell dobbel vedlikehold eller et nytt bygge-/pre-render-verktøy, begge utenfor omfanget denne runden. Kjent konsekvens: ingen egen, crawlbar engelsk URL for søkemotorer i V1 — en fremtidig, avgrenset pre-render-runde er anbefalt løsning, ikke påbegynt.
+
+`hjelp/`-sidenes navigasjon/chrome er oversatt; selve brødteksten (~900 linjer glossar/guider) er bevisst IKKE oversatt denne runden — et synlig varsel i UI-et sier fra om dette når `<html lang="en">`. Flagget som egen Runde 14B i `docs/ROADMAP.md`.
+
+Språkvelgeren (NO/EN-knappene i header/kompaktnav/uttrekksmeny) bruker lokale flaggbilder (`assets/ui/flag-no.webp`, `assets/ui/flag-gb.webp`) fremfor emoji — unicode-flaggemoji rendres upålitelig på tvers av OS/nettleser (bl.a. feil britisk flagg på enkelte plattformer). Bildene er godkjente, uendrede kopier av brukerens egne kildefiler, vist 20px bredt med bevart aspect ratio (`object-fit: contain`), rent dekorative (`alt=""`, `aria-hidden="true"`) siden NO/EN-teksten allerede dekker tilgjengelighet.
+
 ## Runde 13A — «Ny oppskrift» og trygg erstatning av aktiv kladd (2026-08-14)
 
 Manuell testing av Runde 13 viste at å åpne en `.kbhrecipe`-fil stille erstattet aktiv kladd uten varsel eller mulighet til å starte blankt. La til en «Ny oppskrift»-knapp (samme bootstrap-standardtilstand som ved førstegangsbesøk) og en delt `oppskriftHarInnhold()`-sjekk (`js/kbhrecipe.js`) som «Ny oppskrift», byggerens «Åpne oppskriftsfil» og Importer-sidens håndoverlevering alle bruker: bekreftelse spørres kun når aktiv kladd har reelt innhold, og aldri før en fil er validert. Brygger/Bryggeri ble bevisst holdt utenfor «har innhold»-sjekken — de er en lett brukerpreferanse (`kvernhaug_web_identitet`) i tillegg til å være del av selve oppskriften, og forhåndsutfylles på nytt rett etter nullstilling.

@@ -52,10 +52,12 @@ function velgOppskrift(valgtVerdi) {
   sisteBeregning = beregnOppskrift(valgtOppskrift, maltData, humleData, gjaerData, bjcpStyles);
   if (oppdaterSmakshjul) oppdaterSmakshjul(sisteBeregning.flavorProfile);
 
-  document.getElementById("utskrift-info-navn").textContent = valgtOppskrift.navn || "Uten navn";
-  document.getElementById("utskrift-info-tall").textContent =
-    `OG ${sisteBeregning.og.toFixed(3)} · FG ${sisteBeregning.fg.toFixed(3)} · ` +
-    `ABV ${sisteBeregning.abv.toFixed(1).replace(".", ",")} % · IBU ${Math.round(sisteBeregning.ibu)} · EBC ${Math.round(sisteBeregning.ebc)}`;
+  document.getElementById("utskrift-info-navn").textContent = valgtOppskrift.navn || t("identitet.utenNavn");
+  document.getElementById("utskrift-info-tall").textContent = t("utskrift.infoTall", {
+    og: sisteBeregning.og.toFixed(3), fg: sisteBeregning.fg.toFixed(3),
+    abv: sisteBeregning.abv.toFixed(1).replace(".", ","),
+    ibu: Math.round(sisteBeregning.ibu), ebc: Math.round(sisteBeregning.ebc),
+  });
 }
 
 function byggValgliste() {
@@ -78,7 +80,7 @@ function byggValgliste() {
   if (kladd) {
     const opt = document.createElement("option");
     opt.value = "__aktiv__";
-    opt.textContent = `${kladd.navn || "Uten navn"} (aktiv i byggeren, ikke lagret)`;
+    opt.textContent = t("utskrift.velgerAktivt", { navn: kladd.navn || t("identitet.utenNavn") });
     select.appendChild(opt);
   }
   for (const navn of Object.keys(lagrede)) {
@@ -115,5 +117,10 @@ async function init() {
   byggValgliste();
   initUtskriftKnapper();
 }
+
+window.addEventListener("kvernhaug:sprakendret", () => {
+  oppdaterSmakshjul = initSmakshjul(document.getElementById("smakshjul-container"), SMAKS_KATEGORIER);
+  byggValgliste();
+});
 
 init();

@@ -105,26 +105,26 @@ function parseKbhRecipeInnhold(tekst) {
     parsed = JSON.parse(tekst);
   } catch (e) {
     console.warn("kbhrecipe: JSON.parse feilet", e);
-    return { ok: false, melding: "Denne filen kunne ikke leses som en oppskriftsfil (ugyldig JSON)." };
+    return { ok: false, melding: t("kbhrecipe.ugyldigJson") };
   }
 
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    return { ok: false, melding: "Denne filen ser ikke ut som en gyldig Kvernhaug-oppskrift." };
+    return { ok: false, melding: t("kbhrecipe.ikkeGyldigOppskrift") };
   }
 
   if (parsed.format === KBHRECIPE_FORMAT) {
     const versjon = parsed.version;
     if (typeof versjon !== "number") {
-      return { ok: false, melding: "Denne oppskriftsfilen mangler versjonsinformasjon og kan ikke åpnes sikkert her." };
+      return { ok: false, melding: t("kbhrecipe.manglerVersjon") };
     }
     if (versjon > KBHRECIPE_VERSION) {
-      return { ok: false, melding: "Denne oppskriftsfilen er laget med en nyere versjon av Kvernhaug Brygghus og kan ikke åpnes sikkert her ennå." };
+      return { ok: false, melding: t("kbhrecipe.nyereVersjon") };
     }
     if (versjon !== KBHRECIPE_VERSION) {
-      return { ok: false, melding: "Denne oppskriftsfilen bruker en versjon av oppskriftsformatet som ikke støttes her." };
+      return { ok: false, melding: t("kbhrecipe.ustottetVersjon") };
     }
     if (!parsed.recipe || typeof parsed.recipe !== "object" || Array.isArray(parsed.recipe)) {
-      return { ok: false, melding: "Denne oppskriftsfilen mangler selve oppskriften." };
+      return { ok: false, melding: t("kbhrecipe.manglerOppskrift") };
     }
     return { ok: true, oppskrift: _normaliserOppskriftForImport(parsed.recipe), legacy: false };
   }
@@ -134,5 +134,5 @@ function parseKbhRecipeInnhold(tekst) {
     return { ok: true, oppskrift: _normaliserOppskriftForImport(parsed), legacy: true };
   }
 
-  return { ok: false, melding: "Denne filen ser ikke ut som en gyldig Kvernhaug-oppskrift." };
+  return { ok: false, melding: t("kbhrecipe.ikkeGyldigOppskrift") };
 }

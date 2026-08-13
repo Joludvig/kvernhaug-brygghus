@@ -9,26 +9,52 @@
 const _VEILEDNING_TYDELIG_TERSKEL = 0.5;
 
 const _FELT_LABEL = {
-  og: "Styrken i vørteren (OG)",
-  fg: "Restsødmen (FG)",
-  ibu: "Bitterheten (IBU)",
-  ebc: "Fargen (EBC)",
-  abv: "Alkoholstyrken (ABV)",
+  no: {
+    og: "Styrken i vørteren (OG)",
+    fg: "Restsødmen (FG)",
+    ibu: "Bitterheten (IBU)",
+    ebc: "Fargen (EBC)",
+    abv: "Alkoholstyrken (ABV)",
+  },
+  en: {
+    og: "Wort gravity (OG)",
+    fg: "Residual sweetness (FG)",
+    ibu: "Bitterness (IBU)",
+    ebc: "Color (EBC)",
+    abv: "Alcohol strength (ABV)",
+  },
 };
 
 const _FELT_TIPS = {
-  ibu: { under: "mer bitterhumle (lengre koketid eller høyere alfasyre)", over: "mindre bitterhumle eller kortere koketid" },
-  ebc: { under: "litt mer spesialmalt (karamell/røstet)", over: "litt mindre spesialmalt (karamell/røstet)" },
-  og: { under: "mer malt eller høyere brygghuseffektivitet", over: "mindre malt eller lavere brygghuseffektivitet" },
-  fg: { under: "en gjær med lavere utgjæring", over: "en gjær med høyere utgjæring" },
-  abv: { under: "mer malt/høyere OG", over: "mindre malt/lavere OG" },
+  no: {
+    ibu: { under: "mer bitterhumle (lengre koketid eller høyere alfasyre)", over: "mindre bitterhumle eller kortere koketid" },
+    ebc: { under: "litt mer spesialmalt (karamell/røstet)", over: "litt mindre spesialmalt (karamell/røstet)" },
+    og: { under: "mer malt eller høyere brygghuseffektivitet", over: "mindre malt eller lavere brygghuseffektivitet" },
+    fg: { under: "en gjær med lavere utgjæring", over: "en gjær med høyere utgjæring" },
+    abv: { under: "mer malt/høyere OG", over: "mindre malt/lavere OG" },
+  },
+  en: {
+    ibu: { under: "more bittering hops (longer boil time or higher alpha acid)", over: "less bittering hops or a shorter boil time" },
+    ebc: { under: "a bit more specialty malt (caramel/roasted)", over: "a bit less specialty malt (caramel/roasted)" },
+    og: { under: "more malt or higher brewhouse efficiency", over: "less malt or lower brewhouse efficiency" },
+    fg: { under: "a yeast with lower attenuation", over: "a yeast with higher attenuation" },
+    abv: { under: "more malt/higher OG", over: "less malt/lower OG" },
+  },
 };
 
 const _KONSEPT_ADJEKTIV = {
-  og: { over: "sterkere", under: "svakere" },
-  ebc: { over: "mørkere", under: "lysere" },
-  ibu: { over: "mer bitter", under: "mindre bitter" },
-  fg: { over: "fyldigere", under: "tørrere" },
+  no: {
+    og: { over: "sterkere", under: "svakere" },
+    ebc: { over: "mørkere", under: "lysere" },
+    ibu: { over: "mer bitter", under: "mindre bitter" },
+    fg: { over: "fyldigere", under: "tørrere" },
+  },
+  en: {
+    og: { over: "stronger", under: "weaker" },
+    ebc: { over: "darker", under: "lighter" },
+    ibu: { over: "more bitter", under: "less bitter" },
+    fg: { over: "fuller-bodied", under: "drier" },
+  },
 };
 
 function _feltOmrade(felt, lo, hi) {
@@ -39,33 +65,39 @@ function _feltOmrade(felt, lo, hi) {
 
 function _feltNivaOgSetning(felt, avvik, stilNavn) {
   if (!avvik.retning) return { niva: "innenfor", tekst: null };
+  const spraak = gjeldendeSprak();
   const niva = avvik.normalisert >= _VEILEDNING_TYDELIG_TERSKEL ? "tydelig" : "litt";
-  const retningsord = avvik.retning === "under" ? "lavere" : "høyere";
+  const nivaOrd = t(niva === "tydelig" ? "veiledning.nivaTydelig" : "veiledning.nivaLitt");
+  const retningsord = t(avvik.retning === "under" ? "veiledning.retningLavere" : "veiledning.retningHoyere");
 
-  let tekst = `${_FELT_LABEL[felt]} er ${niva} ${retningsord} enn typisk for ${stilNavn}. Vanlig område: ${_feltOmrade(felt, avvik.lo, avvik.hi)}.`;
-  if (niva === "tydelig" && _FELT_TIPS[felt]) {
-    tekst += ` Tips: ${_FELT_TIPS[felt][avvik.retning]} vil trekke oppskriften nærmere stilen.`;
+  let tekst = t("veiledning.linje", {
+    label: _FELT_LABEL[spraak][felt], niva: nivaOrd, retning: retningsord,
+    stil: stilVisningsnavn(stilNavn), omrade: _feltOmrade(felt, avvik.lo, avvik.hi),
+  });
+  if (niva === "tydelig" && _FELT_TIPS[spraak][felt]) {
+    tekst += t("veiledning.tips", { tips: _FELT_TIPS[spraak][felt][avvik.retning] });
   }
   return { niva, tekst };
 }
 
 function _listeMedOg(liste) {
   if (liste.length === 1) return liste[0];
-  return `${liste.slice(0, -1).join(", ")} og ${liste[liste.length - 1]}`;
+  return `${liste.slice(0, -1).join(", ")} ${t("veiledning.listeOg")} ${liste[liste.length - 1]}`;
 }
 
 function _byggSamletOppsummering(feltAvvik, stilNavn) {
   const antallAvvikende = ["og", "fg", "ibu", "ebc", "abv"].filter((f) => feltAvvik[f].retning).length;
   if (antallAvvikende < 2) return null;
 
+  const spraak = gjeldendeSprak();
   const adjektiver = [];
   for (const felt of ["og", "ebc", "ibu", "fg"]) {
     const a = feltAvvik[felt];
-    if (a.retning) adjektiver.push(_KONSEPT_ADJEKTIV[felt][a.retning]);
+    if (a.retning) adjektiver.push(_KONSEPT_ADJEKTIV[spraak][felt][a.retning]);
   }
   if (adjektiver.length < 2) return null;
 
-  return `Oppskriften din er ${_listeMedOg(adjektiver)} enn typisk for ${stilNavn}. Se «Nærliggende stiler» under for et konkret alternativ som kan passe bedre.`;
+  return t("veiledning.samlet", { adjektiver: _listeMedOg(adjektiver), stil: stilVisningsnavn(stilNavn) });
 }
 
 // stilEntry: ett element fra sisteStilAnalyse.stil_liste (har .felt_avvik)

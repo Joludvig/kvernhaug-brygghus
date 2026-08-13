@@ -37,6 +37,7 @@ Fem sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny (
 - **Ny oppskrift** — "🆕 Ny oppskrift" i Lagre og eksporter-panelet nullstiller byggeren til samme blanke starttilstand som ved førstegangsbesøk (også malt-%-låser, mål-IBU-arbeidsfelt og skaleringsmål), og forhåndsutfyller Brygger/Bryggeri fra den lagrede identitetspreferansen. Spør om bekreftelse først dersom aktiv kladd har meningsfullt innhold — se "Aktiv kladd" under.
 - Importere fra **Importer oppskrift**-siden — `.kbhrecipe`-/JSON-fil eller limt inn tekst (fuzzy-matches mot bibliotekene, forhåndsvisning før noe legges inn) — se "Tekstimport" under.
 - **Fire egne utskriftsdokumenter**: **Oppskriftsark**, **Handleliste** (nøytral), **Bryggedagsark** (arbeidsark med sjekkliste) og **Bryggelogg** (papirskjema). A4-vennlige, lys bakgrunn/mørk tekst uansett skjermtema. Brukerens identitet er hoveddokumentet; Kvernhaug Brygghus vises kun diskret i en fotnote.
+- **Norsk/engelsk UI** (NO er standard) — hele app-grensesnittet (bygger, Mine oppskrifter, Importer, Utskrift, print-dokumentene) kan byttes live uten reload eller tap av data. Se "Språk (NO/EN)" under.
 
 ## Hva den bevisst ikke har
 
@@ -63,6 +64,8 @@ web/
   js/veiledning.js       Vennlig tre-nivås stilveiledning -- web-only lag oppå style.js, samme tall
   js/combobox.js        Gjenbrukbar søkbar dropdown (malt/humle/gjær/stil), støtter valgfri gruppering (malt)
   js/help.js             Delt hjelpepopover ("?"-knapper) + "Les mer"-lenker -- web-only, ingen Python-motstykke
+  js/i18n.js              NO/EN-motor: t()/settSprak()/gjeldendeSprak(), data-i18n-skanning, stil-/kategori-/
+                          maltgruppe-visningslag -- lastes FØRST på alle sider, se "Språk (NO/EN)" under
   js/recipe_engine.js    DOM-fri beregningsorkestrering (effektivt datasett, full beregning, tomt-stilmatch-sjekk) --
                           delt av app.js OG utskrift_page.js, se "Arkitektur: recipe_engine.js" under
   js/kbhrecipe.js         Portabel .kbhrecipe-fil: format/versjon/eksport/parse/filnavn -- delt av app.js OG
@@ -82,11 +85,31 @@ web/
                                           for web OG desktop, selv om desktop ikke bruker den i dag)
   assets/branding/kbh_emblem.png        Fullt emblem i identitetsblokken, web-optimert kopi av felles master
                                           assets/branding/kbh_emblem_master.png (delt med desktop)
+  assets/ui/flag-no.webp                 Norsk flagg, språkvelger (Runde 14) -- uendret kopi av godkjent kildefil
+  assets/ui/flag-gb.webp                 Union Jack, språkvelger (Runde 14) -- uendret kopi av godkjent kildefil
   hjelp/index.html        Hjelp & bryggehåndbok -- how-to/FAQ/oppslagsverk, mål for "Les mer"-lenkene
   hjelp/bryggedag.html    Generell bryggedagsguide, 15 steg
   hjelp/bryggemetoder.html   BIAB / all-grain / alt-i-ett -- strukturert for enkel utvidelse
   hjelp/utstyr-brewzilla.html   Første utstyrsspesifikke guide (og uformell mal for flere)
 ```
+
+## Språk (NO/EN)
+
+Runde 14. Vanilla NO/EN-støtte i `js/i18n.js` — ingen npm, ingen build-steg, ingen tredjeparts i18n-bibliotek, samme mønster som resten av web-versjonen. Norsk er primærspråk/default.
+
+**Arkitektur**: `js/i18n.js` er lastet FØRST på hver side (før `chrome.js`) og eksponerer globalt: `t(nøkkel, params)` (enkel `{param}`-substitusjon, ingen pluralregler), `gjeldendeSprak()`, `settSprak(kode)`, `applyI18n(root)`. Statisk HTML dekoreres med `data-i18n="nøkkel"` (setter `textContent`) og `data-i18n-placeholder`/`data-i18n-aria-label`/`data-i18n-title`/`data-i18n-alt` (setter tilsvarende attributt) — anvendes automatisk på `DOMContentLoaded` og igjen ved språkbytte. Dynamiske strenger (statusmeldinger, `confirm()`-dialoger, stilmatch-/veiledningstekst, print-dokumentene) kaller `t()` direkte i JS i stedet for å hardkode norsk. Alle tekster ligger i én flat, dobbel `TEKSTER = { no: {...}, en: {...} }`-ordbok i `i18n.js`.
+
+**Legg til en ny UI-streng**: gi den en dotted-namespace-nøkkel (`side.seksjon.ting`), legg den til i BÅDE `no`- og `en`-objektet i `i18n.js`, og referer den via `data-i18n="nøkkel"` i HTML eller `t("nøkkel")` i JS. Ingen andre filer trenger å vite om det.
+
+**Språkbytte live** (`settSprak()`): oppdaterer `localStorage`, `<html lang>`, kjører `applyI18n()` på nytt, og sender ut en `window`-hendelse (`kvernhaug:sprakendret`) som hver side lytter på for å re-rendre sine egne dynamiske deler (byggerens resultater/combobox-lister, Mine oppskrifter sin liste, Utskrift sin oppskriftsvelger + smakshjul-etiketter). Ingen reload, ingen tap av arbeid.
+
+**Språkpreferanse**: egen, liten nøkkel (`kvernhaug_web_sprak`) — ALDRI en del av `recipe`-objektet, `.kbhrecipe`-filer, `localStorage`-lagrede oppskrifter eller aktiv kladd. En norsk oppskrift vises like fullt i engelsk UI og omvendt; å bytte språk endrer aldri malt/humle/gjær/stilidentitet/tall. Har brukeren ikke valgt språk før: `navigator.language` brukes som ett engangs-utgangspunkt (kun `en`-prefiks gir engelsk, alt annet inkl. `nb`/`nn` gir norsk) — ingen IP/geolocation, ingen serverlogikk, og brukeren kan alltid bytte manuelt via NO/EN-knappene i header/kompaktnav/uttrekksmeny.
+
+**Stil-/kategori-/maltgruppenavn — visningslag, ikke ny identitet**: `data/bjcp_styles.json` bruker det norske displaynavnet som eneste, stabile identitet (dict-nøkkel = `oppskrift.valgtStil` = combobox-verdi — ingen egen id-kolonne finnes, verken i web eller i `modules/style_engine.py`). En bred migrering til en separat stabil id ble vurdert og bevisst avvist denne runden — bakoverkompatibilitet med allerede lagrede oppskrifter/`.kbhrecipe`-filer veier tyngre enn en penere datamodell. Løsningen er i stedet et rent presentasjonslag i `i18n.js`: `STIL_NAVN_EN`/`SMAKS_KATEGORI_EN`/`MALT_GRUPPE_LABEL_EN` er NO→EN-oppslagstabeller brukt KUN av `stilVisningsnavn()`/`smaksKategoriVisning()`/`maltGruppeVisning()` ved rendering (combobox-labels, resultatpanel, stilmatch-/veiledningstekst, smakshjul-akser, print-dokumenter). `valgtStil`, `SMAKS_KATEGORIER` (flavor.js) og malt-gruppenes sorteringsrekkefølge forblir norske og uendret overalt i logikk, beregning, lagring og eksport. `style.js` sin scoringsmatematikk er ikke rørt — kun tekstmalene rundt `mangler`/`onsket_sensorisk`/`balanse`/`problemer` er gjort språkbevisste via `t()`.
+
+**URL-strategi (V1)**: klientside språkbytte på SAMME url — ingen `/en/`, ingen query-/hash-parameter, én statisk filstruktur. Valgt fordi web ikke har noe build-steg i dag (en `/en/`-katalog ville enten kreve manuell duplisering av all HTML — dobbel vedlikeholdsbyrde — eller et nytt bygge-/pre-render-verktøy, som var eksplisitt utenfor omfanget for denne runden), og fordi statisk hosting (Domeneshop) er enklest å drifte som én fil-struktur. **Kjent SEO-konsekvens**: søkemotorer kan ikke indeksere en egen, separat engelsk URL i V1 — kun norsk innhold er reelt crawlbart før JS kjører. Anbefalt fremtidig løsning: et eget, avgrenset pre-render-steg ved deploy (generer statiske `/en/*.html`-snapshots fra samme kilde/samme `TEKSTER`-ordbok, KUN kjørt av utvikleren ved publisering — ingen runtime-avhengighet, ingen endring av dagens enkle "last opp filer"-hosting) — egen fremtidig SEO-runde, ikke påbegynt.
+
+**Status**: full app-UI (bygger, Mine oppskrifter, Importer, Utskrift, print-dokumentene, first-run modusdialog, hjelpeknapper/tooltips) er NO/EN. `hjelp/`-sidenes navigasjon/chrome er oversatt; selve brødteksten (glossarer/guider, ~900 linjer) er foreløpig kun norsk — et synlig varsel (`.hjelp-sprak-merknad`, kun vist når `<html lang="en">`) sier tydelig fra om dette i UI-et. Full oversettelse av hjelpeinnholdet er en egen, avgrenset fremtidig runde (14B) — se `docs/ROADMAP.md`.
 
 ## Design og navigasjon
 

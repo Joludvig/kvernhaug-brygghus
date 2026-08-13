@@ -6,60 +6,72 @@
 <title>Utskrift — Kvernhaug Brygghus</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-i18n-tittel-nokkel="meta.utskrift.tittel">
 <header class="hero no-print">
-  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
   <div class="hero-scrim"></div>
   <div class="hero-topprad">
-    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
   <div class="hero-tekst">
     <div class="hero-navn">Kvernhaug Brygghus</div>
-    <h1 class="hero-sidetittel">🖨️ Utskrift</h1>
+    <h1 class="hero-sidetittel" data-i18n="meta.utskrift.sidetittel">🖨️ Utskrift</h1>
   </div>
 </header>
 
-<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)">
+<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
   <div class="kompaktnav-inner">
-    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
     <img class="kompaktnav-logo" src="assets/branding/kbh_icon_v1.png" alt="">
     <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
 </nav>
 
 <div class="sidemeny-bakteppe no-print"></div>
-<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon">
+<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
   <div class="sidemeny-topp">
     <img class="sidemeny-logo" src="assets/branding/kbh_icon_v1.png" alt="">
     <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
-    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
   </div>
-  <a href="index.html" class="sidemeny-lenke">🍺 Oppskriftsbygger</a>
-  <a href="mine-oppskrifter.html" class="sidemeny-lenke">📂 Mine oppskrifter</a>
-  <a href="importer.html" class="sidemeny-lenke">📥 Importer oppskrift</a>
-  <a href="utskrift.html" class="sidemeny-lenke aktiv">🖨️ Utskrift</a>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
+  <a href="index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="utskrift.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
   <hr class="sidemeny-skille">
-  <a href="hjelp/index.html" class="sidemeny-lenke">📖 Hjelp / Bryggehåndbok</a>
+  <a href="hjelp/index.html" class="sidemeny-lenke"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
 </nav>
 
 <main class="no-print">
   <section class="panel" id="utskrift-tom-tilstand" hidden>
-    <h2>Utskrift</h2>
+    <h2 data-i18n="utskrift.tomTittel">Utskrift</h2>
     <div class="utskrift-tom-tilstand">
-      <p>Du har ingen oppskrift å skrive ut ennå.</p>
-      <p class="hjelpetekst">Gå til <a href="index.html">Oppskriftsbyggeren</a> og lag en, eller åpne en lagret oppskrift under <a href="mine-oppskrifter.html">Mine oppskrifter</a>.</p>
+      <p data-i18n="utskrift.tomTekst1">Du har ingen oppskrift å skrive ut ennå.</p>
+      <p class="hjelpetekst" data-i18n="utskrift.tomTekst2">Gå til <a href="index.html">Oppskriftsbyggeren</a> og lag en, eller åpne en lagret oppskrift under <a href="mine-oppskrifter.html">Mine oppskrifter</a>.</p>
     </div>
   </section>
 
   <div id="utskrift-innhold">
     <section class="panel">
-      <h2>Velg oppskrift</h2>
+      <h2 data-i18n="utskrift.velgOppskriftTittel">Velg oppskrift</h2>
       <div class="felt-rad">
-        <label for="utskrift-oppskrift-velger">Oppskrift</label>
+        <label for="utskrift-oppskrift-velger" data-i18n="utskrift.oppskriftLabel">Oppskrift</label>
         <select id="utskrift-oppskrift-velger"></select>
       </div>
       <div class="utskrift-info">
@@ -69,13 +81,13 @@
     </section>
 
     <section class="panel">
-      <h2>Skriv ut</h2>
-      <p class="hjelpetekst">Hvert ark er sin egen, utskriftsvennlige side — ikke bare et utskrift av denne skjermen.</p>
+      <h2 data-i18n="utskrift.skrivUtTittel">Skriv ut</h2>
+      <p class="hjelpetekst" data-i18n="utskrift.skrivUtHjelpetekst">Hvert ark er sin egen, utskriftsvennlige side — ikke bare et utskrift av denne skjermen.</p>
       <div class="knapperad">
-        <button type="button" id="print-oppskriftsark-knapp">🖨️ Oppskriftsark</button>
-        <button type="button" id="print-handleliste-knapp">🖨️ Handleliste</button>
-        <button type="button" id="print-bryggedagsark-knapp">🖨️ Bryggedagsark</button>
-        <button type="button" id="print-bryggelogg-knapp">🖨️ Bryggelogg</button>
+        <button type="button" id="print-oppskriftsark-knapp" data-i18n="utskrift.knappOppskriftsark">🖨️ Oppskriftsark</button>
+        <button type="button" id="print-handleliste-knapp" data-i18n="utskrift.knappHandleliste">🖨️ Handleliste</button>
+        <button type="button" id="print-bryggedagsark-knapp" data-i18n="utskrift.knappBryggedagsark">🖨️ Bryggedagsark</button>
+        <button type="button" id="print-bryggelogg-knapp" data-i18n="utskrift.knappBryggelogg">🖨️ Bryggelogg</button>
       </div>
     </section>
   </div>
@@ -84,7 +96,7 @@
 <div id="smakshjul-container" hidden></div>
 
 <footer class="no-print">
-  <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server.</p>
+  <p data-i18n="footer.enkel">Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server.</p>
 </footer>
 
 <div id="utskrift-oppskriftsark" class="utskrift-dokument"></div>
@@ -92,6 +104,7 @@
 <div id="utskrift-bryggedagsark" class="utskrift-dokument"></div>
 <div id="utskrift-bryggelogg" class="utskrift-dokument"></div>
 
+<script src="js/i18n.js"></script>
 <script src="js/chrome.js"></script>
 <script src="js/calc.js"></script>
 <script src="js/flavor.js"></script>

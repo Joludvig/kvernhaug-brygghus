@@ -161,10 +161,10 @@ function parseRecipeText(text) {
   if (pctMaltListe.length) {
     const totalPct = pctMaltListe.reduce((sum, p) => sum + p.pct, 0);
     if (Math.abs(totalPct - 100.0) > 5.0) {
-      warnings.push(`Maltprosentene summerer til ${totalPct.toFixed(1)}% (forventet ~100%).`);
+      warnings.push(t("import.advarselProsentSum", { sum: totalPct.toFixed(1) }));
     }
     if (totalMaltKg === null) {
-      warnings.push("Mangler 'Total malt: X kg' — oppgi total maltmengde for å konvertere prosenter til kg.");
+      warnings.push(t("import.advarselManglerTotal"));
     } else {
       for (const p of pctMaltListe) {
         maltListe.push({ navn: p.navn, mengde: Math.round((p.pct / 100.0) * totalMaltKg * 1000) / 1000 });

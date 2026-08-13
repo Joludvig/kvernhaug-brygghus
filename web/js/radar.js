@@ -54,7 +54,7 @@ function initSmakshjul(container, kategorier) {
     viewBox: `0 0 ${_SMAKSHJUL_VIEWBOX} ${_SMAKSHJUL_VIEWBOX}`,
     class: "smakshjul-svg",
     role: "img",
-    "aria-label": "Smakshjul — sensorisk profil basert på valgte ingredienser",
+    "aria-label": t("builder.smaksprofil.ariaLabel"),
   });
 
   // Rutenett: konsentriske 18-kant-ringer i stedet for sirkler, slik at
@@ -89,7 +89,7 @@ function initSmakshjul(container, kategorier) {
       "dominant-baseline": baseline,
       class: "smakshjul-label",
     });
-    text.textContent = kat;
+    text.textContent = smaksKategoriVisning(kat);
     svg.appendChild(text);
   });
 

@@ -23,59 +23,72 @@
 </head>
 <body>
 <header class="hero">
-  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
   <div class="hero-scrim"></div>
   <div class="hero-topprad">
-    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
   <div class="hero-tekst">
     <div class="hero-navn">Kvernhaug Brygghus</div>
-    <h1 class="hero-sidetittel">🛠️ Utstyr: BrewZilla</h1>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</h1>
   </div>
 </header>
 
-<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)">
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
   <div class="kompaktnav-inner">
-    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
     <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
     <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
 </nav>
 
 <div class="sidemeny-bakteppe"></div>
-<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon">
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
   <div class="sidemeny-topp">
     <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
     <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
-    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
   </div>
-  <a href="../index.html" class="sidemeny-lenke">🍺 Oppskriftsbygger</a>
-  <a href="../mine-oppskrifter.html" class="sidemeny-lenke">📂 Mine oppskrifter</a>
-  <a href="../importer.html" class="sidemeny-lenke">📥 Importer oppskrift</a>
-  <a href="../utskrift.html" class="sidemeny-lenke">🖨️ Utskrift</a>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
   <hr class="sidemeny-skille">
-  <a href="index.html" class="sidemeny-lenke aktiv">📖 Hjelp / Bryggehåndbok</a>
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
 </nav>
 
 <nav class="hjelp-side-nav">
-  <a href="index.html">📖 Hjelp &amp; FAQ</a>
-  <a href="bryggedag.html">🗓️ En bryggedag</a>
-  <a href="bryggemetoder.html">⚗️ Bryggemetoder</a>
-  <a href="utstyr-brewzilla.html" class="aktiv">🛠️ Utstyr: BrewZilla</a>
+  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+  <a href="utstyr-brewzilla.html" class="aktiv" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
 </nav>
 
 <div class="hjelp-layout">
-  <nav class="hjelp-toc" aria-label="Innhold på denne siden">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
     <a href="#brewzilla-tekniske-data">Tekniske data</a>
     <a href="#brewzilla-alt-i-ett">Alt-i-ett-prinsippet</a>
     <a href="#brewzilla-ikke-verifisert">Ikke verifisert ennå</a>
   </nav>
 
   <main class="hjelp-side-main">
+  <p class="hjelp-sprak-merknad" data-i18n="hjelp.rundeSprakMerknad"></p>
   <p class="hjelp-innledning">
     Dette er en <strong>referanseguide</strong> for BrewZilla — først av
     flere planlagte utstyrsspesifikke guider — ikke en antakelse om at du
@@ -147,6 +160,7 @@
   </main>
 </div>
 
+<script src="../js/i18n.js"></script>
 <script src="../js/chrome.js"></script>
 </body>
 </html>

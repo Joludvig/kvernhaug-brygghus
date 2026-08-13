@@ -132,6 +132,9 @@ textarea {
   left: 0;
   right: 0;
   padding: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .hero-topprad .meny-knapp {
@@ -1354,6 +1357,73 @@ footer {
   body.modus-laerling .mester-only {
     display: none !important;
   }
+}
+
+/* ── Runde 14: språkvelger (NO/EN) ───────────────────────────────────── */
+.sprakvelger {
+  display: flex;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+}
+
+.sprakvelger-kompakt {
+  margin-left: auto;
+}
+
+.sprakvelger-drawer {
+  margin-bottom: 0.6rem;
+}
+
+.sprak-knapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 2.6rem;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(196, 154, 42, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.sprak-flagg {
+  width: 20px;
+  height: auto;
+  object-fit: contain;
+  line-height: 1;
+}
+
+.hero-topprad .sprak-knapp {
+  background: rgba(8, 5, 3, 0.65);
+  border-color: rgba(196, 154, 42, 0.7);
+  color: #fff;
+}
+
+.sprak-knapp.aktiv {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #201409;
+}
+
+/* Hjelpesidenes brødtekst er foreløpig kun norsk (Runde 14 Fase A) --
+   varselet vises kun når html[lang] er satt til engelsk av i18n.js. */
+.hjelp-sprak-merknad {
+  display: none;
+}
+
+html[lang="en"] .hjelp-sprak-merknad {
+  display: block;
+  margin: 0 0 1.2rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(196, 154, 42, 0.4);
+  border-radius: 8px;
+  background: rgba(196, 154, 42, 0.08);
+  font-size: 0.9rem;
 }
 
 /* ── Hjelpeknapper og popover ────────────────────────────────────────── */

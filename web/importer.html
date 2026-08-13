@@ -6,63 +6,75 @@
 <title>Importer oppskrift — Kvernhaug Brygghus</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-i18n-tittel-nokkel="meta.importer.tittel">
 <header class="hero">
-  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
   <div class="hero-scrim"></div>
   <div class="hero-topprad">
-    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
   <div class="hero-tekst">
     <div class="hero-navn">Kvernhaug Brygghus</div>
-    <h1 class="hero-sidetittel">📥 Importer oppskrift</h1>
+    <h1 class="hero-sidetittel" data-i18n="meta.importer.sidetittel">📥 Importer oppskrift</h1>
   </div>
 </header>
 
-<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)">
+<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
   <div class="kompaktnav-inner">
-    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
     <img class="kompaktnav-logo" src="assets/branding/kbh_icon_v1.png" alt="">
     <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
 </nav>
 
 <div class="sidemeny-bakteppe"></div>
-<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon">
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
   <div class="sidemeny-topp">
     <img class="sidemeny-logo" src="assets/branding/kbh_icon_v1.png" alt="">
     <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
-    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
   </div>
-  <a href="index.html" class="sidemeny-lenke">🍺 Oppskriftsbygger</a>
-  <a href="mine-oppskrifter.html" class="sidemeny-lenke">📂 Mine oppskrifter</a>
-  <a href="importer.html" class="sidemeny-lenke aktiv">📥 Importer oppskrift</a>
-  <a href="utskrift.html" class="sidemeny-lenke">🖨️ Utskrift</a>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
+  <a href="index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="importer.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
   <hr class="sidemeny-skille">
-  <a href="hjelp/index.html" class="sidemeny-lenke">📖 Hjelp / Bryggehåndbok</a>
+  <a href="hjelp/index.html" class="sidemeny-lenke"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
 </nav>
 
 <main>
   <section class="panel">
-    <h2>Importer oppskrift</h2>
-    <p class="hjelpetekst">Bygg oppskriften fra en fil eller fra limt inn tekst — begge veier sender deg videre til Oppskriftsbyggeren med feltene forhåndsutfylt.</p>
+    <h2 data-i18n="importer.tittel">Importer oppskrift</h2>
+    <p class="hjelpetekst" data-i18n="importer.intro">Bygg oppskriften fra en fil eller fra limt inn tekst — begge veier sender deg videre til Oppskriftsbyggeren med feltene forhåndsutfylt.</p>
 
-    <div class="modus-bryter" role="group" aria-label="Velg importmetode">
-      <button type="button" class="modus-knapp" id="import-modus-fil" aria-pressed="true">📄 Åpne fil</button>
-      <button type="button" class="modus-knapp" id="import-modus-tekst" aria-pressed="false">✏️ Lim inn tekst</button>
+    <div class="modus-bryter" role="group" aria-label="Velg importmetode" data-i18n-aria-label="importer.velgMetodeAriaLabel">
+      <button type="button" class="modus-knapp" id="import-modus-fil" aria-pressed="true" data-i18n="importer.modusFil">📄 Åpne fil</button>
+      <button type="button" class="modus-knapp" id="import-modus-tekst" aria-pressed="false" data-i18n="importer.modusTekst">✏️ Lim inn tekst</button>
     </div>
   </section>
 
   <section class="panel importer-fane-panel" id="import-fane-fil">
-    <h2>Åpne oppskriftsfil</h2>
-    <p class="hjelpetekst">Har du en <code>.kbhrecipe</code>-fil — fra denne siden, fra Oppskriftsbyggerens "Lagre oppskriftsfil", eller fra noen andre? Velg den her, så åpnes den direkte i byggeren. Eldre, rå oppskrifts-JSON støttes fortsatt.</p>
+    <h2 data-i18n="importer.filTittel">Åpne oppskriftsfil</h2>
+    <p class="hjelpetekst" data-i18n="importer.filHjelpetekst">Har du en <code>.kbhrecipe</code>-fil — fra denne siden, fra Oppskriftsbyggerens "Lagre oppskriftsfil", eller fra noen andre? Velg den her, så åpnes den direkte i byggeren. Eldre, rå oppskrifts-JSON støttes fortsatt.</p>
     <div class="import-dropzone">
       <div class="knapperad">
-        <button type="button" id="importer-fil-knapp">⬆️ Velg en .kbhrecipe-fil</button>
+        <button type="button" id="importer-fil-knapp" data-i18n="importer.filVelgKnapp">⬆️ Velg en .kbhrecipe-fil</button>
       </div>
       <input type="file" id="importer-fil" accept=".kbhrecipe,.json,application/json" hidden>
     </div>
@@ -70,41 +82,42 @@
   </section>
 
   <section class="panel importer-fane-panel" id="import-fane-tekst" hidden>
-    <h2>Lim inn oppskriftstekst</h2>
+    <h2 data-i18n="importer.tekstTittel">Lim inn oppskriftstekst</h2>
     <div class="import-format-hjelp">
-      <strong>Kg-format:</strong> <code>5 kg Maris Otter</code> · <code>300 g CaraMunich</code><br>
-      <strong>Prosentformat</strong> (krever total maltmengde): <code>Total malt: 6 kg</code> · <code>90% Maris Otter</code><br>
-      <strong>Humle</strong> (må ha koketid): <code>20 g Magnum 60 min</code><br>
-      <strong>Gjær:</strong> <code>Wyeast 1318 London Ale III</code>
+      <strong data-i18n="importer.formatKgLabel">Kg-format:</strong> <code>5 kg Maris Otter</code> · <code>300 g CaraMunich</code><br>
+      <strong data-i18n="importer.formatPctLabel">Prosentformat (krever total maltmengde):</strong> <code>Total malt: 6 kg</code> · <code>90% Maris Otter</code><br>
+      <strong data-i18n="importer.formatHumleLabel">Humle (må ha koketid):</strong> <code>20 g Magnum 60 min</code><br>
+      <strong data-i18n="importer.formatGjaerLabel">Gjær:</strong> <code>Wyeast 1318 London Ale III</code>
     </div>
-    <textarea id="import-tekst-input" rows="8" placeholder="Lim inn oppskriften her …"></textarea>
+    <textarea id="import-tekst-input" rows="8" placeholder="Lim inn oppskriften her …" data-i18n-placeholder="importer.tekstPlaceholder"></textarea>
     <div class="knapperad">
-      <button type="button" id="import-analyser-knapp">🔍 Analyser</button>
+      <button type="button" id="import-analyser-knapp" data-i18n="importer.analyserKnapp">🔍 Analyser</button>
     </div>
 
     <div id="import-forhandsvisning" hidden>
       <p class="import-tellinger" id="import-tellinger"></p>
       <div id="import-advarsler"></div>
 
-      <p class="import-resultat-tittel">Matchet</p>
+      <p class="import-resultat-tittel" data-i18n="importer.matchetTittel">Matchet</p>
       <ul class="import-resultat-liste" id="import-treff-liste"></ul>
 
       <div id="import-uklart-seksjon" hidden>
-        <p class="import-resultat-tittel">Ikke gjenkjent</p>
+        <p class="import-resultat-tittel" data-i18n="importer.ikkeGjenkjentTittel">Ikke gjenkjent</p>
         <ul class="import-resultat-liste" id="import-uklart-liste"></ul>
       </div>
 
       <div class="knapperad">
-        <button type="button" id="import-bekreft-knapp">✅ Legg inn i oppskriftsbygger</button>
+        <button type="button" id="import-bekreft-knapp" data-i18n="importer.bekreftKnapp">✅ Legg inn i oppskriftsbygger</button>
       </div>
     </div>
   </section>
 </main>
 
 <footer class="no-print">
-  <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server.</p>
+  <p data-i18n="footer.enkel">Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server.</p>
 </footer>
 
+<script src="js/i18n.js"></script>
 <script src="js/chrome.js"></script>
 <script src="js/recipe_engine.js"></script>
 <script src="js/kbhrecipe.js"></script>

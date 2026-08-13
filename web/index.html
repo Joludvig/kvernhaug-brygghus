@@ -6,52 +6,64 @@
 <title>Kvernhaug Brygghus — Oppskriftsbygger</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body data-i18n-tittel-nokkel="meta.builder.tittel">
 <header class="hero">
-  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal">
+  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
   <div class="hero-scrim"></div>
   <div class="hero-topprad">
-    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
   <div class="hero-tekst">
     <h1 class="hero-navn">Kvernhaug Brygghus</h1>
-    <p class="hero-motto">Brygg med ild. Del med ære.</p>
+    <p class="hero-motto" data-i18n="brand.motto">Brygg med ild. Del med ære.</p>
   </div>
 </header>
 
-<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)">
+<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
   <div class="kompaktnav-inner">
-    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
       <span></span><span></span><span></span>
     </button>
     <img class="kompaktnav-logo" src="assets/branding/kbh_icon_v1.png" alt="">
     <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
   </div>
 </nav>
 
 <div class="sidemeny-bakteppe no-print"></div>
-<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon">
+<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
   <div class="sidemeny-topp">
     <img class="sidemeny-logo" src="assets/branding/kbh_icon_v1.png" alt="">
     <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
-    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny">✕</button>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
   </div>
-  <a href="index.html" class="sidemeny-lenke aktiv">🍺 Oppskriftsbygger</a>
-  <a href="mine-oppskrifter.html" class="sidemeny-lenke">📂 Mine oppskrifter</a>
-  <a href="importer.html" class="sidemeny-lenke">📥 Importer oppskrift</a>
-  <a href="utskrift.html" class="sidemeny-lenke">🖨️ Utskrift</a>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <button type="button" class="sprak-knapp" data-sprak="no" aria-pressed="true"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</button>
+      <button type="button" class="sprak-knapp" data-sprak="en" aria-pressed="false"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</button>
+    </div>
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
   <hr class="sidemeny-skille">
   <div class="sidemeny-modus">
     <span class="sidemeny-modus-status" id="sidemeny-modus-status">Modus: Bryggelærling</span>
-    <div class="sidemeny-modus-bytt" role="group" aria-label="Bytt modus">
-      <button type="button" class="sidemeny-modus-knapp modus-knapp" data-modus="laerling">🎓 Lærling</button>
-      <button type="button" class="sidemeny-modus-knapp modus-knapp" data-modus="mester">⚙️ Mester</button>
+    <div class="sidemeny-modus-bytt" role="group" aria-label="Bytt modus" data-i18n-aria-label="modus.byttAriaLabel">
+      <button type="button" class="sidemeny-modus-knapp modus-knapp" data-modus="laerling"><span data-i18n="modus.knappLaerlingKort">🎓 Lærling</span></button>
+      <button type="button" class="sidemeny-modus-knapp modus-knapp" data-modus="mester"><span data-i18n="modus.knappMesterKort">⚙️ Mester</span></button>
     </div>
   </div>
   <hr class="sidemeny-skille">
-  <a href="hjelp/index.html" class="sidemeny-lenke">📖 Hjelp / Bryggehåndbok</a>
+  <a href="hjelp/index.html" class="sidemeny-lenke"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
 </nav>
 
 <!-- Runde 11: førstegangsvalg -- vises KUN når ingen moduspreferanse er
@@ -59,16 +71,16 @@
      og dialogen vises aldri igjen; modus byttes deretter fra menyen over. -->
 <div class="modus-forstegang-bakteppe no-print" id="modus-forstegang-bakteppe" hidden></div>
 <div class="modus-forstegang no-print" id="modus-forstegang" role="dialog" aria-modal="true" aria-labelledby="modus-forstegang-tittel" hidden>
-  <h2 id="modus-forstegang-tittel">Hvordan vil du brygge?</h2>
-  <p class="modus-forstegang-intro">Du kan bytte modus når som helst fra menyen (☰).</p>
-  <div class="modus-bryter" role="group" aria-label="Velg modus">
+  <h2 id="modus-forstegang-tittel" data-i18n="modus.forstegangTittel">Hvordan vil du brygge?</h2>
+  <p class="modus-forstegang-intro" data-i18n="modus.forstegangIntro">Du kan bytte modus når som helst fra menyen (☰).</p>
+  <div class="modus-bryter" role="group" aria-label="Velg modus" data-i18n-aria-label="modus.velgAriaLabel">
     <button type="button" class="modus-knapp" data-modus="laerling">
-      🎓 Bryggelærling
-      <span class="modus-undertekst">Veiledet modus – lær mens du brygger</span>
+      <span data-i18n="modus.laerlingNavn">🎓 Bryggelærling</span>
+      <span class="modus-undertekst" data-i18n="modus.laerlingUndertekst">Veiledet modus – lær mens du brygger</span>
     </button>
     <button type="button" class="modus-knapp" data-modus="mester">
-      ⚙️ Bryggmester
-      <span class="modus-undertekst">Full kontroll – alle detaljer tilgjengelig</span>
+      <span data-i18n="modus.mesterNavn">⚙️ Bryggmester</span>
+      <span class="modus-undertekst" data-i18n="modus.mesterUndertekst">Full kontroll – alle detaljer tilgjengelig</span>
     </button>
   </div>
 </div>
@@ -76,105 +88,105 @@
 <main class="byggerlayout">
   <div class="bygger-venstre">
     <section class="panel" id="grunndata-panel">
-      <h2>📋 Grunndata</h2>
+      <h2>📋 <span data-i18n="builder.grunndata.tittel">Grunndata</span></h2>
       <div class="felt-rad">
-        <label for="oppskrift-navn">Ølnavn</label>
-        <input type="text" id="oppskrift-navn" placeholder="Navn på ølet">
+        <label for="oppskrift-navn" data-i18n="builder.grunndata.olnavn">Ølnavn</label>
+        <input type="text" id="oppskrift-navn" placeholder="Navn på ølet" data-i18n-placeholder="builder.grunndata.olnavnPlaceholder">
       </div>
       <div class="felt-rad">
-        <label for="brygger-navn">Brygger</label>
-        <input type="text" id="brygger-navn" placeholder="Ditt navn">
+        <label for="brygger-navn" data-i18n="builder.grunndata.brygger">Brygger</label>
+        <input type="text" id="brygger-navn" placeholder="Ditt navn" data-i18n-placeholder="builder.grunndata.byggerPlaceholder">
       </div>
       <div class="felt-rad">
-        <label for="bryggeri-navn">Bryggeri</label>
-        <input type="text" id="bryggeri-navn" placeholder="Navn på bryggeriet">
+        <label for="bryggeri-navn" data-i18n="builder.grunndata.bryggeri">Bryggeri</label>
+        <input type="text" id="bryggeri-navn" placeholder="Navn på bryggeriet" data-i18n-placeholder="builder.grunndata.bryggeriPlaceholder">
       </div>
       <div class="felt-rad">
-        <label for="batch-volum">Batchvolum (liter)</label>
+        <label for="batch-volum" data-i18n="builder.grunndata.batchvolum">Batchvolum (liter)</label>
         <input type="number" id="batch-volum" min="0" step="0.1" value="20">
       </div>
       <div class="felt-rad mester-only">
-        <label for="effektivitet">Brygghuseffektivitet (%) <button type="button" class="hjelp-knapp" data-hjelp="effektivitet" aria-label="Hva er brygghuseffektivitet?">?</button></label>
+        <label for="effektivitet"><span data-i18n="builder.grunndata.effektivitet">Brygghuseffektivitet (%)</span> <button type="button" class="hjelp-knapp" data-hjelp="effektivitet" aria-label="Hva er brygghuseffektivitet?" data-i18n-aria-label="help.effektivitetAriaLabel">?</button></label>
         <input type="number" id="effektivitet" min="1" max="100" step="1" value="75">
       </div>
       <div class="felt-rad mester-only">
-        <label for="oppskrift-notater">Notater</label>
-        <textarea id="oppskrift-notater" rows="2" placeholder="F.eks. planlagte justeringer, tips til deg selv …"></textarea>
+        <label for="oppskrift-notater" data-i18n="builder.grunndata.notater">Notater</label>
+        <textarea id="oppskrift-notater" rows="2" placeholder="F.eks. planlagte justeringer, tips til deg selv …" data-i18n-placeholder="builder.grunndata.notaterPlaceholder"></textarea>
       </div>
     </section>
 
     <section class="panel" id="stilvalg-panel">
-      <h2>🍺 Hva vil du brygge?</h2>
+      <h2>🍺 <span data-i18n="builder.stilvalg.tittel">Hva vil du brygge?</span></h2>
       <div class="felt-rad felt-rad-combobox">
-        <label id="stil-velger-label">Ølstil</label>
+        <label id="stil-velger-label" data-i18n="builder.stilvalg.olstil">Ølstil</label>
         <div id="stil-velger-mount" aria-labelledby="stil-velger-label"></div>
       </div>
-      <p class="hjelpetekst">Valgfritt — du kan bygge helt fritt. Velger du en stil, vises stilmatchen til høyre mens du bygger.</p>
+      <p class="hjelpetekst" data-i18n="builder.stilvalg.hjelpetekst">Valgfritt — du kan bygge helt fritt. Velger du en stil, vises stilmatchen til høyre mens du bygger.</p>
     </section>
 
     <section class="panel" id="malt-panel">
-      <h2>🌾 Malt</h2>
+      <h2>🌾 <span data-i18n="builder.malt.tittel">Malt</span></h2>
       <div id="malt-rader"></div>
-      <button type="button" class="legg-til-knapp" id="legg-til-malt">+ Legg til malt</button>
+      <button type="button" class="legg-til-knapp" id="legg-til-malt" data-i18n="builder.malt.leggTil">+ Legg til malt</button>
       <div class="malt-prosent-rad mester-only" id="malt-prosent-rad">
         <span class="malt-prosent-sum" id="malt-prosent-sum">Prosent-sum: 0,0%</span>
-        <button type="button" class="malt-prosent-knapp" id="malt-bruk-prosent-knapp">Bruk prosentfordeling</button>
+        <button type="button" class="malt-prosent-knapp" id="malt-bruk-prosent-knapp" data-i18n="builder.malt.brukProsentfordeling">Bruk prosentfordeling</button>
       </div>
       <p class="hjelpetekst malt-prosent-melding mester-only" id="malt-prosent-melding" aria-live="polite" hidden></p>
     </section>
 
     <section class="panel" id="humle-panel">
-      <h2>🌿 Humle</h2>
+      <h2>🌿 <span data-i18n="builder.humle.tittel">Humle</span></h2>
       <div id="humle-rader"></div>
-      <button type="button" class="legg-til-knapp" id="legg-til-humle">+ Legg til humle</button>
+      <button type="button" class="legg-til-knapp" id="legg-til-humle" data-i18n="builder.humle.leggTil">+ Legg til humle</button>
     </section>
 
     <section class="panel" id="gjaer-panel">
-      <h2>🧫 Gjær</h2>
+      <h2>🧫 <span data-i18n="builder.gjaer.tittel">Gjær</span></h2>
       <div class="felt-rad felt-rad-combobox">
-        <label id="gjaer-label">Gjær</label>
+        <label id="gjaer-label" data-i18n="builder.gjaer.label">Gjær</label>
         <div id="gjaer-velger-mount" aria-labelledby="gjaer-label"></div>
       </div>
-      <button type="button" class="egendefinert-knapp" id="gjaer-egendefinert-knapp">+ Egendefinert gjær</button>
+      <button type="button" class="egendefinert-knapp" id="gjaer-egendefinert-knapp" data-i18n="builder.gjaer.egendefinertKnapp">+ Egendefinert gjær</button>
       <div class="felt-rad" id="attenuation-override-rad">
-        <label for="attenuation-override">Forventet utgjæring (%) <button type="button" class="hjelp-knapp" data-hjelp="utgjaering" aria-label="Hva er utgjæring?">?</button></label>
+        <label for="attenuation-override"><span data-i18n="builder.gjaer.utgjaering">Forventet utgjæring (%)</span> <button type="button" class="hjelp-knapp" data-hjelp="utgjaering" aria-label="Hva er utgjæring?" data-i18n-aria-label="help.utgjaeringAriaLabel">?</button></label>
         <input type="number" id="attenuation-override" min="1" max="100" step="1" value="75">
       </div>
       <div class="egendefinert-felt" id="gjaer-egendefinert-felt" hidden>
-        <input type="text" id="gjaer-eg-navn" placeholder="Navn (valgfritt)">
-        <input type="text" id="gjaer-eg-produsent" placeholder="Produsent (valgfritt)">
-        <input type="text" id="gjaer-eg-gjaertype" placeholder="Gjærtype (valgfritt)">
+        <input type="text" id="gjaer-eg-navn" placeholder="Navn (valgfritt)" data-i18n-placeholder="builder.gjaer.navnPlaceholder">
+        <input type="text" id="gjaer-eg-produsent" placeholder="Produsent (valgfritt)" data-i18n-placeholder="builder.egendefinert.produsentPlaceholder">
+        <input type="text" id="gjaer-eg-gjaertype" placeholder="Gjærtype (valgfritt)" data-i18n-placeholder="builder.gjaer.gjaertypePlaceholder">
       </div>
     </section>
 
     <section class="panel no-print" id="handling-panel">
-      <h2>💾 Lagre og eksporter</h2>
+      <h2>💾 <span data-i18n="builder.handling.tittel">Lagre og eksporter</span></h2>
       <div class="knapperad">
-        <button type="button" id="ny-oppskrift-knapp">🆕 Ny oppskrift</button>
-        <button type="button" id="lagre-knapp">💾 Lagre oppskrift</button>
-        <button type="button" id="lagre-fil-knapp">📄 Lagre oppskriftsfil (.kbhrecipe)</button>
-        <button type="button" id="apne-fil-knapp">📂 Åpne oppskriftsfil</button>
+        <button type="button" id="ny-oppskrift-knapp" data-i18n="builder.handling.nyOppskrift">🆕 Ny oppskrift</button>
+        <button type="button" id="lagre-knapp" data-i18n="builder.handling.lagreOppskrift">💾 Lagre oppskrift</button>
+        <button type="button" id="lagre-fil-knapp" data-i18n="builder.handling.lagreFil">📄 Lagre oppskriftsfil (.kbhrecipe)</button>
+        <button type="button" id="apne-fil-knapp" data-i18n="builder.handling.apneFil">📂 Åpne oppskriftsfil</button>
         <input type="file" id="apne-fil-input" accept=".kbhrecipe,.json,application/json" hidden>
       </div>
       <p class="hjelpetekst" id="lagre-status" aria-live="polite"></p>
-      <p class="hjelpetekst">Lagrede oppskrifter ligger lokalt i denne nettleseren. Vil du ta backup eller flytte en oppskrift til en annen enhet, kan du lagre den som en <code>.kbhrecipe</code>-fil og åpne den igjen her eller under «📥 Importer oppskrift».</p>
+      <p class="hjelpetekst" data-i18n="builder.handling.hjelpetekst">Lagrede oppskrifter ligger lokalt i denne nettleseren. Vil du ta backup eller flytte en oppskrift til en annen enhet, kan du lagre den som en <code>.kbhrecipe</code>-fil og åpne den igjen her eller under «📥 Importer oppskrift».</p>
 
       <details class="avansert-eksport">
-        <summary>Avansert: rå JSON</summary>
+        <summary data-i18n="builder.handling.avansertSummary">Avansert: rå JSON</summary>
         <div class="knapperad">
-          <button type="button" id="eksporter-knapp">⬇️ Eksporter rå JSON</button>
+          <button type="button" id="eksporter-knapp" data-i18n="builder.handling.eksporterKnapp">⬇️ Eksporter rå JSON</button>
         </div>
-        <p class="hjelpetekst">Kun til debugging/videre bearbeiding — bruk «Lagre oppskriftsfil» over til vanlig lagring og backup.</p>
+        <p class="hjelpetekst" data-i18n="builder.handling.avansertHjelpetekst">Kun til debugging/videre bearbeiding — bruk «Lagre oppskriftsfil» over til vanlig lagring og backup.</p>
       </details>
 
       <div class="skaler-rad mester-only" id="skaler-rad">
         <span class="skaler-naavaerende" id="skaler-naavaerende">Nåværende batch: 20 L</span>
         <div class="felt-rad">
-          <label for="skaler-maal-volum">Skaler til (L)</label>
+          <label for="skaler-maal-volum" data-i18n="builder.skaler.maalLabel">Skaler til (L)</label>
           <input type="number" id="skaler-maal-volum" min="1" max="200" step="0.5">
         </div>
-        <button type="button" class="skaler-knapp" id="skaler-knapp">📐 Skaler oppskrift</button>
-        <p class="hjelpetekst">Malt (kg) og humle (gram) skaleres proporsjonalt til nytt volum. Ølnavn, brygger, bryggeri, notater, valgt stil, gjærvalg, humletid og alfasyre-overstyring endres ikke.</p>
+        <button type="button" class="skaler-knapp" id="skaler-knapp" data-i18n="builder.skaler.knapp">📐 Skaler oppskrift</button>
+        <p class="hjelpetekst" data-i18n="builder.skaler.hjelpetekst">Malt (kg) og humle (gram) skaleres proporsjonalt til nytt volum. Ølnavn, brygger, bryggeri, notater, valgt stil, gjærvalg, humletid og alfasyre-overstyring endres ikke.</p>
         <p class="hjelpetekst" id="skaler-status" aria-live="polite"></p>
       </div>
     </section>
@@ -185,7 +197,7 @@
       <img class="identitet-logo" src="assets/branding/kbh_emblem.png" alt="Kvernhaug Brygghus">
       <div class="identitet-merke">
         <div class="identitet-merke-navn">Kvernhaug Brygghus</div>
-        <div class="identitet-merke-motto">Ved Dalelva i Åsane</div>
+        <div class="identitet-merke-motto" data-i18n="brand.stedTagline">Ved Dalelva i Åsane</div>
       </div>
       <div class="kbh-ornament" aria-hidden="true"><span>&#9670;</span></div>
       <div class="identitet-navn" id="identitet-navn">Uten navn</div>
@@ -193,36 +205,36 @@
       <div class="identitet-brygger" id="identitet-brygger" hidden></div>
       <div class="kbh-ornament" aria-hidden="true"><span>&#9670;</span></div>
       <div class="resultat-grid">
-        <div class="resultat-boks"><span class="resultat-tall" id="res-og">1.000</span><span class="resultat-label">OG <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="og" aria-label="Hva er OG?">?</button></span></div>
-        <div class="resultat-boks"><span class="resultat-tall" id="res-fg">1.000</span><span class="resultat-label">FG <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="fg" aria-label="Hva er FG?">?</button></span></div>
-        <div class="resultat-boks"><span class="resultat-tall" id="res-abv">0,0 %</span><span class="resultat-label">ABV <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="abv" aria-label="Hva er ABV?">?</button></span></div>
-        <div class="resultat-boks"><span class="resultat-tall" id="res-ibu">0</span><span class="resultat-label">IBU <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ibu" aria-label="Hva er IBU?">?</button></span></div>
-        <div class="resultat-boks resultat-boks-ebc"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ebc" aria-label="Hva er EBC?">?</button></span><span class="ebc-swatch" id="ebc-swatch"></span></div>
+        <div class="resultat-boks"><span class="resultat-tall" id="res-og">1.000</span><span class="resultat-label">OG <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="og" aria-label="Hva er OG?" data-i18n-aria-label="help.ogAriaLabel">?</button></span></div>
+        <div class="resultat-boks"><span class="resultat-tall" id="res-fg">1.000</span><span class="resultat-label">FG <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="fg" aria-label="Hva er FG?" data-i18n-aria-label="help.fgAriaLabel">?</button></span></div>
+        <div class="resultat-boks"><span class="resultat-tall" id="res-abv">0,0 %</span><span class="resultat-label">ABV <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="abv" aria-label="Hva er ABV?" data-i18n-aria-label="help.abvAriaLabel">?</button></span></div>
+        <div class="resultat-boks"><span class="resultat-tall" id="res-ibu">0</span><span class="resultat-label">IBU <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ibu" aria-label="Hva er IBU?" data-i18n-aria-label="help.ibuAriaLabel">?</button></span></div>
+        <div class="resultat-boks resultat-boks-ebc"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ebc" aria-label="Hva er EBC?" data-i18n-aria-label="help.ebcAriaLabel">?</button></span><span class="ebc-swatch" id="ebc-swatch"></span></div>
       </div>
     </section>
 
     <div class="kbh-ornament kbh-ornament-hoyre" aria-hidden="true"><span>&#9670;</span></div>
 
     <section class="smaksprofil-seksjon" id="smaksprofil-panel">
-      <h2>Smaksprofil <button type="button" class="hjelp-knapp" data-hjelp="smakshjul" aria-label="Hva er smakshjulet?">?</button></h2>
+      <h2><span data-i18n="builder.smaksprofil.tittel">Smaksprofil</span> <button type="button" class="hjelp-knapp" data-hjelp="smakshjul" aria-label="Hva er smakshjulet?" data-i18n-aria-label="help.smakshjulAriaLabel">?</button></h2>
       <div class="smakshjul-wrap" id="smakshjul-container"></div>
     </section>
 
     <details class="stilanalyse-seksjon" id="stilanalyse-panel">
       <summary>
-        <span class="stilanalyse-tittel">Stilanalyse</span>
-        <button type="button" class="hjelp-knapp" data-hjelp="stilmatch" aria-label="Hva er stilmatch?">?</button>
+        <span class="stilanalyse-tittel" data-i18n="builder.stilanalyse.tittel">Stilanalyse</span>
+        <button type="button" class="hjelp-knapp" data-hjelp="stilmatch" aria-label="Hva er stilmatch?" data-i18n-aria-label="help.stilmatchAriaLabel">?</button>
       </summary>
 
       <div class="stilanalyse-innhold">
         <div class="stil-tom-tilstand" id="stil-tom-tilstand">
-          <span class="stil-tom-tilstand-tittel">🍺 Ingen stilmatch ennå</span>
-          <p class="stil-tom-tilstand-tekst">Legg til malt og/eller humle for å se hvilke stiler oppskriften nærmer seg.</p>
+          <span class="stil-tom-tilstand-tittel" data-i18n="builder.stilanalyse.tomTittel">🍺 Ingen stilmatch ennå</span>
+          <p class="stil-tom-tilstand-tekst" data-i18n="builder.stilanalyse.tomTekst">Legg til malt og/eller humle for å se hvilke stiler oppskriften nærmer seg.</p>
         </div>
 
         <div id="stil-auto-innhold">
           <div class="stil-headline" id="stil-headline">
-            <div class="stil-headline-label">Numerisk nærmeste stil</div>
+            <div class="stil-headline-label" data-i18n="builder.stilanalyse.headlineLabel">Numerisk nærmeste stil</div>
             <div class="stil-headline-navn" id="stil-headline-navn">—</div>
             <div class="stil-headline-info" id="stil-headline-info"></div>
           </div>
@@ -234,14 +246,14 @@
           <div class="mester-only">
             <p class="hjelpetekst" id="bu-gu-tekst"></p>
             <div class="stil-alternativer">
-              <div class="stil-seksjon-tittel">Nærliggende stiler</div>
+              <div class="stil-seksjon-tittel" data-i18n="builder.stilanalyse.nearbyTittel">Nærliggende stiler</div>
               <div id="stil-alternativ-liste"></div>
             </div>
           </div>
         </div>
 
         <div class="stil-manuell">
-          <div class="stil-seksjon-tittel">Valgt stil</div>
+          <div class="stil-seksjon-tittel" data-i18n="builder.stilanalyse.valgtTittel">Valgt stil</div>
           <div id="stil-veiledning-manuell" class="stil-veiledning"></div>
           <div id="stil-manuell-resultat" class="mester-only"></div>
         </div>
@@ -251,7 +263,7 @@
 </main>
 
 <footer class="no-print">
-  <p>Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server. Full versjon med pantry, vannkjemi og full sensorisk analyse: se hovedappen.</p>
+  <p data-i18n="footer.builder">Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server. Full versjon med pantry, vannkjemi og full sensorisk analyse: se hovedappen.</p>
 </footer>
 
 <template id="malt-rad-mal">
@@ -261,14 +273,14 @@
     <span class="enhet">kg</span>
     <input type="number" class="malt-pct mester-only" min="0" max="100" step="0.1" placeholder="%">
     <span class="enhet mester-only">%</span>
-    <button type="button" class="egendefinert-knapp" title="Legg til en malt som ikke finnes i biblioteket">+ Egendefinert</button>
-    <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern malt">✕</button>
+    <button type="button" class="egendefinert-knapp" title="Legg til en malt som ikke finnes i biblioteket" data-i18n-title="builder.malt.egendefinertTitle" data-i18n="builder.egendefinertKnapp">+ Egendefinert</button>
+    <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern malt" data-i18n-title="builder.malt.fjernTitle" data-i18n-aria-label="builder.malt.fjernAriaLabel">✕</button>
     <div class="egendefinert-felt" hidden>
-      <input type="text" class="eg-navn" placeholder="Navn *">
-      <input type="text" class="eg-produsent" placeholder="Produsent (valgfritt)">
-      <input type="number" class="eg-ebc" min="0" step="0.5" placeholder="EBC *">
-      <input type="number" class="eg-potensiale" min="1" step="0.001" placeholder="Potensiale * (1.036)">
-      <button type="button" class="egendefinert-tilbake-knapp">🔍 Søk i bibliotek i stedet</button>
+      <input type="text" class="eg-navn" placeholder="Navn *" data-i18n-placeholder="builder.egendefinert.navnPlaceholder">
+      <input type="text" class="eg-produsent" placeholder="Produsent (valgfritt)" data-i18n-placeholder="builder.egendefinert.produsentPlaceholder">
+      <input type="number" class="eg-ebc" min="0" step="0.5" placeholder="EBC *" data-i18n-placeholder="builder.malt.ebcPlaceholder">
+      <input type="number" class="eg-potensiale" min="1" step="0.001" placeholder="Potensiale * (1.036)" data-i18n-placeholder="builder.malt.potensialePlaceholder">
+      <button type="button" class="egendefinert-tilbake-knapp" data-i18n="builder.egendefinert.tilbakeKnapp">🔍 Søk i bibliotek i stedet</button>
     </div>
   </div>
 </template>
@@ -276,29 +288,30 @@
 <template id="humle-rad-mal">
   <div class="ingrediens-rad" data-type="humle">
     <div class="combobox-mount humle-velger-mount"></div>
-    <input type="number" class="humle-alfa" min="0" step="0.1" placeholder="alfa">
-    <span class="enhet">%α <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="alfasyre" aria-label="Hva er alfasyre?">?</button></span>
-    <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram">
+    <input type="number" class="humle-alfa" min="0" step="0.1" placeholder="alfa" data-i18n-placeholder="builder.humle.alfaPlaceholder">
+    <span class="enhet">%α <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="alfasyre" aria-label="Hva er alfasyre?" data-i18n-aria-label="help.alfasyreAriaLabel">?</button></span>
+    <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram" data-i18n-placeholder="builder.humle.gramPlaceholder">
     <span class="enhet">g</span>
     <input type="number" class="humle-tid" min="0" step="1" value="60" placeholder="min">
     <span class="enhet">min</span>
-    <button type="button" class="egendefinert-knapp" title="Legg til en humle som ikke finnes i biblioteket">+ Egendefinert</button>
-    <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern humle">✕</button>
+    <button type="button" class="egendefinert-knapp" title="Legg til en humle som ikke finnes i biblioteket" data-i18n-title="builder.humle.egendefinertTitle" data-i18n="builder.egendefinertKnapp">+ Egendefinert</button>
+    <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern humle" data-i18n-title="builder.humle.fjernTitle" data-i18n-aria-label="builder.humle.fjernAriaLabel">✕</button>
     <div class="egendefinert-felt" hidden>
-      <input type="text" class="eg-navn" placeholder="Navn *">
-      <input type="text" class="eg-opprinnelse" placeholder="Opprinnelse (valgfritt)">
-      <input type="text" class="eg-type" placeholder="Type (valgfritt)">
-      <button type="button" class="egendefinert-tilbake-knapp">🔍 Søk i bibliotek i stedet</button>
+      <input type="text" class="eg-navn" placeholder="Navn *" data-i18n-placeholder="builder.egendefinert.navnPlaceholder">
+      <input type="text" class="eg-opprinnelse" placeholder="Opprinnelse (valgfritt)" data-i18n-placeholder="builder.humle.opprinnelsePlaceholder">
+      <input type="text" class="eg-type" placeholder="Type (valgfritt)" data-i18n-placeholder="builder.humle.typePlaceholder">
+      <button type="button" class="egendefinert-tilbake-knapp" data-i18n="builder.egendefinert.tilbakeKnapp">🔍 Søk i bibliotek i stedet</button>
     </div>
     <div class="humle-maal-ibu-rad mester-only">
-      <label>Mål-IBU (denne tilsetningen)
+      <label><span data-i18n="builder.humle.maalIbuLabel">Mål-IBU (denne tilsetningen)</span>
         <input type="number" class="humle-maal-ibu" min="0" step="1" placeholder="0">
       </label>
-      <button type="button" class="humle-beregn-knapp">Beregn gram</button>
+      <button type="button" class="humle-beregn-knapp" data-i18n="builder.humle.beregnGramKnapp">Beregn gram</button>
     </div>
   </div>
 </template>
 
+<script src="js/i18n.js"></script>
 <script src="js/chrome.js"></script>
 <script src="js/combobox.js"></script>
 <script src="js/calc.js"></script>

@@ -44,7 +44,7 @@ function _dokHeader(undertittel, oppskrift) {
 }
 
 function _dokFooter() {
-  return `<div class="doc-footer">Laget med Kvernhaug Brygghus Oppskriftsbygger</div>`;
+  return `<div class="doc-footer">${t("print.footer")}</div>`;
 }
 
 // ─── A. Oppskriftsark ─────────────────────────────────────────────────────
@@ -55,7 +55,7 @@ function byggOppskriftsarkHtml(ctx) {
   const stilNavn = stilAnalyse ? stilAnalyse.stil : null;
   const visStilNavn = oppskrift.valgtStil || (stilNavn && stilNavn !== "Kreativt Brygg" ? stilNavn : null);
   const stilLinje = visStilNavn
-    ? `<p class="doc-stil">Ølstil: <strong>${escHtml(visStilNavn)}</strong></p>`
+    ? `<p class="doc-stil">${t("print.olstilLabel")} <strong>${escHtml(stilVisningsnavn(visStilNavn))}</strong></p>`
     : "";
 
   const maltRows = maltRader.map((m) => {
@@ -71,21 +71,21 @@ function byggOppskriftsarkHtml(ctx) {
   const gjaerInfo = gjaerId ? effGjaer[gjaerId] : null;
   const utgjaering = gjaerInfo ? gjaerInfo.attenuation : (parseFloat(oppskrift.attenuationOverride) || 75) / 100;
   const gjaerHtml = gjaerInfo
-    ? `<p>${escHtml(gjaerInfo.navn || "Gjær")}${gjaerInfo.produsent ? " · " + escHtml(gjaerInfo.produsent) : ""} — forventet utgjæring ${(utgjaering * 100).toFixed(0)} %</p>`
-    : `<p class="hjelpetekst">Ingen gjær valgt.</p>`;
+    ? `<p>${escHtml(gjaerInfo.navn || t("print.gjaerNavnFallback"))}${gjaerInfo.produsent ? " · " + escHtml(gjaerInfo.produsent) : ""}${t("print.utgjaeringSuffix", { pct: (utgjaering * 100).toFixed(0) })}</p>`
+    : `<p class="hjelpetekst">${t("print.ingenGjaerValgt")}</p>`;
 
   const notaterHtml = oppskrift.notater
-    ? `<h2>Notater</h2><p class="doc-notater">${escHtml(oppskrift.notater)}</p>`
+    ? `<h2>${t("print.notaterTittel")}</h2><p class="doc-notater">${escHtml(oppskrift.notater)}</p>`
     : "";
 
   const smakshjulHtml = ctx.smakshjulSvgOuterHtml
-    ? `<h2>Smaksprofil</h2><div class="doc-smakshjul">${ctx.smakshjulSvgOuterHtml}</div>`
+    ? `<h2>${t("builder.smaksprofil.tittel")}</h2><div class="doc-smakshjul">${ctx.smakshjulSvgOuterHtml}</div>`
     : "";
 
   return `
     <div class="doc-a4">
-      ${_dokHeader("Oppskriftsark", oppskrift)}
-      <p class="doc-meta">${oppskrift.volum} L · ${oppskrift.effektivitet}% brygghuseffektivitet</p>
+      ${_dokHeader(t("print.oppskriftsark.undertittel"), oppskrift)}
+      <p class="doc-meta">${t("print.meta", { vol: oppskrift.volum, eff: oppskrift.effektivitet })}</p>
       ${stilLinje}
       <div class="doc-stats">
         <div><span>OG</span><strong>${_fmtOg(ctx.og)}</strong></div>
@@ -94,13 +94,13 @@ function byggOppskriftsarkHtml(ctx) {
         <div><span>IBU</span><strong>${_fmtIbu(ctx.ibu)}</strong></div>
         <div><span>EBC</span><strong>${_fmtEbc(ctx.ebc)}</strong></div>
       </div>
-      <h2>Malt</h2>
-      <table class="doc-table"><thead><tr><th>Navn</th><th>Produsent</th><th>Mengde</th></tr></thead>
-        <tbody>${maltRows || '<tr><td colspan="3">Ingen malt lagt til.</td></tr>'}</tbody></table>
-      <h2>Humle</h2>
-      <table class="doc-table"><thead><tr><th>Navn</th><th>Mengde</th><th>Alfasyre</th><th>Koketid</th></tr></thead>
-        <tbody>${humleRows || '<tr><td colspan="4">Ingen humle lagt til.</td></tr>'}</tbody></table>
-      <h2>Gjær</h2>
+      <h2>${t("print.maltTittel")}</h2>
+      <table class="doc-table"><thead><tr><th>${t("print.navnKol")}</th><th>${t("print.produsentKol")}</th><th>${t("print.mengdeKol")}</th></tr></thead>
+        <tbody>${maltRows || `<tr><td colspan="3">${t("print.oppskriftsark.ingenMalt")}</td></tr>`}</tbody></table>
+      <h2>${t("print.humleTittel")}</h2>
+      <table class="doc-table"><thead><tr><th>${t("print.navnKol")}</th><th>${t("print.mengdeKol")}</th><th>${t("print.alfasyreKol")}</th><th>${t("print.koketidKol")}</th></tr></thead>
+        <tbody>${humleRows || `<tr><td colspan="4">${t("print.oppskriftsark.ingenHumle")}</td></tr>`}</tbody></table>
+      <h2>${t("print.gjaerTittel")}</h2>
       ${gjaerHtml}
       ${smakshjulHtml}
       ${notaterHtml}
@@ -127,20 +127,20 @@ function byggHandlelisteHtml(ctx) {
 
   const gjaerInfo = gjaerId ? effGjaer[gjaerId] : null;
   const gjaerRows = gjaerInfo
-    ? `<tr><td><input type="checkbox" class="doc-checkbox"></td><td colspan="2">${escHtml(gjaerInfo.navn || "Gjær")}</td></tr>`
+    ? `<tr><td><input type="checkbox" class="doc-checkbox"></td><td colspan="2">${escHtml(gjaerInfo.navn || t("print.gjaerNavnFallback"))}</td></tr>`
     : "";
 
   return `
     <div class="doc-a4">
-      ${_dokHeader("Handleliste", oppskrift)}
-      <h2>Malt</h2>
-      <table class="doc-table"><thead><tr><th></th><th>Navn</th><th>Mengde</th></tr></thead>
-        <tbody>${maltRows || '<tr><td colspan="3">Ingen malt.</td></tr>'}</tbody></table>
-      <h2>Humle</h2>
-      <table class="doc-table"><thead><tr><th></th><th>Navn</th><th>Mengde</th><th>Alfasyre</th></tr></thead>
-        <tbody>${humleRows || '<tr><td colspan="4">Ingen humle.</td></tr>'}</tbody></table>
-      <h2>Gjær</h2>
-      <table class="doc-table"><tbody>${gjaerRows || '<tr><td>Ingen gjær valgt.</td></tr>'}</tbody></table>
+      ${_dokHeader(t("print.handleliste.undertittel"), oppskrift)}
+      <h2>${t("print.maltTittel")}</h2>
+      <table class="doc-table"><thead><tr><th></th><th>${t("print.navnKol")}</th><th>${t("print.mengdeKol")}</th></tr></thead>
+        <tbody>${maltRows || `<tr><td colspan="3">${t("print.ingenMalt")}</td></tr>`}</tbody></table>
+      <h2>${t("print.humleTittel")}</h2>
+      <table class="doc-table"><thead><tr><th></th><th>${t("print.navnKol")}</th><th>${t("print.mengdeKol")}</th><th>${t("print.alfasyreKol")}</th></tr></thead>
+        <tbody>${humleRows || `<tr><td colspan="4">${t("print.ingenHumle")}</td></tr>`}</tbody></table>
+      <h2>${t("print.gjaerTittel")}</h2>
+      <table class="doc-table"><tbody>${gjaerRows || `<tr><td>${t("print.ingenGjaerValgt")}</td></tr>`}</tbody></table>
       ${_dokFooter()}
     </div>`;
 }
@@ -160,34 +160,29 @@ function byggBryggedagsarkHtml(ctx) {
     return `<tr><td>${escHtml(info.navn || "?")}</td><td>${h.gram} g</td><td>${h.tid} min</td></tr>`;
   }).join("");
 
+  const sjekkliste = Array.from({ length: 10 }, (_, i) => t(`print.sjekkliste.${i}`))
+    .map((tekst) => `<li><input type="checkbox"> ${tekst}</li>`)
+    .join("");
+
   return `
     <div class="doc-a4">
-      ${_dokHeader("Bryggedagsark", oppskrift)}
-      <p class="doc-meta">Bryggedato: <span class="doc-blank doc-blank-inline"></span>&nbsp;&nbsp;&nbsp; Batch: ${oppskrift.volum} L</p>
-      <h2>Ingredienser</h2>
-      <table class="doc-table"><thead><tr><th>Malt</th><th>Mengde</th></tr></thead>
-        <tbody>${maltRows || '<tr><td colspan="2">Ingen malt.</td></tr>'}</tbody></table>
-      <table class="doc-table"><thead><tr><th>Humletilsetning</th><th>Mengde</th><th>Tidspunkt</th></tr></thead>
-        <tbody>${humleRows || '<tr><td colspan="3">Ingen humle.</td></tr>'}</tbody></table>
-      <h2>Planlagte tall</h2>
+      ${_dokHeader(t("print.bryggedagsark.undertittel"), oppskrift)}
+      <p class="doc-meta">${t("print.bryggedato")} <span class="doc-blank doc-blank-inline"></span>&nbsp;&nbsp;&nbsp; ${t("print.batch", { vol: oppskrift.volum })}</p>
+      <h2>${t("print.ingrediensTittel")}</h2>
+      <table class="doc-table"><thead><tr><th>${t("print.maltTittel")}</th><th>${t("print.mengdeKol")}</th></tr></thead>
+        <tbody>${maltRows || `<tr><td colspan="2">${t("print.ingenMalt")}</td></tr>`}</tbody></table>
+      <table class="doc-table"><thead><tr><th>${t("print.humletilsetningKol")}</th><th>${t("print.mengdeKol")}</th><th>${t("print.tidspunktKol")}</th></tr></thead>
+        <tbody>${humleRows || `<tr><td colspan="3">${t("print.ingenHumle")}</td></tr>`}</tbody></table>
+      <h2>${t("print.planlagteTallTittel")}</h2>
       <table class="doc-table doc-maal">
-        <tr><td>Planlagt OG</td><td>${_fmtOg(ctx.og)}</td><td>Faktisk OG</td><td class="doc-blank"></td></tr>
-        <tr><td>Planlagt volum</td><td>${oppskrift.volum} L</td><td>Faktisk volum</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.planlagtOg")}</td><td>${_fmtOg(ctx.og)}</td><td>${t("print.faktiskOg")}</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.planlagtVolum")}</td><td>${oppskrift.volum} L</td><td>${t("print.faktiskVolum")}</td><td class="doc-blank"></td></tr>
       </table>
-      <h2>Sjekkliste</h2>
+      <h2>${t("print.sjekklisteTittel")}</h2>
       <ul class="doc-sjekkliste">
-        <li><input type="checkbox"> Klargjør utstyr og ingredienser</li>
-        <li><input type="checkbox"> Varm opp meskevann</li>
-        <li><input type="checkbox"> Tilsett malt / mesk</li>
-        <li><input type="checkbox"> Mashout (hvis relevant)</li>
-        <li><input type="checkbox"> Skyll (hvis metoden bruker det)</li>
-        <li><input type="checkbox"> Kok</li>
-        <li><input type="checkbox"> Humletilsetninger som planlagt over</li>
-        <li><input type="checkbox"> Kjøl ned</li>
-        <li><input type="checkbox"> Mål OG</li>
-        <li><input type="checkbox"> Overfør til gjæringskar og tilsett gjær</li>
+        ${sjekkliste}
       </ul>
-      <h2>Notater fra bryggedagen</h2>
+      <h2>${t("print.notaterFraBryggedagenTittel")}</h2>
       <div class="doc-notatfelt"></div>
       ${_dokFooter()}
     </div>`;
@@ -201,30 +196,30 @@ function byggBryggeloggHtml(ctx) {
   const { oppskrift } = ctx;
   return `
     <div class="doc-a4">
-      ${_dokHeader("Bryggelogg", oppskrift)}
+      ${_dokHeader(t("print.bryggelogg.undertittel"), oppskrift)}
       <table class="doc-table doc-maal">
-        <tr><td>Bryggedato</td><td class="doc-blank"></td><td>Batch</td><td class="doc-blank">${oppskrift.volum} L</td></tr>
-        <tr><td>Faktisk OG</td><td class="doc-blank"></td><td>Faktisk FG</td><td class="doc-blank"></td></tr>
-        <tr><td>Faktisk ABV</td><td class="doc-blank"></td><td>Faktisk volum</td><td class="doc-blank"></td></tr>
-        <tr><td>Gjær</td><td class="doc-blank" colspan="3"></td></tr>
-        <tr><td>Gjæringstemp.</td><td class="doc-blank"></td><td>Karbonering</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.bryggedato2")}</td><td class="doc-blank"></td><td>${t("print.batchKol")}</td><td class="doc-blank">${oppskrift.volum} L</td></tr>
+        <tr><td>${t("print.faktiskOg")}</td><td class="doc-blank"></td><td>${t("print.faktiskFg")}</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.faktiskAbv")}</td><td class="doc-blank"></td><td>${t("print.faktiskVolum")}</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.gjaerLabel")}</td><td class="doc-blank" colspan="3"></td></tr>
+        <tr><td>${t("print.gjaeringstemp")}</td><td class="doc-blank"></td><td>${t("print.karbonering")}</td><td class="doc-blank"></td></tr>
       </table>
-      <h2>Viktige datoer</h2>
+      <h2>${t("print.viktigeDatoerTittel")}</h2>
       <table class="doc-table doc-maal">
-        <tr><td>Overført til gjæring</td><td class="doc-blank"></td></tr>
-        <tr><td>Ferdig gjæret</td><td class="doc-blank"></td></tr>
-        <tr><td>Flasket / fatet</td><td class="doc-blank"></td></tr>
-        <tr><td>Klar til smaking</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.overfortTilGjaering")}</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.ferdigGjaeret")}</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.flasketFatet")}</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.klarTilSmaking")}</td><td class="doc-blank"></td></tr>
       </table>
-      <h2>Bryggedagsnotater</h2>
+      <h2>${t("print.bryggedagsnotaterTittel")}</h2>
       <div class="doc-notatfelt"></div>
-      <h2>Gjæringsnotater</h2>
+      <h2>${t("print.gjaeringsnotaterTittel")}</h2>
       <div class="doc-notatfelt"></div>
-      <h2>Smaksnotater</h2>
+      <h2>${t("print.smaksnotaterTittel")}</h2>
       <div class="doc-notatfelt"></div>
-      <h2>Hva fungerte bra?</h2>
+      <h2>${t("print.hvaFungerteBra")}</h2>
       <div class="doc-notatfelt doc-notatfelt-liten"></div>
-      <h2>Hva bør endres neste gang?</h2>
+      <h2>${t("print.hvaBorEndres")}</h2>
       <div class="doc-notatfelt doc-notatfelt-liten"></div>
       ${_dokFooter()}
     </div>`;

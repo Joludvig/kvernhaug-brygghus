@@ -174,22 +174,22 @@ function analyserStilOgBalanse(recipe, bjcpStiler) {
 
     const ogRes = _avvikNumerisk(
       og, krav.og[0], krav.og[1], _EPS_OG, 30, 30,
-      (diff) => `For lav styrke i vørteren: OG ${_fmtKomma(og, 3)} — stilområde ${_fmtKomma(krav.og[0], 3)}–${_fmtKomma(krav.og[1], 3)} — ${_fmtKomma(diff, 3)} under`,
-      (diff) => `For høy styrke i vørteren: OG ${_fmtKomma(og, 3)} — stilområde ${_fmtKomma(krav.og[0], 3)}–${_fmtKomma(krav.og[1], 3)} — ${_fmtKomma(diff, 3)} over`,
+      (diff) => t("stilmatch.ogUnder", { og: _fmtKomma(og, 3), lo: _fmtKomma(krav.og[0], 3), hi: _fmtKomma(krav.og[1], 3), diff: _fmtKomma(diff, 3) }),
+      (diff) => t("stilmatch.ogOver", { og: _fmtKomma(og, 3), lo: _fmtKomma(krav.og[0], 3), hi: _fmtKomma(krav.og[1], 3), diff: _fmtKomma(diff, 3) }),
     );
     if (ogRes.tekst) mangler.push(ogRes.tekst);
 
     const fgRes = _avvikNumerisk(
       fg, krav.fg[0], krav.fg[1], _EPS_FG, 25, 25,
-      (diff) => `For lav FG: ${_fmtKomma(fg, 3)} — stilområde ${_fmtKomma(krav.fg[0], 3)}–${_fmtKomma(krav.fg[1], 3)} — ${_fmtKomma(diff, 3)} under`,
-      (diff) => `For høy FG: ${_fmtKomma(fg, 3)} — stilområde ${_fmtKomma(krav.fg[0], 3)}–${_fmtKomma(krav.fg[1], 3)} — ${_fmtKomma(diff, 3)} over`,
+      (diff) => t("stilmatch.fgUnder", { fg: _fmtKomma(fg, 3), lo: _fmtKomma(krav.fg[0], 3), hi: _fmtKomma(krav.fg[1], 3), diff: _fmtKomma(diff, 3) }),
+      (diff) => t("stilmatch.fgOver", { fg: _fmtKomma(fg, 3), lo: _fmtKomma(krav.fg[0], 3), hi: _fmtKomma(krav.fg[1], 3), diff: _fmtKomma(diff, 3) }),
     );
     if (fgRes.tekst) mangler.push(fgRes.tekst);
 
     const ibuRes = _avvikNumerisk(
       ibu, krav.ibu[0], krav.ibu[1], _EPS_IBU, 25, 20,
-      (diff) => `For lav bitterhet: ${_fmtKomma(ibu, 1)} IBU — stilområde ${_fmtOmradeHeltall(krav.ibu[0])}–${_fmtOmradeHeltall(krav.ibu[1])} IBU — ${_fmtKomma(diff, 1)} IBU under`,
-      (diff) => `For høy bitterhet: ${_fmtKomma(ibu, 1)} IBU — stilområde ${_fmtOmradeHeltall(krav.ibu[0])}–${_fmtOmradeHeltall(krav.ibu[1])} IBU — ${_fmtKomma(diff, 1)} IBU over`,
+      (diff) => t("stilmatch.ibuUnder", { ibu: _fmtKomma(ibu, 1), lo: _fmtOmradeHeltall(krav.ibu[0]), hi: _fmtOmradeHeltall(krav.ibu[1]), diff: _fmtKomma(diff, 1) }),
+      (diff) => t("stilmatch.ibuOver", { ibu: _fmtKomma(ibu, 1), lo: _fmtOmradeHeltall(krav.ibu[0]), hi: _fmtOmradeHeltall(krav.ibu[1]), diff: _fmtKomma(diff, 1) }),
     );
     score += ibuRes.d;
     if (ibuRes.tekst) mangler.push(ibuRes.tekst);
@@ -197,8 +197,8 @@ function analyserStilOgBalanse(recipe, bjcpStiler) {
 
     const ebcRes = _avvikNumerisk(
       ebc, krav.ebc[0], krav.ebc[1], _EPS_EBC, 15, 12,
-      (diff) => `For lys farge: ${_fmtKomma(ebc, 1)} EBC — stilområde ${_fmtOmradeHeltall(krav.ebc[0])}–${_fmtOmradeHeltall(krav.ebc[1])} EBC — ${_fmtKomma(diff, 1)} EBC under`,
-      (diff) => `For mørk farge: ${_fmtKomma(ebc, 1)} EBC — stilområde ${_fmtOmradeHeltall(krav.ebc[0])}–${_fmtOmradeHeltall(krav.ebc[1])} EBC — ${_fmtKomma(diff, 1)} EBC over`,
+      (diff) => t("stilmatch.ebcUnder", { ebc: _fmtKomma(ebc, 1), lo: _fmtOmradeHeltall(krav.ebc[0]), hi: _fmtOmradeHeltall(krav.ebc[1]), diff: _fmtKomma(diff, 1) }),
+      (diff) => t("stilmatch.ebcOver", { ebc: _fmtKomma(ebc, 1), lo: _fmtOmradeHeltall(krav.ebc[0]), hi: _fmtOmradeHeltall(krav.ebc[1]), diff: _fmtKomma(diff, 1) }),
     );
     score += ebcRes.d;
     if (ebcRes.tekst) mangler.push(ebcRes.tekst);
@@ -206,8 +206,8 @@ function analyserStilOgBalanse(recipe, bjcpStiler) {
 
     const abvRes = _avvikNumerisk(
       abv, krav.abv[0], krav.abv[1], _EPS_ABV, 25, 25,
-      (diff) => `For lav alkohol: ${_fmtKomma(abv, 2)} % — stilområde ${_fmtKomma(krav.abv[0], 1)}–${_fmtKomma(krav.abv[1], 1)} % — ${_fmtKomma(diff, 2)} prosentpoeng under`,
-      (diff) => `For høy alkohol: ${_fmtKomma(abv, 2)} % — stilområde ${_fmtKomma(krav.abv[0], 1)}–${_fmtKomma(krav.abv[1], 1)} % — ${_fmtKomma(diff, 2)} prosentpoeng over`,
+      (diff) => t("stilmatch.abvUnder", { abv: _fmtKomma(abv, 2), lo: _fmtKomma(krav.abv[0], 1), hi: _fmtKomma(krav.abv[1], 1), diff: _fmtKomma(diff, 2) }),
+      (diff) => t("stilmatch.abvOver", { abv: _fmtKomma(abv, 2), lo: _fmtKomma(krav.abv[0], 1), hi: _fmtKomma(krav.abv[1], 1), diff: _fmtKomma(diff, 2) }),
     );
     if (abvRes.tekst) mangler.push(abvRes.tekst);
 
@@ -220,7 +220,7 @@ function analyserStilOgBalanse(recipe, bjcpStiler) {
       if (res.diff !== null) {
         score += res.d;
         onsketSensorisk.push(
-          `Ønsket sensorisk preg av *${smaksNavn.toLowerCase()}* (har ${reellVerdi.toFixed(1)}, stilen ber om ${minVerdi.toFixed(1)}+)`,
+          t("stilmatch.sensoriskOnsket", { smak: smaksKategoriVisning(smaksNavn).toLowerCase(), reell: reellVerdi.toFixed(1), krav: minVerdi.toFixed(1) }),
         );
       }
     }
@@ -319,41 +319,41 @@ function analyserStilOgBalanse(recipe, bjcpStiler) {
   const problemer = [];
 
   if (buGu > 0.85) {
-    balanseNotater.push("🔥 Humledominert: Bitterheten vil dominere kraftig over maltprofilen din.");
+    balanseNotater.push(t("stilmatch.balanse.humledominert"));
   } else if (buGu < 0.38) {
-    balanseNotater.push("🌾 Maltdominert: Lav bitterhet gjør at restsødmen fra kornene vil merkes godt.");
+    balanseNotater.push(t("stilmatch.balanse.maltdominert"));
   } else {
-    balanseNotater.push("⚖️ Harmonisk balansert: Forholdet mellom sødme og bitterhet oppleves veldig balansert.");
+    balanseNotater.push(t("stilmatch.balanse.harmonisk"));
   }
 
   if (fg >= 1.018 && abv < 6.0) {
-    problemer.push("⚠️ Fare for tung sødme: Høy FG betyr uforgjærbart sukker. Ølet kan bli klissete.");
+    problemer.push(t("stilmatch.problem.tungSodme"));
   } else if (fg <= 1.006) {
-    balanseNotater.push("🍃 Ekstremt tørt brygg: Gjæren har spist opp nesten alt sukkeret.");
+    balanseNotater.push(t("stilmatch.balanse.ekstremtTort"));
   }
 
   if ((flavor["Kaffe"] || 0) > 6 && ebc > 80 && buGu > 0.8) {
-    problemer.push("☕ Askeaktig finish: Kombinasjonen av mørkt brentmalt og høy bitterhet kan skape en skarp ettersmak.");
+    problemer.push(t("stilmatch.problem.askeaktig"));
   }
 
   if ((flavor["Tropisk"] || 0) + (flavor["Fruktighet"] || 0) > 8 && fg > 1.016 && ibu < 35) {
-    problemer.push("🧃 Juice/sirup-fare: Tropisk humle, høy restsødme og lav bitterhet kan gi et søtt, sirupaktig resultat.");
+    problemer.push(t("stilmatch.problem.juiceSirup"));
   }
 
   if ((flavor["Røyk"] || 0) > 4 && ((flavor["Sitrus"] || 0) > 3 || (flavor["Tropisk"] || 0) > 3)) {
-    problemer.push("🔥 Sensorisk konflikt: Røykmalt og sitrus-/tropisk humle slåss mot hverandre — disse smaknuansene forsterker ikke hverandre.");
+    problemer.push(t("stilmatch.problem.sensoriskKonflikt"));
   }
 
   if (sigs.belgian && (flavor["Tropisk"] || 0) + (flavor["Sitrus"] || 0) > 8) {
-    problemer.push("🇧🇪 Stilkollisjon: Belgisk gjær og aggressive amerikanske humler kan overvelde gjærens esterprofil — vurder nøytral gjær for humledrevne stiler.");
+    problemer.push(t("stilmatch.problem.stilkollisjon"));
   }
 
-  if (sigs.english_ale) balanseNotater.push("🇬🇧 Britisk ale-signatur: Maris Otter / EKG / britisk gjær gir klassisk pub ale-karakter.");
-  if (sigs.hazy) balanseNotater.push("🌀 Hazy-signatur: Tropiske humler kombinert med myk malt (havre/hvete) peker mot NEIPA / Hazy IPA.");
-  if (sigs.belgian) balanseNotater.push("🇧🇪 Belgisk signatur: Gjæren vil dominere med krydrede fenol- og esternoter — typisk pepper, nellik og frukt.");
-  if (sigs.stout) balanseNotater.push("☕ Stout-signatur: Røstet bygg / sort malt gir brent espresso-karakter og sort farge.");
-  if (sigs.west_coast) balanseNotater.push("🏄 West Coast-signatur: Ren, tørr gjær og bittre aromatiske humler gir klassisk West Coast IPA-profil.");
-  if (sigs.lager) balanseNotater.push("🍺 Lager-signatur: Lagergjær peker mot pilsner og lagerstiler.");
+  if (sigs.english_ale) balanseNotater.push(t("stilmatch.sig.britisk"));
+  if (sigs.hazy) balanseNotater.push(t("stilmatch.sig.hazy"));
+  if (sigs.belgian) balanseNotater.push(t("stilmatch.sig.belgisk"));
+  if (sigs.stout) balanseNotater.push(t("stilmatch.sig.stout"));
+  if (sigs.west_coast) balanseNotater.push(t("stilmatch.sig.westCoast"));
+  if (sigs.lager) balanseNotater.push(t("stilmatch.sig.lager"));
 
   return { stil: dominantStil, stil_liste: stilMatcher, bu_gu: buGu, balanse: balanseNotater, problemer };
 }

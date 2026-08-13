@@ -26,7 +26,7 @@ function _aktivKladdHarInnhold() {
 
 function apneIByggeren(oppskrift) {
   if (_aktivKladdHarInnhold()) {
-    const ok = confirm("Åpne denne oppskriften? Den aktive oppskriften blir erstattet.");
+    const ok = confirm(t("oppskrift.apneConfirm"));
     if (!ok) return;
   }
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
@@ -47,7 +47,7 @@ function importerJsonFil(fil) {
     apneIByggeren(resultat.oppskrift);
   };
   reader.onerror = () => {
-    status.textContent = "Kunne ikke lese filen.";
+    status.textContent = t("oppskrift.lesefeil");
   };
   reader.readAsText(fil);
 }
@@ -92,10 +92,12 @@ function _uklartLinjeHtml(tekst) {
   return li;
 }
 
+const _IMPORT_KATEGORI_NOKKEL = { malt: "import.kategoriMalt", humle: "import.kategoriHumle", gjaer: "import.kategoriGjaer" };
+
 function visImportForhandsvisning(parsed, resultat) {
   sisteTreff = resultat;
   const nMalt = parsed.malt.length, nHumle = parsed.humle.length, nGjaer = parsed.gjaer.length;
-  document.getElementById("import-tellinger").textContent = `Tolket: ${nMalt} malt · ${nHumle} humle · ${nGjaer} gjær-linje(r)`;
+  document.getElementById("import-tellinger").textContent = t("import.tellinger", { malt: nMalt, humle: nHumle, gjaer: nGjaer });
 
   const advarselEl = document.getElementById("import-advarsler");
   advarselEl.innerHTML = "";
@@ -112,21 +114,21 @@ function visImportForhandsvisning(parsed, resultat) {
   const { matched, unmatched } = resultat;
   let noeMatchet = false;
   for (const m of matched.malt) {
-    treffListe.appendChild(_treffLinjeHtml(`Malt: ${escHtml(m.navn)} → <code>${escHtml(m.display_name)}</code> (${m.mengde} kg)`));
+    treffListe.appendChild(_treffLinjeHtml(t("import.treffMalt", { navn: escHtml(m.navn), display: escHtml(m.display_name), mengde: m.mengde })));
     noeMatchet = true;
   }
   for (const h of matched.humle) {
-    treffListe.appendChild(_treffLinjeHtml(`Humle: ${escHtml(h.navn)} → <code>${escHtml(h.display_name)}</code> (${h.gram} g, ${h.tid} min)`));
+    treffListe.appendChild(_treffLinjeHtml(t("import.treffHumle", { navn: escHtml(h.navn), display: escHtml(h.display_name), gram: h.gram, tid: h.tid })));
     noeMatchet = true;
   }
   if (matched.gjaer) {
-    treffListe.appendChild(_treffLinjeHtml(`Gjær: ${escHtml(matched.gjaer.navn)} → <code>${escHtml(matched.gjaer.display_name)}</code>`));
+    treffListe.appendChild(_treffLinjeHtml(t("import.treffGjaer", { navn: escHtml(matched.gjaer.navn), display: escHtml(matched.gjaer.display_name) })));
     noeMatchet = true;
   }
   if (!noeMatchet) {
     treffListe.appendChild((() => {
       const li = document.createElement("li");
-      li.textContent = "Ingen ingredienser ble gjenkjent.";
+      li.textContent = t("import.ingenGjenkjent");
       return li;
     })());
   }
@@ -136,7 +138,8 @@ function visImportForhandsvisning(parsed, resultat) {
   uklartListe.innerHTML = "";
   uklartSeksjon.hidden = unmatched.length === 0;
   for (const u of unmatched) {
-    uklartListe.appendChild(_uklartLinjeHtml(`${u.kategori.charAt(0).toUpperCase()}${u.kategori.slice(1)}: ${u.navn}`));
+    const kategoriNavn = t(_IMPORT_KATEGORI_NOKKEL[u.kategori] || "import.kategoriMalt");
+    uklartListe.appendChild(_uklartLinjeHtml(`${kategoriNavn}: ${u.navn}`));
   }
 
   document.getElementById("import-bekreft-knapp").disabled = !noeMatchet;
@@ -159,7 +162,7 @@ function bekreftImportTekst() {
   if (!sisteTreff) return;
   const { matched, metadata } = sisteTreff;
   const oppskrift = {
-    navn: (metadata && metadata.navn) || "Importert oppskrift",
+    navn: (metadata && metadata.navn) || t("oppskrift.importertNavnDefault"),
     volum: (metadata && metadata.batch_liter) || 20,
     malt: matched.malt.map((m) => ({ id: m.id, mengde: m.mengde })),
     humle: matched.humle.map((h) => ({ id: h.id, gram: h.gram, tid: h.tid })),

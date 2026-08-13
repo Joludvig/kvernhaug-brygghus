@@ -141,7 +141,8 @@ function maltItems() {
       search: [v.navn, v.produsent, v.kategori].filter(Boolean).join(" ").toLowerCase(),
       group: _maltGruppe(v),
     }))
-    .sort((a, b) => (rekkefolgeIndeks.get(a.group) - rekkefolgeIndeks.get(b.group)) || a.label.localeCompare(b.label, "no"));
+    .sort((a, b) => (rekkefolgeIndeks.get(a.group) - rekkefolgeIndeks.get(b.group)) || a.label.localeCompare(b.label, "no"))
+    .map((item) => ({ ...item, group: maltGruppeVisning(item.group) }));
 }
 
 function humleItems() {
@@ -163,7 +164,7 @@ function gjaerItems() {
 function stilItems() {
   return Object.keys(bjcpStyles)
     .sort((a, b) => a.localeCompare(b, "no"))
-    .map((navn) => ({ id: navn, label: navn }));
+    .map((navn) => ({ id: navn, label: stilVisningsnavn(navn) }));
 }
 
 // ─── Modus: Bryggelærling / Bryggmester ──────────────────────────────────
@@ -181,7 +182,7 @@ function settModus(modus) {
     knapp.setAttribute("aria-pressed", String(knapp.dataset.modus === modus));
   }
   const statusEl = document.getElementById("sidemeny-modus-status");
-  if (statusEl) statusEl.textContent = modus === "mester" ? "Modus: Bryggmester" : "Modus: Bryggelærling";
+  if (statusEl) statusEl.textContent = t(modus === "mester" ? "modus.statusMester" : "modus.statusLaerling");
   localStorage.setItem(MODUS_NOKKEL, modus);
 }
 
@@ -234,8 +235,8 @@ function leggTilMaltRad(forhandsutfylt) {
 
   const cb = new Combobox({
     items: maltItems(),
-    placeholder: "Søk etter malt …",
-    ariaLabel: "Velg malt",
+    placeholder: t("builder.malt.comboboxPlaceholder"),
+    ariaLabel: t("builder.malt.comboboxAriaLabel"),
     onSelect: beregnOgVisResultat,
   });
   mount.replaceWith(cb.el);
@@ -314,7 +315,7 @@ function oppdaterMaltProsentSum() {
   if (!el) return;
   const pcts = [...maltRaderEl.querySelectorAll(".malt-pct")].map((i) => parseFloat(i.value) || 0);
   const sum = pcts.reduce((a, b) => a + b, 0);
-  el.textContent = `Prosent-sum: ${sum.toFixed(1).replace(".", ",")}%`;
+  el.textContent = t("builder.malt.prosentSum", { sum: sum.toFixed(1).replace(".", ",") });
   el.classList.toggle("malt-prosent-advarsel", pcts.length > 0 && Math.abs(sum - 100) > 0.5);
 }
 
@@ -367,7 +368,7 @@ function brukMaltProsentfordeling() {
   const urorte = alleRader.filter((r) => !_redigerteMaltProsentRader.has(r));
 
   if (laste.length === 0) {
-    _visMaltProsentMelding("Skriv inn en prosentverdi i minst én maltrad før du bruker fordelingen.");
+    _visMaltProsentMelding(t("malt.prosent.tomFelt"));
     return;
   }
 
@@ -375,7 +376,7 @@ function brukMaltProsentfordeling() {
   for (const r of laste) {
     let v = parseFloat(r.querySelector(".malt-pct").value);
     if (!isFinite(v)) {
-      _visMaltProsentMelding("Prosentverdien må være et gyldig tall mellom 0 og 100 i alle redigerte rader.");
+      _visMaltProsentMelding(t("malt.prosent.ugyldigTall"));
       return;
     }
     if (v > 100) v = 100;
@@ -389,10 +390,7 @@ function brukMaltProsentfordeling() {
   // allerede summere til (tilnærmet) 100% for å kunne aksepteres.
   if (urorte.length === 0) {
     if (Math.abs(rest) >= 0.05) {
-      _visMaltProsentMelding(
-        `De valgte prosentene blir ${lastSum.toFixed(1).replace(".", ",")} %. ` +
-        `Juster summen til 100 %, eller la minst én malt stå urørt slik at resten kan beregnes automatisk.`
-      );
+      _visMaltProsentMelding(t("malt.prosent.justerTil100", { sum: lastSum.toFixed(1).replace(".", ",") }));
       return;
     }
     laste.forEach((r, i) => { r.querySelector(".malt-pct").value = lastePct[i].toFixed(1); });
@@ -409,10 +407,7 @@ function brukMaltProsentfordeling() {
   // urørte rader uten å produsere negative prosenter -- avvis vennlig
   // i stedet for å korrumpere data.
   if (rest < -0.05) {
-    _visMaltProsentMelding(
-      `De valgte prosentene blir ${lastSum.toFixed(1).replace(".", ",")} %, som er mer enn 100 %. ` +
-      `Juster en av de redigerte radene.`
-    );
+    _visMaltProsentMelding(t("malt.prosent.overstiger100", { sum: lastSum.toFixed(1).replace(".", ",") }));
     return;
   }
   const restKlemt = Math.max(0, rest);
@@ -491,8 +486,8 @@ function leggTilHumleRad(forhandsutfylt) {
 
   const cb = new Combobox({
     items: humleItems(),
-    placeholder: "Søk etter humle …",
-    ariaLabel: "Velg humle",
+    placeholder: t("builder.humle.comboboxPlaceholder"),
+    ariaLabel: t("builder.humle.comboboxAriaLabel"),
     onSelect: (id) => {
       const info = humleData[id];
       if (info && alfaInput.value === "") alfaInput.value = info.alfa;
@@ -656,19 +651,17 @@ function skalerOppskrift() {
   const statusEl = document.getElementById("skaler-status");
 
   if (naavaerende <= 0 || maal <= 0) {
-    statusEl.textContent = "Ugyldig volum -- skalering avbrutt.";
+    statusEl.textContent = t("builder.skaler.statusUgyldig");
     return;
   }
   if (Math.abs(maal - naavaerende) < 0.01) {
-    statusEl.textContent = "Mål-volum er allerede lik gjeldende volum.";
+    statusEl.textContent = t("builder.skaler.statusUendret");
     return;
   }
 
   const faktor = maal / naavaerende;
   const bekreftet = confirm(
-    `Skaler oppskriften fra ${_fmtVolum(naavaerende)} L til ${_fmtVolum(maal)} L?\n\n` +
-    `Alle malt- (kg) og humlemengder (gram) endres proporsjonalt (faktor ${faktor.toFixed(3)}). ` +
-    `Navn, stil, notater og gjærvalg endres ikke.`
+    t("builder.skaler.confirm", { fra: _fmtVolum(naavaerende), til: _fmtVolum(maal), faktor: faktor.toFixed(3) })
   );
   if (!bekreftet) return;
 
@@ -688,7 +681,7 @@ function skalerOppskrift() {
   oppdaterMaltProsent();
   beregnOgVisResultat();
 
-  statusEl.textContent = `Skalert fra ${_fmtVolum(naavaerende)} L til ${_fmtVolum(maal)} L.`;
+  statusEl.textContent = t("builder.skaler.statusFerdig", { fra: _fmtVolum(naavaerende), til: _fmtVolum(maal) });
 }
 
 function ebcTilFarge(ebc) {
@@ -709,7 +702,7 @@ function beregnOgVisResultat() {
   document.getElementById("res-ibu").textContent = Math.round(sisteBeregning.ibu);
   document.getElementById("res-ebc").textContent = Math.round(sisteBeregning.ebc);
   document.getElementById("ebc-swatch").style.backgroundColor = ebcTilFarge(sisteBeregning.ebc);
-  document.getElementById("identitet-navn").textContent = oppskrift.navn;
+  document.getElementById("identitet-navn").textContent = oppskrift.navn === "Uten navn" ? t("identitet.utenNavn") : oppskrift.navn;
   const bryggerLinje = [oppskrift.brygger, oppskrift.bryggeri].filter(Boolean).join(" · ");
   document.getElementById("identitet-brygger").textContent = bryggerLinje;
   document.getElementById("identitet-brygger").hidden = !bryggerLinje;
@@ -719,7 +712,7 @@ function beregnOgVisResultat() {
   // automatiske stilmatchen (sisteStilAnalyse.stil), som fortsatt vises
   // separat i Stilanalyse-seksjonen. Vises uansett om resten av
   // oppskriften er tom, skjules kun når ingen stil er valgt.
-  document.getElementById("identitet-stil").textContent = oppskrift.valgtStil || "";
+  document.getElementById("identitet-stil").textContent = stilVisningsnavn(oppskrift.valgtStil) || "";
   document.getElementById("identitet-stil").hidden = !oppskrift.valgtStil;
 
   if (oppdaterSmakshjul) oppdaterSmakshjul(sisteBeregning.flavorProfile);
@@ -727,7 +720,7 @@ function beregnOgVisResultat() {
 
   // Kun en visningsetikett (ikke et felt brukeren skriver i) -- trygt å
   // oppdatere på hver beregning, i motsetning til #skaler-maal-volum selv.
-  document.getElementById("skaler-naavaerende").textContent = `Nåværende batch: ${_fmtVolum(oppskrift.volum)} L`;
+  document.getElementById("skaler-naavaerende").textContent = t("builder.skaler.naavaerende", { vol: _fmtVolum(oppskrift.volum) });
 
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
 }
@@ -740,19 +733,19 @@ function _stilEntryFor(navn) {
 
 function _stilKortHtml(s, { visBeskrivelse = false } = {}) {
   const merke = s.bjcp_offisiell === false
-    ? '<span class="stil-merke" title="Kvernhaug/historisk kategori, ikke offisiell BJCP-stil">🏺 ikke offisiell BJCP</span>'
+    ? `<span class="stil-merke" title="${escHtml(t("stilmatch.ikkeOffisiellTitle"))}">${escHtml(t("stilmatch.ikkeOffisiellBadge"))}</span>`
     : "";
   const detaljer = [];
   for (const m of s.mangler) detaljer.push(`<li class="mangel">❌ ${escHtml(m)}</li>`);
   for (const o of s.onsket_sensorisk) detaljer.push(`<li class="onsket">💭 ${escHtml(o)}</li>`);
   const detaljerHtml = detaljer.length
-    ? `<details class="stil-detaljer"><summary>Se hva som mangler</summary><ul>${detaljer.join("")}</ul></details>`
-    : `<p class="stil-full-match">✅ Innenfor alle stilens numeriske grenser.</p>`;
+    ? `<details class="stil-detaljer"><summary>${escHtml(t("stilmatch.seHvaSomMangler"))}</summary><ul>${detaljer.join("")}</ul></details>`
+    : `<p class="stil-full-match">${escHtml(t("stilanalyse.innenforAlle"))}</p>`;
 
   return `
     <div class="stil-kort">
       <div class="stil-kort-topp">
-        <span class="stil-kort-navn">${escHtml(s.stil)}</span>
+        <span class="stil-kort-navn">${escHtml(stilVisningsnavn(s.stil))}</span>
         <span class="stil-kort-score">${s.score}%</span>
       </div>
       ${merke}
@@ -770,7 +763,7 @@ function _renderVeiledning(container, stilEntry, stilNavn) {
   }
   const v = byggStilVeiledning(stilEntry, stilNavn);
   if (v.alleInnenfor) {
-    container.innerHTML = `<p class="stil-veiledning-innenfor">✅ Oppskriften ligger innenfor det typiske området for ${escHtml(stilNavn)}.</p>`;
+    container.innerHTML = `<p class="stil-veiledning-innenfor">${escHtml(t("stilanalyse.innenforOmrade", { stil: stilVisningsnavn(stilNavn) }))}</p>`;
     return;
   }
   const linjer = v.linjer
@@ -793,21 +786,21 @@ function renderStilPanel() {
   if (harData) {
     const headlineNavn = document.getElementById("stil-headline-navn");
     const headlineInfo = document.getElementById("stil-headline-info");
-    headlineNavn.textContent = a.stil;
+    headlineNavn.textContent = stilVisningsnavn(a.stil);
 
     const autoContainer = document.getElementById("stil-veiledning-auto");
     if (a.stil === "Kreativt Brygg") {
-      headlineInfo.textContent = "Ingen stil i biblioteket treffer godt nok ennå — juster ingrediensene eller se nærliggende stiler under.";
+      headlineInfo.textContent = t("stilanalyse.ingenTreff");
       autoContainer.innerHTML = "";
     } else {
       const entry = _stilEntryFor(a.stil);
       headlineInfo.innerHTML = entry && entry.bjcp_offisiell === false
-        ? '<span class="stil-merke">🏺 Kvernhaug/historisk kategori — ikke en offisiell BJCP-stil</span>'
+        ? `<span class="stil-merke">${escHtml(t("stilmatch.ikkeOffisiellHeadline"))}</span>`
         : "";
       _renderVeiledning(autoContainer, entry, a.stil);
     }
 
-    document.getElementById("bu-gu-tekst").textContent = `Bitterhetsindeks (BU:GU): ${a.bu_gu.toFixed(2)}`;
+    document.getElementById("bu-gu-tekst").textContent = t("stilanalyse.buGu", { verdi: a.bu_gu.toFixed(2) });
 
     const notatEl = document.getElementById("stil-notater");
     notatEl.innerHTML = "";
@@ -825,7 +818,7 @@ function renderStilPanel() {
     const altEl = document.getElementById("stil-alternativ-liste");
     altEl.innerHTML = alternativer.length
       ? alternativer.map((s) => _stilKortHtml(s)).join("")
-      : '<p class="hjelpetekst">Ingen stiler matcher oppskriften din ennå.</p>';
+      : `<p class="hjelpetekst">${escHtml(t("stilmatch.ingenAlternativer"))}</p>`;
   }
 
   renderStilManuell();
@@ -843,7 +836,7 @@ function renderStilManuell() {
   const harData = sisteBeregning && harNokDataForStilmatch(sisteBeregning.maltRader, sisteBeregning.humleRader);
   if (!harData) {
     resultatEl.innerHTML = "";
-    veiledningEl.innerHTML = `<p class="hjelpetekst">Legg til malt og/eller humle for å se hvordan oppskriften matcher ${escHtml(valgtNavn)}.</p>`;
+    veiledningEl.innerHTML = `<p class="hjelpetekst">${escHtml(t("stilanalyse.leggTilForMatch", { stil: stilVisningsnavn(valgtNavn) }))}</p>`;
     return;
   }
   const entry = _stilEntryFor(valgtNavn);
@@ -885,7 +878,7 @@ function lagreOppskrift() {
   alle[oppskrift.navn] = oppskrift;
   localStorage.setItem(LAGRINGSNOKKEL, JSON.stringify(alle));
   const status = document.getElementById("lagre-status");
-  status.textContent = `Lagret "${oppskrift.navn}" i nettleseren. Se "📂 Mine oppskrifter" for å åpne den igjen senere.`;
+  status.textContent = t("oppskrift.lagretStatus", { navn: oppskrift.navn });
 }
 
 // Gjenoppretter en oppskrift (fra aktiv kladd, en lagret oppskrift, eller en
@@ -962,7 +955,7 @@ function lagreOppskriftsfil() {
   const oppskrift = samleOppskrift();
   lastNedKbhRecipeFil(oppskrift);
   document.getElementById("lagre-status").textContent =
-    `Lastet ned "${tryggFilnavn(oppskrift.navn)}.kbhrecipe". Bruk denne filen som backup eller for å flytte oppskriften til en annen enhet.`;
+    t("oppskrift.lagreFilStatus", { filnavn: tryggFilnavn(oppskrift.navn) });
 }
 
 // Blank oppskrift -- SAMME autoritative default-form som init() sin
@@ -989,14 +982,14 @@ function _blankOppskrift() {
 // meningsfullt innhold (oppskriftHarInnhold(), se kbhrecipe.js).
 function nyOppskrift() {
   if (oppskriftHarInnhold(samleOppskrift())) {
-    const ok = confirm("Vil du starte en ny oppskrift? Endringer i den aktive oppskriften som ikke er lagret eller eksportert vil forsvinne.");
+    const ok = confirm(t("oppskrift.nyConfirm"));
     if (!ok) return;
   }
   _gjenopprettOppskrift(_blankOppskrift());
   forhandsutfyllIdentitetsPreferanse();
   beregnOgVisResultat();
   document.getElementById("skaler-maal-volum").value = document.getElementById("batch-volum").value;
-  document.getElementById("lagre-status").textContent = "Ny, tom oppskrift.";
+  document.getElementById("lagre-status").textContent = t("oppskrift.nyStatus");
 }
 
 function apneOppskriftsfil(fil) {
@@ -1009,14 +1002,14 @@ function apneOppskriftsfil(fil) {
       return;
     }
     if (oppskriftHarInnhold(samleOppskrift())) {
-      const ok = confirm("Åpne denne oppskriften? Den aktive oppskriften blir erstattet.");
+      const ok = confirm(t("oppskrift.apneConfirm"));
       if (!ok) return;
     }
     _gjenopprettOppskrift(resultat.oppskrift);
-    status.textContent = "Oppskriften er åpnet.";
+    status.textContent = t("oppskrift.apnetStatus");
   };
   reader.onerror = () => {
-    status.textContent = "Kunne ikke lese filen.";
+    status.textContent = t("oppskrift.lesefeil");
   };
   reader.readAsText(fil);
 }
@@ -1031,8 +1024,8 @@ async function init() {
   const gjaerMount = document.getElementById("gjaer-velger-mount");
   gjaerCombobox = new Combobox({
     items: gjaerItems(),
-    placeholder: "Søk etter gjær …",
-    ariaLabel: "Velg gjær",
+    placeholder: t("builder.gjaer.comboboxPlaceholder"),
+    ariaLabel: t("builder.gjaer.comboboxAriaLabel"),
     onSelect: () => {
       attenuationOverrideRad.style.display = gjaerCombobox.getValue() ? "none" : "";
       if (gjaerCombobox.getValue()) gjaerEgendefinertFelt.hidden = true;
@@ -1053,8 +1046,8 @@ async function init() {
   const stilMount = document.getElementById("stil-velger-mount");
   stilCombobox = new Combobox({
     items: stilItems(),
-    placeholder: "Søk eller velg ølstil …",
-    ariaLabel: "Velg ølstil",
+    placeholder: t("builder.stilvalg.comboboxPlaceholder"),
+    ariaLabel: t("builder.stilvalg.comboboxAriaLabel"),
     onSelect: () => { renderStilManuell(); beregnOgVisResultat(); },
   });
   stilMount.replaceWith(stilCombobox.el);
@@ -1104,5 +1097,44 @@ async function init() {
   // slik at vi ikke overskriver brukerens pågående inntasting i feltet.
   document.getElementById("skaler-maal-volum").value = document.getElementById("batch-volum").value;
 }
+
+// Runde 14 -- språkbytte skal aldri miste arbeid eller reloade siden (se
+// i18n.js). data-i18n-attributtene i HTML-en oppdateres allerede av
+// i18n.js sin egen applyI18n(); denne lytteren tar seg KUN av det
+// data-i18n ikke når: allerede-konstruerte combobox-widgeter (placeholder/
+// aria-label lever inne i widgetens egne DOM-noder, og malt/stil sine
+// item-lister/valgt visningstekst må bygges på nytt fra maltData/
+// bjcpStyles), smakshjulets statiske akse-etiketter (tegnes kun én gang av
+// initSmakshjul), og selve resultatberegningen (stilmatch-/veilednings-
+// tekstene genereres på nytt av style.js/veiledning.js sine t()-kall).
+// Ingen oppskriftsdata røres -- kun visning.
+window.addEventListener("kvernhaug:sprakendret", () => {
+  for (const rad of maltRaderEl.querySelectorAll(".ingrediens-rad")) {
+    const cb = rad._combobox;
+    if (!cb) continue;
+    cb.items = maltItems();
+    cb.inputEl.placeholder = t("builder.malt.comboboxPlaceholder");
+    cb.inputEl.setAttribute("aria-label", t("builder.malt.comboboxAriaLabel"));
+  }
+  for (const rad of humleRaderEl.querySelectorAll(".ingrediens-rad")) {
+    const cb = rad._combobox;
+    if (!cb) continue;
+    cb.inputEl.placeholder = t("builder.humle.comboboxPlaceholder");
+    cb.inputEl.setAttribute("aria-label", t("builder.humle.comboboxAriaLabel"));
+  }
+  if (gjaerCombobox) {
+    gjaerCombobox.inputEl.placeholder = t("builder.gjaer.comboboxPlaceholder");
+    gjaerCombobox.inputEl.setAttribute("aria-label", t("builder.gjaer.comboboxAriaLabel"));
+  }
+  if (stilCombobox) {
+    stilCombobox.items = stilItems();
+    stilCombobox.inputEl.placeholder = t("builder.stilvalg.comboboxPlaceholder");
+    stilCombobox.inputEl.setAttribute("aria-label", t("builder.stilvalg.comboboxAriaLabel"));
+    if (stilCombobox.getValue()) stilCombobox.setValue(stilCombobox.getValue());
+  }
+  oppdaterSmakshjul = initSmakshjul(document.getElementById("smakshjul-container"), SMAKS_KATEGORIER);
+  oppdaterMaltProsentSum();
+  beregnOgVisResultat();
+});
 
 init();

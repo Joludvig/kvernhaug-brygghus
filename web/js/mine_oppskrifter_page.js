@@ -34,7 +34,7 @@ function _aktivKladdHarInnhold() {
 
 function apneIByggeren(oppskrift) {
   if (_aktivKladdHarInnhold()) {
-    const ok = confirm("Åpne denne oppskriften? Den aktive oppskriften blir erstattet.");
+    const ok = confirm(t("oppskrift.apneConfirm"));
     if (!ok) return;
   }
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
@@ -71,7 +71,8 @@ function visListe() {
       const dato = document.createElement("span");
       dato.className = "oppskrift-listeelement-dato";
       const d = new Date(oppskrift.lagretDato);
-      dato.textContent = isNaN(d) ? "" : `Lagret ${d.toLocaleDateString("no-NO")}`;
+      const datoLokal = d.toLocaleDateString(gjeldendeSprak() === "en" ? "en-GB" : "no-NO");
+      dato.textContent = isNaN(d) ? "" : t("mineOppskrifter.lagretDato", { dato: datoLokal });
       info.appendChild(dato);
     }
     li.appendChild(info);
@@ -81,7 +82,7 @@ function visListe() {
 
     const apneKnapp = document.createElement("button");
     apneKnapp.type = "button";
-    apneKnapp.textContent = "Åpne i byggeren";
+    apneKnapp.textContent = t("mineOppskrifter.apneKnapp");
     apneKnapp.addEventListener("click", () => apneIByggeren(oppskrift));
     knapperad.appendChild(apneKnapp);
 
@@ -89,10 +90,10 @@ function visListe() {
     slettKnapp.type = "button";
     slettKnapp.className = "fjern-knapp";
     slettKnapp.textContent = "✕";
-    slettKnapp.title = "Slett";
-    slettKnapp.setAttribute("aria-label", `Slett ${navn}`);
+    slettKnapp.title = t("mineOppskrifter.slettTitle");
+    slettKnapp.setAttribute("aria-label", t("mineOppskrifter.slettAriaLabel", { navn }));
     slettKnapp.addEventListener("click", () => {
-      if (confirm(`Slette "${navn}"? Dette kan ikke angres.`)) slettOppskrift(navn);
+      if (confirm(t("mineOppskrifter.slettConfirm", { navn }))) slettOppskrift(navn);
     });
     knapperad.appendChild(slettKnapp);
 
@@ -104,5 +105,7 @@ function visListe() {
 function init() {
   visListe();
 }
+
+window.addEventListener("kvernhaug:sprakendret", visListe);
 
 init();
