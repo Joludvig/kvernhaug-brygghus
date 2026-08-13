@@ -19,7 +19,24 @@ function lagreAlle(alle) {
   localStorage.setItem(LAGRINGSNOKKEL, JSON.stringify(alle));
 }
 
+// Runde 13B -- samme beskyttelse som byggerens "Åpne oppskriftsfil" og
+// Importer-sidens håndoverlevering (app.js::apneOppskriftsfil,
+// importer_page.js::apneIByggeren): bekreft før en eksisterende,
+// meningsfull aktiv kladd overskrives. Samme oppskriftHarInnhold()-
+// kontrakt fra kbhrecipe.js, ingen egen innholdsdetektor.
+function _aktivKladdHarInnhold() {
+  try {
+    return oppskriftHarInnhold(JSON.parse(localStorage.getItem(AKTIV_KLADD_NOKKEL)));
+  } catch {
+    return false;
+  }
+}
+
 function apneIByggeren(oppskrift) {
+  if (_aktivKladdHarInnhold()) {
+    const ok = confirm("Åpne denne oppskriften? Den aktive oppskriften blir erstattet.");
+    if (!ok) return;
+  }
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
   window.location.href = "index.html";
 }

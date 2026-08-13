@@ -108,7 +108,7 @@ Oppskriften som står i byggeren akkurat nå autolagres fortløpende til en egen
 
 1. Laster du `index.html` på nytt (eller lukker og åpner fanen igjen), gjenopprettes akkurat det du holdt på med.
 2. **Utskrift**-siden kan bruke den aktive, *også ulagrede*, oppskriften direkte — du trenger ikke lagre først for å skrive ut. Utskrift-siden leser kun denne nøkkelen; den skriver aldri til den, så å forhåndsvise en lagret oppskrift der overskriver aldri det du faktisk holder på med i byggeren.
-3. **Mine oppskrifter**-siden sin "Åpne i byggeren" og fil-/tekstimport bruker samme nøkkel som håndoverleveringsmekanisme: skriv oppskriften dit, naviger til `index.html`, som gjenoppretter den derfra ved oppstart. Byggerens "Ny oppskrift", byggerens "Åpne oppskriftsfil" og Importer-sidens import spør alle brukeren om bekreftelse før en aktiv kladd med meningsfullt innhold overskrives eller nullstilles (se `oppskriftHarInnhold()` i `js/kbhrecipe.js`) — men aldri før en fil er validert (ugyldige filer avvises med en statusmelding, ingen dialog), og aldri når byggeren allerede er reelt tom.
+3. **Mine oppskrifter**-siden sin "Åpne i byggeren" og fil-/tekstimport bruker samme nøkkel som håndoverleveringsmekanisme: skriv oppskriften dit, naviger til `index.html`, som gjenoppretter den derfra ved oppstart. Byggerens "Ny oppskrift", byggerens "Åpne oppskriftsfil", Importer-sidens import og Mine oppskrifter sin "Åpne i byggeren" spør alle brukeren om bekreftelse før en aktiv kladd med meningsfullt innhold overskrives eller nullstilles (se `oppskriftHarInnhold()` i `js/kbhrecipe.js`) — men aldri før en fil er validert (ugyldige filer avvises med en statusmelding, ingen dialog), og aldri når byggeren allerede er reelt tom.
 
 ## Portabel oppskriftsfil (.kbhrecipe)
 
