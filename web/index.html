@@ -120,6 +120,7 @@
         <span class="malt-prosent-sum" id="malt-prosent-sum">Prosent-sum: 0,0%</span>
         <button type="button" class="malt-prosent-knapp" id="malt-bruk-prosent-knapp">Bruk prosentfordeling</button>
       </div>
+      <p class="hjelpetekst malt-prosent-melding mester-only" id="malt-prosent-melding" aria-live="polite" hidden></p>
     </section>
 
     <section class="panel" id="humle-panel">
@@ -153,6 +154,17 @@
         <button type="button" id="eksporter-knapp">⬇️ Eksporter (JSON)</button>
       </div>
       <p class="hjelpetekst" id="lagre-status"></p>
+
+      <div class="skaler-rad mester-only" id="skaler-rad">
+        <span class="skaler-naavaerende" id="skaler-naavaerende">Nåværende batch: 20 L</span>
+        <div class="felt-rad">
+          <label for="skaler-maal-volum">Skaler til (L)</label>
+          <input type="number" id="skaler-maal-volum" min="1" max="200" step="0.5">
+        </div>
+        <button type="button" class="skaler-knapp" id="skaler-knapp">📐 Skaler oppskrift</button>
+        <p class="hjelpetekst">Malt (kg) og humle (gram) skaleres proporsjonalt til nytt volum. Ølnavn, brygger, bryggeri, notater, valgt stil, gjærvalg, humletid og alfasyre-overstyring endres ikke.</p>
+        <p class="hjelpetekst" id="skaler-status" aria-live="polite"></p>
+      </div>
     </section>
   </div>
 

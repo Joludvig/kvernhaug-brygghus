@@ -698,13 +698,15 @@ textarea:focus,
 }
 
 /* ── Malt: kg ↔ % (kun Bryggmester) ─────────────────────────────────────
-   Runde 11: portert fra ui/malt_panel.py -- se oppdaterMaltProsent()/
-   brukMaltProsentfordeling() i app.js for selve logikken. */
+   Runde 12C: to redigeringsretninger. Kg → % er live (oppdaterMaltProsent()).
+   % → kg er EKSPLISITT: mens brukeren skriver i et %-felt endres kun det
+   feltet + sum-indikatoren (se _registrerMaltProsentInput() i app.js) --
+   kg og andre %-felt endres først når "Bruk prosentfordeling" trykkes
+   (brukMaltProsentfordeling()). */
 
 .malt-prosent-rad {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 0.8rem;
   flex-wrap: wrap;
   margin-top: 0.6rem;
@@ -724,15 +726,19 @@ textarea:focus,
   border: 1px solid var(--line-strong);
   color: var(--body);
   border-radius: 6px;
-  padding: 0.5rem 0.9rem;
-  min-height: 2.5rem;
+  padding: 0.4rem 0.8rem;
+  min-height: 2.3rem;
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 }
 
 .malt-prosent-knapp:hover {
   border-color: var(--gold);
   color: var(--gold);
+}
+
+.malt-prosent-melding {
+  margin-top: 0.4rem;
 }
 
 /* ── Humle: gram ↔ mål-IBU (kun Bryggmester) ────────────────────────────
@@ -1046,6 +1052,44 @@ textarea:focus,
   font-size: 0.92rem;
   line-height: 1.5;
   margin: 0.7rem 0 0;
+}
+
+/* Oppskriftsskalering (kun Bryggmester, Runde 12) -- portert fra
+   ui/recipe_card.py sin "Skaler oppskrift"-kontrakt: eksplisitt knapp,
+   ingen live-kobling til batch-volum-feltet (se app.js::skalerOppskrift). */
+.skaler-rad {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.skaler-naavaerende {
+  display: block;
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin-bottom: 0.4rem;
+}
+
+.skaler-knapp {
+  background: none;
+  border: 1px solid var(--line-strong);
+  color: var(--body);
+  border-radius: 6px;
+  padding: 0.55rem 1rem;
+  min-height: 2.6rem;
+  cursor: pointer;
+  font-size: 0.92rem;
+}
+
+.skaler-knapp:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+@media (max-width: 640px) {
+  .skaler-knapp {
+    width: 100%;
+  }
 }
 
 /* ── Lagrede oppskrifter ─────────────────────────────────────────────── */

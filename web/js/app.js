@@ -260,29 +260,41 @@ function leggTilMaltRad(forhandsutfylt) {
   }
 
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
+    _redigerteMaltProsentRader.delete(rad);
     rad.remove();
     oppdaterMaltProsent();
     beregnOgVisResultat();
   });
   rad.querySelector(".malt-mengde").addEventListener("input", () => {
+    _redigerteMaltProsentRader.clear();
     oppdaterMaltProsent();
     beregnOgVisResultat();
   });
+  rad.querySelector(".malt-pct").addEventListener("input", () => _registrerMaltProsentInput(rad));
   maltRaderEl.appendChild(rad);
   oppdaterMaltProsent();
   beregnOgVisResultat();
 }
 
 // ─── Malt kg ↔ % (kun Bryggmester) ────────────────────────────────────────
-// Portert fra ui/malt_panel.py sin faktiske kontrakt: kg er ALLTID
-// kilden, % er alltid DERIVERT av kg/total -- oppdateres live for alle
-// rader hver gang en kg-verdi, tillegg eller fjerning endrer totalen
-// (samme utløsere som desktop-appens "_malt_pct_pending_sync"). Det
-// motsatte (redigere %) skjer IKKE live -- akkurat som på desktop krever
-// det et eksplisitt klikk på "Bruk prosentfordeling", som leser ALLE
-// rader sine %-felt samtidig og fordeler den NÅVÆRENDE totalvekten
-// proporsjonalt. Ingen live-lytter på .malt-pct -- det er nettopp det
-// som gjør at det ikke oppstår en kg<->%-feedback-loop.
+// Runde 12D -- to tydelige, motsatte redigeringsretninger:
+//
+// 1) Rediger KG (oppdaterMaltProsent, kalt fra .malt-mengde sin egen
+//    "input"-lytter i leggTilMaltRad): kg er fasit, alle % beregnes fra
+//    kg/total, live. Tømmer `_redigerteMaltProsentRader` -- gamle
+//    %-redigeringer er ikke lenger relevante når kg endres direkte.
+//
+// 2) Rediger % (_registrerMaltProsentInput, kalt fra .malt-pct sin
+//    "input"-lytter): MENS brukeren skriver endres KUN det feltet + sum-
+//    indikatoren. Raden legges i settet `_redigerteMaltProsentRader` --
+//    FLERE rader kan være manuelt redigert ("låst") samtidig, ikke bare
+//    den sist skrevne. Verken kg eller andre %-felt røres her -- det
+//    skjer kun i brukMaltProsentfordeling(), kalt av "Bruk
+//    prosentfordeling"-knappen. Dette erstatter Runde 12C sin
+//    enkelt-rad-låsing (`_sistRedigertMaltProsentRad`), som feilaktig
+//    lot knappen overskrive tidligere manuelt satte %-verdier når
+//    brukeren redigerte flere rader etter hverandre (f.eks. hovedmalt
+//    60% + spesialmalt 20% -- 12C ville da kunne endre 60%-verdien).
 function oppdaterMaltProsent() {
   const rader = [...maltRaderEl.querySelectorAll(".ingrediens-rad")];
   const kgVerdier = rader.map((r) => parseFloat(r.querySelector(".malt-mengde").value) || 0);
@@ -294,6 +306,9 @@ function oppdaterMaltProsent() {
   oppdaterMaltProsentSum();
 }
 
+// Leser DIREKTE fra de synlige .malt-pct-inputfeltene (aldri fra en
+// tidligere/lagret verdi) -- dette er akkurat den verdien brukeren ser,
+// også midlertidig mens summen f.eks. viser 135,0% før knappetrykk.
 function oppdaterMaltProsentSum() {
   const el = document.getElementById("malt-prosent-sum");
   if (!el) return;
@@ -303,22 +318,153 @@ function oppdaterMaltProsentSum() {
   el.classList.toggle("malt-prosent-advarsel", pcts.length > 0 && Math.abs(sum - 100) > 0.5);
 }
 
-// "Bruk prosentfordeling" -- portert fra malt_panel.py sin apply_pct_btn:
-// leser hva brukeren har skrevet i %-feltene NÅ, og fordeler dagens
-// totale kg-vekt proporsjonalt mellom radene (round til 3 desimaler,
-// samme som desktop). Rører ingenting hvis prosentsummen eller totalen er 0.
+// Settet av maltrader brukeren har manuelt redigert %-feltet på siden
+// forrige kg-redigering / vellykkede prosentfordeling. Kalt på hvert
+// tastetrykk i et .malt-pct-felt -- gjør KUN to ting: legger raden i
+// settet, og oppdaterer sum-indikatoren fra synlige felt.
+let _redigerteMaltProsentRader = new Set();
+function _registrerMaltProsentInput(rad) {
+  _redigerteMaltProsentRader.add(rad);
+  oppdaterMaltProsentSum();
+  _visMaltProsentMelding("");
+}
+
+function _visMaltProsentMelding(tekst) {
+  const el = document.getElementById("malt-prosent-melding");
+  if (!el) return;
+  el.textContent = tekst;
+  el.hidden = !tekst;
+}
+
+// Kalt av "Bruk prosentfordeling"-knappen. ALLE manuelt redigerte rader
+// (`_redigerteMaltProsentRader`) er brukerens eksplisitte, låste valg og
+// endres ALDRI av denne funksjonen. De ØVRIGE (urørte) radene fordeles
+// proporsjonalt mellom seg (ut fra sine SYNLIGE %-forhold på
+// knappetrykk-tidspunktet) slik at summen blir eksakt 100,0%, og total
+// maltvekt (fasit = summen av kg FØR knappetrykk) fordeles på nytt til
+// alle rader ut fra den ferdige %-fordelingen.
 function brukMaltProsentfordeling() {
-  const rader = [...maltRaderEl.querySelectorAll(".ingrediens-rad")];
-  const pcts = rader.map((r) => parseFloat(r.querySelector(".malt-pct").value) || 0);
-  const sumPct = pcts.reduce((a, b) => a + b, 0);
-  const currentTotal = rader.reduce((sum, r) => sum + (parseFloat(r.querySelector(".malt-mengde").value) || 0), 0);
-  if (sumPct > 0 && currentTotal > 0) {
-    rader.forEach((r, i) => {
-      const nyKg = Math.round((pcts[i] / sumPct) * currentTotal * 1000) / 1000;
-      r.querySelector(".malt-mengde").value = nyKg;
-    });
+  const alleRader = [...maltRaderEl.querySelectorAll(".ingrediens-rad")];
+  if (alleRader.length === 0) return;
+
+  const totalKg = alleRader.reduce((sum, r) => sum + (parseFloat(r.querySelector(".malt-mengde").value) || 0), 0);
+
+  // Spesialtilfelle: kun én maltrad -- den er alltid 100%.
+  if (alleRader.length === 1) {
+    alleRader[0].querySelector(".malt-pct").value = "100.0";
+    alleRader[0].querySelector(".malt-mengde").value = Math.round(totalKg * 1000) / 1000;
+    _redigerteMaltProsentRader.clear();
+    _visMaltProsentMelding("");
+    oppdaterMaltProsentSum();
+    beregnOgVisResultat();
+    return;
   }
-  oppdaterMaltProsent();
+
+  // Kun rader som fortsatt finnes i DOM-et regnes som gyldig låst --
+  // beskytter mot stale referanser (f.eks. etter at oppskriften er
+  // bygget på nytt fra lagret state/import).
+  const laste = alleRader.filter((r) => _redigerteMaltProsentRader.has(r));
+  const urorte = alleRader.filter((r) => !_redigerteMaltProsentRader.has(r));
+
+  if (laste.length === 0) {
+    _visMaltProsentMelding("Skriv inn en prosentverdi i minst én maltrad før du bruker fordelingen.");
+    return;
+  }
+
+  const lastePct = [];
+  for (const r of laste) {
+    let v = parseFloat(r.querySelector(".malt-pct").value);
+    if (!isFinite(v)) {
+      _visMaltProsentMelding("Prosentverdien må være et gyldig tall mellom 0 og 100 i alle redigerte rader.");
+      return;
+    }
+    if (v > 100) v = 100;
+    else if (v < 0) v = 0;
+    lastePct.push(v);
+  }
+  const lastSum = lastePct.reduce((a, b) => a + b, 0);
+  const rest = 100 - lastSum;
+
+  // Ingen urørt rad kan absorbere resten -- da må de låste verdiene
+  // allerede summere til (tilnærmet) 100% for å kunne aksepteres.
+  if (urorte.length === 0) {
+    if (Math.abs(rest) >= 0.05) {
+      _visMaltProsentMelding(
+        `De valgte prosentene blir ${lastSum.toFixed(1).replace(".", ",")} %. ` +
+        `Juster summen til 100 %, eller la minst én malt stå urørt slik at resten kan beregnes automatisk.`
+      );
+      return;
+    }
+    laste.forEach((r, i) => { r.querySelector(".malt-pct").value = lastePct[i].toFixed(1); });
+    const nyeKg = laste.map((_, i) => Math.round(totalKg * lastePct[i] / 100 * 1000) / 1000);
+    laste.forEach((r, i) => { r.querySelector(".malt-mengde").value = nyeKg[i]; });
+    _redigerteMaltProsentRader.clear();
+    _visMaltProsentMelding("");
+    oppdaterMaltProsentSum();
+    beregnOgVisResultat();
+    return;
+  }
+
+  // Låste verdier som til sammen overstiger 100% kan ikke fordeles til
+  // urørte rader uten å produsere negative prosenter -- avvis vennlig
+  // i stedet for å korrumpere data.
+  if (rest < -0.05) {
+    _visMaltProsentMelding(
+      `De valgte prosentene blir ${lastSum.toFixed(1).replace(".", ",")} %, som er mer enn 100 %. ` +
+      `Juster en av de redigerte radene.`
+    );
+    return;
+  }
+  const restKlemt = Math.max(0, rest);
+
+  // Skriv låste verdier uendret tilbake (etter klemming til [0,100]).
+  laste.forEach((r, i) => { r.querySelector(".malt-pct").value = lastePct[i].toFixed(1); });
+
+  // Proporsjonal fordeling av `restKlemt` mellom de urørte radene, ut fra
+  // deres synlige %-forhold på knappetrykk-tidspunktet. Siste urørte rad
+  // får avrundingsresten i stedet for sin egen avrundede andel, slik at
+  // vist sum alltid blir eksakt 100,0%. Ved 0-sum blant de urørte: fordel
+  // resten likt (unngår udefinert 0/0-divisjon).
+  const gjeldendeUrortePct = urorte.map((r) => parseFloat(r.querySelector(".malt-pct").value) || 0);
+  const gjeldendeUrorteSum = gjeldendeUrortePct.reduce((a, b) => a + b, 0);
+  const nyeUrortePct = urorte.map((_, i) => {
+    if (i === urorte.length - 1) return null; // fylles inn under
+    return gjeldendeUrorteSum > 0
+      ? gjeldendeUrortePct[i] / gjeldendeUrorteSum * restKlemt
+      : restKlemt / urorte.length;
+  });
+  let sumUtenSiste = 0;
+  for (let i = 0; i < urorte.length - 1; i++) {
+    nyeUrortePct[i] = Math.round(nyeUrortePct[i] * 10) / 10;
+    sumUtenSiste += nyeUrortePct[i];
+  }
+  nyeUrortePct[urorte.length - 1] = Math.round((restKlemt - sumUtenSiste) * 10) / 10;
+
+  urorte.forEach((r, i) => {
+    r.querySelector(".malt-pct").value = nyeUrortePct[i].toFixed(1);
+  });
+
+  // Kg beregnes for ALLE rader direkte fra den ferdige %-fordelingen
+  // (3 desimaler). En eventuell avrundingsrest korrigeres på en URØRT
+  // rad (siste urørte) slik at total maltvekt bevares eksakt -- de
+  // manuelt låste radene røres aldri for avrunding.
+  const nyeKg = alleRader.map((r) => {
+    const lasteIdx = laste.indexOf(r);
+    if (lasteIdx !== -1) return Math.round(totalKg * lastePct[lasteIdx] / 100 * 1000) / 1000;
+    const urortIdx = urorte.indexOf(r);
+    return Math.round(totalKg * nyeUrortePct[urortIdx] / 100 * 1000) / 1000;
+  });
+  const kgSum = nyeKg.reduce((a, b) => a + b, 0);
+  const kgRest = Math.round((totalKg - kgSum) * 1000) / 1000;
+  if (kgRest !== 0) {
+    const sisteUrortIdx = alleRader.indexOf(urorte[urorte.length - 1]);
+    nyeKg[sisteUrortIdx] = Math.round((nyeKg[sisteUrortIdx] + kgRest) * 1000) / 1000;
+  }
+  alleRader.forEach((r, i) => { r.querySelector(".malt-mengde").value = nyeKg[i]; });
+
+  _redigerteMaltProsentRader.clear();
+  _visMaltProsentMelding("");
+  oppdaterMaltProsentSum();
   beregnOgVisResultat();
 }
 
@@ -484,6 +630,67 @@ function _lesGjaerEgendefinert() {
   };
 }
 
+// ─── Oppskriftsskalering (kun Bryggmester) ────────────────────────────────
+// Portert fra ui/recipe_card.py sin "Skaler oppskrift"-kontrakt: faktor =
+// mål-volum / nåværende volum, malt-kg skaleres til 3 desimaler, humle-gram
+// til 1 desimal (samme avrunding som desktop). Alt annet -- humletid,
+// alfasyre-overstyring, egendefinerte ingredienser, gjærvalg, navn, brygger,
+// bryggeri, notater, valgt stil -- er UENDRET, akkurat som desktop (som kun
+// itererer malt sitt "mengde"-felt og humle sitt "gram"-felt, aldri gjær
+// eller metadata -- se ui/recipe_card.py sin skaler_btn-handler). Ett
+// bevisst avvik fra desktop: desktop foreslår automatisk et nytt navn
+// ("<navn> - <mål>L batch") som en lagre-sikkerhet mot å overskrive
+// originalen ved et uhell -- her beholdes navnet helt uendret, siden
+// oppskriftsnavnet eksplisitt skal bevares ved skalering i web. Eksplisitt
+// knapp, ingen live-kobling til batch-volum-feltet -- samme prinsipp som
+// hindrer en feedback-loop i malt kg/%- og mål-IBU-arbeidet over.
+function _fmtVolum(v) {
+  return Number.isInteger(v) ? String(v) : v.toFixed(1).replace(/\.0$/, "");
+}
+
+function skalerOppskrift() {
+  const volumInput = document.getElementById("batch-volum");
+  const naavaerende = parseFloat(volumInput.value) || 0;
+  const maalInput = document.getElementById("skaler-maal-volum");
+  const maal = parseFloat(maalInput.value) || 0;
+  const statusEl = document.getElementById("skaler-status");
+
+  if (naavaerende <= 0 || maal <= 0) {
+    statusEl.textContent = "Ugyldig volum -- skalering avbrutt.";
+    return;
+  }
+  if (Math.abs(maal - naavaerende) < 0.01) {
+    statusEl.textContent = "Mål-volum er allerede lik gjeldende volum.";
+    return;
+  }
+
+  const faktor = maal / naavaerende;
+  const bekreftet = confirm(
+    `Skaler oppskriften fra ${_fmtVolum(naavaerende)} L til ${_fmtVolum(maal)} L?\n\n` +
+    `Alle malt- (kg) og humlemengder (gram) endres proporsjonalt (faktor ${faktor.toFixed(3)}). ` +
+    `Navn, stil, notater og gjærvalg endres ikke.`
+  );
+  if (!bekreftet) return;
+
+  for (const rad of maltRaderEl.querySelectorAll(".ingrediens-rad")) {
+    const felt = rad.querySelector(".malt-mengde");
+    felt.value = Math.round((parseFloat(felt.value) || 0) * faktor * 1000) / 1000;
+  }
+  for (const rad of humleRaderEl.querySelectorAll(".ingrediens-rad")) {
+    const felt = rad.querySelector(".humle-gram");
+    felt.value = Math.round((parseFloat(felt.value) || 0) * faktor * 10) / 10;
+  }
+
+  volumInput.value = maal;
+  maalInput.value = maal;
+
+  _redigerteMaltProsentRader.clear();
+  oppdaterMaltProsent();
+  beregnOgVisResultat();
+
+  statusEl.textContent = `Skalert fra ${_fmtVolum(naavaerende)} L til ${_fmtVolum(maal)} L.`;
+}
+
 function ebcTilFarge(ebc) {
   // Grov, kun-visuell EBC->RGB-tilnærming for fargeswatch (ikke en presis fargemodell).
   const clamped = Math.max(2, Math.min(ebc, 80));
@@ -517,6 +724,10 @@ function beregnOgVisResultat() {
 
   if (oppdaterSmakshjul) oppdaterSmakshjul(sisteBeregning.flavorProfile);
   renderStilPanel();
+
+  // Kun en visningsetikett (ikke et felt brukeren skriver i) -- trygt å
+  // oppdatere på hver beregning, i motsetning til #skaler-maal-volum selv.
+  document.getElementById("skaler-naavaerende").textContent = `Nåværende batch: ${_fmtVolum(oppskrift.volum)} L`;
 
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
 }
@@ -687,6 +898,7 @@ function _gjenopprettOppskrift(oppskrift) {
   document.getElementById("batch-volum").value = oppskrift.volum;
   document.getElementById("effektivitet").value = oppskrift.effektivitet || 75;
 
+  _redigerteMaltProsentRader.clear();
   maltRaderEl.innerHTML = "";
   (oppskrift.malt || []).forEach((m) => leggTilMaltRad(m));
   if (!oppskrift.malt || oppskrift.malt.length === 0) leggTilMaltRad();
@@ -781,7 +993,6 @@ async function init() {
 
   document.getElementById("legg-til-malt").addEventListener("click", () => leggTilMaltRad());
   document.getElementById("legg-til-humle").addEventListener("click", () => leggTilHumleRad());
-  document.getElementById("malt-bruk-prosent-knapp").addEventListener("click", brukMaltProsentfordeling);
   document.getElementById("oppskrift-navn").addEventListener("input", beregnOgVisResultat);
   document.getElementById("batch-volum").addEventListener("input", beregnOgVisResultat);
   document.getElementById("effektivitet").addEventListener("input", beregnOgVisResultat);
@@ -800,6 +1011,8 @@ async function init() {
 
   document.getElementById("lagre-knapp").addEventListener("click", lagreOppskrift);
   document.getElementById("eksporter-knapp").addEventListener("click", eksporterJson);
+  document.getElementById("skaler-knapp").addEventListener("click", skalerOppskrift);
+  document.getElementById("malt-bruk-prosent-knapp").addEventListener("click", brukMaltProsentfordeling);
 
   const kladd = hentAktivKladd();
   if (kladd) {
@@ -809,6 +1022,11 @@ async function init() {
     leggTilHumleRad();
     beregnOgVisResultat();
   }
+  // Skaler-til-feltet foreslår gjeldende volum som startpunkt (som desktop-
+  // appens number_input(value=ctx["volum"])) -- oppdateres kun her og etter
+  // vellykket skalering, ALDRI på hvert tastetrykk i beregnOgVisResultat(),
+  // slik at vi ikke overskriver brukerens pågående inntasting i feltet.
+  document.getElementById("skaler-maal-volum").value = document.getElementById("batch-volum").value;
 }
 
 init();
