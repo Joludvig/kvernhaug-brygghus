@@ -5,10 +5,16 @@
 ## Hvordan kjøre
 
 ```bash
-py -3 -m unittest discover -s tests
+py -3 -m unittest discover -s tests -b
 ```
 
+`-b`/`--buffer` demper stdout/stderr fra hver test (inkl. print()-støy fra enkelte scraper-moduler i `modules/`) for tester som består — output for feilende tester vises fortsatt i sin helhet, uendret. Ingen testlogikk endres av flagget.
+
 Ved siste kjente fulle kjøring (jf. `docs/PROJECT_STATUS_JULI_2026.md`, punkt-i-tid — verifiser alltid faktisk antall ved behov fremfor å stole på et gammelt tall): 581 tester, 0 skipped/errors/failures, fordelt på ~50 testfiler i `tests/`.
+
+## Full suite vs. avgrenset kjøring
+
+`tests/` dekker kun desktop-appen (`app.py`/`modules/`/`ui/`) — ingen tester overlapper med `web/`. Se testpolicy i [`.claude/rules/testing.md`](../../.claude/rules/testing.md) for når full suite faktisk trengs kontra en avgrenset/intermediate runde.
 
 ## Isolasjonsprinsipp
 

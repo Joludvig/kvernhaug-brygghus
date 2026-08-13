@@ -6,6 +6,8 @@ Du er ikke bare en kodeassistent for dette prosjektet. Du fungerer som teknisk p
 
 Målet er ikke bare fungerende kode. Målet er at hele prosjektet alltid skal være konsistent, sikkert og lett å vedlikeholde.
 
+**Dette dokumentet leses ved behov** — for en større eller ikke-triviell oppgave, ikke for enhver liten endring (se de alltid-gjeldende reglene i [../../CLAUDE.md](../../CLAUDE.md) for det som faktisk må sitte i minnet hele tiden). Ikke alle 10 faser er relevante for enhver oppgave: et rent web/-arbeid (`web/**`) berører aldri Demo Mode (fase 3) eller Streamlit-spesifikk selvkontroll, og en liten dokumentasjonsendring trenger sjelden alle faser. Bruk faseoversikten som en sjekkliste å vurdere relevans mot, ikke som et påbud om å utføre alt hver gang.
+
 ---
 
 ## Grunnprinsipper
@@ -50,7 +52,7 @@ Rapporter funn i sluttrapporten (fase 10).
 
 ### Fase 3 — Demo Mode
 
-Undersøk alltid om endringen påvirker Demo Mode. Hvis ja: oppdater Demo Mode. Hvis nei: forklar hvorfor i sluttrapporten.
+**Kun relevant for desktop-/Python-arbeid** (`app.py`, `config.py`, `modules/**`, `ui/**`) — web-versjonen (`web/**`) har ikke Demo Mode og denne fasen er irrelevant for rent web-arbeid. For desktop-arbeid: undersøk alltid om endringen påvirker Demo Mode. Hvis ja: oppdater Demo Mode. Hvis nei: forklar hvorfor i sluttrapporten.
 
 Full arkitektur, dekningstabell og hva som fortsatt er bevisst avslått: [DEMO_MODE.md](DEMO_MODE.md).
 
@@ -74,7 +76,9 @@ Ikke opprett nye statusdokumenter uten at brukeren ber om det — oppdater eksis
 
 ### Fase 6 — Testing
 
-Kjør relevante tester og rapporter: tester kjørt, resultat, warnings, regresjoner, kodedekning dersom relevant. Dersom tester mangler for det som ble endret: forklar hvorfor (og foreslå om det bør legges til).
+Kjør relevante/avgrensede tester først og rapporter: tester kjørt, resultat, warnings, regresjoner, kodedekning dersom relevant. Dersom tester mangler for det som ble endret: forklar hvorfor (og foreslå om det bør legges til).
+
+Full Python-testsuite (`tests/`) er påkrevd ved endelig sjekkpunkt/commit-klar validering. For mellomliggende runder der diffen påviselig er avgrenset til `web/**` (som ikke har egen Python-testdekning), er full suite ikke påkrevd underveis — kjør den likevel ved det endelige sjekkpunktet. Se testpolicy: [`.claude/rules/testing.md`](../../.claude/rules/testing.md).
 
 Konvensjoner for testisolasjon og hvordan kjøre testsuiten: [TESTING.md](TESTING.md).
 

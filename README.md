@@ -68,10 +68,10 @@ Se [docs/ROADMAP.md](docs/ROADMAP.md) og [docs/PROJECT_STATUS_JULI_2026.md](docs
 ## Tester
 
 ```bash
-py -3 -m unittest discover -s tests
+py -3 -m unittest discover -s tests -b
 ```
 
-Ingen test skal berøre dine ekte, private filer i `recipes/` eller `data/pantry.json` — testene bruker isolerte, midlertidige kataloger.
+`-b` demper output fra tester som består (feilende tester vises fortsatt i sin helhet). Ingen test skal berøre dine ekte, private filer i `recipes/` eller `data/pantry.json` — testene bruker isolerte, midlertidige kataloger.
 
 ---
 

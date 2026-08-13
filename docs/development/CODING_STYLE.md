@@ -31,10 +31,6 @@ Etter enhver implementasjon (fase 2 og 7 i [WORKFLOW.md](WORKFLOW.md)), sjekk og
 
 Rapporter alt som ble funnet — også det du bevisst lot stå og hvorfor.
 
-## Kommentarer
+## Kommentarer og backwards-compat
 
-Standard: ingen kommentarer med mindre *hvorfor* er ikke-opplagt (en skjult begrensning, en subtil invariant, en workaround for en spesifikk bug). Ikke forklar *hva* koden gjør — gode navn gjør det allerede. Ikke referer til gjeldende oppgave, fiks eller kalleren i kommentarer ("brukt av X", "lagt til for Y") — det hører hjemme i commit-meldingen, ikke i koden, og råtner etter hvert som koden endrer seg videre.
-
-## Backwards-compat-hacks
-
-Unngå omdøping av ubrukte variabler med understrek-prefiks, re-eksport av typer for kompatibilitet, `# removed`-kommentarer for fjernet kode, eller feature flags for ting som bare kan endres direkte. Hvis noe er bekreftet ubrukt: slett det fullstendig.
+Følger standard praksis (minimale kommentarer, kun der *hvorfor* er ikke-opplagt; ingen backwards-compat-hacks som understrek-prefiks/re-eksport/`# removed`-kommentarer — slett bekreftet ubrukt kode fullstendig). Ingen Kvernhaug-spesifikke unntak fra dette.

@@ -12,7 +12,12 @@ __pycache__/
 
 # IDE og tool-konfig
 .vscode/
-.claude/
+# Hele .claude/ er lokal/maskinspesifikk konfig som standard (settings.local.json,
+# launch.json, permission-allowlists m.m.) -- MEN rules/ og skills/ er ment som
+# delt prosjektkonfig og skal overleve en fersk klone, derfor eksplisitt unntatt.
+.claude/*
+!.claude/rules/
+!.claude/skills/
 
 # Utviklerverktøy og testscripts
 backup/
