@@ -1261,6 +1261,16 @@ textarea:focus,
   flex: none;
 }
 
+/* Runde 21B.2 -- .utstyr-rad-handlinger sin egen "display: flex" har samme
+   spesifisitet som (og kommer etter) nettleserens innebygde
+   "[hidden] { display: none }", som dermed ble overstyrt: JS satte
+   hidden=true korrekt for "Ingen utstyrsprofil"-raden og BrewZilla-
+   presetten, men Rediger/Slett vistes likevel. Eksplisitt override
+   gjenoppretter faktisk skjuling uten å røre JS/DOM-strukturen. */
+.utstyr-rad-handlinger[hidden] {
+  display: none;
+}
+
 .utstyr-rad-rediger,
 .utstyr-rad-slett {
   background: none;
