@@ -4,6 +4,39 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 22 — Faktisk enhetsvalg: Metric / US customary (2026-08-14)
+
+Bygger videre på Runde 21C sin unit-ready arkitektur og gjør US customary
+til en faktisk brukbar visning, ikke bare en helper. Ny, DOM-uavhengig
+`web/js/preferences.js` styrer `kvernhaug_web_preferanser`
+(`{format:"kbh-preferences", version:1, unitSystem:"metric"|"us"}`) --
+default metric, trygg fallback ved manglende/korrupt/ugyldig state.
+Kompakt to-knappers "Måleenheter"-bryter i drawer-menyen på alle 9 sider
+(samme sted som språkvelgeren, men helt uavhengig av språkvalg), koblet
+via en ny `kvernhaug:enhetendret`-hendelse.
+
+`units.js` utvidet med `formatMaltMass`/`parseMaltMass` (kg/lb) og
+`formatHopMass`/`parseHopMass` (g/oz), pluss `formatTemperature`/
+`parseTemperature` (°C/°F, arkitektur klar men ikke koblet til noe UI --
+web har ingen brukerredigerbare temperaturfelt). Batchvolum, skaler-til,
+malt-kg, humle-gram og utstyrsprofilenes kjelekapasitet/maks-batch viser
+og tar imot tall i valgt unitSystem. Hvert felt holder canonical
+metric-verdi i et `data-canonical`-attributt (aldri avrundet) -- et
+unit-bytte rerendrer ALLTID fra dette attributtet, aldri ved å tolke
+allerede avrundet displaytekst på nytt, slik at gjentatte Metric↔US-bytter
+ikke driver. Recipe-/utstyr-beregninger (OG/FG/ABV/IBU/EBC, malt-%-
+binding, batch-advarsel-terskel) forblir uendret av unit-bytte, siden de
+alltid leser samme canonical-attributt uavhengig av visning.
+
+`.kbhrecipe` og `kvernhaug_web_utstyr` uendret -- ingen `unitSystem`-felt
+lagt til noe sted i lagret data, kun en egen, separat UI-preferanse.
+print.js sine tidligere rå `" L"/"kg"/"g"`-interpoleringer (rapportert i
+Runde 21B.1) er nå ryddet til samme formatteringspunkt som resten av
+appen. Én reell HTML5 step-valideringsbug funnet og fikset underveis
+(samme klasse som Runde 21B sin: `step="0.5"` på utstyrsskjemaets
+kapasitet/maks-felt avviste stille gyldige US gallon-desimaltall som
+"13.21" -- endret til `step="0.01"`).
+
 ## Runde 21C — Unit-readiness: metric canonical / US-klar arkitektur (2026-08-14)
 
 Liten, kontrollert arkitekturrunde: ingen ny funksjonalitet, ingen

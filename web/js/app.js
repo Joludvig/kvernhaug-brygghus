@@ -23,6 +23,58 @@ const MODUS_NOKKEL = "kvernhaug_web_modus";
 const IDENTITET_NOKKEL = "kvernhaug_web_identitet";
 const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
 
+// ─── Enhetsbevisste felt-lesing/-skriving (Runde 22) ───────────────────────
+// Et unit-bærende input sitt SYNLIGE .value viser tallet i GJELDENDE
+// unitSystem (metric/us), mens dataset.canonical alltid holder full
+// presisjon i metrisk (liter/kg/gram) -- den ENESTE fasiten. Unit-bytte
+// (kvernhaug:enhetendret, se initEnhetVisning()) rerendrer .value FRA
+// dataset.canonical, ALDRI ved å tolke allerede avrundet displaytekst på
+// nytt -- det er nettopp det som forhindrer drift ved gjentatte
+// frem-og-tilbake-bytter (Metric->US->Metric skal gi eksakt samme tall).
+// Vanlig tasting oppdaterer dataset.canonical live (_syncKanonisk, kalt fra
+// feltenes egne "input"-lyttere) slik at beregning/lagring/skalering/%-
+// binding alltid leser en fersk, korrekt kg/gram/liter-verdi uavhengig av
+// hvilket system som vises.
+function _settEnhetsfelt(el, canonicalVerdi, formatterNumber) {
+  el.dataset.canonical = String(canonicalVerdi);
+  el.value = formatterNumber(canonicalVerdi, hentUnitSystem());
+}
+function _lesEnhetsfelt(el, parser) {
+  if (el.dataset.canonical !== undefined && el.dataset.canonical !== "") {
+    const lagret = parseFloat(el.dataset.canonical);
+    if (isFinite(lagret)) return lagret;
+  }
+  const tolket = parser(el.value, hentUnitSystem());
+  return isFinite(tolket) ? tolket : 0;
+}
+function _syncKanonisk(el, parser) {
+  const tolket = parser(el.value, hentUnitSystem());
+  el.dataset.canonical = isFinite(tolket) ? String(tolket) : "";
+}
+// Leser KUN dataset.canonical (aldri el.value) -- brukt utelukkende av
+// _rerenderAlleEnhetsfelt() på unit-bytte, for å garantere at rerendring
+// aldri kan tolke gammel visningstekst i feil system.
+function _kanoniskVerdi(el) {
+  const lagret = parseFloat(el.dataset.canonical);
+  return isFinite(lagret) ? lagret : null;
+}
+
+function _settVolumFelt(el, liter) { _settEnhetsfelt(el, liter, formatVolumeNumber); }
+function _lesVolumFelt(el) { return _lesEnhetsfelt(el, parseVolume); }
+function _settMaltKg(el, kg) { _settEnhetsfelt(el, kg, formatMaltMassNumber); }
+function _lesMaltKg(el) { return _lesEnhetsfelt(el, parseMaltMass); }
+function _settHumleGram(el, g) { _settEnhetsfelt(el, g, formatHopMassNumber); }
+function _lesHumleGram(el) { return _lesEnhetsfelt(el, parseHopMass); }
+
+// Rene enhetsforkortelser -- identiske i NO/EN (se f.eks. utstyr.detaljKapasitet
+// sin "{kap} kjele"/"{kap} kettle", der selve "L" alltid er uendret), så disse
+// trenger ikke leve i i18n.js. Brukes til å komponere unit-bevisste
+// felt-labels/placeholders parameterisert i stedet for dupliserte tekstblokker.
+const ENHET_FORKORTELSE = {
+  metric: { volum: "L", malt: "kg", humle: "g" },
+  us: { volum: "US gal", malt: "lb", humle: "oz" },
+};
+
 // Malt-gruppering i søkefeltet -- speiler ui/malt_panel.py sin
 // FORETRUKKET_GRUPPE_REKKEFØLGE/KATEGORI_TIL_GRUPPE nøyaktig, slik at web og
 // desktop viser malt organisert på samme måte. Ingen ny taksonomi oppfunnet.
@@ -248,8 +300,9 @@ function leggTilMaltRad(forhandsutfylt) {
     felt.addEventListener("input", beregnOgVisResultat);
   }
 
+  const mengdeFelt = rad.querySelector(".malt-mengde");
   if (forhandsutfylt && forhandsutfylt.custom) {
-    rad.querySelector(".malt-mengde").value = forhandsutfylt.mengde;
+    _settMaltKg(mengdeFelt, forhandsutfylt.mengde);
     _settMaltEgendefinert(rad, true, forhandsutfylt.id);
     rad.querySelector(".eg-navn").value = forhandsutfylt.custom.navn || "";
     rad.querySelector(".eg-produsent").value = forhandsutfylt.custom.produsent || "";
@@ -257,8 +310,13 @@ function leggTilMaltRad(forhandsutfylt) {
     rad.querySelector(".eg-potensiale").value = forhandsutfylt.custom.potensiale ?? "";
   } else if (forhandsutfylt) {
     cb.setValue(forhandsutfylt.id);
-    rad.querySelector(".malt-mengde").value = forhandsutfylt.mengde;
+    _settMaltKg(mengdeFelt, forhandsutfylt.mengde);
+  } else {
+    // Malens egen default-verdi (value="1") er alltid 1 kg canonical --
+    // rerendres til gjeldende unitSystem akkurat som en forhåndsutfylt rad.
+    _settMaltKg(mengdeFelt, parseFloat(mengdeFelt.value) || 1);
   }
+  mengdeFelt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].malt;
 
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
     _redigerteMaltProsentRader.delete(rad);
@@ -266,7 +324,8 @@ function leggTilMaltRad(forhandsutfylt) {
     oppdaterMaltProsent();
     beregnOgVisResultat();
   });
-  rad.querySelector(".malt-mengde").addEventListener("input", () => {
+  mengdeFelt.addEventListener("input", (e) => {
+    _syncKanonisk(e.target, parseMaltMass);
     _redigerteMaltProsentRader.clear();
     oppdaterMaltProsent();
     beregnOgVisResultat();
@@ -298,7 +357,7 @@ function leggTilMaltRad(forhandsutfylt) {
 //    60% + spesialmalt 20% -- 12C ville da kunne endre 60%-verdien).
 function oppdaterMaltProsent() {
   const rader = [...maltRaderEl.querySelectorAll(".ingrediens-rad")];
-  const kgVerdier = rader.map((r) => parseFloat(r.querySelector(".malt-mengde").value) || 0);
+  const kgVerdier = rader.map((r) => _lesMaltKg(r.querySelector(".malt-mengde")));
   const total = kgVerdier.reduce((a, b) => a + b, 0);
   rader.forEach((r, i) => {
     const pctInput = r.querySelector(".malt-pct");
@@ -348,12 +407,12 @@ function brukMaltProsentfordeling() {
   const alleRader = [...maltRaderEl.querySelectorAll(".ingrediens-rad")];
   if (alleRader.length === 0) return;
 
-  const totalKg = alleRader.reduce((sum, r) => sum + (parseFloat(r.querySelector(".malt-mengde").value) || 0), 0);
+  const totalKg = alleRader.reduce((sum, r) => sum + _lesMaltKg(r.querySelector(".malt-mengde")), 0);
 
   // Spesialtilfelle: kun én maltrad -- den er alltid 100%.
   if (alleRader.length === 1) {
     alleRader[0].querySelector(".malt-pct").value = "100.0";
-    alleRader[0].querySelector(".malt-mengde").value = Math.round(totalKg * 1000) / 1000;
+    _settMaltKg(alleRader[0].querySelector(".malt-mengde"), Math.round(totalKg * 1000) / 1000);
     _redigerteMaltProsentRader.clear();
     _visMaltProsentMelding("");
     oppdaterMaltProsentSum();
@@ -395,7 +454,7 @@ function brukMaltProsentfordeling() {
     }
     laste.forEach((r, i) => { r.querySelector(".malt-pct").value = lastePct[i].toFixed(1); });
     const nyeKg = laste.map((_, i) => Math.round(totalKg * lastePct[i] / 100 * 1000) / 1000);
-    laste.forEach((r, i) => { r.querySelector(".malt-mengde").value = nyeKg[i]; });
+    laste.forEach((r, i) => { _settMaltKg(r.querySelector(".malt-mengde"), nyeKg[i]); });
     _redigerteMaltProsentRader.clear();
     _visMaltProsentMelding("");
     oppdaterMaltProsentSum();
@@ -455,7 +514,7 @@ function brukMaltProsentfordeling() {
     const sisteUrortIdx = alleRader.indexOf(urorte[urorte.length - 1]);
     nyeKg[sisteUrortIdx] = Math.round((nyeKg[sisteUrortIdx] + kgRest) * 1000) / 1000;
   }
-  alleRader.forEach((r, i) => { r.querySelector(".malt-mengde").value = nyeKg[i]; });
+  alleRader.forEach((r, i) => { _settMaltKg(r.querySelector(".malt-mengde"), nyeKg[i]); });
 
   _redigerteMaltProsentRader.clear();
   _visMaltProsentMelding("");
@@ -503,8 +562,9 @@ function leggTilHumleRad(forhandsutfylt) {
     felt.addEventListener("input", beregnOgVisResultat);
   }
 
+  const gramFelt = rad.querySelector(".humle-gram");
   if (forhandsutfylt && forhandsutfylt.custom) {
-    rad.querySelector(".humle-gram").value = forhandsutfylt.gram;
+    _settHumleGram(gramFelt, forhandsutfylt.gram);
     rad.querySelector(".humle-tid").value = forhandsutfylt.tid;
     alfaInput.value = forhandsutfylt.custom.alfa ?? "";
     _settHumleEgendefinert(rad, true, forhandsutfylt.id);
@@ -513,17 +573,25 @@ function leggTilHumleRad(forhandsutfylt) {
     rad.querySelector(".eg-type").value = forhandsutfylt.custom.type || "";
   } else if (forhandsutfylt) {
     cb.setValue(forhandsutfylt.id);
-    rad.querySelector(".humle-gram").value = forhandsutfylt.gram;
+    _settHumleGram(gramFelt, forhandsutfylt.gram);
     rad.querySelector(".humle-tid").value = forhandsutfylt.tid;
     if (forhandsutfylt.alfaOverride != null) alfaInput.value = forhandsutfylt.alfaOverride;
     else if (humleData[forhandsutfylt.id]) alfaInput.value = humleData[forhandsutfylt.id].alfa;
+  } else {
+    // Malens egen default-verdi (value="10") er alltid 10 gram canonical --
+    // rerendres til gjeldende unitSystem akkurat som en forhåndsutfylt rad.
+    _settHumleGram(gramFelt, parseFloat(gramFelt.value) || 10);
   }
+  gramFelt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].humle;
 
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
     rad.remove();
     beregnOgVisResultat();
   });
-  rad.querySelector(".humle-gram").addEventListener("input", beregnOgVisResultat);
+  gramFelt.addEventListener("input", (e) => {
+    _syncKanonisk(e.target, parseHopMass);
+    beregnOgVisResultat();
+  });
   rad.querySelector(".humle-tid").addEventListener("input", () => {
     oppdaterHumleMaalIbuSynlighet(rad);
     beregnOgVisResultat();
@@ -553,11 +621,11 @@ function beregnHumleGramFraMaalIbu(rad) {
   if (maalIbu <= 0) return;
   const alfa = parseFloat(rad.querySelector(".humle-alfa").value) || 0;
   const tid = parseFloat(rad.querySelector(".humle-tid").value) || 0;
-  const volum = parseFloat(document.getElementById("batch-volum").value) || 0;
+  const volum = _lesVolumFelt(document.getElementById("batch-volum"));
   const og = sisteBeregning ? sisteBeregning.og : 1.05;
   const gram = beregnGramFraIBU(maalIbu, alfa, tid, volum, og);
   if (gram > 0) {
-    rad.querySelector(".humle-gram").value = gram;
+    _settHumleGram(rad.querySelector(".humle-gram"), gram);
     beregnOgVisResultat();
   }
 }
@@ -567,7 +635,7 @@ function beregnHumleGramFraMaalIbu(rad) {
 function lesMaltRader() {
   return [...maltRaderEl.querySelectorAll(".ingrediens-rad")]
     .map((rad) => {
-      const mengde = parseFloat(rad.querySelector(".malt-mengde").value) || 0;
+      const mengde = _lesMaltKg(rad.querySelector(".malt-mengde"));
       if (rad.dataset.egendefinert === "1") {
         const navn = rad.querySelector(".eg-navn").value.trim();
         if (!navn) return null;
@@ -591,7 +659,7 @@ function lesMaltRader() {
 function lesHumleRader() {
   return [...humleRaderEl.querySelectorAll(".ingrediens-rad")]
     .map((rad) => {
-      const gram = parseFloat(rad.querySelector(".humle-gram").value) || 0;
+      const gram = _lesHumleGram(rad.querySelector(".humle-gram"));
       const tid = parseFloat(rad.querySelector(".humle-tid").value) || 0;
       const alfaTekst = rad.querySelector(".humle-alfa").value;
       const alfa = alfaTekst !== "" ? parseFloat(alfaTekst) : null;
@@ -640,14 +708,14 @@ function _lesGjaerEgendefinert() {
 // knapp, ingen live-kobling til batch-volum-feltet -- samme prinsipp som
 // hindrer en feedback-loop i malt kg/%- og mål-IBU-arbeidet over.
 function _fmtVolum(v) {
-  return formatVolumeNumber(v);
+  return formatVolume(v, hentUnitSystem());
 }
 
 function skalerOppskrift() {
   const volumInput = document.getElementById("batch-volum");
-  const naavaerende = parseFloat(volumInput.value) || 0;
+  const naavaerende = _lesVolumFelt(volumInput);
   const maalInput = document.getElementById("skaler-maal-volum");
-  const maal = parseFloat(maalInput.value) || 0;
+  const maal = _lesVolumFelt(maalInput);
   const statusEl = document.getElementById("skaler-status");
 
   if (naavaerende <= 0 || maal <= 0) {
@@ -667,15 +735,15 @@ function skalerOppskrift() {
 
   for (const rad of maltRaderEl.querySelectorAll(".ingrediens-rad")) {
     const felt = rad.querySelector(".malt-mengde");
-    felt.value = Math.round((parseFloat(felt.value) || 0) * faktor * 1000) / 1000;
+    _settMaltKg(felt, Math.round(_lesMaltKg(felt) * faktor * 1000) / 1000);
   }
   for (const rad of humleRaderEl.querySelectorAll(".ingrediens-rad")) {
     const felt = rad.querySelector(".humle-gram");
-    felt.value = Math.round((parseFloat(felt.value) || 0) * faktor * 10) / 10;
+    _settHumleGram(felt, Math.round(_lesHumleGram(felt) * faktor * 10) / 10);
   }
 
-  volumInput.value = maal;
-  maalInput.value = maal;
+  _settVolumFelt(volumInput, maal);
+  _settVolumFelt(maalInput, maal);
 
   _redigerteMaltProsentRader.clear();
   oppdaterMaltProsent();
@@ -741,9 +809,9 @@ function _utstyrRadDetalj(profil) {
   const deler = [];
   const merke = [profil.manufacturer, profil.model].filter(Boolean).join(" ");
   if (merke) deler.push(merke);
-  deler.push(t("utstyr.detaljKapasitet", { kap: formatVolume(profil.kettleCapacityL) }));
+  deler.push(t("utstyr.detaljKapasitet", { kap: formatVolume(profil.kettleCapacityL, hentUnitSystem()) }));
   if (profil.maxRecommendedBatchL) {
-    deler.push(t("utstyr.detaljMaks", { maks: formatVolume(profil.maxRecommendedBatchL) }));
+    deler.push(t("utstyr.detaljMaks", { maks: formatVolume(profil.maxRecommendedBatchL, hentUnitSystem()) }));
   }
   return deler.join(" · ");
 }
@@ -819,13 +887,13 @@ function _oppdaterUtstyrBatchAdvarsel(batchVolum) {
     el.textContent = "";
     return;
   }
-  el.textContent = t("utstyr.batchAdvarsel", { navn: profil.name, maks: formatVolume(profil.maxRecommendedBatchL) });
+  el.textContent = t("utstyr.batchAdvarsel", { navn: profil.name, maks: formatVolume(profil.maxRecommendedBatchL, hentUnitSystem()) });
   el.hidden = false;
 }
 
 function _oppdaterUtstyrUI() {
   _oppdaterUtstyrChip();
-  _oppdaterUtstyrBatchAdvarsel(parseFloat(document.getElementById("batch-volum").value) || 0);
+  _oppdaterUtstyrBatchAdvarsel(_lesVolumFelt(document.getElementById("batch-volum")));
 }
 
 function _utstyrEscapeHandler(e) {
@@ -854,9 +922,14 @@ function _apneUtstyrSkjema(profil) {
   document.getElementById("utstyr-felt-navn").value = profil ? profil.name : "";
   document.getElementById("utstyr-felt-produsent").value = (profil && profil.manufacturer) || "";
   document.getElementById("utstyr-felt-modell").value = (profil && profil.model) || "";
-  document.getElementById("utstyr-felt-kapasitet").value = profil ? profil.kettleCapacityL : "";
-  document.getElementById("utstyr-felt-maks").value = (profil && profil.maxRecommendedBatchL) || "";
+  const kapasitetFelt = document.getElementById("utstyr-felt-kapasitet");
+  const maksFelt = document.getElementById("utstyr-felt-maks");
+  if (profil) _settVolumFelt(kapasitetFelt, profil.kettleCapacityL);
+  else { kapasitetFelt.value = ""; delete kapasitetFelt.dataset.canonical; }
+  if (profil && profil.maxRecommendedBatchL) _settVolumFelt(maksFelt, profil.maxRecommendedBatchL);
+  else { maksFelt.value = ""; delete maksFelt.dataset.canonical; }
   document.getElementById("utstyr-felt-notater").value = (profil && profil.notes) || "";
+  _oppdaterEnhetsLabels();
   _visUtstyrSkjemaMelding("");
   document.getElementById("utstyr-skjema").hidden = false;
   document.getElementById("utstyr-felt-navn").focus();
@@ -878,12 +951,17 @@ function _visUtstyrSkjemaMelding(tekst) {
 
 function _handleUtstyrSkjemaSubmit(e) {
   e.preventDefault();
+  const maksRaw = document.getElementById("utstyr-felt-maks").value;
   const felter = {
     name: document.getElementById("utstyr-felt-navn").value,
     manufacturer: document.getElementById("utstyr-felt-produsent").value,
     model: document.getElementById("utstyr-felt-modell").value,
-    kettleCapacityL: document.getElementById("utstyr-felt-kapasitet").value,
-    maxRecommendedBatchL: document.getElementById("utstyr-felt-maks").value,
+    // Skjemafeltene viser tall i gjeldende unitSystem -- konverteres til
+    // canonical liter her, FØR de når equipment.js (som aldri skal vite noe
+    // om enheter, se dens egen filhode-kommentar). Et tomt maks-felt skal
+    // fortsatt bety "ingen maks", ikke "0" eller "NaN".
+    kettleCapacityL: parseVolume(document.getElementById("utstyr-felt-kapasitet").value, hentUnitSystem()),
+    maxRecommendedBatchL: maksRaw.trim() === "" ? "" : parseVolume(maksRaw, hentUnitSystem()),
     notes: document.getElementById("utstyr-felt-notater").value,
   };
   const resultat = _utstyrRedigererId
@@ -913,7 +991,88 @@ function initUtstyr() {
   document.getElementById("utstyr-nytt-knapp").addEventListener("click", () => _apneUtstyrSkjema(null));
   document.getElementById("utstyr-skjema-avbryt").addEventListener("click", _lukkUtstyrSkjema);
   document.getElementById("utstyr-skjema").addEventListener("submit", _handleUtstyrSkjemaSubmit);
+  document.getElementById("utstyr-felt-kapasitet").addEventListener("input", (e) => _syncKanonisk(e.target, parseVolume));
+  document.getElementById("utstyr-felt-maks").addEventListener("input", (e) => _syncKanonisk(e.target, parseVolume));
   _oppdaterUtstyrChip();
+}
+
+// ─── Måleenhet-toggle (Runde 22) ────────────────────────────────────────
+// Setter enhetsavhengig suffiks på volum-labels -- parameterisert (kun
+// selve forkortelsen byttes ut via ENHET_FORKORTELSE) i stedet for
+// dupliserte hele tekstblokker per unitSystem, se Runde 22-rapporten.
+// Feltenes egne data-i18n-attributter styrer fortsatt SPRÅKET (via
+// applyI18n() ved sideinnlasting); denne funksjonen kjører alltid ETTERPÅ
+// og legger kun til enhets-parentesen.
+function _oppdaterEnhetsLabels() {
+  const enhet = ENHET_FORKORTELSE[hentUnitSystem()];
+  const settLabel = (selector, tekstNokkel) => {
+    const el = document.querySelector(selector);
+    if (el) el.textContent = `${t(tekstNokkel)} (${enhet.volum})`;
+  };
+  settLabel('label[for="batch-volum"]', "builder.grunndata.batchvolum");
+  settLabel('label[for="skaler-maal-volum"]', "builder.skaler.maalLabel");
+  settLabel('label[for="utstyr-felt-kapasitet"]', "utstyr.felt.kjelekapasitet");
+  settLabel('label[for="utstyr-felt-maks"]', "utstyr.felt.anbefaltMaks");
+}
+
+// Rerendrer ALLE synlige/monterte unit-bærende felt FRA sin egen
+// dataset.canonical (aldri fra allerede avrundet displaytekst) når
+// brukeren bytter måleenhet mens en oppskrift står åpen. Canonical
+// recipe-/utstyr-state endres IKKE her -- kun visningen. Se
+// _settEnhetsfelt()-kommentaren for hvorfor dette forhindrer drift ved
+// gjentatte frem-og-tilbake-bytter.
+function _rerenderAlleEnhetsfelt() {
+  const batchVolumEl = document.getElementById("batch-volum");
+  const batchKanonisk = _kanoniskVerdi(batchVolumEl);
+  if (batchKanonisk !== null) _settVolumFelt(batchVolumEl, batchKanonisk);
+
+  const maalVolumEl = document.getElementById("skaler-maal-volum");
+  const maalKanonisk = _kanoniskVerdi(maalVolumEl);
+  if (maalKanonisk !== null) _settVolumFelt(maalVolumEl, maalKanonisk);
+
+  for (const rad of maltRaderEl.querySelectorAll(".ingrediens-rad")) {
+    const felt = rad.querySelector(".malt-mengde");
+    const kanonisk = _kanoniskVerdi(felt);
+    if (kanonisk !== null) _settMaltKg(felt, kanonisk);
+    felt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].malt;
+  }
+  for (const rad of humleRaderEl.querySelectorAll(".ingrediens-rad")) {
+    const felt = rad.querySelector(".humle-gram");
+    const kanonisk = _kanoniskVerdi(felt);
+    if (kanonisk !== null) _settHumleGram(felt, kanonisk);
+    felt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].humle;
+  }
+
+  // Utstyrsskjemaet, hvis åpent, rerendres på samme måte -- ellers er det
+  // uansett skjult og trenger ingen oppdatering før neste gang det åpnes
+  // (_apneUtstyrSkjema() setter alltid ferske verdier fra profilen selv).
+  const utstyrSkjema = document.getElementById("utstyr-skjema");
+  if (utstyrSkjema && !utstyrSkjema.hidden) {
+    const kapasitetFelt = document.getElementById("utstyr-felt-kapasitet");
+    const kapasitetKanonisk = _kanoniskVerdi(kapasitetFelt);
+    if (kapasitetKanonisk !== null) _settVolumFelt(kapasitetFelt, kapasitetKanonisk);
+    const maksFelt = document.getElementById("utstyr-felt-maks");
+    const maksKanonisk = _kanoniskVerdi(maksFelt);
+    if (maksKanonisk !== null) _settVolumFelt(maksFelt, maksKanonisk);
+  }
+
+  _oppdaterEnhetsLabels();
+  // Rerendrer utstyrslisten (kapasitet/maks-tekst) hvis modalen er åpen,
+  // og oppdaterer chip + batch-advarsel -- ingen av delene endrer canonical
+  // state, kun tekstene som vises.
+  const utstyrModal = document.getElementById("utstyr-modal");
+  if (utstyrModal && !utstyrModal.hidden) _renderUtstyrListe();
+  _oppdaterUtstyrUI();
+  // Til slutt: en full rerun av beregning/visning -- leser canonical via
+  // _lesMaltKg/_lesHumleGram/_lesVolumFelt (dataset.canonical, uendret),
+  // så OG/FG/ABV/IBU/EBC forblir eksakt like. Oppdaterer også
+  // #skaler-naavaerende-etiketten.
+  beregnOgVisResultat();
+}
+
+function initEnhetVisning() {
+  _oppdaterEnhetsLabels();
+  document.addEventListener("kvernhaug:enhetendret", _rerenderAlleEnhetsfelt);
 }
 
 // ─── Stilmatch-visning (read-only, høyre panel) ──────────────────────────
@@ -1043,7 +1202,7 @@ function samleOppskrift() {
     brygger: document.getElementById("brygger-navn").value.trim(),
     bryggeri: document.getElementById("bryggeri-navn").value.trim(),
     notater: document.getElementById("oppskrift-notater").value.trim(),
-    volum: parseFloat(document.getElementById("batch-volum").value) || 0,
+    volum: _lesVolumFelt(document.getElementById("batch-volum")),
     effektivitet: parseFloat(document.getElementById("effektivitet").value) || 0,
     malt: lesMaltRader(),
     humle: lesHumleRader(),
@@ -1086,7 +1245,7 @@ function _gjenopprettOppskrift(oppskrift) {
   document.getElementById("brygger-navn").value = oppskrift.brygger || "";
   document.getElementById("bryggeri-navn").value = oppskrift.bryggeri || "";
   document.getElementById("oppskrift-notater").value = oppskrift.notater || "";
-  document.getElementById("batch-volum").value = oppskrift.volum;
+  _settVolumFelt(document.getElementById("batch-volum"), oppskrift.volum);
   document.getElementById("effektivitet").value = oppskrift.effektivitet || 75;
 
   _redigerteMaltProsentRader.clear();
@@ -1186,7 +1345,7 @@ function nyOppskrift() {
   _gjenopprettOppskrift(_blankOppskrift());
   forhandsutfyllIdentitetsPreferanse();
   beregnOgVisResultat();
-  document.getElementById("skaler-maal-volum").value = document.getElementById("batch-volum").value;
+  _settVolumFelt(document.getElementById("skaler-maal-volum"), _lesVolumFelt(document.getElementById("batch-volum")));
   document.getElementById("lagre-status").textContent = t("oppskrift.nyStatus");
 }
 
@@ -1217,6 +1376,7 @@ async function init() {
   initModus();
   initHjelp();
   initUtstyr();
+  initEnhetVisning();
 
   oppdaterSmakshjul = initSmakshjul(document.getElementById("smakshjul-container"), SMAKS_KATEGORIER);
 
@@ -1254,7 +1414,11 @@ async function init() {
   document.getElementById("legg-til-malt").addEventListener("click", () => leggTilMaltRad());
   document.getElementById("legg-til-humle").addEventListener("click", () => leggTilHumleRad());
   document.getElementById("oppskrift-navn").addEventListener("input", beregnOgVisResultat);
-  document.getElementById("batch-volum").addEventListener("input", beregnOgVisResultat);
+  document.getElementById("batch-volum").addEventListener("input", (e) => {
+    _syncKanonisk(e.target, parseVolume);
+    beregnOgVisResultat();
+  });
+  document.getElementById("skaler-maal-volum").addEventListener("input", (e) => _syncKanonisk(e.target, parseVolume));
   document.getElementById("effektivitet").addEventListener("input", beregnOgVisResultat);
   attenuationOverrideInput.addEventListener("input", beregnOgVisResultat);
   document.getElementById("oppskrift-notater").addEventListener("input", beregnOgVisResultat);
@@ -1286,6 +1450,10 @@ async function init() {
   if (kladd) {
     _gjenopprettOppskrift(kladd);
   } else {
+    // Ingen aktiv kladd -- feltets egen HTML-default (value="20") er
+    // canonical liter, akkurat som malt-/humleradenes default-verdier.
+    const batchVolumEl = document.getElementById("batch-volum");
+    _settVolumFelt(batchVolumEl, parseFloat(batchVolumEl.value) || 20);
     leggTilMaltRad();
     leggTilHumleRad();
     beregnOgVisResultat();
@@ -1294,7 +1462,7 @@ async function init() {
   // appens number_input(value=ctx["volum"])) -- oppdateres kun her og etter
   // vellykket skalering, ALDRI på hvert tastetrykk i beregnOgVisResultat(),
   // slik at vi ikke overskriver brukerens pågående inntasting i feltet.
-  document.getElementById("skaler-maal-volum").value = document.getElementById("batch-volum").value;
+  _settVolumFelt(document.getElementById("skaler-maal-volum"), _lesVolumFelt(document.getElementById("batch-volum")));
 }
 
 // Runde 14 -- språkbytte skal aldri miste arbeid eller reloade siden (se

@@ -60,12 +60,12 @@ function byggOppskriftsarkHtml(ctx) {
 
   const maltRows = maltRader.map((m) => {
     const info = effMalt[m.id] || {};
-    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${escHtml(info.produsent || "")}</td><td>${m.mengde.toFixed(2)} kg</td></tr>`;
+    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${escHtml(info.produsent || "")}</td><td>${formatMaltMass(m.mengde, hentUnitSystem())}</td></tr>`;
   }).join("");
 
   const humleRows = [...humleRader].sort((a, b) => b.tid - a.tid).map((h) => {
     const info = effHumle[h.id] || {};
-    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${h.gram} g</td><td>${(info.alfa ?? 0).toFixed(1)} %</td><td>${h.tid} min</td></tr>`;
+    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${formatHopMass(h.gram, hentUnitSystem())}</td><td>${(info.alfa ?? 0).toFixed(1)} %</td><td>${h.tid} min</td></tr>`;
   }).join("");
 
   const gjaerInfo = gjaerId ? effGjaer[gjaerId] : null;
@@ -85,7 +85,7 @@ function byggOppskriftsarkHtml(ctx) {
   return `
     <div class="doc-a4">
       ${_dokHeader(t("print.oppskriftsark.undertittel"), oppskrift)}
-      <p class="doc-meta">${t("print.meta", { vol: oppskrift.volum, eff: oppskrift.effektivitet })}</p>
+      <p class="doc-meta">${t("print.meta", { vol: formatVolume(oppskrift.volum, hentUnitSystem()), eff: oppskrift.effektivitet })}</p>
       ${stilLinje}
       <div class="doc-stats">
         <div><span>OG</span><strong>${_fmtOg(ctx.og)}</strong></div>
@@ -117,12 +117,12 @@ function byggHandlelisteHtml(ctx) {
 
   const maltRows = maltRader.map((m) => {
     const info = effMalt[m.id] || {};
-    return `<tr><td><input type="checkbox" class="doc-checkbox"></td><td>${escHtml(info.navn || "?")}</td><td>${m.mengde.toFixed(2)} kg</td></tr>`;
+    return `<tr><td><input type="checkbox" class="doc-checkbox"></td><td>${escHtml(info.navn || "?")}</td><td>${formatMaltMass(m.mengde, hentUnitSystem())}</td></tr>`;
   }).join("");
 
   const humleRows = humleRader.map((h) => {
     const info = effHumle[h.id] || {};
-    return `<tr><td><input type="checkbox" class="doc-checkbox"></td><td>${escHtml(info.navn || "?")}</td><td>${h.gram} g</td><td>${(info.alfa ?? 0).toFixed(1)} %</td></tr>`;
+    return `<tr><td><input type="checkbox" class="doc-checkbox"></td><td>${escHtml(info.navn || "?")}</td><td>${formatHopMass(h.gram, hentUnitSystem())}</td><td>${(info.alfa ?? 0).toFixed(1)} %</td></tr>`;
   }).join("");
 
   const gjaerInfo = gjaerId ? effGjaer[gjaerId] : null;
@@ -152,12 +152,12 @@ function byggBryggedagsarkHtml(ctx) {
 
   const maltRows = maltRader.map((m) => {
     const info = effMalt[m.id] || {};
-    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${m.mengde.toFixed(2)} kg</td></tr>`;
+    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${formatMaltMass(m.mengde, hentUnitSystem())}</td></tr>`;
   }).join("");
 
   const humleRows = [...humleRader].sort((a, b) => b.tid - a.tid).map((h) => {
     const info = effHumle[h.id] || {};
-    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${h.gram} g</td><td>${h.tid} min</td></tr>`;
+    return `<tr><td>${escHtml(info.navn || "?")}</td><td>${formatHopMass(h.gram, hentUnitSystem())}</td><td>${h.tid} min</td></tr>`;
   }).join("");
 
   const sjekkliste = Array.from({ length: 10 }, (_, i) => t(`print.sjekkliste.${i}`))
@@ -167,7 +167,7 @@ function byggBryggedagsarkHtml(ctx) {
   return `
     <div class="doc-a4">
       ${_dokHeader(t("print.bryggedagsark.undertittel"), oppskrift)}
-      <p class="doc-meta">${t("print.bryggedato")} <span class="doc-blank doc-blank-inline"></span>&nbsp;&nbsp;&nbsp; ${t("print.batch", { vol: oppskrift.volum })}</p>
+      <p class="doc-meta">${t("print.bryggedato")} <span class="doc-blank doc-blank-inline"></span>&nbsp;&nbsp;&nbsp; ${t("print.batch", { vol: formatVolume(oppskrift.volum, hentUnitSystem()) })}</p>
       <h2>${t("print.ingrediensTittel")}</h2>
       <table class="doc-table"><thead><tr><th>${t("print.maltTittel")}</th><th>${t("print.mengdeKol")}</th></tr></thead>
         <tbody>${maltRows || `<tr><td colspan="2">${t("print.ingenMalt")}</td></tr>`}</tbody></table>
@@ -176,7 +176,7 @@ function byggBryggedagsarkHtml(ctx) {
       <h2>${t("print.planlagteTallTittel")}</h2>
       <table class="doc-table doc-maal">
         <tr><td>${t("print.planlagtOg")}</td><td>${_fmtOg(ctx.og)}</td><td>${t("print.faktiskOg")}</td><td class="doc-blank"></td></tr>
-        <tr><td>${t("print.planlagtVolum")}</td><td>${oppskrift.volum} L</td><td>${t("print.faktiskVolum")}</td><td class="doc-blank"></td></tr>
+        <tr><td>${t("print.planlagtVolum")}</td><td>${formatVolume(oppskrift.volum, hentUnitSystem())}</td><td>${t("print.faktiskVolum")}</td><td class="doc-blank"></td></tr>
       </table>
       <h2>${t("print.sjekklisteTittel")}</h2>
       <ul class="doc-sjekkliste">
@@ -198,7 +198,7 @@ function byggBryggeloggHtml(ctx) {
     <div class="doc-a4">
       ${_dokHeader(t("print.bryggelogg.undertittel"), oppskrift)}
       <table class="doc-table doc-maal">
-        <tr><td>${t("print.bryggedato2")}</td><td class="doc-blank"></td><td>${t("print.batchKol")}</td><td class="doc-blank">${oppskrift.volum} L</td></tr>
+        <tr><td>${t("print.bryggedato2")}</td><td class="doc-blank"></td><td>${t("print.batchKol")}</td><td class="doc-blank">${formatVolume(oppskrift.volum, hentUnitSystem())}</td></tr>
         <tr><td>${t("print.faktiskOg")}</td><td class="doc-blank"></td><td>${t("print.faktiskFg")}</td><td class="doc-blank"></td></tr>
         <tr><td>${t("print.faktiskAbv")}</td><td class="doc-blank"></td><td>${t("print.faktiskVolum")}</td><td class="doc-blank"></td></tr>
         <tr><td>${t("print.gjaerLabel")}</td><td class="doc-blank" colspan="3"></td></tr>

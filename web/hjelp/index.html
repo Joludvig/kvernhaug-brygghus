@@ -55,6 +55,13 @@
     <a class="sprak-knapp aktiv" data-sprak="no" href="index.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
       <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/index.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
     </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
   <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
   <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
   <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
@@ -100,6 +107,12 @@
       <h3 data-i18n="hjelp.idx.laerlingMester.tittel">Bryggelærling og Bryggmester</h3>
       <p data-i18n-html="hjelp.idx.laerlingMester.tekst">De to knappene øverst bytter mellom to visninger av <em>samme</em> oppskrift. <strong>Bryggelærling</strong> skjuler tekniske detaljer og viser mer veiledning — fin når du er ny. <strong>Bryggmester</strong> viser alt: BU:GU, nærliggende stiler, full stilanalyse. Ingen data forsvinner når du bytter — det er bare hvor mye som vises på skjermen som endrer seg.</p>
       <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.laerlingMester.hvorfor">Du kan bytte fram og tilbake så mye du vil, når som helst i prosessen. Mange starter i Bryggelærling og går over til Bryggmester etter hvert som begrepene blir kjente.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="maleenheter">
+      <h3 data-i18n="hjelp.idx.maleenheter.tittel">Måleenheter: Metrisk eller US customary</h3>
+      <p data-i18n-html="hjelp.idx.maleenheter.tekst">Menyen (☰) har en liten bryter kalt «Måleenheter» — velg mellom <strong>Metrisk</strong> (liter, kg, gram) og <strong>US customary</strong> (US gallons, pund, ounce). Valget er uavhengig av språk: du kan lese siden på engelsk og likevel se metriske tall, eller lese på norsk med US-enheter. Oppskriften lagres alltid likt internt uansett hva du velger å se — å bytte enhet endrer kun visningen, aldri selve oppskriften.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.maleenheter.hvorfor">Slik kan bryggere som er vant til ulike måleenheter dele samme lagrede/eksporterte oppskrift og se tallene i enheten de kjenner best, uten at noe konverteres feil eller går tapt underveis.</p>
     </article>
 
     <article class="hjelp-artikkel" id="skalere-oppskrift">
@@ -398,6 +411,7 @@
 </footer>
 
 <script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
 <script src="../js/chrome.js"></script>
 </body>
 </html>

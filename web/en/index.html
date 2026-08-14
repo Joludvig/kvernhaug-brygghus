@@ -60,6 +60,13 @@
 <a class="sprak-knapp" data-sprak="no" href="../index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
 <a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
 </div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
 <a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
 <a class="sidemeny-lenke" href="mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
 <a class="sidemeny-lenke" href="importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
@@ -120,12 +127,12 @@
 <input id="utstyr-felt-modell" type="text"/>
 </div>
 <div class="felt-rad">
-<label data-i18n="utstyr.felt.kjelekapasitet" for="utstyr-felt-kapasitet">Kettle capacity (L)</label>
-<input id="utstyr-felt-kapasitet" min="0.5" required="" step="0.5" type="number"/>
+<label data-i18n="utstyr.felt.kjelekapasitet" for="utstyr-felt-kapasitet">Kettle capacity</label>
+<input id="utstyr-felt-kapasitet" min="0.01" required="" step="0.01" type="number"/>
 </div>
 <div class="felt-rad">
-<label data-i18n="utstyr.felt.anbefaltMaks" for="utstyr-felt-maks">Recommended max batch size (L)</label>
-<input id="utstyr-felt-maks" min="0.5" step="0.5" type="number"/>
+<label data-i18n="utstyr.felt.anbefaltMaks" for="utstyr-felt-maks">Recommended max batch size</label>
+<input id="utstyr-felt-maks" min="0.01" step="0.01" type="number"/>
 </div>
 <div class="felt-rad">
 <label data-i18n="utstyr.felt.notater" for="utstyr-felt-notater">Notes</label>
@@ -155,7 +162,7 @@
 <input data-i18n-placeholder="builder.grunndata.bryggeriPlaceholder" id="bryggeri-navn" placeholder="Name of the brewery" type="text"/>
 </div>
 <div class="felt-rad">
-<label data-i18n="builder.grunndata.batchvolum" for="batch-volum">Batch volume (liters)</label>
+<label data-i18n="builder.grunndata.batchvolum" for="batch-volum">Batch volume</label>
 <input id="batch-volum" min="0" step="0.1" type="number" value="20"/>
 </div>
 <div class="felt-rad">
@@ -234,9 +241,9 @@
 <p class="hjelpetekst" data-i18n="builder.handling.avansertHjelpetekst">For debugging/further processing only — use «Save recipe file» above for regular saving and backup.</p>
 </details>
 <div class="skaler-rad mester-only" id="skaler-rad">
-<span class="skaler-naavaerende" data-i18n="builder.skaler.naavaerende" id="skaler-naavaerende">Current batch: {vol} L</span>
+<span class="skaler-naavaerende" data-i18n="builder.skaler.naavaerende" id="skaler-naavaerende">Current batch: {vol}</span>
 <div class="felt-rad">
-<label data-i18n="builder.skaler.maalLabel" for="skaler-maal-volum">Scale to (L)</label>
+<label data-i18n="builder.skaler.maalLabel" for="skaler-maal-volum">Scale to</label>
 <input id="skaler-maal-volum" max="200" min="1" step="0.5" type="number"/>
 </div>
 <button class="skaler-knapp" data-i18n="builder.skaler.knapp" id="skaler-knapp" type="button">📐 Scale recipe</button>
@@ -365,6 +372,7 @@
 </li>
 </template>
 <script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
 <script src="../js/chrome.js"></script>
 <script src="../js/combobox.js"></script>
 <script src="../js/calc.js"></script>

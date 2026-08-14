@@ -60,6 +60,13 @@
 <a class="sprak-knapp" data-sprak="no" href="../../hjelp/index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
 <a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
 </div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
 <a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
 <a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
 <a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
@@ -95,9 +102,14 @@
 <p data-i18n-html="hjelp.idx.laerlingMester.tekst">The two buttons at the top switch between two views of the <em>same</em> recipe. <strong>Brewing Apprentice</strong> hides technical detail and shows more guidance — good when you're new. <strong>Brewing Master</strong> shows everything: BU:GU, nearby styles, full style analysis. No data disappears when you switch — only how much shows on screen changes.</p>
 <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.laerlingMester.hvorfor"><strong>Why this matters:</strong> You can switch back and forth as often as you like, at any point in the process. Many people start in Brewing Apprentice and move to Brewing Master as the terms become familiar.</p>
 </article>
+<article class="hjelp-artikkel" id="maleenheter">
+<h3 data-i18n="hjelp.idx.maleenheter.tittel">Units: Metric or US customary</h3>
+<p data-i18n-html="hjelp.idx.maleenheter.tekst">The menu (☰) has a small «Units» switch — choose between <strong>Metric</strong> (liters, kg, grams) and <strong>US customary</strong> (US gallons, pounds, ounces). The choice is independent of language: you can read the site in Norwegian and still see metric numbers, or read it in English with US units. The recipe is always stored the same way internally no matter what you choose to see — switching units only changes the display, never the recipe itself.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.maleenheter.hvorfor">This lets brewers who are used to different measurement systems share the same saved/exported recipe and see the numbers in whichever unit they know best, without anything being converted incorrectly or lost along the way.</p>
+</article>
 <article class="hjelp-artikkel" id="skalere-oppskrift">
 <h3 data-i18n="hjelp.idx.skalering.tittel">Scaling the recipe (batch size)</h3>
-<p data-i18n-html="hjelp.idx.skalering.tekst">"📐 Scale recipe" (in Brewing Master) changes the whole recipe from one batch volume to another, without you having to recalculate every ingredient by hand. Batch volume is how many litres of finished beer you're aiming for — the field you fill in right at the start, under Basics. Enter the new volume you want in "Scale to (L)" and click the button: all malt (kg) and all hops (grams) change proportionally, using the same factor. Going from, say, 23 L to 30 L scales everything by a factor of 30 ÷ 23 ≈ 1.30 — 5 kg of malt becomes about 6.52 kg, 25 g of hops becomes about 32.5 g.</p>
+<p data-i18n-html="hjelp.idx.skalering.tekst">"📐 Scale recipe" (in Brewing Master) changes the whole recipe from one batch volume to another, without you having to recalculate every ingredient by hand. Batch volume is how many litres of finished beer you're aiming for — the field you fill in right at the start, under Basics. Enter the new volume you want in "Scale to" and click the button: all malt (kg) and all hops (grams) change proportionally, using the same factor. Going from, say, 23 L to 30 L scales everything by a factor of 30 ÷ 23 ≈ 1.30 — 5 kg of malt becomes about 6.52 kg, 25 g of hops becomes about 32.5 g.</p>
 <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.skalering.hvorfor"><strong>Why this matters:</strong> Because ALL malt and hop amounts change by the same factor, the recipe keeps the same ratios between ingredients — and therefore the same character and style profile — just at a different batch size. That's the difference from just editing individual amounts by hand, which easily shifts the balance. Beer name, brewer, brewery, notes, chosen style, yeast choice, hop time, and any custom alpha acid override are not changed by scaling, and scaling itself only happens when you click the button — never automatically while you type in the volume field.</p>
 </article>
 <article class="hjelp-artikkel" id="malt-kg-prosent">
@@ -339,6 +351,7 @@
 <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
 </footer>
 <script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
 <script src="../../js/chrome.js"></script>
 </body>
 </html>

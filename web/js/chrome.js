@@ -78,8 +78,38 @@
     });
   }
 
+  // Runde 22 -- måleenhet-toggle (metric/US customary), samme sted i
+  // drawer-menyen på alle sider som språkvelgeren, men uten sideoppfrisking
+  // (unitSystem lagres og en global hendelse varsler siden om at synlige
+  // tall bør rerendres). Ren visnings-toggle -- ingen egen "lukk meny"-
+  // logikk her, samme mønster som modus-knapp-bytte.
+  function initEnhet() {
+    var knapper = document.querySelectorAll(".enhet-knapp");
+    if (!knapper.length) return;
+
+    function oppdaterAktiv() {
+      var system = hentUnitSystem();
+      knapper.forEach(function (k) {
+        var aktiv = k.dataset.enhet === system;
+        k.classList.toggle("aktiv", aktiv);
+        k.setAttribute("aria-pressed", String(aktiv));
+      });
+    }
+
+    knapper.forEach(function (knapp) {
+      knapp.addEventListener("click", function () {
+        var nyttSystem = settUnitSystem(knapp.dataset.enhet);
+        oppdaterAktiv();
+        document.dispatchEvent(new CustomEvent("kvernhaug:enhetendret", { detail: { unitSystem: nyttSystem } }));
+      });
+    });
+
+    oppdaterAktiv();
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     initHero();
     initSidemeny();
+    initEnhet();
   });
 })();

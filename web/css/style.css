@@ -1666,6 +1666,46 @@ footer {
   color: #201409;
 }
 
+/* ── Runde 22: måleenhetsvelger (Metric/US customary) ─────────────────
+   Samme kompakte to-knappers mønster som .sidemeny-modus/.modus-knapp --
+   kun i drawer-menyen (ikke hero/kompakt-navbar, akkurat som modusbytte),
+   siden dette er en global preferanse, ikke et page-spesifikt kontrollpunkt. */
+.enhetsvelger-blokk {
+  padding: 0 0.7rem 0.6rem;
+}
+
+.enhetsvelger-label {
+  display: block;
+  color: var(--gold);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.enhetsvelger {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.enhet-knapp {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--muted);
+  padding: 0.45rem 0.3rem;
+  min-height: 2.4rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.enhet-knapp.aktiv {
+  border-color: var(--gold);
+  color: var(--pergament);
+  background: rgba(196, 154, 42, 0.1);
+}
+
 /* ── Hjelpeknapper og popover ────────────────────────────────────────── */
 
 .hjelp-knapp {
