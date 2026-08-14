@@ -4,6 +4,30 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 19 — Google Search Console-verifisering (2026-08-14)
+
+Ren dokumentasjons-/verifiseringsrunde, ingen kodeendring. Domain
+property `kvernhaugbrygghus.no` verifisert i Google Search Console
+via DNS TXT-record hos Domeneshop (én permanent record, ingen andre
+DNS-endringer). `sitemap.xml` sendt inn og akseptert — Search Console
+rapporterte status «Fullført» med 18/18 URL-er oppdaget, som matcher
+nettstedets faktiske sitemap (9 NO + 9 EN). Manuell «Be om
+indeksering» sendt for de 4 høyest prioriterte sidene (`/`, `/en/`,
+`/hjelp/`, `/en/hjelp/`); resten av de 18 sidene håndteres via
+sitemap fremfor enkeltvise forespørsler.
+
+Første URL Inspection av `/` viste «Oppdaget – ikke indeksert for
+øyeblikket», uten noen teknisk blokkering indikert — forventet status
+for et nettsted som ble publisert samme dag Search Console ble satt
+opp, ikke et tegn på en SEO-feil. Uavhengig teknisk re-verifisering
+av produksjon (robots.txt, sitemap-innhold, canonical, hreflang,
+noindex, HTTPS/TLS, HTTP→HTTPS-redirect) fant ingen nye funn — samme
+grønne status som ved deploy i Runde 18. `www.kvernhaugbrygghus.no`
+serverer fortsatt identisk innhold direkte i stedet for å
+301-redirecte til non-www (uendret SHOULD/backlog-status, ikke en
+blocker — canonical peker uansett korrekt til non-www). Videre
+indekseringsstatus avhenger nå av Googles egen crawl-takt.
+
 ## Runde 18 — Første produksjonsdeploy + "Uten navn"-hotfix (2026-08-14)
 
 Første offentlige produksjonsdeploy av web-versjonen, til
