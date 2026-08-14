@@ -722,7 +722,198 @@ function beregnOgVisResultat() {
   // oppdatere på hver beregning, i motsetning til #skaler-maal-volum selv.
   document.getElementById("skaler-naavaerende").textContent = t("builder.skaler.naavaerende", { vol: _fmtVolum(oppskrift.volum) });
 
+  // Runde 21B -- leser aktiv utstyrsprofil på hver beregning (samme
+  // rimelige kostnad som t()/localStorage ellers i denne funksjonen).
+  // Dekker batch-volum-input OG skalering gratis, siden begge ender her.
+  _oppdaterUtstyrBatchAdvarsel(oppskrift.volum);
+
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
+}
+
+// ─── Utstyrsprofiler (Runde 21B) ────────────────────────────────────────
+// UI-laget for web/js/equipment.js sin DOM-frie state. Ingen kobling til
+// recipe-beregninger her -- kettleCapacityL/maxRecommendedBatchL er ren
+// metadata/veiledning i V1, se equipment.js for full begrunnelse.
+
+let _utstyrRedigererId = null; // null = "nytt utstyr", ellers id på profilen som redigeres
+
+function _utstyrRadDetalj(profil) {
+  const deler = [];
+  const merke = [profil.manufacturer, profil.model].filter(Boolean).join(" ");
+  if (merke) deler.push(merke);
+  deler.push(t("utstyr.detaljKapasitet", { kap: _fmtVolum(profil.kettleCapacityL) }));
+  if (profil.maxRecommendedBatchL) {
+    deler.push(t("utstyr.detaljMaks", { maks: _fmtVolum(profil.maxRecommendedBatchL) }));
+  }
+  return deler.join(" · ");
+}
+
+function _byggUtstyrRad(profil, aktivId) {
+  const mal = document.getElementById("utstyr-rad-mal");
+  const rad = mal.content.cloneNode(true).querySelector(".utstyr-rad");
+  const knapp = rad.querySelector(".utstyr-rad-velg");
+  const navnEl = rad.querySelector(".utstyr-rad-navn");
+  const detaljEl = rad.querySelector(".utstyr-rad-detalj");
+  const handlinger = rad.querySelector(".utstyr-rad-handlinger");
+
+  const id = profil ? profil.id : null;
+  if (!profil) {
+    navnEl.textContent = t("utstyr.ingenProfilValgt");
+    detaljEl.textContent = "";
+  } else {
+    navnEl.textContent = profil.name;
+    detaljEl.textContent = _utstyrRadDetalj(profil);
+  }
+
+  const erAktiv = id === aktivId;
+  rad.classList.toggle("aktiv", erAktiv);
+  knapp.setAttribute("aria-pressed", String(erAktiv));
+  // Velge en profil aktiverer og lukker modalen med det samme (samme
+  // "velg og ferdig"-mønster som #modus-forstegang) -- rediger/slett
+  // under skal derimot IKKE lukke, siden brukeren ofte vil fortsette å
+  // se på listen etterpå.
+  knapp.addEventListener("click", () => {
+    aktiverUtstyrsprofil(id);
+    _oppdaterUtstyrUI();
+    _lukkUtstyrModal();
+  });
+
+  if (profil && profil.type === "custom") {
+    handlinger.hidden = false;
+    rad.querySelector(".utstyr-rad-rediger").addEventListener("click", (e) => {
+      e.stopPropagation();
+      _apneUtstyrSkjema(profil);
+    });
+    rad.querySelector(".utstyr-rad-slett").addEventListener("click", (e) => {
+      e.stopPropagation();
+      _slettUtstyrMedBekreftelse(profil);
+    });
+  }
+
+  return rad;
+}
+
+function _renderUtstyrListe() {
+  const liste = document.getElementById("utstyr-liste");
+  liste.innerHTML = "";
+  const aktivId = lesUtstyrState().activeProfileId;
+  liste.appendChild(_byggUtstyrRad(null, aktivId));
+  for (const profil of alleUtstyrsprofiler()) {
+    liste.appendChild(_byggUtstyrRad(profil, aktivId));
+  }
+}
+
+function _oppdaterUtstyrChip() {
+  const profil = hentAktivUtstyrsprofil();
+  document.getElementById("utstyr-velger-navn").textContent = profil ? profil.name : t("utstyr.ingenProfilValgt");
+}
+
+// batchVolum sendes inn av beregnOgVisResultat() (allerede kjent der) --
+// unngår å lese/parse #batch-volum.value på nytt her.
+function _oppdaterUtstyrBatchAdvarsel(batchVolum) {
+  const el = document.getElementById("utstyr-batch-advarsel");
+  if (!el) return;
+  const profil = hentAktivUtstyrsprofil();
+  if (!profil || !profil.maxRecommendedBatchL || batchVolum <= profil.maxRecommendedBatchL) {
+    el.hidden = true;
+    el.textContent = "";
+    return;
+  }
+  el.textContent = t("utstyr.batchAdvarsel", { navn: profil.name, maks: _fmtVolum(profil.maxRecommendedBatchL) });
+  el.hidden = false;
+}
+
+function _oppdaterUtstyrUI() {
+  _oppdaterUtstyrChip();
+  _oppdaterUtstyrBatchAdvarsel(parseFloat(document.getElementById("batch-volum").value) || 0);
+}
+
+function _utstyrEscapeHandler(e) {
+  if (e.key === "Escape") _lukkUtstyrModal();
+}
+
+function _apneUtstyrModal() {
+  _renderUtstyrListe();
+  _lukkUtstyrSkjema();
+  document.getElementById("utstyr-modal-bakteppe").hidden = false;
+  document.getElementById("utstyr-modal").hidden = false;
+  document.addEventListener("keydown", _utstyrEscapeHandler);
+}
+
+function _lukkUtstyrModal() {
+  document.getElementById("utstyr-modal-bakteppe").hidden = true;
+  document.getElementById("utstyr-modal").hidden = true;
+  document.removeEventListener("keydown", _utstyrEscapeHandler);
+}
+
+function _apneUtstyrSkjema(profil) {
+  _utstyrRedigererId = profil ? profil.id : null;
+  document.getElementById("utstyr-skjema-tittel").textContent = profil
+    ? t("utstyr.skjemaTittelRediger")
+    : t("utstyr.skjemaTittelNytt");
+  document.getElementById("utstyr-felt-navn").value = profil ? profil.name : "";
+  document.getElementById("utstyr-felt-produsent").value = (profil && profil.manufacturer) || "";
+  document.getElementById("utstyr-felt-modell").value = (profil && profil.model) || "";
+  document.getElementById("utstyr-felt-kapasitet").value = profil ? profil.kettleCapacityL : "";
+  document.getElementById("utstyr-felt-maks").value = (profil && profil.maxRecommendedBatchL) || "";
+  document.getElementById("utstyr-felt-notater").value = (profil && profil.notes) || "";
+  _visUtstyrSkjemaMelding("");
+  document.getElementById("utstyr-skjema").hidden = false;
+  document.getElementById("utstyr-felt-navn").focus();
+}
+
+function _lukkUtstyrSkjema() {
+  const skjema = document.getElementById("utstyr-skjema");
+  skjema.hidden = true;
+  skjema.reset();
+  _utstyrRedigererId = null;
+  _visUtstyrSkjemaMelding("");
+}
+
+function _visUtstyrSkjemaMelding(tekst) {
+  const el = document.getElementById("utstyr-skjema-melding");
+  el.textContent = tekst;
+  el.hidden = !tekst;
+}
+
+function _handleUtstyrSkjemaSubmit(e) {
+  e.preventDefault();
+  const felter = {
+    name: document.getElementById("utstyr-felt-navn").value,
+    manufacturer: document.getElementById("utstyr-felt-produsent").value,
+    model: document.getElementById("utstyr-felt-modell").value,
+    kettleCapacityL: document.getElementById("utstyr-felt-kapasitet").value,
+    maxRecommendedBatchL: document.getElementById("utstyr-felt-maks").value,
+    notes: document.getElementById("utstyr-felt-notater").value,
+  };
+  const resultat = _utstyrRedigererId
+    ? oppdaterCustomUtstyrsprofil(_utstyrRedigererId, felter)
+    : opprettCustomUtstyrsprofil(felter);
+  if (!resultat.ok) {
+    _visUtstyrSkjemaMelding(resultat.melding);
+    return;
+  }
+  _lukkUtstyrSkjema();
+  _renderUtstyrListe();
+  _oppdaterUtstyrUI();
+}
+
+function _slettUtstyrMedBekreftelse(profil) {
+  const bekreftet = confirm(t("utstyr.slettBekreft", { navn: profil.name }));
+  if (!bekreftet) return;
+  slettCustomUtstyrsprofil(profil.id);
+  _renderUtstyrListe();
+  _oppdaterUtstyrUI();
+}
+
+function initUtstyr() {
+  document.getElementById("utstyr-velger-knapp").addEventListener("click", _apneUtstyrModal);
+  document.getElementById("utstyr-modal-bakteppe").addEventListener("click", _lukkUtstyrModal);
+  document.getElementById("utstyr-modal-lukk").addEventListener("click", _lukkUtstyrModal);
+  document.getElementById("utstyr-nytt-knapp").addEventListener("click", () => _apneUtstyrSkjema(null));
+  document.getElementById("utstyr-skjema-avbryt").addEventListener("click", _lukkUtstyrSkjema);
+  document.getElementById("utstyr-skjema").addEventListener("submit", _handleUtstyrSkjemaSubmit);
+  _oppdaterUtstyrChip();
 }
 
 // ─── Stilmatch-visning (read-only, høyre panel) ──────────────────────────
@@ -1025,6 +1216,7 @@ async function init() {
   await lastData();
   initModus();
   initHjelp();
+  initUtstyr();
 
   oppdaterSmakshjul = initSmakshjul(document.getElementById("smakshjul-container"), SMAKS_KATEGORIER);
 

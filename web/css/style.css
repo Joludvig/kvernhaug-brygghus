@@ -1113,6 +1113,228 @@ textarea:focus,
   }
 }
 
+/* ── Utstyrsprofiler (Runde 21B) ─────────────────────────────────────────
+   Kompakt profilvelger i Grunndata + modal for å velge/opprette/redigere/
+   slette utstyr. Modal-laget gjenbruker samme mønster som
+   .modus-forstegang(-bakteppe) over; radene i listen samme kort-stil som
+   #oppskrift-liste li lenger ned. */
+
+.utstyr-velger-knapp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 22rem;
+  background: var(--bg-sect-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--body);
+  padding: 0.55rem 0.8rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.utstyr-velger-knapp:hover {
+  border-color: var(--gold);
+}
+
+.utstyr-velger-pil {
+  color: var(--muted);
+  flex: none;
+}
+
+/* Samme dempede varselfarge som .malt-prosent-advarsel -- vennlig,
+   ikke-blokkerende tone, ikke --danger sin skarpere feilfarge. */
+.utstyr-advarsel {
+  color: #e0a89a;
+}
+
+.utstyr-modal-bakteppe {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 55;
+}
+
+.utstyr-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 56;
+  width: min(30rem, 92vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--bg-sect);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  padding: 1.4rem 1.4rem 1.6rem;
+}
+
+.utstyr-modal-topp {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.utstyr-modal-topp h2 {
+  margin: 0;
+  color: var(--pergament);
+  font-family: var(--serif);
+  font-size: 1.2rem;
+}
+
+.utstyr-modal-lukk {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+}
+
+.utstyr-modal-lukk:hover {
+  color: var(--gold);
+}
+
+.utstyr-liste {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.utstyr-rad {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(196, 154, 42, 0.3);
+  border-radius: 6px;
+  padding: 0.3rem 0.4rem 0.3rem 0.7rem;
+}
+
+.utstyr-rad.aktiv {
+  border-color: var(--gold);
+  background: rgba(196, 154, 42, 0.1);
+}
+
+.utstyr-rad-velg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--body);
+  padding: 0.5rem 0.2rem;
+  min-height: 2.4rem;
+}
+
+.utstyr-rad-navn {
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+
+.utstyr-rad-detalj {
+  color: var(--muted);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.utstyr-rad-handlinger {
+  display: flex;
+  gap: 0.3rem;
+  flex: none;
+}
+
+.utstyr-rad-rediger,
+.utstyr-rad-slett {
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.4rem 0.5rem;
+  min-height: 2.2rem;
+  font-size: 0.8rem;
+}
+
+.utstyr-rad-rediger:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.utstyr-rad-slett:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.utstyr-skjema {
+  margin-top: 0.6rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+
+.utstyr-skjema h3 {
+  margin: 0 0 0.6rem;
+  color: var(--body);
+  font-size: 1rem;
+}
+
+/* Egne kolonne-regler i stedet for å arve .byggerlayout .felt-rad -- modalen
+   ligger utenfor <main class="byggerlayout"> (samme lagdeling som
+   .modus-forstegang), så den generiske rad-.felt-rad (space-between) ville
+   ellers gjelde. */
+.utstyr-skjema .felt-rad {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-bottom: 0.7rem;
+}
+
+.utstyr-skjema .felt-rad label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding-top: 0;
+}
+
+.utstyr-skjema .felt-rad input,
+.utstyr-skjema .felt-rad textarea {
+  width: 100%;
+  max-width: none;
+}
+
+.utstyr-skjema-melding {
+  color: #e0a89a;
+}
+
+@media (max-width: 640px) {
+  .utstyr-modal {
+    padding: 1.1rem 1rem 1.3rem;
+  }
+  .utstyr-rad {
+    flex-wrap: wrap;
+  }
+  .utstyr-rad-handlinger {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
 /* ── Lagrede oppskrifter ─────────────────────────────────────────────── */
 
 #oppskrift-liste {

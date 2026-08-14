@@ -90,6 +90,53 @@
   </div>
 </div>
 
+<!-- Runde 21B: Utstyrsprofiler -- samme modal-mønster (bakteppe + sentrert
+     boks) som #modus-forstegang over. Lukkes ved klikk på bakteppe, ✕-knapp
+     eller Escape (se _lukkUtstyrModal() i app.js). Kettle capacity/anbefalt
+     maks er ren metadata/veiledning her -- ingen pre-boil-beregning. -->
+<div class="utstyr-modal-bakteppe no-print" id="utstyr-modal-bakteppe" hidden></div>
+<div class="utstyr-modal no-print" id="utstyr-modal" role="dialog" aria-modal="true" aria-labelledby="utstyr-modal-tittel" hidden>
+  <div class="utstyr-modal-topp">
+    <h2 id="utstyr-modal-tittel" data-i18n="utstyr.modalTittel">Utstyrsprofil</h2>
+    <button type="button" class="utstyr-modal-lukk" id="utstyr-modal-lukk" aria-label="Lukk" data-i18n-aria-label="utstyr.lukkAriaLabel">✕</button>
+  </div>
+  <ul class="utstyr-liste" id="utstyr-liste"></ul>
+  <button type="button" class="legg-til-knapp" id="utstyr-nytt-knapp" data-i18n="utstyr.nyttEgendefinert">+ Nytt egendefinert utstyr</button>
+
+  <form class="utstyr-skjema" id="utstyr-skjema" hidden>
+    <h3 id="utstyr-skjema-tittel" data-i18n="utstyr.skjemaTittelNytt">Nytt egendefinert utstyr</h3>
+    <div class="felt-rad">
+      <label for="utstyr-felt-navn" data-i18n="utstyr.felt.navn">Navn</label>
+      <input type="text" id="utstyr-felt-navn" required>
+    </div>
+    <div class="felt-rad">
+      <label for="utstyr-felt-produsent" data-i18n="utstyr.felt.produsent">Produsent</label>
+      <input type="text" id="utstyr-felt-produsent">
+    </div>
+    <div class="felt-rad">
+      <label for="utstyr-felt-modell" data-i18n="utstyr.felt.modell">Modell</label>
+      <input type="text" id="utstyr-felt-modell">
+    </div>
+    <div class="felt-rad">
+      <label for="utstyr-felt-kapasitet" data-i18n="utstyr.felt.kjelekapasitet">Kjelekapasitet (L)</label>
+      <input type="number" id="utstyr-felt-kapasitet" min="0.5" step="0.5" required>
+    </div>
+    <div class="felt-rad">
+      <label for="utstyr-felt-maks" data-i18n="utstyr.felt.anbefaltMaks">Anbefalt maks batchvolum (L)</label>
+      <input type="number" id="utstyr-felt-maks" min="0.5" step="0.5">
+    </div>
+    <div class="felt-rad">
+      <label for="utstyr-felt-notater" data-i18n="utstyr.felt.notater">Notater</label>
+      <textarea id="utstyr-felt-notater" rows="2"></textarea>
+    </div>
+    <p class="hjelpetekst utstyr-skjema-melding" id="utstyr-skjema-melding" aria-live="polite" hidden></p>
+    <div class="knapperad">
+      <button type="submit" id="utstyr-skjema-lagre" data-i18n="utstyr.lagre">💾 Lagre utstyr</button>
+      <button type="button" id="utstyr-skjema-avbryt" data-i18n="utstyr.avbryt">Avbryt</button>
+    </div>
+  </form>
+</div>
+
 <main class="byggerlayout">
   <div class="bygger-venstre">
     <section class="panel" id="grunndata-panel">
@@ -110,6 +157,14 @@
         <label for="batch-volum" data-i18n="builder.grunndata.batchvolum">Batchvolum (liter)</label>
         <input type="number" id="batch-volum" min="0" step="0.1" value="20">
       </div>
+      <div class="felt-rad">
+        <label id="utstyr-velger-label" data-i18n="builder.grunndata.aktivtUtstyr">Aktivt utstyr</label>
+        <button type="button" class="utstyr-velger-knapp" id="utstyr-velger-knapp" aria-labelledby="utstyr-velger-label" aria-haspopup="dialog">
+          <span id="utstyr-velger-navn" data-i18n="utstyr.ingenProfilValgt">Ingen utstyrsprofil valgt</span>
+          <span class="utstyr-velger-pil" aria-hidden="true">▾</span>
+        </button>
+      </div>
+      <p class="hjelpetekst utstyr-advarsel" id="utstyr-batch-advarsel" aria-live="polite" hidden></p>
       <div class="felt-rad mester-only">
         <label for="effektivitet"><span data-i18n="builder.grunndata.effektivitet">Brygghuseffektivitet (%)</span> <button type="button" class="hjelp-knapp" data-hjelp="effektivitet" aria-label="Hva er brygghuseffektivitet?" data-i18n-aria-label="help.effektivitetAriaLabel">?</button></label>
         <input type="number" id="effektivitet" min="1" max="100" step="1" value="75">
@@ -317,6 +372,19 @@
   </div>
 </template>
 
+<template id="utstyr-rad-mal">
+  <li class="utstyr-rad">
+    <button type="button" class="utstyr-rad-velg">
+      <span class="utstyr-rad-navn"></span>
+      <span class="utstyr-rad-detalj"></span>
+    </button>
+    <div class="utstyr-rad-handlinger" hidden>
+      <button type="button" class="utstyr-rad-rediger" data-i18n="utstyr.rediger">Rediger</button>
+      <button type="button" class="utstyr-rad-slett" data-i18n="utstyr.slett">Slett</button>
+    </div>
+  </li>
+</template>
+
 <script src="js/i18n.js"></script>
 <script src="js/chrome.js"></script>
 <script src="js/combobox.js"></script>
@@ -328,6 +396,7 @@
 <script src="js/help.js"></script>
 <script src="js/recipe_engine.js"></script>
 <script src="js/kbhrecipe.js"></script>
+<script src="js/equipment.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
