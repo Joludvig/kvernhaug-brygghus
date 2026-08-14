@@ -249,6 +249,24 @@ py -3 -m http.server 8000
 # åpne http://localhost:8000
 ```
 
+## Deploy
+
+Ingen CI/CD — deploy er fortsatt en eksplisitt, manuell handling, men skjer nå via ett trygt PowerShell-script i stedet for filnavlingering i FileZilla (som var årsaken til flere tidligere deploy mismatch-hendelser).
+
+```powershell
+# Se hva som ville blitt lastet opp -- 0 tilkobling, 0 endringer
+.\scripts\deploy_web.ps1 -DryRun
+
+# Faktisk deploy -- spør om FTP-brukernavn/passord, viser bekreftelse (default NO)
+.\scripts\deploy_web.ps1
+```
+
+- **Source**: alltid `web/` i repoet scriptet selv ligger i (`scripts/deploy_web.ps1` sin egen foreldre-mappe) — aldri en tilfeldig lokal mappe.
+- **Target**: `ftp.domeneshop.no:/www`, eksplisitt FTPS (AUTH TLS) via curl.
+- **Full sync**: hele `web/` lastes opp/overskrives hver gang, unntatt `README.md`/`CHANGELOG.md` (utviklerdokumentasjon). Ingenting slettes automatisk på serveren.
+- **Credentials**: spørres interaktivt hver kjøring, lagres aldri i repoet eller på disk (kun en midlertidig curl-configfil som slettes rett etter opplasting).
+- Etter vellykket opplasting kjører scriptet en enkel, read-only HTTPS-verifisering (`/`, `/en/`, `/js/app.js`, `/js/preferences.js`) og feiler tydelig (non-zero exit) hvis noe fortsatt er galt.
+
 ## Vedlikehold av formler og stillogikk
 
 Ingen delt kjøretid mellom Python- og JS-siden. `js/calc.js`, `js/flavor.js` og `js/style.js` er manuelle porter som må oppdateres for hånd hvis kilden i `modules/` endres:
