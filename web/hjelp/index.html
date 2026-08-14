@@ -102,6 +102,30 @@
       <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.laerlingMester.hvorfor">Du kan bytte fram og tilbake så mye du vil, når som helst i prosessen. Mange starter i Bryggelærling og går over til Bryggmester etter hvert som begrepene blir kjente.</p>
     </article>
 
+    <article class="hjelp-artikkel" id="skalere-oppskrift">
+      <h3 data-i18n="hjelp.idx.skalering.tittel">Skalere oppskriften (batchstørrelse)</h3>
+      <p data-i18n-html="hjelp.idx.skalering.tekst">"📐 Skaler oppskrift" (i Bryggmester) endrer hele oppskriften fra ett batch-volum til et annet, uten at du må regne om hver ingrediens for hånd. Batch-volum er antall liter ferdig øl du sikter mot — feltet du fyller ut helt i starten under Grunndata. Skriv inn ønsket nytt volum i "Skaler til (L)" og trykk knappen: all malt (kg) og all humle (gram) endres proporsjonalt med samme faktor. Går du f.eks. fra 23 L til 30 L, skaleres alt med faktor 30 ÷ 23 ≈ 1,30 — 5 kg malt blir da rundt 6,52 kg, 25 g humle rundt 32,5 g.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.skalering.hvorfor"><strong>Hvorfor du bryr deg:</strong> Fordi ALLE malt- og humlemengder endres med samme faktor, beholder oppskriften samme forhold mellom ingrediensene — og dermed samme karakter og stilprofil — bare i en annen batchstørrelse. Det er forskjellen fra å bare endre enkeltmengder for hånd, som lett forskyver balansen. Ølnavn, brygger, bryggeri, notater, valgt stil, gjærvalg, humletid og eventuell egendefinert alfasyre endres ikke av skalering, og selve skaleringen skjer kun når du trykker knappen — aldri automatisk mens du skriver i volumfeltet.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="malt-kg-prosent">
+      <h3 data-i18n="hjelp.idx.maltKgProsent.tittel">Malt: kg og % henger sammen — men ikke likt begge veier</h3>
+      <p data-i18n-html="hjelp.idx.maltKgProsent.tekst">Hver maltrad i Bryggmester har både et kg-felt og et %-felt. De to feltene oppfører seg bevisst ulikt: endrer du kg, oppdateres alle %-feltene automatisk og øyeblikkelig ut fra ny total — kg er alltid fasit. Skriver du derimot direkte i %-feltet, skjer det motsatte: kg-verdiene endres ikke mens du skriver, og de andre %-feltene skrives heller ikke om automatisk. Prosent-summen øverst i maltlisten oppdateres likevel live, slik at du kan se om du har nådd 100%.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.maltKgProsent.hvorfor"><strong>Hvorfor du bryr deg:</strong> Dette gir deg albuerom til å sette opp en hel prosentfordeling — for eksempel 70 % basemalt, 20 % karamellmalt, 10 % røkt malt — før noe faktisk endrer kg-mengdene. Skulle kg oppdateres for hvert tastetrykk i %-feltet, ville tidligere innskrevne rader stadig forskyve seg mens du fortsatt jobbet med fordelingen. Når prosentene er slik du vil ha dem, gjør du dem gjeldende med "Bruk prosentfordeling" (se under).</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="bruk-prosentfordeling">
+      <h3 data-i18n="hjelp.idx.brukProsentfordeling.tittel">"Bruk prosentfordeling"</h3>
+      <p data-i18n-html="hjelp.idx.brukProsentfordeling.tekst">Knappen tar prosentverdiene du har skrevet inn og gjør dem gjeldende for de faktiske kg-mengdene. Rader du har skrevet en %-verdi i regnes som "låst" og beholder akkurat den prosenten du satte. De øvrige (urørte) radene deler resten mellom seg proporsjonalt, slik at summen alltid blir nøyaktig 100 %. Total maltmengde — summen av alle kg før du trykket knappen — forblir uendret; det er kun fordelingen mellom radene som endres.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.brukProsentfordeling.hvorfor"><strong>Eksempel:</strong> Har du 5 kg totalt fordelt på to malter, skriver 70 % i den ene raden og trykker knappen, får den andre automatisk de resterende 30 % — og kg-feltene oppdateres til å matche (3,5 kg / 1,5 kg). Har du ikke skrevet i noe %-felt ennå, gjør knappen ingenting: den har ingenting "låst" å fordele resten rundt.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="mal-ibu">
+      <h3 data-i18n="hjelp.idx.malIbu.tittel">Mål-IBU: baklengs bitterhetsberegning</h3>
+      <p data-i18n-html="hjelp.idx.malIbu.tekst">Vanligvis regner byggeren bitterhet fremover: du oppgir gram, koketid og alfasyre for en humletilsetning, og IBU-bidraget beregnes automatisk. "Mål-IBU (denne tilsetningen)" snur regningen: du oppgir hvor mange IBU akkurat denne tilsetningen skal bidra med, og trykker "Beregn gram" — da regner byggeren ut hvor mange gram som trengs, gitt koketid, alfasyre, batch-volum og forventet OG. Dette er den inverse Tinseth-beregningen, og feltet vises kun for tilsetninger med koketid over 0 minutter (dryhumling har ingen kokeutnyttelse å regne på).</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.malIbu.hvorfor"><strong>Hvorfor du bryr deg:</strong> Sier du "denne tilsetningen skal bidra med ca. 15 IBU", fyller "Beregn gram" inn den gramvekten som gir omtrent det bidraget — med samme formel som resten av byggeren, bare baklengs. Mål-IBU er ikke en live-kobling; beregningen skjer kun når du trykker knappen, akkurat som skalering og "Bruk prosentfordeling". Husk at dette er en beregnet startverdi, ikke en garanti — faktisk bitterhet i det ferdige ølet påvirkes også av kokekar, fordampning, vørterklarhet og andre forhold i din egen bryggeprosess.</p>
+    </article>
+
     <article class="hjelp-artikkel" id="lagre-oppskrift">
       <h3 data-i18n="hjelp.idx.lagreOppskrift.tittel">Lagre en oppskrift</h3>
       <p data-i18n-html="hjelp.idx.lagreOppskrift.tekst">"💾 Lagre oppskrift" lagrer oppskriften <strong>i denne nettleseren</strong> (localStorage) under navnet du har gitt den. Den dukker opp i "Mine lagrede oppskrifter" lenger ned, og du kan laste den inn igjen når som helst — også etter at du har lukket fanen.</p>
