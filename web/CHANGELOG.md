@@ -4,6 +4,51 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 18 — Første produksjonsdeploy + "Uten navn"-hotfix (2026-08-14)
+
+Første offentlige produksjonsdeploy av web-versjonen, til
+`https://kvernhaugbrygghus.no` (Domeneshop, `/www` som document root).
+Full pre-deploy-verifisering (generator-sync, 899 Python-tester,
+manuell pre-deploy-regresjon) grønn før push av commit `ef1a2c3` til
+`origin/master` og manuell FTP-opplasting av `web/`-innholdet (uten
+`README.md`/`CHANGELOG.md`, som er utviklerdokumentasjon). Full
+produksjons-smoke rett etter deploy: alle 18 sider (NO/EN), rå SEO
+(canonical/hreflang/description), sitemap.xml (18 URL-er), robots.txt,
+HTTP→HTTPS-redirect, TLS, 0 tredjeparts runtime-requests — alt grønt.
+
+**Hotfix (samme dag, commit `56c924e`):** en ekte iPhone Safari-bruker
+oppdaget at EN-builderens "Beer name"-felt viste den norske interne
+sentinelverdien "Uten navn" i stedet for en lokalisert engelsk
+placeholder/default. Root cause: `_gjenopprettOppskrift()` i `app.js`
+satte input-feltets `.value` direkte fra `oppskrift.navn` uten
+displaylag-oversettelse — i motsetning til recipe card-visningen
+(`identitet-navn`), som allerede gjorde dette riktig. Samme
+lekkasjemønster (`navn || fallback`, som aldri trigger siden "Uten
+navn" er en ikke-tom streng) ble funnet og rettet fire steder til:
+lagre-status-meldingen, Utskrift-sidens info-linje og nedtrekksvelger,
+print-dokumentenes `<h1>`, og Mine oppskrifter-listens tittel. Ny delt
+display-helper `visningsnavn()` i `i18n.js` brukes for all READ-ONLY
+visning (viser "Untitled" på EN, "Uten navn" på NO, brukerskrevne
+navn uendret). Det REDIGERBARE navnefeltet fikk en annen løsning —
+vises tomt (ikke oversatt tekst) når intern navn er sentinelen, slik
+at den allerede lokaliserte placeholderen ("Name of the beer") vises
+naturlig, uten risiko for at "Untitled" ved et uhell lagres som et
+faktisk brukernavn. Intern `recipe.navn`-kontrakt, `.kbhrecipe`-format
+og `samleOppskrift()`/`_gjenopprettOppskrift()`-signaturen er
+uendret — kun visningslaget endret.
+
+**Deploy mismatch underveis:** det første FTP-opplastingsforsøket av
+disse 5 JS-filene resulterte i at produksjonen fortsatt serverte den
+gamle, pre-hotfix-koden — bekreftet ved direkte byte-diff mot lokal
+`HEAD`. Server-headerne (`Last-Modified`) viste at filene faktisk
+_var_ nylig overskrevet, som utelukket cache som forklaring — årsaken
+var at feil lokal kildemappe (en eldre deploy-/scratch-kopi) ble brukt
+i FTP-klienten i stedet for det faktiske repoets `web/js/`. Andre
+opplastingsforsøk (fra riktig kildemappe) verifisert byte-identisk mot
+lokal `HEAD` for alle 5 filer, og full produksjons-smoke av det
+opprinnelige bug-scenarioet (inkl. 1000ms+ stabilitetssjekk over flere
+NO↔EN-runder) bekreftet fikset.
+
 ## Runde 17 — Kontakt og personvern (2026-08-14)
 
 Offentlig kontakt-e-post (`post@kvernhaugbrygghus.no`, bekreftet opprettet hos Domeneshop) og en minimal, ærlig personvernforklaring før første lansering — ingen cookie-banner, ingen consent-framework, ingen analytics (bekreftet på nytt: ingen `fetch`/`XMLHttpRequest`/`sendBeacon`/tredjeparts script/iframe noe sted i `web/`).
