@@ -4,6 +4,20 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 14B — Engelsk hjelp/bryggehåndbok (2026-08-14)
+
+Fullførte NO/EN-dekningen fra Runde 14: alle fire `hjelp/`-sidenes brødtekst (`index.html` sitt kom-i-gang/begrepsforklaringer/ingredienser/ordliste/FAQ, `bryggedag.html` sine 15 steg, `bryggemetoder.html` sine tre metoder, `utstyr-brewzilla.html` sin BrewZilla-referanse) er nå oversatt til naturlig, idiomatisk bryggeengelsk — ikke maskinoversettelse. Samme arkitektur som resten av appen (`data-i18n`/`t()`/`TEKSTER` i `i18n.js`), ingen ny språkmodell. 282 nye nøkkelpar (NO+EN) under `hjelp.idx.*`/`hjelp.dag.*`/`hjelp.metoder.*`/`hjelp.brewzilla.*`.
+
+Ny `data-i18n-html`-attributt lagt til i `applyI18n()` (`i18n.js`): identisk med `data-i18n`, men setter `innerHTML` i stedet for `textContent`. Nødvendig fordi hjelpeteksten har mye inline-markup (`<strong>`, `<em>`, ankerlenker som `<a href="#ibu">`) som ville forsvunnet med ren tekst-erstatning. Trygt fordi `TEKSTER`-ordboken er statisk, egen-forfattet innhold — aldri brukerinput — så ingen XSS-vektor oppstår.
+
+BrewZilla-sidens proveniens-skille (faktisk produktspesifikasjon vs. Kvernhaug-standardverdi for beregning vs. generell bryggeforutsetning vs. praktisk Kvernhaug-anbefaling vs. ikke-verifisert) er bevart nøyaktig i engelsk tekst — kun språket endret, aldri den epistemiske statusen. Alle tall (35 L kjelekapasitet, 30 L pre-boil-varsel, 4,0 L/time fordampning, 2,0 L dead space, 3,2 L/kg meskeforhold, 1,0 L/kg kornabsorpsjon) uendret og fortsatt metriske — ingen imperial-konvertering.
+
+Det midlertidige `.hjelp-sprak-merknad`-varselet fra Runde 14 (og tilhørende CSS) er fjernet nå som det ikke lenger er noe delvis-oversatt innhold å varsle om.
+
+`docs/ROADMAP.md` sin fremtidige SEO-/pre-render-runde (egen crawlbar `/en/`-URL-struktur) er uendret og fortsatt ikke påbegynt — Runde 14B løste kun innholdsdekning, ikke URL-strategien fra Runde 14.
+
+Manuell kontroll av førsteutkastet fant fire konsistensproblemer, rettet i et eget engelsk redaksjonspass før commit (kun EN-verdier i `i18n.js`, norsk urørt): moduspar-navnene («Homebrewer»/«Brewmaster») matchet ikke de faktiske UI-navnene og er nå konsekvent «Brewing Apprentice»/«Brewing Master»; standard-callouten («Why you should care:») var litt markedsføringspreget og er standardisert til «Why this matters:» (21 forekomster); «Save a Recipe»-avsnittet anbefalte fortsatt rå JSON-eksport som normal måte å flytte en oppskrift på — beskriver nå `.kbhrecipe` som primær portabel fil (Runde 13-kontrakten), med JSON beholdt som avansert/bakoverkompatibelt alternativ; «Open or Import a Recipe» skiller nå tydelig mellom å åpne en fil (`.kbhrecipe`/legacy JSON) og å importere fri tekst, med dagens faktiske knappetekster. Samme gjennomgang identifiserte at flere Bryggmester-features (batchskalering, malt kg/%, «Bruk prosentfordeling», mål-IBU, aktiv-kladd-beskyttelse, selve språkvalget) ikke er dokumentert i Help i det hele tatt — verken norsk eller engelsk — flagget som eget fremtidig innholdspunkt i `docs/ROADMAP.md`, ikke løst i denne runden.
+
 ## Runde 14 — Norsk/engelsk UI (2026-08-14)
 
 Vanilla NO/EN-støtte (`js/i18n.js`) på tvers av hele app-UI-et — bygger, Mine oppskrifter, Importer, Utskrift, de fire print-dokumentene, first-run modusdialog og hjelpeknapper/tooltips. Ingen npm, ingen build-steg, ingen tredjeparts i18n-bibliotek. Norsk er fortsatt primærspråk/default; språkbytte skjer live (ingen reload) via en delt `kvernhaug:sprakendret`-hendelse, og lagres i en egen `kvernhaug_web_sprak`-nøkkel som aldri er del av selve oppskriftsdataen — se README "Språk (NO/EN)" for full arkitektur.

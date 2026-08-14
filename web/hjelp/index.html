@@ -67,16 +67,15 @@
 
 <div class="hjelp-layout">
   <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
-    <a href="#kom-i-gang">A. Kom i gang</a>
-    <a href="#forsta-oppskriften">B. Forstå oppskriften</a>
-    <a href="#ingredienser">C. Ingredienser</a>
-    <a href="#bryggeprosess">D. Bryggeprosess</a>
-    <a href="#faq">E. Spørsmål &amp; svar</a>
+    <a href="#kom-i-gang" data-i18n="hjelp.idx.toc.a">A. Kom i gang</a>
+    <a href="#forsta-oppskriften" data-i18n="hjelp.idx.toc.b">B. Forstå oppskriften</a>
+    <a href="#ingredienser" data-i18n="hjelp.idx.toc.c">C. Ingredienser</a>
+    <a href="#bryggeprosess" data-i18n="hjelp.idx.toc.d">D. Bryggeprosess</a>
+    <a href="#faq" data-i18n-html="hjelp.idx.toc.e">E. Spørsmål &amp; svar</a>
   </nav>
 
   <main class="hjelp-side-main">
-  <p class="hjelp-sprak-merknad" data-i18n="hjelp.rundeSprakMerknad"></p>
-  <p class="hjelp-innledning">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.idx.intro">
     Et oppslagsverk for deg som bygger en oppskrift i Kvernhaug Brygghus.
     Alt her er skrevet for å svare på to spørsmål: hva betyr dette, og
     hvorfor bryr jeg meg? Bruk innholdsmenyen til å hoppe rundt, eller
@@ -84,282 +83,282 @@
   </p>
 
   <div class="hjelp-seksjon" id="kom-i-gang">
-    <h2>A. Kom i gang</h2>
+    <h2 data-i18n="hjelp.idx.secA.tittel">A. Kom i gang</h2>
 
     <article class="hjelp-artikkel" id="forste-oppskrift">
-      <h3>Lag din første øloppskrift</h3>
-      <p>Start i <strong>Grunndata</strong> med et ølnavn og batchvolum (hvor mange liter du skal brygge). Legg deretter til minst én malt under <strong>Malt</strong> — søkefeltet filtrerer mens du skriver. Gjør det samme under <strong>Humle</strong> og velg en <strong>Gjær</strong>. Tallene i <strong>Resultat</strong> (OG/FG/ABV/IBU/EBC) og smakshjulet oppdaterer seg automatisk for hvert valg — du trenger ikke trykke noen "beregn"-knapp.</p>
-      <p class="hjelp-hvorfor">Det finnes ingen "feil" startpunkt. Prøv deg fram, se hvordan tallene endrer seg, og juster til de treffer stilen du har lyst på — eller bare det du synes høres godt ut.</p>
+      <h3 data-i18n="hjelp.idx.forsteOppskrift.tittel">Lag din første øloppskrift</h3>
+      <p data-i18n-html="hjelp.idx.forsteOppskrift.tekst">Start i <strong>Grunndata</strong> med et ølnavn og batchvolum (hvor mange liter du skal brygge). Legg deretter til minst én malt under <strong>Malt</strong> — søkefeltet filtrerer mens du skriver. Gjør det samme under <strong>Humle</strong> og velg en <strong>Gjær</strong>. Tallene i <strong>Resultat</strong> (OG/FG/ABV/IBU/EBC) og smakshjulet oppdaterer seg automatisk for hvert valg — du trenger ikke trykke noen "beregn"-knapp.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.forsteOppskrift.hvorfor">Det finnes ingen "feil" startpunkt. Prøv deg fram, se hvordan tallene endrer seg, og juster til de treffer stilen du har lyst på — eller bare det du synes høres godt ut.</p>
     </article>
 
     <article class="hjelp-artikkel" id="laerling-mester-intro">
-      <h3>Bryggelærling og Bryggmester</h3>
-      <p>De to knappene øverst bytter mellom to visninger av <em>samme</em> oppskrift. <strong>Bryggelærling</strong> skjuler tekniske detaljer og viser mer veiledning — fin når du er ny. <strong>Bryggmester</strong> viser alt: BU:GU, nærliggende stiler, full stilanalyse. Ingen data forsvinner når du bytter — det er bare hvor mye som vises på skjermen som endrer seg.</p>
-      <p class="hjelp-hvorfor">Du kan bytte fram og tilbake så mye du vil, når som helst i prosessen. Mange starter i Bryggelærling og går over til Bryggmester etter hvert som begrepene blir kjente.</p>
+      <h3 data-i18n="hjelp.idx.laerlingMester.tittel">Bryggelærling og Bryggmester</h3>
+      <p data-i18n-html="hjelp.idx.laerlingMester.tekst">De to knappene øverst bytter mellom to visninger av <em>samme</em> oppskrift. <strong>Bryggelærling</strong> skjuler tekniske detaljer og viser mer veiledning — fin når du er ny. <strong>Bryggmester</strong> viser alt: BU:GU, nærliggende stiler, full stilanalyse. Ingen data forsvinner når du bytter — det er bare hvor mye som vises på skjermen som endrer seg.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.laerlingMester.hvorfor">Du kan bytte fram og tilbake så mye du vil, når som helst i prosessen. Mange starter i Bryggelærling og går over til Bryggmester etter hvert som begrepene blir kjente.</p>
     </article>
 
     <article class="hjelp-artikkel" id="lagre-oppskrift">
-      <h3>Lagre en oppskrift</h3>
-      <p>"💾 Lagre oppskrift" lagrer oppskriften <strong>i denne nettleseren</strong> (localStorage) under navnet du har gitt den. Den dukker opp i "Mine lagrede oppskrifter" lenger ned, og du kan laste den inn igjen når som helst — også etter at du har lukket fanen.</p>
-      <p class="hjelp-hvorfor">Ingenting sendes til noen server. Lagrer du på én enhet, er oppskriften bare der — bruk "⬇️ Eksporter (JSON)" hvis du vil ta den med til en annen datamaskin eller telefon.</p>
+      <h3 data-i18n="hjelp.idx.lagreOppskrift.tittel">Lagre en oppskrift</h3>
+      <p data-i18n-html="hjelp.idx.lagreOppskrift.tekst">"💾 Lagre oppskrift" lagrer oppskriften <strong>i denne nettleseren</strong> (localStorage) under navnet du har gitt den. Den dukker opp i "Mine lagrede oppskrifter" lenger ned, og du kan laste den inn igjen når som helst — også etter at du har lukket fanen.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.lagreOppskrift.hvorfor">Ingenting sendes til noen server. Lagrer du på én enhet, er oppskriften bare der — bruk "⬇️ Eksporter (JSON)" hvis du vil ta den med til en annen datamaskin eller telefon.</p>
     </article>
 
     <article class="hjelp-artikkel" id="aapne-importere">
-      <h3>Åpne eller importere en oppskrift</h3>
-      <p>Klikk "Åpne i byggeren" på en lagret oppskrift under "Mine oppskrifter" for å laste den inn. Har du en oppskrift som JSON-fil, eller bare limt inn som ren tekst (f.eks. "5 kg Maris Otter", "20 g Magnum 60 min"), bruk "📥 Importer oppskrift" i menyen — inkludert eventuelle egendefinerte ingredienser.</p>
+      <h3 data-i18n="hjelp.idx.aapneImportere.tittel">Åpne eller importere en oppskrift</h3>
+      <p data-i18n-html="hjelp.idx.aapneImportere.tekst">Klikk "Åpne i byggeren" på en lagret oppskrift under "Mine oppskrifter" for å laste den inn. Har du en oppskrift som JSON-fil, eller bare limt inn som ren tekst (f.eks. "5 kg Maris Otter", "20 g Magnum 60 min"), bruk "📥 Importer oppskrift" i menyen — inkludert eventuelle egendefinerte ingredienser.</p>
     </article>
 
     <article class="hjelp-artikkel" id="skrive-ut-intro">
-      <h3>Skrive ut</h3>
-      <p>Under "Skriv ut" finner du fire egne ark: <strong>Oppskriftsark</strong> (for å dele oppskriften med andre), <strong>Handleliste</strong> (bare ingrediensene), <strong>Bryggedagsark</strong> (arbeidsark for selv bryggedagen) og <strong>Bryggelogg</strong> (tomt skjema for faktiske resultater, til å fylle ut med penn). Hvert ark er sin egen, ryddige side — ikke bare et utskrift av skjermbildet.</p>
+      <h3 data-i18n="hjelp.idx.skriveUt.tittel">Skrive ut</h3>
+      <p data-i18n-html="hjelp.idx.skriveUt.tekst">Under "Skriv ut" finner du fire egne ark: <strong>Oppskriftsark</strong> (for å dele oppskriften med andre), <strong>Handleliste</strong> (bare ingrediensene), <strong>Bryggedagsark</strong> (arbeidsark for selve bryggedagen) og <strong>Bryggelogg</strong> (tomt skjema for faktiske resultater, til å fylle ut med penn). Hvert ark er sin egen, ryddige side — ikke bare et utskrift av skjermbildet.</p>
     </article>
   </div>
 
   <div class="hjelp-seksjon" id="forsta-oppskriften">
-    <h2>B. Forstå oppskriften</h2>
+    <h2 data-i18n="hjelp.idx.secB.tittel">B. Forstå oppskriften</h2>
 
     <article class="hjelp-artikkel" id="og">
-      <h3>OG — Original Gravity</h3>
-      <p>OG måler mengden sukker som er løst i vørteren <em>før</em> gjæring starter — vanligvis et tall som 1,050. Jo høyere OG, jo mer sukker har gjæren å jobbe med.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> OG er utgangspunktet for både alkoholstyrke og fylde. Øker du maltmengden (eller batcheffektiviteten), stiger OG. Reduserer du malt eller øker vannmengden, synker den. Et lyst, lett øl ligger typisk rundt 1,035–1,045; et sterkt øl kan ligge over 1,070.</p>
+      <h3 data-i18n="hjelp.idx.og.tittel">OG — Original Gravity</h3>
+      <p data-i18n-html="hjelp.idx.og.tekst">OG måler mengden sukker som er løst i vørteren <em>før</em> gjæring starter — vanligvis et tall som 1,050. Jo høyere OG, jo mer sukker har gjæren å jobbe med.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.og.hvorfor"><strong>Hvorfor du bryr deg:</strong> OG er utgangspunktet for både alkoholstyrke og fylde. Øker du maltmengden (eller batcheffektiviteten), stiger OG. Reduserer du malt eller øker vannmengden, synker den. Et lyst, lett øl ligger typisk rundt 1,035–1,045; et sterkt øl kan ligge over 1,070.</p>
     </article>
 
     <article class="hjelp-artikkel" id="fg">
-      <h3>FG — Final Gravity</h3>
-      <p>FG måler sukkeret som er <em>igjen</em> etter at gjæringen er ferdig. Forskjellen mellom OG og FG forteller hvor mye sukker som faktisk ble omdannet til alkohol.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Lav FG gir et tørrere øl, høy FG gir mer restsødme og fylde i munnen. FG styres i denne oppskriftsbyggeren av gjærens forventede <a href="#utgjaering">utgjæring</a> — velger du en gjær med høyere utgjæring, synker FG. Den faktiske FG-en du måler etter brygging kan avvike noe fra det beregnede tallet, se <a href="#faq-faktisk-fg">FAQ</a>.</p>
+      <h3 data-i18n="hjelp.idx.fg.tittel">FG — Final Gravity</h3>
+      <p data-i18n-html="hjelp.idx.fg.tekst">FG måler sukkeret som er <em>igjen</em> etter at gjæringen er ferdig. Forskjellen mellom OG og FG forteller hvor mye sukker som faktisk ble omdannet til alkohol.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.fg.hvorfor"><strong>Hvorfor du bryr deg:</strong> Lav FG gir et tørrere øl, høy FG gir mer restsødme og fylde i munnen. FG styres i denne oppskriftsbyggeren av gjærens forventede <a href="#utgjaering">utgjæring</a> — velger du en gjær med høyere utgjæring, synker FG. Den faktiske FG-en du måler etter brygging kan avvike noe fra det beregnede tallet, se <a href="#faq-faktisk-fg">FAQ</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="abv">
-      <h3>ABV — Alkoholstyrke</h3>
-      <p>ABV (Alcohol By Volume) er alkoholprosenten i det ferdige ølet, regnet ut fra forskjellen mellom OG og FG.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Vil du ha et sterkere øl, må enten OG opp (mer malt) eller FG ned (gjær med høyere utgjæring) — eller begge deler. Et sessionøl ligger gjerne under 4,5 %, et vanlig pale ale rundt 5–6 %, et imperial stout kan passere 9–10 %.</p>
+      <h3 data-i18n="hjelp.idx.abv.tittel">ABV — Alkoholstyrke</h3>
+      <p data-i18n-html="hjelp.idx.abv.tekst">ABV (Alcohol By Volume) er alkoholprosenten i det ferdige ølet, regnet ut fra forskjellen mellom OG og FG.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.abv.hvorfor"><strong>Hvorfor du bryr deg:</strong> Vil du ha et sterkere øl, må enten OG opp (mer malt) eller FG ned (gjær med høyere utgjæring) — eller begge deler. Et sessionøl ligger gjerne under 4,5 %, et vanlig pale ale rundt 5–6 %, et imperial stout kan passere 9–10 %.</p>
     </article>
 
     <article class="hjelp-artikkel" id="ibu">
-      <h3>IBU — Bitterhet</h3>
-      <p>IBU (International Bitterness Units) er et mål på humlebitterhet. Høyere tall betyr mer bittert øl. De fleste ølstiler ligger et sted mellom 10 og 70 IBU.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> IBU styres av humlemengde, alfasyre og koketid — se <a href="#alfasyre">alfasyre</a>. Humle tilsatt tidlig i koket (60 min) gir mest bitterhet; humle tilsatt sent (0–10 min) gir mer aroma og smak, men lite bitterhet. Dobler du mengden av en tidlig humletilsetning, øker IBU markant; flytter du samme humle til slutten av koket, synker IBU kraftig selv om mengden er lik.</p>
+      <h3 data-i18n="hjelp.idx.ibu.tittel">IBU — Bitterhet</h3>
+      <p data-i18n-html="hjelp.idx.ibu.tekst">IBU (International Bitterness Units) er et mål på humlebitterhet. Høyere tall betyr mer bittert øl. De fleste ølstiler ligger et sted mellom 10 og 70 IBU.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.ibu.hvorfor"><strong>Hvorfor du bryr deg:</strong> IBU styres av humlemengde, alfasyre og koketid — se <a href="#alfasyre">alfasyre</a>. Humle tilsatt tidlig i koket (60 min) gir mest bitterhet; humle tilsatt sent (0–10 min) gir mer aroma og smak, men lite bitterhet. Dobler du mengden av en tidlig humletilsetning, øker IBU markant; flytter du samme humle til slutten av koket, synker IBU kraftig selv om mengden er lik.</p>
     </article>
 
     <article class="hjelp-artikkel" id="ebc">
-      <h3>EBC — Farge</h3>
-      <p>EBC måler ølets farge, fra blekt gult (lave tall, under 10) via kobber og rav til nesten sort (over 80).</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Fargen kommer nesten utelukkende fra malten — mørkere malt (som ristet malt eller karamellmalt) gir en langt større EBC-økning per kilo enn lys basemalt. Legger du til bare 200 g ristet malt i en ellers lys oppskrift, kan EBC hoppe merkbart selv om mengden er liten.</p>
+      <h3 data-i18n="hjelp.idx.ebc.tittel">EBC — Farge</h3>
+      <p data-i18n-html="hjelp.idx.ebc.tekst">EBC måler ølets farge, fra blekt gult (lave tall, under 10) via kobber og rav til nesten sort (over 80).</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.ebc.hvorfor"><strong>Hvorfor du bryr deg:</strong> Fargen kommer nesten utelukkende fra malten — mørkere malt (som ristet malt eller karamellmalt) gir en langt større EBC-økning per kilo enn lys basemalt. Legger du til bare 200 g ristet malt i en ellers lys oppskrift, kan EBC hoppe merkbart selv om mengden er liten.</p>
     </article>
 
     <article class="hjelp-artikkel" id="bu-gu">
-      <h3>BU:GU — Bitterhet mot fylde</h3>
-      <p>BU:GU (vist i Bryggmester) er forholdet mellom IBU og OG (skalert), og sier noe om balansen mellom bitterhet og maltfylde. Et lavt tall betyr et maltdominert øl, et høyt tall betyr et humledominert øl.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> To øl kan ha samme IBU, men oppleves helt forskjellig avhengig av hvor mye malt (OG) som står imot bitterheten. BU:GU er et raskt sjekkpunkt på om balansen stemmer med det du sikter mot.</p>
+      <h3 data-i18n="hjelp.idx.buGu.tittel">BU:GU — Bitterhet mot fylde</h3>
+      <p data-i18n-html="hjelp.idx.buGu.tekst">BU:GU (vist i Bryggmester) er forholdet mellom IBU og OG (skalert), og sier noe om balansen mellom bitterhet og maltfylde. Et lavt tall betyr et maltdominert øl, et høyt tall betyr et humledominert øl.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.buGu.hvorfor"><strong>Hvorfor du bryr deg:</strong> To øl kan ha samme IBU, men oppleves helt forskjellig avhengig av hvor mye malt (OG) som står imot bitterheten. BU:GU er et raskt sjekkpunkt på om balansen stemmer med det du sikter mot.</p>
     </article>
 
     <article class="hjelp-artikkel" id="utgjaering">
-      <h3>Utgjæring (attenuation)</h3>
-      <p>Utgjæring er hvor stor andel av sukkeret gjæren klarer å omdanne til alkohol, oppgitt i prosent. En gjær med 75 % utgjæring "spiser" 75 % av det tilgjengelige sukkeret.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Høyere utgjæring gir lavere <a href="#fg">FG</a> og dermed et tørrere øl med litt høyere <a href="#abv">ABV</a>, ved samme OG. Velger du en biblioteksgjær, fylles utgjæringen ut automatisk — du kan overstyre den manuelt hvis du bruker en egendefinert gjær eller vet noe annet om akkurat din gjærstamme.</p>
+      <h3 data-i18n="hjelp.idx.utgjaering.tittel">Utgjæring (attenuation)</h3>
+      <p data-i18n-html="hjelp.idx.utgjaering.tekst">Utgjæring er hvor stor andel av sukkeret gjæren klarer å omdanne til alkohol, oppgitt i prosent. En gjær med 75 % utgjæring "spiser" 75 % av det tilgjengelige sukkeret.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.utgjaering.hvorfor"><strong>Hvorfor du bryr deg:</strong> Høyere utgjæring gir lavere <a href="#fg">FG</a> og dermed et tørrere øl med litt høyere <a href="#abv">ABV</a>, ved samme OG. Velger du en biblioteksgjær, fylles utgjæringen ut automatisk — du kan overstyre den manuelt hvis du bruker en egendefinert gjær eller vet noe annet om akkurat din gjærstamme.</p>
     </article>
 
     <article class="hjelp-artikkel" id="alfasyre">
-      <h3>Alfasyre</h3>
-      <p>Alfasyre (α-syre) er prosentandelen bitterstoffer i humlen. Høyere alfasyre gir mer bitterhet per gram humle.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Alfasyre-innholdet i en gitt humlesort varierer normalt noe fra sesong til sesong og pose til pose — det som faktisk står trykt på <em>din</em> pose kan avvike fra bibliotekets typiske verdi. Juster gjerne alfa-feltet til det som faktisk står på posen din for et mer presist IBU-anslag; se <a href="#faq-produsentdata">FAQ</a>.</p>
+      <h3 data-i18n="hjelp.idx.alfasyre.tittel">Alfasyre</h3>
+      <p data-i18n-html="hjelp.idx.alfasyre.tekst">Alfasyre (α-syre) er prosentandelen bitterstoffer i humlen. Høyere alfasyre gir mer bitterhet per gram humle.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.alfasyre.hvorfor"><strong>Hvorfor du bryr deg:</strong> Alfasyre-innholdet i en gitt humlesort varierer normalt noe fra sesong til sesong og pose til pose — det som faktisk står trykt på <em>din</em> pose kan avvike fra bibliotekets typiske verdi. Juster gjerne alfa-feltet til det som faktisk står på posen din for et mer presist IBU-anslag; se <a href="#faq-produsentdata">FAQ</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="effektivitet">
-      <h3>Brygghuseffektivitet</h3>
-      <p>Effektivitet er hvor stor andel av maltens sukkerpotensial du faktisk får ut i vørteren på ditt eget utstyr og med din egen teknikk — 75 % er et vanlig utgangspunkt, men det varierer fra bryggeri til bryggeri.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Effektiviteten går rett inn i <a href="#og">OG</a>-beregningen. Bryggelærling skjuler feltet og bruker 75 % som estimat, slik at du kan komme i gang uten å måtte vite dette først. I Bryggmester kan du justere det etter egne, målte brygg — se også <a href="#faq-traff-ikke-og">FAQ</a>.</p>
+      <h3 data-i18n="hjelp.idx.effektivitet.tittel">Brygghuseffektivitet</h3>
+      <p data-i18n-html="hjelp.idx.effektivitet.tekst">Effektivitet er hvor stor andel av maltens sukkerpotensial du faktisk får ut i vørteren på ditt eget utstyr og med din egen teknikk — 75 % er et vanlig utgangspunkt, men det varierer fra bryggeri til bryggeri.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.effektivitet.hvorfor"><strong>Hvorfor du bryr deg:</strong> Effektiviteten går rett inn i <a href="#og">OG</a>-beregningen. Bryggelærling skjuler feltet og bruker 75 % som estimat, slik at du kan komme i gang uten å måtte vite dette først. I Bryggmester kan du justere det etter egne, målte brygg — se også <a href="#faq-traff-ikke-og">FAQ</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="maltpotensial">
-      <h3>Maltpotensial</h3>
-      <p>Maltpotensial sier hvor mye sukker en gitt malt kan bidra med per kilo — grunnlaget for OG-beregningen. Ulike malttyper har ulikt potensial; en ren basemalt gir mer enn en spesialmalt med lavere gjærbart innhold.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Legger du inn en egendefinert malt, må du oppgi et anslått potensial selv (produsentens datablad, hvis du har det, er beste kilde). Et for høyt tall overvurderer OG, et for lavt undervurderer den.</p>
+      <h3 data-i18n="hjelp.idx.maltpotensial.tittel">Maltpotensial</h3>
+      <p data-i18n-html="hjelp.idx.maltpotensial.tekst">Maltpotensial sier hvor mye sukker en gitt malt kan bidra med per kilo — grunnlaget for OG-beregningen. Ulike malttyper har ulikt potensial; en ren basemalt gir mer enn en spesialmalt med lavere gjærbart innhold.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.maltpotensial.hvorfor"><strong>Hvorfor du bryr deg:</strong> Legger du inn en egendefinert malt, må du oppgi et anslått potensial selv (produsentens datablad, hvis du har det, er beste kilde). Et for høyt tall overvurderer OG, et for lavt undervurderer den.</p>
     </article>
 
     <article class="hjelp-artikkel" id="smakshjulet">
-      <h3>Smakshjulet</h3>
-      <p>Smakshjulet er et radardiagram med 18 smaksakser, basert på malt-, humle- og gjærvalgene dine. Jo lenger ut mot kanten en akse strekker seg, jo mer fremtredende er den smaken forventet å bli.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Det er en rask, visuell sjekk av om oppskriften faktisk peker i den retningen du hadde tenkt — for eksempel om en "sitrus/tropisk"-akse virkelig stikker ut når du har brukt mye Citra og Mosaic. Diagrammet er en forventning basert på ingrediensdataene, ikke en garanti for hvordan det faktiske ølet smaker.</p>
+      <h3 data-i18n="hjelp.idx.smakshjulet.tittel">Smakshjulet</h3>
+      <p data-i18n-html="hjelp.idx.smakshjulet.tekst">Smakshjulet er et radardiagram med 18 smaksakser, basert på malt-, humle- og gjærvalgene dine. Jo lenger ut mot kanten en akse strekker seg, jo mer fremtredende er den smaken forventet å bli.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.smakshjulet.hvorfor"><strong>Hvorfor du bryr deg:</strong> Det er en rask, visuell sjekk av om oppskriften faktisk peker i den retningen du hadde tenkt — for eksempel om en "sitrus/tropisk"-akse virkelig stikker ut når du har brukt mye Citra og Mosaic. Diagrammet er en forventning basert på ingrediensdataene, ikke en garanti for hvordan det faktiske ølet smaker.</p>
     </article>
 
     <article class="hjelp-artikkel" id="stilmatching">
-      <h3>Stilmatching</h3>
-      <p>Stilmatchen sammenligner oppskriftens tall (OG/FG/ABV/IBU/EBC) og smaksprofil mot kjente ølstiler i Kvernhaug Brygghus sitt eget bibliotek, og viser hvilken stil oppskriften ligner mest på — pluss noen nærliggende alternativer.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Det er en rettesnor, ikke en dom. Se <a href="#stilgrenser">stilgrenser</a> og <a href="#faq-feil-verdi">FAQ</a> for hvordan du bør tolke den. Biblioteket dekker 26 stiler — det er <em>ikke</em> hele det offisielle BJCP 2021-stilheftet (som har rundt 100 understiler).</p>
+      <h3 data-i18n="hjelp.idx.stilmatching.tittel">Stilmatching</h3>
+      <p data-i18n-html="hjelp.idx.stilmatching.tekst">Stilmatchen sammenligner oppskriftens tall (OG/FG/ABV/IBU/EBC) og smaksprofil mot kjente ølstiler i Kvernhaug Brygghus sitt eget bibliotek, og viser hvilken stil oppskriften ligner mest på — pluss noen nærliggende alternativer.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.stilmatching.hvorfor"><strong>Hvorfor du bryr deg:</strong> Det er en rettesnor, ikke en dom. Se <a href="#stilgrenser">stilgrenser</a> og <a href="#faq-feil-verdi">FAQ</a> for hvordan du bør tolke den. Biblioteket dekker 26 stiler — det er <em>ikke</em> hele det offisielle BJCP 2021-stilheftet (som har rundt 100 understiler).</p>
     </article>
 
     <article class="hjelp-artikkel" id="stilgrenser">
-      <h3>Stilgrenser</h3>
-      <p>Hver stil i biblioteket har typiske tallområder for OG/FG/IBU/EBC/ABV, hentet fra kjente stilbeskrivelser. Når oppskriften din avviker fra en valgt stils typiske område, forklarer stilveiledningen dette i rolig språk — "litt utenfor" eller "tydelig utenfor" — aldri som en feilmelding.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Stilgrenser er en beskrivelse av hva som er <em>typisk</em> for en stil, ikke en regel du må følge. Mange gode øl ligger bevisst utenfor en stils typiske område.</p>
+      <h3 data-i18n="hjelp.idx.stilgrenser.tittel">Stilgrenser</h3>
+      <p data-i18n-html="hjelp.idx.stilgrenser.tekst">Hver stil i biblioteket har typiske tallområder for OG/FG/IBU/EBC/ABV, hentet fra kjente stilbeskrivelser. Når oppskriften din avviker fra en valgt stils typiske område, forklarer stilveiledningen dette i rolig språk — "litt utenfor" eller "tydelig utenfor" — aldri som en feilmelding.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.stilgrenser.hvorfor"><strong>Hvorfor du bryr deg:</strong> Stilgrenser er en beskrivelse av hva som er <em>typisk</em> for en stil, ikke en regel du må følge. Mange gode øl ligger bevisst utenfor en stils typiske område.</p>
     </article>
   </div>
 
   <div class="hjelp-seksjon" id="ingredienser">
-    <h2>C. Ingredienser</h2>
+    <h2 data-i18n="hjelp.idx.secC.tittel">C. Ingredienser</h2>
 
     <article class="hjelp-artikkel" id="om-malt">
-      <h3>Malt</h3>
-      <p>Malt er kornet som gir vørteren sukker (til alkohol), farge og mye av grunnsmaken. Det er kilden til det aller meste av OG og EBC i oppskriften.</p>
+      <h3 data-i18n="hjelp.idx.omMalt.tittel">Malt</h3>
+      <p data-i18n="hjelp.idx.omMalt.tekst">Malt er kornet som gir vørteren sukker (til alkohol), farge og mye av grunnsmaken. Det er kilden til det aller meste av OG og EBC i oppskriften.</p>
     </article>
 
     <article class="hjelp-artikkel" id="om-humle">
-      <h3>Humle</h3>
-      <p>Humle gir bitterhet (tidlig i koket), og aroma/smak (sent i koket eller etter koking). Samme humlesort kan altså bidra helt forskjellig avhengig av <em>når</em> den tilsettes.</p>
+      <h3 data-i18n="hjelp.idx.omHumle.tittel">Humle</h3>
+      <p data-i18n-html="hjelp.idx.omHumle.tekst">Humle gir bitterhet (tidlig i koket), og aroma/smak (sent i koket eller etter koking). Samme humlesort kan altså bidra helt forskjellig avhengig av <em>når</em> den tilsettes.</p>
     </article>
 
     <article class="hjelp-artikkel" id="om-gjaer">
-      <h3>Gjær</h3>
-      <p>Gjæren omdanner sukker til alkohol og CO₂, men påvirker også smak og munnfølelse betydelig — se <a href="#gjaer-pavirkning">hvordan gjær påvirker ølet</a> under.</p>
+      <h3 data-i18n="hjelp.idx.omGjaer.tittel">Gjær</h3>
+      <p data-i18n-html="hjelp.idx.omGjaer.tekst">Gjæren omdanner sukker til alkohol og CO₂, men påvirker også smak og munnfølelse betydelig — se <a href="#gjaer-pavirkning">hvordan gjær påvirker ølet</a> under.</p>
     </article>
 
     <article class="hjelp-artikkel" id="basemalt-spesialmalt">
-      <h3>Basemalt kontra spesialmalt</h3>
-      <p><strong>Basemalt</strong> (f.eks. Pilsner- eller Pale Ale-malt) utgjør normalt hoveddelen av kornregningen — lys farge, høyt potensial, nøytral-til-mild smak. <strong>Spesialmalt</strong> (karamellmalt, ristet malt, hvete, havre m.fl.) brukes i mindre mengder for å justere farge, kropp og smak.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> En oppskrift med 100 % basemalt blir ofte for tynn og ensformig i smaken; for mye spesialmalt kan derimot dominere og gjøre ølet klumpete i profilen. De fleste vellykkede oppskrifter har basemalt som bærebjelke og spesialmalt som krydder.</p>
+      <h3 data-i18n="hjelp.idx.basemaltSpesialmalt.tittel">Basemalt kontra spesialmalt</h3>
+      <p data-i18n-html="hjelp.idx.basemaltSpesialmalt.tekst"><strong>Basemalt</strong> (f.eks. Pilsner- eller Pale Ale-malt) utgjør normalt hoveddelen av kornregningen — lys farge, høyt potensial, nøytral-til-mild smak. <strong>Spesialmalt</strong> (karamellmalt, ristet malt, hvete, havre m.fl.) brukes i mindre mengder for å justere farge, kropp og smak.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.basemaltSpesialmalt.hvorfor"><strong>Hvorfor du bryr deg:</strong> En oppskrift med 100 % basemalt blir ofte for tynn og ensformig i smaken; for mye spesialmalt kan derimot dominere og gjøre ølet klumpete i profilen. De fleste vellykkede oppskrifter har basemalt som bærebjelke og spesialmalt som krydder.</p>
     </article>
 
     <article class="hjelp-artikkel" id="bitterhumle-aromahumle">
-      <h3>Bitterhumle kontra aroma-/smakshumle</h3>
-      <p>Noen humlesorter har høy alfasyre og passer godt til tidlig, ren bittertilsetning. Andre er valgt for sin aroma og brukes sent i koket eller som "dry hop" etter gjæring, der bitterheten knapt rekker å utvikle seg.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Samme totale grammantall humle kan gi helt ulikt resultat avhengig av om den er fordelt tidlig (bitterhet) eller sent (aroma). Se <a href="#ibu">IBU</a> for sammenhengen med koketid.</p>
+      <h3 data-i18n="hjelp.idx.bitterAroma.tittel">Bitterhumle kontra aroma-/smakshumle</h3>
+      <p data-i18n="hjelp.idx.bitterAroma.tekst">Noen humlesorter har høy alfasyre og passer godt til tidlig, ren bittertilsetning. Andre er valgt for sin aroma og brukes sent i koket eller som "dry hop" etter gjæring, der bitterheten knapt rekker å utvikle seg.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.bitterAroma.hvorfor"><strong>Hvorfor du bryr deg:</strong> Samme totale grammantall humle kan gi helt ulikt resultat avhengig av om den er fordelt tidlig (bitterhet) eller sent (aroma). Se <a href="#ibu">IBU</a> for sammenhengen med koketid.</p>
     </article>
 
     <article class="hjelp-artikkel" id="gjaer-pavirkning">
-      <h3>Hvordan gjær påvirker ølet</h3>
-      <p>Gjærvalget påvirker ikke bare <a href="#utgjaering">utgjæring</a> (og dermed FG/ABV), men også smaksstoffer gjæren selv produserer — estere (fruktighet), fenoler (krydder/klove i enkelte hvete- og belgiske stiler) og gjæringstemperaturens innvirkning på begge deler.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> To identiske oppskrifter kan smake påfallende forskjellig med to ulike gjærstammer — selv om OG, FG og IBU er tilnærmet like.</p>
+      <h3 data-i18n="hjelp.idx.gjaerPavirkning.tittel">Hvordan gjær påvirker ølet</h3>
+      <p data-i18n-html="hjelp.idx.gjaerPavirkning.tekst">Gjærvalget påvirker ikke bare <a href="#utgjaering">utgjæring</a> (og dermed FG/ABV), men også smaksstoffer gjæren selv produserer — estere (fruktighet), fenoler (krydder/klove i enkelte hvete- og belgiske stiler) og gjæringstemperaturens innvirkning på begge deler.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerPavirkning.hvorfor"><strong>Hvorfor du bryr deg:</strong> To identiske oppskrifter kan smake påfallende forskjellig med to ulike gjærstammer — selv om OG, FG og IBU er tilnærmet like.</p>
     </article>
 
     <article class="hjelp-artikkel" id="egendefinerte-ingredienser">
-      <h3>Egendefinerte ingredienser</h3>
-      <p>Finner du ikke malten, humlen eller gjæren din i biblioteket? Klikk "+ Egendefinert" på raden og skriv inn navn og de tekniske grunnverdiene selv (EBC/potensial for malt, alfasyre for humle, utgjæring for gjær). Egendefinerte ingredienser fungerer fullt ut i beregningene og følger oppskriften din i lagring, eksport og import.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Egendefinerte ingredienser lagres kun på <em>din</em> oppskrift — de havner aldri i det delte biblioteket andre bruker.</p>
+      <h3 data-i18n="hjelp.idx.egendefinerte.tittel">Egendefinerte ingredienser</h3>
+      <p data-i18n-html="hjelp.idx.egendefinerte.tekst">Finner du ikke malten, humlen eller gjæren din i biblioteket? Klikk "+ Egendefinert" på raden og skriv inn navn og de tekniske grunnverdiene selv (EBC/potensial for malt, alfasyre for humle, utgjæring for gjær). Egendefinerte ingredienser fungerer fullt ut i beregningene og følger oppskriften din i lagring, eksport og import.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.egendefinerte.hvorfor"><strong>Hvorfor du bryr deg:</strong> Egendefinerte ingredienser lagres kun på <em>din</em> oppskrift — de havner aldri i det delte biblioteket andre bruker.</p>
     </article>
 
     <article class="hjelp-artikkel" id="alfa-variasjon">
-      <h3>Hvorfor alfa-% kan variere fra pose til pose</h3>
-      <p>Alfasyreinnholdet i humle er en naturlig plante-egenskap som varierer med vekstsesong, klima og avling — ikke et fast tall. Biblioteket viser en typisk verdi, men produsentens faktiske pose kan avvike noe.</p>
-      <p class="hjelp-hvorfor"><strong>Hvorfor du bryr deg:</strong> Har du posen for hånden, juster alfa-feltet på humleraden til det som faktisk står trykt der — det gir et mer presist IBU-anslag enn bibliotekets gjennomsnitt.</p>
+      <h3 data-i18n="hjelp.idx.alfaVariasjon.tittel">Hvorfor alfa-% kan variere fra pose til pose</h3>
+      <p data-i18n="hjelp.idx.alfaVariasjon.tekst">Alfasyreinnholdet i humle er en naturlig plante-egenskap som varierer med vekstsesong, klima og avling — ikke et fast tall. Biblioteket viser en typisk verdi, men produsentens faktiske pose kan avvike noe.</p>
+      <p class="hjelp-hvorfor" data-i18n="hjelp.idx.alfaVariasjon.hvorfor"><strong>Hvorfor du bryr deg:</strong> Har du posen for hånden, juster alfa-feltet på humleraden til det som faktisk står trykt der — det gir et mer presist IBU-anslag enn bibliotekets gjennomsnitt.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-produsentdata">
-      <h3>Hvorfor produsentdata kan variere</h3>
-      <p>EBC, potensial, alfasyre og utgjæring er alle egenskaper som i praksis varierer noe fra batch til batch hos produsenten — biblioteket i Kvernhaug Brygghus viser typiske, kuraterte verdier, ikke en garanti for akkurat din pose eller pakke.</p>
+      <h3 data-i18n="hjelp.idx.produsentdata.tittel">Hvorfor produsentdata kan variere</h3>
+      <p data-i18n="hjelp.idx.produsentdata.tekst">EBC, potensial, alfasyre og utgjæring er alle egenskaper som i praksis varierer noe fra batch til batch hos produsenten — biblioteket i Kvernhaug Brygghus viser typiske, kuraterte verdier, ikke en garanti for akkurat din pose eller pakke.</p>
     </article>
   </div>
 
   <div class="hjelp-seksjon" id="bryggeprosess">
-    <h2>D. Bryggeprosess — kort ordliste</h2>
-    <p class="hjelp-innledning">
+    <h2 data-i18n="hjelp.idx.secD.tittel">D. Bryggeprosess — kort ordliste</h2>
+    <p class="hjelp-innledning" data-i18n-html="hjelp.idx.secD.intro">
       Dette er en rask ordliste. For en fullstendig gjennomgang av selve
       bryggedagen, steg for steg, se <a href="bryggedag.html">En bryggedag
       — fra vann til gjæringskar</a>.
     </p>
 
     <article class="hjelp-artikkel" id="def-mesking">
-      <h3>Mesking</h3>
-      <p>Å blande knust malt med varmt vann i en bestemt temperatur og tid, slik at maltens enzymer omdanner stivelse til gjærbart sukker.</p>
+      <h3 data-i18n="hjelp.idx.defMesking.tittel">Mesking</h3>
+      <p data-i18n="hjelp.idx.defMesking.tekst">Å blande knust malt med varmt vann i en bestemt temperatur og tid, slik at maltens enzymer omdanner stivelse til gjærbart sukker.</p>
     </article>
     <article class="hjelp-artikkel" id="def-mashout">
-      <h3>Mashout</h3>
-      <p>En kort oppvarming til rundt 75–78 °C etter mesking, som stanser enzymaktiviteten og gjør vørteren lettere å skylle ut.</p>
+      <h3 data-i18n="hjelp.idx.defMashout.tittel">Mashout</h3>
+      <p data-i18n="hjelp.idx.defMashout.tekst">En kort oppvarming til rundt 75–78 °C etter mesking, som stanser enzymaktiviteten og gjør vørteren lettere å skylle ut.</p>
     </article>
     <article class="hjelp-artikkel" id="def-skylling">
-      <h3>Skylling</h3>
-      <p>Å skylle gjenværende sukker ut av kornresten med varmt vann, slik at mest mulig av potensialet havner i kjelen — brukes ikke i alle metoder (se <a href="bryggemetoder.html">bryggemetoder</a>).</p>
+      <h3 data-i18n="hjelp.idx.defSkylling.tittel">Skylling</h3>
+      <p data-i18n-html="hjelp.idx.defSkylling.tekst">Å skylle gjenværende sukker ut av kornresten med varmt vann, slik at mest mulig av potensialet havner i kjelen — brukes ikke i alle metoder (se <a href="bryggemetoder.html">bryggemetoder</a>).</p>
     </article>
     <article class="hjelp-artikkel" id="def-kok">
-      <h3>Kok</h3>
-      <p>Vørteren kokes, normalt 60 minutter, for å sterilisere, drive ut uønskede stoffer og gi humlen mulighet til å avgi bitterhet og aroma.</p>
+      <h3 data-i18n="hjelp.idx.defKok.tittel">Kok</h3>
+      <p data-i18n="hjelp.idx.defKok.tekst">Vørteren kokes, normalt 60 minutter, for å sterilisere, drive ut uønskede stoffer og gi humlen mulighet til å avgi bitterhet og aroma.</p>
     </article>
     <article class="hjelp-artikkel" id="def-humletilsetning">
-      <h3>Humletilsetninger</h3>
-      <p>Humle tilsatt på bestemte tidspunkt i koket — tidlig for bitterhet, sent for aroma. Se <a href="#ibu">IBU</a>.</p>
+      <h3 data-i18n="hjelp.idx.defHumletilsetning.tittel">Humletilsetninger</h3>
+      <p data-i18n-html="hjelp.idx.defHumletilsetning.tekst">Humle tilsatt på bestemte tidspunkt i koket — tidlig for bitterhet, sent for aroma. Se <a href="#ibu">IBU</a>.</p>
     </article>
     <article class="hjelp-artikkel" id="def-kjoling">
-      <h3>Kjøling</h3>
-      <p>Rask nedkjøling av vørteren etter kok, ned mot gjærens starttemperatur — jo raskere, jo mindre risiko for uønsket bakterievekst og klarere øl.</p>
+      <h3 data-i18n="hjelp.idx.defKjoling.tittel">Kjøling</h3>
+      <p data-i18n="hjelp.idx.defKjoling.tekst">Rask nedkjøling av vørteren etter kok, ned mot gjærens starttemperatur — jo raskere, jo mindre risiko for uønsket bakterievekst og klarere øl.</p>
     </article>
     <article class="hjelp-artikkel" id="def-og-maling">
-      <h3>OG-måling</h3>
-      <p>Å måle vørterens tetthet rett før gjæring, med et flytespir eller refraktometer — sammenlignes mot beregnet <a href="#og">OG</a>.</p>
+      <h3 data-i18n="hjelp.idx.defOgMaling.tittel">OG-måling</h3>
+      <p data-i18n-html="hjelp.idx.defOgMaling.tekst">Å måle vørterens tetthet rett før gjæring, med et flytespir eller refraktometer — sammenlignes mot beregnet <a href="#og">OG</a>.</p>
     </article>
     <article class="hjelp-artikkel" id="def-gjaering">
-      <h3>Gjæring</h3>
-      <p>Perioden gjæren omdanner sukker til alkohol og CO₂ — varer normalt 1–3 uker avhengig av gjærtype, styrke og temperatur.</p>
+      <h3 data-i18n="hjelp.idx.defGjaering.tittel">Gjæring</h3>
+      <p data-i18n="hjelp.idx.defGjaering.tekst">Perioden gjæren omdanner sukker til alkohol og CO₂ — varer normalt 1–3 uker avhengig av gjærtype, styrke og temperatur.</p>
     </article>
     <article class="hjelp-artikkel" id="def-fg-maling">
-      <h3>FG-måling</h3>
-      <p>Å måle tettheten når gjæringen har roet seg, for å bekrefte at den er ferdig og regne ut faktisk <a href="#abv">ABV</a>.</p>
+      <h3 data-i18n="hjelp.idx.defFgMaling.tittel">FG-måling</h3>
+      <p data-i18n-html="hjelp.idx.defFgMaling.tekst">Å måle tettheten når gjæringen har roet seg, for å bekrefte at den er ferdig og regne ut faktisk <a href="#abv">ABV</a>.</p>
     </article>
     <article class="hjelp-artikkel" id="def-karbonering">
-      <h3>Karbonering</h3>
-      <p>Å tilføre CO₂ til det ferdige ølet — enten naturlig (sukker + gjenværende gjær på flaske/fat) eller ved tvangskarbonering med CO₂-trykk på fat.</p>
+      <h3 data-i18n="hjelp.idx.defKarbonering.tittel">Karbonering</h3>
+      <p data-i18n="hjelp.idx.defKarbonering.tekst">Å tilføre CO₂ til det ferdige ølet — enten naturlig (sukker + gjenværende gjær på flaske/fat) eller ved tvangskarbonering med CO₂-trykk på fat.</p>
     </article>
     <article class="hjelp-artikkel" id="def-flasking">
-      <h3>Flasking/fat, på generelt nivå</h3>
-      <p>Ølet overføres til flasker eller fat for lagring, modning og servering. Valget påvirker først og fremst hvordan karboneringen gjøres.</p>
+      <h3 data-i18n="hjelp.idx.defFlasking.tittel">Flasking/fat, på generelt nivå</h3>
+      <p data-i18n="hjelp.idx.defFlasking.tekst">Ølet overføres til flasker eller fat for lagring, modning og servering. Valget påvirker først og fremst hvordan karboneringen gjøres.</p>
     </article>
   </div>
 
   <div class="hjelp-seksjon" id="faq">
-    <h2>E. Ofte stilte spørsmål</h2>
+    <h2 data-i18n="hjelp.idx.secE.tittel">E. Ofte stilte spørsmål</h2>
 
     <article class="hjelp-artikkel" id="faq-alle-verdier">
-      <p class="hjelp-faq-sporsmal">Må alle verdier være innenfor ølstilen?</p>
-      <p>Nei. Stilgrenser er typiske områder, ikke regler. Mange gode, bevisste øl ligger utenfor på ett eller flere punkter.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqAlleVerdier.sporsmal">Må alle verdier være innenfor ølstilen?</p>
+      <p data-i18n="hjelp.idx.faqAlleVerdier.svar">Nei. Stilgrenser er typiske områder, ikke regler. Mange gode, bevisste øl ligger utenfor på ett eller flere punkter.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-feil-verdi">
-      <p class="hjelp-faq-sporsmal">Er oppskriften feil hvis én verdi er utenfor?</p>
-      <p>Nei — stilveiledningen sier fra om det ("litt utenfor" eller "tydelig utenfor"), men det er informasjon, ikke en feilmelding. Bruk den til å vurdere om avviket er med vilje.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqFeilVerdi.sporsmal">Er oppskriften feil hvis én verdi er utenfor?</p>
+      <p data-i18n="hjelp.idx.faqFeilVerdi.svar">Nei — stilveiledningen sier fra om det ("litt utenfor" eller "tydelig utenfor"), men det er informasjon, ikke en feilmelding. Bruk den til å vurdere om avviket er med vilje.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-ibu-endring">
-      <p class="hjelp-faq-sporsmal">Hvorfor endrer IBU seg når jeg endrer alfasyren?</p>
-      <p>IBU beregnes direkte fra humlens alfasyreinnhold, mengde og koketid. Høyere alfasyre gir mer bitterstoff per gram humle, og dermed høyere IBU ved samme mengde og tid. Se <a href="#ibu">IBU</a> og <a href="#alfasyre">alfasyre</a>.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqIbuEndring.sporsmal">Hvorfor endrer IBU seg når jeg endrer alfasyren?</p>
+      <p data-i18n-html="hjelp.idx.faqIbuEndring.svar">IBU beregnes direkte fra humlens alfasyreinnhold, mengde og koketid. Høyere alfasyre gir mer bitterstoff per gram humle, og dermed høyere IBU ved samme mengde og tid. Se <a href="#ibu">IBU</a> og <a href="#alfasyre">alfasyre</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-morkere-farge">
-      <p class="hjelp-faq-sporsmal">Hvorfor blir ølet mørkere når jeg legger til denne malten?</p>
-      <p>Fargebidraget fra malt varierer enormt — en mørk, ristet malt kan ha 10–50 ganger høyere EBC enn en lys basemalt. Selv en liten mengde av en mørk malt kan derfor gi et stort utslag på ølets totale farge. Se <a href="#ebc">EBC</a>.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqMorkereFarge.sporsmal">Hvorfor blir ølet mørkere når jeg legger til denne malten?</p>
+      <p data-i18n-html="hjelp.idx.faqMorkereFarge.svar">Fargebidraget fra malt varierer enormt — en mørk, ristet malt kan ha 10–50 ganger høyere EBC enn en lys basemalt. Selv en liten mengde av en mørk malt kan derfor gi et stort utslag på ølets totale farge. Se <a href="#ebc">EBC</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-bytte-gjaer">
-      <p class="hjelp-faq-sporsmal">Hva skjer hvis jeg bytter gjær?</p>
-      <p>Utgjæringen (og dermed FG og ABV) endres til den nye gjærens verdi, og smaksprofilen kan endre seg — ulike gjærstammer bidrar med ulike estere og fenoler. Se <a href="#gjaer-pavirkning">hvordan gjær påvirker ølet</a>.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqByttGjaer.sporsmal">Hva skjer hvis jeg bytter gjær?</p>
+      <p data-i18n-html="hjelp.idx.faqByttGjaer.svar">Utgjæringen (og dermed FG og ABV) endres til den nye gjærens verdi, og smaksprofilen kan endre seg — ulike gjærstammer bidrar med ulike estere og fenoler. Se <a href="#gjaer-pavirkning">hvordan gjær påvirker ølet</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-utgjaering">
-      <p class="hjelp-faq-sporsmal">Hva betyr utgjæring?</p>
-      <p>Se <a href="#utgjaering">utgjæring</a> over — kort sagt, hvor stor andel av sukkeret gjæren klarer å omdanne til alkohol.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqUtgjaering.sporsmal">Hva betyr utgjæring?</p>
+      <p data-i18n-html="hjelp.idx.faqUtgjaering.svar">Se <a href="#utgjaering">utgjæring</a> over — kort sagt, hvor stor andel av sukkeret gjæren klarer å omdanne til alkohol.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-egne-ingredienser">
-      <p class="hjelp-faq-sporsmal">Kan jeg bruke ingredienser som ikke finnes i biblioteket?</p>
-      <p>Ja — bruk "+ Egendefinert" på malt-, humle- eller gjærraden. Se <a href="#egendefinerte-ingredienser">egendefinerte ingredienser</a>.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqEgneIngredienser.sporsmal">Kan jeg bruke ingredienser som ikke finnes i biblioteket?</p>
+      <p data-i18n-html="hjelp.idx.faqEgneIngredienser.svar">Ja — bruk "+ Egendefinert" på malt-, humle- eller gjærraden. Se <a href="#egendefinerte-ingredienser">egendefinerte ingredienser</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-traff-ikke-og">
-      <p class="hjelp-faq-sporsmal">Hvorfor traff jeg ikke forventet OG på bryggedagen?</p>
-      <p>Beregnet OG forutsetter at brygghuseffektiviteten (feltet i Grunndata) faktisk stemmer med ditt utstyr og din teknikk denne dagen. Knusingsgrad, mesketemperatur, skyllemetode og selv værforhold kan gi avvik. Juster gjerne effektivitetstallet etter noen egne brygg, slik at fremtidige anslag blir mer presise for akkurat ditt oppsett.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqTraffIkkeOg.sporsmal">Hvorfor traff jeg ikke forventet OG på bryggedagen?</p>
+      <p data-i18n="hjelp.idx.faqTraffIkkeOg.svar">Beregnet OG forutsetter at brygghuseffektiviteten (feltet i Grunndata) faktisk stemmer med ditt utstyr og din teknikk denne dagen. Knusingsgrad, mesketemperatur, skyllemetode og selv værforhold kan gi avvik. Juster gjerne effektivitetstallet etter noen egne brygg, slik at fremtidige anslag blir mer presise for akkurat ditt oppsett.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-og-fg-forskjell">
-      <p class="hjelp-faq-sporsmal">Hva er forskjellen på OG og FG?</p>
-      <p>OG måles før gjæring (sukker til stede), FG måles etter (sukker som er igjen). Se <a href="#og">OG</a> og <a href="#fg">FG</a>.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqOgFgForskjell.sporsmal">Hva er forskjellen på OG og FG?</p>
+      <p data-i18n-html="hjelp.idx.faqOgFgForskjell.svar">OG måles før gjæring (sukker til stede), FG måles etter (sukker som er igjen). Se <a href="#og">OG</a> og <a href="#fg">FG</a>.</p>
     </article>
 
     <article class="hjelp-artikkel" id="faq-faktisk-fg">
-      <p class="hjelp-faq-sporsmal">Hvorfor er faktisk FG forskjellig fra beregnet FG?</p>
-      <p>Beregnet FG bruker gjærens <em>typiske</em> utgjæringsprosent. Faktisk utgjæring påvirkes av gjæringstemperatur, gjærmengde/-helse, mesketemperatur (som styrer hvor gjærbar vørteren faktisk er) og gjærstammens variasjon fra batch til batch. Et lite avvik er normalt og ingen grunn til bekymring.</p>
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqFaktiskFg.sporsmal">Hvorfor er faktisk FG forskjellig fra beregnet FG?</p>
+      <p data-i18n-html="hjelp.idx.faqFaktiskFg.svar">Beregnet FG bruker gjærens <em>typiske</em> utgjæringsprosent. Faktisk utgjæring påvirkes av gjæringstemperatur, gjærmengde/-helse, mesketemperatur (som styrer hvor gjærbar vørteren faktisk er) og gjærstammens variasjon fra batch til batch. Et lite avvik er normalt og ingen grunn til bekymring.</p>
     </article>
   </div>
 
-  <p class="hjelp-innledning">
+  <p class="hjelp-innledning" data-i18n="hjelp.idx.avslutning">
     Fant du ikke svar på det du lurte på? Håndboken utvides fortløpende.
   </p>
   </main>

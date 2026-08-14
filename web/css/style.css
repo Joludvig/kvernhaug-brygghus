@@ -1410,22 +1410,6 @@ footer {
   color: #201409;
 }
 
-/* Hjelpesidenes brødtekst er foreløpig kun norsk (Runde 14 Fase A) --
-   varselet vises kun når html[lang] er satt til engelsk av i18n.js. */
-.hjelp-sprak-merknad {
-  display: none;
-}
-
-html[lang="en"] .hjelp-sprak-merknad {
-  display: block;
-  margin: 0 0 1.2rem;
-  padding: 0.8rem 1rem;
-  border: 1px solid rgba(196, 154, 42, 0.4);
-  border-radius: 8px;
-  background: rgba(196, 154, 42, 0.08);
-  font-size: 0.9rem;
-}
-
 /* ── Hjelpeknapper og popover ────────────────────────────────────────── */
 
 .hjelp-knapp {

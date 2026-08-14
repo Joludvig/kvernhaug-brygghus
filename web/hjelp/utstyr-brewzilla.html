@@ -82,14 +82,13 @@
 
 <div class="hjelp-layout">
   <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
-    <a href="#brewzilla-tekniske-data">Tekniske data</a>
-    <a href="#brewzilla-alt-i-ett">Alt-i-ett-prinsippet</a>
-    <a href="#brewzilla-ikke-verifisert">Ikke verifisert ennå</a>
+    <a href="#brewzilla-tekniske-data" data-i18n="hjelp.brewzilla.toc.tekniske">Tekniske data</a>
+    <a href="#brewzilla-alt-i-ett" data-i18n="hjelp.brewzilla.toc.altiett">Alt-i-ett-prinsippet</a>
+    <a href="#brewzilla-ikke-verifisert" data-i18n="hjelp.brewzilla.toc.ikkeVerifisert">Ikke verifisert ennå</a>
   </nav>
 
   <main class="hjelp-side-main">
-  <p class="hjelp-sprak-merknad" data-i18n="hjelp.rundeSprakMerknad"></p>
-  <p class="hjelp-innledning">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.brewzilla.intro">
     Dette er en <strong>referanseguide</strong> for BrewZilla — først av
     flere planlagte utstyrsspesifikke guider — ikke en antakelse om at du
     selv eier én. Kvernhaug Brygghus har én intern utstyrsprofil kalibrert
@@ -104,55 +103,55 @@
   </p>
 
   <article class="hjelp-artikkel" id="brewzilla-tekniske-data">
-    <h3>Kjelekapasitet</h3>
-    <p>BrewZilla 35L Gen 4.1 har en nominell kjelekapasitet på <strong>35 liter</strong> — dette ligger i selve produktnavnet, og er den eneste av verdiene på denne siden som faktisk er en produktegenskap og ikke noe Kvernhaug Brygghus selv har valgt eller beregnet.</p>
+    <h3 data-i18n="hjelp.brewzilla.kjelekapasitet.tittel">Kjelekapasitet</h3>
+    <p data-i18n-html="hjelp.brewzilla.kjelekapasitet.tekst">BrewZilla 35L Gen 4.1 har en nominell kjelekapasitet på <strong>35 liter</strong> — dette ligger i selve produktnavnet, og er den eneste av verdiene på denne siden som faktisk er en produktegenskap og ikke noe Kvernhaug Brygghus selv har valgt eller beregnet.</p>
 
-    <h3>Kvernhaugs praktiske anbefaling: maks pre-boil-volum</h3>
-    <p>Kvernhaug Brygghus-appen varsler når beregnet pre-boil-volum overstiger omtrent <strong>30 liter</strong> — en praktisk sikkerhetsmargin under kjelens 35-literskapasitet, for å unngå overkoking ved kraftig kok. Dette er <strong>Kvernhaugs egen praktiske grense</strong>, ikke et tall hentet fra en offisiell produsentspesifikasjon.</p>
+    <h3 data-i18n="hjelp.brewzilla.maksPreboil.tittel">Kvernhaugs praktiske anbefaling: maks pre-boil-volum</h3>
+    <p data-i18n-html="hjelp.brewzilla.maksPreboil.tekst">Kvernhaug Brygghus-appen varsler når beregnet pre-boil-volum overstiger omtrent <strong>30 liter</strong> — en praktisk sikkerhetsmargin under kjelens 35-literskapasitet, for å unngå overkoking ved kraftig kok. Dette er <strong>Kvernhaugs egen praktiske grense</strong>, ikke et tall hentet fra en offisiell produsentspesifikasjon.</p>
 
-    <h3>Kvernhaugs standardverdier for beregning (utstyrsprofil)</h3>
-    <p>Disse to tallene er standardverdiene Kvernhaug Brygghus-appen bruker i sin egen BrewZilla-utstyrsprofil for å beregne vannmengder og volum. De er <strong>appens egne beregningsforutsetninger</strong>, ikke bekreftet mot en offisiell produsentspesifikasjon:</p>
+    <h3 data-i18n="hjelp.brewzilla.standardverdier.tittel">Kvernhaugs standardverdier for beregning (utstyrsprofil)</h3>
+    <p data-i18n-html="hjelp.brewzilla.standardverdier.tekst">Disse to tallene er standardverdiene Kvernhaug Brygghus-appen bruker i sin egen BrewZilla-utstyrsprofil for å beregne vannmengder og volum. De er <strong>appens egne beregningsforutsetninger</strong>, ikke bekreftet mot en offisiell produsentspesifikasjon:</p>
     <table class="hjelp-tabell">
-      <thead><tr><th>Egenskap</th><th>Kvernhaug-standard for beregning</th></tr></thead>
+      <thead><tr><th data-i18n="hjelp.brewzilla.tabell.egenskap">Egenskap</th><th data-i18n="hjelp.brewzilla.tabell.kvernhaugStandard">Kvernhaug-standard for beregning</th></tr></thead>
       <tbody>
-        <tr><td>Fordampning under kok</td><td>4,0 L/time</td></tr>
-        <tr><td>Dead space (restvolum)</td><td>2,0 L</td></tr>
+        <tr><td data-i18n="hjelp.brewzilla.fordampning">Fordampning under kok</td><td data-i18n="hjelp.brewzilla.fordampningVerdi">4,0 L/time</td></tr>
+        <tr><td data-i18n="hjelp.brewzilla.deadspace">Dead space (restvolum)</td><td data-i18n="hjelp.brewzilla.deadspaceVerdi">2,0 L</td></tr>
       </tbody>
     </table>
-    <p>Faktisk fordampning varierer med kokestyrke, lokk/uten lokk, effekt og omgivelser — juster gjerne tallet etter egne, målte brygg på ditt eget oppsett. Dead space er heller ikke kontrollert mot produsentens egen dokumentasjon.</p>
+    <p data-i18n="hjelp.brewzilla.standardverdier.tekst2">Faktisk fordampning varierer med kokestyrke, lokk/uten lokk, effekt og omgivelser — juster gjerne tallet etter egne, målte brygg på ditt eget oppsett. Dead space er heller ikke kontrollert mot produsentens egen dokumentasjon.</p>
 
-    <h3>Generelle bryggeforutsetninger (ikke BrewZilla-spesifikke)</h3>
-    <p>Disse to tallene ligger i samme utstyrsprofil i koden, men er egentlig <strong>generelle bryggeforutsetninger</strong> som gjelder uansett hvilket utstyr du bruker — ikke egenskaper ved BrewZilla:</p>
+    <h3 data-i18n="hjelp.brewzilla.generelle.tittel">Generelle bryggeforutsetninger (ikke BrewZilla-spesifikke)</h3>
+    <p data-i18n-html="hjelp.brewzilla.generelle.tekst">Disse to tallene ligger i samme utstyrsprofil i koden, men er egentlig <strong>generelle bryggeforutsetninger</strong> som gjelder uansett hvilket utstyr du bruker — ikke egenskaper ved BrewZilla:</p>
     <table class="hjelp-tabell">
-      <thead><tr><th>Egenskap</th><th>Kvernhaug-standard for beregning</th></tr></thead>
+      <thead><tr><th data-i18n="hjelp.brewzilla.tabell.egenskap">Egenskap</th><th data-i18n="hjelp.brewzilla.tabell.kvernhaugStandard">Kvernhaug-standard for beregning</th></tr></thead>
       <tbody>
-        <tr><td>Meskeforhold</td><td>3,2 L/kg</td></tr>
-        <tr><td>Kornabsorpsjon</td><td>1,0 L/kg</td></tr>
+        <tr><td data-i18n="hjelp.brewzilla.meskeforhold">Meskeforhold</td><td data-i18n="hjelp.brewzilla.meskeforholdVerdi">3,2 L/kg</td></tr>
+        <tr><td data-i18n="hjelp.brewzilla.kornabsorpsjon">Kornabsorpsjon</td><td data-i18n="hjelp.brewzilla.kornabsorpsjonVerdi">1,0 L/kg</td></tr>
       </tbody>
     </table>
-    <p>Meskeforhold er et prosessvalg du kan justere selv, og kornabsorpsjon er en vanlig beregningsforutsetning i hjemmebrygging generelt — ingen av delene er en fast BrewZilla-spesifikasjon.</p>
+    <p data-i18n="hjelp.brewzilla.generelle.tekst2">Meskeforhold er et prosessvalg du kan justere selv, og kornabsorpsjon er en vanlig beregningsforutsetning i hjemmebrygging generelt — ingen av delene er en fast BrewZilla-spesifikasjon.</p>
 
-    <p class="hjelp-kildeliste">Kilde for alle tallene over: Kvernhaug Brygghus-appens <code>modules/equipment.py</code> (standardverdier for utstyrsprofil) og bryggedagsberegningens 30 L-varsel i <code>modules/brewday_calc.py</code>/<code>ui/brewday_panel.py</code>. Ingen av tallene er kontrollert mot en offisiell BrewZilla-produktspesifikasjon.</p>
+    <p class="hjelp-kildeliste" data-i18n-html="hjelp.brewzilla.kildeliste">Kilde for alle tallene over: Kvernhaug Brygghus-appens <code>modules/equipment.py</code> (standardverdier for utstyrsprofil) og bryggedagsberegningens 30 L-varsel i <code>modules/brewday_calc.py</code>/<code>ui/brewday_panel.py</code>. Ingen av tallene er kontrollert mot en offisiell BrewZilla-produktspesifikasjon.</p>
   </article>
 
   <article class="hjelp-artikkel" id="brewzilla-alt-i-ett">
-    <h3>Alt-i-ett-prinsippet</h3>
-    <p>BrewZilla mesker og koker i samme kar, med elektrisk temperaturstyring og innebygd pumpe/filter for resirkulering — se <a href="bryggemetoder.html#alt-i-ett">alt-i-ett bryggemaskin</a> for hvordan dette forenkler bryggedagen sammenlignet med separate kar.</p>
+    <h3 data-i18n="hjelp.brewzilla.altiett.tittel">Alt-i-ett-prinsippet</h3>
+    <p data-i18n-html="hjelp.brewzilla.altiett.tekst">BrewZilla mesker og koker i samme kar, med elektrisk temperaturstyring og innebygd pumpe/filter for resirkulering — se <a href="bryggemetoder.html#alt-i-ett">alt-i-ett bryggemaskin</a> for hvordan dette forenkler bryggedagen sammenlignet med separate kar.</p>
   </article>
 
   <div class="hjelp-uverifisert" id="brewzilla-ikke-verifisert">
-    <strong>Ikke verifisert ennå</strong> — følgende er bevisst IKKE fylt ut med oppdiktet informasjon, og venter på faktisk verifisering mot et konkret BrewZilla-oppsett:
+    <strong data-i18n="hjelp.brewzilla.ikkeVerifisert.tittel">Ikke verifisert ennå</strong> — <span data-i18n="hjelp.brewzilla.ikkeVerifisert.intro">følgende er bevisst IKKE fylt ut med oppdiktet informasjon, og venter på faktisk verifisering mot et konkret BrewZilla-oppsett:</span>
     <ul>
-      <li>Konkrete kontrollpanel-/temperaturprogrammeringssteg</li>
-      <li>Anbefalt rengjørings- og vedlikeholdsrutine</li>
-      <li>Kjente quirks eller vanlige feilkilder spesifikt for BrewZilla</li>
-      <li>Pumpe-/resirkuleringsinnstillinger for optimal mesking</li>
-      <li>Modellspesifikke forskjeller (Gen 3 / Gen 4 / Gen 4.1 m.fl.)</li>
+      <li data-i18n="hjelp.brewzilla.ikkeVerifisert.li1">Konkrete kontrollpanel-/temperaturprogrammeringssteg</li>
+      <li data-i18n="hjelp.brewzilla.ikkeVerifisert.li2">Anbefalt rengjørings- og vedlikeholdsrutine</li>
+      <li data-i18n="hjelp.brewzilla.ikkeVerifisert.li3">Kjente quirks eller vanlige feilkilder spesifikt for BrewZilla</li>
+      <li data-i18n="hjelp.brewzilla.ikkeVerifisert.li4">Pumpe-/resirkuleringsinnstillinger for optimal mesking</li>
+      <li data-i18n="hjelp.brewzilla.ikkeVerifisert.li5">Modellspesifikke forskjeller (Gen 3 / Gen 4 / Gen 4.1 m.fl.)</li>
     </ul>
-    <p>Fyll inn denne seksjonen når informasjonen er verifisert — enten mot faktisk bruk, eller mot produsentens egen dokumentasjon.</p>
+    <p data-i18n="hjelp.brewzilla.ikkeVerifisert.avslutning">Fyll inn denne seksjonen når informasjonen er verifisert — enten mot faktisk bruk, eller mot produsentens egen dokumentasjon.</p>
   </div>
 
-  <p class="hjelp-innledning">
+  <p class="hjelp-innledning" data-i18n="hjelp.brewzilla.roadmap">
     Utstyrsvalg i selve oppskriftsbyggeren (kjelevolum, fordampning m.m.)
     er ikke koblet til denne guiden ennå — det er en egen, større
     funksjon planlagt lenger fram (se Equipment Profile i roadmapen).
