@@ -1109,6 +1109,13 @@ async function init() {
 // tekstene genereres på nytt av style.js/veiledning.js sine t()-kall).
 // Ingen oppskriftsdata røres -- kun visning.
 window.addEventListener("kvernhaug:sprakendret", () => {
+  // Runde 15B.0 -- #sidemeny-modus-status fikk et data-i18n (for pre-
+  // render-crawlbarhet av Bryggelærling-standardteksten), men den er
+  // modus-avhengig -- applyI18n() alene ville alltid tvunget den tilbake
+  // til laerling-teksten. settModus() med GJELDENDE modus (lest fra
+  // body-klassen settModus selv setter) gjenoppretter riktig tekst uten
+  // å røre modus-state.
+  settModus(document.body.classList.contains("modus-mester") ? "mester" : "laerling");
   for (const rad of maltRaderEl.querySelectorAll(".ingrediens-rad")) {
     const cb = rad._combobox;
     if (!cb) continue;

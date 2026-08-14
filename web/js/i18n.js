@@ -139,6 +139,9 @@ const TEKSTER = {
     "meta.importer.tittel": "Kvernhaug Brygghus — Importer oppskrift",
     "meta.utskrift.tittel": "Kvernhaug Brygghus — Utskrift",
     "meta.hjelp.tittel": "Kvernhaug Brygghus — Hjelp & bryggehåndbok",
+    "meta.hjelpBryggedag.tittel": "En bryggedag — fra vann til gjæringskar — Kvernhaug Brygghus",
+    "meta.hjelpBryggemetoder.tittel": "Bryggemetoder — Kvernhaug Brygghus",
+    "meta.hjelpBrewzilla.tittel": "Utstyr: BrewZilla — Kvernhaug Brygghus",
 
     "brand.motto": "Brygg med ild. Del med ære.",
     "brand.stedTagline": "Ved Dalelva i Åsane",
@@ -823,6 +826,9 @@ const TEKSTER = {
     "meta.importer.tittel": "Kvernhaug Brygghus — Import Recipe",
     "meta.utskrift.tittel": "Kvernhaug Brygghus — Print",
     "meta.hjelp.tittel": "Kvernhaug Brygghus — Help & Brewing Handbook",
+    "meta.hjelpBryggedag.tittel": "A Brew Day — From Water to Fermenter — Kvernhaug Brygghus",
+    "meta.hjelpBryggemetoder.tittel": "Brewing Methods — Kvernhaug Brygghus",
+    "meta.hjelpBrewzilla.tittel": "Equipment: BrewZilla — Kvernhaug Brygghus",
 
     "brand.motto": "Brew with fire. Share with honor.",
     "brand.stedTagline": "By the Dalelva, Åsane",
