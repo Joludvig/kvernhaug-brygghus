@@ -1,6 +1,6 @@
 """Genererer engelske, crawlbare speil-sider under web/en/ fra de norske
 kilde-HTML-filene i web/*.html og web/hjelp/*.html + TEKSTER.en-ordboken i
-web/js/i18n.js, samt web/sitemap.xml for alle 16 språk-URL-ene.
+web/js/i18n.js, samt web/sitemap.xml for alle 18 språk-URL-ene.
 
 Kjøres manuelt, etter enhver endring i en registrert NO-side eller i
 TEKSTER i i18n.js, og før commit av web/en/ + web/sitemap.xml:
@@ -55,6 +55,7 @@ PAGES = [
     "mine-oppskrifter.html",
     "importer.html",
     "utskrift.html",
+    "personvern.html",
     "hjelp/index.html",
     "hjelp/bryggedag.html",
     "hjelp/bryggemetoder.html",

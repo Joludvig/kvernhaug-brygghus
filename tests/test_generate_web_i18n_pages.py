@@ -229,7 +229,7 @@ class TestSeoDescriptionOgCanonicalGuard(unittest.TestCase):
         cls.tekster = gen.parse_tekster()
         cls.en = cls.tekster["en"]
 
-    def test_alle_8_sider_har_description_nokkel_i_no_og_en(self):
+    def test_alle_sider_har_description_nokkel_i_no_og_en(self):
         for page in gen.PAGES:
             html = (gen.WEB / page).read_text(encoding="utf-8")
             soup = BeautifulSoup(html, "html.parser")
@@ -254,7 +254,7 @@ class TestSeoDescriptionOgCanonicalGuard(unittest.TestCase):
 
 
 class TestCanonicalOgHreflangGjensidighet(unittest.TestCase):
-    """Kjører faktisk generering for alle 8 sider og verifiserer det
+    """Kjører faktisk generering for alle sider i PAGES og verifiserer det
     eksplisitte gjensidighetskravet fra oppgaven: NO->EN, EN->NO, begge
     x-default->NO, canonical alltid selvrefererende."""
 
@@ -266,7 +266,7 @@ class TestCanonicalOgHreflangGjensidighet(unittest.TestCase):
     def _hreflang_map(self, soup):
         return {a.get("hreflang"): a["href"] for a in soup.find_all("link", rel="alternate")}
 
-    def test_alle_8_par_er_gjensidig_korrekte(self):
+    def test_alle_sider_er_gjensidig_korrekte(self):
         for page in gen.PAGES:
             no_html = (gen.WEB / page).read_text(encoding="utf-8")
             no_soup = BeautifulSoup(no_html, "html.parser")
@@ -290,11 +290,11 @@ class TestCanonicalOgHreflangGjensidighet(unittest.TestCase):
 
 
 class TestSitemap(unittest.TestCase):
-    def test_sitemap_er_gyldig_xml_med_16_urls(self):
+    def test_sitemap_er_gyldig_xml_med_riktig_antall_urls(self):
         xml_tekst = gen.build_sitemap_xml()
         root = ET.fromstring(xml_tekst)
         urls = root.findall("sm:url", _SITEMAP_NS)
-        self.assertEqual(len(urls), 16)
+        self.assertEqual(len(urls), len(gen.PAGES) * 2)
 
     def test_sitemap_ingen_duplikater(self):
         xml_tekst = gen.build_sitemap_xml()

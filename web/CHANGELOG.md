@@ -4,6 +4,22 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 17 — Kontakt og personvern (2026-08-14)
+
+Offentlig kontakt-e-post (`post@kvernhaugbrygghus.no`, bekreftet opprettet hos Domeneshop) og en minimal, ærlig personvernforklaring før første lansering — ingen cookie-banner, ingen consent-framework, ingen analytics (bekreftet på nytt: ingen `fetch`/`XMLHttpRequest`/`sendBeacon`/tredjeparts script/iframe noe sted i `web/`).
+
+Ny niende side, `web/personvern.html` (NO) / generert `web/en/personvern.html` (EN) — "Kontakt og personvern" / "Contact & Privacy", registrert i generatorens `PAGES`-liste med samme kontrakt som de øvrige åtte sidene (hero/kompaktnav/sidemeny-krom, `data-i18n-tittel-nokkel`, canonical/hreflang, egen meta description). Tre korte seksjoner: Kontakt (mailto-lenke, ren tekst, samme adresse på begge språk), Oppskriftene dine (lokal lagring, ingen konto/sentral database, `.kbhrecipe` for backup/flytting), Personvern (ingen egen analyse/reklame/sporing i denne versjonen; e-postkontakt innebærer naturligvis at adresse+innhold mottas for å kunne svare — ingen bredere/udokumenterbare påstander som "ingen data forlater noensinne enheten").
+
+Ny, delt footer-kontaktlinje (`Kvernhaug Brygghus · post@kvernhaugbrygghus.no · Kontakt og personvern`, `mailto:`-lenke + lenke til `personvern.html`) lagt til på alle 8 eksisterende sider — inkl. de 4 Hjelp-sidene, som tidligere ikke hadde noen `<footer>` i det hele tatt. Ingen ny CSS — gjenbruker eksisterende `footer`/`a`-styling, ingen visuell nyredesign.
+
+13 nye NO/EN-nøkkelpar i `i18n.js` (`meta.personvern.*`, `personvern.*`, `footer.kontaktLenke`) — 611 nøkkelpar totalt, fortsatt NO/EN-symmetrisk. `scripts/generate_web_i18n_pages.py` oppdatert (`PAGES`, docstring-tallet 16→18) — kjørt to ganger, byte-identisk output begge ganger (SHA-256-verifisert). `web/sitemap.xml` nå 18 URL-er (9 sider × NO/EN), `web/robots.txt` uendret (trengte ingen endring).
+
+Testoppdateringer i `tests/test_generate_web_i18n_pages.py`: fjernet hardkodede "8"/"16"-tall fra testnavn/assertions (nå dynamisk mot `len(gen.PAGES)`), slik at antallet aldri kan bli stille feil neste gang en side legges til. Full Python-suite: 899 tester, 0 feil (samme antall som før — ingen nye Python-tester lagt til denne runden, kun eksisterende justert).
+
+**Microfix (manuell kontroll, samme runde):** footer-/panel-teksten "Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server" var for absolutt — kontakt via e-post innebærer naturligvis serverkommunikasjon, og teksten ga et udokumenterbart løfte om hosting/serverlogger. Endret til "Oppskriftene dine lagres lokalt i denne nettleseren (localStorage)" — samme sannhet (`localStorage`-basert lagring), men uten løftet om at *ingenting* noensinne sendes noe sted. Rettet i `footer.enkel`/`footer.builder` (5 sider), `mineOppskrifter.hjelpetekst` og `meta.mineOppskrifter.beskrivelse` (samme absolutte formulering funnet der under et sitewide-søk), samt `hjelp.idx.lagreOppskrift.hvorfor` (Hjelp-siden, inkl. den rå NO-kildeteksten som hadde driftet fra `TEKSTER.no` siden Runde 16 sin polish av samme nøkkel). NO/EN-nøkkeltall uendret (611 — kun verdier endret, ingen nye nøkler). Sitewide-søk etter frasen (case-insensitivt) bekreftet 0 gjenværende treff etter fiksen, inkl. i regenerert `web/en/`.
+
+Ikke innført: Open Graph/Twitter Cards, JSON-LD, analytics/tracking, cookie-banner, Search Console-verifisering — bevisst utenfor omfanget, som før.
+
 ## Runde 15B.4 — SEO-metadata + sitemap + robots (2026-08-14)
 
 Fullførte den tekniske SEO-grunnmuren for alle 16 språk-URL-ene — siste steg i SEO-/pre-render-arbeidet fra Runde 15A. Produksjonsdomene `https://kvernhaugbrygghus.no` (ingen `www.`-variant funnet noe sted i repoet, verifisert før bruk). URL-kontrakt: "pene" katalog-URL-er for de to index-sidene (`/`, `/hjelp/`, `/en/`, `/en/hjelp/`), eksplisitt `.html` for resten — kun brukt til canonical/hreflang/sitemap, selve navigasjonslenkene i HTML-en er urørt fra Runde 15B.3 (ingen redirect/rewrite innført eller forutsatt).

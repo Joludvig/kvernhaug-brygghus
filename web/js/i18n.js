@@ -210,15 +210,17 @@ const TEKSTER = {
     "meta.hjelpBryggedag.tittel": "En bryggedag — fra vann til gjæringskar — Kvernhaug Brygghus",
     "meta.hjelpBryggemetoder.tittel": "Bryggemetoder — Kvernhaug Brygghus",
     "meta.hjelpBrewzilla.tittel": "Utstyr: BrewZilla — Kvernhaug Brygghus",
+    "meta.personvern.tittel": "Kvernhaug Brygghus — Kontakt og personvern",
 
     "meta.builder.beskrivelse": "Lag og beregn øloppskrifter med malt, humle, gjær, OG, FG, ABV, IBU og EBC. Stilmatching mot Kvernhaug Brygghus sitt eget stilbibliotek og live smaksprofil.",
-    "meta.mineOppskrifter.beskrivelse": "Se, åpne og slett øloppskriftene dine. Lagres lokalt i nettleseren — ingen konto, ingen sky, ingenting sendes til noen server.",
+    "meta.mineOppskrifter.beskrivelse": "Se, åpne og slett øloppskriftene dine. Lagres lokalt i nettleseren — ingen konto, ingen sky.",
     "meta.importer.beskrivelse": "Importer en øloppskrift fra en .kbhrecipe-fil, eldre rå JSON, eller ved å lime inn tekst — med forhåndsvisning før den legges inn i oppskriftsbyggeren.",
     "meta.utskrift.beskrivelse": "Skriv ut oppskriftsark, handleliste, bryggedagsark og bryggelogg for din aktive eller lagrede øloppskrift — fire A4-vennlige dokumenter.",
     "meta.hjelp.beskrivelse": "Praktisk bryggehåndbok for hjemmebryggere: kom i gang, begrepsforklaringer, ingredienser og ofte stilte spørsmål om Kvernhaug Brygghus sin oppskriftsbygger.",
     "meta.hjelpBryggedag.beskrivelse": "En komplett bryggedag i 15 steg — fra vann og mesking til gjæringskar — med hva du gjør, hvorfor, og hva du bør følge med på i hvert steg.",
     "meta.hjelpBryggemetoder.beskrivelse": "Sammenligning av BIAB, vanlig all-grain med eget meskekar, og alt-i-ett bryggemaskin — hvordan hver metode påvirker en vanlig bryggedag.",
     "meta.hjelpBrewzilla.beskrivelse": "Praktisk guide til å bruke BrewZilla i Kvernhaug Brygghus sin oppskriftsbygger, med tydelig skille mellom produsentens spesifikasjoner og Kvernhaug sine egne standardverdier.",
+    "meta.personvern.beskrivelse": "Kontaktadresse og en kort, ærlig forklaring på hvordan Kvernhaug Brygghus behandler data: ingen konto, ingen sky, oppskrifter lagres lokalt i nettleseren.",
 
     "brand.motto": "Brygg med ild. Del med ære.",
     "brand.stedTagline": "Ved Dalelva i Åsane",
@@ -252,8 +254,9 @@ const TEKSTER = {
     "modus.mesterNavn": "⚙️ Bryggmester",
     "modus.mesterUndertekst": "Full kontroll – alle detaljer tilgjengelig",
 
-    "footer.enkel": "Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server.",
-    "footer.builder": "Data lagres kun lokalt i denne nettleseren (localStorage) — ingenting sendes til noen server. Full versjon med pantry, vannkjemi og full sensorisk analyse: se hovedappen.",
+    "footer.enkel": "Oppskriftene dine lagres lokalt i denne nettleseren (localStorage).",
+    "footer.builder": "Oppskriftene dine lagres lokalt i denne nettleseren (localStorage). Full versjon med pantry, vannkjemi og full sensorisk analyse: se hovedappen.",
+    "footer.kontaktLenke": "Kontakt og personvern",
 
     "help.ogAriaLabel": "Hva er OG?",
     "help.fgAriaLabel": "Hva er FG?",
@@ -384,7 +387,7 @@ const TEKSTER = {
 
     "meta.mineOppskrifter.sidetittel": "📂 Mine oppskrifter",
     "mineOppskrifter.tittel": "Mine lagrede oppskrifter",
-    "mineOppskrifter.hjelpetekst": "Lagres kun i denne nettleseren (localStorage) — ingenting sendes til noen server.",
+    "mineOppskrifter.hjelpetekst": "Oppskriftene dine lagres kun i denne nettleseren (localStorage).",
     "mineOppskrifter.ingenOppskrifter": "Ingen lagrede oppskrifter ennå. Bygg en oppskrift og trykk \"Lagre oppskrift\" i Oppskriftsbyggeren.",
     "mineOppskrifter.importerTittel": "Importere en oppskrift?",
     "mineOppskrifter.importerHjelpetekst": "Fil- og tekstimport har flyttet til en egen side i menyen:",
@@ -504,6 +507,17 @@ const TEKSTER = {
     "print.hvaFungerteBra": "Hva fungerte bra?",
     "print.hvaBorEndres": "Hva bør endres neste gang?",
 
+    "meta.personvern.sidetittel": "✉️ Kontakt og personvern",
+    "personvern.kontaktTittel": "Kontakt",
+    "personvern.kontaktTekst": "Har du spørsmål, tilbakemeldinger eller finner en feil?",
+    "personvern.oppskrifterTittel": "Oppskriftene dine",
+    "personvern.oppskrifterTekst1": "Oppskrifter du lagrer i Kvernhaug Brygghus lagres lokalt i nettleseren på enheten du bruker.",
+    "personvern.oppskrifterTekst2": "Kvernhaug Brygghus har ingen brukerkonto eller sentral oppskriftsdatabase i denne versjonen.",
+    "personvern.oppskrifterTekst3": "Du kan selv lagre en portabel .kbhrecipe-fil for backup eller for å flytte en oppskrift mellom enheter.",
+    "personvern.personvernTittel": "Personvern",
+    "personvern.personvernTekst1": "Denne versjonen av Kvernhaug Brygghus bruker ikke egen analyse, reklame eller sporing.",
+    "personvern.personvernTekst2": "Når du kontakter Kvernhaug Brygghus på e-post, mottar vi naturligvis e-postadressen din og innholdet i meldingen, slik at vi kan lese og besvare henvendelsen.",
+
     "hjelp.sidetittel": "📖 Hjelp & bryggehåndbok",
     "hjelp.sidenavFaq": "📖 Hjelp & FAQ",
     "hjelp.sidenavBryggedag": "🗓️ En bryggedag",
@@ -529,7 +543,7 @@ const TEKSTER = {
 
     "hjelp.idx.lagreOppskrift.tittel": "Lagre en oppskrift",
     "hjelp.idx.lagreOppskrift.tekst": "\"💾 Lagre oppskrift\" lagrer oppskriften <strong>i denne nettleseren</strong> (localStorage) under navnet du har gitt den. Den dukker opp i \"Mine lagrede oppskrifter\" lenger ned, og du kan laste den inn igjen når som helst — også etter at du har lukket fanen.",
-    "hjelp.idx.lagreOppskrift.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Ingenting sendes til noen server, så en oppskrift lagret på denne måten finnes kun på denne enheten. Vil du ta backup eller flytte den til en annen datamaskin eller telefon, bruk heller \"📄 Lagre oppskriftsfil (.kbhrecipe)\" — det er den vanlige, portable måten å sikkerhetskopiere og dele en oppskrift på. Rå JSON-eksport finnes fortsatt under \"Avansert\" for eldre filer eller videre bearbeiding, men .kbhrecipe er anbefalt format til vanlig bruk.",
+    "hjelp.idx.lagreOppskrift.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Oppskriften lagres lokalt i denne nettleseren, så den finnes kun på denne enheten. Vil du ta backup eller flytte den til en annen datamaskin eller telefon, bruk heller \"📄 Lagre oppskriftsfil (.kbhrecipe)\" — det er den vanlige, portable måten å sikkerhetskopiere og dele en oppskrift på. Rå JSON-eksport finnes fortsatt under \"Avansert\" for eldre filer eller videre bearbeiding, men .kbhrecipe er anbefalt format til vanlig bruk.",
 
     "hjelp.idx.aapneImportere.tittel": "Åpne eller importere en oppskrift",
     "hjelp.idx.aapneImportere.tekst": "Klikk \"Åpne i byggeren\" på en lagret oppskrift under \"Mine oppskrifter\" for å laste den inn med det samme. Har du en .kbhrecipe-fil (eller en eldre, rå oppskrifts-JSON)? Bruk \"📂 Åpne oppskriftsfil\" i byggeren, eller \"📄 Åpne fil\" på \"📥 Importer oppskrift\"-siden — begge åpner den direkte, uten at du må skrive noe på nytt. Har du i stedet en oppskrift som limt inn ren tekst (f.eks. \"5 kg Maris Otter\", \"20 g Magnum 60 min\")? Bruk \"📥 Importer oppskrift\" og \"✏️ Lim inn tekst\" der — egendefinerte ingredienser inkludert.",
@@ -906,15 +920,17 @@ const TEKSTER = {
     "meta.hjelpBryggedag.tittel": "A Brew Day — From Water to Fermenter — Kvernhaug Brygghus",
     "meta.hjelpBryggemetoder.tittel": "Brewing Methods — Kvernhaug Brygghus",
     "meta.hjelpBrewzilla.tittel": "Equipment: BrewZilla — Kvernhaug Brygghus",
+    "meta.personvern.tittel": "Kvernhaug Brygghus — Contact & Privacy",
 
     "meta.builder.beskrivelse": "Build and calculate beer recipes with malt, hops, yeast, OG, FG, ABV, IBU and EBC. Style matching against Kvernhaug Brygghus's own style library and a live flavour profile.",
-    "meta.mineOppskrifter.beskrivelse": "View, open and delete your saved beer recipes. Stored locally in your browser — no account, no cloud, nothing sent to any server.",
+    "meta.mineOppskrifter.beskrivelse": "View, open and delete your saved beer recipes. Stored locally in your browser — no account, no cloud.",
     "meta.importer.beskrivelse": "Import a beer recipe from a .kbhrecipe file, older raw JSON, or by pasting plain text — with a preview before it's added to the recipe builder.",
     "meta.utskrift.beskrivelse": "Print a recipe sheet, shopping list, brew day worksheet and brew log for your active or saved beer recipe — four A4-friendly documents.",
     "meta.hjelp.beskrivelse": "A practical brewing handbook for homebrewers: getting started, terminology, ingredients and frequently asked questions about the Kvernhaug Brygghus recipe builder.",
     "meta.hjelpBryggedag.beskrivelse": "A complete brew day in 15 steps — from water and mashing to the fermenter — what to do, why, and what to watch for at each step.",
     "meta.hjelpBryggemetoder.beskrivelse": "A comparison of BIAB, traditional all-grain with a separate mash tun, and all-in-one brewing systems — how each method changes a typical brew day.",
     "meta.hjelpBrewzilla.beskrivelse": "A practical guide to using a BrewZilla with the Kvernhaug Brygghus recipe builder, clearly distinguishing manufacturer specifications from Kvernhaug's own default values.",
+    "meta.personvern.beskrivelse": "Contact address and a short, honest explanation of how Kvernhaug Brygghus handles data: no account, no cloud, recipes are stored locally in your browser.",
 
     "brand.motto": "Brew with fire. Share with honor.",
     "brand.stedTagline": "By the Dalelva, Åsane",
@@ -948,8 +964,9 @@ const TEKSTER = {
     "modus.mesterNavn": "⚙️ Brewing Master",
     "modus.mesterUndertekst": "Full control – every detail available",
 
-    "footer.enkel": "Data is stored only locally in this browser (localStorage) — nothing is sent to any server.",
-    "footer.builder": "Data is stored only locally in this browser (localStorage) — nothing is sent to any server. Full version with pantry, water chemistry, and full sensory analysis: see the main app.",
+    "footer.enkel": "Your recipes are stored locally in this browser (localStorage).",
+    "footer.builder": "Your recipes are stored locally in this browser (localStorage). Full version with pantry, water chemistry, and full sensory analysis: see the main app.",
+    "footer.kontaktLenke": "Contact & Privacy",
 
     "help.ogAriaLabel": "What is OG?",
     "help.fgAriaLabel": "What is FG?",
@@ -1080,7 +1097,7 @@ const TEKSTER = {
 
     "meta.mineOppskrifter.sidetittel": "📂 My Recipes",
     "mineOppskrifter.tittel": "My saved recipes",
-    "mineOppskrifter.hjelpetekst": "Stored only in this browser (localStorage) — nothing is sent to any server.",
+    "mineOppskrifter.hjelpetekst": "Your recipes are stored only in this browser (localStorage).",
     "mineOppskrifter.ingenOppskrifter": "No saved recipes yet. Build a recipe and press \"Save recipe\" in the Recipe Builder.",
     "mineOppskrifter.importerTittel": "Importing a recipe?",
     "mineOppskrifter.importerHjelpetekst": "File and text import have moved to their own page in the menu:",
@@ -1200,6 +1217,17 @@ const TEKSTER = {
     "print.hvaFungerteBra": "What worked well?",
     "print.hvaBorEndres": "What should change next time?",
 
+    "meta.personvern.sidetittel": "✉️ Contact & Privacy",
+    "personvern.kontaktTittel": "Contact",
+    "personvern.kontaktTekst": "Questions, feedback or found a bug?",
+    "personvern.oppskrifterTittel": "Your recipes",
+    "personvern.oppskrifterTekst1": "Recipes you save in Kvernhaug Brygghus are stored locally in the browser on the device you're using.",
+    "personvern.oppskrifterTekst2": "This version of Kvernhaug Brygghus has no user account or central recipe database.",
+    "personvern.oppskrifterTekst3": "You can save a portable .kbhrecipe file yourself for backup, or to move a recipe between devices.",
+    "personvern.personvernTittel": "Privacy",
+    "personvern.personvernTekst1": "This version of Kvernhaug Brygghus does not use its own analytics, advertising or tracking.",
+    "personvern.personvernTekst2": "If you contact Kvernhaug Brygghus by email, we naturally receive your email address and the contents of your message, so that we can read and reply to it.",
+
     "hjelp.sidetittel": "📖 Help & Brewing Handbook",
     "hjelp.sidenavFaq": "📖 Help & FAQ",
     "hjelp.sidenavBryggedag": "🗓️ A Brew Day",
@@ -1225,7 +1253,7 @@ const TEKSTER = {
 
     "hjelp.idx.lagreOppskrift.tittel": "Save a Recipe",
     "hjelp.idx.lagreOppskrift.tekst": "\"💾 Save recipe\" saves the recipe <strong>in this browser</strong> (localStorage) under the name you gave it. It shows up under \"My saved recipes\" further down, and you can reload it any time — even after closing the tab.",
-    "hjelp.idx.lagreOppskrift.hvorfor": "<strong>Why this matters:</strong> Nothing is sent to any server, so a recipe saved this way only exists on this device. To back it up or move it to another computer or phone, use \"📄 Save recipe file (.kbhrecipe)\" instead — that's the normal, portable way to back up and share a recipe. Raw JSON export is still available under \"Advanced\" for legacy files or further processing, but .kbhrecipe is the recommended format for everyday use.",
+    "hjelp.idx.lagreOppskrift.hvorfor": "<strong>Why this matters:</strong> The recipe is stored locally in this browser, so it only exists on this device. To back it up or move it to another computer or phone, use \"📄 Save recipe file (.kbhrecipe)\" instead — that's the normal, portable way to back up and share a recipe. Raw JSON export is still available under \"Advanced\" for legacy files or further processing, but .kbhrecipe is the recommended format for everyday use.",
 
     "hjelp.idx.aapneImportere.tittel": "Open or Import a Recipe",
     "hjelp.idx.aapneImportere.tekst": "Click \"Open in builder\" on a saved recipe under \"My recipes\" to load it instantly. Have a .kbhrecipe file (or an older, raw recipe JSON)? Use \"📂 Open recipe file\" in the builder, or the \"Open file\" option on the \"📥 Import Recipe\" page — both open it directly, no re-typing needed. Have a recipe as plain pasted text instead (e.g. \"5 kg Maris Otter\", \"20 g Magnum 60 min\")? Use \"📥 Import Recipe\" and its \"Paste text\" mode — custom ingredients included.",

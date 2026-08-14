@@ -6,7 +6,7 @@ Web er en responsiv, noe forenklet videreføring av desktop-appen — ikke en vi
 
 ## Sider
 
-Fem sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny (åpnes fra hamburgerknappen i mastheaden på alle sider):
+Seks sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny (åpnes fra hamburgerknappen i mastheaden på alle sider):
 
 | Side | Formål |
 |---|---|
@@ -15,6 +15,7 @@ Fem sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny (
 | `importer.html` — **Importer oppskrift** | Åpne en `.kbhrecipe`-/JSON-fil, ELLER lime inn ren tekst (samme kontrakt som `ui/sidebar.py`/`modules/recipe_importer.py`) med forhåndsvisning før den legges inn i byggeren. |
 | `utskrift.html` — **Utskrift** | Skrive ut den aktive oppskriften — lagret eller ikke — eller en tidligere lagret oppskrift. |
 | `hjelp/index.html` — **Hjelp** | How-to/FAQ/bryggehåndbok, se eget avsnitt under. |
+| `personvern.html` — **Kontakt og personvern** | Kontakt-e-post og en kort, ærlig forklaring av hvordan V1 behandler data (lokal lagring, ingen analytics/tracking). Lenket fra footer på alle sider, ikke fra hovedmenyen. Lagt til Runde 17. |
 
 ## Hva den kan
 
@@ -32,7 +33,7 @@ Fem sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny (
 - Stilmatching mot **Kvernhaug Brygghus sitt eget stilbibliotek** (26 stiler): numerisk nærmeste stil, vennlig tre-nivås stilveiledning ("innenfor"/"litt utenfor"/"tydelig utenfor" — aldri "FEIL"), nærliggende alternativer med "hva mangler" (Bryggmester). Tom oppskrift viser "Ingen stilmatch ennå" (datadrevet sjekk, ikke visuell hardkoding).
 - Brukeridentitet — **Ølnavn**, **Brygger**, **Bryggeri** i Grunndata, pluss notatfelt (Bryggmester). Lagres på oppskriften og som en lett brukerpreferanse som forhåndsutfyller nye oppskrifter — uten å overstyre en allerede lastet/importert oppskrift.
 - Høyrekortets identitetsblokk viser den manuelt **valgte** Ølstilen (ikke stilmatch-resultatet) pluss KBH-emblemet. Under: alltid synlig **Smaksprofil**, deretter sammenleggbar **Stilanalyse**.
-- Lagre oppskrifter lokalt i nettleseren (`localStorage`) — ingenting sendes til noen server. Oppskriften du aktivt bygger på autolagres fortløpende som en "aktiv kladd" — se "Aktiv kladd" under.
+- Lagre oppskrifter lokalt i nettleseren (`localStorage`). Oppskriften du aktivt bygger på autolagres fortløpende som en "aktiv kladd" — se "Aktiv kladd" under.
 - **Portabel `.kbhrecipe`-fil** — "Lagre oppskriftsfil" laster ned én fil du kan sende, dele, ta backup av eller flytte til en annen enhet. Åpnes igjen med "Åpne oppskriftsfil" eller på Importer-siden. Rå JSON-eksport finnes fortsatt, nedgradert til et "Avansert"-felt — se "Portabel oppskriftsfil (.kbhrecipe)" under.
 - **Ny oppskrift** — "🆕 Ny oppskrift" i Lagre og eksporter-panelet nullstiller byggeren til samme blanke starttilstand som ved førstegangsbesøk (også malt-%-låser, mål-IBU-arbeidsfelt og skaleringsmål), og forhåndsutfyller Brygger/Bryggeri fra den lagrede identitetspreferansen. Spør om bekreftelse først dersom aktiv kladd har meningsfullt innhold — se "Aktiv kladd" under.
 - Importere fra **Importer oppskrift**-siden — `.kbhrecipe`-/JSON-fil eller limt inn tekst (fuzzy-matches mot bibliotekene, forhåndsvisning før noe legges inn) — se "Tekstimport" under.
@@ -55,6 +56,7 @@ web/
   mine-oppskrifter.html  Åpne/slette lagrede oppskrifter
   importer.html        Importer oppskrift — fil (.kbhrecipe/JSON) ELLER limt inn tekst, med forhåndsvisning
   utskrift.html        Velg aktiv kladd ELLER en lagret oppskrift, skriv ut de fire dokumentene
+  personvern.html       Kontakt og personvern -- e-post, kort forklaring av lokal lagring/ingen tracking (Runde 17)
   css/style.css        Styling — to-lags palett (kaldt app-krom + varm merkevaresone), masthead/drawer, print, hjelp-TOC
   js/chrome.js          Delt "app-krom": masthead-krymping ved scroll + uttrekkbar venstremeny -- på alle sider
   js/calc.js           OG/FG/ABV/IBU/EBC — portert fra modules/calculations.py
@@ -91,11 +93,11 @@ web/
   hjelp/bryggedag.html    Generell bryggedagsguide, 15 steg
   hjelp/bryggemetoder.html   BIAB / all-grain / alt-i-ett -- strukturert for enkel utvidelse
   hjelp/utstyr-brewzilla.html   Første utstyrsspesifikke guide (og uformell mal for flere)
-  en/                    GENERERT engelsk speiling av de 8 sidene over (samme filnavn/struktur, én katalognivå
+  en/                    GENERERT engelsk speiling av de 9 sidene over (samme filnavn/struktur, én katalognivå
                           dypere) -- håndrediger ALDRI, kjør scripts/generate_web_i18n_pages.py på nytt i stedet.
                           Deler css/js/assets/data med resten av web/ (ikke kopiert inn). Se "Engelsk pre-render
                           (web/en/)" under.
-  sitemap.xml             GENERERT -- 16 URL-er (8 sider x NO/EN) med gjensidige hreflang-alternates, samme
+  sitemap.xml             GENERERT -- 18 URL-er (9 sider x NO/EN) med gjensidige hreflang-alternates, samme
                           PAGES-liste som resten av generatoren. Håndrediger ALDRI.
   robots.txt              Håndskrevet, statisk -- Allow: /, peker til sitemap.xml.
 ```
@@ -104,13 +106,13 @@ web/
 
 Runde 14. Vanilla NO/EN-støtte i `js/i18n.js` — ingen npm, ingen build-steg, ingen tredjeparts i18n-bibliotek, samme mønster som resten av web-versjonen. Norsk er primærspråk/default.
 
-**Arkitektur**: `js/i18n.js` er lastet FØRST på hver side (før `chrome.js`) og eksponerer globalt: `t(nøkkel, params)` (enkel `{param}`-substitusjon, ingen pluralregler), `gjeldendeSprak()`, `settSprak(kode)`, `applyI18n(root)`. Statisk HTML dekoreres med `data-i18n="nøkkel"` (setter `textContent`), `data-i18n-html="nøkkel"` (setter `innerHTML` — for tekst med inline-markup som `<strong>`/`<a href="#anker">`) og `data-i18n-placeholder`/`data-i18n-aria-label`/`data-i18n-title`/`data-i18n-alt` (setter tilsvarende attributt) — anvendes automatisk på `DOMContentLoaded`. Dynamiske strenger (statusmeldinger, `confirm()`-dialoger, stilmatch-/veiledningstekst, print-dokumentene) kaller `t()` direkte i JS i stedet for å hardkode norsk. Alle tekster ligger i én flat, dobbel `TEKSTER = { no: {...}, en: {...} }`-ordbok i `i18n.js` — 590 nøkkelpar (Runde 15B.3), verifisert NO/EN-symmetrisk av `scripts/generate_web_i18n_pages.py` ved hver generering.
+**Arkitektur**: `js/i18n.js` er lastet FØRST på hver side (før `chrome.js`) og eksponerer globalt: `t(nøkkel, params)` (enkel `{param}`-substitusjon, ingen pluralregler), `gjeldendeSprak()`, `settSprak(kode)`, `applyI18n(root)`. Statisk HTML dekoreres med `data-i18n="nøkkel"` (setter `textContent`), `data-i18n-html="nøkkel"` (setter `innerHTML` — for tekst med inline-markup som `<strong>`/`<a href="#anker">`) og `data-i18n-placeholder`/`data-i18n-aria-label`/`data-i18n-title`/`data-i18n-alt` (setter tilsvarende attributt) — anvendes automatisk på `DOMContentLoaded`. Dynamiske strenger (statusmeldinger, `confirm()`-dialoger, stilmatch-/veiledningstekst, print-dokumentene) kaller `t()` direkte i JS i stedet for å hardkode norsk. Alle tekster ligger i én flat, dobbel `TEKSTER = { no: {...}, en: {...} }`-ordbok i `i18n.js` — 611 nøkkelpar (Runde 17), verifisert NO/EN-symmetrisk av `scripts/generate_web_i18n_pages.py` ved hver generering.
 
 **Legg til en ny UI-streng**: gi den en dotted-namespace-nøkkel (`side.seksjon.ting`), legg den til i BÅDE `no`- og `en`-objektet i `i18n.js`, referer den via `data-i18n="nøkkel"` i den norske kilde-HTML-en eller `t("nøkkel")` i JS, og kjør generatoren på nytt (se "Engelsk pre-render (web/en/)" under) hvis nøkkelen brukes på en registrert side. Ingen andre filer trenger å vite om det.
 
 **Språkpreferanse**: egen, liten nøkkel (`kvernhaug_web_sprak`) — ALDRI en del av `recipe`-objektet, `.kbhrecipe`-filer, `localStorage`-lagrede oppskrifter eller aktiv kladd. En norsk oppskrift vises like fullt i engelsk UI og omvendt; å bytte språk endrer aldri malt/humle/gjær/stilidentitet/tall.
 
-**Autoritativ språkkilde**: dokumentets EGEN `<html lang>` — satt i HTML-kilden, og i den genererte `/en/`-speilingen — er autoritativ, lest av `gjeldendeSprak()` FØR noe annet (`DOKUMENT_SPRAK`-konstanten i i18n.js). `localStorage`-preferansen er kun fallback for en side uten gyldig `lang`-attributt (skal i praksis aldri inntreffe — alle 16 sider har korrekt `lang` i kilden/generert output). Browser-språkgjetting (`navigator.language`) brukes ikke noe sted — en pre-rendret engelsk side forblir engelsk uansett browserspråk eller tidligere lagret preferanse, og omvendt for norsk. `settSprak(kode)` (bytter DOM-tekst direkte, uten navigasjon) finnes fortsatt som offentlig API og brukes fortsatt internt av `applyI18n()`/dynamiske JS-strenger, men er IKKE lenger koblet til språkvelgerens knapper i UI-et — se "Språkbytte via URL-navigasjon" under.
+**Autoritativ språkkilde**: dokumentets EGEN `<html lang>` — satt i HTML-kilden, og i den genererte `/en/`-speilingen — er autoritativ, lest av `gjeldendeSprak()` FØR noe annet (`DOKUMENT_SPRAK`-konstanten i i18n.js). `localStorage`-preferansen er kun fallback for en side uten gyldig `lang`-attributt (skal i praksis aldri inntreffe — alle 18 sider har korrekt `lang` i kilden/generert output). Browser-språkgjetting (`navigator.language`) brukes ikke noe sted — en pre-rendret engelsk side forblir engelsk uansett browserspråk eller tidligere lagret preferanse, og omvendt for norsk. `settSprak(kode)` (bytter DOM-tekst direkte, uten navigasjon) finnes fortsatt som offentlig API og brukes fortsatt internt av `applyI18n()`/dynamiske JS-strenger, men er IKKE lenger koblet til språkvelgerens knapper i UI-et — se "Språkbytte via URL-navigasjon" under.
 
 **Stil-/kategori-/maltgruppenavn — visningslag, ikke ny identitet**: `data/bjcp_styles.json` bruker det norske displaynavnet som eneste, stabile identitet (dict-nøkkel = `oppskrift.valgtStil` = combobox-verdi — ingen egen id-kolonne finnes, verken i web eller i `modules/style_engine.py`). En bred migrering til en separat stabil id ble vurdert og bevisst avvist denne runden — bakoverkompatibilitet med allerede lagrede oppskrifter/`.kbhrecipe`-filer veier tyngre enn en penere datamodell. Løsningen er i stedet et rent presentasjonslag i `i18n.js`: `STIL_NAVN_EN`/`SMAKS_KATEGORI_EN`/`MALT_GRUPPE_LABEL_EN` er NO→EN-oppslagstabeller brukt KUN av `stilVisningsnavn()`/`smaksKategoriVisning()`/`maltGruppeVisning()` ved rendering (combobox-labels, resultatpanel, stilmatch-/veiledningstekst, smakshjul-akser, print-dokumenter). `valgtStil`, `SMAKS_KATEGORIER` (flavor.js) og malt-gruppenes sorteringsrekkefølge forblir norske og uendret overalt i logikk, beregning, lagring og eksport. `style.js` sin scoringsmatematikk er ikke rørt — kun tekstmalene rundt `mangler`/`onsket_sensorisk`/`balanse`/`problemer` er gjort språkbevisste via `t()`.
 
@@ -150,11 +152,11 @@ py -3 scripts/generate_web_i18n_pages.py
 
 **URL-form**: "pene" katalog-URL-er for de to index-sidene (`/` og `/hjelp/` NO, `/en/` og `/en/hjelp/` EN), eksplisitt `.html` for alle andre sider (`/mine-oppskrifter.html`, `/en/hjelp/bryggedag.html` osv.) — standard `DirectoryIndex`-oppførsel på vanlig statisk hosting (Apache/Domeneshop) antatt, ingen server-rewrite konfigurert eller forutsatt av dette repoet. Denne kontrakten brukes KUN til canonical/hreflang/sitemap — selve navigasjonslenkene i HTML-en (drawer, sidenav, "Les mer"-lenker) er URØRT dokument-relative `.html`-lenker, uendret fra Runde 15B.3. Ingen redirect, ingen `www.`-regel, ingen trailing-slash-rewrite er innført.
 
-**Meta description**: samme arkitektur som title — én nøkkel per side og språk i `TEKSTER` (`meta.X.beskrivelse`, 8 par NO/EN), referert fra `<meta name="description" content="..." data-i18n-content="nøkkel">` i HTML-en via en ny `data-i18n-content`-attributt (samme mønster som `data-i18n-alt`/`-title`). Norsk kilde har den norske teksten statisk i `content`; generatoren overskriver den til engelsk for `web/en/`, akkurat som for `data-i18n`/`data-i18n-html`.
+**Meta description**: samme arkitektur som title — én nøkkel per side og språk i `TEKSTER` (`meta.X.beskrivelse`, 9 par NO/EN), referert fra `<meta name="description" content="..." data-i18n-content="nøkkel">` i HTML-en via en ny `data-i18n-content`-attributt (samme mønster som `data-i18n-alt`/`-title`). Norsk kilde har den norske teksten statisk i `content`; generatoren overskriver den til engelsk for `web/en/`, akkurat som for `data-i18n`/`data-i18n-html`.
 
-**Canonical + hreflang**: alle 16 sider har `<link rel="canonical">` (selvrefererende, absolutt HTTPS) og tre `<link rel="alternate" hreflang="...">` (`no`, `en`, `x-default` → alltid norsk). De 8 norske kilde-sidene har disse fire lenkene satt statisk i `<head>` (satt for NO-konteksten); generatoren overskriver dem til riktige EN-URL-er for `web/en/`-speilingen — samme "generator overskriver, eier ikke teksten selv"-prinsipp som resten av transformasjonen. Verifisert gjensidig for alle 8 par (NO→EN, EN→NO, begge x-default→NO) og selvreferanse for alle 16 canonical-lenker.
+**Canonical + hreflang**: alle 18 sider har `<link rel="canonical">` (selvrefererende, absolutt HTTPS) og tre `<link rel="alternate" hreflang="...">` (`no`, `en`, `x-default` → alltid norsk). De 9 norske kilde-sidene har disse fire lenkene satt statisk i `<head>` (satt for NO-konteksten); generatoren overskriver dem til riktige EN-URL-er for `web/en/`-speilingen — samme "generator overskriver, eier ikke teksten selv"-prinsipp som resten av transformasjonen. Verifisert gjensidig for alle 9 par (NO→EN, EN→NO, begge x-default→NO) og selvreferanse for alle 18 canonical-lenker.
 
-**sitemap.xml + robots.txt**: `web/sitemap.xml` genereres deterministisk fra samme `PAGES`-liste som resten av generatoren (ingen egen sitemap-spesifikk liste) — 16 `<url>`-entries med gjensidige hreflang-alternates (xhtml-namespace), ingen `lastmod`/`priority`/`changefreq` (ville enten vært falsk eller ikke-deterministisk). `web/robots.txt` er en liten, håndskrevet statisk fil (`Allow: /`, pekt til sitemap) — ingen sider/mapper er blokkert.
+**sitemap.xml + robots.txt**: `web/sitemap.xml` genereres deterministisk fra samme `PAGES`-liste som resten av generatoren (ingen egen sitemap-spesifikk liste) — 18 `<url>`-entries med gjensidige hreflang-alternates (xhtml-namespace), ingen `lastmod`/`priority`/`changefreq` (ville enten vært falsk eller ikke-deterministisk). `web/robots.txt` er en liten, håndskrevet statisk fil (`Allow: /`, pekt til sitemap) — ingen sider/mapper er blokkert.
 
 **SEO-guard**: generatoren feiler hardt dersom en registrert side mangler `data-i18n-content` på description-taggen, `<link rel="canonical">`, eller noen av de tre hreflang-lenkene i NO-kilden — ingen stille fallback til en generisk description.
 
