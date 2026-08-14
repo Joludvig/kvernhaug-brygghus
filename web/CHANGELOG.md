@@ -4,6 +4,14 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 15B.2 — Dokument-språk som autoritativ kilde (2026-08-14)
+
+Forarbeid for en fremtidig pre-rendret `/en/`-struktur (Runde 15A-analysen), del 2. Tidligere leste `gjeldendeSprak()` `localStorage` (og falt tilbake til `navigator.language`-gjetting) FØR dokumentets egen `<html lang>` — og skrev deretter det resultatet rett tilbake til `<html lang>` ved hver sideinnlasting. Det betydde at en fremtidig pre-rendret engelsk side kunne blitt vist på norsk (eller omvendt) avhengig av en tidligere lagret preferanse eller browserspråk, uavhengig av hva URL-en/HTML-kilden faktisk sa — SEO-kritisk galt.
+
+Ny prioritet i `gjeldendeSprak()`: (1) dokumentets egen `<html lang>` (lest i en `DOKUMENT_SPRAK`-konstant helt i toppen av `i18n.js`, FØR noe annet kjører), (2) `localStorage` KUN som fallback for en side uten gyldig `lang`-attributt (skal aldri inntreffe i dag — alle 8 sider har korrekt `lang="no"` i kilden, bekreftet), (3) norsk default. `_nettleserSprakGjetning()` og all `navigator.language`-basert språkvalg er fjernet helt.
+
+`localStorage`-nøkkelen (`kvernhaug_web_sprak`) endrer rolle fra "autoritativ side-språk" til "husket preferanse for live-bytte" — `settSprak()` (dagens same-URL NO↔EN-veksling) er uendret og skriver fortsatt til den, men en FULL reload av en norsk kilde-URL lar alltid `lang="no"` fra kilden vinne igjen, uansett hva som sist var lagret eller vist. Verifisert med to prototype-tester (midlertidig `<html lang="en">`-kopi av `index.html` + nb-NO browserlocale + `localStorage="no"` → forblir engelsk; ekte `index.html` + en-US browserlocale + `localStorage="en"` → forblir norsk), samt full NO→EN→NO-regresjon på alle 8 sider (tekst/tittel/help-markup/modus-status/localStorage-isolasjon/`.kbhrecipe`-payload uendret). Ingen `/en/`-struktur, URL-strategi eller språkvelger-navigasjon innført ennå.
+
 ## Runde 15B.1 — Dybde-uavhengig data-fetch (2026-08-14)
 
 Forarbeid for en fremtidig pre-rendret `/en/`-struktur (Runde 15A-analysen). De 11 `fetch("data/*.json")`-kallene i `app.js`/`importer_page.js`/`utskrift_page.js` var dokument-relative og ville feilet fra en dypere katalog som `/en/` eller `/en/hjelp/`. Løst med `KBH_ROOT`, en global konstant i `i18n.js` beregnet fra scriptets egen `<script src>`-URL (`document.currentScript`) — ingen hardkodet domene, ingen språkspesifikk path, ingen duplisert `/en/data/`. Verifisert med midlertidige, script-genererte testsider på +1 og +2 katalogdybde; dagens rotside-oppførsel er uendret. Ingen URL-strategi, generator eller `/en/`-struktur er innført ennå — se README "Runtime data-paths".

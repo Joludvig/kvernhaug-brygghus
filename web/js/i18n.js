@@ -3,12 +3,22 @@
 // localStorage-oppskrifter og .kbhrecipe-formatet vet ingenting om dette
 // laget og skal aldri gjøre det (se web/README.md "Språk (NO/EN)").
 //
-// URL-strategi V1: client-side språkbytte på SAMME url (ingen /en/, ingen
-// query/hash-parameter) -- én statisk fil-struktur, ingen duplisert HTML å
-// vedlikeholde, kompatibelt med dagens enkle statiske hosting. Kjent
-// konsekvens: søkemotorer kan ikke indeksere en egen engelsk URL i V1 --
-// se web/README.md for anbefalt fremtidig løsning (statisk pre-render av
-// /en/ ved deploy, IKKE en runtime-avhengighet).
+// Runde 15B.2 -- dokumentets EGEN <html lang> (satt i HTML-kilden, og i en
+// fremtidig /en/ av pre-render-generatoren) er AUTORITATIV språkkilde.
+// localStorage er kun en husket preferanse for LIVE-bytte på samme side
+// (se settSprak() under), aldri en side-autoritet, og browserens språk
+// (navigator.language) brukes ikke lenger noe sted til å velge språk -- se
+// gjeldendeSprak(). Nødvendig fordi en fremtidig pre-rendret /en/-side
+// ellers kunne blitt vist på norsk (eller omvendt) avhengig av brukerens
+// tidligere valg eller browserspråk, uavhengig av hva URL-en faktisk
+// serverte -- SEO-kritisk galt.
+//
+// URL-strategi V1 (uendret denne runden): client-side språkbytte på SAMME
+// url (ingen /en/, ingen query/hash-parameter) -- én statisk fil-struktur,
+// ingen duplisert HTML å vedlikeholde, kompatibelt med dagens enkle statiske
+// hosting. Kjent konsekvens: søkemotorer kan ikke indeksere en egen engelsk
+// URL i V1 -- se web/README.md for anbefalt fremtidig løsning (statisk
+// pre-render av /en/ ved deploy, IKKE en runtime-avhengighet).
 
 const SPRAK_NOKKEL = "kvernhaug_web_sprak";
 const SPRAK_LISTE = ["no", "en"];
@@ -37,6 +47,14 @@ const KBH_ROOT = (() => {
   return new URL("../", scriptUrl).href;
 })();
 
+// Dokumentets EGEN <html lang>, lest FØR noe annet i denne filen får sjanse
+// til å endre den. Dette er kilden gjeldendeSprak() under prioriterer
+// først. Caches med det samme -- document.documentElement.lang endres
+// senere av settSprak() (live-bytte) og skal IKKE leses på nytt her, ellers
+// ville live-bytte sluttet å virke (gjeldendeSprak() ville alltid falt
+// tilbake til DOKUMENT_SPRAK i stedet for å beholde _gjeldendeSprak).
+const DOKUMENT_SPRAK = SPRAK_LISTE.includes(document.documentElement.lang) ? document.documentElement.lang : null;
+
 let _gjeldendeSprak = null;
 
 function _lagretSprak() {
@@ -48,23 +66,18 @@ function _lagretSprak() {
   }
 }
 
-// Ingen IP/geolocation, ingen serverlogikk -- kun navigator.language, og
-// KUN som et engangs-utgangspunkt når brukeren ikke har valgt noe selv.
-// Norsk er fortsatt fallback for alt annet (inkl. "nb"/"nn" og alt vi ikke
-// gjenkjenner). Brukeren kan alltid bytte manuelt via språkvelgeren.
-function _nettleserSprakGjetning() {
-  try {
-    const spraak = (navigator.language || navigator.userLanguage || "").toLowerCase();
-    if (spraak.startsWith("en")) return "en";
-  } catch {
-    // ignorer -- fall gjennom til norsk default
-  }
-  return SPRAK_DEFAULT;
-}
-
+// Prioritet (Runde 15B.2): (1) dokumentets egen <html lang> -- satt i
+// HTML-kilden, autoritativ, aldri overstyrt av en tidligere lagret
+// preferanse; (2) lagret preferanse i localStorage, KUN som fallback for en
+// side uten gyldig lang-attributt (skal i praksis aldri inntreffe -- alle
+// dagens sider har korrekt lang="no" i kilden); (3) norsk default.
+// navigator.language brukes ikke lenger noe sted til å velge språk --
+// fjernet fordi det tidligere kunne få en pre-rendret engelsk side til å
+// reverte til norsk (eller omvendt) etter at JS kjørte, uavhengig av hva
+// URL-en faktisk serverte. Se web/README.md "Språk (NO/EN)".
 function gjeldendeSprak() {
   if (_gjeldendeSprak) return _gjeldendeSprak;
-  _gjeldendeSprak = _lagretSprak() || _nettleserSprakGjetning();
+  _gjeldendeSprak = DOKUMENT_SPRAK || _lagretSprak() || SPRAK_DEFAULT;
   return _gjeldendeSprak;
 }
 
@@ -144,6 +157,11 @@ function _initSprakvelger() {
   _oppdaterSprakvelgerUI();
 }
 
+// Normaliserer <html lang> til den løste språkverdien -- en no-op på alle
+// dagens sider (som allerede har korrekt lang i kilden, altså
+// DOKUMENT_SPRAK === gjeldendeSprak() her), men gir et definert resultat
+// for en side uten gyldig lang-attributt (fallback-grenen i
+// gjeldendeSprak() over).
 document.documentElement.lang = gjeldendeSprak();
 
 document.addEventListener("DOMContentLoaded", () => {
