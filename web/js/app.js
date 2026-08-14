@@ -878,13 +878,20 @@ function lagreOppskrift() {
   alle[oppskrift.navn] = oppskrift;
   localStorage.setItem(LAGRINGSNOKKEL, JSON.stringify(alle));
   const status = document.getElementById("lagre-status");
-  status.textContent = t("oppskrift.lagretStatus", { navn: oppskrift.navn });
+  status.textContent = t("oppskrift.lagretStatus", { navn: visningsnavn(oppskrift.navn) });
 }
 
 // Gjenoppretter en oppskrift (fra aktiv kladd, en lagret oppskrift, eller en
 // importert JSON-fil) inn i skjemaet.
 function _gjenopprettOppskrift(oppskrift) {
-  document.getElementById("oppskrift-navn").value = oppskrift.navn || "";
+  // Runde 18A -- den interne sentinelen "Uten navn" (satt av samleOppskrift()
+  // når feltet står tomt) skal ALDRI settes som selve input-verdien -- det
+  // ville vist den norske sentinelteksten ordrett også i EN. Feltet skal i
+  // stedet stå tomt, akkurat som en fersk/blank oppskrift, slik at den
+  // allerede lokaliserte placeholder-teksten (builder.grunndata.
+  // olnavnPlaceholder) vises naturlig. Et faktisk brukerskrevet navn --
+  // inkl. om det tilfeldigvis er nøyaktig "Uten navn" -- settes uendret.
+  document.getElementById("oppskrift-navn").value = (oppskrift.navn && oppskrift.navn !== "Uten navn") ? oppskrift.navn : "";
   document.getElementById("brygger-navn").value = oppskrift.brygger || "";
   document.getElementById("bryggeri-navn").value = oppskrift.bryggeri || "";
   document.getElementById("oppskrift-notater").value = oppskrift.notater || "";

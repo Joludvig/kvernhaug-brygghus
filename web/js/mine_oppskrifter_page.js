@@ -65,7 +65,7 @@ function visListe() {
     info.className = "oppskrift-listeelement-info";
     const tittel = document.createElement("span");
     tittel.className = "oppskrift-listeelement-navn";
-    tittel.textContent = navn;
+    tittel.textContent = visningsnavn(navn);
     info.appendChild(tittel);
     if (oppskrift.lagretDato) {
       const dato = document.createElement("span");

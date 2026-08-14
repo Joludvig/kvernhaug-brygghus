@@ -95,6 +95,17 @@ function t(nokkel, params) {
   return tekst;
 }
 
+// Runde 18A -- delt display-helper: samleOppskrift() sin interne norske
+// sentinelverdi "Uten navn" (satt når navnefeltet står tomt, se app.js) er
+// en stabil datakontrakt og skal ALDRI endres eller oversettes i selve
+// recipe.navn. Denne funksjonen oversetter den KUN for visning, uansett
+// hvor et oppskriftsnavn rendres (recipe card, Mine oppskrifter, Utskrift,
+// lagre-status) -- et faktisk brukerskrevet navn (inkl. om det tilfeldigvis
+// er nøyaktig "Uten navn") går alltid uendret gjennom.
+function visningsnavn(navn) {
+  return navn === "Uten navn" ? t("identitet.utenNavn") : navn;
+}
+
 function applyI18n(root) {
   const scope = root || document;
   scope.querySelectorAll("[data-i18n]").forEach((el) => {

@@ -37,7 +37,7 @@ function _dokHeader(undertittel, oppskrift) {
   const brygger = [oppskrift.brygger, oppskrift.bryggeri].filter(Boolean).join(" · ");
   return `
     <div class="doc-header">
-      <h1>${escHtml(oppskrift.navn)}</h1>
+      <h1>${escHtml(visningsnavn(oppskrift.navn))}</h1>
       <p class="doc-undertittel">${escHtml(undertittel)}</p>
       ${brygger ? `<p class="doc-brygger">${escHtml(brygger)}</p>` : ""}
     </div>`;

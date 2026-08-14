@@ -52,7 +52,7 @@ function velgOppskrift(valgtVerdi) {
   sisteBeregning = beregnOppskrift(valgtOppskrift, maltData, humleData, gjaerData, bjcpStyles);
   if (oppdaterSmakshjul) oppdaterSmakshjul(sisteBeregning.flavorProfile);
 
-  document.getElementById("utskrift-info-navn").textContent = valgtOppskrift.navn || t("identitet.utenNavn");
+  document.getElementById("utskrift-info-navn").textContent = visningsnavn(valgtOppskrift.navn) || t("identitet.utenNavn");
   document.getElementById("utskrift-info-tall").textContent = t("utskrift.infoTall", {
     og: sisteBeregning.og.toFixed(3), fg: sisteBeregning.fg.toFixed(3),
     abv: sisteBeregning.abv.toFixed(1).replace(".", ","),
@@ -80,13 +80,13 @@ function byggValgliste() {
   if (kladd) {
     const opt = document.createElement("option");
     opt.value = "__aktiv__";
-    opt.textContent = t("utskrift.velgerAktivt", { navn: kladd.navn || t("identitet.utenNavn") });
+    opt.textContent = t("utskrift.velgerAktivt", { navn: visningsnavn(kladd.navn) || t("identitet.utenNavn") });
     select.appendChild(opt);
   }
   for (const navn of Object.keys(lagrede)) {
     const opt = document.createElement("option");
     opt.value = `lagret:${navn}`;
-    opt.textContent = navn;
+    opt.textContent = visningsnavn(navn);
     select.appendChild(opt);
   }
 
