@@ -122,19 +122,28 @@ function applyI18n(root) {
   });
 }
 
+// aria-current (ikke aria-pressed) fordi .sprak-knapp er ekte <a href>-
+// lenker siden Runde 15B.3, ikke toggle-knapper -- se _initSprakvelger().
 function _oppdaterSprakvelgerUI() {
   document.querySelectorAll(".sprak-knapp").forEach((knapp) => {
     const aktiv = knapp.dataset.sprak === gjeldendeSprak();
     knapp.classList.toggle("aktiv", aktiv);
-    knapp.setAttribute("aria-pressed", String(aktiv));
+    if (aktiv) {
+      knapp.setAttribute("aria-current", "page");
+    } else {
+      knapp.removeAttribute("aria-current");
+    }
   });
 }
 
-// Bytter UI-tekst direkte i gjeldende DOM -- ingen reload, ingen tap av
-// arbeid (pkt. 25). Sider med egne dynamiske visninger (byggerens
-// resultater, Mine oppskrifter sin liste, stilanalyse osv.) lytter selv på
-// "kvernhaug:sprakendret" og gjør sin egen re-render -- i18n.js vet
-// bevisst ingenting om sidespesifikk state.
+// Bytter UI-tekst direkte i gjeldende DOM UTEN navigasjon -- beholdt som
+// offentlig API (Runde 14) for evt. fremtidig/programmatisk bruk og fordi
+// applyI18n()/gjeldendeSprak()/kvernhaug:sprakendret fortsatt er i aktiv
+// bruk (dynamiske JS-strenger, re-render ved language-relevante hendelser).
+// IKKE lenger koblet til språkvelgeren i UI-et -- se _initSprakvelger().
+// Siden Runde 15B.3 er normal språkbytte-kontrakt URL-navigasjon til
+// tilsvarende side under /en/ (ekte pre-rendret engelsk HTML, crawlbar uten
+// JS) -- settSprak() ville uansett bli overskrevet av neste sideinnlasting.
 function settSprak(kode) {
   if (!SPRAK_LISTE.includes(kode) || kode === gjeldendeSprak()) return;
   _gjeldendeSprak = kode;
@@ -150,9 +159,22 @@ function settSprak(kode) {
   window.dispatchEvent(new CustomEvent("kvernhaug:sprakendret", { detail: { sprak: kode } }));
 }
 
+// Runde 15B.3 -- .sprak-knapp er ekte <a href>-lenker til søsteren under
+// /en/ (satt statisk i HTML-kilden/av generatoren, mekanisk speilet
+// katalogstruktur -- se scripts/generate_web_i18n_pages.py). Ingen JS
+// trengs for selve navigasjonen. Eneste nødvendige runtime-logikk: bevare
+// en ev. nåværende location.hash (f.eks. #steg-7 på en hjelpeside) ved
+// klikk, siden en statisk href aldri kan vite hvilket anker brukeren
+// faktisk står på. Ingen query-parametre i dagens app, men bevares gratis
+// av samme mekanisme dersom det skulle dukke opp.
 function _initSprakvelger() {
-  document.querySelectorAll(".sprak-knapp").forEach((knapp) => {
-    knapp.addEventListener("click", () => settSprak(knapp.dataset.sprak));
+  document.querySelectorAll(".sprak-knapp[href]").forEach((lenke) => {
+    lenke.addEventListener("click", () => {
+      if (location.hash || location.search) {
+        const base = lenke.getAttribute("href").split("#")[0].split("?")[0];
+        lenke.href = base + location.search + location.hash;
+      }
+    });
   });
   _oppdaterSprakvelgerUI();
 }

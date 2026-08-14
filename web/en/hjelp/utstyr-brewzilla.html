@@ -1,0 +1,142 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py -- IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/utstyr-brewzilla.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!--
+  MAL FOR UTSTYRSSPESIFIKKE GUIDER
+  Denne filen er både den første utstyrsguiden (BrewZilla) OG den uformelle
+  malen for fremtidige guider (Grainfather, andre alt-i-ett-systemer): kopier
+  strukturen til en ny fil, f.eks. utstyr-grainfather.html, og legg til en
+  lenke i .hjelp-side-nav på alle sider.
+
+  PROVENIENS-PRINSIPP FOR TALL/PÅSTANDER (viktig -- se kontroll 2026-08-10):
+  Tall fra vår egen kodebase (modules/equipment.py m.fl.) er IKKE automatisk
+  offisielle produsentspesifikasjoner. Merk hver konkret verdi tydelig som
+  én av: (A) faktisk produktspesifikasjon, (B) Kvernhaug sin standardverdi
+  for beregning/utstyrsprofil, (C) generell bryggeforutsetning (ikke
+  utstyrsspesifikk), (D) praktisk Kvernhaug-anbefaling, eller
+  (E) ikke sikkert verifisert -- bruk .hjelp-uverifisert for E.
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Equipment: BrewZilla — Kvernhaug Brygghus</title>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpBrewzilla.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/utstyr-brewzilla.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utstyr-brewzilla.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavUtstyr">🛠️ Equipment: BrewZilla</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/utstyr-brewzilla.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utstyr-brewzilla.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/utstyr-brewzilla.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utstyr-brewzilla.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a class="aktiv" data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.brewzilla.toc.tekniske" href="#brewzilla-tekniske-data">Technical Specs</a>
+<a data-i18n="hjelp.brewzilla.toc.altiett" href="#brewzilla-alt-i-ett">All-in-One Principle</a>
+<a data-i18n="hjelp.brewzilla.toc.ikkeVerifisert" href="#brewzilla-ikke-verifisert">Not Yet Verified</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.brewzilla.intro">This is a <strong>reference guide</strong> for the BrewZilla — the first of several planned equipment-specific guides — not an assumption that you own one yourself. Kvernhaug Brygghus has one internal equipment profile calibrated against the BrewZilla 35L Gen 4.1 (see the <a href="../index.html">Recipe Builder</a>), and this page documents exactly which numbers in that profile come from the product itself, and which are Kvernhaug's own calculation choices. If you use other equipment, the general brewing assumptions further down still apply — they aren't BrewZilla-specific. See also <a href="bryggemetoder.html#alt-i-ett">all-in-one brewing system</a> for the general method the BrewZilla is one example of.</p>
+<article class="hjelp-artikkel" id="brewzilla-tekniske-data">
+<h3 data-i18n="hjelp.brewzilla.kjelekapasitet.tittel">Kettle Capacity</h3>
+<p data-i18n-html="hjelp.brewzilla.kjelekapasitet.tekst">The BrewZilla 35L Gen 4.1 has a nominal kettle capacity of <strong>35 litres</strong> — this is right there in the product name, and is the only value on this page that is actually a product property and not something Kvernhaug Brygghus itself chose or calculated.</p>
+<h3 data-i18n="hjelp.brewzilla.maksPreboil.tittel">Kvernhaug's Practical Recommendation: Max Pre-Boil Volume</h3>
+<p data-i18n-html="hjelp.brewzilla.maksPreboil.tekst">The Kvernhaug Brygghus app warns when the calculated pre-boil volume exceeds roughly <strong>30 litres</strong> — a practical safety margin under the kettle's 35-litre capacity, to avoid boil-over during a vigorous boil. This is <strong>Kvernhaug's own practical limit</strong>, not a number taken from an official manufacturer specification.</p>
+<h3 data-i18n="hjelp.brewzilla.standardverdier.tittel">Kvernhaug's Calculation Defaults (Equipment Profile)</h3>
+<p data-i18n-html="hjelp.brewzilla.standardverdier.tekst">These two numbers are the default values the Kvernhaug Brygghus app uses in its own BrewZilla equipment profile to calculate water amounts and volume. They are <strong>the app's own calculation assumptions</strong>, not confirmed against an official manufacturer specification:</p>
+<table class="hjelp-tabell">
+<thead><tr><th data-i18n="hjelp.brewzilla.tabell.egenskap">Property</th><th data-i18n="hjelp.brewzilla.tabell.kvernhaugStandard">Kvernhaug Calculation Default</th></tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.brewzilla.fordampning">Boil-off Rate</td><td data-i18n="hjelp.brewzilla.fordampningVerdi">4.0 L/hour</td></tr>
+<tr><td data-i18n="hjelp.brewzilla.deadspace">Dead Space (Residual Volume)</td><td data-i18n="hjelp.brewzilla.deadspaceVerdi">2.0 L</td></tr>
+</tbody>
+</table>
+<p data-i18n="hjelp.brewzilla.standardverdier.tekst2">Actual boil-off varies with boil intensity, lid on/off, power, and ambient conditions — feel free to adjust the number based on your own measured brews on your specific setup. Dead space is likewise not checked against the manufacturer's own documentation.</p>
+<h3 data-i18n="hjelp.brewzilla.generelle.tittel">General Brewing Assumptions (Not BrewZilla-Specific)</h3>
+<p data-i18n-html="hjelp.brewzilla.generelle.tekst">These two numbers live in the same equipment profile in the code, but are really <strong>general brewing assumptions</strong> that apply regardless of which equipment you use — not properties of the BrewZilla:</p>
+<table class="hjelp-tabell">
+<thead><tr><th data-i18n="hjelp.brewzilla.tabell.egenskap">Property</th><th data-i18n="hjelp.brewzilla.tabell.kvernhaugStandard">Kvernhaug Calculation Default</th></tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.brewzilla.meskeforhold">Mash Ratio</td><td data-i18n="hjelp.brewzilla.meskeforholdVerdi">3.2 L/kg</td></tr>
+<tr><td data-i18n="hjelp.brewzilla.kornabsorpsjon">Grain Absorption</td><td data-i18n="hjelp.brewzilla.kornabsorpsjonVerdi">1.0 L/kg</td></tr>
+</tbody>
+</table>
+<p data-i18n="hjelp.brewzilla.generelle.tekst2">Mash ratio is a process choice you can adjust yourself, and grain absorption is a common calculation assumption in homebrewing generally — neither is a fixed BrewZilla specification.</p>
+<p class="hjelp-kildeliste" data-i18n-html="hjelp.brewzilla.kildeliste">Source for all the numbers above: the Kvernhaug Brygghus app's <code>modules/equipment.py</code> (equipment profile default values) and the brew day calculation's 30 L warning in <code>modules/brewday_calc.py</code>/<code>ui/brewday_panel.py</code>. None of the numbers have been checked against an official BrewZilla product specification.</p>
+</article>
+<article class="hjelp-artikkel" id="brewzilla-alt-i-ett">
+<h3 data-i18n="hjelp.brewzilla.altiett.tittel">The All-in-One Principle</h3>
+<p data-i18n-html="hjelp.brewzilla.altiett.tekst">The BrewZilla mashes and boils in the same vessel, with electric temperature control and a built-in pump/filter for recirculation — see <a href="bryggemetoder.html#alt-i-ett">all-in-one brewing system</a> for how this simplifies the brew day compared to separate vessels.</p>
+</article>
+<div class="hjelp-uverifisert" id="brewzilla-ikke-verifisert">
+<strong data-i18n="hjelp.brewzilla.ikkeVerifisert.tittel">Not Yet Verified</strong> — <span data-i18n="hjelp.brewzilla.ikkeVerifisert.intro">the following has deliberately NOT been filled in with made-up information, and is waiting for actual verification against a concrete BrewZilla setup:</span>
+<ul>
+<li data-i18n="hjelp.brewzilla.ikkeVerifisert.li1">Concrete control panel / temperature programming steps</li>
+<li data-i18n="hjelp.brewzilla.ikkeVerifisert.li2">Recommended cleaning and maintenance routine</li>
+<li data-i18n="hjelp.brewzilla.ikkeVerifisert.li3">Known quirks or common sources of error specific to the BrewZilla</li>
+<li data-i18n="hjelp.brewzilla.ikkeVerifisert.li4">Pump/recirculation settings for optimal mashing</li>
+<li data-i18n="hjelp.brewzilla.ikkeVerifisert.li5">Model-specific differences (Gen 3 / Gen 4 / Gen 4.1, etc.)</li>
+</ul>
+<p data-i18n="hjelp.brewzilla.ikkeVerifisert.avslutning">This section will be filled in once the information is verified — either through actual use, or against the manufacturer's own documentation.</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.brewzilla.roadmap">Equipment choices in the recipe builder itself (kettle volume, boil-off, etc.) aren't connected to this guide yet — that's a separate, larger feature planned further out (see Equipment Profile in the roadmap).</p>
+</main>
+</div>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

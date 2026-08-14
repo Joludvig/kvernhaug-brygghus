@@ -1,0 +1,122 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py -- IKKE REDIGER MANUELT.
+  Kilde: web/importer.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kvernhaug Brygghus — Import Recipe</title>
+<link href="../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.importer.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../importer.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="importer.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="meta.importer.sidetittel">📥 Import Recipe</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav no-print" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../importer.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="importer.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../importer.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="importer.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<a class="sidemeny-lenke" href="index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke aktiv" href="importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke" href="hjelp/index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<main>
+<section class="panel">
+<h2 data-i18n="importer.tittel">Import Recipe</h2>
+<p class="hjelpetekst" data-i18n="importer.intro">Build the recipe from a file or from pasted text — either way sends you on to the Recipe Builder with the fields pre-filled.</p>
+<div aria-label="Choose import method" class="modus-bryter" data-i18n-aria-label="importer.velgMetodeAriaLabel" role="group">
+<button aria-pressed="true" class="modus-knapp" data-i18n="importer.modusFil" id="import-modus-fil" type="button">📄 Open file</button>
+<button aria-pressed="false" class="modus-knapp" data-i18n="importer.modusTekst" id="import-modus-tekst" type="button">✏️ Paste text</button>
+</div>
+</section>
+<section class="panel importer-fane-panel" id="import-fane-fil">
+<h2 data-i18n="importer.filTittel">Open recipe file</h2>
+<p class="hjelpetekst" data-i18n="importer.filHjelpetekst">Have a .kbhrecipe file — from this page, from the Recipe Builder's "Save recipe file", or from somewhere else? Choose it here and it opens directly in the builder. Older, raw recipe JSON is still supported.</p>
+<div class="import-dropzone">
+<div class="knapperad">
+<button data-i18n="importer.filVelgKnapp" id="importer-fil-knapp" type="button">⬆️ Choose a .kbhrecipe file</button>
+</div>
+<input accept=".kbhrecipe,.json,application/json" hidden="" id="importer-fil" type="file"/>
+</div>
+<p aria-live="polite" class="hjelpetekst" id="importer-fil-status"></p>
+</section>
+<section class="panel importer-fane-panel" hidden="" id="import-fane-tekst">
+<h2 data-i18n="importer.tekstTittel">Paste recipe text</h2>
+<div class="import-format-hjelp">
+<strong data-i18n="importer.formatKgLabel">Kg format:</strong> <code>5 kg Maris Otter</code> · <code>300 g CaraMunich</code><br/>
+<strong data-i18n="importer.formatPctLabel">Percentage format (requires total malt amount):</strong> <code>Total malt: 6 kg</code> · <code>90% Maris Otter</code><br/>
+<strong data-i18n="importer.formatHumleLabel">Hops (must have a boil time):</strong> <code>20 g Magnum 60 min</code><br/>
+<strong data-i18n="importer.formatGjaerLabel">Yeast:</strong> <code>Wyeast 1318 London Ale III</code>
+</div>
+<textarea data-i18n-placeholder="importer.tekstPlaceholder" id="import-tekst-input" placeholder="Paste the recipe here …" rows="8"></textarea>
+<div class="knapperad">
+<button data-i18n="importer.analyserKnapp" id="import-analyser-knapp" type="button">🔍 Analyze</button>
+</div>
+<div hidden="" id="import-forhandsvisning">
+<p class="import-tellinger" id="import-tellinger"></p>
+<div id="import-advarsler"></div>
+<p class="import-resultat-tittel" data-i18n="importer.matchetTittel">Matched</p>
+<ul class="import-resultat-liste" id="import-treff-liste"></ul>
+<div hidden="" id="import-uklart-seksjon">
+<p class="import-resultat-tittel" data-i18n="importer.ikkeGjenkjentTittel">Not recognized</p>
+<ul class="import-resultat-liste" id="import-uklart-liste"></ul>
+</div>
+<div class="knapperad">
+<button data-i18n="importer.bekreftKnapp" id="import-bekreft-knapp" type="button">✅ Add to recipe builder</button>
+</div>
+</div>
+</section>
+</main>
+<footer class="no-print">
+<p data-i18n="footer.enkel">Data is stored only locally in this browser (localStorage) — nothing is sent to any server.</p>
+</footer>
+<script src="../js/i18n.js"></script>
+<script src="../js/chrome.js"></script>
+<script src="../js/recipe_engine.js"></script>
+<script src="../js/kbhrecipe.js"></script>
+<script src="../js/recipe_importer.js"></script>
+<script src="../js/importer_page.js"></script>
+</body>
+</html>

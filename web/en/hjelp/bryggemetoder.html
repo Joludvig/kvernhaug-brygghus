@@ -1,0 +1,100 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py -- IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/bryggemetoder.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brewing Methods — Kvernhaug Brygghus</title>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpBryggemetoder.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/bryggemetoder.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="bryggemetoder.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Brewing Methods</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/bryggemetoder.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="bryggemetoder.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/bryggemetoder.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="bryggemetoder.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a class="aktiv" data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.metoder.toc.biab" href="#biab">BIAB</a>
+<a data-i18n="hjelp.metoder.toc.allgrain" href="#all-grain">Traditional All-Grain</a>
+<a data-i18n="hjelp.metoder.toc.altiett" href="#alt-i-ett">All-in-One System</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.metoder.intro">All the methods below broadly follow the same <a href="bryggedag.html">brew day</a> — the difference lies in how mashing and sparging are done in practice. This round covers the three most common for homebrewers; more can be added later without changing the page's structure.</p>
+<div class="hjelp-metode-kort" id="biab">
+<h3 data-i18n="hjelp.metoder.biab.tittel">BIAB — Brew In A Bag</h3>
+<p data-i18n-html="hjelp.metoder.biab.tekst">The entire grain bill mashes directly in a large bag in the boil kettle — no separate mash tun. After mashing, the bag is lifted out and drained, often <strong>without</strong> a separate sparge.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.metoder.biab.hvorfor"><strong>How it affects the brew day:</strong> Steps 3–6 in the <a href="bryggedag.html">brew day guide</a> (add malt → mash → mash-out → sparge) simplify to "mash in the bag, lift out, drain" — <a href="index.html#def-skylling">sparging</a> is often skipped entirely, or done as a simple dunk sparge. Requires less equipment than traditional all-grain, but places slightly higher demands on a good crush for good yield since it isn't sparged as thoroughly.</p>
+</div>
+<div class="hjelp-metode-kort" id="all-grain">
+<h3 data-i18n="hjelp.metoder.allgrain.tittel">Traditional All-Grain (Separate Mash Tun)</h3>
+<p data-i18n-html="hjelp.metoder.allgrain.tekst">Mashing takes place in a dedicated mash tun (often with a false bottom/filter), and the wort is drained into the boil kettle — the grain bed is then sparged separately with hot water to extract more sugar.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.metoder.allgrain.hvorfor"><strong>How it affects the brew day:</strong> All 15 steps in the <a href="bryggedag.html">brew day guide</a> are carried out as described, including a dedicated, more thorough <a href="index.html#def-skylling">sparge</a> step. Requires more equipment (a separate mash tun) than BIAB, but often gives somewhat better control over the sparging process and batch size.</p>
+</div>
+<div class="hjelp-metode-kort" id="alt-i-ett">
+<h3 data-i18n="hjelp.metoder.altiett.tittel">All-in-One Brewing System</h3>
+<p data-i18n-html="hjelp.metoder.altiett.tekst">A single electric vessel handles both mashing and boiling, often with a built-in pump for recirculation and/or sparging. See <a href="utstyr-brewzilla.html">BrewZilla</a> for a concrete example.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.metoder.altiett.hvorfor"><strong>How it affects the brew day:</strong> Same steps as traditional all-grain, but mashing and boiling happen in the same vessel — you skip moving wort between two vessels between steps 4 and 7 in the <a href="bryggedag.html">brew day guide</a>. Built-in temperature control makes steps 2 and 4 (heating / holding temperature) easier to hit precisely than with a manual gas burner.</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.metoder.avslutning">More methods (e.g. decoction, parti-gyle, no-sparge) can be added as their own cards here later, without changing the rest of the page.</p>
+</main>
+</div>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py -- IKKE REDIGER MANUELT.
+  Kilde: web/mine-oppskrifter.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kvernhaug Brygghus — My Recipes</title>
+<link href="../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.mineOppskrifter.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../mine-oppskrifter.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="mine-oppskrifter.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="meta.mineOppskrifter.sidetittel">📂 My Recipes</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav no-print" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../mine-oppskrifter.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="mine-oppskrifter.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe no-print"></div>
+<nav aria-label="Main navigation" class="sidemeny no-print" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../mine-oppskrifter.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="mine-oppskrifter.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<a class="sidemeny-lenke" href="index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke aktiv" href="mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke" href="hjelp/index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<main>
+<section class="panel">
+<h2 data-i18n="mineOppskrifter.tittel">My saved recipes</h2>
+<p class="hjelpetekst" data-i18n="mineOppskrifter.hjelpetekst">Stored only in this browser (localStorage) — nothing is sent to any server.</p>
+<ul id="oppskrift-liste"></ul>
+<p class="hjelpetekst" data-i18n="mineOppskrifter.ingenOppskrifter" id="ingen-oppskrifter-melding">No saved recipes yet. Build a recipe and press "Save recipe" in the Recipe Builder.</p>
+</section>
+<section class="panel">
+<h2 data-i18n="mineOppskrifter.importerTittel">Importing a recipe?</h2>
+<p class="hjelpetekst"><span data-i18n="mineOppskrifter.importerHjelpetekst">File and text import have moved to their own page in the menu:</span> <a data-i18n="nav.importer" href="importer.html">📥 Import Recipe</a>.</p>
+</section>
+</main>
+<footer class="no-print">
+<p data-i18n="footer.enkel">Data is stored only locally in this browser (localStorage) — nothing is sent to any server.</p>
+</footer>
+<script src="../js/i18n.js"></script>
+<script src="../js/chrome.js"></script>
+<script src="../js/kbhrecipe.js"></script>
+<script src="../js/mine_oppskrifter_page.js"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py -- IKKE REDIGER MANUELT.
+  Kilde: web/utskrift.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kvernhaug Brygghus — Print</title>
+<link href="../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.utskrift.tittel">
+<header class="hero no-print">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="meta.utskrift.sidetittel">🖨️ Print</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav no-print" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe no-print"></div>
+<nav aria-label="Main navigation" class="sidemeny no-print" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<a class="sidemeny-lenke" href="index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke aktiv" href="utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke" href="hjelp/index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<main class="no-print">
+<section class="panel" hidden="" id="utskrift-tom-tilstand">
+<h2 data-i18n="utskrift.tomTittel">Print</h2>
+<div class="utskrift-tom-tilstand">
+<p data-i18n="utskrift.tomTekst1">You don't have a recipe to print yet.</p>
+<p class="hjelpetekst" data-i18n-html="utskrift.tomTekst2">Go to the <a href="index.html">Recipe Builder</a> and make one, or open a saved recipe under <a href="mine-oppskrifter.html">My Recipes</a>.</p>
+</div>
+</section>
+<div id="utskrift-innhold">
+<section class="panel">
+<h2 data-i18n="utskrift.velgOppskriftTittel">Choose recipe</h2>
+<div class="felt-rad">
+<label data-i18n="utskrift.oppskriftLabel" for="utskrift-oppskrift-velger">Recipe</label>
+<select id="utskrift-oppskrift-velger"></select>
+</div>
+<div class="utskrift-info">
+<div class="utskrift-info-navn" id="utskrift-info-navn"></div>
+<div class="utskrift-info-tall" id="utskrift-info-tall"></div>
+</div>
+</section>
+<section class="panel">
+<h2 data-i18n="utskrift.skrivUtTittel">Print</h2>
+<p class="hjelpetekst" data-i18n="utskrift.skrivUtHjelpetekst">Each sheet is its own print-friendly page — not just a printout of this screen.</p>
+<div class="knapperad">
+<button data-i18n="utskrift.knappOppskriftsark" id="print-oppskriftsark-knapp" type="button">🖨️ Recipe Sheet</button>
+<button data-i18n="utskrift.knappHandleliste" id="print-handleliste-knapp" type="button">🖨️ Shopping List</button>
+<button data-i18n="utskrift.knappBryggedagsark" id="print-bryggedagsark-knapp" type="button">🖨️ Brew Day Sheet</button>
+<button data-i18n="utskrift.knappBryggelogg" id="print-bryggelogg-knapp" type="button">🖨️ Brew Log</button>
+</div>
+</section>
+</div>
+</main>
+<div hidden="" id="smakshjul-container"></div>
+<footer class="no-print">
+<p data-i18n="footer.enkel">Data is stored only locally in this browser (localStorage) — nothing is sent to any server.</p>
+</footer>
+<div class="utskrift-dokument" id="utskrift-oppskriftsark"></div>
+<div class="utskrift-dokument" id="utskrift-handleliste"></div>
+<div class="utskrift-dokument" id="utskrift-bryggedagsark"></div>
+<div class="utskrift-dokument" id="utskrift-bryggelogg"></div>
+<script src="../js/i18n.js"></script>
+<script src="../js/chrome.js"></script>
+<script src="../js/calc.js"></script>
+<script src="../js/flavor.js"></script>
+<script src="../js/radar.js"></script>
+<script src="../js/style.js"></script>
+<script src="../js/veiledning.js"></script>
+<script src="../js/recipe_engine.js"></script>
+<script src="../js/print.js"></script>
+<script src="../js/utskrift_page.js"></script>
+</body>
+</html>

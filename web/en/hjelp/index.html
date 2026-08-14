@@ -1,0 +1,316 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py -- IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/index.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kvernhaug Brygghus — Help &amp; Brewing Handbook</title>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelp.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidetittel">📖 Help &amp; Brewing Handbook</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="index.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a class="aktiv" data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.idx.toc.a" href="#kom-i-gang">A. Getting Started</a>
+<a data-i18n="hjelp.idx.toc.b" href="#forsta-oppskriften">B. Understanding the Recipe</a>
+<a data-i18n="hjelp.idx.toc.c" href="#ingredienser">C. Ingredients</a>
+<a data-i18n="hjelp.idx.toc.d" href="#bryggeprosess">D. Brewing Process</a>
+<a data-i18n-html="hjelp.idx.toc.e" href="#faq">E. Questions &amp; Answers</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.idx.intro">A reference for anyone building a recipe in Kvernhaug Brygghus. Everything here is written to answer two questions: what does this mean, and why should I care? Use the contents menu to jump around, or scroll down like an ordinary handbook.</p>
+<div class="hjelp-seksjon" id="kom-i-gang">
+<h2 data-i18n="hjelp.idx.secA.tittel">A. Getting Started</h2>
+<article class="hjelp-artikkel" id="forste-oppskrift">
+<h3 data-i18n="hjelp.idx.forsteOppskrift.tittel">Build Your First Beer Recipe</h3>
+<p data-i18n-html="hjelp.idx.forsteOppskrift.tekst">Start in <strong>Basics</strong> with a beer name and batch volume (how many litres you're brewing). Then add at least one malt under <strong>Malt</strong> — the search field filters as you type. Do the same under <strong>Hops</strong> and pick a <strong>Yeast</strong>. The numbers in <strong>Results</strong> (OG/FG/ABV/IBU/EBC) and the flavor wheel update automatically with every choice — there's no "calculate" button to press.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.forsteOppskrift.hvorfor"><strong>Why this matters:</strong> There's no "wrong" starting point. Experiment, watch how the numbers change, and adjust until they match the style you're going for — or just whatever sounds good to you.</p>
+</article>
+<article class="hjelp-artikkel" id="laerling-mester-intro">
+<h3 data-i18n="hjelp.idx.laerlingMester.tittel">Brewing Apprentice and Brewing Master</h3>
+<p data-i18n-html="hjelp.idx.laerlingMester.tekst">The two buttons at the top switch between two views of the <em>same</em> recipe. <strong>Brewing Apprentice</strong> hides technical detail and shows more guidance — good when you're new. <strong>Brewing Master</strong> shows everything: BU:GU, nearby styles, full style analysis. No data disappears when you switch — only how much shows on screen changes.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.laerlingMester.hvorfor"><strong>Why this matters:</strong> You can switch back and forth as often as you like, at any point in the process. Many people start in Brewing Apprentice and move to Brewing Master as the terms become familiar.</p>
+</article>
+<article class="hjelp-artikkel" id="lagre-oppskrift">
+<h3 data-i18n="hjelp.idx.lagreOppskrift.tittel">Save a Recipe</h3>
+<p data-i18n-html="hjelp.idx.lagreOppskrift.tekst">"💾 Save recipe" saves the recipe <strong>in this browser</strong> (localStorage) under the name you gave it. It shows up under "My saved recipes" further down, and you can reload it any time — even after closing the tab.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.lagreOppskrift.hvorfor"><strong>Why this matters:</strong> Nothing is sent to any server, so a recipe saved this way only exists on this device. To back it up or move it to another computer or phone, use "📄 Save recipe file (.kbhrecipe)" instead — that's the normal, portable way to back up and share a recipe. Raw JSON export is still available under "Advanced" for legacy files or further processing, but .kbhrecipe is the recommended format for everyday use.</p>
+</article>
+<article class="hjelp-artikkel" id="aapne-importere">
+<h3 data-i18n="hjelp.idx.aapneImportere.tittel">Open or Import a Recipe</h3>
+<p data-i18n-html="hjelp.idx.aapneImportere.tekst">Click "Open in builder" on a saved recipe under "My recipes" to load it instantly. Have a .kbhrecipe file (or an older, raw recipe JSON)? Use "📂 Open recipe file" in the builder, or the "Open file" option on the "📥 Import Recipe" page — both open it directly, no re-typing needed. Have a recipe as plain pasted text instead (e.g. "5 kg Maris Otter", "20 g Magnum 60 min")? Use "📥 Import Recipe" and its "Paste text" mode — custom ingredients included.</p>
+</article>
+<article class="hjelp-artikkel" id="skrive-ut-intro">
+<h3 data-i18n="hjelp.idx.skriveUt.tittel">Printing</h3>
+<p data-i18n-html="hjelp.idx.skriveUt.tekst">Under "Print" you'll find four separate sheets: <strong>Recipe sheet</strong> (for sharing the recipe with others), <strong>Shopping list</strong> (ingredients only), <strong>Brew day sheet</strong> (a worksheet for the brew day itself), and <strong>Brew log</strong> (a blank form for actual results, to fill in by hand). Each sheet is its own clean page — not just a screenshot printout.</p>
+</article>
+</div>
+<div class="hjelp-seksjon" id="forsta-oppskriften">
+<h2 data-i18n="hjelp.idx.secB.tittel">B. Understanding the Recipe</h2>
+<article class="hjelp-artikkel" id="og">
+<h3 data-i18n="hjelp.idx.og.tittel">OG — Original Gravity</h3>
+<p data-i18n-html="hjelp.idx.og.tekst">OG measures the amount of sugar dissolved in the wort <em>before</em> fermentation starts — typically a number like 1.050. The higher the OG, the more sugar the yeast has to work with.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.og.hvorfor"><strong>Why this matters:</strong> OG is the starting point for both alcohol strength and body. Increase the malt amount (or your brewhouse efficiency) and OG rises. Reduce malt or add more water and it drops. A light, easy-drinking beer typically sits around 1.035–1.045; a strong beer can go above 1.070.</p>
+</article>
+<article class="hjelp-artikkel" id="fg">
+<h3 data-i18n="hjelp.idx.fg.tittel">FG — Final Gravity</h3>
+<p data-i18n-html="hjelp.idx.fg.tekst">FG measures the sugar <em>left over</em> once fermentation is finished. The difference between OG and FG tells you how much sugar was actually converted to alcohol.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.fg.hvorfor"><strong>Why this matters:</strong> A low FG gives a drier beer, a high FG gives more residual sweetness and mouthfeel. In this recipe builder, FG is driven by the yeast's expected <a href="#utgjaering">attenuation</a> — pick a yeast with higher attenuation and FG drops. The actual FG you measure after brewing can differ slightly from the calculated number — see the <a href="#faq-faktisk-fg">FAQ</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="abv">
+<h3 data-i18n="hjelp.idx.abv.tittel">ABV — Alcohol Strength</h3>
+<p data-i18n-html="hjelp.idx.abv.tekst">ABV (Alcohol By Volume) is the alcohol percentage in the finished beer, calculated from the difference between OG and FG.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.abv.hvorfor"><strong>Why this matters:</strong> To get a stronger beer, either OG needs to go up (more malt) or FG needs to come down (a higher-attenuation yeast) — or both. A session beer usually sits under 4.5%, a typical pale ale around 5–6%, an imperial stout can pass 9–10%.</p>
+</article>
+<article class="hjelp-artikkel" id="ibu">
+<h3 data-i18n="hjelp.idx.ibu.tittel">IBU — Bitterness</h3>
+<p data-i18n-html="hjelp.idx.ibu.tekst">IBU (International Bitterness Units) measures hop bitterness. Higher numbers mean a more bitter beer. Most beer styles fall somewhere between 10 and 70 IBU.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.ibu.hvorfor"><strong>Why this matters:</strong> IBU is driven by hop amount, alpha acid, and boil time — see <a href="#alfasyre">alpha acid</a>. Hops added early in the boil (60 min) give the most bitterness; hops added late (0–10 min) give more aroma and flavor but little bitterness. Double the amount of an early hop addition and IBU rises sharply; move that same hop to the end of the boil and IBU drops sharply even though the amount is the same.</p>
+</article>
+<article class="hjelp-artikkel" id="ebc">
+<h3 data-i18n="hjelp.idx.ebc.tittel">EBC — Color</h3>
+<p data-i18n-html="hjelp.idx.ebc.tekst">EBC measures the beer's color, from pale gold (low numbers, under 10) through copper and amber to almost black (over 80).</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.ebc.hvorfor"><strong>Why this matters:</strong> Color comes almost entirely from the malt — darker malt (like roasted malt or crystal malt) gives a far bigger EBC increase per kilo than pale base malt. Add just 200 g of roasted malt to an otherwise pale recipe and EBC can jump noticeably even though the amount is small.</p>
+</article>
+<article class="hjelp-artikkel" id="bu-gu">
+<h3 data-i18n="hjelp.idx.buGu.tittel">BU:GU — Bitterness vs. Body</h3>
+<p data-i18n-html="hjelp.idx.buGu.tekst">BU:GU (shown in Brewing Master) is the ratio of IBU to OG (scaled), and says something about the balance between bitterness and malt body. A low number means a malt-forward beer, a high number means a hop-forward beer.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.buGu.hvorfor"><strong>Why this matters:</strong> Two beers can have the same IBU but taste completely different depending on how much malt (OG) stands up to the bitterness. BU:GU is a quick check on whether the balance matches what you're aiming for.</p>
+</article>
+<article class="hjelp-artikkel" id="utgjaering">
+<h3 data-i18n="hjelp.idx.utgjaering.tittel">Attenuation</h3>
+<p data-i18n-html="hjelp.idx.utgjaering.tekst">Attenuation is how much of the available sugar the yeast manages to convert to alcohol, given as a percentage. A yeast with 75% attenuation "eats" 75% of the available sugar.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.utgjaering.hvorfor"><strong>Why this matters:</strong> Higher attenuation gives a lower <a href="#fg">FG</a> and therefore a drier beer with slightly higher <a href="#abv">ABV</a>, at the same OG. Pick a library yeast and attenuation fills in automatically — you can override it manually if you're using a custom yeast or know something specific about your particular strain.</p>
+</article>
+<article class="hjelp-artikkel" id="alfasyre">
+<h3 data-i18n="hjelp.idx.alfasyre.tittel">Alpha Acid</h3>
+<p data-i18n-html="hjelp.idx.alfasyre.tekst">Alpha acid (α-acid) is the percentage of bittering compounds in the hop. Higher alpha acid means more bitterness per gram of hops.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.alfasyre.hvorfor"><strong>Why this matters:</strong> The alpha acid content of a given hop variety normally varies somewhat from season to season and pack to pack — what's actually printed on <em>your</em> pack can differ from the library's typical value. Feel free to adjust the alpha field to match what's actually printed on your pack for a more precise IBU estimate; see the <a href="#faq-produsentdata">FAQ</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="effektivitet">
+<h3 data-i18n="hjelp.idx.effektivitet.tittel">Brewhouse Efficiency</h3>
+<p data-i18n-html="hjelp.idx.effektivitet.tekst">Efficiency is how much of the malt's sugar potential you actually get into the wort with your own equipment and technique — 75% is a common starting point, but it varies from brewery to brewery.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.effektivitet.hvorfor"><strong>Why this matters:</strong> Efficiency feeds directly into the <a href="#og">OG</a> calculation. Brewing Apprentice hides the field and uses 75% as an estimate, so you can get started without needing to know this first. In Brewing Master you can adjust it based on your own measured brews — see also the <a href="#faq-traff-ikke-og">FAQ</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="maltpotensial">
+<h3 data-i18n="hjelp.idx.maltpotensial.tittel">Malt Potential</h3>
+<p data-i18n-html="hjelp.idx.maltpotensial.tekst">Malt potential is how much sugar a given malt can contribute per kilo — the basis for the OG calculation. Different malt types have different potential; a pure base malt gives more than a specialty malt with lower fermentable content.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.maltpotensial.hvorfor"><strong>Why this matters:</strong> If you enter a custom malt, you need to supply an estimated potential yourself (the manufacturer's data sheet, if you have it, is the best source). Too high a number overestimates OG, too low underestimates it.</p>
+</article>
+<article class="hjelp-artikkel" id="smakshjulet">
+<h3 data-i18n="hjelp.idx.smakshjulet.tittel">The Flavor Wheel</h3>
+<p data-i18n-html="hjelp.idx.smakshjulet.tekst">The flavor wheel is a radar chart with 18 flavor axes, based on your malt, hop, and yeast choices. The further an axis stretches toward the edge, the more prominent that flavor is expected to be.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.smakshjulet.hvorfor"><strong>Why this matters:</strong> It's a quick, visual check on whether the recipe is actually pointing in the direction you intended — for example, whether a "citrus/tropical" axis really stands out when you've used plenty of Citra and Mosaic. The chart is an expectation based on the ingredient data, not a guarantee of how the actual beer will taste.</p>
+</article>
+<article class="hjelp-artikkel" id="stilmatching">
+<h3 data-i18n="hjelp.idx.stilmatching.tittel">Style Matching</h3>
+<p data-i18n-html="hjelp.idx.stilmatching.tekst">Style matching compares the recipe's numbers (OG/FG/ABV/IBU/EBC) and flavor profile against known beer styles in Kvernhaug Brygghus's own library, and shows which style the recipe resembles most — plus a few nearby alternatives.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.stilmatching.hvorfor"><strong>Why this matters:</strong> It's a guideline, not a verdict. See <a href="#stilgrenser">style ranges</a> and the <a href="#faq-feil-verdi">FAQ</a> for how to interpret it. The library covers 26 styles — this is <em>not</em> the entire official BJCP 2021 style guide (which has around 100 sub-styles).</p>
+</article>
+<article class="hjelp-artikkel" id="stilgrenser">
+<h3 data-i18n="hjelp.idx.stilgrenser.tittel">Style Ranges</h3>
+<p data-i18n-html="hjelp.idx.stilgrenser.tekst">Each style in the library has typical ranges for OG/FG/IBU/EBC/ABV, drawn from well-known style descriptions. When your recipe deviates from a selected style's typical range, the style guidance explains this in calm language — "slightly outside" or "clearly outside" — never as an error message.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.stilgrenser.hvorfor"><strong>Why this matters:</strong> Style ranges describe what's <em>typical</em> for a style, not a rule you must follow. Many good beers sit deliberately outside a style's typical range.</p>
+</article>
+</div>
+<div class="hjelp-seksjon" id="ingredienser">
+<h2 data-i18n="hjelp.idx.secC.tittel">C. Ingredients</h2>
+<article class="hjelp-artikkel" id="om-malt">
+<h3 data-i18n="hjelp.idx.omMalt.tittel">Malt</h3>
+<p data-i18n="hjelp.idx.omMalt.tekst">Malt is the grain that gives the wort sugar (for alcohol), color, and much of the base flavor. It's the source of nearly all the OG and EBC in the recipe.</p>
+</article>
+<article class="hjelp-artikkel" id="om-humle">
+<h3 data-i18n="hjelp.idx.omHumle.tittel">Hops</h3>
+<p data-i18n-html="hjelp.idx.omHumle.tekst">Hops provide bitterness (early in the boil) and aroma/flavor (late in the boil or after boiling). The same hop variety can therefore contribute completely differently depending on <em>when</em> it's added.</p>
+</article>
+<article class="hjelp-artikkel" id="om-gjaer">
+<h3 data-i18n="hjelp.idx.omGjaer.tittel">Yeast</h3>
+<p data-i18n-html="hjelp.idx.omGjaer.tekst">Yeast converts sugar into alcohol and CO₂, but also significantly affects flavor and mouthfeel — see <a href="#gjaer-pavirkning">how yeast affects the beer</a> below.</p>
+</article>
+<article class="hjelp-artikkel" id="basemalt-spesialmalt">
+<h3 data-i18n="hjelp.idx.basemaltSpesialmalt.tittel">Base Malt vs. Specialty Malt</h3>
+<p data-i18n-html="hjelp.idx.basemaltSpesialmalt.tekst"><strong>Base malt</strong> (e.g. Pilsner or Pale Ale malt) normally makes up the bulk of the grain bill — pale color, high potential, neutral-to-mild flavor. <strong>Specialty malt</strong> (crystal malt, roasted malt, wheat, oats, and others) is used in smaller amounts to adjust color, body, and flavor.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.basemaltSpesialmalt.hvorfor"><strong>Why this matters:</strong> A recipe with 100% base malt often ends up thin and one-dimensional in flavor; too much specialty malt, on the other hand, can dominate and make the beer's profile muddled. Most successful recipes have base malt as the backbone and specialty malt as seasoning.</p>
+</article>
+<article class="hjelp-artikkel" id="bitterhumle-aromahumle">
+<h3 data-i18n="hjelp.idx.bitterAroma.tittel">Bittering Hops vs. Aroma/Flavor Hops</h3>
+<p data-i18n="hjelp.idx.bitterAroma.tekst">Some hop varieties have high alpha acid and suit a clean, early bittering addition. Others are chosen for their aroma and are used late in the boil or as a "dry hop" after fermentation, where bitterness barely has time to develop.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.bitterAroma.hvorfor"><strong>Why this matters:</strong> The same total gram count of hops can give a completely different result depending on whether it's split early (bitterness) or late (aroma). See <a href="#ibu">IBU</a> for the connection to boil time.</p>
+</article>
+<article class="hjelp-artikkel" id="gjaer-pavirkning">
+<h3 data-i18n="hjelp.idx.gjaerPavirkning.tittel">How Yeast Affects the Beer</h3>
+<p data-i18n-html="hjelp.idx.gjaerPavirkning.tekst">Your yeast choice affects not just <a href="#utgjaering">attenuation</a> (and therefore FG/ABV), but also flavor compounds the yeast itself produces — esters (fruitiness), phenols (spice/clove in certain wheat and Belgian styles), and how fermentation temperature influences both.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerPavirkning.hvorfor"><strong>Why this matters:</strong> Two identical recipes can taste strikingly different with two different yeast strains — even when OG, FG, and IBU are nearly the same.</p>
+</article>
+<article class="hjelp-artikkel" id="egendefinerte-ingredienser">
+<h3 data-i18n="hjelp.idx.egendefinerte.tittel">Custom Ingredients</h3>
+<p data-i18n-html="hjelp.idx.egendefinerte.tekst">Can't find your malt, hop, or yeast in the library? Click "+ Custom" on the row and enter the name and basic technical values yourself (EBC/potential for malt, alpha acid for hops, attenuation for yeast). Custom ingredients work fully in the calculations and travel with your recipe through saving, export, and import.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.egendefinerte.hvorfor"><strong>Why this matters:</strong> Custom ingredients are saved only on <em>your</em> recipe — they never end up in the shared library other users see.</p>
+</article>
+<article class="hjelp-artikkel" id="alfa-variasjon">
+<h3 data-i18n="hjelp.idx.alfaVariasjon.tittel">Why Alpha % Can Vary from Pack to Pack</h3>
+<p data-i18n="hjelp.idx.alfaVariasjon.tekst">The alpha acid content of hops is a natural plant trait that varies with growing season, climate, and harvest — not a fixed number. The library shows a typical value, but the actual pack from the manufacturer can differ somewhat.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.alfaVariasjon.hvorfor"><strong>Why this matters:</strong> If you have the pack in hand, adjust the alpha field on the hop row to match what's actually printed on it — it gives a more precise IBU estimate than the library average.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-produsentdata">
+<h3 data-i18n="hjelp.idx.produsentdata.tittel">Why Manufacturer Data Can Vary</h3>
+<p data-i18n="hjelp.idx.produsentdata.tekst">EBC, potential, alpha acid, and attenuation are all properties that in practice vary somewhat from batch to batch at the manufacturer — the Kvernhaug Brygghus library shows typical, curated values, not a guarantee for your specific pack or package.</p>
+</article>
+</div>
+<div class="hjelp-seksjon" id="bryggeprosess">
+<h2 data-i18n="hjelp.idx.secD.tittel">D. Brewing Process — Quick Glossary</h2>
+<p class="hjelp-innledning" data-i18n-html="hjelp.idx.secD.intro">This is a quick glossary. For a full step-by-step walkthrough of the brew day itself, see <a href="bryggedag.html">A Brew Day — From Water to Fermenter</a>.</p>
+<article class="hjelp-artikkel" id="def-mesking">
+<h3 data-i18n="hjelp.idx.defMesking.tittel">Mashing</h3>
+<p data-i18n="hjelp.idx.defMesking.tekst">Mixing crushed malt with hot water at a specific temperature and time, so the malt's enzymes convert starch into fermentable sugar.</p>
+</article>
+<article class="hjelp-artikkel" id="def-mashout">
+<h3 data-i18n="hjelp.idx.defMashout.tittel">Mash-out</h3>
+<p data-i18n="hjelp.idx.defMashout.tekst">A brief heat-up to around 75–78°C after mashing, which stops enzyme activity and makes the wort easier to sparge.</p>
+</article>
+<article class="hjelp-artikkel" id="def-skylling">
+<h3 data-i18n="hjelp.idx.defSkylling.tittel">Sparging</h3>
+<p data-i18n-html="hjelp.idx.defSkylling.tekst">Rinsing remaining sugar out of the grain bed with hot water, so as much of the potential as possible ends up in the kettle — not used in every method (see <a href="bryggemetoder.html">brewing methods</a>).</p>
+</article>
+<article class="hjelp-artikkel" id="def-kok">
+<h3 data-i18n="hjelp.idx.defKok.tittel">Boil</h3>
+<p data-i18n="hjelp.idx.defKok.tekst">The wort is boiled, normally for 60 minutes, to sterilize, drive off unwanted compounds, and let the hops release bitterness and aroma.</p>
+</article>
+<article class="hjelp-artikkel" id="def-humletilsetning">
+<h3 data-i18n="hjelp.idx.defHumletilsetning.tittel">Hop Additions</h3>
+<p data-i18n-html="hjelp.idx.defHumletilsetning.tekst">Hops added at specific points in the boil — early for bitterness, late for aroma. See <a href="#ibu">IBU</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="def-kjoling">
+<h3 data-i18n="hjelp.idx.defKjoling.tittel">Chilling</h3>
+<p data-i18n="hjelp.idx.defKjoling.tekst">Rapidly cooling the wort after the boil, down toward the yeast's starting temperature — the faster, the lower the risk of unwanted bacterial growth and the clearer the beer.</p>
+</article>
+<article class="hjelp-artikkel" id="def-og-maling">
+<h3 data-i18n="hjelp.idx.defOgMaling.tittel">OG Reading</h3>
+<p data-i18n-html="hjelp.idx.defOgMaling.tekst">Measuring the wort's gravity right before fermentation, with a hydrometer or refractometer — compared against the calculated <a href="#og">OG</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="def-gjaering">
+<h3 data-i18n="hjelp.idx.defGjaering.tittel">Fermentation</h3>
+<p data-i18n="hjelp.idx.defGjaering.tekst">The period during which yeast converts sugar into alcohol and CO₂ — normally lasts 1–3 weeks depending on yeast type, strength, and temperature.</p>
+</article>
+<article class="hjelp-artikkel" id="def-fg-maling">
+<h3 data-i18n="hjelp.idx.defFgMaling.tittel">FG Reading</h3>
+<p data-i18n-html="hjelp.idx.defFgMaling.tekst">Measuring the gravity once fermentation has settled down, to confirm it's finished and calculate the actual <a href="#abv">ABV</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="def-karbonering">
+<h3 data-i18n="hjelp.idx.defKarbonering.tittel">Carbonation</h3>
+<p data-i18n="hjelp.idx.defKarbonering.tekst">Adding CO₂ to the finished beer — either naturally (sugar + residual yeast in bottle/keg) or by force-carbonating with CO₂ pressure in a keg.</p>
+</article>
+<article class="hjelp-artikkel" id="def-flasking">
+<h3 data-i18n="hjelp.idx.defFlasking.tittel">Bottling/Kegging, in General</h3>
+<p data-i18n="hjelp.idx.defFlasking.tekst">The beer is transferred to bottles or a keg for storage, conditioning, and serving. The choice mainly affects how carbonation is handled.</p>
+</article>
+</div>
+<div class="hjelp-seksjon" id="faq">
+<h2 data-i18n="hjelp.idx.secE.tittel">E. Frequently Asked Questions</h2>
+<article class="hjelp-artikkel" id="faq-alle-verdier">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqAlleVerdier.sporsmal">Do all values need to fall within the beer style?</p>
+<p data-i18n="hjelp.idx.faqAlleVerdier.svar">No. Style ranges are typical ranges, not rules. Many good, deliberate beers fall outside on one or more points.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-feil-verdi">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqFeilVerdi.sporsmal">Is the recipe wrong if one value is outside range?</p>
+<p data-i18n="hjelp.idx.faqFeilVerdi.svar">No — the style guidance flags it ("slightly outside" or "clearly outside"), but that's information, not an error message. Use it to judge whether the deviation is intentional.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-ibu-endring">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqIbuEndring.sporsmal">Why does IBU change when I change the alpha acid?</p>
+<p data-i18n-html="hjelp.idx.faqIbuEndring.svar">IBU is calculated directly from the hop's alpha acid content, amount, and boil time. Higher alpha acid means more bittering compound per gram of hops, and therefore higher IBU at the same amount and time. See <a href="#ibu">IBU</a> and <a href="#alfasyre">alpha acid</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-morkere-farge">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqMorkereFarge.sporsmal">Why does the beer get darker when I add this malt?</p>
+<p data-i18n-html="hjelp.idx.faqMorkereFarge.svar">Malt's color contribution varies enormously — a dark, roasted malt can have 10–50 times higher EBC than a pale base malt. Even a small amount of a dark malt can therefore have a large effect on the beer's overall color. See <a href="#ebc">EBC</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-bytte-gjaer">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqByttGjaer.sporsmal">What happens if I switch yeast?</p>
+<p data-i18n-html="hjelp.idx.faqByttGjaer.svar">Attenuation (and therefore FG and ABV) changes to the new yeast's value, and the flavor profile can change — different yeast strains contribute different esters and phenols. See <a href="#gjaer-pavirkning">how yeast affects the beer</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-utgjaering">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqUtgjaering.sporsmal">What does attenuation mean?</p>
+<p data-i18n-html="hjelp.idx.faqUtgjaering.svar">See <a href="#utgjaering">attenuation</a> above — in short, how much of the sugar the yeast manages to convert to alcohol.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-egne-ingredienser">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqEgneIngredienser.sporsmal">Can I use ingredients that aren't in the library?</p>
+<p data-i18n-html="hjelp.idx.faqEgneIngredienser.svar">Yes — use "+ Custom" on the malt, hop, or yeast row. See <a href="#egendefinerte-ingredienser">custom ingredients</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-traff-ikke-og">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqTraffIkkeOg.sporsmal">Why didn't I hit my expected OG on brew day?</p>
+<p data-i18n="hjelp.idx.faqTraffIkkeOg.svar">The calculated OG assumes your brewhouse efficiency (the field in Basics) actually matches your equipment and technique that day. Crush quality, mash temperature, sparging method, and even weather conditions can cause deviation. Feel free to adjust the efficiency number after a few of your own brews, so future estimates become more precise for your specific setup.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-og-fg-forskjell">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqOgFgForskjell.sporsmal">What's the difference between OG and FG?</p>
+<p data-i18n-html="hjelp.idx.faqOgFgForskjell.svar">OG is measured before fermentation (sugar present), FG is measured after (sugar remaining). See <a href="#og">OG</a> and <a href="#fg">FG</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-faktisk-fg">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqFaktiskFg.sporsmal">Why is the actual FG different from the calculated FG?</p>
+<p data-i18n-html="hjelp.idx.faqFaktiskFg.svar">Calculated FG uses the yeast's <em>typical</em> attenuation percentage. Actual attenuation is affected by fermentation temperature, yeast amount/health, mash temperature (which governs how fermentable the wort actually is), and the yeast strain's variation from batch to batch. A small deviation is normal and no cause for concern.</p>
+</article>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.idx.avslutning">Didn't find what you were looking for? The handbook keeps growing.</p>
+</main>
+</div>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

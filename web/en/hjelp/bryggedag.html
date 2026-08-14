@@ -1,0 +1,292 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py -- IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/bryggedag.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>A Brew Day — From Water to Fermenter — Kvernhaug Brygghus</title>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpBryggedag.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/bryggedag.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="bryggedag.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavBryggedag">🗓️ A Brew Day</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/bryggedag.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="bryggedag.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/bryggedag.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="bryggedag.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a class="aktiv" data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.dag.toc.1" href="#steg-1">1. Prep</a>
+<a data-i18n="hjelp.dag.toc.2" href="#steg-2">2. Mash Water</a>
+<a data-i18n="hjelp.dag.toc.3" href="#steg-3">3. Add Malt</a>
+<a data-i18n="hjelp.dag.toc.4" href="#steg-4">4. Mash</a>
+<a data-i18n="hjelp.dag.toc.5" href="#steg-5">5. Mash-out</a>
+<a data-i18n="hjelp.dag.toc.6" href="#steg-6">6. Sparge</a>
+<a data-i18n="hjelp.dag.toc.7" href="#steg-7">7. Boil</a>
+<a data-i18n="hjelp.dag.toc.8" href="#steg-8">8. Hops</a>
+<a data-i18n="hjelp.dag.toc.9" href="#steg-9">9. Chill</a>
+<a data-i18n="hjelp.dag.toc.10" href="#steg-10">10. OG Reading</a>
+<a data-i18n="hjelp.dag.toc.11" href="#steg-11">11. Fermenter</a>
+<a data-i18n="hjelp.dag.toc.12" href="#steg-12">12. Pitch Yeast</a>
+<a data-i18n="hjelp.dag.toc.13" href="#steg-13">13. Fermentation</a>
+<a data-i18n="hjelp.dag.toc.14" href="#steg-14">14. FG Reading</a>
+<a data-i18n="hjelp.dag.toc.15" href="#steg-15">15. Carbonate/Bottle</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.dag.intro">A general walkthrough of a typical all-grain brew day, step by step. The exact order and some steps vary with <a href="bryggemetoder.html">brewing method</a> and equipment — this is the typical sequence most homebrewers follow.</p>
+<div class="hjelp-steg" id="steg-1">
+<h3><span class="hjelp-steg-nr">1</span><span data-i18n="hjelp.dag.steg1.tittel">Prep Equipment and Ingredients</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n="hjelp.dag.steg1.hva">Weigh out malt and hops according to the recipe, clean and set out the kettle, mash tun, chiller, fermenter, and everything else you'll need along the way.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg1.hvorfor">Hunting for equipment or missing an ingredient mid-mash or mid-boil costs you precious time exactly when temperature and timing matter most.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg1.folgMed">That everything that needs to be clean actually is clean — especially anything that touches the wort after the boil.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg1.feil">Discovering after mashing has started that you're missing an ingredient, or that the chiller isn't hooked up to water.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-2">
+<h3><span class="hjelp-steg-nr">2</span><span data-i18n="hjelp.dag.steg2.tittel">Heat the Mash Water</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n="hjelp.dag.steg2.hva">Heat the amount of water the mash needs to a few degrees above your target temperature (cold grain and cold equipment pull the temperature down when the water meets the malt).</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n-html="hjelp.dag.steg2.hvorfor">Mash temperature determines which type of sugar the enzymes produce — and therefore how fermentable the wort becomes. See <a href="index.html#def-mesking">mashing</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n-html="hjelp.dag.steg2.folgMed">That you hit the right temperature <em>after</em> the malt has been added, not just in the water alone.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg2.feil">Heating the water to exactly the target temperature, then missing because cold grain pulls the temperature down a couple of degrees.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-3">
+<h3><span class="hjelp-steg-nr">3</span><span data-i18n="hjelp.dag.steg3.tittel">Add the Malt</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n="hjelp.dag.steg3.hva">Stir the crushed malt into the water, evenly and without clumps ("dough-in").</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg3.hvorfor">Clumps of dry malt ("dough balls") stop the enzymes from reaching the whole grain, and you lose yield.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg3.folgMed">Stir thoroughly right away, especially at the bottom and along the edges.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg3.feil">Pouring in all the malt at once without stirring at the same time.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-4">
+<h3><span class="hjelp-steg-nr">4</span><span data-i18n="hjelp.dag.steg4.tittel">Mash</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg4.hva">Hold the mixture at the correct temperature for the time the recipe specifies (typically 45–90 minutes), see <a href="index.html#def-mesking">mashing</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg4.hvorfor">This is when the enzymes actually convert starch into fermentable sugar — the foundation of the whole batch.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg4.folgMed">Temperature drift. Insulation (lid, blanket) helps a lot on simple mash tuns.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg4.feil">Letting the temperature drop gradually without noticing.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-5">
+<h3><span class="hjelp-steg-nr">5</span><span data-i18n="hjelp.dag.steg5.tittel">Mash-out (If Relevant)</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg5.hva">Quickly heat the mash to around 75–78°C, see <a href="index.html#def-mashout">mash-out</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg5.hvorfor">Stops enzyme activity (locking in the sugar profile) and makes the wort less viscous, which makes sparging easier.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg5.folgMed">Don't let the temperature go too high or hold too long — the point is to stop the process, not boil the mash.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg5.feil">Skipping mash-out and then wondering why sparging is slow.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-6">
+<h3><span class="hjelp-steg-nr">6</span><span data-i18n="hjelp.dag.steg6.tittel">Sparge (If the Method Uses It)</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg6.hva">Rinse remaining sugar out of the grain bed with hot water, see <a href="index.html#def-skylling">sparging</a> and <a href="bryggemetoder.html">brewing methods</a> for which methods use this step.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n-html="hjelp.dag.steg6.hvorfor">Without sparging, a lot of the malt potential is left behind in the grain bed — it directly affects <a href="index.html#og">OG</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg6.folgMed">The sparge water temperature (too hot can extract unwanted tannins).</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg6.feil">Sparging with boiling water, or squeezing the grain bed hard to "get more out" — both can produce bitter byproducts.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-7">
+<h3><span class="hjelp-steg-nr">7</span><span data-i18n="hjelp.dag.steg7.tittel">Boil</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg7.hva">Boil the wort, normally for 60 minutes, see <a href="index.html#def-kok">boil</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg7.hvorfor">Sterilization, concentrating the wort, and the foundation for the hop additions below.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg7.folgMed">A vigorous boil is prone to boiling over in the first few minutes — stay nearby until the boil has settled.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg7.feil">Walking away from the kettle right as the boil starts and coming back to a boiled-over stovetop.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-8">
+<h3><span class="hjelp-steg-nr">8</span><span data-i18n="hjelp.dag.steg8.tittel">Hop Additions</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg8.hva">Add hops at the times the recipe specifies, see <a href="index.html#def-humletilsetning">hop additions</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n-html="hjelp.dag.steg8.hvorfor">Timing determines whether the hops contribute mostly bitterness (early) or aroma/flavor (late), see <a href="index.html#ibu">IBU</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg8.folgMed">Actually timing the additions against remaining boil time, not elapsed time.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg8.feil">Mixing up "minutes into the boil" and "minutes left in the boil" — they count in opposite directions.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-9">
+<h3><span class="hjelp-steg-nr">9</span><span data-i18n="hjelp.dag.steg9.tittel">Chill</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg9.hva">Rapidly chill the wort down toward the yeast's starting temperature, see <a href="index.html#def-kjoling">chilling</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg9.hvorfor">Rapid chilling reduces the time the wort spends in a temperature range where unwanted bacteria thrive, and often gives clearer beer.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg9.folgMed">That your chilling equipment is actually clean — it meets the wort after the boil, the most vulnerable phase.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg9.feil">Letting the wort sit and cool slowly at room temperature instead of using a chiller/ice bath.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-10">
+<h3><span class="hjelp-steg-nr">10</span><span data-i18n="hjelp.dag.steg10.tittel">Take an OG Reading</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg10.hva">Measure the gravity with a hydrometer or refractometer, see <a href="index.html#def-og-maling">OG reading</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n-html="hjelp.dag.steg10.hvorfor">Confirms whether you hit your expected <a href="index.html#og">OG</a> — an important starting point for assessing the whole batch.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg10.folgMed">That the sample has cooled to the correct reference temperature for your instrument.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n-html="hjelp.dag.steg10.feil">Measuring a warm sample and getting a misleading number, see the <a href="index.html#faq-traff-ikke-og">FAQ</a>.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-11">
+<h3><span class="hjelp-steg-nr">11</span><span data-i18n="hjelp.dag.steg11.tittel">Transfer to the Fermenter</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n="hjelp.dag.steg11.hva">Transfer the chilled wort to a clean, sanitized fermenter.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg11.hvorfor">From this point on, it's the yeast that should dominate the environment — not other microorganisms.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg11.folgMed">A bit of splashing during transfer is actually desirable here — the wort needs oxygen for the yeast to get off to a good start.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg11.feil">Transferring too gently and giving the yeast too little oxygen for a good start.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-12">
+<h3><span class="hjelp-steg-nr">12</span><span data-i18n="hjelp.dag.steg12.tittel">Pitch Yeast</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n="hjelp.dag.steg12.hva">Add the yeast (rehydrated or pitched directly, per the manufacturer's instructions).</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg12.hvorfor">The faster the yeast gets going, the less time unwanted microorganisms have to establish themselves first.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg12.folgMed">That the wort is within the yeast's recommended temperature range before you pitch.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg12.feil">Pitching yeast into wort that's too warm, which can damage or kill the yeast.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-13">
+<h3><span class="hjelp-steg-nr">13</span><span data-i18n="hjelp.dag.steg13.tittel">Fermentation</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg13.hva">Let the yeast work undisturbed, at a stable temperature, see <a href="index.html#def-gjaering">fermentation</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg13.hvorfor">A stable temperature gives a cleaner, more predictable flavor profile than a fluctuating one.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg13.folgMed">Activity in the airlock over the first few days, and that the temperature stays within the yeast's recommended range.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg13.feil">Opening the fermenter often "to check" — every opening is a new chance for contamination.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-14">
+<h3><span class="hjelp-steg-nr">14</span><span data-i18n="hjelp.dag.steg14.tittel">Take an FG Reading</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg14.hva">Measure the gravity once activity has settled down, see <a href="index.html#def-fg-maling">FG reading</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n-html="hjelp.dag.steg14.hvorfor">Confirms that fermentation is actually finished, and lets you calculate the actual <a href="index.html#abv">ABV</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg14.folgMed">Take readings on two consecutive days — if the number is stable, fermentation is done.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg14.feil">Ending fermentation too early because the airlock has gone quiet, without confirming with an actual reading.</dd>
+</dl>
+</div>
+<div class="hjelp-steg" id="steg-15">
+<h3><span class="hjelp-steg-nr">15</span><span data-i18n="hjelp.dag.steg15.tittel">Carbonate / Bottle / Keg</span></h3>
+<dl>
+<dt data-i18n="hjelp.dag.dt.hva">What do I do?</dt>
+<dd data-i18n-html="hjelp.dag.steg15.hva">Transfer the beer to bottles or a keg and carbonate it, see <a href="index.html#def-karbonering">carbonation</a> and <a href="index.html#def-flasking">bottling/kegging</a>.</dd>
+<dt data-i18n="hjelp.dag.dt.hvorfor">Why do I do it?</dt>
+<dd data-i18n="hjelp.dag.steg15.hvorfor">This is the last step before the beer is ready to drink — and what gives it the right mouthfeel.</dd>
+<dt data-i18n="hjelp.dag.dt.folgMed">What should I watch for?</dt>
+<dd data-i18n="hjelp.dag.steg15.folgMed">The correct sugar amount for bottle carbonation (too much can cause overpressure/explosion risk), or the correct pressure/time for force-carbonating in a keg.</dd>
+<dt data-i18n="hjelp.dag.dt.feil">Common beginner mistakes</dt>
+<dd data-i18n="hjelp.dag.steg15.feil">Drinking the beer too soon — most beers improve noticeably after a few weeks of conditioning.</dd>
+</dl>
+</div>
+<p class="hjelp-innledning" data-i18n-html="hjelp.dag.avslutning">Build a concrete brew day sheet for your own recipe from the recipe builder's <a href="../index.html">Print</a> panel.</p>
+</main>
+</div>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>
