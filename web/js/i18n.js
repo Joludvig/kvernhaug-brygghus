@@ -120,6 +120,11 @@ function applyI18n(root) {
   scope.querySelectorAll("[data-i18n-alt]").forEach((el) => {
     el.setAttribute("alt", t(el.getAttribute("data-i18n-alt")));
   });
+  // data-i18n-content -- Runde 15B.4, kun <meta name="description">. Samme
+  // mønster som de andre attributt-variantene over.
+  scope.querySelectorAll("[data-i18n-content]").forEach((el) => {
+    el.setAttribute("content", t(el.getAttribute("data-i18n-content")));
+  });
 }
 
 // aria-current (ikke aria-pressed) fordi .sprak-knapp er ekte <a href>-
@@ -205,6 +210,15 @@ const TEKSTER = {
     "meta.hjelpBryggedag.tittel": "En bryggedag — fra vann til gjæringskar — Kvernhaug Brygghus",
     "meta.hjelpBryggemetoder.tittel": "Bryggemetoder — Kvernhaug Brygghus",
     "meta.hjelpBrewzilla.tittel": "Utstyr: BrewZilla — Kvernhaug Brygghus",
+
+    "meta.builder.beskrivelse": "Lag og beregn øloppskrifter med malt, humle, gjær, OG, FG, ABV, IBU og EBC. Stilmatching mot Kvernhaug Brygghus sitt eget stilbibliotek og live smaksprofil.",
+    "meta.mineOppskrifter.beskrivelse": "Se, åpne og slett øloppskriftene dine. Lagres lokalt i nettleseren — ingen konto, ingen sky, ingenting sendes til noen server.",
+    "meta.importer.beskrivelse": "Importer en øloppskrift fra en .kbhrecipe-fil, eldre rå JSON, eller ved å lime inn tekst — med forhåndsvisning før den legges inn i oppskriftsbyggeren.",
+    "meta.utskrift.beskrivelse": "Skriv ut oppskriftsark, handleliste, bryggedagsark og bryggelogg for din aktive eller lagrede øloppskrift — fire A4-vennlige dokumenter.",
+    "meta.hjelp.beskrivelse": "Praktisk bryggehåndbok for hjemmebryggere: kom i gang, begrepsforklaringer, ingredienser og ofte stilte spørsmål om Kvernhaug Brygghus sin oppskriftsbygger.",
+    "meta.hjelpBryggedag.beskrivelse": "En komplett bryggedag i 15 steg — fra vann og mesking til gjæringskar — med hva du gjør, hvorfor, og hva du bør følge med på i hvert steg.",
+    "meta.hjelpBryggemetoder.beskrivelse": "Sammenligning av BIAB, vanlig all-grain med eget meskekar, og alt-i-ett bryggemaskin — hvordan hver metode påvirker en vanlig bryggedag.",
+    "meta.hjelpBrewzilla.beskrivelse": "Praktisk guide til å bruke BrewZilla i Kvernhaug Brygghus sin oppskriftsbygger, med tydelig skille mellom produsentens spesifikasjoner og Kvernhaug sine egne standardverdier.",
 
     "brand.motto": "Brygg med ild. Del med ære.",
     "brand.stedTagline": "Ved Dalelva i Åsane",
@@ -892,6 +906,15 @@ const TEKSTER = {
     "meta.hjelpBryggedag.tittel": "A Brew Day — From Water to Fermenter — Kvernhaug Brygghus",
     "meta.hjelpBryggemetoder.tittel": "Brewing Methods — Kvernhaug Brygghus",
     "meta.hjelpBrewzilla.tittel": "Equipment: BrewZilla — Kvernhaug Brygghus",
+
+    "meta.builder.beskrivelse": "Build and calculate beer recipes with malt, hops, yeast, OG, FG, ABV, IBU and EBC. Style matching against Kvernhaug Brygghus's own style library and a live flavour profile.",
+    "meta.mineOppskrifter.beskrivelse": "View, open and delete your saved beer recipes. Stored locally in your browser — no account, no cloud, nothing sent to any server.",
+    "meta.importer.beskrivelse": "Import a beer recipe from a .kbhrecipe file, older raw JSON, or by pasting plain text — with a preview before it's added to the recipe builder.",
+    "meta.utskrift.beskrivelse": "Print a recipe sheet, shopping list, brew day worksheet and brew log for your active or saved beer recipe — four A4-friendly documents.",
+    "meta.hjelp.beskrivelse": "A practical brewing handbook for homebrewers: getting started, terminology, ingredients and frequently asked questions about the Kvernhaug Brygghus recipe builder.",
+    "meta.hjelpBryggedag.beskrivelse": "A complete brew day in 15 steps — from water and mashing to the fermenter — what to do, why, and what to watch for at each step.",
+    "meta.hjelpBryggemetoder.beskrivelse": "A comparison of BIAB, traditional all-grain with a separate mash tun, and all-in-one brewing systems — how each method changes a typical brew day.",
+    "meta.hjelpBrewzilla.beskrivelse": "A practical guide to using a BrewZilla with the Kvernhaug Brygghus recipe builder, clearly distinguishing manufacturer specifications from Kvernhaug's own default values.",
 
     "brand.motto": "Brew with fire. Share with honor.",
     "brand.stedTagline": "By the Dalelva, Åsane",

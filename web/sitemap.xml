@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://kvernhaugbrygghus.no/</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/mine-oppskrifter.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/mine-oppskrifter.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/mine-oppskrifter.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/mine-oppskrifter.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/mine-oppskrifter.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/mine-oppskrifter.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/mine-oppskrifter.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/mine-oppskrifter.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/importer.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/importer.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/importer.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/importer.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/importer.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/importer.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/importer.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/importer.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/utskrift.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/utskrift.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/utskrift.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/utskrift.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/utskrift.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/utskrift.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/utskrift.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/utskrift.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/hjelp/</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/hjelp/</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/hjelp/bryggedag.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/bryggedag.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/bryggedag.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/bryggedag.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/hjelp/bryggedag.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/bryggedag.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/bryggedag.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/bryggedag.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/hjelp/bryggemetoder.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/bryggemetoder.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/bryggemetoder.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/bryggemetoder.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/hjelp/bryggemetoder.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/bryggemetoder.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/bryggemetoder.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/bryggemetoder.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/utstyr-brewzilla.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/hjelp/utstyr-brewzilla.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/utstyr-brewzilla.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html"/>
+  </url>
+</urlset>

@@ -95,6 +95,9 @@ web/
                           dypere) -- håndrediger ALDRI, kjør scripts/generate_web_i18n_pages.py på nytt i stedet.
                           Deler css/js/assets/data med resten av web/ (ikke kopiert inn). Se "Engelsk pre-render
                           (web/en/)" under.
+  sitemap.xml             GENERERT -- 16 URL-er (8 sider x NO/EN) med gjensidige hreflang-alternates, samme
+                          PAGES-liste som resten av generatoren. Håndrediger ALDRI.
+  robots.txt              Håndskrevet, statisk -- Allow: /, peker til sitemap.xml.
 ```
 
 ## Språk (NO/EN)
@@ -129,7 +132,7 @@ py -3 scripts/generate_web_i18n_pages.py
 
 **Kjør på nytt** hver gang en registrert NO-side eller `TEKSTER` i `i18n.js` endres, og før commit av `web/en/`.
 
-**Arkitektur** (uendret fra Runde 15A-analysen): de norske HTML-filene er ENESTE strukturelle template/fasit; `TEKSTER.en` i `i18n.js` er ENESTE oversettelsesinnhold. Generatoren eier ingen tekst selv — kun transformasjonen: setter `<html lang="en">`, anvender engelsk tekst på alle `data-i18n-*`-attributter (inkl. `data-i18n-html` → ekte markup, ikke escaped tekst — verifisert eksplisitt for `utskrift.tomTekst2` og `hjelp.idx.alfaVariasjon.hvorfor`, de to defektene fra Runde 15B.0), setter engelsk `<title>` fra sidens `data-i18n-tittel-nokkel`, justerer relative `css/js/assets`-stier for én ekstra katalogdybde (`css/style.css` → `../css/style.css` på rotnivå, `../css/style.css` → `../../css/style.css` på hjelp-nivå), og kobler språkvelgeren til riktig søsterside. Vanlige side-til-side-navigasjonslenker (`index.html`, `../index.html`, `bryggedag.html#anker`) røres IKKE — de er allerede riktige fordi hele treet er speilet på samme relative dybde.
+**Arkitektur** (uendret fra Runde 15A-analysen): de norske HTML-filene er ENESTE strukturelle template/fasit; `TEKSTER.en` i `i18n.js` er ENESTE oversettelsesinnhold. Generatoren eier ingen tekst selv — kun transformasjonen: setter `<html lang="en">`, anvender engelsk tekst på alle `data-i18n-*`-attributter (inkl. `data-i18n-html` → ekte markup, ikke escaped tekst — verifisert eksplisitt for `utskrift.tomTekst2` og `hjelp.idx.alfaVariasjon.hvorfor`, de to defektene fra Runde 15B.0), setter engelsk `<title>` fra sidens `data-i18n-tittel-nokkel`, justerer relative `css/js/assets`-stier for én ekstra katalogdybde (`css/style.css` → `../css/style.css` på rotnivå, `../css/style.css` → `../../css/style.css` på hjelp-nivå), kobler språkvelgeren til riktig søsterside, og overskriver canonical/hreflang-lenkene til riktige EN-URL-er (Runde 15B.4, se "URL-kontrakt" under). Vanlige side-til-side-navigasjonslenker (`index.html`, `../index.html`, `bryggedag.html#anker`) røres IKKE — de er allerede riktige fordi hele treet er speilet på samme relative dybde.
 
 **Delt runtime, ingen duplisering**: `web/en/` inneholder KUN generert HTML. `css/`, `js/`, `assets/`, `data/` er IKKE kopiert inn — engelske sider laster nøyaktig samme kjøretidskode og data som norske, via `KBH_ROOT` (Runde 15B.1, delt web-rot uavhengig av katalogdybde). Ingen parallell app, ingen egen datakopi.
 
@@ -141,7 +144,21 @@ py -3 scripts/generate_web_i18n_pages.py
 
 **web/en/ SKAL committes** — samme begrunnelse som `web/data/*.json` (generert av `scripts/generate_web_data.py`, også committet): deploy er fortsatt "last opp `web/`-mappen" uten build-steg eller CI. Håndrediger ALDRI en fil under `web/en/` — endre norsk kilde-HTML eller `TEKSTER` i `i18n.js`, og kjør generatoren på nytt.
 
-**Ikke gjort ennå** (Runde 15B.4, ikke påbegynt): `meta description`, `canonical`, `hreflang`/`x-default`, `sitemap.xml`, `robots.txt`. `web/en/` er crawlbar (riktig `<html lang>`, tittel og brødtekst direkte i rå HTML, verifisert uten JS), men har ingen SEO-metadata utover det ennå.
+### URL-kontrakt (canonical/hreflang) — Runde 15B.4
+
+**Produksjonsdomene**: `https://kvernhaugbrygghus.no` — eneste sted dette er hardkodet (`PROD_BASE` i generatoren). Ingen `www.`-variant er i bruk noe sted i repoet; verifisert eksplisitt før innføring.
+
+**URL-form**: "pene" katalog-URL-er for de to index-sidene (`/` og `/hjelp/` NO, `/en/` og `/en/hjelp/` EN), eksplisitt `.html` for alle andre sider (`/mine-oppskrifter.html`, `/en/hjelp/bryggedag.html` osv.) — standard `DirectoryIndex`-oppførsel på vanlig statisk hosting (Apache/Domeneshop) antatt, ingen server-rewrite konfigurert eller forutsatt av dette repoet. Denne kontrakten brukes KUN til canonical/hreflang/sitemap — selve navigasjonslenkene i HTML-en (drawer, sidenav, "Les mer"-lenker) er URØRT dokument-relative `.html`-lenker, uendret fra Runde 15B.3. Ingen redirect, ingen `www.`-regel, ingen trailing-slash-rewrite er innført.
+
+**Meta description**: samme arkitektur som title — én nøkkel per side og språk i `TEKSTER` (`meta.X.beskrivelse`, 8 par NO/EN), referert fra `<meta name="description" content="..." data-i18n-content="nøkkel">` i HTML-en via en ny `data-i18n-content`-attributt (samme mønster som `data-i18n-alt`/`-title`). Norsk kilde har den norske teksten statisk i `content`; generatoren overskriver den til engelsk for `web/en/`, akkurat som for `data-i18n`/`data-i18n-html`.
+
+**Canonical + hreflang**: alle 16 sider har `<link rel="canonical">` (selvrefererende, absolutt HTTPS) og tre `<link rel="alternate" hreflang="...">` (`no`, `en`, `x-default` → alltid norsk). De 8 norske kilde-sidene har disse fire lenkene satt statisk i `<head>` (satt for NO-konteksten); generatoren overskriver dem til riktige EN-URL-er for `web/en/`-speilingen — samme "generator overskriver, eier ikke teksten selv"-prinsipp som resten av transformasjonen. Verifisert gjensidig for alle 8 par (NO→EN, EN→NO, begge x-default→NO) og selvreferanse for alle 16 canonical-lenker.
+
+**sitemap.xml + robots.txt**: `web/sitemap.xml` genereres deterministisk fra samme `PAGES`-liste som resten av generatoren (ingen egen sitemap-spesifikk liste) — 16 `<url>`-entries med gjensidige hreflang-alternates (xhtml-namespace), ingen `lastmod`/`priority`/`changefreq` (ville enten vært falsk eller ikke-deterministisk). `web/robots.txt` er en liten, håndskrevet statisk fil (`Allow: /`, pekt til sitemap) — ingen sider/mapper er blokkert.
+
+**SEO-guard**: generatoren feiler hardt dersom en registrert side mangler `data-i18n-content` på description-taggen, `<link rel="canonical">`, eller noen av de tre hreflang-lenkene i NO-kilden — ingen stille fallback til en generisk description.
+
+**Ikke gjort ennå** (bevisst utenfor omfanget til Runde 15B): Open Graph, Twitter Cards, structured data/JSON-LD, analytics/tracking, cookie-banner, Search Console-verifiseringsfil. Kan vurderes i en egen, senere runde ved behov.
 
 **Runtime data-paths (Runde 15B.1, forarbeid for pre-render)**: `fetch("data/*.json")`-kallene i `app.js`/`importer_page.js`/`utskrift_page.js` var dokument-relative og ville feilet fra en fremtidig `/en/`- eller `/en/hjelp/`-katalog. Løst med `KBH_ROOT` i `i18n.js` — en global konstant beregnet fra `i18n.js` sin egen `<script src>`-URL (`document.currentScript`, lest synkront ved script-lasting, siden `i18n.js` alltid lastes FØRST og som vanlig `<script src>` på alle sider). `js/`-mappen ligger alltid rett under web-roten uansett hvor dypt selve siden ligger, så `new URL("../", scriptUrl)` gir alltid riktig rot. De 11 `fetch()`-kallene bruker nå `KBH_ROOT + "data/..."` i stedet for `"data/..."`. Ingen produksjonsdomene hardkodet, ingen språkspesifikk path, ingen duplisert `/en/data/`. Testet med midlertidige, script-genererte sider på +1 og +2 katalogdybde (simulerer `/en/` og `/en/hjelp/`) — data lastes korrekt fra felles rot i begge tilfeller; scratch-filene er slettet igjen, ikke en del av repoet.
 

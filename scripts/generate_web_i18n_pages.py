@@ -1,28 +1,39 @@
 """Genererer engelske, crawlbare speil-sider under web/en/ fra de norske
 kilde-HTML-filene i web/*.html og web/hjelp/*.html + TEKSTER.en-ordboken i
-web/js/i18n.js.
+web/js/i18n.js, samt web/sitemap.xml for alle 16 språk-URL-ene.
 
 Kjøres manuelt, etter enhver endring i en registrert NO-side eller i
-TEKSTER i i18n.js, og før commit av web/en/:
+TEKSTER i i18n.js, og før commit av web/en/ + web/sitemap.xml:
 
     py -3 scripts/generate_web_i18n_pages.py
 
 Ingen eksterne avhengigheter utover beautifulsoup4 (allerede krevd av
 prosjektet, se requirements.txt). Deterministisk: uendret kildeinnhold gir
 byte-identisk output ved re-kjøring (kan verifiseres med
-`git diff --exit-code web/en/` etter en re-kjøring).
+`git diff --exit-code web/en/ web/sitemap.xml` etter en re-kjøring).
 
-ARKITEKTUR (Runde 15A/15B.3): de norske HTML-filene er ENESTE strukturelle
-template/fasit; TEKSTER i i18n.js er ENESTE oversettelsesinnhold. Denne
-filen eier ingen tekst selv -- kun transformasjonen (sett <html lang="en">,
-anvend engelsk tekst via data-i18n-*, sett engelsk <title>, juster relative
-asset-stier for én ekstra katalogdybde, koble språkvelgeren til riktig
-søsterside). web/en/** er 100% generert output og skal ALDRI håndredigeres
--- se web/README.md "Engelsk pre-render (web/en/)".
+ARKITEKTUR (Runde 15A/15B.3/15B.4): de norske HTML-filene er ENESTE
+strukturelle template/fasit; TEKSTER i i18n.js er ENESTE oversettelses-
+innhold (inkl. meta-descriptions, Runde 15B.4). Denne filen eier ingen
+tekst selv -- kun transformasjonen: sett <html lang="en">, anvend engelsk
+tekst via data-i18n-* (inkl. data-i18n-content for <meta description>),
+sett engelsk <title>, juster relative asset-stier for én ekstra katalog-
+dybde, koble språkvelgeren til riktig søsterside, og overskriv
+canonical/hreflang-lenkene (som allerede finnes i NO-kilden, satt for NO-
+konteksten) med riktige EN-URL-er. web/en/** er 100% generert output og
+skal ALDRI håndredigeres -- se web/README.md "Engelsk pre-render (web/en/)".
 
 web/en/ inneholder KUN generert HTML -- css/js/assets/data er IKKE
 kopiert inn, og lastes fra samme delte web-rot som norsk (se KBH_ROOT i
 i18n.js, Runde 15B.1).
+
+URL-kontrakt (Runde 15B.4, se web/README.md "URL-kontrakt (canonical/
+hreflang)" for full begrunnelse): "pene" katalog-URL-er for index-sider
+(https://kvernhaugbrygghus.no/ og /hjelp/, /en/ og /en/hjelp/), eksplisitt
+.html for alle andre sider. Kun brukt for canonical/hreflang/sitemap --
+selve navigasjonslenkene i HTML-en er URØRT dokument-relative .html-lenker
+(uendret fra Runde 15B.3), ingen server-side rewrite/redirect er innført
+eller forutsatt.
 """
 import json
 import posixpath
@@ -51,6 +62,11 @@ PAGES = [
 ]
 
 GENERATOR_MARKER = "GENERERT AV scripts/generate_web_i18n_pages.py"
+
+# Produksjonsdomene -- ENESTE stedet dette er hardkodet. Ingen etablert
+# www.-konvensjon funnet noe sted i repoet ved innføring (Runde 15B.4) --
+# verifisert på nytt før implementasjon.
+PROD_BASE = "https://kvernhaugbrygghus.no"
 
 _ASSET_PREFIX_RE = re.compile(r"^(?:\.\./)*(?:css|js|assets)/")
 
@@ -192,6 +208,28 @@ def _en_href_selv(page: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Absolutt URL-kontrakt (canonical/hreflang/sitemap) -- Runde 15B.4
+# ---------------------------------------------------------------------------
+
+def _url_sti_no(page: str) -> str:
+    """"Pen" katalog-URL for index-sider (/, /hjelp/), ellers eksplisitt
+    .html. Se modulens toppkommentar "URL-kontrakt" for begrunnelse."""
+    if posixpath.basename(page) == "index.html":
+        d = posixpath.dirname(page)
+        return f"/{d}/" if d else "/"
+    return f"/{page}"
+
+
+def canonical_url(page: str, spraak: str) -> str:
+    sti = _url_sti_no(page)
+    if spraak == "en":
+        sti = "/en" + sti
+    elif spraak != "no":
+        raise GeneratorError(f"canonical_url: ugyldig språk {spraak!r}")
+    return PROD_BASE + sti
+
+
+# ---------------------------------------------------------------------------
 # HTML-transformasjon
 # ---------------------------------------------------------------------------
 
@@ -285,6 +323,35 @@ def _anvend_i18n(soup: BeautifulSoup, en: dict, page: str) -> None:
     for el in soup.select("[data-i18n-alt]"):
         nokkel = el["data-i18n-alt"]
         el["alt"] = _hent_tekst(en, nokkel, page, "data-i18n-alt")
+    for el in soup.select("[data-i18n-content]"):
+        nokkel = el["data-i18n-content"]
+        el["content"] = _hent_tekst(en, nokkel, page, "data-i18n-content")
+
+
+def _rewrite_seo_links(soup: BeautifulSoup, page: str) -> None:
+    """Overskriver canonical + hreflang-lenkene som allerede finnes i
+    NO-kilden (satt for NO-konteksten av Runde 15B.4-migreringen) med
+    riktige, absolutte EN-URL-er. Krever at NO-kilden faktisk har disse
+    fire elementene -- en registrert side som mangler dem er en SEO-guard-
+    feil (pkt. "META-/SEO-GUARD"), ikke noe generatoren stille kompenserer for."""
+    no_url = canonical_url(page, "no")
+    en_url = canonical_url(page, "en")
+
+    canonical = soup.find("link", rel="canonical")
+    if canonical is None:
+        raise GeneratorError(f'{page}: mangler <link rel="canonical"> i NO-kilden')
+    canonical["href"] = en_url
+
+    alternates = soup.find_all("link", rel="alternate")
+    per_kode = {a.get("hreflang"): a for a in alternates}
+    for kode in ("no", "en", "x-default"):
+        if kode not in per_kode:
+            raise GeneratorError(
+                f'{page}: mangler <link rel="alternate" hreflang="{kode}"> i NO-kilden'
+            )
+    per_kode["no"]["href"] = no_url
+    per_kode["en"]["href"] = en_url
+    per_kode["x-default"]["href"] = no_url
 
 
 def _sett_tittel(soup: BeautifulSoup, en: dict, page: str) -> None:
@@ -312,12 +379,13 @@ def generer_side_html(page: str, en: dict) -> str:
     _sett_tittel(soup, en, page)
     _rewrite_asset_paths(soup)
     _rewrite_sprakvelger(soup, page)
+    _rewrite_seo_links(soup, page)
 
     header = (
         "<!--\n"
-        f"  {GENERATOR_MARKER} -- IKKE REDIGER MANUELT.\n"
+        f"  {GENERATOR_MARKER} — IKKE REDIGER MANUELT.\n"
         f"  Kilde: web/{page} (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).\n"
-        "  Kjør generatoren på nytt for å oppdatere denne filen -- håndredigering blir\n"
+        "  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir\n"
         "  overskrevet ved neste kjøring. Se web/README.md \"Engelsk pre-render (web/en/)\".\n"
         "-->\n"
     )
@@ -354,6 +422,35 @@ def _rens_gammel_output() -> None:
             p.rmdir()
 
 
+# ---------------------------------------------------------------------------
+# sitemap.xml -- én autoritativ sidestruktur (PAGES) for HTML, canonical,
+# hreflang OG sitemap. Ingen egen sitemap-spesifikk liste.
+# ---------------------------------------------------------------------------
+
+def build_sitemap_xml() -> str:
+    """16 <url>-entries (8 sider x NO/EN), hver med gjensidige hreflang-
+    alternates (xhtml-namespace). Ingen lastmod -- ville gjort output
+    ikke-deterministisk uten å representere ekte innholdsdata (pkt. 9 i
+    Runde 15B.4-oppgaven). Ingen priority/changefreq."""
+    linjer = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        f"<!-- {GENERATOR_MARKER} — IKKE REDIGER MANUELT. -->",
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    ]
+    for page in PAGES:
+        no_url = canonical_url(page, "no")
+        en_url = canonical_url(page, "en")
+        for loc in (no_url, en_url):
+            linjer.append("  <url>")
+            linjer.append(f"    <loc>{loc}</loc>")
+            linjer.append(f'    <xhtml:link rel="alternate" hreflang="no" href="{no_url}"/>')
+            linjer.append(f'    <xhtml:link rel="alternate" hreflang="en" href="{en_url}"/>')
+            linjer.append(f'    <xhtml:link rel="alternate" hreflang="x-default" href="{no_url}"/>')
+            linjer.append("  </url>")
+    linjer.append("</urlset>")
+    return "\n".join(linjer) + "\n"
+
+
 def main() -> None:
     valider_pages_mot_source()
     tekster = parse_tekster()
@@ -367,8 +464,12 @@ def main() -> None:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(output, encoding="utf-8")
 
+    sitemap = build_sitemap_xml()
+    (WEB / "sitemap.xml").write_text(sitemap, encoding="utf-8")
+
     print(f"i18n-nøkler: no={len(tekster['no'])}, en={len(tekster['en'])} (symmetrisk)")
     print(f"Genererte {len(PAGES)} side(r) under {WEB_EN}")
+    print(f"Genererte sitemap.xml med {len(PAGES) * 2} URL-er under {WEB}")
 
 
 if __name__ == "__main__":
