@@ -178,9 +178,9 @@ function initTekstImport() {
 
 async function init() {
   const [malt, humle, gjaer] = await Promise.all([
-    fetch("data/malt.json").then((r) => r.json()),
-    fetch("data/humle.json").then((r) => r.json()),
-    fetch("data/gjaer.json").then((r) => r.json()),
+    fetch(KBH_ROOT + "data/malt.json").then((r) => r.json()),
+    fetch(KBH_ROOT + "data/humle.json").then((r) => r.json()),
+    fetch(KBH_ROOT + "data/gjaer.json").then((r) => r.json()),
   ]);
   maltData = malt;
   humleData = humle;

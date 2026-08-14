@@ -4,6 +4,10 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 15B.1 — Dybde-uavhengig data-fetch (2026-08-14)
+
+Forarbeid for en fremtidig pre-rendret `/en/`-struktur (Runde 15A-analysen). De 11 `fetch("data/*.json")`-kallene i `app.js`/`importer_page.js`/`utskrift_page.js` var dokument-relative og ville feilet fra en dypere katalog som `/en/` eller `/en/hjelp/`. Løst med `KBH_ROOT`, en global konstant i `i18n.js` beregnet fra scriptets egen `<script src>`-URL (`document.currentScript`) — ingen hardkodet domene, ingen språkspesifikk path, ingen duplisert `/en/data/`. Verifisert med midlertidige, script-genererte testsider på +1 og +2 katalogdybde; dagens rotside-oppførsel er uendret. Ingen URL-strategi, generator eller `/en/`-struktur er innført ennå — se README "Runtime data-paths".
+
 ## Runde 14B — Engelsk hjelp/bryggehåndbok (2026-08-14)
 
 Fullførte NO/EN-dekningen fra Runde 14: alle fire `hjelp/`-sidenes brødtekst (`index.html` sitt kom-i-gang/begrepsforklaringer/ingredienser/ordliste/FAQ, `bryggedag.html` sine 15 steg, `bryggemetoder.html` sine tre metoder, `utstyr-brewzilla.html` sin BrewZilla-referanse) er nå oversatt til naturlig, idiomatisk bryggeengelsk — ikke maskinoversettelse. Samme arkitektur som resten av appen (`data-i18n`/`t()`/`TEKSTER` i `i18n.js`), ingen ny språkmodell. 282 nye nøkkelpar (NO+EN) under `hjelp.idx.*`/`hjelp.dag.*`/`hjelp.metoder.*`/`hjelp.brewzilla.*`.

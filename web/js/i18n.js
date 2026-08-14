@@ -14,6 +14,29 @@ const SPRAK_NOKKEL = "kvernhaug_web_sprak";
 const SPRAK_LISTE = ["no", "en"];
 const SPRAK_DEFAULT = "no";
 
+// Runde 15B.1 -- delt web-root, uavhengig av hvilket katalognivå siden som
+// laster dette scriptet ligger på (i dag: / eller /hjelp/; forarbeid for en
+// fremtidig /en/ og /en/hjelp/ som deler samme js/ og data/ -- se
+// web/README.md "Runtime data-paths"). Beregnes fra i18n.js sin egen
+// <script src>-URL siden i18n.js alltid lastes som et vanlig, synkront,
+// første <script> på alle sider (verifisert i alle 8 HTML-filer). js/
+// ligger alltid rett under web-roten, uansett hvor mange undermapper siden
+// selv ligger i, så "../" herfra er alltid roten. document.currentScript er
+// kun pålitelig SYNKRONT under selve script-kjøringen -- caches derfor med
+// det samme i en konstant, ikke lest på nytt senere (f.eks. inne i en
+// event-listener, der den ville vært null).
+const KBH_ROOT = (() => {
+  const scriptUrl = document.currentScript && document.currentScript.src;
+  if (!scriptUrl) {
+    // Skal aldri skje ved korrekt <script src="...i18n.js">-lasting -- dette
+    // er en utviklerfeil (f.eks. inline-script eller dynamisk injeksjon uten
+    // src), ikke noe brukeren kan forårsake. Feiler høyt fremfor stille
+    // fallback som kunne hentet data fra feil sted.
+    throw new Error("KBH_ROOT: kan ikke bestemme web-root -- i18n.js ble ikke lastet via <script src>.");
+  }
+  return new URL("../", scriptUrl).href;
+})();
+
 let _gjeldendeSprak = null;
 
 function _lagretSprak() {

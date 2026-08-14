@@ -107,10 +107,10 @@ function forhandsutfyllIdentitetsPreferanse() {
 
 async function lastData() {
   const [malt, humle, gjaer, stiler] = await Promise.all([
-    fetch("data/malt.json").then((r) => r.json()),
-    fetch("data/humle.json").then((r) => r.json()),
-    fetch("data/gjaer.json").then((r) => r.json()),
-    fetch("data/bjcp_styles.json").then((r) => r.json()),
+    fetch(KBH_ROOT + "data/malt.json").then((r) => r.json()),
+    fetch(KBH_ROOT + "data/humle.json").then((r) => r.json()),
+    fetch(KBH_ROOT + "data/gjaer.json").then((r) => r.json()),
+    fetch(KBH_ROOT + "data/bjcp_styles.json").then((r) => r.json()),
   ]);
   maltData = malt;
   humleData = humle;
