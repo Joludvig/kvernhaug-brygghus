@@ -4,6 +4,25 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 21C — Unit-readiness: metric canonical / US-klar arkitektur (2026-08-14)
+
+Liten, kontrollert arkitekturrunde: ingen ny funksjonalitet, ingen
+konvertering til US customary er slått på noe sted i UI-et. Ny
+DOM-uavhengig modul `web/js/units.js` samler volum-formattering/parsing
+bak `formatVolume(liter, unitSystem)`/`parseVolume(tekst, unitSystem)` —
+`unitSystem` støtter i dag kun `"metric"` i praksis, men `"us"` finnes
+teknisk implementert (gallons, US_GALLON_L = 3.785411784) som et
+demonstrert extension point uten at noe UI kaller det ennå. `_fmtVolum()`
+i `app.js` delegerer nå til samme modul i stedet for å duplisere
+avrundingslogikken. Utstyrsprofilenes tre visningstekster
+(`utstyr.detaljKapasitet`/`detaljMaks`/`batchAdvarsel`) går nå gjennom
+ett formatteringspunkt i stedet for hardkodet " L" i i18n-malene.
+Canonical storage uendret (liter, `kettleCapacityL`/`maxRecommendedBatchL`
+som rene tall) — `kvernhaug_web_utstyr` og `.kbhrecipe` har ingen
+schemaendring, ingen `unitSystem`-felt lagt til noe sted. LB_KG/OZ_G-
+konstanter dokumentert i `units.js` som fremtidig kontrakt; masse- og
+temperaturkonvertering er eksplisitt ikke bygget denne runden.
+
 ## Runde 19 — Google Search Console-verifisering (2026-08-14)
 
 Ren dokumentasjons-/verifiseringsrunde, ingen kodeendring. Domain

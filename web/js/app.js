@@ -640,7 +640,7 @@ function _lesGjaerEgendefinert() {
 // knapp, ingen live-kobling til batch-volum-feltet -- samme prinsipp som
 // hindrer en feedback-loop i malt kg/%- og mål-IBU-arbeidet over.
 function _fmtVolum(v) {
-  return Number.isInteger(v) ? String(v) : v.toFixed(1).replace(/\.0$/, "");
+  return formatVolumeNumber(v);
 }
 
 function skalerOppskrift() {
@@ -741,9 +741,9 @@ function _utstyrRadDetalj(profil) {
   const deler = [];
   const merke = [profil.manufacturer, profil.model].filter(Boolean).join(" ");
   if (merke) deler.push(merke);
-  deler.push(t("utstyr.detaljKapasitet", { kap: _fmtVolum(profil.kettleCapacityL) }));
+  deler.push(t("utstyr.detaljKapasitet", { kap: formatVolume(profil.kettleCapacityL) }));
   if (profil.maxRecommendedBatchL) {
-    deler.push(t("utstyr.detaljMaks", { maks: _fmtVolum(profil.maxRecommendedBatchL) }));
+    deler.push(t("utstyr.detaljMaks", { maks: formatVolume(profil.maxRecommendedBatchL) }));
   }
   return deler.join(" · ");
 }
@@ -819,7 +819,7 @@ function _oppdaterUtstyrBatchAdvarsel(batchVolum) {
     el.textContent = "";
     return;
   }
-  el.textContent = t("utstyr.batchAdvarsel", { navn: profil.name, maks: _fmtVolum(profil.maxRecommendedBatchL) });
+  el.textContent = t("utstyr.batchAdvarsel", { navn: profil.name, maks: formatVolume(profil.maxRecommendedBatchL) });
   el.hidden = false;
 }
 
