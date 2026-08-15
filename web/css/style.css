@@ -2864,3 +2864,33 @@ footer {
   font-size: 1rem;
   margin: 0 0 0.2rem;
 }
+
+/* ── Pantry-polish (Runde 24C) ───────────────────────────────────────── */
+.pantry-backup-blokk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.6rem 0 1rem;
+}
+
+.pantry-backup-blokk .hjelpetekst {
+  flex-basis: 100%;
+  margin: 0.2rem 0 0;
+}
+
+.pantry-quick-add-knapp {
+  flex: none;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  color: var(--moss);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pantry-quick-add-knapp:hover {
+  border-color: var(--moss);
+}

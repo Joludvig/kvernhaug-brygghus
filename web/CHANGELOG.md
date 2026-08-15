@@ -4,6 +4,42 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 24C — Pantry V1 polish: backup + quick add (2026-08-15)
+
+Tredje og siste steg i Pantry V1: gjør lageret trygt å stole på som
+eneste lagringssted (local-first uten sync) og lukker sløyfen mellom
+"Hva mangler du?" og selve lageret.
+
+Eget, portabelt `.kbhpantry`-backupformat i `pantry.js`
+(`{format:"kbhpantry", version:1, exportedAt, generator,
+pantry:{items:[...]}}`) — helt adskilt fra `.kbhrecipe`, alltid
+canonical (kg/gram/antall), aldri valgt display-enhet. Eksport laster
+ned `Kvernhaug-Pantry-Backup-YYYY-MM-DD.kbhpantry` lokalt (samme
+Blob-mønster som `kbhrecipe.js`), ingen server-request. Import er
+RESTORE/REPLACE, ikke merge — brukeren bekreftes eksplisitt før
+eksisterende lager erstattes, og en avslått bekreftelse endrer
+ingenting. Valideringskontrakt: wrapper-feil (ugyldig JSON, feil
+format/version, `pantry.items` ikke en array) avviser HELE importen;
+enkelt-item-feil (negativ mengde, desimal gjær-antall, custom uten
+navn, o.l.) filtreres bort stille SÅ LENGE wrapperen selv er gyldig —
+samme prinsipp som `lesPantryState()` allerede bruker for korrupt
+localStorage-innhold.
+
+Ny "Legg til i lager"-knapp på hver tracked shortage-rad i "Hva mangler
+du?" — bruker ALLTID `pantry_compare.js` sin kanoniske
+`shortage`-verdi direkte (aldri et parset/avrundet display-tall, for å
+unngå drift på tvers av Metric/US). Merger inn i eksisterende
+pantry-rad om varen allerede finnes, oppretter ny ellers. Skjules helt
+når kravet allerede er dekket. Egendefinerte oppskrift-rader får aldri
+denne knappen — de forblir i "Ikke sporet i lager" med en kort
+forklaring om at de må legges inn manuelt.
+
+Ingen nye sider (sitemap fortsatt 20 URL-er), ingen endring i
+`.kbhrecipe`- eller andre localStorage-nøkler (kun
+`kvernhaug_web_pantry` leses/skrives av backup/import). 32 nye
+symmetriske NO/EN-nøkler. Pantry V1 anses funksjonelt komplett etter
+denne runden — se `web/README.md`.
+
 ## Runde 24B — Oppskrift ↔ lager-sammenligning + handleliste (2026-08-15)
 
 Andre steg i Pantry/Shopping V1: ny `web/js/pantry_compare.js` (DOM-fri

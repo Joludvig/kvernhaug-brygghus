@@ -90,7 +90,7 @@
 <ul class="utstyr-liste" id="pantry-mangel-liste"></ul>
 <div hidden="" id="pantry-ikke-sporet-blokk">
 <h3 data-i18n="pantry.compare.ikkeSporetTittel">Not tracked in pantry</h3>
-<p class="hjelpetekst" data-i18n="pantry.compare.ikkeSporetForklaring">Custom ingredients are not automatically linked to your pantry.</p>
+<p class="hjelpetekst" data-i18n="pantry.compare.ikkeSporetForklaring">Custom ingredients are not automatically linked to your pantry — add them manually to your pantry if you want to track them.</p>
 <ul class="utstyr-liste" id="pantry-ikke-sporet-liste"></ul>
 </div>
 <button class="egendefinert-knapp" data-i18n="pantry.compare.kopierHandleliste" id="pantry-kopier-handleliste-knapp" type="button">📋 Copy shopping list</button>
@@ -99,7 +99,13 @@
 <section class="panel">
 <h2 data-i18n="pantry.tittel">Pantry &amp; shopping</h2>
 <p class="hjelpetekst" data-i18n="pantry.intro">Keep track of the malt, hops, and yeast you have at home.</p>
-<p class="hjelpetekst" data-i18n="pantry.localFirst">Your pantry is stored only in this browser.</p>
+<p class="hjelpetekst" data-i18n="pantry.localFirst">Your pantry is stored only in this browser. Export a backup if you want to move it to another device or protect against browser data being cleared.</p>
+<div class="pantry-backup-blokk">
+<button class="egendefinert-knapp" data-i18n="pantry.backup.eksporter" id="pantry-eksporter-knapp" type="button">💾 Export pantry</button>
+<button class="egendefinert-knapp" data-i18n="pantry.backup.importer" id="pantry-importer-knapp" type="button">📂 Import pantry</button>
+<input accept=".kbhpantry,.json,application/json" hidden="" id="pantry-importer-input" type="file"/>
+<p aria-live="polite" class="hjelpetekst" hidden="" id="pantry-backup-status"></p>
+</div>
 <ul class="utstyr-liste" id="pantry-liste"></ul>
 <p class="hjelpetekst" data-i18n="pantry.tomLager" hidden="" id="pantry-tom-melding">Your pantry is empty. Add the malt, hops, and yeast you have at home.</p>
 <button class="legg-til-knapp" data-i18n="pantry.leggTilVare" id="pantry-legg-til-knapp" type="button">+ Add item</button>
@@ -160,6 +166,7 @@
 <span class="utstyr-rad-detalj"></span>
 </div>
 <span class="pantry-status"></span>
+<button class="pantry-quick-add-knapp" data-i18n="pantry.compare.leggTilILager" hidden="" type="button">Add to pantry</button>
 </li>
 </template>
 <template id="pantry-ikke-sporet-rad-mal">

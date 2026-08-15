@@ -230,3 +230,82 @@ function slettPantryItem(pantryItemId) {
   if (slettet) _lagrePantryState(state);
   return slettet;
 }
+
+// ─── Runde 24C -- Backup/eksport/import ────────────────────────────────────
+// Eget, portabelt format -- ALDRI .kbhrecipe (se kbhrecipe.js). Inneholder
+// KUN pantry-items, alltid canonical (kg/gram/antall) -- aldri valgt
+// display-enhet (unitSystem hentes fra en helt separat nøkkel,
+// preferences.js, og skal aldri blandes inn i en pantry-backup). Samme
+// versjonerte wrapper-idé som .kbhrecipe, men eget format-navn slik at de
+// to filtypene aldri kan forveksles eller åpnes i feil flyt.
+
+const PANTRY_BACKUP_FORMAT = "kbhpantry";
+const PANTRY_BACKUP_VERSION = 1;
+
+function byggPantryBackupInnhold() {
+  return {
+    format: PANTRY_BACKUP_FORMAT,
+    version: PANTRY_BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    generator: "Kvernhaug Brygghus",
+    pantry: { items: allePantryItems() },
+  };
+}
+
+function _pantryBackupFilnavn() {
+  return `Kvernhaug-Pantry-Backup-${new Date().toISOString().slice(0, 10)}`;
+}
+
+function lastNedPantryBackup() {
+  const blob = new Blob([JSON.stringify(byggPantryBackupInnhold(), null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${_pantryBackupFilnavn()}.kbhpantry`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Parser en importert backup-fils tekstinnhold. Returnerer { ok: true,
+// items } eller { ok: false, melding }. Kontrakt (Runde 24C pkt. 17):
+// WRAPPER-feil (ugyldig JSON, feil format/version, pantry.items ikke en
+// array) avviser HELE importen -- ingen delvis gjetting på en fil som ikke
+// engang har riktig struktur. Enkelt-ITEM-feil (korrupt rad, negativ
+// mengde, desimal gjær-antall, custom uten navn, osv.) filtreres derimot
+// bort stille -- samme _gyldigPantryItem-validering som lesPantryState()
+// allerede bruker -- SÅ LENGE wrapperen selv er gyldig, slik at resten av
+// en ellers god backup ikke går tapt pga. én dårlig rad.
+function parsePantryBackupInnhold(tekst) {
+  let parsed;
+  try {
+    parsed = JSON.parse(tekst);
+  } catch {
+    return { ok: false, melding: t("pantry.backup.feilUgyldigJson") };
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { ok: false, melding: t("pantry.backup.feilUgyldigFil") };
+  }
+  if (parsed.format !== PANTRY_BACKUP_FORMAT) {
+    return { ok: false, melding: t("pantry.backup.feilUgyldigFil") };
+  }
+  if (parsed.version !== PANTRY_BACKUP_VERSION) {
+    return { ok: false, melding: t("pantry.backup.feilVersjon") };
+  }
+  if (!parsed.pantry || typeof parsed.pantry !== "object" || !Array.isArray(parsed.pantry.items)) {
+    return { ok: false, melding: t("pantry.backup.feilUgyldigFil") };
+  }
+  return { ok: true, items: parsed.pantry.items.filter(_gyldigPantryItem).map(_normalisertPantryItem) };
+}
+
+// Erstatter HELE pantryet med en allerede validert item-liste (typisk fra
+// parsePantryBackupInnhold()). Kjører items gjennom samme validering en
+// gang til -- defense in depth, samme prinsipp som lesPantryState() --
+// slik at denne funksjonen aldri kan lagre noe ugyldig uansett hvem som
+// kaller den. RESTORE/REPLACE, ikke merge (Runde 24C pkt. 5) -- UI-laget
+// (pantry_page.js) er ansvarlig for å bekrefte med brukeren FØR dette
+// kalles.
+function erstattPantryItems(items) {
+  const gyldige = (Array.isArray(items) ? items : []).filter(_gyldigPantryItem).map(_normalisertPantryItem);
+  _lagrePantryState({ format: "kbh-pantry", version: PANTRY_VERSION, items: gyldige });
+  return gyldige;
+}

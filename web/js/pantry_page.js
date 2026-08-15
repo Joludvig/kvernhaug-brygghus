@@ -240,7 +240,27 @@ function _visMangelRad(listeEl, type, rad) {
   const status = li.querySelector(".pantry-status");
   status.textContent = _statusTekst(rad.status);
   status.classList.add(`pantry-status-${rad.status}`);
+
+  const quickAddKnapp = li.querySelector(".pantry-quick-add-knapp");
+  if (rad.shortage > 0) {
+    quickAddKnapp.hidden = false;
+    quickAddKnapp.addEventListener("click", () => _handleQuickAdd(type, rad.id, rad.shortage));
+  }
   listeEl.appendChild(li);
+}
+
+// ─── Runde 24C -- "Legg til i lager" fra shortage-rad ──────────────────────
+// Bruker ALLTID rad.shortage -- den kanoniske verdien fra pantry_compare.js
+// -- ALDRI et parset/avrundet display-tall (Runde 24C pkt. 11), for å
+// unngå drift. Kun tracked (bibliotek-id-baserte) rader har denne knappen
+// i det hele tatt -- egendefinerte oppskrift-rader vises kun i "Ikke
+// sporet i lager" og får ALDRI en auto-link-knapp (pkt. 10).
+function _handleQuickAdd(type, id, shortage) {
+  const eksisterende = finnPantryItemVedIngrediens(type, id);
+  const res = eksisterende
+    ? oppdaterPantryItem(eksisterende.pantryItemId, { mengde: eksisterende.mengde + shortage })
+    : leggTilPantryItem({ ingredientType: type, id, mengde: shortage });
+  if (res.ok) visPantryListe();
 }
 
 function _visIkkeSporetRad(listeEl, rad) {
@@ -331,6 +351,41 @@ function _handleKopierHandleliste() {
   } else {
     visStatus("pantry.compare.kopieringFeilet");
   }
+}
+
+// ─── Runde 24C -- Backup/eksport/import ─────────────────────────────────────
+// Samme fil-mønster som app.js sin lagreOppskriftsfil()/apneOppskriftsfil()
+// (Blob-nedlasting / FileReader + skjult <input type="file">), men et
+// helt eget .kbhpantry-format (se pantry.js) -- aldri .kbhrecipe, aldri
+// recipe-data. Import er RESTORE/REPLACE (Runde 24C pkt. 5), ikke merge --
+// brukeren bekreftes eksplisitt FØR eksisterende lager erstattes.
+
+function _visBackupStatus(tekst) {
+  const el = document.getElementById("pantry-backup-status");
+  el.textContent = tekst;
+  el.hidden = false;
+}
+
+function _handleEksporterPantry() {
+  lastNedPantryBackup();
+  _visBackupStatus(t("pantry.backup.eksportertStatus"));
+}
+
+function _handleImporterPantryFil(fil) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const resultat = parsePantryBackupInnhold(reader.result);
+    if (!resultat.ok) {
+      _visBackupStatus(resultat.melding);
+      return;
+    }
+    if (!confirm(t("pantry.backup.erstattConfirm"))) return;
+    const importerte = erstattPantryItems(resultat.items);
+    visPantryListe();
+    _visBackupStatus(t("pantry.backup.importertStatus", { antall: importerte.length }));
+  };
+  reader.onerror = () => _visBackupStatus(t("pantry.backup.lesefeil"));
+  reader.readAsText(fil);
 }
 
 // ─── Skjema: type-bryter / combobox / egendefinert ────────────────────────
@@ -509,6 +564,14 @@ async function init() {
   });
   document.getElementById("pantry-oppskrift-velger").addEventListener("change", (e) => velgOppskrift(e.target.value));
   document.getElementById("pantry-kopier-handleliste-knapp").addEventListener("click", _handleKopierHandleliste);
+
+  document.getElementById("pantry-eksporter-knapp").addEventListener("click", _handleEksporterPantry);
+  const importerInput = document.getElementById("pantry-importer-input");
+  document.getElementById("pantry-importer-knapp").addEventListener("click", () => importerInput.click());
+  importerInput.addEventListener("change", () => {
+    if (importerInput.files[0]) _handleImporterPantryFil(importerInput.files[0]);
+    importerInput.value = "";
+  });
 
   byggOppskriftValgliste();
   visPantryListe();

@@ -87,7 +87,7 @@
     <ul class="utstyr-liste" id="pantry-mangel-liste"></ul>
     <div id="pantry-ikke-sporet-blokk" hidden>
       <h3 data-i18n="pantry.compare.ikkeSporetTittel">Ikke sporet i lager</h3>
-      <p class="hjelpetekst" data-i18n="pantry.compare.ikkeSporetForklaring">Egendefinerte ingredienser kobles ikke automatisk til lageret.</p>
+      <p class="hjelpetekst" data-i18n="pantry.compare.ikkeSporetForklaring">Egendefinerte ingredienser kobles ikke automatisk til lageret — legg dem inn manuelt i lageret om du vil spore dem.</p>
       <ul class="utstyr-liste" id="pantry-ikke-sporet-liste"></ul>
     </div>
     <button type="button" class="egendefinert-knapp" id="pantry-kopier-handleliste-knapp" data-i18n="pantry.compare.kopierHandleliste">📋 Kopier handleliste</button>
@@ -97,7 +97,14 @@
   <section class="panel">
     <h2 data-i18n="pantry.tittel">Lager & innkjøp</h2>
     <p class="hjelpetekst" data-i18n="pantry.intro">Hold oversikt over malt, humle og gjær du har hjemme.</p>
-    <p class="hjelpetekst" data-i18n="pantry.localFirst">Lageret lagres bare i denne nettleseren.</p>
+    <p class="hjelpetekst" data-i18n="pantry.localFirst">Lageret lagres bare i denne nettleseren. Eksporter en backup hvis du vil flytte det til en annen enhet eller sikre deg mot sletting av nettleserdata.</p>
+
+    <div class="pantry-backup-blokk">
+      <button type="button" class="egendefinert-knapp" id="pantry-eksporter-knapp" data-i18n="pantry.backup.eksporter">💾 Eksporter lager</button>
+      <button type="button" class="egendefinert-knapp" id="pantry-importer-knapp" data-i18n="pantry.backup.importer">📂 Importer lager</button>
+      <input type="file" id="pantry-importer-input" accept=".kbhpantry,.json,application/json" hidden>
+      <p class="hjelpetekst" id="pantry-backup-status" aria-live="polite" hidden></p>
+    </div>
 
     <ul class="utstyr-liste" id="pantry-liste"></ul>
     <p class="hjelpetekst" id="pantry-tom-melding" data-i18n="pantry.tomLager" hidden>Lageret er tomt. Legg inn malt, humle og gjær du har hjemme.</p>
@@ -168,6 +175,7 @@
       <span class="utstyr-rad-detalj"></span>
     </div>
     <span class="pantry-status"></span>
+    <button type="button" class="pantry-quick-add-knapp" data-i18n="pantry.compare.leggTilILager" hidden>Legg til i lager</button>
   </li>
 </template>
 

@@ -42,7 +42,7 @@ Seks sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny 
 
 ## Hva den bevisst ikke har
 
-Dette er ikke en nettversjon av hele Streamlit-appen. Ingen innlogging, ingen database, ingen vannkjemi eller Smart Handleliste — se hovedappen (`app.py`) for full funksjonalitet. Pantry finnes fra Runde 24A/24B som en enkel, lokal lagerliste med oppskrift ↔ lager-sammenligning og handleliste (`pantry.html`) — fortsatt ingen pris-/butikkdata, se `web/CHANGELOG.md`.
+Dette er ikke en nettversjon av hele Streamlit-appen. Ingen innlogging, ingen database, ingen vannkjemi eller Smart Handleliste — se hovedappen (`app.py`) for full funksjonalitet. Pantry V1 (`pantry.html`, Runde 24A–24C) er funksjonelt komplett: lokal lagerliste, oppskrift ↔ lager-sammenligning med handleliste, "Legg til i lager"-snarvei, og backup/restore via et eget `.kbhpantry`-format — fortsatt ingen pris-/butikkdata, ingen konto/sync, se `web/CHANGELOG.md`.
 
 **Stilmatchen er IKKE "full BJCP-matching".** Kall den "stilmatching mot Kvernhaug Brygghus sitt stilbibliotek". `data/bjcp_styles.json` er identisk med — men ikke bredere enn — biblioteket appen selv bruker i dag: 26 stiler (25 offisielle BJCP-understiler + tre eksplisitt merkede, ikke-offisielle Kvernhaug-kategorier). Det offisielle BJCP 2021-heftet har rundt 100 understiler; hele stilfamilier (sure øl, saison, barleywine, moderne craft-stiler m.fl.) finnes ikke i biblioteket — verken i web eller desktop.
 
@@ -81,7 +81,8 @@ web/
   js/importer_page.js    Importer oppskrift-siden: fil-modus + tekst-modus (kaller recipe_importer.js)
   js/utskrift_page.js    Utskrift-siden: velger aktiv kladd/lagret oppskrift, kaller recipe_engine.js + print.js
   js/pantry.js            DOM-fri Pantry-state (Runde 24A) -- samme mønster som equipment.js. Egen
-                          kvernhaug_web_pantry-nøkkel, aldri blandet med recipes/utstyr/.kbhrecipe
+                          kvernhaug_web_pantry-nøkkel, aldri blandet med recipes/utstyr/.kbhrecipe. Eget
+                          .kbhpantry backup-/importformat (Runde 24C), aldri .kbhrecipe
   js/pantry_compare.js    DOM-fri oppskrift <-> lager-sammenligning (Runde 24B) -- samme mønster som
                           recipe_engine.js. required/available/shortage per ingrediens, aldri persistert
   js/pantry_page.js       Lager-siden: CRUD-UI over pantry.js, enhetsbevisst mengde via units.js, samt
