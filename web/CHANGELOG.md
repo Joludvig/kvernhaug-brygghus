@@ -4,6 +4,26 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 23 — Unit completeness: Importer forstår US customary (2026-08-15)
+
+Lukker den mest synlige gjenværende glippen etter Runde 22: fritekstimport
+på Importer-siden var fortsatt metrisk-spesifikk (kun `kg`/`g`/`L`), mens
+resten av appen siden Runde 22 lot brukeren velge US customary.
+`recipe_importer.js` sine regex-mønstre for batch/malt/humle er utvidet
+til å i tillegg forstå `US gal`/`gal`/`gallon(s)` (alltid tolket som US
+gallon, aldri Imperial/UK), `lb`/`lbs`/`pound`/`pounds`, og `oz`/
+`ounce`/`ounces` -- parseren tolker ALLTID enheten som faktisk står i
+teksten, uavhengig av brukerens valgte visningsenhet, og returnerer alltid
+canonical metrisk (liter/kg/gram), akkurat som før. Selve konverteringen
+gjenbruker `units.js` sine `parseVolume`/`parseMaltMass`/`parseHopMass`
+direkte, så det finnes fortsatt bare én kilde til
+US_GALLON_L/LB_KG/OZ_G-konstantene i hele web-appen. Eksplisitt "imperial
+gallon(s)" gir en vennlig advarsel i stedet for å stille bli tolket som US
+gallon. Dette er et bevisst avvik fra desktop-portens 1:1-prinsipp --
+desktop har ingen unitSystem-velger og forblir uendret. Importer-siden
+laster nå `units.js`, og hjelpeteksten i "Lim inn oppskriftstekst"-fanen
+viser ett metrisk og ett US-eksempel per format.
+
 ## Runde 22 — Faktisk enhetsvalg: Metric / US customary (2026-08-14)
 
 Bygger videre på Runde 21C sin unit-ready arkitektur og gjør US customary

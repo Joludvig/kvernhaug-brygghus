@@ -95,10 +95,12 @@
 
   <section class="panel importer-fane-panel" id="import-fane-tekst" hidden>
     <h2 data-i18n="importer.tekstTittel">Lim inn oppskriftstekst</h2>
+    <p class="hjelpetekst" data-i18n="importer.tekstIntro">Fritekstimport forstår vanlige mengder i både metriske enheter og US customary — «gal»/«gallon» tolkes alltid som US gallon, ikke Imperial/UK gallon.</p>
     <div class="import-format-hjelp">
-      <strong data-i18n="importer.formatKgLabel">Kg-format:</strong> <code>5 kg Maris Otter</code> · <code>300 g CaraMunich</code><br>
+      <strong data-i18n="importer.formatBatchLabel">Batch:</strong> <code>Batch: 20 L</code> · <code>Batch: 5.28 US gal</code><br>
+      <strong data-i18n="importer.formatKgLabel">Kg-format:</strong> <code>5 kg Maris Otter</code> · <code>11.02 lb Maris Otter</code><br>
       <strong data-i18n="importer.formatPctLabel">Prosentformat (krever total maltmengde):</strong> <code>Total malt: 6 kg</code> · <code>90% Maris Otter</code><br>
-      <strong data-i18n="importer.formatHumleLabel">Humle (må ha koketid):</strong> <code>20 g Magnum 60 min</code><br>
+      <strong data-i18n="importer.formatHumleLabel">Humle (må ha koketid):</strong> <code>20 g Magnum 60 min</code> · <code>0.7 oz Magnum 60 min</code><br>
       <strong data-i18n="importer.formatGjaerLabel">Gjær:</strong> <code>Wyeast 1318 London Ale III</code>
     </div>
     <textarea id="import-tekst-input" rows="8" placeholder="Lim inn oppskriften her …" data-i18n-placeholder="importer.tekstPlaceholder"></textarea>
@@ -132,6 +134,7 @@
 
 <script src="js/i18n.js"></script>
 <script src="js/preferences.js"></script>
+<script src="js/units.js"></script>
 <script src="js/chrome.js"></script>
 <script src="js/recipe_engine.js"></script>
 <script src="js/kbhrecipe.js"></script>

@@ -450,6 +450,8 @@ const TEKSTER = {
     "importer.filHjelpetekst": "Har du en .kbhrecipe-fil — fra denne siden, fra Oppskriftsbyggerens \"Lagre oppskriftsfil\", eller fra noen andre? Velg den her, så åpnes den direkte i byggeren. Eldre, rå oppskrifts-JSON støttes fortsatt.",
     "importer.filVelgKnapp": "⬆️ Velg en .kbhrecipe-fil",
     "importer.tekstTittel": "Lim inn oppskriftstekst",
+    "importer.tekstIntro": "Fritekstimport forstår vanlige mengder i både metriske enheter og US customary — «gal»/«gallon» tolkes alltid som US gallon, ikke Imperial/UK gallon.",
+    "importer.formatBatchLabel": "Batch:",
     "importer.formatKgLabel": "Kg-format:",
     "importer.formatPctLabel": "Prosentformat (krever total maltmengde):",
     "importer.formatHumleLabel": "Humle (må ha koketid):",
@@ -470,6 +472,7 @@ const TEKSTER = {
     "import.kategoriGjaer": "Gjær",
     "import.advarselProsentSum": "Maltprosentene summerer til {sum}% (forventet ~100%).",
     "import.advarselManglerTotal": "Mangler 'Total malt: X kg' — oppgi total maltmengde for å konvertere prosenter til kg.",
+    "import.advarselImperialGallon": "Fant en Imperial/UK gallon-mengde, som ikke støttes — Kvernhaug forstår metriske enheter og US customary (US gallon), ikke Imperial. Skriv om linjen i liter eller US gallon.",
     "oppskrift.importertNavnDefault": "Importert oppskrift",
 
     "meta.utskrift.sidetittel": "🖨️ Utskrift",
@@ -1212,6 +1215,8 @@ const TEKSTER = {
     "importer.filHjelpetekst": "Have a .kbhrecipe file — from this page, from the Recipe Builder's \"Save recipe file\", or from somewhere else? Choose it here and it opens directly in the builder. Older, raw recipe JSON is still supported.",
     "importer.filVelgKnapp": "⬆️ Choose a .kbhrecipe file",
     "importer.tekstTittel": "Paste recipe text",
+    "importer.tekstIntro": "Text import understands common amounts in both metric units and US customary — \"gal\"/\"gallon\" is always read as a US gallon, not Imperial/UK gallon.",
+    "importer.formatBatchLabel": "Batch:",
     "importer.formatKgLabel": "Kg format:",
     "importer.formatPctLabel": "Percentage format (requires total malt amount):",
     "importer.formatHumleLabel": "Hops (must have a boil time):",
@@ -1232,6 +1237,7 @@ const TEKSTER = {
     "import.kategoriGjaer": "Yeast",
     "import.advarselProsentSum": "The malt percentages total {sum}% (expected ~100%).",
     "import.advarselManglerTotal": "Missing 'Total malt: X kg' — provide the total malt amount to convert percentages to kg.",
+    "import.advarselImperialGallon": "Found an Imperial/UK gallon amount, which isn't supported — Kvernhaug understands metric units and US customary (US gallon), not Imperial. Rewrite the line in liters or US gallons.",
     "oppskrift.importertNavnDefault": "Imported recipe",
 
     "meta.utskrift.sidetittel": "🖨️ Print",

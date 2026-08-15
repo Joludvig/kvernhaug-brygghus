@@ -7,6 +7,20 @@
 // samme prinsipp og terskel (0.6), men ikke bit-for-bit identisk output i
 // alle kanttilfeller siden det er to uavhengige implementasjoner.
 // Ingen DOM her -- ren beregningslogikk, gjenbrukt av web/js/importer_page.js.
+//
+// Runde 23 -- BEVISST avvik fra desktop-portens 1:1-prinsipp: web har (siden
+// Runde 22) en Metric/US customary-visningsvelger som desktop ikke har, så
+// fritekstimporten her forstår i tillegg US customary-enheter (US gal, lb,
+// oz) desktop-parseren ikke kjenner til. Parseren tolker ALLTID enheten som
+// faktisk står skrevet i teksten -- aldri brukerens valgte visningsenhet
+// (unitSystem) -- og returnerer alltid canonical metrisk (liter/kg/gram),
+// nøyaktig som før. Se formatX()/parseX() i units.js, hvis konstanter
+// (US_GALLON_L/LB_KG/OZ_G) og parseVolume/parseMaltMass/parseHopMass
+// gjenbrukes direkte her for selve konverteringen, slik at det kun finnes
+// ÉN kilde til disse tallene i hele web-appen. "gal"/"gallon(s)" tolkes
+// alltid som US gallon, aldri Imperial/UK gallon -- eksplisitt "imperial
+// gallon(s)" gir en vennlig advarsel i stedet for en stille feilgjetning,
+// se _reBatchImperial nedenfor.
 
 const RECIPE_IMPORTER_TERSKEL = 0.6;
 
@@ -90,16 +104,36 @@ function _importerNormaliserTekst(text) {
   return text;
 }
 
+// Runde 23 -- delt kg-konvertering for malt-linjer (både enkeltrader og
+// "Total malt: ..."), gjenbrukt av begge steder unit-token dukker opp.
+// kg/g dekkes ikke av parseMaltMass (den kjenner kun kg<->lb), så g
+// regnes manuelt -- lb/lbs/pound/pounds går via samme US_GALLON/LB_KG-
+// konstant som resten av appen via parseMaltMass(verdi, "us").
+function _importerMaltKg(verdi, enhetRaa) {
+  const enhet = enhetRaa.toLowerCase();
+  if (enhet === "kg") return verdi;
+  if (enhet === "g") return verdi / 1000.0;
+  return parseMaltMass(verdi, "us");
+}
+
 function parseRecipeText(text) {
   text = _importerNormaliserTekst(text);
 
-  const reHumle = /^\s*(\d+[.,]?\d*)\s*g\s+(.+?)\s+(\d+)\s*min\s*$/i;
-  const reMaltKg = /^\s*(\d+[.,]?\d*)\s*kg\s+(.+?)\s*$/i;
-  const reMaltG = /^\s*(\d+[.,]?\d*)\s*g\s+(.+?)\s*$/i;
-  const reTotalMalt = /^totalt?\s*malt\s*:?\s*(\d+[.,]?\d*)\s*(kg|g)\b/i;
+  // Runde 23 -- humle/malt-enhetsgruppene er utvidet med US customary
+  // (oz for humle, lb/lbs/pound/pounds for malt) i tillegg til de
+  // opprinnelige g/kg. "kg" står FØR "g" i malt-alternativet (regex-
+  // alternering velger første treff, ikke lengste), akkurat som før --
+  // ellers uendret matchrekkefølge/-presedens fra før Runde 23.
+  const reHumle = /^\s*(\d+[.,]?\d*)\s*(g|oz|ounces?)\s+(.+?)\s+(\d+)\s*min\s*$/i;
+  const reMalt = /^\s*(\d+[.,]?\d*)\s*(kg|g|lbs?|pounds?)\s+(.+?)\s*$/i;
+  const reTotalMalt = /^totalt?\s*malt\s*:?\s*(\d+[.,]?\d*)\s*(kg|g|lbs?|pounds?)\b/i;
   const reMaltPct = /^\s*(\d+[.,]?\d*)\s*%\s+(.+?)\s*$/i;
   const reMetadata = /^(?:batch(?:\s*size)?|volum(?:e)?|boil|kok(?:etid)?|efficiency|effektivitet|og|fg|ibu|abv)\s*:/i;
-  const reBatch = /^(?:batch(?:\s*size)?|volum(?:e)?)\s*:\s*(\d+[.,]?\d*)\s*[Ll]?\b/i;
+  // Eksplisitt "imperial gal(lon(s))" sjekkes FØR den vanlige batch-
+  // regexen under, slik at Kvernhaug aldri stille tolker Imperial/UK
+  // gallon som US gallon -- se filhode-kommentaren.
+  const reBatchImperial = /^(?:batch(?:\s*size)?|volum(?:e)?)\s*:\s*(\d+[.,]?\d*)\s*imperial\s*gal(?:lons?)?\b/i;
+  const reBatch = /^(?:batch(?:\s*size)?|volum(?:e)?)\s*:\s*(\d+[.,]?\d*)\s*(us\s*gal(?:lons?)?|gal(?:lons?)?|l(?:iters?|itres?)?)?\b/i;
   const reLabel = /^(?:recipe|navn|name|oppskrift)\s*:\s*(.+)$/i;
 
   const maltListe = [], humleListe = [], gjaerListe = [], pctMaltListe = [];
@@ -112,23 +146,33 @@ function parseRecipeText(text) {
     linje = linje.trim();
     if (!linje || linje.startsWith("#")) continue;
 
-    let m = reBatch.exec(linje);
+    let m = reBatchImperial.exec(linje);
     if (m) {
-      batchLiter = parseFloat(m[1].replace(",", "."));
+      warnings.push(t("import.advarselImperialGallon"));
+      continue;
+    }
+
+    m = reBatch.exec(linje);
+    if (m) {
+      const verdi = parseFloat(m[1].replace(",", "."));
+      const enhet = (m[2] || "").toLowerCase().replace(/\s+/g, "");
+      batchLiter = enhet.includes("gal") ? parseVolume(verdi, "us") : parseVolume(verdi, "metric");
       continue;
     }
     if (reMetadata.test(linje)) continue;
 
     m = reTotalMalt.exec(linje);
     if (m) {
-      const verdi = parseFloat(m[1].replace(",", "."));
-      totalMaltKg = m[2].toLowerCase() === "kg" ? verdi : verdi / 1000.0;
+      totalMaltKg = _importerMaltKg(parseFloat(m[1].replace(",", ".")), m[2]);
       continue;
     }
 
     m = reHumle.exec(linje);
     if (m) {
-      humleListe.push({ navn: m[2].trim(), gram: parseFloat(m[1].replace(",", ".")), tid: parseInt(m[3], 10) });
+      const verdi = parseFloat(m[1].replace(",", "."));
+      const enhet = m[2].toLowerCase();
+      const gram = enhet === "g" ? parseHopMass(verdi, "metric") : parseHopMass(verdi, "us");
+      humleListe.push({ navn: m[3].trim(), gram, tid: parseInt(m[4], 10) });
       continue;
     }
 
@@ -138,15 +182,10 @@ function parseRecipeText(text) {
       continue;
     }
 
-    m = reMaltKg.exec(linje);
+    m = reMalt.exec(linje);
     if (m) {
-      maltListe.push({ navn: m[2].trim(), mengde: parseFloat(m[1].replace(",", ".")) });
-      continue;
-    }
-
-    m = reMaltG.exec(linje);
-    if (m) {
-      maltListe.push({ navn: m[2].trim(), mengde: parseFloat(m[1].replace(",", ".")) / 1000.0 });
+      const mengde = _importerMaltKg(parseFloat(m[1].replace(",", ".")), m[2]);
+      maltListe.push({ navn: m[3].trim(), mengde });
       continue;
     }
 
