@@ -464,8 +464,8 @@ const TEKSTER = {
 
     "import.tellinger": "Tolket: {malt} malt · {humle} humle · {gjaer} gjær-linje(r)",
     "import.ingenGjenkjent": "Ingen ingredienser ble gjenkjent.",
-    "import.treffMalt": "Malt: {navn} → <code>{display}</code> ({mengde} kg)",
-    "import.treffHumle": "Humle: {navn} → <code>{display}</code> ({gram} g, {tid} min)",
+    "import.treffMalt": "Malt: {navn} → <code>{display}</code> ({mengde})",
+    "import.treffHumle": "Humle: {navn} → <code>{display}</code> ({gram}, {tid} min)",
     "import.treffGjaer": "Gjær: {navn} → <code>{display}</code>",
     "import.kategoriMalt": "Malt",
     "import.kategoriHumle": "Humle",
@@ -1229,8 +1229,8 @@ const TEKSTER = {
 
     "import.tellinger": "Parsed: {malt} malt · {humle} hops · {gjaer} yeast line(s)",
     "import.ingenGjenkjent": "No ingredients were recognized.",
-    "import.treffMalt": "Malt: {navn} → <code>{display}</code> ({mengde} kg)",
-    "import.treffHumle": "Hops: {navn} → <code>{display}</code> ({gram} g, {tid} min)",
+    "import.treffMalt": "Malt: {navn} → <code>{display}</code> ({mengde})",
+    "import.treffHumle": "Hops: {navn} → <code>{display}</code> ({gram}, {tid} min)",
     "import.treffGjaer": "Yeast: {navn} → <code>{display}</code>",
     "import.kategoriMalt": "Malt",
     "import.kategoriHumle": "Hops",

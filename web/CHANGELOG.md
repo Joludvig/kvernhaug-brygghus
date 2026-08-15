@@ -4,6 +4,20 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 23A — Importer preview: unit-aware display (2026-08-15)
+
+Lukker det siste kjente display-gapet fra Runde 23: treff-listen i
+Importer sin tekstforhåndsvisning viste alltid hardkodet `kg`/`g`
+(`import.treffMalt`/`import.treffHumle` i i18n.js), uansett valgt
+unitSystem. Malen inneholder ikke lenger enheten selv -- `mengde`/`gram`
+formateres nå via `formatMaltMass()`/`formatHopMass()` fra units.js
+(samme helper byggeren bruker) FØR verdien settes inn i malen, så
+oversettelsestekstene forblir enhetsnøytrale. Et enhetsbytte mens
+forhåndsvisningen står synlig rerendrer den nå direkte fra sist parsede
+data via en ny `kvernhaug:enhetendret`-lytter i importer_page.js -- ingen
+ny analyse nødvendig. Ingen endring i parser, canonical data eller
+.kbhrecipe -- rent display-only, som forventet.
+
 ## Runde 23 — Unit completeness: Importer forstår US customary (2026-08-15)
 
 Lukker den mest synlige gjenværende glippen etter Runde 22: fritekstimport

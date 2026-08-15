@@ -8,6 +8,7 @@ const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
 
 let maltData = {}, humleData = {}, gjaerData = {};
 let sisteTreff = null;
+let sistParsed = null; // Runde 23A -- husket for å kunne rerendre preview live ved enhetsbytte
 
 // Runde 13A -- samme beskyttelse som byggerens "Åpne oppskriftsfil"
 // (app.js::apneOppskriftsfil): bekreft før en eksisterende, meningsfull
@@ -113,12 +114,17 @@ function visImportForhandsvisning(parsed, resultat) {
   treffListe.innerHTML = "";
   const { matched, unmatched } = resultat;
   let noeMatchet = false;
+  // Runde 23A -- mengde/gram formateres via units.js (samme unit-helper
+  // som byggeren) FØR de settes inn i i18n-malen, slik at malen selv
+  // aldri trenger å inneholde en hardkodet "kg"/"g" -- se
+  // import.treffMalt/import.treffHumle i i18n.js.
+  const enhet = hentUnitSystem();
   for (const m of matched.malt) {
-    treffListe.appendChild(_treffLinjeHtml(t("import.treffMalt", { navn: escHtml(m.navn), display: escHtml(m.display_name), mengde: m.mengde })));
+    treffListe.appendChild(_treffLinjeHtml(t("import.treffMalt", { navn: escHtml(m.navn), display: escHtml(m.display_name), mengde: formatMaltMass(m.mengde, enhet) })));
     noeMatchet = true;
   }
   for (const h of matched.humle) {
-    treffListe.appendChild(_treffLinjeHtml(t("import.treffHumle", { navn: escHtml(h.navn), display: escHtml(h.display_name), gram: h.gram, tid: h.tid })));
+    treffListe.appendChild(_treffLinjeHtml(t("import.treffHumle", { navn: escHtml(h.navn), display: escHtml(h.display_name), gram: formatHopMass(h.gram, enhet), tid: h.tid })));
     noeMatchet = true;
   }
   if (matched.gjaer) {
@@ -155,8 +161,17 @@ function analyserImportTekst() {
   const parsed = parseRecipeText(tekst);
   const resultat = matchImportedIngredients(parsed, maltData, humleData, gjaerData);
   resultat.metadata = { navn: parsed.navn, batch_liter: parsed.batch_liter };
+  sistParsed = parsed;
   visImportForhandsvisning(parsed, resultat);
 }
+
+// Runde 23A -- treff-listen viser malt/humle-mengder i valgt unitSystem
+// (se visImportForhandsvisning). Uten dette ville et enhetsbytte mens
+// forhåndsvisningen står synlig latt den vise feil enhet til neste
+// "Analyser"-klikk -- rerendrer samme data på nytt, ingen ny analyse.
+document.addEventListener("kvernhaug:enhetendret", () => {
+  if (sistParsed) visImportForhandsvisning(sistParsed, sisteTreff);
+});
 
 function bekreftImportTekst() {
   if (!sisteTreff) return;
