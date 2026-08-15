@@ -50,6 +50,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/utskrift.html"/>
   </url>
   <url>
+    <loc>https://kvernhaugbrygghus.no/pantry.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/pantry.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/pantry.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/pantry.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/pantry.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/pantry.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/pantry.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/pantry.html"/>
+  </url>
+  <url>
     <loc>https://kvernhaugbrygghus.no/personvern.html</loc>
     <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/personvern.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/personvern.html"/>

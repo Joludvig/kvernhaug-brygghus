@@ -2800,3 +2800,26 @@ footer {
   width: auto;
   max-width: 24rem;
 }
+
+/* ── Pantry (Runde 24A) ──────────────────────────────────────────────── */
+/* Gjenbruker .utstyr-liste/.utstyr-rad/.utstyr-rad-*-klassene uendret --
+   samme rad-med-rediger/slett-mønster som utstyrsprofil-listen. Eneste
+   override: pantry-rader er ikke klikkbare "velg denne"-knapper slik
+   utstyrsprofiler er, så #pantry-liste sin .utstyr-rad-velg skal ikke vise
+   pekerhånd-cursor. */
+#pantry-liste .utstyr-rad-velg {
+  cursor: default;
+}
+
+/* Samme kjente spesifisitets-fallgruve som Runde 21B.2 løste for
+   .utstyr-rad-handlinger[hidden]: .modus-bryter/.felt-rad sin egen
+   "display: flex" (author-stylesheet) vinner over nettleserens innebygde
+   "[hidden] { display: none }" (UA-stylesheet) uansett spesifisitet, siden
+   author alltid slår UA i cascade-origin. pantry_page.js sin
+   _apnePantrySkjemaRediger() setter .hidden=true på disse to for å skjule
+   type-bryteren/biblioteksvelgeren i redigeringsmodus -- uten eksplisitt
+   override her ville de blitt stående synlige. */
+#pantry-type-bryter[hidden],
+#pantry-velger-rad[hidden] {
+  display: none;
+}

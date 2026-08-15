@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lager & innkjøp — Kvernhaug Brygghus</title>
+<meta name="description" content="Hold oversikt over malt, humle og gjær du har hjemme — lagres lokalt i denne nettleseren, aldri på en server." data-i18n-content="meta.pantry.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/pantry.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/pantry.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/pantry.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/pantry.html">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.pantry.tittel">
+<header class="hero">
+  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="pantry.html" aria-current="page"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="en/pantry.html"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="meta.pantry.sidetittel">📦 Lager & innkjøp</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="pantry.html" aria-current="page"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="en/pantry.html"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe no-print"></div>
+<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="pantry.html" aria-current="page"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="en/pantry.html"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="pantry.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <hr class="sidemeny-skille">
+  <a href="hjelp/index.html" class="sidemeny-lenke"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<main>
+  <section class="panel">
+    <h2 data-i18n="pantry.tittel">Lager & innkjøp</h2>
+    <p class="hjelpetekst" data-i18n="pantry.intro">Hold oversikt over malt, humle og gjær du har hjemme.</p>
+    <p class="hjelpetekst" data-i18n="pantry.localFirst">Lageret lagres bare i denne nettleseren.</p>
+
+    <ul class="utstyr-liste" id="pantry-liste"></ul>
+    <p class="hjelpetekst" id="pantry-tom-melding" data-i18n="pantry.tomLager" hidden>Lageret er tomt. Legg inn malt, humle og gjær du har hjemme.</p>
+
+    <button type="button" class="legg-til-knapp" id="pantry-legg-til-knapp" data-i18n="pantry.leggTilVare">+ Legg til vare</button>
+
+    <form class="utstyr-skjema" id="pantry-skjema" novalidate hidden>
+      <h3 id="pantry-skjema-tittel" data-i18n="pantry.skjemaTittelNytt">Ny vare</h3>
+
+      <div class="modus-bryter" role="group" aria-label="Velg type" data-i18n-aria-label="pantry.velgTypeAriaLabel" id="pantry-type-bryter">
+        <button type="button" class="modus-knapp pantry-type-knapp" data-type="malt" aria-pressed="true" data-i18n="pantry.typeMalt">Malt</button>
+        <button type="button" class="modus-knapp pantry-type-knapp" data-type="humle" aria-pressed="false" data-i18n="pantry.typeHumle">Humle</button>
+        <button type="button" class="modus-knapp pantry-type-knapp" data-type="gjaer" aria-pressed="false" data-i18n="pantry.typeGjaer">Gjær</button>
+      </div>
+
+      <p class="hjelpetekst" id="pantry-redigerer-navn" hidden></p>
+
+      <div class="felt-rad felt-rad-combobox" id="pantry-velger-rad">
+        <label id="pantry-velger-label" data-i18n="pantry.velgVare">Velg vare</label>
+        <div id="pantry-velger-mount" aria-labelledby="pantry-velger-label"></div>
+      </div>
+      <button type="button" class="egendefinert-knapp" id="pantry-egendefinert-knapp" data-i18n="builder.egendefinertKnapp">+ Egendefinert</button>
+      <div class="egendefinert-felt" id="pantry-egendefinert-felt" hidden>
+        <input type="text" id="pantry-eg-navn" placeholder="Navn *" data-i18n-placeholder="builder.egendefinert.navnPlaceholder">
+        <input type="text" id="pantry-eg-produsent" placeholder="Produsent (valgfritt)" data-i18n-placeholder="builder.egendefinert.produsentPlaceholder">
+        <button type="button" class="egendefinert-tilbake-knapp" id="pantry-egendefinert-tilbake-knapp" data-i18n="builder.egendefinert.tilbakeKnapp">🔍 Søk i bibliotek i stedet</button>
+      </div>
+
+      <div class="felt-rad">
+        <label for="pantry-mengde" id="pantry-mengde-label" data-i18n="pantry.mengdeLabel">Mengde ({enhet})</label>
+        <input type="number" id="pantry-mengde" min="0" step="0.01" required>
+      </div>
+      <div class="felt-rad">
+        <label for="pantry-notat" data-i18n="pantry.notatLabel">Notat (valgfritt)</label>
+        <input type="text" id="pantry-notat" placeholder="F.eks. åpnet pose, kjøpt i juli" data-i18n-placeholder="pantry.notatPlaceholder">
+      </div>
+      <p class="hjelpetekst utstyr-skjema-melding" id="pantry-skjema-melding" aria-live="polite" hidden></p>
+      <div class="knapperad">
+        <button type="submit" id="pantry-skjema-lagre" data-i18n="pantry.lagreVare">💾 Lagre vare</button>
+        <button type="button" id="pantry-skjema-avbryt" data-i18n="pantry.avbryt">Avbryt</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<footer class="no-print">
+  <p data-i18n="footer.enkel">Oppskriftene dine lagres lokalt i denne nettleseren (localStorage).</p>
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<template id="pantry-rad-mal">
+  <li class="utstyr-rad">
+    <div class="utstyr-rad-velg">
+      <span class="utstyr-rad-navn"></span>
+      <span class="utstyr-rad-detalj"></span>
+    </div>
+    <div class="utstyr-rad-handlinger">
+      <button type="button" class="utstyr-rad-rediger" data-i18n="utstyr.rediger">Rediger</button>
+      <button type="button" class="utstyr-rad-slett" data-i18n="utstyr.slett">Slett</button>
+    </div>
+  </li>
+</template>
+
+<script src="js/i18n.js"></script>
+<script src="js/preferences.js"></script>
+<script src="js/units.js"></script>
+<script src="js/chrome.js"></script>
+<script src="js/combobox.js"></script>
+<script src="js/pantry.js"></script>
+<script src="js/pantry_page.js"></script>
+</body>
+</html>

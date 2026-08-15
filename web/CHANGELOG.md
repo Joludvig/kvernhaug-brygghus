@@ -4,6 +4,46 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 24A — Pantry V1: storage + lager-CRUD (2026-08-15)
+
+Første steg i Pantry/Shopping V1 (se Runde 24 sin arkitekturanalyse):
+lokal, kontofri lagerstyring for malt/humle/gjær, helt separat fra
+recipes/utstyr/preferanser/.kbhrecipe. Ny `web/js/pantry.js` (DOM-fri
+state-modul, samme mønster som `equipment.js`) eier
+`kvernhaug_web_pantry`-nøkkelen (`{format:"kbh-pantry", version:1,
+items:[]}`) med samme defensive fallback-til-tom-state-kontrakt ved
+korrupt/manglende/feil data. Identitet er ALLTID eksakt masterdata-id
+(samme skjema som oppskrift-ingredienser) valgt via samme `combobox.js`
+som byggeren bruker -- aldri fritekst/fuzzy-matching. Custom pantry-varer
+får sin egen `egen_pantry_<type>_<unik>`-navnerom, bevisst forskjellig fra
+oppskriftenes `egen_<type>_<timestamp>_<teller>`, og matches ALDRI
+automatisk mot oppskrift-custom (kommer evt. som eksplisitt, brukerstyrt
+kobling i en senere runde, ikke i V1).
+
+Ny side `web/pantry.html` (+ generert `web/en/pantry.html`, sitemap
+18→20 URL-er, ny "📦 Lager"/"Pantry"-lenke i sidemenyen på alle sider,
+IKKE gatet bak Bryggmester-modus). Rad-basert liste (gjenbruker
+`.utstyr-liste`/`.utstyr-rad`-mønsteret fra utstyrsprofiler, ikke en
+HTML-tabell) med ett delt legg-til/rediger-skjema (samme ett-skjema-
+prinsipp som `_apneUtstyrSkjema()`). Mengde vises/tas imot i valgt
+Metric/US customary via eksisterende `units.js`
+(`formatMaltMass`/`parseMaltMass`/`formatHopMass`/`parseHopMass`) --
+ingen ny konverteringslogikk. Gjær er rent pakke-antall (heltall, ingen
+enhetskonvertering). Duplikat-forsøk på samme biblioteks-id spør
+eksplisitt om mengden skal legges til eksisterende beholdning, i stedet
+for å opprette en ny rad stille.
+
+To reelle bugs funnet og fikset underveis: (1) samme `[hidden]`-vs-
+`display:flex`-spesifisitetsfelle som Runde 21B.2 løste for
+`.utstyr-rad-handlinger` traff nå `#pantry-type-bryter`/`#pantry-velger-rad`
+også -- egne scopede overrides lagt til. (2) skjemaets `required`/`step`-
+attributter blokkerte stille `submit`-eventet via nettleserens native
+constraint validation før JS-valideringen fikk kjøre (samme bugklasse som
+Runde 22 sitt utstyrsfelt-funn) -- fikset med `novalidate` på skjemaet,
+all validering skjer nå kun i JS med vennlige, oversatte feilmeldinger.
+
+Ingen recipe-sammenligning/mangelliste ennå -- det er Runde 24B.
+
 ## Runde 23A — Importer preview: unit-aware display (2026-08-15)
 
 Lukker det siste kjente display-gapet fra Runde 23: treff-listen i
