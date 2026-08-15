@@ -1,8 +1,9 @@
 # ui/recipe_card.py
+import json
 import re
 import os
 import streamlit as st
-from datetime import date
+from datetime import date, datetime, timezone
 from config import DEMO_MODE
 from modules.recipe_storage import (
     lagre_oppskrift,
@@ -15,6 +16,7 @@ from modules.recipe_storage import (
     LegacyLoggKandidatUkjent,
 )
 from modules.recipe import bygg_recipe_object
+from modules.kbh_contract import bygg_kbhrecipe_konvolutt, UgyldigOppskriftForEksport
 from modules.card_template import render_card_html, render_a4_html
 from ui.branding import _logo_base64
 
@@ -295,3 +297,23 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 width="stretch",
             )
             st.info("💡 Åpne filen i nettleseren og trykk **Ctrl + P** for å skrive ut.")
+
+        st.write("---")
+        st.caption("Eksporter oppskriften som en portabel .kbhrecipe-fil (KBH Core Contract V1) — kan åpnes i Kvernhaug Brygghus Web.")
+        if st.button("📦 Eksporter KBH-oppskrift (.kbhrecipe)", width="stretch"):
+            eksport_recipe = _bygg_recipe_fra_session(ctx)
+            generert_tidspunkt = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+            try:
+                konvolutt = bygg_kbhrecipe_konvolutt(eksport_recipe, generert_tidspunkt)
+            except UgyldigOppskriftForEksport as e:
+                st.error(f"❌ Kunne ikke eksportere «{eksport_recipe['name']}»: {e}")
+            else:
+                fil_navn = eksport_recipe["name"].replace(" ", "_").replace("/", "-") + ".kbhrecipe"
+                st.download_button(
+                    label="📥 Last ned .kbhrecipe",
+                    data=json.dumps(konvolutt, ensure_ascii=False, indent=2),
+                    file_name=fil_navn,
+                    mime="application/json",
+                    width="stretch",
+                    key="last_ned_kbhrecipe_btn",
+                )
