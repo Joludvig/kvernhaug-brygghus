@@ -42,7 +42,7 @@ Seks sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny 
 
 ## Hva den bevisst ikke har
 
-Dette er ikke en nettversjon av hele Streamlit-appen. Ingen innlogging, ingen database, ingen vannkjemi eller Smart Handleliste — se hovedappen (`app.py`) for full funksjonalitet. Pantry finnes fra Runde 24A som en enkel, lokal lagerliste (`pantry.html`) — ingen pris-/butikkdata, ingen oppskrift-sammenligning ennå (kommer i en senere runde), se `web/CHANGELOG.md`.
+Dette er ikke en nettversjon av hele Streamlit-appen. Ingen innlogging, ingen database, ingen vannkjemi eller Smart Handleliste — se hovedappen (`app.py`) for full funksjonalitet. Pantry finnes fra Runde 24A/24B som en enkel, lokal lagerliste med oppskrift ↔ lager-sammenligning og handleliste (`pantry.html`) — fortsatt ingen pris-/butikkdata, se `web/CHANGELOG.md`.
 
 **Stilmatchen er IKKE "full BJCP-matching".** Kall den "stilmatching mot Kvernhaug Brygghus sitt stilbibliotek". `data/bjcp_styles.json` er identisk med — men ikke bredere enn — biblioteket appen selv bruker i dag: 26 stiler (25 offisielle BJCP-understiler + tre eksplisitt merkede, ikke-offisielle Kvernhaug-kategorier). Det offisielle BJCP 2021-heftet har rundt 100 understiler; hele stilfamilier (sure øl, saison, barleywine, moderne craft-stiler m.fl.) finnes ikke i biblioteket — verken i web eller desktop.
 
@@ -56,8 +56,8 @@ web/
   mine-oppskrifter.html  Åpne/slette lagrede oppskrifter
   importer.html        Importer oppskrift — fil (.kbhrecipe/JSON) ELLER limt inn tekst, med forhåndsvisning
   utskrift.html        Velg aktiv kladd ELLER en lagret oppskrift, skriv ut de fire dokumentene
-  pantry.html           Lager & innkjøp -- lokal, kontofri lagerliste for malt/humle/gjær (Runde 24A). Ingen
-                          pris-/butikkdata, ingen oppskrift-sammenligning ennå
+  pantry.html           Lager & innkjøp -- lokal, kontofri lagerliste for malt/humle/gjær (Runde 24A) med
+                          oppskrift <-> lager-sammenligning og handleliste (Runde 24B). Ingen pris-/butikkdata
   personvern.html       Kontakt og personvern -- e-post, kort forklaring av lokal lagring/ingen tracking (Runde 17)
   css/style.css        Styling — to-lags palett (kaldt app-krom + varm merkevaresone), masthead/drawer, print, hjelp-TOC
   js/chrome.js          Delt "app-krom": masthead-krymping ved scroll + uttrekkbar venstremeny -- på alle sider
@@ -82,7 +82,10 @@ web/
   js/utskrift_page.js    Utskrift-siden: velger aktiv kladd/lagret oppskrift, kaller recipe_engine.js + print.js
   js/pantry.js            DOM-fri Pantry-state (Runde 24A) -- samme mønster som equipment.js. Egen
                           kvernhaug_web_pantry-nøkkel, aldri blandet med recipes/utstyr/.kbhrecipe
-  js/pantry_page.js       Lager-siden: CRUD-UI over pantry.js, enhetsbevisst mengde via units.js
+  js/pantry_compare.js    DOM-fri oppskrift <-> lager-sammenligning (Runde 24B) -- samme mønster som
+                          recipe_engine.js. required/available/shortage per ingrediens, aldri persistert
+  js/pantry_page.js       Lager-siden: CRUD-UI over pantry.js, enhetsbevisst mengde via units.js, samt
+                          oppskriftsvelger og "Hva mangler du?"-visning over pantry_compare.js (Runde 24B)
   data/malt.json         Generert fra data/master_malt.json — se "Ingrediensdata" under
   data/humle.json        Generert fra data/master_humle_v2.json
   data/gjaer.json         Generert fra data/master_gjaer_v2.json

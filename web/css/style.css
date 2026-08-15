@@ -2823,3 +2823,44 @@ footer {
 #pantry-velger-rad[hidden] {
   display: none;
 }
+
+/* ── Pantry-sammenligning (Runde 24B) ────────────────────────────────── */
+#pantry-oppskrift-velger {
+  flex: 1 1 auto;
+  width: auto;
+  max-width: 24rem;
+}
+
+.pantry-mangel-rad,
+.pantry-ikke-sporet-rad {
+  align-items: center;
+}
+
+.pantry-status {
+  flex: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0 0.6rem;
+}
+
+.pantry-status-nok {
+  color: var(--moss);
+}
+
+.pantry-status-knapp {
+  color: var(--gold);
+}
+
+.pantry-status-mangler {
+  color: var(--danger);
+}
+
+#pantry-ikke-sporet-blokk {
+  margin-top: 0.8rem;
+}
+
+#pantry-ikke-sporet-blokk h3 {
+  font-size: 1rem;
+  margin: 0 0 0.2rem;
+}

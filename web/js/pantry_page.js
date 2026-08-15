@@ -1,7 +1,7 @@
-// Runde 24A -- Pantry-siden: DOM-laget over pantry.js (samme oppdeling som
-// app.js over recipe_engine.js). Ren CRUD + visning -- ingen recipe-
-// sammenligning/mangelliste her, det kommer i Runde 24B (se filhode-
-// kommentaren i pantry.js).
+// Runde 24A/24B -- Pantry-siden: DOM-laget over pantry.js (samme oppdeling
+// som app.js over recipe_engine.js) og pantry_compare.js (samme oppdeling
+// som utskrift_page.js over recipe_engine.js). CRUD + visning + oppskrift
+// ↔ lager-sammenligning ("Hva mangler du?").
 //
 // Enhetsbevisst mengde-felt: samme dataset.canonical-mønster som app.js
 // (_settEnhetsfelt/_lesEnhetsfelt/_syncKanonisk), duplisert lokalt i liten
@@ -13,6 +13,18 @@
 let maltData = {}, humleData = {}, gjaerData = {};
 let _valgtType = "malt";
 let _redigererId = null;
+
+// ─── Runde 24B -- Oppskrift ↔ lager-sammenligning ─────────────────────────
+// Gjenbruker EKSAKT samme mønster som utskrift_page.js (aktiv kladd +
+// lagrede oppskrifter, samme lagringsnøkler/select-verdikonvensjon
+// "__aktiv__" / "lagret:<navn>") -- ingen ny oppskrifts-storage-kontrakt.
+// Skriver ALDRI til AKTIV_KLADD_NOKKEL eller LAGRINGSNOKKEL, samme
+// prinsipp som utskrift-siden: å se på en oppskrift her endrer den aldri.
+
+const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
+const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
+let valgtOppskrift = null;
+let sisteSammenligning = null;
 
 const PANTRY_ENHET_FORKORTELSE = {
   metric: { malt: "kg", humle: "g" },
@@ -112,7 +124,10 @@ function visPantryListe() {
   const tomEl = document.getElementById("pantry-tom-melding");
   listeEl.innerHTML = "";
   tomEl.hidden = items.length !== 0;
-  if (items.length === 0) return;
+  if (items.length === 0) {
+    _oppdaterSammenligning();
+    return;
+  }
 
   const mal = document.getElementById("pantry-rad-mal");
   for (const item of items) {
@@ -127,6 +142,194 @@ function visPantryListe() {
       }
     });
     listeEl.appendChild(rad);
+  }
+
+  _oppdaterSammenligning();
+}
+
+// ─── Runde 24B -- Oppskriftsvelger ─────────────────────────────────────────
+// Identisk mønster med utskrift_page.js sin hentAktivKladd/
+// hentLagredeOppskrifter/byggValgliste/velgOppskrift.
+
+function hentAktivKladd() {
+  try {
+    return JSON.parse(localStorage.getItem(AKTIV_KLADD_NOKKEL));
+  } catch {
+    return null;
+  }
+}
+
+function hentLagredeOppskrifter() {
+  try {
+    return JSON.parse(localStorage.getItem(LAGRINGSNOKKEL)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function velgOppskrift(valgtVerdi) {
+  const kladd = hentAktivKladd();
+  const lagrede = hentLagredeOppskrifter();
+  if (valgtVerdi === "__aktiv__") valgtOppskrift = kladd;
+  else if (valgtVerdi && valgtVerdi.startsWith("lagret:")) valgtOppskrift = lagrede[valgtVerdi.slice(7)];
+  else valgtOppskrift = kladd || Object.values(lagrede)[0] || null;
+  _oppdaterSammenligning();
+}
+
+function byggOppskriftValgliste() {
+  const kladd = hentAktivKladd();
+  const lagrede = hentLagredeOppskrifter();
+  const tomEl = document.getElementById("pantry-oppskrift-tom-melding");
+  const velgerRad = document.getElementById("pantry-oppskrift-velger-rad");
+
+  if (!kladd && Object.keys(lagrede).length === 0) {
+    tomEl.hidden = false;
+    velgerRad.hidden = true;
+    valgtOppskrift = null;
+    _oppdaterSammenligning();
+    return;
+  }
+  tomEl.hidden = true;
+  velgerRad.hidden = false;
+
+  const select = document.getElementById("pantry-oppskrift-velger");
+  const forrigeValg = select.value;
+  select.innerHTML = "";
+  if (kladd) {
+    const opt = document.createElement("option");
+    opt.value = "__aktiv__";
+    opt.textContent = t("utskrift.velgerAktivt", { navn: visningsnavn(kladd.navn) || t("identitet.utenNavn") });
+    select.appendChild(opt);
+  }
+  for (const navn of Object.keys(lagrede)) {
+    const opt = document.createElement("option");
+    opt.value = `lagret:${navn}`;
+    opt.textContent = visningsnavn(navn);
+    select.appendChild(opt);
+  }
+  if (forrigeValg && [...select.options].some((o) => o.value === forrigeValg)) select.value = forrigeValg;
+  velgOppskrift(select.value);
+}
+
+// ─── Runde 24B -- Sammenligningsresultat (Hva mangler du?) ─────────────────
+
+function _formatMengdeForType(type, mengde) {
+  if (type === "malt") return formatMaltMass(mengde, hentUnitSystem());
+  if (type === "humle") return formatHopMass(mengde, hentUnitSystem());
+  return `${mengde} ${t("pantry.gjaerEnhet")}`;
+}
+
+function _statusTekst(status) {
+  if (status === "nok") return t("pantry.compare.statusNok");
+  if (status === "knapp") return t("pantry.compare.statusKnapp");
+  return t("pantry.compare.statusMangler");
+}
+
+function _visMangelRad(listeEl, type, rad) {
+  const mal = document.getElementById("pantry-mangel-rad-mal");
+  const li = mal.content.firstElementChild.cloneNode(true);
+  li.querySelector(".utstyr-rad-navn").textContent = rad.navn || t("pantry.compare.ukjentVare");
+  let detalj = t("pantry.compare.radDetalj", {
+    trengs: _formatMengdeForType(type, rad.required),
+    paaLager: _formatMengdeForType(type, rad.available),
+  });
+  if (rad.shortage > 0) {
+    detalj += ` · ${t("pantry.compare.radMangler", { mangler: _formatMengdeForType(type, rad.shortage) })}`;
+  }
+  li.querySelector(".utstyr-rad-detalj").textContent = detalj;
+  const status = li.querySelector(".pantry-status");
+  status.textContent = _statusTekst(rad.status);
+  status.classList.add(`pantry-status-${rad.status}`);
+  listeEl.appendChild(li);
+}
+
+function _visIkkeSporetRad(listeEl, rad) {
+  const mal = document.getElementById("pantry-ikke-sporet-rad-mal");
+  const li = mal.content.firstElementChild.cloneNode(true);
+  li.querySelector(".utstyr-rad-navn").textContent = rad.navn;
+  li.querySelector(".utstyr-rad-detalj").textContent = t("pantry.compare.ikkeSporetTrengs", {
+    trengs: _formatMengdeForType(rad.ingredientType, rad.required),
+  });
+  listeEl.appendChild(li);
+}
+
+function _oppdaterSammenligning() {
+  const panel = document.getElementById("pantry-mangel-panel");
+  if (!valgtOppskrift) {
+    panel.hidden = true;
+    sisteSammenligning = null;
+    return;
+  }
+
+  const resultat = beregnPantryStatus(valgtOppskrift, allePantryItems(), maltData, humleData, gjaerData);
+  sisteSammenligning = resultat;
+  panel.hidden = false;
+
+  const oppsummeringEl = document.getElementById("pantry-mangel-oppsummering");
+  oppsummeringEl.textContent = resultat.antallMangler === 0
+    ? t("pantry.compare.altPaaLager")
+    : (resultat.antallMangler === 1 ? t("pantry.compare.mangler1") : t("pantry.compare.manglerN", { antall: resultat.antallMangler }));
+  if (resultat.antallIkkeSporet > 0) {
+    oppsummeringEl.textContent += " · " + (resultat.antallIkkeSporet === 1
+      ? t("pantry.compare.ikkeSporet1")
+      : t("pantry.compare.ikkeSporetN", { antall: resultat.antallIkkeSporet }));
+  }
+
+  const listeEl = document.getElementById("pantry-mangel-liste");
+  listeEl.innerHTML = "";
+  for (const rad of resultat.malt) _visMangelRad(listeEl, "malt", rad);
+  for (const rad of resultat.humle) _visMangelRad(listeEl, "humle", rad);
+  if (resultat.gjaer) _visMangelRad(listeEl, "gjaer", resultat.gjaer);
+
+  const ikkeSporetBlokk = document.getElementById("pantry-ikke-sporet-blokk");
+  const ikkeSporetListe = document.getElementById("pantry-ikke-sporet-liste");
+  ikkeSporetListe.innerHTML = "";
+  ikkeSporetBlokk.hidden = resultat.ikkeSporet.length === 0;
+  for (const rad of resultat.ikkeSporet) _visIkkeSporetRad(ikkeSporetListe, rad);
+
+  document.getElementById("pantry-kopier-handleliste-knapp").hidden =
+    resultat.antallMangler === 0 && resultat.antallIkkeSporet === 0;
+  document.getElementById("pantry-kopier-status").hidden = true;
+}
+
+// ─── Runde 24B -- Kopier handleliste (SHOULD, pkt. 17) ─────────────────────
+// Kopierer KUN shortage-varer + "ikke sporet"-seksjonen -- aldri varer som
+// allerede er nok/knapt nok på lager. Ren tekst, ingen pris/butikk/valuta
+// (Runde 24B pkt. 16).
+
+function _byggHandlelisteTekst(resultat) {
+  const linjer = [t("pantry.compare.handlelisteTittel"), ""];
+  const grupper = [["malt", resultat.malt], ["humle", resultat.humle], ["gjaer", resultat.gjaer ? [resultat.gjaer] : []]];
+  for (const [type, rader] of grupper) {
+    for (const rad of rader) {
+      if (rad.shortage > 0) linjer.push(`${rad.navn || t("pantry.compare.ukjentVare")} — ${_formatMengdeForType(type, rad.shortage)}`);
+    }
+  }
+  if (resultat.ikkeSporet.length > 0) {
+    linjer.push("");
+    linjer.push(t("pantry.compare.handlelisteIkkeSporetTittel"));
+    for (const rad of resultat.ikkeSporet) {
+      linjer.push(`${rad.navn} — ${_formatMengdeForType(rad.ingredientType, rad.required)}`);
+    }
+  }
+  return linjer.join("\n");
+}
+
+function _handleKopierHandleliste() {
+  if (!sisteSammenligning) return;
+  const tekst = _byggHandlelisteTekst(sisteSammenligning);
+  const statusEl = document.getElementById("pantry-kopier-status");
+  const visStatus = (nokkel) => {
+    statusEl.textContent = t(nokkel);
+    statusEl.hidden = false;
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(tekst).then(
+      () => visStatus("pantry.compare.kopiertBekreftelse"),
+      () => visStatus("pantry.compare.kopieringFeilet")
+    );
+  } else {
+    visStatus("pantry.compare.kopieringFeilet");
   }
 }
 
@@ -304,11 +507,19 @@ async function init() {
   document.querySelectorAll(".pantry-type-knapp").forEach((knapp) => {
     knapp.addEventListener("click", () => _settType(knapp.dataset.type));
   });
+  document.getElementById("pantry-oppskrift-velger").addEventListener("change", (e) => velgOppskrift(e.target.value));
+  document.getElementById("pantry-kopier-handleliste-knapp").addEventListener("click", _handleKopierHandleliste);
 
+  byggOppskriftValgliste();
+  visPantryListe();
+}
+
+function _sprakRerender() {
+  byggOppskriftValgliste();
   visPantryListe();
 }
 
 document.addEventListener("kvernhaug:enhetendret", _pantryEnhetRerender);
-window.addEventListener("kvernhaug:sprakendret", visPantryListe);
+window.addEventListener("kvernhaug:sprakendret", _sprakRerender);
 
 init();

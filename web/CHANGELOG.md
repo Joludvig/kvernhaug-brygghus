@@ -4,6 +4,46 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 24B — Oppskrift ↔ lager-sammenligning + handleliste (2026-08-15)
+
+Andre steg i Pantry/Shopping V1: ny `web/js/pantry_compare.js` (DOM-fri
+sammenligningsmotor, samme oppdeling som `recipe_engine.js`) regner ut
+`required`/`available`/`shortage` per ingrediens ved å slå sammen en valgt
+oppskrift (aktiv kladd eller lagret oppskrift -- gjenbruker EKSAKT
+`utskrift_page.js` sitt velger-/lagringsmønster, ingen ny oppskrifts-
+storage-kontrakt) mot `pantry.js` sin `allePantryItems()`. Malt-/
+humlerader med samme masterdata-id summeres FØR sammenligning (flere
+humletilsetninger ved ulik koketid teller som ett behov); gjær har ingen
+eksplisitt pakke-count i dagens oppskriftsmodell, så en valgt gjær-id
+telles som `required = 1 pakke`. Status er `nok`/`knapp`/`mangler` --
+"knapp" (mindre enn 5% margin for malt, 10% for humle) er rent
+rådgivende og teller aldri som shortage. Egendefinerte oppskrift-rader
+matches ALDRI mot lageret (verken bibliotek- eller custom-pantryvarer,
+selv ved identisk navn) -- de vises i en egen "Ikke sporet i lager"-
+seksjon, bevisst sikkerhet mot feil matching (se Runde 24 pkt. 6/8).
+Ukjent/fjernet masterdata-id (oppskriften refererer en ingrediens som
+ikke lenger finnes) viser en trygg "Ukjent / ikke sporet"-fallback i
+stedet for å gjette.
+
+`web/pantry.html` fikk to nye seksjoner foran lagerlisten: "Oppskrift"
+(velger) og "Hva mangler du?" (rad-basert resultatliste + oppsummering +
+"Ikke sporet i lager"-blokk + en "Kopier handleliste"-knapp som kun
+kopierer shortage-varer og ikke-sporet-varer som ren tekst -- ingen
+pris/butikk/valuta, shop-agnostisk per Runde 24B sitt eksplisitte krav).
+Sammenligningen regnes ALLTID på nytt fra oppskrift+lager (aldri
+persistert) og oppdateres live -- uten reload -- ved enhver
+pantry-mutasjon, oppskriftsbytte, enhetsbytte (Metric/US) eller
+språkbytte, siden `visPantryListe()` nå alltid ender med et kall til
+`_oppdaterSammenligning()`. Ingen ny side, ingen sitemap-endring (fortsatt
+20 URL-er), ingen endring i `.kbhrecipe`- eller
+`kvernhaug_web_oppskrifter`-kontraktene.
+
+Én reell bug funnet og fikset underveis: `visPantryListe()` sin
+early-return for tomt lager lå FØR det nye `_oppdaterSammenligning()`-
+kallet, så sammenligningen ble stående med utdaterte tall når siste
+pantry-vare ble slettet (viste f.eks. fortsatt "På lager: 5 kg" etter at
+varen var borte). Flyttet kallet inn i early-return-grenen også.
+
 ## Runde 24A — Pantry V1: storage + lager-CRUD (2026-08-15)
 
 Første steg i Pantry/Shopping V1 (se Runde 24 sin arkitekturanalyse):

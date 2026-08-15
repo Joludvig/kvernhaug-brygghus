@@ -77,6 +77,26 @@
 </nav>
 <main>
 <section class="panel">
+<h2 data-i18n="pantry.compare.tittelOppskrift">Recipe</h2>
+<p class="hjelpetekst" data-i18n="pantry.compare.ingenOppskrift" id="pantry-oppskrift-tom-melding">Choose a recipe to see what you have and what you're missing.</p>
+<div class="felt-rad" hidden="" id="pantry-oppskrift-velger-rad">
+<label data-i18n="utskrift.oppskriftLabel" for="pantry-oppskrift-velger">Recipe</label>
+<select id="pantry-oppskrift-velger"></select>
+</div>
+</section>
+<section class="panel" hidden="" id="pantry-mangel-panel">
+<h2 data-i18n="pantry.compare.tittelMangler">What are you missing?</h2>
+<p class="hjelpetekst" id="pantry-mangel-oppsummering"></p>
+<ul class="utstyr-liste" id="pantry-mangel-liste"></ul>
+<div hidden="" id="pantry-ikke-sporet-blokk">
+<h3 data-i18n="pantry.compare.ikkeSporetTittel">Not tracked in pantry</h3>
+<p class="hjelpetekst" data-i18n="pantry.compare.ikkeSporetForklaring">Custom ingredients are not automatically linked to your pantry.</p>
+<ul class="utstyr-liste" id="pantry-ikke-sporet-liste"></ul>
+</div>
+<button class="egendefinert-knapp" data-i18n="pantry.compare.kopierHandleliste" id="pantry-kopier-handleliste-knapp" type="button">📋 Copy shopping list</button>
+<p aria-live="polite" class="hjelpetekst" hidden="" id="pantry-kopier-status"></p>
+</section>
+<section class="panel">
 <h2 data-i18n="pantry.tittel">Pantry &amp; shopping</h2>
 <p class="hjelpetekst" data-i18n="pantry.intro">Keep track of the malt, hops, and yeast you have at home.</p>
 <p class="hjelpetekst" data-i18n="pantry.localFirst">Your pantry is stored only in this browser.</p>
@@ -133,12 +153,30 @@
 </div>
 </li>
 </template>
+<template id="pantry-mangel-rad-mal">
+<li class="utstyr-rad pantry-mangel-rad">
+<div class="utstyr-rad-velg">
+<span class="utstyr-rad-navn"></span>
+<span class="utstyr-rad-detalj"></span>
+</div>
+<span class="pantry-status"></span>
+</li>
+</template>
+<template id="pantry-ikke-sporet-rad-mal">
+<li class="utstyr-rad pantry-ikke-sporet-rad">
+<div class="utstyr-rad-velg">
+<span class="utstyr-rad-navn"></span>
+<span class="utstyr-rad-detalj"></span>
+</div>
+</li>
+</template>
 <script src="../js/i18n.js"></script>
 <script src="../js/preferences.js"></script>
 <script src="../js/units.js"></script>
 <script src="../js/chrome.js"></script>
 <script src="../js/combobox.js"></script>
 <script src="../js/pantry.js"></script>
+<script src="../js/pantry_compare.js"></script>
 <script src="../js/pantry_page.js"></script>
 </body>
 </html>
