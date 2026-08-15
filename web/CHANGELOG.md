@@ -4,6 +4,54 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 25B — .kbhbrew datafundament (2026-08-15)
+
+Ren datamodell-runde: ingen UI, ingen nye sider, ingen bryggelogg-visning.
+Ny `web/js/brew_storage.js` (DOM-fri) etablerer brygget som et
+førsteklasses objekt ved siden av oppskriften. En oppskrift er PLANEN; et
+brygg er den historiske HENDELSEN.
+
+Fem lag, med grenser satt etter tidspunkt og type sannhet: identitet/
+livssyklus, frosset snapshot, actuals (målinger), sensing (opplevelse) og
+learning (`whatWorked`/`whatChanged`/`nextTime`). Lagring:
+`kvernhaug_web_brygg` med `{format:"kbh-brews", version:1, items:[]}` —
+samme envelope- og valideringsmønster som resten av systemet.
+
+Snapshotet er rundens kjerne og svarer på ett spørsmål: *hva visste KBH da
+dette brygget startet?* Det fryser både inndata (hele recipe-payloaden,
+de FULLE masterdata-oppføringene for de refererte ingrediensene, aktiv
+utstyrsprofil) og utdata (predikert OG/FG/ABV/IBU/EBC/BU:GU,
+smaksprofil-vektoren, stilmatch-navn og -score), pluss proveniens
+(motorversjon, recipeSchemaVersion, bibliotekstørrelser, tidspunkt).
+Grunnen er at predikerte verdier IKKE kan gjenskapes pålitelig senere:
+maltpotensialer korrigeres, alfasyrer oppdateres, beregningsmotoren
+forbedres og BJCP-data revideres. Uten frysing ville "forventet" endret
+seg i ettertid, og hele plan-mot-faktisk-premisset falt.
+
+Motsatt lagres aldri noe som KAN gjenskapes: avvik mellom plan og faktisk,
+og faktisk ABV, regnes ut ved visning (`planVsFaktisk()`, `faktiskAbv()`).
+Heller ikke frosset: SVG/grafikk, språk- og enhetspreferanser, hele
+masterdata-biblioteket, og — viktig — de lokaliserte tekstene fra
+stilanalysen (`balanse`, `problemer`, `mangler`), som er bygget med `t()`
+og ville bakt brukerens språk inn i historikken.
+
+Et ufullstendig brygg er gyldig: alle felt i lag 3-5 er valgfrie og kan
+fylles ut i vilkårlig rekkefølge, når som helst. Status er metadata med
+tre fritt omsettelige verdier (`active`/`done`/`discarded`), ikke en
+tilstandsmaskin — et forkastet brygg er fullverdig historikk.
+`recipeId` er en SVAK referanse: slettes eller omdøpes oppskriften, er
+brygget fortsatt komplett, fordi snapshotet er autoritativt.
+
+Nytt `.kbhbrew`-filformat med en identitetspolicy som bevisst avviker fra
+`.kbhrecipe`: en importert oppskrift lander i kladden og lagres først når
+brukeren vil, mens en importert brygghistorikk må skrives rett i lageret.
+Å bare mynte ny id ved hver import ville derfor duplisert hele historikken
+ved gjentatt import. Løsningen skiller `brewId` (lokal lagringsidentitet,
+myntes alltid lokalt, adopteres aldri fra fil) fra `originBrewId`
+(historisk identitet, følger filen) — så egen historikk kan flyttes til ny
+maskin, brygg kan deles uten id-kollisjon, og gjentatt import gjenkjennes
+som duplikat i stedet for å dobles stille.
+
 ## Runde 25A — Versjonert oppskriftslagring + stabile recipeId-er (2026-08-15)
 
 Kirurgisk foundation-runde uten nye brukerfunksjoner.

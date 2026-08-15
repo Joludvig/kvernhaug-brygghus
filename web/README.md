@@ -82,6 +82,8 @@ web/
   js/utskrift_page.js    Utskrift-siden: velger aktiv kladd/lagret oppskrift, kaller recipe_engine.js + print.js
   js/recipe_storage.js    DOM-fri oppskriftslagring (Runde 25A): versjonert wrapper, stabile recipeId-er,
                           automatisk migrering fra gammel navne-nøklet ordbok. Se eget avsnitt under
+  js/brew_storage.js      DOM-fri brygghistorikk (Runde 25B): .kbhbrew-datamodell med frosset snapshot av
+                          plan + beregnede verdier. Ingen UI ennå. Se eget avsnitt under
   js/pantry.js            DOM-fri Pantry-state (Runde 24A) -- samme mønster som equipment.js. Egen
                           kvernhaug_web_pantry-nøkkel, aldri blandet med recipes/utstyr/.kbhrecipe. Eget
                           .kbhpantry backup-/importformat (Runde 24C), aldri .kbhrecipe
@@ -215,6 +217,28 @@ Payloaden ligger nestet under `recipe` nettopp fordi den da er nøyaktig det sam
 Eldre, flat lagring (ordbok nøklet på oppskriftsnavn) migreres automatisk ved første lesing, usynlig for brukeren. Rå kopi av den gamle strengen sikres i `kvernhaug_web_oppskrifter_legacy_backup` — med verifiserende tilbakelesing — *før* hovednøkkelen overskrives, og overskrives aldri senere.
 
 **`recipeId` skrives aldri til `.kbhrecipe` og leses aldri fra en.** Identiteten er lokal, aldri global: en delt eller gjeninnlest fil får fersk lokal identitet først når brukeren lagrer, slik at to nettlesere aldri kan ende med samme id for to uavhengige oppskrifter.
+
+## Brygghistorikk: .kbhbrew (Runde 25B — datamodell, ingen UI ennå)
+
+En oppskrift er PLANEN. Et brygg er den historiske HENDELSEN. `js/brew_storage.js` eier `kvernhaug_web_brygg` (`{format: "kbh-brews", version: 1, items: [...]}`) og deler hvert brygg i fem lag, med grensene satt etter *tidspunkt* og *type sannhet*:
+
+1. **identitet/livssyklus** — `brewId`, `recipeId` (svak referanse), `status`, datoer
+2. **snapshot** — den frosne planen. Skrives én gang, endres aldri
+3. **actuals** — målinger (`og`, `fg`, `volumeL`, `notes`), alle valgfrie
+4. **sensing** — brukerens opplevelse: `judgment` (`yes`/`maybe`/`no` — «ville jeg brygget denne igjen?», bevisst ikke stjerner), faktisk smaksprofil, fritekst
+5. **learning** — `whatWorked`, `whatChanged`, `nextTime`
+
+**Snapshotet** svarer på ett spørsmål: *hva visste KBH da dette brygget startet?* Det fryser hele recipe-payloaden, de **fulle** masterdata-oppføringene for de refererte ingrediensene, aktiv utstyrsprofil, de predikerte verdiene (OG/FG/ABV/IBU/EBC/BU:GU, smaksprofil-vektor, stilnavn + score) og proveniens (motorversjon, `recipeSchemaVersion`, bibliotekstørrelser, tidspunkt).
+
+Det styrende prinsippet: **lagre det som ikke kan gjenskapes, aldri det som kan.** Predikerte verdier kan ikke gjenskapes pålitelig senere — maltpotensialer korrigeres, alfasyrer oppdateres, beregningsmotoren forbedres, BJCP-data revideres — så de fryses. Avvik mellom plan og faktisk, og faktisk ABV, kan alltid regnes ut fra lagrede tall, så de lagres aldri (`planVsFaktisk()`, `faktiskAbv()`).
+
+Aldri frosset: SVG/grafikk, språk- og enhetspreferanser, hele masterdata-biblioteket, og de lokaliserte tekstene fra stilanalysen (`balanse`/`problemer`/`mangler` er bygget med `t()` og ville bakt brukerens språk inn i historikken).
+
+**Et ufullstendig brygg er gyldig.** Alle felt i lag 3–5 er valgfrie, kan fylles ut i vilkårlig rekkefølge og endres senere. `status` er metadata med tre fritt omsettelige verdier (`active`/`done`/`discarded`) — ikke en tilstandsmaskin. Et forkastet brygg er fullverdig historikk.
+
+**`recipeId` er en svak referanse**: slettes eller omdøpes oppskriften, er brygget fortsatt komplett og lesbart, fordi snapshotet er autoritativt.
+
+**Filidentitet** avviker bevisst fra `.kbhrecipe`: en importert oppskrift lander i kladden og lagres først når brukeren vil, mens en importert brygghistorikk må skrives rett i lageret — så «mynt alltid ny id» ville duplisert hele historikken ved gjentatt import. Derfor skilles `brewId` (lokal lagringsidentitet, myntes alltid lokalt, adopteres aldri fra fil) fra `originBrewId` (historisk identitet, følger filen). Egen historikk kan dermed flyttes til ny maskin, brygg kan deles uten id-kollisjon, og gjentatt import gjenkjennes som duplikat i stedet for å dobles stille.
 
 ## Portabel oppskriftsfil (.kbhrecipe)
 
