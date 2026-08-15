@@ -421,6 +421,7 @@ const TEKSTER = {
     "oppskrift.apneConfirm": "Åpne denne oppskriften? Den aktive oppskriften blir erstattet.",
     "oppskrift.apnetStatus": "Oppskriften er åpnet.",
     "oppskrift.lesefeil": "Kunne ikke lese filen.",
+    "oppskrift.lagreFeil": "Kunne ikke lagre oppskriften i nettleseren. Lagringsplassen kan være full, eller nettleseren kan være i privat modus. Prøv å lagre oppskriften som fil i stedet.",
 
     "kbhrecipe.ugyldigJson": "Denne filen kunne ikke leses som en oppskriftsfil (ugyldig JSON).",
     "kbhrecipe.ikkeGyldigOppskrift": "Denne filen ser ikke ut som en gyldig Kvernhaug-oppskrift.",
@@ -1254,6 +1255,7 @@ const TEKSTER = {
     "oppskrift.apneConfirm": "Open this recipe? The active recipe will be replaced.",
     "oppskrift.apnetStatus": "The recipe has been opened.",
     "oppskrift.lesefeil": "Could not read the file.",
+    "oppskrift.lagreFeil": "Couldn't save the recipe in this browser. Storage may be full, or the browser may be in private mode. Try saving the recipe as a file instead.",
 
     "kbhrecipe.ugyldigJson": "This file could not be read as a recipe file (invalid JSON).",
     "kbhrecipe.ikkeGyldigOppskrift": "This file doesn't look like a valid Kvernhaug recipe.",

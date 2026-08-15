@@ -18,10 +18,18 @@
 // AKTIVE, ulagrede oppskriften direkte, og lar denne siden gjenopprette seg
 // selv ved neste besøk uten tap av data.
 
-const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
 const MODUS_NOKKEL = "kvernhaug_web_modus";
 const IDENTITET_NOKKEL = "kvernhaug_web_identitet";
 const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
+
+// Runde 25A -- hvilken LAGRET oppskrift den aktive kladden redigerer, eller
+// null for en ny/uspart kladd. Følger med kladden til AKTIV_KLADD_NOKKEL
+// slik at "Lagre oppskrift" oppdaterer riktig rad i stedet for å opprette
+// et duplikat ved navnebytte -- og slik at et fremtidig .kbhbrew kan vite
+// om brygget stammer fra en lagret oppskrift. Ligger BEVISST utenfor
+// samleOppskrift(): lokal lagringsidentitet skal aldri havne i en
+// eksportert .kbhrecipe-fil (se recipe_storage.js).
+let _aktivRecipeId = null;
 
 // ─── Enhetsbevisste felt-lesing/-skriving (Runde 22) ───────────────────────
 // Et unit-bærende input sitt SYNLIGE .value viser tallet i GJELDENDE
@@ -795,7 +803,8 @@ function beregnOgVisResultat() {
   // Dekker batch-volum-input OG skalering gratis, siden begge ender her.
   _oppdaterUtstyrBatchAdvarsel(oppskrift.volum);
 
-  localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
+  const kladd = _aktivRecipeId ? { ...oppskrift, recipeId: _aktivRecipeId } : oppskrift;
+  localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(kladd));
 }
 
 // ─── Utstyrsprofiler (Runde 21B) ────────────────────────────────────────
@@ -1198,6 +1207,10 @@ function renderStilManuell() {
 
 function samleOppskrift() {
   return {
+    // Runde 25A -- semantisk versjon på selve payloaden, ikke på wrapperen.
+    // Følger oppskriften overalt: aktiv kladd, lagret rad, .kbhrecipe-fil og
+    // (senere) frosne .kbhbrew-snapshots. Se recipe_storage.js.
+    recipeSchemaVersion: RECIPE_SCHEMA_VERSION,
     navn: document.getElementById("oppskrift-navn").value.trim() || "Uten navn",
     brygger: document.getElementById("brygger-navn").value.trim(),
     bryggeri: document.getElementById("bryggeri-navn").value.trim(),
@@ -1214,20 +1227,21 @@ function samleOppskrift() {
   };
 }
 
-function hentLagredeOppskrifter() {
-  try {
-    return JSON.parse(localStorage.getItem(LAGRINGSNOKKEL)) || {};
-  } catch {
-    return {};
-  }
-}
-
+// Runde 25A -- upsert på recipeId i stedet for på navn. Redigerer kladden en
+// allerede lagret oppskrift, oppdateres NØYAKTIG den raden, også når navnet
+// er endret; tidligere opprettet et navnebytte en ny rad og lot den gamle
+// bli liggende. Skrivefeil (full kvote/privat nettlesing) rapporteres nå
+// synlig i stedet for å boble opp som et ufanget unntak i klikk-handleren.
 function lagreOppskrift() {
   const oppskrift = samleOppskrift();
-  const alle = hentLagredeOppskrifter();
-  alle[oppskrift.navn] = oppskrift;
-  localStorage.setItem(LAGRINGSNOKKEL, JSON.stringify(alle));
   const status = document.getElementById("lagre-status");
+  const res = lagreOppskriftIStore(oppskrift, _aktivRecipeId);
+  if (!res.ok) {
+    status.textContent = res.melding;
+    return;
+  }
+  _aktivRecipeId = res.recipeId;
+  beregnOgVisResultat(); // skriver kladden på nytt, nå med recipeId
   status.textContent = t("oppskrift.lagretStatus", { navn: visningsnavn(oppskrift.navn) });
 }
 
@@ -1342,6 +1356,7 @@ function nyOppskrift() {
     const ok = confirm(t("oppskrift.nyConfirm"));
     if (!ok) return;
   }
+  _aktivRecipeId = null; // helt ny kladd -- ikke lenger knyttet til en lagret rad
   _gjenopprettOppskrift(_blankOppskrift());
   forhandsutfyllIdentitetsPreferanse();
   beregnOgVisResultat();
@@ -1362,6 +1377,10 @@ function apneOppskriftsfil(fil) {
       const ok = confirm(t("oppskrift.apneConfirm"));
       if (!ok) return;
     }
+    // Runde 25A -- en importert fil har ingen LOKAL identitet: recipeId
+    // følger aldri med i .kbhrecipe, og en fersk id oppstår først når
+    // brukeren faktisk lagrer. Se recipe_storage.js pkt. A/B/C.
+    _aktivRecipeId = null;
     _gjenopprettOppskrift(resultat.oppskrift);
     status.textContent = t("oppskrift.apnetStatus");
   };
@@ -1448,6 +1467,9 @@ async function init() {
 
   const kladd = hentAktivKladd();
   if (kladd) {
+    // Runde 25A -- kladden husker hvilken lagret rad den redigerer, slik at
+    // Lagre oppdaterer den i stedet for å lage et duplikat ved navnebytte.
+    _aktivRecipeId = typeof kladd.recipeId === "string" && kladd.recipeId ? kladd.recipeId : null;
     _gjenopprettOppskrift(kladd);
   } else {
     // Ingen aktiv kladd -- feltets egen HTML-default (value="20") er

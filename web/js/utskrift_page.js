@@ -6,7 +6,6 @@
 // faktisk holder på med i Oppskriftsbyggeren. "Tilbake til byggeren" er
 // derfor en helt vanlig lenke; kladden er urørt uansett hva som er gjort her.
 
-const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
 const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
 
 let maltData = {}, humleData = {}, gjaerData = {}, bjcpStyles = {};
@@ -32,20 +31,16 @@ function hentAktivKladd() {
   }
 }
 
-function hentLagredeOppskrifter() {
-  try {
-    return JSON.parse(localStorage.getItem(LAGRINGSNOKKEL)) || {};
-  } catch {
-    return {};
-  }
-}
-
+// Runde 25A -- velgerens verdi bruker recipeId, ikke navn, slik at valget
+// overlever et navnebytte og aldri kan peke på feil rad.
 function velgOppskrift(valgtVerdi) {
   const kladd = hentAktivKladd();
-  const lagrede = hentLagredeOppskrifter();
+  const lagrede = alleOppskrifter();
   if (valgtVerdi === "__aktiv__") valgtOppskrift = kladd;
-  else if (valgtVerdi && valgtVerdi.startsWith("lagret:")) valgtOppskrift = lagrede[valgtVerdi.slice(7)];
-  else valgtOppskrift = kladd || Object.values(lagrede)[0] || null;
+  else if (valgtVerdi && valgtVerdi.startsWith("lagret:")) {
+    const item = lagrede.find((i) => i.recipeId === valgtVerdi.slice(7));
+    valgtOppskrift = item ? item.recipe : null;
+  } else valgtOppskrift = kladd || (lagrede[0] ? lagrede[0].recipe : null);
 
   if (!valgtOppskrift) return;
 
@@ -62,11 +57,11 @@ function velgOppskrift(valgtVerdi) {
 
 function byggValgliste() {
   const kladd = hentAktivKladd();
-  const lagrede = hentLagredeOppskrifter();
+  const lagrede = alleOppskrifter();
   const tomTilstand = document.getElementById("utskrift-tom-tilstand");
   const innhold = document.getElementById("utskrift-innhold");
 
-  if (!kladd && Object.keys(lagrede).length === 0) {
+  if (!kladd && lagrede.length === 0) {
     tomTilstand.hidden = false;
     innhold.hidden = true;
     return;
@@ -83,10 +78,10 @@ function byggValgliste() {
     opt.textContent = t("utskrift.velgerAktivt", { navn: visningsnavn(kladd.navn) || t("identitet.utenNavn") });
     select.appendChild(opt);
   }
-  for (const navn of Object.keys(lagrede)) {
+  for (const item of lagrede) {
     const opt = document.createElement("option");
-    opt.value = `lagret:${navn}`;
-    opt.textContent = visningsnavn(navn);
+    opt.value = `lagret:${item.recipeId}`;
+    opt.textContent = visningsnavn(item.recipe.navn);
     select.appendChild(opt);
   }
 

@@ -4,6 +4,61 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 25A — Versjonert oppskriftslagring + stabile recipeId-er (2026-08-15)
+
+Kirurgisk foundation-runde uten nye brukerfunksjoner.
+`kvernhaug_web_oppskrifter` var den siste lagringskontrakten uten
+format/version-wrapper: en flat ordbok nøklet på OPPSKRIFTSNAVN, slik at
+navnet også var identiteten. Det ga to problemer — å endre navn og lagre
+opprettet en NY rad og lot den gamle bli liggende (utilsiktet duplikat),
+og ingen annen del av systemet kunne holde en referanse til en oppskrift
+som overlevde et navnebytte.
+
+Ny `web/js/recipe_storage.js` (DOM-fri, samme mønster som `equipment.js`/
+`pantry.js`) eier nå nøkkelen med formen `{format:"kbh-recipes",
+version:1, items:[{recipeId, recipe}]}`. Kontrakten er: **recipeId =
+stabil lokal identitet** (genereres én gang, overlever navnebytte, aldri
+utledet fra navnet), **navn = ren visningsmetadata**. Payloaden ligger
+nestet under `recipe` slik at den er nøyaktig samme selvstendige objekt
+som `.kbhrecipe` sitt `recipe`-felt — ett objekt som kan løftes ut og
+fryses i sin helhet, uten at lagringsmetadata blør inn i historikk eller
+eksporterte filer. `recipeSchemaVersion` ligger INNE i payloaden, ikke
+som søsken, fordi versjonen må reise sammen med oppskriften inn i filer
+som skal tolkes om mange år.
+
+Migrering fra den flate ordboken skjer automatisk ved første lesing,
+usynlig for brukeren, med insettingsrekkefølge og alle canonical verdier
+bevart. Rå kopi av den gamle strengen skrives til
+`kvernhaug_web_oppskrifter_legacy_backup` med verifiserende
+tilbakelesing FØR hovednøkkelen overskrives — feiler noe underveis, står
+den gamle nøkkelen urørt og appen kjører videre på den migrerte staten i
+minnet. Backupen overskrives aldri senere.
+
+Lagring er nå upsert på recipeId i stedet for på navn, så navnebytte
+oppdaterer riktig rad. Navneunikhet er bevisst BEVART fra den gamle
+kontrakten (den flate ordboken gjorde duplikatnavn umulig) — denne
+runden åpner ikke nytt UX-scope. Oppskriftsvelgerne i Utskrift og Pantry
+bruker nå recipeId som `<option>`-verdi i stedet for navn. Aktiv kladd
+kan bære `recipeId` når den redigerer en lagret oppskrift.
+
+`.kbhrecipe`-identitet: recipeId skrives ALDRI til fil og leses ALDRI
+fra fil — den er lokal, aldri global. En delt eller gjeninnlest fil får
+fersk lokal identitet først når brukeren lagrer, slik at to nettlesere
+aldri kan ende med samme id for to uavhengige oppskrifter. En fil som
+likevel inneholder en recipeId (håndredigert) får den strippet ved
+import. `recipeSchemaVersion` følger derimot med payloaden.
+
+Fant og fikset underveis: lagring til localStorage kunne feile stille.
+`lagreOppskrift()` skrev tidligere uten try/catch, så full lagringskvote
+eller privat nettlesing kastet et ufanget unntak i klikk-handleren —
+brukeren så ingen bekreftelse og ingen feil. Skriving verifiseres nå ved
+tilbakelesing, og feil vises som en vennlig melding i det eksisterende
+statusfeltet.
+
+Dette fjerner den siste blokkeren for et fremtidig `.kbhbrew`, som må
+kunne peke svakt på en oppskrift (recipeId) og samtidig bære et sterkt,
+frosset snapshot av den (`item.recipe` + `recipeSchemaVersion`).
+
 ## Runde 24C — Pantry V1 polish: backup + quick add (2026-08-15)
 
 Tredje og siste steg i Pantry V1: gjør lageret trygt å stole på som

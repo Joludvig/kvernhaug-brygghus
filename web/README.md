@@ -80,6 +80,8 @@ web/
   js/mine_oppskrifter_page.js   Mine oppskrifter-siden
   js/importer_page.js    Importer oppskrift-siden: fil-modus + tekst-modus (kaller recipe_importer.js)
   js/utskrift_page.js    Utskrift-siden: velger aktiv kladd/lagret oppskrift, kaller recipe_engine.js + print.js
+  js/recipe_storage.js    DOM-fri oppskriftslagring (Runde 25A): versjonert wrapper, stabile recipeId-er,
+                          automatisk migrering fra gammel navne-nøklet ordbok. Se eget avsnitt under
   js/pantry.js            DOM-fri Pantry-state (Runde 24A) -- samme mønster som equipment.js. Egen
                           kvernhaug_web_pantry-nøkkel, aldri blandet med recipes/utstyr/.kbhrecipe. Eget
                           .kbhpantry backup-/importformat (Runde 24C), aldri .kbhrecipe
@@ -198,6 +200,21 @@ Oppskriften som står i byggeren akkurat nå autolagres fortløpende til en egen
 1. Laster du `index.html` på nytt (eller lukker og åpner fanen igjen), gjenopprettes akkurat det du holdt på med.
 2. **Utskrift**-siden kan bruke den aktive, *også ulagrede*, oppskriften direkte — du trenger ikke lagre først for å skrive ut. Utskrift-siden leser kun denne nøkkelen; den skriver aldri til den, så å forhåndsvise en lagret oppskrift der overskriver aldri det du faktisk holder på med i byggeren.
 3. **Mine oppskrifter**-siden sin "Åpne i byggeren" og fil-/tekstimport bruker samme nøkkel som håndoverleveringsmekanisme: skriv oppskriften dit, naviger til `index.html`, som gjenoppretter den derfra ved oppstart. Byggerens "Ny oppskrift", byggerens "Åpne oppskriftsfil", Importer-sidens import og Mine oppskrifter sin "Åpne i byggeren" spør alle brukeren om bekreftelse før en aktiv kladd med meningsfullt innhold overskrives eller nullstilles (se `oppskriftHarInnhold()` i `js/kbhrecipe.js`) — men aldri før en fil er validert (ugyldige filer avvises med en statusmelding, ingen dialog), og aldri når byggeren allerede er reelt tom.
+
+## Oppskriftslagring: identitet og versjonering (Runde 25A)
+
+`kvernhaug_web_oppskrifter` eies av `js/recipe_storage.js` (DOM-fri, samme mønster som `equipment.js`/`pantry.js`) og har formen `{format: "kbh-recipes", version: 1, items: [{recipeId, recipe}]}`. Fire begreper, bevisst adskilt:
+
+- **`recipeId`** — stabil, *lokal* identitet. Genereres én gang, overlever navnebytte, utledes aldri fra navnet. Andre deler av systemet (og et fremtidig `.kbhbrew`) refererer oppskrifter med denne, aldri med navnet.
+- **oppskriftsnavn** — ren, endrebar visningsmetadata. Er ikke lenger identitet.
+- **storage-wrapper-versjon** (`version: 1`) — versjonerer selve *lagringsformen*.
+- **`recipeSchemaVersion`** — semantisk versjon på selve oppskrifts-*payloaden*. Ligger INNE i payloaden, ikke ved siden av, fordi den må reise med oppskriften inn i `.kbhrecipe`-filer og (senere) frosne `.kbhbrew`-snapshots som skal kunne tolkes om mange år.
+
+Payloaden ligger nestet under `recipe` nettopp fordi den da er nøyaktig det samme selvstendige objektet som `.kbhrecipe` sitt `recipe`-felt: ett objekt som kan løftes ut og fryses i sin helhet, uten at lagringsmetadata blør inn i historikk eller eksporterte filer.
+
+Eldre, flat lagring (ordbok nøklet på oppskriftsnavn) migreres automatisk ved første lesing, usynlig for brukeren. Rå kopi av den gamle strengen sikres i `kvernhaug_web_oppskrifter_legacy_backup` — med verifiserende tilbakelesing — *før* hovednøkkelen overskrives, og overskrives aldri senere.
+
+**`recipeId` skrives aldri til `.kbhrecipe` og leses aldri fra en.** Identiteten er lokal, aldri global: en delt eller gjeninnlest fil får fersk lokal identitet først når brukeren lagrer, slik at to nettlesere aldri kan ende med samme id for to uavhengige oppskrifter.
 
 ## Portabel oppskriftsfil (.kbhrecipe)
 

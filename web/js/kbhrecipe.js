@@ -86,8 +86,15 @@ function _erGyldigOppskriftForm(obj) {
 // kontrakten selv) -- en fil kan i prinsippet inneholde hva som helst,
 // og malt/humle MÅ være arrays for at leggTilMaltRad()/leggTilHumleRad()
 // ikke skal krasje på .forEach().
+// Runde 25A -- recipeId strippes ALLTID ved import. En recipeId er lokal
+// lagringsidentitet i én nettleser, aldri global identitet. Skulle en fil
+// likevel inneholde en (håndredigert, eller fra et fremtidig format), må
+// den ikke adopteres: to nettlesere ville da kunne ende med samme id for
+// to uavhengige oppskrifter. Se recipe_storage.js for hele policyen.
+// recipeSchemaVersion beholdes derimot -- den beskriver payloadens form.
 function _normaliserOppskriftForImport(raw) {
   const o = { ...raw };
+  delete o.recipeId;
   if (!Array.isArray(o.malt)) o.malt = [];
   if (!Array.isArray(o.humle)) o.humle = [];
   return o;

@@ -21,7 +21,6 @@ let _redigererId = null;
 // Skriver ALDRI til AKTIV_KLADD_NOKKEL eller LAGRINGSNOKKEL, samme
 // prinsipp som utskrift-siden: å se på en oppskrift her endrer den aldri.
 
-const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
 const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
 let valgtOppskrift = null;
 let sisteSammenligning = null;
@@ -159,30 +158,26 @@ function hentAktivKladd() {
   }
 }
 
-function hentLagredeOppskrifter() {
-  try {
-    return JSON.parse(localStorage.getItem(LAGRINGSNOKKEL)) || {};
-  } catch {
-    return {};
-  }
-}
-
+// Runde 25A -- velgerens verdi bruker recipeId, ikke navn (se
+// utskrift_page.js for samme endring og begrunnelse).
 function velgOppskrift(valgtVerdi) {
   const kladd = hentAktivKladd();
-  const lagrede = hentLagredeOppskrifter();
+  const lagrede = alleOppskrifter();
   if (valgtVerdi === "__aktiv__") valgtOppskrift = kladd;
-  else if (valgtVerdi && valgtVerdi.startsWith("lagret:")) valgtOppskrift = lagrede[valgtVerdi.slice(7)];
-  else valgtOppskrift = kladd || Object.values(lagrede)[0] || null;
+  else if (valgtVerdi && valgtVerdi.startsWith("lagret:")) {
+    const item = lagrede.find((i) => i.recipeId === valgtVerdi.slice(7));
+    valgtOppskrift = item ? item.recipe : null;
+  } else valgtOppskrift = kladd || (lagrede[0] ? lagrede[0].recipe : null);
   _oppdaterSammenligning();
 }
 
 function byggOppskriftValgliste() {
   const kladd = hentAktivKladd();
-  const lagrede = hentLagredeOppskrifter();
+  const lagrede = alleOppskrifter();
   const tomEl = document.getElementById("pantry-oppskrift-tom-melding");
   const velgerRad = document.getElementById("pantry-oppskrift-velger-rad");
 
-  if (!kladd && Object.keys(lagrede).length === 0) {
+  if (!kladd && lagrede.length === 0) {
     tomEl.hidden = false;
     velgerRad.hidden = true;
     valgtOppskrift = null;
@@ -201,10 +196,10 @@ function byggOppskriftValgliste() {
     opt.textContent = t("utskrift.velgerAktivt", { navn: visningsnavn(kladd.navn) || t("identitet.utenNavn") });
     select.appendChild(opt);
   }
-  for (const navn of Object.keys(lagrede)) {
+  for (const item of lagrede) {
     const opt = document.createElement("option");
-    opt.value = `lagret:${navn}`;
-    opt.textContent = visningsnavn(navn);
+    opt.value = `lagret:${item.recipeId}`;
+    opt.textContent = visningsnavn(item.recipe.navn);
     select.appendChild(opt);
   }
   if (forrigeValg && [...select.options].some((o) => o.value === forrigeValg)) select.value = forrigeValg;

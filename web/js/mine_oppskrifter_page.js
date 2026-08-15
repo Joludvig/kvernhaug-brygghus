@@ -4,20 +4,7 @@
 // gjenoppretter den derfra -- samme mekanisme som byggerens egen
 // autolagrede kladd, se app.js.
 
-const LAGRINGSNOKKEL = "kvernhaug_web_oppskrifter";
 const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
-
-function hentLagredeOppskrifter() {
-  try {
-    return JSON.parse(localStorage.getItem(LAGRINGSNOKKEL)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function lagreAlle(alle) {
-  localStorage.setItem(LAGRINGSNOKKEL, JSON.stringify(alle));
-}
 
 // Runde 13B -- samme beskyttelse som byggerens "Åpne oppskriftsfil" og
 // Importer-sidens håndoverlevering (app.js::apneOppskriftsfil,
@@ -32,32 +19,33 @@ function _aktivKladdHarInnhold() {
   }
 }
 
-function apneIByggeren(oppskrift) {
+// Runde 25A -- kladden får med recipeId, slik at byggeren vet at den
+// redigerer NØYAKTIG denne lagrede raden og oppdaterer den ved lagring i
+// stedet for å opprette et duplikat om navnet endres.
+function apneIByggeren(item) {
   if (_aktivKladdHarInnhold()) {
     const ok = confirm(t("oppskrift.apneConfirm"));
     if (!ok) return;
   }
-  localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
+  localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify({ ...item.recipe, recipeId: item.recipeId }));
   window.location.href = "index.html";
 }
 
-function slettOppskrift(navn) {
-  const alle = hentLagredeOppskrifter();
-  delete alle[navn];
-  lagreAlle(alle);
+function slettOppskrift(recipeId) {
+  slettOppskriftFraStore(recipeId);
   visListe();
 }
 
 function visListe() {
-  const alle = hentLagredeOppskrifter();
-  const navnListe = Object.keys(alle);
+  const items = alleOppskrifter();
   const listeEl = document.getElementById("oppskrift-liste");
   const meldingEl = document.getElementById("ingen-oppskrifter-melding");
   listeEl.innerHTML = "";
-  meldingEl.style.display = navnListe.length === 0 ? "" : "none";
+  meldingEl.style.display = items.length === 0 ? "" : "none";
 
-  for (const navn of navnListe) {
-    const oppskrift = alle[navn];
+  for (const item of items) {
+    const oppskrift = item.recipe;
+    const navn = oppskrift.navn;
     const li = document.createElement("li");
     li.className = "oppskrift-listeelement";
 
@@ -83,7 +71,7 @@ function visListe() {
     const apneKnapp = document.createElement("button");
     apneKnapp.type = "button";
     apneKnapp.textContent = t("mineOppskrifter.apneKnapp");
-    apneKnapp.addEventListener("click", () => apneIByggeren(oppskrift));
+    apneKnapp.addEventListener("click", () => apneIByggeren(item));
     knapperad.appendChild(apneKnapp);
 
     const slettKnapp = document.createElement("button");
@@ -93,7 +81,7 @@ function visListe() {
     slettKnapp.title = t("mineOppskrifter.slettTitle");
     slettKnapp.setAttribute("aria-label", t("mineOppskrifter.slettAriaLabel", { navn }));
     slettKnapp.addEventListener("click", () => {
-      if (confirm(t("mineOppskrifter.slettConfirm", { navn }))) slettOppskrift(navn);
+      if (confirm(t("mineOppskrifter.slettConfirm", { navn }))) slettOppskrift(item.recipeId);
     });
     knapperad.appendChild(slettKnapp);
 
