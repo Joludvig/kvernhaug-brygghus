@@ -395,6 +395,76 @@ function planVsFaktisk(brew) {
   };
 }
 
+// Faktisk effektivitet, utledet UTELUKKENDE fra det frosne snapshotet --
+// aldri fra det levende biblioteket eller ved å kjøre beregnOG() på nytt.
+// Det er nettopp poenget: et brygg fra i fjor skal gi samme svar i dag.
+//
+// beregnOG() i calc.js er (OG-1)*1000 = totalePoeng * eff * 8.3454 / volum.
+// Fra planen kjenner vi OG, eff og volum, og kan derfor eliminere
+// totalePoeng helt:
+//   effFaktisk = (OGfaktisk-1) * volumFaktisk * effPlan
+//                / ((OGplan-1) * volumPlan)
+// Mangler faktisk volum, brukes planlagt volum -- da måler tallet ren
+// meskeutnyttelse ved forventet volum.
+function faktiskEffektivitet(brew) {
+  if (!brew || !brew.snapshot) return null;
+  const plan = brew.snapshot.predicted || {};
+  const recipe = brew.snapshot.recipe || {};
+  const a = brew.actuals || {};
+  const ogFaktisk = a.og;
+  const ogPlan = plan.og;
+  const effPlan = parseFloat(recipe.effektivitet);
+  const volumPlan = parseFloat(recipe.volum);
+  const volumFaktisk = isFinite(a.volumeL) ? a.volumeL : volumPlan;
+  if (!isFinite(ogFaktisk) || !isFinite(ogPlan) || !isFinite(effPlan) || !isFinite(volumPlan)) return null;
+  if (ogPlan <= 1 || volumPlan <= 0 || effPlan <= 0) return null;
+  return ((ogFaktisk - 1) * volumFaktisk * effPlan) / ((ogPlan - 1) * volumPlan);
+}
+
+// Tilsynelatende utgjæringsgrad i prosent, (OG-FG)/(OG-1).
+function faktiskUtgjaering(brew) {
+  const a = (brew && brew.actuals) || {};
+  if (!isFinite(a.og) || !isFinite(a.fg) || a.og <= 1) return null;
+  return ((a.og - a.fg) / (a.og - 1)) * 100;
+}
+
+// Den sirkulære læringssløyfen (Runde 25C): hent KUN den ene tekststrengen
+// som trengs for å vise "Erfaring fra forrige gang" før et nytt brygg
+// startes. Bevisst lettvekts -- laster ikke hele historikken inn i UI-et.
+// Nyeste brygg med et utfylt nextTime vinner.
+function sisteErfaringForOppskrift(recipeId) {
+  if (!recipeId) return null;
+  const kandidater = alleBrygg().filter(
+    (b) => b.recipeId === recipeId && b.learning && b.learning.nextTime
+  );
+  if (!kandidater.length) return null;
+  kandidater.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  const nyeste = kandidater[0];
+  return {
+    nextTime: nyeste.learning.nextTime,
+    navn: nyeste.snapshot && nyeste.snapshot.recipe ? nyeste.snapshot.recipe.navn : null,
+    createdAt: nyeste.createdAt,
+  };
+}
+
+// Hva trenger dette brygget NÅ? UI-et organiseres etter dette, ikke etter
+// datamodellen og ikke etter status alene -- status er brukerens egen
+// markering, mens fasen utledes av hva som faktisk er fylt ut.
+//   "bryggedag"  -> ingen OG ennå
+//   "gjaering"   -> OG målt, venter på FG
+//   "smaking"    -> FG målt, ingen dom ennå
+//   "ferdig"     -> dom avgitt
+//   "forkastet"  -> brukeren har markert brygget som forkastet
+function bryggFase(brew) {
+  if (!brew) return null;
+  if (brew.status === "discarded") return "forkastet";
+  const a = brew.actuals || {};
+  if (!isFinite(a.og)) return "bryggedag";
+  if (!isFinite(a.fg)) return "gjaering";
+  if (!brew.sensing || !brew.sensing.judgment) return "smaking";
+  return "ferdig";
+}
+
 // ─── .kbhbrew-fil ─────────────────────────────────────────────────────────
 //
 // IDENTITETSPOLICY (Runde 25B oppgave 3). Brygg skiller seg fra oppskrifter

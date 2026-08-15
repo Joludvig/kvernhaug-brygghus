@@ -1242,6 +1242,7 @@ function lagreOppskrift() {
   }
   _aktivRecipeId = res.recipeId;
   beregnOgVisResultat(); // skriver kladden på nytt, nå med recipeId
+  visForrigeErfaring();
   status.textContent = t("oppskrift.lagretStatus", { navn: visningsnavn(oppskrift.navn) });
 }
 
@@ -1306,6 +1307,48 @@ function hentAktivKladd() {
   }
 }
 
+// ─── Runde 25C, AKT 1 -- start brygging ──────────────────────────────────
+// Fryser oppskriften slik den er NÅ og oppretter et brygg. Ingen endring i
+// beregningsmotoren: byggBrewSnapshot() får den ferdige beregningen fra
+// samme beregnOppskrift() som resten av siden allerede bruker.
+
+function startBrygging() {
+  const status = document.getElementById("brygg-start-status");
+  const oppskrift = samleOppskrift();
+  if (!oppskriftHarInnhold(oppskrift)) {
+    status.textContent = t("builder.brygg.tomOppskrift");
+    return;
+  }
+  const beregning = beregnOppskrift(oppskrift, maltData, humleData, gjaerData, bjcpStyles);
+  const snapshot = byggBrewSnapshot(oppskrift, beregning, maltData, humleData, gjaerData, hentAktivUtstyrsprofil());
+  const res = opprettBrygg({ snapshot, recipeId: _aktivRecipeId });
+  if (!res.ok) {
+    status.textContent = res.melding;
+    return;
+  }
+  status.textContent = t("builder.brygg.startetStatus", {
+    navn: visningsnavn(oppskrift.navn) || t("identitet.utenNavn"),
+  });
+}
+
+// Den sirkulære læringssløyfen: viser forrige gangs "Neste gang" FØR et
+// nytt brygg startes. Lettvekts med vilje -- sisteErfaringForOppskrift()
+// henter kun den ene tekststrengen, ikke hele historikken.
+function visForrigeErfaring() {
+  const boks = document.getElementById("brygg-erfaring");
+  if (!boks) return;
+  const erfaring = _aktivRecipeId ? sisteErfaringForOppskrift(_aktivRecipeId) : null;
+  if (!erfaring) {
+    boks.hidden = true;
+    return;
+  }
+  document.getElementById("brygg-erfaring-tittel").textContent = t("builder.brygg.erfaringTittel", {
+    navn: visningsnavn(erfaring.navn) || t("identitet.utenNavn"),
+  });
+  document.getElementById("brygg-erfaring-tekst").textContent = erfaring.nextTime;
+  boks.hidden = false;
+}
+
 function eksporterJson() {
   const oppskrift = samleOppskrift();
   const blob = new Blob([JSON.stringify(oppskrift, null, 2)], { type: "application/json" });
@@ -1357,6 +1400,7 @@ function nyOppskrift() {
     if (!ok) return;
   }
   _aktivRecipeId = null; // helt ny kladd -- ikke lenger knyttet til en lagret rad
+  visForrigeErfaring();
   _gjenopprettOppskrift(_blankOppskrift());
   forhandsutfyllIdentitetsPreferanse();
   beregnOgVisResultat();
@@ -1381,6 +1425,7 @@ function apneOppskriftsfil(fil) {
     // følger aldri med i .kbhrecipe, og en fersk id oppstår først når
     // brukeren faktisk lagrer. Se recipe_storage.js pkt. A/B/C.
     _aktivRecipeId = null;
+    visForrigeErfaring();
     _gjenopprettOppskrift(resultat.oppskrift);
     status.textContent = t("oppskrift.apnetStatus");
   };
@@ -1462,6 +1507,7 @@ async function init() {
     if (apneFilInput.files[0]) apneOppskriftsfil(apneFilInput.files[0]);
     apneFilInput.value = "";
   });
+  document.getElementById("start-brygging-knapp").addEventListener("click", startBrygging);
   document.getElementById("skaler-knapp").addEventListener("click", skalerOppskrift);
   document.getElementById("malt-bruk-prosent-knapp").addEventListener("click", brukMaltProsentfordeling);
 
@@ -1470,6 +1516,7 @@ async function init() {
     // Runde 25A -- kladden husker hvilken lagret rad den redigerer, slik at
     // Lagre oppdaterer den i stedet for å lage et duplikat ved navnebytte.
     _aktivRecipeId = typeof kladd.recipeId === "string" && kladd.recipeId ? kladd.recipeId : null;
+    visForrigeErfaring();
     _gjenopprettOppskrift(kladd);
   } else {
     // Ingen aktiv kladd -- feltets egen HTML-default (value="20") er

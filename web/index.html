@@ -67,6 +67,7 @@
   <a href="importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
   <a href="utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
   <a href="pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
   <hr class="sidemeny-skille">
   <div class="sidemeny-modus">
     <span class="sidemeny-modus-status" id="sidemeny-modus-status" data-i18n="modus.statusLaerling">Modus: Bryggelærling</span>
@@ -225,6 +226,22 @@
         <input type="text" id="gjaer-eg-produsent" placeholder="Produsent (valgfritt)" data-i18n-placeholder="builder.egendefinert.produsentPlaceholder">
         <input type="text" id="gjaer-eg-gjaertype" placeholder="Gjærtype (valgfritt)" data-i18n-placeholder="builder.gjaer.gjaertypePlaceholder">
       </div>
+    </section>
+
+    <!-- Runde 25C, AKT 1 -- planen. Erfaringsboksen står BEVISST over
+         knappen: forrige gangs "Neste gang" skal leses før neste brygg
+         starter, ikke etterpå. Se sisteErfaringForOppskrift(). -->
+    <section class="panel no-print" id="brygg-panel">
+      <h2>🪓 <span data-i18n="builder.brygg.tittel">Brygging</span></h2>
+      <div class="brygg-erfaring" id="brygg-erfaring" hidden>
+        <div class="brygg-erfaring-tittel" id="brygg-erfaring-tittel"></div>
+        <p class="brygg-erfaring-tekst" id="brygg-erfaring-tekst"></p>
+      </div>
+      <div class="knapperad">
+        <button type="button" id="start-brygging-knapp" data-i18n="builder.brygg.startKnapp">🪓 Start brygging</button>
+      </div>
+      <p class="hjelpetekst" id="brygg-start-status" aria-live="polite"></p>
+      <p class="hjelpetekst" data-i18n-html="builder.brygg.hjelpetekst">Når du starter et brygg, fryser KBH oppskriften slik den er nå — så historikken din endrer seg aldri selv om oppskriften gjør det. Du finner brygget igjen under <a href="bryggelogg.html">🪓 Bryggelogg</a>.</p>
     </section>
 
     <section class="panel no-print" id="handling-panel">

@@ -72,6 +72,7 @@
 <a class="sidemeny-lenke" href="importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
 <a class="sidemeny-lenke" href="utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
 <a class="sidemeny-lenke" href="pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
 <hr class="sidemeny-skille"/>
 <div class="sidemeny-modus">
 <span class="sidemeny-modus-status" data-i18n="modus.statusLaerling" id="sidemeny-modus-status">Mode: Brewing Apprentice</span>
@@ -222,6 +223,21 @@
 <input data-i18n-placeholder="builder.egendefinert.produsentPlaceholder" id="gjaer-eg-produsent" placeholder="Producer (optional)" type="text"/>
 <input data-i18n-placeholder="builder.gjaer.gjaertypePlaceholder" id="gjaer-eg-gjaertype" placeholder="Yeast type (optional)" type="text"/>
 </div>
+</section>
+<!-- Runde 25C, AKT 1 -- planen. Erfaringsboksen står BEVISST over
+         knappen: forrige gangs "Neste gang" skal leses før neste brygg
+         starter, ikke etterpå. Se sisteErfaringForOppskrift(). -->
+<section class="panel no-print" id="brygg-panel">
+<h2>🪓 <span data-i18n="builder.brygg.tittel">Brewing</span></h2>
+<div class="brygg-erfaring" hidden="" id="brygg-erfaring">
+<div class="brygg-erfaring-tittel" id="brygg-erfaring-tittel"></div>
+<p class="brygg-erfaring-tekst" id="brygg-erfaring-tekst"></p>
+</div>
+<div class="knapperad">
+<button data-i18n="builder.brygg.startKnapp" id="start-brygging-knapp" type="button">🪓 Start brewing</button>
+</div>
+<p aria-live="polite" class="hjelpetekst" id="brygg-start-status"></p>
+<p class="hjelpetekst" data-i18n-html="builder.brygg.hjelpetekst">When you start a brew, KBH freezes the recipe exactly as it is now — so your history never changes even when the recipe does. You will find the brew again under <a href="bryggelogg.html">🪓 Brew log</a>.</p>
 </section>
 <section class="panel no-print" id="handling-panel">
 <h2>💾 <span data-i18n="builder.handling.tittel">Save &amp; export</span></h2>

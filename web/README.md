@@ -56,6 +56,8 @@ web/
   mine-oppskrifter.html  Åpne/slette lagrede oppskrifter
   importer.html        Importer oppskrift — fil (.kbhrecipe/JSON) ELLER limt inn tekst, med forhåndsvisning
   utskrift.html        Velg aktiv kladd ELLER en lagret oppskrift, skriv ut de fire dokumentene
+  bryggelogg.html       Bryggeloggen -- de fire aktene (plan/bryggedag/gjæring/dom) som ETT kort per brygg,
+                          der innholdet utledes av hva brygget mangler, ikke av lagret status (Runde 25C)
   pantry.html           Lager & innkjøp -- lokal, kontofri lagerliste for malt/humle/gjær (Runde 24A) med
                           oppskrift <-> lager-sammenligning og handleliste (Runde 24B). Ingen pris-/butikkdata
   personvern.html       Kontakt og personvern -- e-post, kort forklaring av lokal lagring/ingen tracking (Runde 17)
@@ -83,7 +85,8 @@ web/
   js/recipe_storage.js    DOM-fri oppskriftslagring (Runde 25A): versjonert wrapper, stabile recipeId-er,
                           automatisk migrering fra gammel navne-nøklet ordbok. Se eget avsnitt under
   js/brew_storage.js      DOM-fri brygghistorikk (Runde 25B): .kbhbrew-datamodell med frosset snapshot av
-                          plan + beregnede verdier. Ingen UI ennå. Se eget avsnitt under
+                          plan + beregnede verdier, samt utledet effektivitet/ABV/utgjæring. Se avsnitt under
+  js/brygg_page.js        Bryggelogg-siden (Runde 25C): kortene som utleder brukerens neste handling fra data
   js/pantry.js            DOM-fri Pantry-state (Runde 24A) -- samme mønster som equipment.js. Egen
                           kvernhaug_web_pantry-nøkkel, aldri blandet med recipes/utstyr/.kbhrecipe. Eget
                           .kbhpantry backup-/importformat (Runde 24C), aldri .kbhrecipe
@@ -233,6 +236,8 @@ En oppskrift er PLANEN. Et brygg er den historiske HENDELSEN. `js/brew_storage.j
 Det styrende prinsippet: **lagre det som ikke kan gjenskapes, aldri det som kan.** Predikerte verdier kan ikke gjenskapes pålitelig senere — maltpotensialer korrigeres, alfasyrer oppdateres, beregningsmotoren forbedres, BJCP-data revideres — så de fryses. Avvik mellom plan og faktisk, og faktisk ABV, kan alltid regnes ut fra lagrede tall, så de lagres aldri (`planVsFaktisk()`, `faktiskAbv()`).
 
 Aldri frosset: SVG/grafikk, språk- og enhetspreferanser, hele masterdata-biblioteket, og de lokaliserte tekstene fra stilanalysen (`balanse`/`problemer`/`mangler` er bygget med `t()` og ville bakt brukerens språk inn i historikken).
+
+Fra Runde 25C har modellen en synlig overflate: `bryggelogg.html`. Siden organiseres etter **brukerens neste handling**, aldri etter datamodellen — ordene «snapshot», «actuals» og «sensing» finnes ikke i det brukeren ser. Hvilket kort et brygg får, utledes av `bryggFase()` (altså av hva som faktisk er fylt ut), ikke av lagret `status`. Hver registrering svarer med noe utregnet — faktisk effektivitet, ABV og utgjæring, alt utledet fra det frosne snapshotet — i stedet for bare «Lagret». Forrige gangs «Neste gang» hentes med `sisteErfaringForOppskrift()` og vises i byggeren *før* neste brygg startes.
 
 **Et ufullstendig brygg er gyldig.** Alle felt i lag 3–5 er valgfrie, kan fylles ut i vilkårlig rekkefølge og endres senere. `status` er metadata med tre fritt omsettelige verdier (`active`/`done`/`discarded`) — ikke en tilstandsmaskin. Et forkastet brygg er fullverdig historikk.
 

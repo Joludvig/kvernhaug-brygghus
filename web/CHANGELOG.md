@@ -4,6 +4,47 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Runde 25C — Bryggeloggen som brukeropplevelse (2026-08-15)
+
+Første synlige lag over 25B-datamodellen: ny side `bryggelogg.html`
+(+ generert EN, sitemap 20 → 22 URL-er, ny «🪓 Bryggelogg»-lenke i
+sidemenyen på alle sider) og ny `web/js/brygg_page.js`. Ingen nytt
+designsystem — `.panel`, `.knapperad`, `.felt-rad`, `.modus-bryter` og
+`.utstyr-liste`/`.utstyr-rad` gjenbrukes uendret, og den ene nye
+komponenten (`.brygg-kort`) låner rammespråket fra `.utstyr-rad`.
+
+Det bærende UX-valget: siden organiseres etter brukerens NESTE HANDLING,
+ikke etter datamodellen. Ordene «snapshot», «actuals» og «sensing»
+finnes ikke i noe brukeren ser — der står det «Fikk du målt OG?», «Står
+ølet fortsatt til gjæring?» og «Ville du brygget dette igjen?». Hvilket
+kort et brygg får, utledes av en ny `bryggFase()` fra hva som faktisk er
+fylt ut, ikke av lagret `status`. Aktene er dermed en fortelling som
+oppstår av dataene, ikke en låst prosess: felt kan fylles i vilkårlig
+rekkefølge, hoppes over, og et forkastet brygg forblir gyldig historikk
+med sitt eget «Neste gang».
+
+Hver registrering gir noe TILBAKE i stedet for å kvittere med «Lagret».
+Ny `faktiskEffektivitet()` utleder faktisk meskeutnyttelse ved å
+eliminere totalpoengene mellom plan og faktisk — utelukkende fra det
+frosne snapshotet, aldri fra det levende biblioteket, så et brygg fra i
+fjor gir samme svar i dag. Bryggedagen svarer «Du traff OG 1.049 mot
+planlagt 1.052. Det gir 71 % effektivitet mot planlagt 75 %»;
+gjæringen svarer med faktisk ABV, utgjæringsgrad og retning på
+FG-avviket. Ingen av tallene lagres — alt regnes ut ved visning.
+
+«Neste gang» behandles som førsteklasses informasjon, ikke et notatfelt
+nederst: eget gullrammet felt, egen plass i historikkraden, og — den
+sirkulære sløyfen — vist i byggeren FØR neste brygg startes, via en
+bevisst lettvekts `sisteErfaringForOppskrift()` som henter kun den ene
+tekststrengen.
+
+Smakshjulet krever aldri 18 felt. «Ikke vurdert» og «vurdert likt som
+planlagt» skilles uten ny datamodell: sier brukeren «Ja, som forventet»,
+lagres den predikerte profilen som faktisk profil (nøyaktig hva brukeren
+påstår), og da finnes `sensing.flavorProfile`. Har brukeren ikke sagt
+noe, finnes den ikke. Detaljerte justeringer ligger bak en `<details>`,
+forhåndsutfylt fra prediksjonen.
+
 ## Runde 25B — .kbhbrew datafundament (2026-08-15)
 
 Ren datamodell-runde: ingen UI, ingen nye sider, ingen bryggelogg-visning.

@@ -2894,3 +2894,185 @@ footer {
 .pantry-quick-add-knapp:hover {
   border-color: var(--moss);
 }
+
+/* ── Bryggelogg (Runde 25C) ──────────────────────────────────────────── */
+/* Gjenbruker .panel/.knapperad/.felt-rad/.modus-bryter og
+   .utstyr-liste/.utstyr-rad uendret. Kortet under er den eneste nye
+   komponenten, og den låner rammespråket fra .utstyr-rad (samme
+   gullkant/radius) slik at bryggeloggen ser ut som resten av KBH. */
+.brygg-kort {
+  border: 1px solid rgba(196, 154, 42, 0.3);
+  border-radius: 6px;
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.brygg-kort-topp {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.brygg-kort-navn {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--pergament);
+  overflow-wrap: anywhere;
+}
+
+.brygg-kort-plan {
+  color: var(--muted);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.brygg-fase {
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  color: var(--muted);
+}
+
+.brygg-fase-bryggedag { color: var(--copper); border-color: var(--copper); }
+.brygg-fase-gjaering { color: var(--gold); border-color: var(--gold); }
+.brygg-fase-smaking { color: var(--moss); border-color: var(--moss); }
+.brygg-fase-forkastet { color: var(--danger); border-color: var(--danger); }
+
+/* Spørsmålet er hovedsaken i kortet -- brukerens neste handling, ikke et
+   felt-etikett. Derfor større enn resten. */
+.brygg-sporsmal {
+  font-family: var(--serif);
+  font-size: 1rem;
+  color: var(--body);
+  margin: 0.7rem 0 0.4rem;
+}
+
+.brygg-felt-rad {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.brygg-felt-rad[hidden] { display: none; }
+
+.brygg-felt-rad label {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.brygg-felt-rad input {
+  width: 7rem;
+  max-width: 100%;
+}
+
+.brygg-dom[hidden] { display: none; }
+
+.brygg-dom-bryter {
+  margin-bottom: 0.5rem;
+}
+
+.brygg-tilbakemelding {
+  border-left: 3px solid var(--gold);
+  padding: 0.4rem 0 0.4rem 0.7rem;
+  margin: 0.6rem 0;
+  color: var(--body);
+  font-size: 0.88rem;
+}
+
+/* "Neste gang" er førsteklasses informasjon, ikke et notatfelt nederst --
+   derfor gullramme og egen vekt, ikke .hjelpetekst-grå. */
+.brygg-laering[hidden] { display: none; }
+
+.brygg-laering > label {
+  display: block;
+  font-family: var(--serif);
+  color: var(--gold);
+  font-size: 0.95rem;
+  margin: 0.6rem 0 0.25rem;
+}
+
+.brygg-laering textarea,
+.brygg-laering-mer textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.brygg-laering-mer label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0.5rem 0 0.2rem;
+}
+
+.brygg-smak-rad {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.25rem 0;
+}
+
+.brygg-smak-rad label {
+  flex: 1 1 10rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.brygg-smak-slider {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.brygg-handlinger {
+  margin-top: 0.7rem;
+}
+
+.brygg-ferdig-rad .brygg-ferdig-nestegang {
+  color: var(--gold);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.brygg-dom-merke {
+  flex: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0 0.5rem;
+  white-space: nowrap;
+}
+
+.brygg-dom-yes { color: var(--moss); }
+.brygg-dom-maybe { color: var(--gold); }
+.brygg-dom-no { color: var(--danger); }
+
+/* Erfaringsboksen i byggeren -- forrige gangs "Neste gang", vist FØR et
+   nytt brygg startes. */
+.brygg-erfaring {
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  background: rgba(196, 154, 42, 0.08);
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.brygg-erfaring[hidden] { display: none; }
+
+.brygg-erfaring-tittel {
+  font-family: var(--serif);
+  color: var(--gold);
+  font-size: 0.92rem;
+  margin-bottom: 0.25rem;
+}
+
+.brygg-erfaring-tekst {
+  margin: 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}

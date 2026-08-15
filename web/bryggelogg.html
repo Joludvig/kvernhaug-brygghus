@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bryggelogg — Kvernhaug Brygghus</title>
+<meta name="description" content="Bryggeboka di: hva du planla, hva som faktisk skjedde, og hva du tar med til neste brygg. Lagres lokalt i denne nettleseren." data-i18n-content="meta.bryggelogg.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/bryggelogg.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/bryggelogg.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/bryggelogg.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/bryggelogg.html">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.bryggelogg.tittel">
+<header class="hero">
+  <img class="hero-img" src="assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="bryggelogg.html" aria-current="page"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="en/bryggelogg.html"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="meta.bryggelogg.sidetittel">🪓 Bryggelogg</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav no-print" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="bryggelogg.html" aria-current="page"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="en/bryggelogg.html"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe no-print"></div>
+<nav class="sidemeny no-print" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="bryggelogg.html" aria-current="page"><img class="sprak-flagg" src="assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="en/bryggelogg.html"><img class="sprak-flagg" src="assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="bryggelogg.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="hjelp/index.html" class="sidemeny-lenke"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<main>
+  <section class="panel">
+    <h2 data-i18n="brygg.tittel">Bryggeloggen din</h2>
+    <p class="hjelpetekst" data-i18n="brygg.intro">Hva du planla, hva som faktisk skjedde, og hva du tar med videre.</p>
+    <p class="hjelpetekst" data-i18n="brygg.localFirst">Bryggeloggen lagres bare i denne nettleseren.</p>
+    <p class="hjelpetekst" id="brygg-tom-melding" data-i18n-html="brygg.tomLogg" hidden>Du har ingen brygg ennå. Åpne en oppskrift i <a href="index.html">Oppskriftsbyggeren</a> og trykk «🪓 Start brygging» når du er klar.</p>
+  </section>
+
+  <div id="brygg-aktive-blokk" hidden>
+    <section class="panel">
+      <h2 data-i18n="brygg.aktiveTittel">Under arbeid</h2>
+      <div id="brygg-aktive-liste"></div>
+    </section>
+  </div>
+
+  <div id="brygg-ferdige-blokk" hidden>
+    <section class="panel">
+      <h2 data-i18n="brygg.ferdigeTittel">Ferdige brygg</h2>
+      <ul class="utstyr-liste" id="brygg-ferdige-liste"></ul>
+    </section>
+  </div>
+</main>
+
+<footer class="no-print">
+  <p data-i18n="footer.enkel">Oppskriftene dine lagres lokalt i denne nettleseren (localStorage).</p>
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<template id="brygg-kort-mal">
+  <article class="brygg-kort">
+    <div class="brygg-kort-topp">
+      <div>
+        <div class="brygg-kort-navn"></div>
+        <div class="brygg-kort-plan"></div>
+      </div>
+      <span class="brygg-fase"></span>
+    </div>
+
+    <p class="brygg-sporsmal"></p>
+
+    <div class="brygg-felt-rad brygg-felt-bryggedag" hidden>
+      <label class="brygg-og-label"></label>
+      <input type="number" class="brygg-og" step="0.001" inputmode="decimal">
+      <label class="brygg-volum-label"></label>
+      <input type="number" class="brygg-volum" step="0.1" inputmode="decimal">
+    </div>
+
+    <div class="brygg-felt-rad brygg-felt-gjaering" hidden>
+      <label class="brygg-fg-label"></label>
+      <input type="number" class="brygg-fg" step="0.001" inputmode="decimal">
+    </div>
+
+    <div class="brygg-dom brygg-felt-smaking" hidden>
+      <div class="modus-bryter brygg-dom-bryter" role="group">
+        <button type="button" class="modus-knapp brygg-dom-knapp" data-dom="yes"></button>
+        <button type="button" class="modus-knapp brygg-dom-knapp" data-dom="maybe"></button>
+        <button type="button" class="modus-knapp brygg-dom-knapp" data-dom="no"></button>
+      </div>
+      <p class="hjelpetekst brygg-smak-sporsmal"></p>
+      <div class="knapperad">
+        <button type="button" class="brygg-smak-som-forventet"></button>
+      </div>
+      <details class="brygg-smak-detaljer">
+        <summary class="brygg-smak-summary"></summary>
+        <div class="brygg-smak-sliders"></div>
+      </details>
+    </div>
+
+    <p class="brygg-tilbakemelding" aria-live="polite" hidden></p>
+
+    <div class="brygg-laering" hidden>
+      <label class="brygg-nesteganglabel"></label>
+      <textarea class="brygg-nestegang" rows="3"></textarea>
+      <details class="brygg-laering-mer">
+        <summary class="brygg-laering-summary"></summary>
+        <label class="brygg-fungerte-label"></label>
+        <textarea class="brygg-fungerte" rows="2"></textarea>
+        <label class="brygg-endret-label"></label>
+        <textarea class="brygg-endret" rows="2"></textarea>
+      </details>
+    </div>
+
+    <div class="knapperad brygg-handlinger">
+      <button type="button" class="brygg-primar"></button>
+      <button type="button" class="brygg-lagre-notat" hidden></button>
+      <button type="button" class="brygg-forkast"></button>
+      <button type="button" class="brygg-slett fjern-knapp">✕</button>
+    </div>
+  </article>
+</template>
+
+<template id="brygg-ferdig-mal">
+  <li class="utstyr-rad brygg-ferdig-rad">
+    <div class="utstyr-rad-velg">
+      <span class="utstyr-rad-navn"></span>
+      <span class="utstyr-rad-detalj"></span>
+      <span class="brygg-ferdig-nestegang"></span>
+    </div>
+    <span class="brygg-dom-merke"></span>
+    <div class="utstyr-rad-handlinger">
+      <button type="button" class="brygg-gjenapne utstyr-rad-rediger"></button>
+      <button type="button" class="utstyr-rad-slett brygg-slett"></button>
+    </div>
+  </li>
+</template>
+
+<script src="js/i18n.js"></script>
+<script src="js/preferences.js"></script>
+<script src="js/units.js"></script>
+<script src="js/chrome.js"></script>
+<script src="js/recipe_storage.js"></script>
+<script src="js/brew_storage.js"></script>
+<script src="js/brygg_page.js"></script>
+</body>
+</html>
