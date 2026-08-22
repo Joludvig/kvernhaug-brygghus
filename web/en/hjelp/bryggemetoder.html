@@ -88,6 +88,7 @@
 <a data-i18n="hjelp.metoder.toc.allgrain" href="#all-grain">Traditional All-Grain</a>
 <a data-i18n="hjelp.metoder.toc.altiett" href="#alt-i-ett">All-in-One System</a>
 <a data-i18n="hjelp.metoder.toc.skylling" href="#skyllemetoder">Sparging Methods</a>
+<a data-i18n="hjelp.metoder.toc.bryggmester" href="#bryggmester-mesking">Brewing Master: Advanced Mashing Methods</a>
 </nav>
 <main class="hjelp-side-main">
 <p class="hjelp-innledning" data-i18n-html="hjelp.metoder.intro">All the methods below broadly follow the same <a href="bryggedag.html">brew day</a> — the difference lies in how mashing and sparging are done in practice. This round covers the three most common for homebrewers; more can be added later without changing the page's structure.</p>
@@ -119,7 +120,36 @@
 <p class="hjelp-hvorfor" data-i18n="hjelp.metoder.flySparge.hvorfor">&lt;strong&gt;Why you'd choose this:&lt;/strong&gt; Can give good sparge efficiency, but requires more control over flow rate and attention throughout the sparge than batch sparge.</p>
 </div>
 </div>
-<p class="hjelp-innledning" data-i18n="hjelp.metoder.avslutning">More methods (e.g. decoction, parti-gyle, no-sparge) can be added as their own cards here later, without changing the rest of the page.</p>
+<div id="bryggmester-mesking">
+<p class="hjelp-innledning" data-i18n-html="hjelp.metoder.bryggmesterIntro">These three methods exist as complete process profiles in Brewing Master (the Process Profile panel in the recipe builder) — this explains WHAT they are, WHY they're used, WHEN they can be useful, and their practical pitfalls. None of them is a universally "better" method than simple infusion — they're tools for specific goals.</p>
+<div class="hjelp-metode-kort" id="hochkurz">
+<h3 data-i18n="hjelp.metoder.hochkurz.tittel">Hochkurz (Step Mash)</h3>
+<p data-i18n-html="hjelp.metoder.hochkurz.tekst">Hochkurz is a step mash with typically at least two saccharification rests — one lower temperature followed by one higher. Broadly speaking, a lower temperature favors a more fermentable wort, while a higher temperature favors more dextrins/body — but enzyme activity is temperature-dependent and overlapping, not an on/off switch, so the two rests blend into each other in practice rather than being isolated "modes". The method is often used to shape the balance between attenuation, body, and malt character, and is historically/practically often associated with lager brewing — but isn't limited to one style. Kvernhaug Brygghus's own Hochkurz profile (Brewing Master → Process Profile) uses, as an example, 63 °C/40 min followed by 70 °C/30 min and a mashout — this is the project's example profile, not a universal rule; other temperatures and times are equally valid.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.metoder.hochkurz.hvorfor"><strong>Why choose Hochkurz over simple infusion:</strong> Modern malt usually doesn't need complicated multi-step processes to convert well — a single mash temperature (simple infusion) is often entirely sufficient. Hochkurz is therefore primarily used for deliberate process/flavor control, not because simple infusion is inadequate. <strong>When should I consider this?</strong> You want more control over fermentability/body than one temperature gives, you're brewing a lager- or malt-focused beer, or you simply want to work deliberately with step mashing.</p>
+</div>
+<div class="hjelp-metode-kort" id="dekoksjon">
+<h3 data-i18n="hjelp.metoder.dekoksjon.tittel">Decoction</h3>
+<p data-i18n-html="hjelp.metoder.dekoksjon.tekst">In decoction mashing, part of the mash (the "thick mash") is pulled out, heated/boiled separately, and then returned to the main mash — this raises the temperature of the main mash toward the next step. This is a traditional method, historically used before precise temperature control was easily available, and can contribute a distinctive malty/bready/toasted character from melanoidins formed when the thick mash is boiled. Decoction can also affect the mash's physical properties and extraction somewhat. Kvernhaug Brygghus's own decoction profile (Brewing Master → Process Profile, "Simple Decoction") is an example with a single pull — not traditional double/triple decoction. The pull volume is calculated as a suggestion based on the desired temperature rise, but all values can be edited freely.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.metoder.dekoksjon.hvorfor"><strong>Important nuance:</strong> Decoction doesn't automatically produce "better" beer — modern malt makes the method less necessary than historically, and the actual flavor effect depends on the malt, method, and how intensely it's boiled. <strong>Practical pitfalls:</strong> more time and work, risk of scorching if a thick mash is heated hard without enough stirring, temperature control becomes important, and volume/temperature calculation is more demanding than simple infusion. <strong>When should I consider this?</strong> You want a traditional method, want to explore the malt character it can give, and accept that it takes more time and work.</p>
+</div>
+<div class="hjelp-metode-kort" id="reiterated-mash">
+<h3 data-i18n="hjelp.metoder.reiteratedMash.tittel">Double Mashing / Reiterated Mash</h3>
+<p data-i18n-html="hjelp.metoder.reiteratedMash.tekst">Double mashing (reiterated mash) is used when the grain bill is too large for the mash tun, or when a very high OG is desired without an extremely large boil volume. The first grain charge is mashed normally with fresh water and lautered to a wort — this wort is then used AS the mash liquor for a new grain charge, so extract concentration builds up in the same liquid across two rounds. This differs from <strong>a regular step mash</strong> (one grain charge, multiple temperatures — not two separate mash/lauter rounds), <strong>double batch sparging</strong> (multiple sparge rounds on the same spent grain, not two separate grain charges), and <strong>simply adding more malt to the same full mash tun</strong> (which just requires more physical space than the tun has). Kvernhaug Brygghus's own reiterated mash profile splits the grain bill 50/50 between the two mashes as an example — this is the project's default split, not a fixed rule; the split can be adjusted freely.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.metoder.reiteratedMash.hvorfor"><strong>Advantages:</strong> Enables high OG on limited brewing equipment, and is relevant for imperial stout, barleywine, and other very strong beers — can reduce the need for extreme boil-down compared to some other high-gravity setups. <strong>Disadvantages/pitfalls:</strong> takes considerably more time (two full mash and lauter cycles), efficiency can drop and becomes harder to predict (the second mash is mashed with wort, not fresh water, which can give less favorable enzymatic conditions), and both thickness/water balance and temperature control need careful planning. Reiterated mash doesn't, on its own, solve the fermentation challenges of a strong wort — a high OG gives the yeast a heavier job regardless of mash method, see <a href="index.html#gjaerhelse-temperatur">yeast health and temperature</a>. <strong>When should I consider this?</strong> The grain bill doesn't fit your system, very high OG is the goal, or your kettle/mash tun sets the volume limit.</p>
+</div>
+<h3 data-i18n="hjelp.metoder.sammenligning.tittel">Compare the Methods</h3>
+<table class="hjelp-tabell">
+<thead><tr><th data-i18n="hjelp.metoder.tabell.metode">Method</th><th data-i18n="hjelp.metoder.tabell.oppsummert">Summary</th></tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.metoder.tabell.enkelInfusjon">Simple Infusion</td><td data-i18n="hjelp.metoder.tabell.enkelInfusjonTekst">Simple, fast, suits most modern recipes.</td></tr>
+<tr><td data-i18n="hjelp.metoder.tabell.hochkurz">Hochkurz</td><td data-i18n="hjelp.metoder.tabell.hochkurzTekst">More control over mash profile / fermentability / body.</td></tr>
+<tr><td data-i18n="hjelp.metoder.tabell.dekoksjon">Decoction</td><td data-i18n="hjelp.metoder.tabell.dekoksjonTekst">Traditional, labor-intensive, possible distinctive malt character.</td></tr>
+<tr><td data-i18n="hjelp.metoder.tabell.reiteratedMash">Double Mashing / Reiterated Mash</td><td data-i18n="hjelp.metoder.tabell.reiteratedMashTekst">Primarily a tool for very high OG / capacity constraints.</td></tr>
+</tbody>
+</table>
+<p class="hjelp-innledning" data-i18n-html="hjelp.metoder.bryggmesterAvslutning">The goal is to choose a method based on need, not on "advanced is better". If simple infusion already gives the result you want, there's no bonus for making the process harder.</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.metoder.avslutning">More methods (e.g. parti-gyle, no-sparge) can be added as their own cards here later, without changing the rest of the page.</p>
 </main>
 </div>
 <footer class="no-print">
