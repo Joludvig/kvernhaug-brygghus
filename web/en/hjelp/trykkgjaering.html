@@ -1,0 +1,186 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/trykkgjaering.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pressure Fermentation, Spunding and Closed Transfer — Kvernhaug Brygghus</title>
+<meta content="A practical explanation of pressure fermentation, spunding, natural carbonation during fermentation and closed transfer — what the pressure actually does, and the safety limits that apply." data-i18n-content="meta.hjelpTrykkgjaering.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/trykkgjaering.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/trykkgjaering.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/trykkgjaering.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/trykkgjaering.html" hreflang="x-default" rel="alternate"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpTrykkgjaering.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/trykkgjaering.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="trykkgjaering.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Pressure Fermentation</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/trykkgjaering.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="trykkgjaering.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/trykkgjaering.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="trykkgjaering.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a class="aktiv" data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.trykk.toc.hva" href="#trykkgjaering-hva">Pressure Fermentation: What It Is</a>
+<a data-i18n="hjelp.trykk.toc.hvorfor" href="#hvorfor-trykkgjaere">Why Pressure Ferment?</a>
+<a data-i18n="hjelp.trykk.toc.spunding" href="#spunding">Spunding Valve</a>
+<a data-i18n="hjelp.trykk.toc.naturligKarbonering" href="#naturlig-karbonering-gjaering">Natural Carbonation During Fermentation</a>
+<a data-i18n="hjelp.trykk.toc.trykkTemperatur" href="#trykk-temperatur">Pressure and Temperature</a>
+<a data-i18n="hjelp.trykk.toc.closedTransfer" href="#closed-transfer">Closed Transfer</a>
+<a data-i18n="hjelp.trykk.toc.sikkerhet" href="#sikkerhet-trykk">Safety</a>
+<a data-i18n="hjelp.trykk.toc.feilsoking" href="#feilsoking-trykk">Troubleshooting</a>
+<a data-i18n="hjelp.trykk.toc.ikkePanikk" href="#ikke-panikk">"Don't Panic"</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.trykk.intro">This page expands on the short safety notice in <a href="index.html#def-trykkgjaering-sikkerhet">Help &amp; FAQ</a> with a complete practical explanation of pressure fermentation, spunding, natural carbonation during fermentation, and closed transfer. The goal is understanding, not a single recipe — equipment, yeast strain and beer style all affect what actually works for you.</p>
+<div id="trykkgjaering-hva">
+<div class="hjelp-metode-kort" id="trykkgjaering-hva-kort">
+<h3 data-i18n="hjelp.trykk.hva.tittel">Pressure Fermentation — What It Is</h3>
+<p data-i18n-html="hjelp.trykk.hva.tekst">Pressure fermentation takes place in a fermenter rated for a controlled overpressure. CO₂ produced by the yeast builds up pressure inside the closed vessel instead of escaping freely through an ordinary airlock, and the pressure is regulated — typically with a <a href="#spunding">spunding valve</a>. It's still a fermentation system: the yeast still does the work, and pressure is a property of how the vessel handles the CO₂ byproduct — not a substitute for fermentation itself.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.hva.hvorfor"><strong>Three things that often get mixed up:</strong> (A) <strong>Ordinary atmospheric fermentation</strong> — CO₂ escapes freely through an airlock, with practically no overpressure in the vessel. (B) <strong>Fermentation with moderate controlled pressure</strong> — the main fermentation itself happens under a regulated overpressure in the vessel. (C) <strong>Carbonation/conditioning under higher pressure after fermentation</strong> — fermentation is essentially finished, and pressure is used to carbonate/condition the beer, not to control fermentation itself. These three are not the same thing, and shouldn't be talked about interchangeably.</p>
+</div>
+</div>
+<div id="hvorfor-trykkgjaere">
+<div class="hjelp-metode-kort">
+<h3 data-i18n="hjelp.trykk.hvorfor.tittel">Why Pressure Ferment?</h3>
+<p data-i18n="hjelp.trykk.hvorfor.tekst">Possible reasons to pressure ferment: keeping more CO₂ dissolved in the beer already during fermentation, reducing the need for post-fermentation carbonation, enabling a closed transfer to a keg without unnecessary air exposure, a possible effect on the production of certain fermentation aromas/esters in some yeast strains, and general process control in a pressure-rated system.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.hvorfor.hvorfor"><strong>Important nuance:</strong> Pressure fermentation isn't automatically "better" beer. Pressure doesn't fix poor yeast health — too little yeast, the wrong temperature, or a stressed fermentation still gives a worse result, see <a href="index.html#gjaerhelse-temperatur">yeast health and temperature</a>. Pressure also doesn't automatically turn an ale yeast into a lager yeast, and it doesn't eliminate the need for temperature control, see <a href="#trykk-temperatur">pressure and temperature</a>. Too much pressure can, on the contrary, inhibit or stress the yeast, and different yeast strains respond differently — there's no universal claim like "X psi lets you ferment lager at room temperature".</p>
+</div>
+<div class="hjelp-metode-kort" id="nar-trykket-pafores">
+<h3 data-i18n="hjelp.trykk.narTrykketPafores.tittel">When the Pressure Is Applied</h3>
+<p data-i18n="hjelp.trykk.narTrykketPafores.tekst">Brewers use different strategies for when pressure builds up: little or no pressure early in fermentation followed by building pressure later, moderate pressure from early on, or spunding mainly toward the end of fermentation, primarily to capture naturally produced CO₂ for carbonation.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.trykk.narTrykketPafores.hvorfor">&lt;strong&gt;Why timing can matter:&lt;/strong&gt; Early yeast growth and metabolism can be affected by pressure differently than the calmer later phase of fermentation, which in turn can affect the ester profile. Timing also affects how much natural CO₂ actually gets captured, and what final pressure you end up with. None of these strategies is a universal answer — they're tools suited to different goals and yeast strains.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="spunding">
+<h3 data-i18n="hjelp.trykk.spunding.tittel">Spunding Valve</h3>
+<p data-i18n="hjelp.trykk.spunding.tekst">The yeast produces CO₂ throughout fermentation. In a closed, pressure-rated vessel, pressure increases as CO₂ forms. A spunding valve opens once the pressure in the vessel exceeds a set value, releases the excess CO₂, and closes again — keeping the pressure roughly around the set level for the rest of fermentation.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.spunding.hvorfor"><strong>Three different components, often confused:</strong> <strong>Spunding valve</strong> — process control, regulates the desired fermentation pressure within the equipment's limits. <strong>CO₂ regulator</strong> — controls pressure from an external CO₂ source (cylinder/tank), typically used for force carbonation or dispensing, not for regulating fermentation pressure. <strong>PRV (pressure relief valve)</strong> — a safety component that protects against dangerous overpressure if something goes wrong. The spunding valve is NOT a substitute for a working PRV — the two do different jobs, and a pressure fermentation system should have both.</p>
+</div>
+<div class="hjelp-metode-kort" id="naturlig-karbonering-gjaering">
+<h3 data-i18n="hjelp.trykk.naturligKarbonering.tittel">Natural Carbonation During Fermentation</h3>
+<p data-i18n="hjelp.trykk.naturligKarbonering.tekst">CO₂ produced during fermentation itself can be captured in a pressure-rated vessel instead of escaping through an airlock. Colder liquid holds more dissolved CO₂, and both pressure and temperature together determine how much CO₂ actually dissolves in the beer. The beer can therefore be partially or significantly carbonated already before packaging — exactly how much depends on pressure level, temperature and fermentation progress, and isn't a single fixed number.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.naturligKarbonering.hvorfor">This is related to, but not the same as, <a href="index.html#naturlig-tvangskarbonering">natural vs. force carbonation</a> described in the main help: there, natural carbonation refers to sugar added AFTER fermentation (bottle/keg), while this is CO₂ captured DURING fermentation itself. This page doesn't build a carbonation calculator — use the link above for the practical priming/bottle carbonation calculation.</p>
+</div>
+<div class="hjelp-metode-kort" id="trykk-temperatur">
+<h3 data-i18n="hjelp.trykk.trykkTemperatur.tittel">Pressure and Temperature</h3>
+<p data-i18n="hjelp.trykk.trykkTemperatur.tekst">Pressure and temperature can't be considered entirely separately. Temperature affects the yeast's metabolism — how fast it works and which flavour compounds form along the way. Temperature also affects how much CO₂ dissolves at a given pressure: colder liquid holds more CO₂. Pressure itself can also affect yeast behaviour and aroma production in some strains.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.trykk.trykkTemperatur.hvorfor">&lt;strong&gt;Important:&lt;/strong&gt; Higher temperature can't automatically be "compensated for" with higher pressure — that's too simple a rule of thumb and can lead to poor practice and unpredictable results. Treat pressure and temperature as two variables that interact, not as one substituting for the other.</p>
+</div>
+<div id="closed-transfer">
+<div class="hjelp-metode-kort" id="closed-transfer-kort">
+<h3 data-i18n="hjelp.trykk.closedTransfer.tittel">Closed Transfer</h3>
+<p data-i18n="hjelp.trykk.closedTransfer.tekst">The goal of closed transfer is to move finished beer from the fermenter to a keg or other vessel without exposing it to unnecessary air contact. At a high level: the receiving keg is cleaned and sanitized, the keg is purged/filled with CO₂ to displace air, the beer is transferred through a closed line from the fermenter to the keg, and gas in the receiving keg is allowed to escape in a controlled way as the beer fills it — often assisted by a pressure difference between the fermenter and the receiver.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.closedTransfer.hvorfor"><strong>Why it's done:</strong> Reduced oxygen contact, better preservation of hop aroma, and less risk of oxidation, see <a href="index.html#def-oksidasjon">oxidation after fermentation</a>. Especially useful right after fermentation, when the beer is most vulnerable to air contact.</p>
+</div>
+<div class="hjelp-metode-kort" id="trykkbalanse-transfer">
+<h3 data-i18n="hjelp.trykk.trykkbalanse.tittel">Pressure Balance During Closed Transfer</h3>
+<p data-i18n="hjelp.trykk.trykkbalanse.tekst">A large pressure difference between the fermenter and the receiving keg can cause violent flow and foaming during the transfer. Too small a difference can instead cause a slow or completely stalled transfer. The receiver's gas pressure needs to be allowed to escape in a controlled way as the beer fills it, and the beer flow should stay calm rather than rushing through the line.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.trykk.trykkbalanse.hvorfor">This is a principle, not a universal psi or bar number — the right balance depends on equipment, line length/diameter, carbonation level and the beer's temperature. If equipment-specific text elsewhere in the project gives concrete numbers for a particular system, those are examples for that system — not a fixed answer that applies to all equipment.</p>
+</div>
+<div class="hjelp-metode-kort" id="floating-dip-tube">
+<h3 data-i18n="hjelp.trykk.floatingDipTube.tittel">Floating Dip Tube / Trub</h3>
+<p data-i18n="hjelp.trykk.floatingDipTube.tekst">A floating dip tube draws beer from near the liquid surface instead of from the bottom of the vessel, which can reduce how much sediment/yeast trub gets carried along during the transfer. Exact placement and flow are affected by CO₂ evolution, line setup and the vessel's shape.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.trykk.floatingDipTube.hvorfor">This is a practical aid — not a required precondition for the principle of closed transfer itself, which works regardless of dip tube type. Not equipment-brand-specific here — the principle applies no matter which system you use.</p>
+</div>
+</div>
+<div id="sikkerhet-trykk">
+<div class="hjelp-metode-kort">
+<h3 data-i18n="hjelp.trykk.sikkerhet.tittel">Safety</h3>
+<p data-i18n-html="hjelp.trykk.sikkerhet.intro">Pressure and liquid are a combination that should be taken seriously. This list expands on the short safety notice in <a href="index.html#def-trykkgjaering-sikkerhet">Help &amp; FAQ</a> — read both.</p>
+<div class="hjelp-advarsel" data-i18n-html="hjelp.trykk.sikkerhet.liste"><ul><li>Only use fermenters, lids, fittings, hoses and connectors rated for the pressure you're actually using.</li><li>Know your equipment's manufacturer-stated maximum working pressure — it's the equipment's own specification that sets the limit, not one universal number.</li><li>A working PRV (pressure relief valve) should always be present and in good condition.</li><li>Never block, plug or bypass a safety valve, for any reason.</li><li>Don't assume homemade or improvised vessels can handle pressure — they usually aren't built or tested for it.</li><li>Check fittings and hoses for wear or damage before every use.</li><li>Depressurize the system in a controlled way before disassembling anything.</li><li>Liquid under pressure can cause uncontrolled spray or blowout if handled incorrectly.</li><li>Temperature changes can alter the pressure in a closed system, even without active fermentation.</li></ul></div>
+</div>
+</div>
+<div id="feilsoking-trykk">
+<h3 data-i18n="hjelp.trykk.feilsoking.tittel">Common Issues / Troubleshooting</h3>
+<p class="hjelp-innledning" data-i18n="hjelp.trykk.feilsoking.intro">A short practical troubleshooting guide — not a complete hardware diagnostics database, but typical starting points.</p>
+<table class="hjelp-tabell">
+<thead><tr><th data-i18n="hjelp.trykk.feilsoking.kolonneSituasjon">Situation</th><th data-i18n="hjelp.trykk.feilsoking.kolonneArsaker">Possible Causes</th></tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.trykk.feilsoking.a.situasjon">A. Pressure isn't building</td><td data-i18n="hjelp.trykk.feilsoking.a.arsaker">A leak, a bad lid/gasket, spunding set too low, low fermentation activity, or a faulty connection.</td></tr>
+<tr><td data-i18n="hjelp.trykk.feilsoking.b.situasjon">B. Pressure is higher than expected</td><td data-i18n="hjelp.trykk.feilsoking.b.arsaker">Spunding blocked or misconfigured, a blocked gas path, or an incorrect regulator setup. A PRV should never be used as normal process control — it's a safety component, not a spunding valve.</td></tr>
+<tr><td data-i18n="hjelp.trykk.feilsoking.c.situasjon">C. Heavy foaming during transfer</td><td data-i18n="hjelp.trykk.feilsoking.c.arsaker">Too large a pressure difference between vessel and receiver, the beer is warm or highly carbonated, or flow that's too fast/turbulent.</td></tr>
+<tr><td data-i18n="hjelp.trykk.feilsoking.d.situasjon">D. Beer stops flowing</td><td data-i18n="hjelp.trykk.feilsoking.d.arsaker">Pressure has equalized between vessel and receiver, a blocked dip tube/filter, the receiver isn't venting gas, or a hose/connection problem.</td></tr>
+<tr><td data-i18n="hjelp.trykk.feilsoking.e.situasjon">E. Beer enters the gas line/spunding</td><td data-i18n="hjelp.trykk.feilsoking.e.arsaker">An overfilled vessel, strong krausen/foam during active fermentation, incorrect dip tube placement/setup, or a missing collection solution where the system requires one.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="hjelp-metode-kort" id="ikke-panikk">
+<h3 data-i18n="hjelp.trykk.ikkePanikk.tittel">"Don't Panic"</h3>
+<p data-i18n-html="hjelp.trykk.ikkePanikk.tekst">A bit of pressure variation is normal as room or beer temperature changes. A spunding valve can "breathe" periodically instead of holding a perfectly steady pressure. The pressure gauge can vary slightly between readings. A lack of visible bubbling says little on its own — measure SG/FG and observe actual fermentation activity instead, see <a href="index.html#faq-gjaring-stoppet">fermentation seems stalled</a>. Avoid randomly adjusting several things at once if something looks unexpected — change one thing at a time, so you actually know what fixed it.</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.trykk.avslutning">Pressure fermentation, spunding and closed transfer are tools for specific goals — better process control, less oxygen contact, or less need for post-fermentation carbonation — not a guarantee of better beer. Good yeast health, proper temperature control and safe equipment matter more than how many psi/bar you run.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

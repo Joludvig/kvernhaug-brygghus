@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trykkgjæring, spunding og closed transfer — Kvernhaug Brygghus</title>
+<meta name="description" content="Praktisk forklaring av trykkgjæring, spunding, naturlig karbonering under gjæring og closed transfer — hva trykket gjør, og sikkerhetsgrensene som gjelder." data-i18n-content="meta.hjelpTrykkgjaering.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/hjelp/trykkgjaering.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/trykkgjaering.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/trykkgjaering.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/trykkgjaering.html">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpTrykkgjaering.tittel">
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="trykkgjaering.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/trykkgjaering.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="trykkgjaering.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/trykkgjaering.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="trykkgjaering.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/trykkgjaering.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="../pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="../bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<nav class="hjelp-side-nav">
+  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+  <a href="trykkgjaering.html" class="aktiv" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+</nav>
+
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
+    <a href="#trykkgjaering-hva" data-i18n="hjelp.trykk.toc.hva">Trykkgjæring: hva det er</a>
+    <a href="#hvorfor-trykkgjaere" data-i18n="hjelp.trykk.toc.hvorfor">Hvorfor trykkgjære?</a>
+    <a href="#spunding" data-i18n="hjelp.trykk.toc.spunding">Spundingventil</a>
+    <a href="#naturlig-karbonering-gjaering" data-i18n="hjelp.trykk.toc.naturligKarbonering">Naturlig karbonering under gjæring</a>
+    <a href="#trykk-temperatur" data-i18n="hjelp.trykk.toc.trykkTemperatur">Trykk og temperatur</a>
+    <a href="#closed-transfer" data-i18n="hjelp.trykk.toc.closedTransfer">Closed transfer</a>
+    <a href="#sikkerhet-trykk" data-i18n="hjelp.trykk.toc.sikkerhet">Sikkerhet</a>
+    <a href="#feilsoking-trykk" data-i18n="hjelp.trykk.toc.feilsoking">Feilsøking</a>
+    <a href="#ikke-panikk" data-i18n="hjelp.trykk.toc.ikkePanikk">«Ikke panikk»</a>
+  </nav>
+
+  <main class="hjelp-side-main">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.trykk.intro">
+    Denne siden utvider den korte sikkerhetsnotisen i
+    <a href="index.html#def-trykkgjaering-sikkerhet">Hjelp &amp; FAQ</a> med
+    en fullstendig praktisk forklaring av trykkgjæring, spunding, naturlig
+    karbonering under gjæring og closed transfer. Målet er forståelse, ikke
+    én oppskrift — utstyr, gjærstamme og øltype påvirker hva som faktisk
+    fungerer for deg.
+  </p>
+
+  <div id="trykkgjaering-hva">
+  <div class="hjelp-metode-kort" id="trykkgjaering-hva-kort">
+    <h3 data-i18n="hjelp.trykk.hva.tittel">Trykkgjæring — hva det er</h3>
+    <p data-i18n-html="hjelp.trykk.hva.tekst">Trykkgjæring foregår i et gjæringskar som tåler et kontrollert overtrykk. CO₂ som gjæren produserer bygger opp trykk i det lukkede karet i stedet for å slippe fritt ut gjennom en vanlig gjæringslås, og trykket reguleres — typisk med en <a href="#spunding">spundingventil</a>. Det er fortsatt et gjæringssystem: gjæren gjør fortsatt jobben, og trykket er en egenskap ved hvordan karet håndterer biproduktet CO₂ — ikke en erstatning for selve gjæringen.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.hva.hvorfor"><strong>Tre ting som ofte blandes sammen:</strong> (A) <strong>Vanlig atmosfærisk gjæring</strong> — CO₂ slipper fritt ut gjennom en gjæringslås, praktisk talt uten overtrykk i karet. (B) <strong>Gjæring med moderat kontrollert trykk</strong> — selve hovedgjæringen skjer med et regulert overtrykk i karet. (C) <strong>Karbonering/lagring under høyere trykk etter gjæring</strong> — gjæringen er i praksis ferdig, og trykk brukes til å karbonere/lagre ølet, ikke til å styre selve gjæringen. Disse tre er ikke det samme, og bør ikke omtales om hverandre.</p>
+  </div>
+  </div>
+
+  <div id="hvorfor-trykkgjaere">
+  <div class="hjelp-metode-kort">
+    <h3 data-i18n="hjelp.trykk.hvorfor.tittel">Hvorfor trykkgjære?</h3>
+    <p data-i18n="hjelp.trykk.hvorfor.tekst">Mulige grunner til å trykkgjære: å holde mer CO₂ løst i ølet allerede under gjæringen, redusere behovet for etterkarbonering, muliggjøre en lukket overføring (closed transfer) til fat uten unødvendig lufteksponering, mulig påvirkning på produksjon av enkelte gjæringsaromaer/estere hos noen gjærstammer, og generell prosesskontroll i et trykkgodkjent system.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.hvorfor.hvorfor"><strong>Viktig nyansering:</strong> Trykkgjæring er ikke automatisk «bedre» øl. Trykk fikser ikke dårlig gjærhelse — for lite gjær, feil temperatur eller en stresset gjæring gir fortsatt et dårligere resultat, se <a href="index.html#gjaerhelse-temperatur">gjærhelse og temperatur</a>. Trykk gjør heller ikke automatisk en ale-gjær om til en lagergjær, og det eliminerer ikke behovet for temperaturkontroll, se <a href="#trykk-temperatur">trykk og temperatur</a>. For mye trykk kan tvert imot hemme eller stresse gjæren, og ulike gjærstammer reagerer forskjellig — det finnes ingen universell påstand av typen «X psi gjør at du kan gjære lager på romtemperatur».</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="nar-trykket-pafores">
+    <h3 data-i18n="hjelp.trykk.narTrykketPafores.tittel">Når trykket påføres</h3>
+    <p data-i18n="hjelp.trykk.narTrykketPafores.tekst">Bryggere velger ulike strategier for når trykk bygges opp: lite eller ikke noe trykk tidlig i gjæringen etterfulgt av oppbygd trykk senere, moderat trykk fra tidlig av, eller spunding hovedsakelig mot slutten av gjæringen, primært for å fange naturlig produsert CO₂ til karbonering.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.trykk.narTrykketPafores.hvorfor"><strong>Hvorfor tidspunktet kan bety noe:</strong> Tidlig gjærvekst og metabolisme kan påvirkes av trykk på en annen måte enn den senere, roligere fasen av gjæringen, noe som igjen kan påvirke esterprofilen. Tidspunktet påvirker også hvor mye naturlig CO₂ som faktisk fanges, og hvilket slutttrykk du ender opp med. Ingen av strategiene er en universell fasit — de er verktøy som passer ulike mål og gjærstammer.</p>
+  </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="spunding">
+    <h3 data-i18n="hjelp.trykk.spunding.tittel">Spundingventil</h3>
+    <p data-i18n="hjelp.trykk.spunding.tekst">Gjæren produserer CO₂ gjennom gjæringen. I et lukket, trykkgodkjent kar øker trykket etter hvert som CO₂ dannes. En spundingventil åpner når trykket i karet overskrider en innstilt verdi, slipper ut overskytende CO₂, og lukker igjen — trykket holdes dermed omtrent rundt det innstilte nivået gjennom resten av gjæringen.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.spunding.hvorfor"><strong>Tre forskjellige komponenter, ofte forvekslet:</strong> <strong>Spundingventil</strong> — prosesskontroll, regulerer ønsket gjæringstrykk innenfor utstyrets grenser. <strong>CO₂-regulator</strong> — styrer trykk fra en ekstern CO₂-kilde (flaske/tank), brukes typisk til tvangskarbonering eller skjenking, ikke til å regulere gjæringstrykk. <strong>PRV (trykksikkerhetsventil)</strong> — en sikkerhetskomponent som beskytter mot farlig overtrykk hvis noe går galt. Spundingventilen er IKKE en erstatning for en fungerende PRV — de to har forskjellige jobber, og et trykkgjæringssystem bør ha begge.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="naturlig-karbonering-gjaering">
+    <h3 data-i18n="hjelp.trykk.naturligKarbonering.tittel">Naturlig karbonering under gjæring</h3>
+    <p data-i18n="hjelp.trykk.naturligKarbonering.tekst">CO₂ som produseres under selve gjæringen kan fanges i et trykkgodkjent kar i stedet for å slippe ut gjennom en gjæringslås. Kaldere væske holder mer CO₂ løst, og både trykk og temperatur påvirker sammen hvor mye CO₂ som faktisk løses i ølet. Ølet kan derfor være delvis eller betydelig karbonert allerede før tapping — nøyaktig hvor mye avhenger av trykknivå, temperatur og gjæringsforløp, og er ikke ett fasttall.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.naturligKarbonering.hvorfor">Dette er beslektet med, men ikke det samme som, <a href="index.html#naturlig-tvangskarbonering">naturlig vs. tvangskarbonering</a> beskrevet i hovedhjelpen: der handler naturlig karbonering om sukker tilsatt ETTER gjæring (flaske/fat), mens dette er CO₂ fanget UNDER selve hovedgjæringen. Denne siden bygger ingen karboneringskalkulator — bruk lenken over for den praktiske beregningen av priming/flaskekarbonering.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="trykk-temperatur">
+    <h3 data-i18n="hjelp.trykk.trykkTemperatur.tittel">Trykk og temperatur</h3>
+    <p data-i18n="hjelp.trykk.trykkTemperatur.tekst">Trykk og temperatur kan ikke vurderes helt separat. Temperatur påvirker gjærens metabolisme — hvor fort den jobber og hvilke smaksstoffer som dannes underveis. Temperatur påvirker også hvor mye CO₂ som løses ved et gitt trykk: kaldere væske holder på mer CO₂. Trykk i seg selv kan i tillegg påvirke gjærens oppførsel og aromaproduksjon hos enkelte stammer.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.trykk.trykkTemperatur.hvorfor"><strong>Viktig:</strong> Høyere temperatur kan ikke automatisk «kompenseres» med høyere trykk — det er en for enkel tommelfingerregel som kan gi dårlig praksis og uforutsigbare resultater. Behandle trykk og temperatur som to variabler som virker sammen, ikke som at den ene kan erstatte den andre.</p>
+  </div>
+
+  <div id="closed-transfer">
+  <div class="hjelp-metode-kort" id="closed-transfer-kort">
+    <h3 data-i18n="hjelp.trykk.closedTransfer.tittel">Closed transfer</h3>
+    <p data-i18n="hjelp.trykk.closedTransfer.tekst">Målet med closed transfer er å flytte ferdig øl fra gjæringskar til fat eller annen beholder uten å eksponere det unødvendig for luft. På et overordnet nivå: mottakerfatet rengjøres og desinfiseres, fatet purges/fylles med CO₂ for å fortrenge luft, ølet overføres gjennom en lukket slange fra gjæringskar til fat, og gass i mottakerfatet får forlate det kontrollert etter hvert som ølet fyller opp — ofte hjulpet av en trykkforskjell mellom gjæringskar og mottaker.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.trykk.closedTransfer.hvorfor"><strong>Hvorfor det gjøres:</strong> Redusert oksygenkontakt, bedre bevaring av humlearoma, og mindre risiko for oksidasjon, se <a href="index.html#def-oksidasjon">oksidasjon etter gjæring</a>. Spesielt nyttig rett etter gjæring, når ølet er mest sårbart for luftkontakt.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="trykkbalanse-transfer">
+    <h3 data-i18n="hjelp.trykk.trykkbalanse.tittel">Trykkbalanse ved closed transfer</h3>
+    <p data-i18n="hjelp.trykk.trykkbalanse.tekst">En stor trykkforskjell mellom gjæringskar og mottakerfat kan gi voldsom strøm og skumming under overføringen. For liten forskjell kan i stedet gi en treg eller helt uteblitt overføring. Mottakerens gasstrykk må få slippe ut kontrollert etter hvert som ølet fyller opp, og ølstrømmen bør holdes rolig snarere enn å fosse gjennom slangen.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.trykk.trykkbalanse.hvorfor">Dette er et prinsipp, ikke ett universelt psi- eller bar-tall — riktig balanse avhenger av utstyr, slangelengde/-diameter, karboneringsnivå og temperaturen på ølet. Har utstyrsteksten i prosjektet konkrete tall for et spesifikt system, er de eksempler for det systemet — ikke en fasit som gjelder alt utstyr.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="floating-dip-tube">
+    <h3 data-i18n="hjelp.trykk.floatingDipTube.tittel">Floating dip tube / bunnfall</h3>
+    <p data-i18n="hjelp.trykk.floatingDipTube.tekst">En floating dip tube henter øl fra nær væskeoverflaten i stedet for fra bunnen av karet, som kan redusere hvor mye sediment/gjærbunnfall som følger med under overføringen. Nøyaktig plassering og flyt påvirkes av CO₂-utvikling, slangeoppsett og karets utforming.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.trykk.floatingDipTube.hvorfor">Dette er et praktisk hjelpemiddel — ikke en nødvendig forutsetning for selve prinsippet om closed transfer, som fungerer uavhengig av dip tube-type. Ikke utstyrsmerke-spesifikt her — prinsippet gjelder uansett hvilket system du bruker.</p>
+  </div>
+  </div>
+
+  <div id="sikkerhet-trykk">
+  <div class="hjelp-metode-kort">
+    <h3 data-i18n="hjelp.trykk.sikkerhet.tittel">Sikkerhet</h3>
+    <p data-i18n-html="hjelp.trykk.sikkerhet.intro">Trykk og væske er en kombinasjon som skal tas på alvor. Denne listen utvider den korte sikkerhetsnotisen i <a href="index.html#def-trykkgjaering-sikkerhet">Hjelp &amp; FAQ</a> — les begge.</p>
+    <div class="hjelp-advarsel" data-i18n-html="hjelp.trykk.sikkerhet.liste">
+      <ul>
+        <li>Bruk kun gjæringskar, lokk, koblinger, slanger og fittings som er beregnet for det trykket du faktisk bruker.</li>
+        <li>Kjenn produsentens oppgitte maks arbeidstrykk for utstyret ditt — det er utstyrets spesifikasjon som bestemmer grensen, ikke ett universelt tall.</li>
+        <li>En fungerende PRV (trykksikkerhetsventil) skal alltid være tilgjengelig og i god stand.</li>
+        <li>Blokker, plugg eller bypass aldri en sikkerhetsventil, uansett årsak.</li>
+        <li>Ikke anta at hjemmelagde eller tilfeldige beholdere tåler trykk — de er som regel verken laget eller testet for det.</li>
+        <li>Kontroller koblinger og slanger for slitasje/skade før hver bruk.</li>
+        <li>Trykkavlast systemet kontrollert før du demonterer noe.</li>
+        <li>Væske under trykk kan gi ukontrollert sprut eller utblåsning ved feil håndtering.</li>
+        <li>Temperaturendringer kan endre trykket i et lukket system, selv uten aktiv gjæring.</li>
+      </ul>
+    </div>
+  </div>
+  </div>
+
+  <div id="feilsoking-trykk">
+  <h3 data-i18n="hjelp.trykk.feilsoking.tittel">Vanlige feil / feilsøking</h3>
+  <p class="hjelp-innledning" data-i18n="hjelp.trykk.feilsoking.intro">Kort praktisk feilsøking — ikke en fullstendig hardware-diagnostikk, men typiske startpunkter.</p>
+  <table class="hjelp-tabell">
+    <thead><tr><th data-i18n="hjelp.trykk.feilsoking.kolonneSituasjon">Situasjon</th><th data-i18n="hjelp.trykk.feilsoking.kolonneArsaker">Mulige årsaker</th></tr></thead>
+    <tbody>
+      <tr><td data-i18n="hjelp.trykk.feilsoking.a.situasjon">A. Trykket bygger seg ikke</td><td data-i18n="hjelp.trykk.feilsoking.a.arsaker">Lekkasje, dårlig lokk/pakning, spunding satt for lavt, lite gjæraktivitet, eller feil kobling.</td></tr>
+      <tr><td data-i18n="hjelp.trykk.feilsoking.b.situasjon">B. Trykket blir høyere enn forventet</td><td data-i18n="hjelp.trykk.feilsoking.b.arsaker">Spunding blokkert eller feilinnstilt, blokkert gassvei, eller feil regulatoroppsett. PRV skal aldri brukes som normal prosesskontroll — den er en sikkerhetskomponent, ikke en spundingventil.</td></tr>
+      <tr><td data-i18n="hjelp.trykk.feilsoking.c.situasjon">C. Mye skum ved overføring</td><td data-i18n="hjelp.trykk.feilsoking.c.arsaker">For stor trykkforskjell mellom kar og mottaker, ølet er varmt eller sterkt karbonert, eller for rask/turbulent strøm.</td></tr>
+      <tr><td data-i18n="hjelp.trykk.feilsoking.d.situasjon">D. Ølet stopper å flyte</td><td data-i18n="hjelp.trykk.feilsoking.d.arsaker">Trykket har utlignet seg mellom kar og mottaker, dip tube/filter blokkert, mottakeren får ikke ventilert gass, eller problem med slange/kobling.</td></tr>
+      <tr><td data-i18n="hjelp.trykk.feilsoking.e.situasjon">E. Øl kommer i gasslangen/spunding</td><td data-i18n="hjelp.trykk.feilsoking.e.arsaker">Overfylt kar, kraftig krausen/skum under aktiv gjæring, feil plassering/oppsett av dip tube, eller manglende oppsamlingsløsning der systemet krever det.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="hjelp-metode-kort" id="ikke-panikk">
+    <h3 data-i18n="hjelp.trykk.ikkePanikk.tittel">«Ikke panikk»</h3>
+    <p data-i18n-html="hjelp.trykk.ikkePanikk.tekst">Litt trykkvariasjon er normalt når temperaturen i rommet eller ølet selv endres. En spunding kan «puste» periodisk i stedet for å holde et helt jevnt trykk. Trykkmåleren (gauge) kan variere litt fra avlesning til avlesning. Manglende synlig bobling sier lite alene — mål SG/FG og observer faktisk gjæringsaktivitet i stedet, se <a href="index.html#faq-gjaring-stoppet">gjæringen virker stoppet</a>. Unngå å skru tilfeldig på flere ting samtidig hvis noe virker uventet — endre én ting av gangen, slik at du faktisk vet hva som løste det.</p>
+  </div>
+
+  <p class="hjelp-innledning" data-i18n="hjelp.trykk.avslutning">
+    Trykkgjæring, spunding og closed transfer er verktøy for bestemte mål —
+    bedre prosesskontroll, mindre oksygenkontakt, eller mindre behov for
+    etterkarbonering — ikke en garanti for et bedre øl. God gjærhelse, riktig
+    temperaturstyring og trygt utstyr betyr mer enn hvor mange psi/bar du
+    kjører.
+  </p>
+  </main>
+</div>
+
+<footer class="no-print">
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="../personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
+<script src="../js/chrome.js"></script>
+</body>
+</html>
