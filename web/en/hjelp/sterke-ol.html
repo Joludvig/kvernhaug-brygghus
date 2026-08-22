@@ -1,0 +1,196 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/sterke-ol.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Strong Beer / High Gravity — Kvernhaug Brygghus</title>
+<meta content="A Master Brewer guide to strong beer and high gravity brewing: yeast health, oxygenation, yeast nutrients, mash and fermentability, temperature, alcohol tolerance and practical planning." data-i18n-content="meta.hjelpSterkeOl.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/sterke-ol.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/sterke-ol.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/sterke-ol.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/sterke-ol.html" hreflang="x-default" rel="alternate"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpSterkeOl.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/sterke-ol.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="sterke-ol.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavSterkeOl">🥃 Strong Beer</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/sterke-ol.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="sterke-ol.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/sterke-ol.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="sterke-ol.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a class="aktiv" data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.sterkeOl.toc.hva" href="#sterke-ol-hva">What Is High Gravity?</a>
+<a data-i18n="hjelp.sterkeOl.toc.utfordringer" href="#utfordringer-hoy-og">The Challenges Of High OG</a>
+<a data-i18n="hjelp.sterkeOl.toc.gjaerForberedelse" href="#gjaer-forberedelse">Yeast: Pitch, Oxygen and Nutrients</a>
+<a data-i18n="hjelp.sterkeOl.toc.meskGjaerbarhet" href="#mesk-gjaerbarhet">Mash and Fermentability</a>
+<a data-i18n="hjelp.sterkeOl.toc.kokVolum" href="#kok-volum-konsentrasjon">Boil, Volume and Concentration</a>
+<a data-i18n="hjelp.sterkeOl.toc.temperaturTrykk" href="#temperatur-trykk-sterke-ol">Temperature and Pressure</a>
+<a data-i18n="hjelp.sterkeOl.toc.gjaeringsforlop" href="#gjaeringsforlop-sterke-ol">Fermentation Course, Troubleshooting and Alcohol Tolerance</a>
+<a data-i18n="hjelp.sterkeOl.toc.modning" href="#modning-sterke-ol">Aging Strong Beer</a>
+<a data-i18n="hjelp.sterkeOl.toc.planlegging" href="#praktisk-planlegging">Practical Planning</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.sterkeOl.intro">This page is a Master Brewer guide to brewing and fermenting strong beer / high-gravity beer — imperial stout, barleywine, quadrupel and similar. The focus is on WHY a strong wort is more demanding than a regular one, and which parts of the process you should plan more carefully for. This is not a "more malt = more alcohol" article.</p>
+<div class="hjelp-metode-kort" id="sterke-ol-hva">
+<h3 data-i18n="hjelp.sterkeOl.hva.tittel">What Is High Gravity?</h3>
+<p data-i18n="hjelp.sterkeOl.hva.tekst">"High gravity" means wort with a high original gravity (OG) — a lot of dissolved sugar/extract before fermentation starts. It's typically used for strong beers, with examples like imperial stout, barleywine, quadrupel and other powerful styles. Higher OG means higher potential alcohol (ABV), but it also means a heavier job for the yeast and a process that needs more planning than a regular-strength beer does.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.hva.grense">There's no universal OG threshold that defines "high gravity" — styles and brewers draw the line differently. Kvernhaug Brygghus internally uses a practical threshold of OG 1.075 for when <a href="bryggemetoder.html#reiterated-mash">reiterated mash</a> is suggested in the process recommendation — that's an internal, practical limit for this app, not an official or universal definition of what counts as "strong beer".</p>
+</div>
+<div class="hjelp-metode-kort" id="utfordringer-hoy-og">
+<h3 data-i18n="hjelp.sterkeOl.utfordringer.tittel">The Challenges Of High OG</h3>
+<p data-i18n="hjelp.sterkeOl.utfordringer.tekst">A high sugar concentration in the wort creates osmotic stress for the yeast early in fermentation: the cells lose water to the sugar-rich environment around them before fermentation gets properly going, somewhat like being placed in strong brine. As fermentation progresses, the alcohol level also rises, adding its own layer of stress on top of the osmotic one — the yeast has to handle both a demanding start and an increasingly tough finish in the same batch.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sterkeOl.utfordringer.hvorfor">The consequences can be a slow or stalled fermentation, higher FG than planned and a sweeter final result than intended, and — if the yeast is pushed hard — a stronger hot/fusel-like character in the finished beer. Fermentation itself can also simply take longer than you're used to from weaker beers.</p>
+</div>
+<div id="gjaer-forberedelse">
+<div class="hjelp-metode-kort" id="pitch-rate-frisk-gjaer">
+<h3 data-i18n="hjelp.sterkeOl.pitchRate.tittel">Pitch Rate / Enough Fresh Yeast</h3>
+<p data-i18n-html="hjelp.sterkeOl.pitchRate.tekst">Strong beers often place greater demands on the yeast pitch itself: sufficient cell count relative to the wort's size and strength, fresh yeast with good vitality, possibly a <a href="index.html#gjaerstarter">yeast starter</a> for liquid yeast, or several packets of dry yeast depending on batch, OG and the manufacturer's own guidance.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.pitchRate.hvorfor">There's no universal pitch-rate recipe that fits every yeast strain and every OG level — use the manufacturer's own yeast data as a starting point, and see <a href="index.html#gjaerhelse-temperatur">yeast health and temperature</a> for the broader context. This page doesn't build a pitch-rate calculator.</p>
+</div>
+<div class="hjelp-metode-kort" id="oksygenering">
+<h3 data-i18n="hjelp.sterkeOl.oksygenering.tittel">Oxygenation</h3>
+<p data-i18n-html="hjelp.sterkeOl.oksygenering.tekst">Yeast uses oxygen early in fermentation to build cell membranes and reproduce, before alcohol production itself takes over. Strong wort can therefore have a greater need for good oxygen availability before or very early in the fermentation start than a weaker wort does. Once fermentation is actively underway, the picture flips completely: oxygen is then unwanted, see <a href="index.html#def-oksidasjon">oxidation after fermentation</a>.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.oksygenering.hvorfor">There's no universal litre/minute figure or timing that fits all equipment and all wort strengths here — "more oxygen is always better" isn't true; too much can cause its own problems. Some advanced high-gravity processes re-oxygenate partway into fermentation; this is advanced practice for experienced brewers with good control over hygiene and equipment, not standard advice for beginners.</p>
+</div>
+<div class="hjelp-metode-kort" id="gjaernaering">
+<h3 data-i18n="hjelp.sterkeOl.gjaernaering.tittel">Yeast Nutrients</h3>
+<p data-i18n="hjelp.sterkeOl.gjaernaering.tekst">Strong wort can place greater demands on the yeast's nutrient status than a regular wort, and yeast nutrient can therefore be useful in some recipes and processes. Different products have different compositions and dosing — follow the manufacturer's own instructions for the specific product you're using.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sterkeOl.gjaernaering.hvorfor">Yeast nutrient alone doesn't fix the problem if something else is wrong: too little yeast, poor temperature control, poor hygiene or an extremely unfavourable wort aren't fixed by more nutrient. This page gives no universal gram dosage — it depends on the product.</p>
+</div>
+</div>
+<div id="mesk-gjaerbarhet">
+<div class="hjelp-metode-kort" id="mesk-og-gjaerbarhet">
+<h3 data-i18n="hjelp.sterkeOl.meskGjaerbarhet.tittel">Mash and Fermentability</h3>
+<p data-i18n="hjelp.sterkeOl.meskGjaerbarhet.tekst">The mash profile governs how fermentable the wort becomes, and fermentability in turn ties together high OG and final FG. Strong beer doesn't automatically need a high mash temperature or "lots of body" — if the recipe already has a lot of malt/extract, too much non-fermentable material can instead give a heavy, sweet result rather than a balanced one.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.meskGjaerbarhet.hvorfor">The brewer has to balance body, alcohol, fermentability and residual sweetness against each other — not just turn everything up at once. See <a href="bryggemetoder.html#hochkurz">Hochkurz</a> and single infusion for how the mash profile itself can be used to shape this balance.</p>
+</div>
+<div class="hjelp-metode-kort" id="reiterated-mash-kobling">
+<h3 data-i18n="hjelp.sterkeOl.reiteratedMashKobling.tittel">The Reiterated Mash Connection</h3>
+<p data-i18n-html="hjelp.sterkeOl.reiteratedMashKobling.tekst"><a href="bryggemetoder.html#reiterated-mash">Reiterated mash</a> can solve the capacity problem in the mash tun, and make it possible to reach high OG without an extremely large pre-boil volume.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sterkeOl.reiteratedMashKobling.hvorfor">Reiterated mash does NOT, however, solve yeast stress, alcohol stress, pitch needs, oxygenation, nutrition or temperature control — it's a tool for mash capacity, not a solution to the fermentation challenges a strong wort creates. See the rest of this page for those parts of the process.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="kok-volum-konsentrasjon">
+<h3 data-i18n="hjelp.sterkeOl.kokVolum.tittel">Boil, Volume and Concentration</h3>
+<p data-i18n-html="hjelp.sterkeOl.kokVolum.tekst">A long or hard boil can concentrate the wort: more <a href="index.html#def-kok">boil-off</a> means less final volume and therefore higher OG from the same malt and sparge amount. This can be used deliberately as a route to higher strength, but it comes at a cost.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.kokVolum.hvorfor">The cost is a lower final volume than planned, more heat load on the wort, potentially more darkening/Maillard character than intended, and a longer brew day overall. Extreme boil-down isn't automatically the best route to a strong beer — see <a href="index.html#def-forkok">pre-boil volume and pre-boil gravity</a> for how to check yourself along the way.</p>
+</div>
+<div id="temperatur-trykk-sterke-ol">
+<div class="hjelp-metode-kort" id="temperaturstyring-sterke-ol">
+<h3 data-i18n="hjelp.sterkeOl.temperaturstyring.tittel">Temperature Control</h3>
+<p data-i18n="hjelp.sterkeOl.temperaturstyring.tekst">Fermentation produces its own heat, and strong wort can generate vigorous fermentation activity — the liquid temperature in the vessel can therefore run noticeably higher than the surrounding room temperature, especially during the most active phase.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.temperaturstyring.hvorfor">Too high a temperature can contribute to unwanted esters, fusel character or general yeast stress — see <a href="index.html#gjaerhelse-temperatur">yeast health and temperature</a>. The right temperature should be judged from the yeast strain's own recommended range and the actual beer temperature, not room temperature alone or one universal figure meant to fit every strong beer.</p>
+</div>
+<div class="hjelp-metode-kort" id="trykkgjaering-sterke-ol">
+<h3 data-i18n="hjelp.sterkeOl.trykkSterkeOl.tittel">Pressure Fermentation and Strong Beer</h3>
+<p data-i18n-html="hjelp.sterkeOl.trykkSterkeOl.tekst"><a href="trykkgjaering.html">Pressure fermentation</a> can be used for strong beer if the equipment and yeast strain suit it.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.trykkSterkeOl.hvorfor">Pressure is not a cure for high-gravity stress — it fixes neither osmotic stress, alcohol stress, nor a poor pitch. Too much pressure can instead add even more load onto a yeast that already has enough to deal with. Never use pressure as an excuse to ferment warmer than the strain tolerates or to skimp on pitch amount — see <a href="trykkgjaering.html#trykk-temperatur">pressure and temperature</a> and <a href="trykkgjaering.html#sikkerhet-trykk">safety</a> in the pressure fermentation guide.</p>
+</div>
+</div>
+<div id="gjaeringsforlop-sterke-ol">
+<div class="hjelp-metode-kort" id="forventet-gjaeringsforlop">
+<h3 data-i18n="hjelp.sterkeOl.gjaeringsforlop.tittel">Expected Fermentation Course</h3>
+<p data-i18n-html="hjelp.sterkeOl.gjaeringsforlop.tekst">Strong beers can take longer than you're used to, and krausen/activity can be violent during the most active phase. The airlock isn't a reliable measure of progress here either — SG/FG measurements matter more, see <a href="index.html#faq-gjaring-stoppet">fermentation seems stalled</a>.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.gjaeringsforlop.hvorfor">Don't cold crash or package before FG is stable across several readings — strong beers can need more time to clean up after the main fermentation than a weaker beer does, see <a href="index.html#def-diacetylrest">diacetyl and diacetyl rest</a> and <a href="index.html#def-cold-crash">cold crash</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="nar-gjaeringen-stopper-hoyt">
+<h3 data-i18n="hjelp.sterkeOl.stoppetHoyt.tittel">When Fermentation Stalls High</h3>
+<p data-i18n="hjelp.sterkeOl.stoppetHoyt.intro">When a strong fermentation stalls higher (a higher FG) than planned, several things could be behind it — start by understanding the cause before doing anything about it:</p>
+<ul data-i18n-html="hjelp.sterkeOl.stoppetHoyt.liste"><li>The yeast strain has reached its alcohol tolerance</li><li>Too low a cell count at pitching</li><li>Poor yeast health</li><li>A temperature problem — too low, too high, or unstable</li><li>A poorly fermentable wort, see mash and fermentability above</li><li>Nutrient deficiency</li><li>An extremely high starting gravity</li><li>A measurement error — for example a refractometer read without alcohol correction, see <a href="index.html#def-refraktometer-brix">refractometer and Brix</a> and <a href="index.html#def-fg-maling">FG measurement</a></li></ul>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sterkeOl.stoppetHoyt.hvorfor">Don't just automatically "pitch more yeast" — new yeast added to an already alcohol-rich environment can also struggle to get going. First understand which of the causes above actually applies to your batch, and address that, rather than guessing.</p>
+</div>
+<div class="hjelp-metode-kort" id="alkoholtoleranse">
+<h3 data-i18n="hjelp.sterkeOl.alkoholtoleranse.tittel">Alcohol Tolerance</h3>
+<p data-i18n="hjelp.sterkeOl.alkoholtoleranse.tekst">Yeast strains have different alcohol tolerances, and the manufacturer's stated figure is a guideline — not an exact wall the yeast is guaranteed to stop at.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sterkeOl.alkoholtoleranse.hvorfor">Actual tolerance in practice is affected by yeast health, pitch amount, oxygenation, nutrients, temperature and the wort composition itself. A yeast rated at "12%" doesn't automatically stop at exactly 12% — the real outcome depends on everything else in this guide having gone right too.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="modning-sterke-ol">
+<h3 data-i18n="hjelp.sterkeOl.modning.tittel">Aging Strong Beer</h3>
+<p data-i18n-html="hjelp.sterkeOl.modning.tekst">Strong and dark beers can change a lot with time — more than pale, fresh styles often do. Alcohol heat can mellow, and flavours can integrate better after a few weeks or months, see <a href="index.html#modning-lagring">aging and storage</a>.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sterkeOl.modning.hvorfor">Some oxidation notes can be perceived as part of a "complex" character in strong, dark beers — but oxidation still isn't a goal in itself, see <a href="index.html#def-oksidasjon">oxidation after fermentation</a>. Hop character fades with time regardless, so a strong, hop-forward beer ages differently from a malt-forward one. Strong beers don't automatically need long aging — how long is style- and recipe-dependent, not a fixed rule.</p>
+</div>
+<div class="hjelp-metode-kort" id="praktisk-planlegging">
+<h3 data-i18n="hjelp.sterkeOl.planlegging.tittel">Practical Planning — Before You Brew</h3>
+<p data-i18n="hjelp.sterkeOl.planlegging.intro">A compact checklist for the whole chain, not just the OG figure itself:</p>
+<ul data-i18n-html="hjelp.sterkeOl.planlegging.liste"><li>Does all the malt fit in your mash tun?</li><li>Do you need <a href="bryggemetoder.html#reiterated-mash">reiterated mash</a>?</li><li>Is the pre-boil and final volume realistic with the boil intensity you're planning?</li><li>Do you have enough fresh yeast, with the right cell count for this batch?</li><li>Does the yeast's stated alcohol tolerance suit your target ABV?</li><li>How will you oxygenate before pitching?</li><li>Does the recipe need yeast nutrient, and do you have the right product/dosage for it?</li><li>Can you actually control fermentation temperature — not just room temperature?</li><li>Does the fermenter have enough headspace for vigorous krausen?</li><li>Is the recipe planned for the target FG, not just a high OG?</li></ul>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sterkeOl.planlegging.hvorfor">The goal of this page is for you to plan the whole chain before brew day — not just add more malt and hope the rest sorts itself out.</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.sterkeOl.avslutning">A strong beer isn't just a regular recipe with more malt in it — it's a recipe that places higher demands on yeast, oxygenation, temperature control and patience throughout the process. Good planning before brew day is what actually determines whether the result is a balanced strong beer, or just a sweet, hot one.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

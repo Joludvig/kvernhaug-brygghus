@@ -62,6 +62,7 @@ PAGES = [
     "hjelp/bryggedag.html",
     "hjelp/bryggemetoder.html",
     "hjelp/trykkgjaering.html",
+    "hjelp/sterke-ol.html",
     "hjelp/utstyr-brewzilla.html",
 ]
 

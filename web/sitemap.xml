@@ -122,6 +122,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/trykkgjaering.html"/>
   </url>
   <url>
+    <loc>https://kvernhaugbrygghus.no/hjelp/sterke-ol.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/sterke-ol.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/sterke-ol.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/sterke-ol.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/hjelp/sterke-ol.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/sterke-ol.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/sterke-ol.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/sterke-ol.html"/>
+  </url>
+  <url>
     <loc>https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html</loc>
     <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/utstyr-brewzilla.html"/>
