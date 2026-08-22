@@ -90,6 +90,7 @@
 <a data-i18n="hjelp.idx.toc.d" href="#bryggeprosess">D. Brewing Process</a>
 <a data-i18n-html="hjelp.idx.toc.e" href="#faq">E. Questions &amp; Answers</a>
 <a data-i18n="hjelp.idx.toc.f" href="#vannkjemi">F. Water Chemistry</a>
+<a data-i18n="hjelp.idx.toc.g" href="#gjaer-karbonering-lagring">G. Yeast, Carbonation &amp; Conditioning</a>
 </nav>
 <main class="hjelp-side-main">
 <p class="hjelp-innledning" data-i18n-html="hjelp.idx.intro">A reference for anyone building a recipe in Kvernhaug Brygghus. Everything here is written to answer two questions: what does this mean, and why should I care? Use the contents menu to jump around, or scroll down like an ordinary handbook.</p>
@@ -295,6 +296,10 @@
 <h3 data-i18n="hjelp.idx.defOgMaling.tittel">OG Reading</h3>
 <p data-i18n-html="hjelp.idx.defOgMaling.tekst">Measuring the wort's gravity right before fermentation, with a hydrometer or refractometer — compared against the calculated <a href="#og">OG</a>.</p>
 </article>
+<article class="hjelp-artikkel" id="def-hydrometer-temperatur">
+<h3 data-i18n="hjelp.idx.defHydrometerTemperatur.tittel">Hydrometer — Temperature Correction</h3>
+<p data-i18n-html="hjelp.idx.defHydrometerTemperatur.tekst">A hydrometer is calibrated for one specific temperature, normally printed on the instrument itself — 20 °C is common, but the instrument decides, not a universal rule. Measuring a sample that deviates significantly from that calibration temperature can give a misleading reading. Check what's actually printed on your own hydrometer, and correct the reading (or cool/warm the sample to the reference temperature) for large deviations.</p>
+</article>
 <article class="hjelp-artikkel" id="def-gjaering">
 <h3 data-i18n="hjelp.idx.defGjaering.tittel">Fermentation</h3>
 <p data-i18n="hjelp.idx.defGjaering.tekst">The period during which yeast converts sugar into alcohol and CO₂ — normally lasts 1–3 weeks depending on yeast type, strength, and temperature.</p>
@@ -310,6 +315,10 @@
 <article class="hjelp-artikkel" id="def-fg-maling">
 <h3 data-i18n="hjelp.idx.defFgMaling.tittel">FG Reading</h3>
 <p data-i18n-html="hjelp.idx.defFgMaling.tekst">Measuring the gravity once fermentation has settled down, to confirm it's finished and calculate the actual <a href="#abv">ABV</a>. A refractometer works directly on unfermented wort, but gives a misleading reading as soon as alcohol is present in the sample — use an alcohol/refractometer correction, or measure with a hydrometer instead.</p>
+</article>
+<article class="hjelp-artikkel" id="def-refraktometer-brix">
+<h3 data-i18n="hjelp.idx.defRefraktometerBrix.tittel">Refractometer and Brix</h3>
+<p data-i18n-html="hjelp.idx.defRefraktometerBrix.tekst">Many refractometers show Brix instead of SG. Before fermentation, Brix can be converted to an approximate SG value without issue. Once fermentation has started, that simple conversion no longer holds — alcohol in the sample bends light differently than sugar, so a correct calculation must then use both the original wort strength and the current Brix reading together, see <a href="#def-fg-maling">FG reading</a>. If you're unsure whether the correction is accurate, a hydrometer is often the simplest check measurement.</p>
 </article>
 <article class="hjelp-artikkel" id="def-cold-crash">
 <h3 data-i18n="hjelp.idx.defColdCrash.tittel">Cold Crash</h3>
@@ -386,6 +395,34 @@
 <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqKarboneringFeil.sporsmal">Too little or too much carbonation — what do I do?</p>
 <p data-i18n-html="hjelp.idx.faqKarboneringFeil.svar">Don't blindly add extra sugar to "fix" low carbonation — first check that FG was actually stable before bottling (see above), since a fermentation that wasn't finished can continue in the bottle. Too much carbonation isn't just a taste issue: overcarbonation can cause dangerous overpressure, see the safety warning in the <a href="bryggedag.html#steg-15">brew day guide</a>.</p>
 </article>
+<article class="hjelp-artikkel" id="faq-lavt-utbytte">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqLavtUtbytte.sporsmal">Why was my efficiency/OG lower than expected?</p>
+<p data-i18n-html="hjelp.idx.faqLavtUtbytte.svar">Low efficiency is rarely a single mistake — it's usually the result of the whole mash and sparge process taken together. Common contributors: crush consistency (too coarse or too fine), mash temperature, mash time, water-to-grain ratio, poor circulation in the mash, sparging method and technique, an inaccurate measured volume, or an inaccurate temperature/gravity reading. See also <a href="#faq-traff-ikke-og">why didn't I hit my expected OG</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-hoy-og">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqHoyOg.sporsmal">Why was my OG higher than expected?</p>
+<p data-i18n-html="hjelp.idx.faqHoyOg.svar">Common causes are often the opposite of low efficiency: less final volume than planned (for example more boil-off than expected, see <a href="bryggedag.html#steg-7">the boil</a>), higher brewhouse efficiency than assumed that day, or an error in the volume or gravity measurement. A high OG isn't necessarily a problem in itself, but it affects your expected FG and ABV.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-svovel">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqSvovel.sporsmal">My beer smells of sulfur during fermentation — is that wrong?</p>
+<p data-i18n="hjelp.idx.faqSvovel.svar">Certain yeast strains produce sulfur compounds as a perfectly normal part of fermentation, and the smell often fades with time and a bit of conditioning. It isn't automatically a sign of infection. If a strong sulfur smell persists well after fermentation and a few weeks of conditioning, it may be worth reconsidering process and hygiene.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-fusel">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqFusel.sporsmal">My beer tastes hot/solvent-like — what could cause that?</p>
+<p data-i18n-html="hjelp.idx.faqFusel.svar">Common contributors are a high fermentation temperature, stressed yeast (for example too little yeast pitched), a high OG giving the yeast a heavier job to do, or insufficient oxygenation/pitch rate at the start — see <a href="#gjaerhelse-temperatur">yeast health and temperature</a>. Note that not all noticeable alcohol heat in strong beers means something is wrong — it can mellow with a few weeks or months of conditioning, see <a href="#modning-lagring">conditioning and storage</a>.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-diacetyl-feilsoking">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqDiacetylFeilsoking.sporsmal">My beer tastes buttery/butterscotch — is that diacetyl?</p>
+<p data-i18n-html="hjelp.idx.faqDiacetylFeilsoking.svar">A buttery or butterscotch character often points to diacetyl, see <a href="#def-diacetylrest">diacetyl and the diacetyl rest</a>. First consider whether fermentation actually got enough time at the right temperature toward the end (a diacetyl rest) before concluding something is wrong — this is often something the yeast cleans up on its own, given enough time.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-oksidasjon-feilsoking">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqOksidasjonFeilsoking.sporsmal">My beer tastes papery/stale — could that be oxidation?</p>
+<p data-i18n-html="hjelp.idx.faqOksidasjonFeilsoking.svar">Papery or "stale" notes, muted hop aroma, and sometimes a slightly darker color than expected can point to oxidation, see <a href="#def-oksidasjon">oxidation after fermentation</a>. Consider whether the beer may have gotten unnecessary air contact after fermentation was actively underway — splashing during transfers, a poorly sealed cold crash, or long storage at a high temperature are common ways it happens.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-ikke-panikk">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqIkkePanikk.sporsmal">When should I NOT worry?</p>
+<p data-i18n-html="hjelp.idx.faqIkkePanikk.svar">Some observations look dramatic but are often perfectly normal: an airlock going quiet doesn't automatically mean fermentation has stopped (see <a href="#faq-gjaring-stoppet">fermentation seems to have stopped</a>); krausen can drop early without anything being wrong; a sulfur smell can be normal for certain yeast strains (see above); a hazy beer doesn't necessarily mean infection; and strong alcohol heat in strong beers can mellow with a bit of time. Hydrometer/FG readings are a more reliable indicator than airlock activity alone — learn to observe and measure before you "fix".</p>
+</article>
 </div>
 <div class="hjelp-seksjon" id="vannkjemi">
 <h2 data-i18n="hjelp.idx.secF.tittel">F. Water Chemistry — Brief Introduction</h2>
@@ -424,6 +461,34 @@
 <h3 data-i18n="hjelp.idx.vannClSo4.tittel">Cl:SO4 Ratio</h3>
 <p data-i18n="hjelp.idx.vannClSo4.tekst">The ratio between chloride and sulfate (Cl:SO4) gives a rough signal of which direction a water profile leans — more toward malt/fullness, or more toward a dry, sharp hop emphasis.</p>
 <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.vannClSo4.hvorfor"><strong>Why you care:</strong> An important nuance: the ratio alone does <strong>not</strong> determine the flavor, and it isn't a universal "malt vs. hops" switch. The actual ion concentrations — not just the ratio between them — also matter a great deal. Two water profiles with the same Cl:SO4 ratio but very different absolute levels can taste quite different.</p>
+</article>
+</div>
+<div class="hjelp-seksjon" id="gjaer-karbonering-lagring">
+<h2 data-i18n="hjelp.idx.secG.tittel">G. Yeast, Carbonation &amp; Conditioning</h2>
+<article class="hjelp-artikkel" id="gjaerstarter">
+<h3 data-i18n="hjelp.idx.gjaerstarter.tittel">Yeast Starter</h3>
+<p data-i18n-html="hjelp.idx.gjaerstarter.tekst">A yeast starter is a small amount of sterile wort you pitch yeast into ahead of time, let multiply for anywhere from a few hours to a couple of days, and use as a "boosted" yeast package on brew day itself. Especially relevant for liquid yeast, low cell counts in the package, or ahead of a strong wort that needs a lot of yeast. The goal is primarily more, healthier yeast cells — not necessarily a whole separate process. Hygienic handling throughout is critical, since the starter is an environment where unwanted microorganisms can multiply just as readily as the yeast itself.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerstarter.hvorfor"><strong>Why you care:</strong> A yeast starter isn't a universal necessity for all yeast — many brews do fine without one. Dry yeast is often handled differently (rehydrated or pitched directly, see <a href="bryggedag.html#steg-12">pitch yeast</a>), and the manufacturer's own recommendations should be followed where they exist.</p>
+</article>
+<article class="hjelp-artikkel" id="gjaerhelse-temperatur">
+<h3 data-i18n="hjelp.idx.gjaerhelseTemperatur.tittel">Yeast Health and Temperature</h3>
+<p data-i18n="hjelp.idx.gjaerhelseTemperatur.tekst">Too little yeast relative to the wort's size and strength can cause a slow or stressed fermentation. Temperature also plays a major role: a temperature too high or too low for what the yeast strain is built for can affect both how well the yeast works and which flavor compounds it produces along the way. Different yeast strains have different working ranges, and a sharp or sudden temperature rise can create off-flavors that wouldn't otherwise occur. A high OG also gives the yeast a heavier job to do.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerhelseTemperatur.hvorfor"><strong>Why you care:</strong> The manufacturer's stated temperature range is a sensible starting point — not proof that exactly one temperature suits every beer or every yeast strain. See also <a href="bryggedag.html#steg-13">the fermentation step</a> in a brew day.</p>
+</article>
+<article class="hjelp-artikkel" id="naturlig-tvangskarbonering">
+<h3 data-i18n="hjelp.idx.naturligTvangskarbonering.tittel">Natural vs. Forced Carbonation</h3>
+<p data-i18n-html="hjelp.idx.naturligTvangskarbonering.tekst"><strong>Natural carbonation:</strong> sugar is added after fermentation is finished, and residual yeast produces CO₂ in a sealed container — most common when bottling, but can also be used in a keg. <strong>Forced carbonation:</strong> CO₂ is supplied directly from a bottle or tank — most common in a keg. With forced carbonation, pressure and temperature determine how much CO₂ actually dissolves into the beer: colder beer holds more CO₂, and higher pressure gives more dissolved CO₂ at a given temperature.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.naturligTvangskarbonering.hvorfor"><strong>Why you care:</strong> Desired carbonation level varies by beer style — there's no single universal psi or bar value that suits every beer. See <a href="#priming-flaskekarbonering">priming/bottle carbonation</a> for the practical side of natural carbonation.</p>
+</article>
+<article class="hjelp-artikkel" id="priming-flaskekarbonering">
+<h3 data-i18n="hjelp.idx.primingFlaskekarbonering.tittel">Priming / Bottle Carbonation</h3>
+<p data-i18n-html="hjelp.idx.primingFlaskekarbonering.tekst">With bottle carbonation ("priming"), a calculated amount of sugar is added right before bottling, so that residual yeast produces CO₂ inside the sealed bottle. FG must be stable before doing this (see <a href="#faq-gjaring-stoppet">fermentation seems to have stopped</a>) — the beer may already contain some dissolved CO₂ from fermentation itself, and a correctly calculated priming amount should account for that. The sugar amount should be calculated from the desired carbonation level, not eyeballed.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.primingFlaskekarbonering.hvorfor"><strong>Why you care:</strong> Too much sugar combined with residual fermentation activity can cause dangerous overpressure in the bottle, see the safety warning in the <a href="bryggedag.html#steg-15">brew day guide</a>. Too little sugar instead gives a flatter beer than planned.</p>
+</article>
+<article class="hjelp-artikkel" id="modning-lagring">
+<h3 data-i18n="hjelp.idx.modningLagring.tittel">Conditioning and Storage</h3>
+<p data-i18n-html="hjelp.idx.modningLagring.tekst">Beer can keep changing after packaging. Some beers — especially pale, hop-forward styles — are usually best fresh, since hop aroma often fades with time. Others — especially stronger or darker beers — can keep developing and sometimes benefit from longer conditioning. Oxidation (see <a href="#def-oksidasjon">oxidation after fermentation</a>) happens faster at higher temperatures, so a dark, cool storage spot is generally preferable to a warm, bright one.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.modningLagring.hvorfor"><strong>Why you care:</strong> How well a beer suits aging is style- and recipe-dependent — "older is always better" doesn't hold as a general rule. Serve fresh beers within a reasonable time, and feel free to give strong/dark beers a bit more time if you're curious how they develop.</p>
 </article>
 </div>
 <p class="hjelp-innledning" data-i18n="hjelp.idx.avslutning">Didn't find what you were looking for? The handbook keeps growing.</p>

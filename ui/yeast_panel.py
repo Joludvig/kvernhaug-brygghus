@@ -2,6 +2,16 @@ import streamlit as st
 
 def render_yeast_panel(gjaer_database):
     st.header("🧫 Gjærstamme")
+    with st.expander("ℹ️ Gjærstarter og gjærhelse (kort intro)"):
+        st.markdown(
+            "- **Gjærstarter** — en liten mengde steril vørter du tilsetter gjær i på "
+            "forhånd, slik at den rekker å formere seg før bryggedagen. Særlig aktuelt "
+            "for flytende gjær, lav cellemengde eller en sterk vørter. Ikke en universell "
+            "nødvendighet — tørrgjær håndteres ofte annerledes, følg produsentens råd.\n"
+            "- **Gjærmengde og temperatur** — for lite gjær eller feil temperatur kan gi "
+            "en treg/stresset gjæring og uønskede smaker. Produsentens temperaturområde "
+            "er et utgangspunkt, ikke ett fasittall som passer alle øl."
+        )
     gjaer_id_kart, gjaer_meny_valg = {}, []
     for g_id, info in gjaer_database.items():
         if info:

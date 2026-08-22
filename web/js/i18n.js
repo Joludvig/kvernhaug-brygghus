@@ -723,6 +723,7 @@ const TEKSTER = {
     "hjelp.idx.toc.d": "D. Bryggeprosess",
     "hjelp.idx.toc.e": "E. Spørsmål &amp; svar",
     "hjelp.idx.toc.f": "F. Vannkjemi",
+    "hjelp.idx.toc.g": "G. Gjær, karbonering og lagring",
     "hjelp.idx.intro": "Et oppslagsverk for deg som bygger en oppskrift i Kvernhaug Brygghus. Alt her er skrevet for å svare på to spørsmål: hva betyr dette, og hvorfor bryr jeg meg? Bruk innholdsmenyen til å hoppe rundt, eller bla nedover som en vanlig håndbok.",
 
     "hjelp.idx.secA.tittel": "A. Kom i gang",
@@ -871,6 +872,8 @@ const TEKSTER = {
     "hjelp.idx.defKjoling.tekst": "Rask nedkjøling av vørteren etter kok, ned mot gjærens starttemperatur — jo raskere, jo mindre risiko for uønsket bakterievekst og klarere øl.",
     "hjelp.idx.defOgMaling.tittel": "OG-måling",
     "hjelp.idx.defOgMaling.tekst": "Å måle vørterens tetthet rett før gjæring, med et hydrometer (flytevekt) eller refraktometer — sammenlignes mot beregnet <a href=\"#og\">OG</a>.",
+    "hjelp.idx.defHydrometerTemperatur.tittel": "Hydrometer — temperaturkorreksjon",
+    "hjelp.idx.defHydrometerTemperatur.tekst": "Et hydrometer er kalibrert for én bestemt temperatur, som normalt står trykt på selve instrumentet — 20 °C er vanlig, men det er instrumentet som bestemmer, ikke en universell regel. Måler du en prøve som avviker vesentlig fra denne kalibreringstemperaturen, kan avlesningen bli misvisende. Sjekk hva som faktisk står på ditt eget hydrometer, og korriger avlesningen (eller avkjøl/varm prøven til referansetemperaturen) ved store avvik.",
     "hjelp.idx.defGjaering.tittel": "Gjæring",
     "hjelp.idx.defGjaering.tekst": "Perioden gjæren omdanner sukker til alkohol og CO₂ — varer normalt 1–3 uker avhengig av gjærtype, styrke og temperatur.",
     "hjelp.idx.defDiacetylrest.tittel": "Diacetyl og diacetylrest",
@@ -879,6 +882,8 @@ const TEKSTER = {
     "hjelp.idx.defOksidasjon.tekst": "Litt oksygen er ønskelig FØR gjæren settes til (se <a href=\"bryggedag.html#steg-11\">overføring til gjæringskar</a>) — det hjelper gjæren i gang. Oksygen som når ølet ETTER at gjæringen er aktivt i gang er noe helt annet: det kan gi oksidasjon, som kan dempe fersk humlearoma, gi mørkere/pappaktige/«stale» toner og redusere holdbarheten. Unngå unødvendig plasking ved overføringer, og bruk lukkede overføringer der det er praktisk mulig — men ett enkelt, tilfeldig oksygenmolekyl ødelegger ikke automatisk hele batchen.",
     "hjelp.idx.defFgMaling.tittel": "FG-måling",
     "hjelp.idx.defFgMaling.tekst": "Å måle tettheten når gjæringen har roet seg, for å bekrefte at den er ferdig og regne ut faktisk <a href=\"#abv\">ABV</a>. Et refraktometer virker direkte på ugjæret vørter, men gir en misvisende avlesning så snart det finnes alkohol i prøven — bruk en alkohol-/refraktometerkorreksjon, eller mål med hydrometer i stedet.",
+    "hjelp.idx.defRefraktometerBrix.tittel": "Refraktometer og Brix",
+    "hjelp.idx.defRefraktometerBrix.tekst": "Mange refraktometre viser Brix i stedet for SG. Før gjæring kan Brix regnes om til en tilnærmet SG-verdi uten problemer. Etter at gjæringen har startet holder ikke denne enkle omregningen lenger — alkohol i prøven bøyer lyset annerledes enn sukker, så en korrekt beregning må da bruke både opprinnelig vørterstyrke og den aktuelle Brix-avlesningen sammen, se <a href=\"#def-fg-maling\">FG-måling</a>. Er du usikker på om korreksjonen stemmer, er et hydrometer ofte den enkleste kontrollmålingen.",
     "hjelp.idx.defColdCrash.tittel": "Cold crash",
     "hjelp.idx.defColdCrash.tekst": "Å kjøle ølet ytterligere ned etter at gjæringen faktisk er ferdig (se <a href=\"#faq-gjaring-stoppet\">gjæringen virker stoppet</a>) — vanlige eksempler ligger et sted mellom 0–4 °C i ett til noen få døgn, men dette varierer med utstyr og ønsket resultat, og er ikke ett fasitall. Lavere temperatur får gjær, proteiner og andre partikler til å sedimentere raskere, som ofte gir et klarere øl. Den raske temperaturendringen kan skape undertrykk i et lukket gjæringskar, som igjen kan trekke inn luft/oksygen dersom karet ikke er tett eller håndtert riktig, se <a href=\"#def-oksidasjon\">oksidasjon etter gjæring</a>.",
     "hjelp.idx.defKarbonering.tittel": "Karbonering",
@@ -918,6 +923,27 @@ const TEKSTER = {
     "hjelp.idx.faqKarboneringFeil.sporsmal": "For lite eller for mye karbonering — hva gjør jeg?",
     "hjelp.idx.faqKarboneringFeil.svar": "Ikke tilsett ekstra sukker blindt for å «fikse» lite karbonering — sjekk først at FG faktisk var stabil før flasking (se over), siden en gjæring som ikke var ferdig kan fortsette på flaske. For mye karbonering er ikke bare en smakssak: overkarbonering kan gi farlig overtrykk, se sikkerhetsvarselet i <a href=\"bryggedag.html#steg-15\">bryggedagsguiden</a>.",
 
+    "hjelp.idx.faqLavtUtbytte.sporsmal": "Hvorfor ble effektiviteten/OG lavere enn forventet?",
+    "hjelp.idx.faqLavtUtbytte.svar": "Lav effektivitet er sjelden én enkelt feil — det er som regel resultatet av hele meske- og skylleprosessen sett under ett. Vanlige bidragsytere: knusingsgrad (for grov eller for fin), mesketemperatur, mesketid, vannmengde i forhold til malt, dårlig sirkulasjon i mesken, skyllemetode og -teknikk, feil målt volum, eller en unøyaktig temperatur-/tetthetsmåling. Se også <a href=\"#faq-traff-ikke-og\">hvorfor traff jeg ikke forventet OG</a>.",
+
+    "hjelp.idx.faqHoyOg.sporsmal": "Hvorfor ble OG høyere enn forventet?",
+    "hjelp.idx.faqHoyOg.svar": "Vanlige årsaker er ofte motsatt av lav effektivitet: mindre sluttvolum enn planlagt (for eksempel mer fordamping/boil-off enn ventet, se <a href=\"bryggedag.html#steg-7\">kok</a>), høyere brygghuseffektivitet enn antatt denne dagen, eller en feil i volum- eller tetthetsmålingen. Høy OG er ikke nødvendigvis et problem i seg selv, men det påvirker forventet FG og ABV.",
+
+    "hjelp.idx.faqSvovel.sporsmal": "Ølet lukter svovel under gjæringen — er det feil?",
+    "hjelp.idx.faqSvovel.svar": "Enkelte gjærstammer produserer svovelforbindelser som en helt normal del av gjæringen, og lukten avtar ofte med tid og litt modning. Det er ikke automatisk tegn på infeksjon. Vedvarer en kraftig svovellukt lenge etter at gjæringen og noen ukers modning er unnagjort, kan det være verdt å vurdere prosess og hygiene på nytt.",
+
+    "hjelp.idx.faqFusel.sporsmal": "Ølet smaker spritaktig/fuselaktig — hva kan det skyldes?",
+    "hjelp.idx.faqFusel.svar": "Vanlige bidragsytere er høy gjæringstemperatur, stresset gjær (for eksempel for lite gjær tilsatt), høy OG som gir gjæren en tyngre jobb, eller utilstrekkelig oksygenering/pitch ved oppstart — se <a href=\"#gjaerhelse-temperatur\">gjærhelse og temperatur</a>. Merk at ikke all merkbar alkoholvarme i sterke øl betyr at noe er galt — den kan mykne med noen ukers/måneders modning, se <a href=\"#modning-lagring\">modning og lagring</a>.",
+
+    "hjelp.idx.faqDiacetylFeilsoking.sporsmal": "Ølet smaker smør/butterscotch — er det diacetyl?",
+    "hjelp.idx.faqDiacetylFeilsoking.svar": "Et smør- eller butterscotch-preg peker ofte mot diacetyl, se <a href=\"#def-diacetylrest\">diacetyl og diacetylrest</a>. Vurder først om gjæringen faktisk fikk nok tid ved riktig temperatur mot slutten (en diacetylrest) før du konkluderer med at noe er galt — dette er ofte noe gjæren rydder opp i selv, gitt nok tid.",
+
+    "hjelp.idx.faqOksidasjonFeilsoking.sporsmal": "Ølet smaker papp/dovent — kan det være oksidasjon?",
+    "hjelp.idx.faqOksidasjonFeilsoking.svar": "Papp- eller «stale»-toner, dempet humlearoma og noen ganger en anelse mørkere farge enn ventet kan pekes mot oksidasjon, se <a href=\"#def-oksidasjon\">oksidasjon etter gjæring</a>. Tenk gjennom om ølet kan ha fått unødvendig luftkontakt etter at gjæringen var aktivt i gang — plasking ved overføringer, en dårlig forseglet cold crash, eller lang lagring ved høy temperatur er vanlige veier inn.",
+
+    "hjelp.idx.faqIkkePanikk.sporsmal": "Når bør jeg IKKE bekymre meg?",
+    "hjelp.idx.faqIkkePanikk.svar": "Noen observasjoner ser dramatiske ut, men er ofte helt normale: at gjæringslåsen slutter å boble betyr ikke automatisk at gjæringen har stoppet (se <a href=\"#faq-gjaring-stoppet\">gjæringen virker stoppet</a>); krausen kan falle tidlig uten at noe er galt; svovellukt kan være normalt for enkelte gjærstammer (se over); uklart øl betyr ikke nødvendigvis infeksjon; og sterk alkoholvarme i sterke øl kan mykne med litt tid. Hydrometer/FG-målinger er en mer pålitelig indikator enn gjæringslåsaktivitet alene — lær deg å observere og måle før du «fikser».",
+
     "hjelp.idx.secF.tittel": "F. Vannkjemi — kort innføring",
     "hjelp.idx.secF.intro": "Kvernhaug Brygghus har en egen «💧 Vannkjemi»-modul i oppskriftsbyggeren (Bryggmester) hvor du kan registrere kildevann, sette en målprofil og få saltforslag. Denne seksjonen forklarer bare <em>hvorfor</em> disse tallene betyr noe — ikke hvordan modulen selv brukes steg for steg.",
     "hjelp.idx.vannPh.tittel": "pH",
@@ -941,6 +967,23 @@ const TEKSTER = {
     "hjelp.idx.vannClSo4.tittel": "Cl:SO4-forhold",
     "hjelp.idx.vannClSo4.tekst": "Forholdet mellom klorid og sulfat (Cl:SO4) gir et grovt signal om hvilken retning en vannprofil peker — mer mot malt/fylde, eller mer mot en tørr, skarp humlefremheving.",
     "hjelp.idx.vannClSo4.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Viktig presisjon: forholdstallet alene bestemmer <strong>ikke</strong> smaken, og er ikke en universell «malt vs. humle»-bryter. De faktiske ionekonsentrasjonene — ikke bare forholdet mellom dem — betyr også mye. To vannprofiler med samme Cl:SO4-forhold, men svært ulike absolutte nivåer, kan oppleves ganske forskjellig.",
+
+    "hjelp.idx.secG.tittel": "G. Gjær, karbonering og lagring",
+    "hjelp.idx.gjaerstarter.tittel": "Gjærstarter",
+    "hjelp.idx.gjaerstarter.tekst": "En gjærstarter er en liten mengde steril vørter du tilsetter gjær i på forhånd, lar formere seg noen timer til et par dager, og bruker som en «forsterket» gjærpakke på selve bryggedagen. Særlig relevant for flytende gjær, ved lav cellemengde i pakken, eller foran en sterk vørter som krever mye gjær. Målet er først og fremst flere og friskere gjærceller — ikke nødvendigvis en helt egen prosess. Hygienisk håndtering underveis er kritisk, siden starteren er et miljø der uønskede mikroorganismer like gjerne kan formere seg som gjæren selv.",
+    "hjelp.idx.gjaerstarter.hvorfor": "<strong>Hvorfor du bryr deg:</strong> En gjærstarter er ikke en universell nødvendighet for all gjær — mange brygg klarer seg fint uten. Tørrgjær håndteres ofte annerledes (rehydrert eller direkte tilsatt, se <a href=\"bryggedag.html#steg-12\">tilsett gjær</a>), og produsentens egne anbefalinger bør følges der de finnes.",
+    "hjelp.idx.gjaerhelseTemperatur.tittel": "Gjærhelse og temperatur",
+    "hjelp.idx.gjaerhelseTemperatur.tekst": "For lite gjær i forhold til vørterens størrelse og styrke kan gi en treg eller stresset gjæring. Temperatur spiller også en stor rolle: for høy eller for lav temperatur i forhold til det gjærstammen er laget for kan påvirke både hvor godt gjæren jobber og hvilke smaksstoffer den produserer underveis. Ulike gjærstammer har ulike arbeidsområder, og en kraftig eller brå temperaturøkning kan skape uønskede smaker som ellers ikke ville oppstått. En høy OG gir i tillegg gjæren en tyngre jobb å gjøre.",
+    "hjelp.idx.gjaerhelseTemperatur.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Produsentens oppgitte temperaturområde er et fornuftig utgangspunkt — ikke et bevis på at nøyaktig én temperatur passer alle øl eller alle gjærstammer. Se også <a href=\"bryggedag.html#steg-13\">gjæringssteget</a> i en bryggedag.",
+    "hjelp.idx.naturligTvangskarbonering.tittel": "Naturlig vs. tvangskarbonering",
+    "hjelp.idx.naturligTvangskarbonering.tekst": "<strong>Naturlig karbonering:</strong> sukker tilsettes etter ferdig gjæring, og gjenværende gjær produserer CO₂ i en lukket beholder — vanligst ved flasking, men kan også brukes på fat. <strong>Tvangskarbonering:</strong> CO₂ tilføres direkte fra flaske eller tank — vanligst på fat. Ved tvangskarbonering er det trykket og temperaturen som avgjør hvor mye CO₂ som faktisk løses i ølet: kaldere øl holder på mer CO₂, og høyere trykk gir mer oppløst CO₂ ved en gitt temperatur.",
+    "hjelp.idx.naturligTvangskarbonering.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Ønsket karboneringsnivå varierer med ølstil — det finnes ikke ett universelt psi- eller bar-tall som passer alle øl. Se <a href=\"#priming-flaskekarbonering\">priming/flaskekarbonering</a> for den praktiske siden av naturlig karbonering.",
+    "hjelp.idx.primingFlaskekarbonering.tittel": "Priming / flaskekarbonering",
+    "hjelp.idx.primingFlaskekarbonering.tekst": "Ved flaskekarbonering («priming») tilsettes en beregnet mengde sukker rett før flasking, slik at gjenværende gjær produserer CO₂ inne i den lukkede flasken. FG må være stabil før dette gjøres (se <a href=\"#faq-gjaring-stoppet\">gjæringen virker stoppet</a>) — ølet kan allerede inneholde noe løst CO₂ fra selve gjæringen, og det bør en riktig beregnet primingmengde ta hensyn til. Sukkermengden bør beregnes ut fra ønsket karboneringsnivå, ikke anslås etter øyemål.",
+    "hjelp.idx.primingFlaskekarbonering.hvorfor": "<strong>Hvorfor du bryr deg:</strong> For mye sukker kombinert med gjenværende gjæringsaktivitet kan gi farlig overtrykk i flasken, se sikkerhetsvarselet i <a href=\"bryggedag.html#steg-15\">bryggedagsguiden</a>. For lite sukker gir i stedet et flatere øl enn planlagt.",
+    "hjelp.idx.modningLagring.tittel": "Modning og lagring",
+    "hjelp.idx.modningLagring.tekst": "Øl kan fortsette å endre seg etter pakking. Noen øl — særlig lyse, humledominerte stiler — er som regel best ferske, siden humlearoma ofte avtar med tid. Andre — særlig sterkere eller mørkere øl — kan utvikle seg videre og noen ganger dra nytte av lengre modning. Oksidasjon (se <a href=\"#def-oksidasjon\">oksidasjon etter gjæring</a>) går raskere ved høyere temperatur, så et mørkt og kjølig lagringssted er generelt å foretrekke fremfor et varmt og lyst.",
+    "hjelp.idx.modningLagring.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Hvor godt et øl egner seg for lagring er stil- og oppskriftsavhengig — «eldre er alltid bedre» stemmer ikke som en generell regel. Server ferske øl innen rimelig tid, og gi gjerne sterke/mørke øl litt mer tid om du er nysgjerrig på hvordan de utvikler seg.",
 
     "hjelp.idx.avslutning": "Fant du ikke svar på det du lurte på? Håndboken utvides fortløpende.",
 
@@ -1023,7 +1066,7 @@ const TEKSTER = {
     "hjelp.dag.steg10.tittel": "Mål OG",
     "hjelp.dag.steg10.hva": "Mål tettheten med hydrometer eller refraktometer, se <a href=\"index.html#def-og-maling\">OG-måling</a>.",
     "hjelp.dag.steg10.hvorfor": "Bekrefter om du traff forventet <a href=\"index.html#og\">OG</a> — viktig utgangspunkt for å vurdere hele batchen.",
-    "hjelp.dag.steg10.folgMed": "At prøven er avkjølt til riktig referansetemperatur for måleinstrumentet ditt.",
+    "hjelp.dag.steg10.folgMed": "At prøven er avkjølt til riktig referansetemperatur for måleinstrumentet ditt — se <a href=\"index.html#def-hydrometer-temperatur\">hydrometer — temperaturkorreksjon</a> hvis du er usikker på hvordan du korrigerer et avvik.",
     "hjelp.dag.steg10.feil": "Å måle en varm prøve og få et misvisende tall, se <a href=\"index.html#faq-traff-ikke-og\">FAQ</a>.",
 
     "hjelp.dag.steg11.tittel": "Overfør til gjæringskar",
@@ -1033,7 +1076,7 @@ const TEKSTER = {
     "hjelp.dag.steg11.feil": "Å overføre for forsiktig og gi gjæren for lite oksygen til en god start.",
 
     "hjelp.dag.steg12.tittel": "Tilsett gjær",
-    "hjelp.dag.steg12.hva": "Tilsett riktig mengde gjær for batchstørrelsen og ølets styrke, etter produsentens anbefaling. Tørrgjær kan tilsettes rehydrert eller direkte — følg produsentens anvisning, siden dette varierer mellom produkter. Flytende gjær og gjærstarter er et videregående tema.",
+    "hjelp.dag.steg12.hva": "Tilsett riktig mengde gjær for batchstørrelsen og ølets styrke, etter produsentens anbefaling. Tørrgjær kan tilsettes rehydrert eller direkte — følg produsentens anvisning, siden dette varierer mellom produkter. Flytende gjær og gjærstarter er et videregående tema, se <a href=\"index.html#gjaerstarter\">gjærstarter</a>.",
     "hjelp.dag.steg12.hvorfor": "Jo raskere gjæren kommer i gang, jo mindre tid har uønskede mikroorganismer til å etablere seg først.",
     "hjelp.dag.steg12.folgMed": "At vørteren er innenfor gjærens anbefalte temperaturområde før du tilsetter.",
     "hjelp.dag.steg12.feil": "Å tilsette gjær i for varm vørter, som kan skade eller drepe gjæren — eller å bruke for lite gjær til en stor eller sterk batch.",
@@ -1041,7 +1084,7 @@ const TEKSTER = {
     "hjelp.dag.steg13.tittel": "Gjæring",
     "hjelp.dag.steg13.hva": "La gjæren jobbe i fred, ved stabil temperatur, se <a href=\"index.html#def-gjaering\">gjæring</a>.",
     "hjelp.dag.steg13.hvorfor": "Stabil temperatur gir en renere, mer forutsigbar smaksprofil enn svingende temperatur.",
-    "hjelp.dag.steg13.folgMed": "Aktivitet i gjæringslåsen de første dagene, og at temperaturen holder seg innenfor gjærens anbefalte område. Mot slutten av gjæringen kan noen ekstra dager ved samme (eller litt høyere) temperatur være lurt før du går videre, se <a href=\"index.html#def-diacetylrest\">diacetyl og diacetylrest</a>. Unngå å røre eller overføre ølet mer enn nødvendig — oksygenkontakt fra dette punktet kan gi <a href=\"index.html#def-oksidasjon\">oksidasjon</a>, som skader aroma, smak og holdbarhet.",
+    "hjelp.dag.steg13.folgMed": "Aktivitet i gjæringslåsen de første dagene, og at temperaturen holder seg innenfor gjærens anbefalte område. Temperaturen underveis påvirker ikke bare hastighet, men også smaksstoffene gjæren produserer, se <a href=\"index.html#gjaerhelse-temperatur\">gjærhelse og temperatur</a>. Mot slutten av gjæringen kan noen ekstra dager ved samme (eller litt høyere) temperatur være lurt før du går videre, se <a href=\"index.html#def-diacetylrest\">diacetyl og diacetylrest</a>. Unngå å røre eller overføre ølet mer enn nødvendig — oksygenkontakt fra dette punktet kan gi <a href=\"index.html#def-oksidasjon\">oksidasjon</a>, som skader aroma, smak og holdbarhet.",
     "hjelp.dag.steg13.feil": "Å åpne karet ofte \"for å sjekke\" — hver åpning er en ny mulighet for kontaminering.",
 
     "hjelp.dag.steg14.tittel": "Mål FG",
@@ -1051,10 +1094,10 @@ const TEKSTER = {
     "hjelp.dag.steg14.feil": "Å avslutte gjæringen for tidlig fordi gjæringslåsen har roet seg, uten å bekrefte med en faktisk måling.",
 
     "hjelp.dag.steg15.tittel": "Karboner / flask / sett på fat",
-    "hjelp.dag.steg15.hva": "Overfør ølet til flasker eller fat og karboner det, se <a href=\"index.html#def-karbonering\">karbonering</a> og <a href=\"index.html#def-flasking\">flasking/fat</a>.",
+    "hjelp.dag.steg15.hva": "Overfør ølet til flasker eller fat og karboner det, se <a href=\"index.html#def-karbonering\">karbonering</a> og <a href=\"index.html#def-flasking\">flasking/fat</a>. Se <a href=\"index.html#naturlig-tvangskarbonering\">naturlig vs. tvangskarbonering</a> for forskjellen mellom de to metodene.",
     "hjelp.dag.steg15.hvorfor": "Dette er siste steg før ølet er klart til å drikkes — og det som gir det riktig munnfølelse.",
-    "hjelp.dag.steg15.folgMed": "Riktig sukkermengde ved flaskekarbonering (for mye kan gi overtrykk/eksplosjonsfare), eller riktig trykk/tid ved tvangskarbonering på fat.",
-    "hjelp.dag.steg15.feil": "Å drikke ølet for tidlig — de fleste øl blir tydelig bedre etter noen ukers modning.",
+    "hjelp.dag.steg15.folgMed": "Riktig sukkermengde ved flaskekarbonering (for mye kan gi overtrykk/eksplosjonsfare), eller riktig trykk/tid ved tvangskarbonering på fat. Se <a href=\"index.html#priming-flaskekarbonering\">priming/flaskekarbonering</a> for hvordan sukkermengden beregnes.",
+    "hjelp.dag.steg15.feil": "Å drikke ølet for tidlig — de fleste øl blir tydelig bedre etter noen ukers modning, se <a href=\"index.html#modning-lagring\">modning og lagring</a>.",
 
     "hjelp.dag.avslutning": "Lag et konkret bryggedagsark for din egen oppskrift fra oppskriftsbyggerens <a href=\"../index.html\">Skriv ut</a>-panel.",
 
@@ -1688,6 +1731,7 @@ const TEKSTER = {
     "hjelp.idx.toc.d": "D. Brewing Process",
     "hjelp.idx.toc.e": "E. Questions &amp; Answers",
     "hjelp.idx.toc.f": "F. Water Chemistry",
+    "hjelp.idx.toc.g": "G. Yeast, Carbonation & Conditioning",
     "hjelp.idx.intro": "A reference for anyone building a recipe in Kvernhaug Brygghus. Everything here is written to answer two questions: what does this mean, and why should I care? Use the contents menu to jump around, or scroll down like an ordinary handbook.",
 
     "hjelp.idx.secA.tittel": "A. Getting Started",
@@ -1836,6 +1880,8 @@ const TEKSTER = {
     "hjelp.idx.defKjoling.tekst": "Rapidly cooling the wort after the boil, down toward the yeast's starting temperature — the faster, the lower the risk of unwanted bacterial growth and the clearer the beer.",
     "hjelp.idx.defOgMaling.tittel": "OG Reading",
     "hjelp.idx.defOgMaling.tekst": "Measuring the wort's gravity right before fermentation, with a hydrometer or refractometer — compared against the calculated <a href=\"#og\">OG</a>.",
+    "hjelp.idx.defHydrometerTemperatur.tittel": "Hydrometer — Temperature Correction",
+    "hjelp.idx.defHydrometerTemperatur.tekst": "A hydrometer is calibrated for one specific temperature, normally printed on the instrument itself — 20 °C is common, but the instrument decides, not a universal rule. Measuring a sample that deviates significantly from that calibration temperature can give a misleading reading. Check what's actually printed on your own hydrometer, and correct the reading (or cool/warm the sample to the reference temperature) for large deviations.",
     "hjelp.idx.defGjaering.tittel": "Fermentation",
     "hjelp.idx.defGjaering.tekst": "The period during which yeast converts sugar into alcohol and CO₂ — normally lasts 1–3 weeks depending on yeast type, strength, and temperature.",
     "hjelp.idx.defDiacetylrest.tittel": "Diacetyl and Diacetyl Rest",
@@ -1844,6 +1890,8 @@ const TEKSTER = {
     "hjelp.idx.defOksidasjon.tekst": "A bit of oxygen is wanted BEFORE pitching the yeast (see <a href=\"bryggedag.html#steg-11\">transferring to the fermenter</a>) — it helps the yeast get going. Oxygen reaching the beer AFTER fermentation is actively underway is something else entirely: it can cause oxidation, which can dull fresh hop aroma, produce darker/cardboard-like/\"stale\" notes, and reduce shelf life. Avoid unnecessary splashing during transfers, and use closed transfers where practical — but a single, stray oxygen molecule won't automatically ruin the whole batch.",
     "hjelp.idx.defFgMaling.tittel": "FG Reading",
     "hjelp.idx.defFgMaling.tekst": "Measuring the gravity once fermentation has settled down, to confirm it's finished and calculate the actual <a href=\"#abv\">ABV</a>. A refractometer works directly on unfermented wort, but gives a misleading reading as soon as alcohol is present in the sample — use an alcohol/refractometer correction, or measure with a hydrometer instead.",
+    "hjelp.idx.defRefraktometerBrix.tittel": "Refractometer and Brix",
+    "hjelp.idx.defRefraktometerBrix.tekst": "Many refractometers show Brix instead of SG. Before fermentation, Brix can be converted to an approximate SG value without issue. Once fermentation has started, that simple conversion no longer holds — alcohol in the sample bends light differently than sugar, so a correct calculation must then use both the original wort strength and the current Brix reading together, see <a href=\"#def-fg-maling\">FG reading</a>. If you're unsure whether the correction is accurate, a hydrometer is often the simplest check measurement.",
     "hjelp.idx.defColdCrash.tittel": "Cold Crash",
     "hjelp.idx.defColdCrash.tekst": "Chilling the beer further down once fermentation is actually finished (see <a href=\"#faq-gjaring-stoppet\">fermentation seems stopped</a>) — common examples fall somewhere around 0–4°C for a day to a few days, but this varies with equipment and desired result, and there's no single fixed number. Lower temperature makes yeast, proteins, and other particles settle out faster, often giving a clearer beer. The rapid temperature change can create a vacuum in a closed fermenter, which can in turn draw air/oxygen in if the vessel isn't sealed or handled properly, see <a href=\"#def-oksidasjon\">oxidation after fermentation</a>.",
     "hjelp.idx.defKarbonering.tittel": "Carbonation",
@@ -1883,6 +1931,27 @@ const TEKSTER = {
     "hjelp.idx.faqKarboneringFeil.sporsmal": "Too little or too much carbonation — what do I do?",
     "hjelp.idx.faqKarboneringFeil.svar": "Don't blindly add extra sugar to \"fix\" low carbonation — first check that FG was actually stable before bottling (see above), since a fermentation that wasn't finished can continue in the bottle. Too much carbonation isn't just a taste issue: overcarbonation can cause dangerous overpressure, see the safety warning in the <a href=\"bryggedag.html#steg-15\">brew day guide</a>.",
 
+    "hjelp.idx.faqLavtUtbytte.sporsmal": "Why was my efficiency/OG lower than expected?",
+    "hjelp.idx.faqLavtUtbytte.svar": "Low efficiency is rarely a single mistake — it's usually the result of the whole mash and sparge process taken together. Common contributors: crush consistency (too coarse or too fine), mash temperature, mash time, water-to-grain ratio, poor circulation in the mash, sparging method and technique, an inaccurate measured volume, or an inaccurate temperature/gravity reading. See also <a href=\"#faq-traff-ikke-og\">why didn't I hit my expected OG</a>.",
+
+    "hjelp.idx.faqHoyOg.sporsmal": "Why was my OG higher than expected?",
+    "hjelp.idx.faqHoyOg.svar": "Common causes are often the opposite of low efficiency: less final volume than planned (for example more boil-off than expected, see <a href=\"bryggedag.html#steg-7\">the boil</a>), higher brewhouse efficiency than assumed that day, or an error in the volume or gravity measurement. A high OG isn't necessarily a problem in itself, but it affects your expected FG and ABV.",
+
+    "hjelp.idx.faqSvovel.sporsmal": "My beer smells of sulfur during fermentation — is that wrong?",
+    "hjelp.idx.faqSvovel.svar": "Certain yeast strains produce sulfur compounds as a perfectly normal part of fermentation, and the smell often fades with time and a bit of conditioning. It isn't automatically a sign of infection. If a strong sulfur smell persists well after fermentation and a few weeks of conditioning, it may be worth reconsidering process and hygiene.",
+
+    "hjelp.idx.faqFusel.sporsmal": "My beer tastes hot/solvent-like — what could cause that?",
+    "hjelp.idx.faqFusel.svar": "Common contributors are a high fermentation temperature, stressed yeast (for example too little yeast pitched), a high OG giving the yeast a heavier job to do, or insufficient oxygenation/pitch rate at the start — see <a href=\"#gjaerhelse-temperatur\">yeast health and temperature</a>. Note that not all noticeable alcohol heat in strong beers means something is wrong — it can mellow with a few weeks or months of conditioning, see <a href=\"#modning-lagring\">conditioning and storage</a>.",
+
+    "hjelp.idx.faqDiacetylFeilsoking.sporsmal": "My beer tastes buttery/butterscotch — is that diacetyl?",
+    "hjelp.idx.faqDiacetylFeilsoking.svar": "A buttery or butterscotch character often points to diacetyl, see <a href=\"#def-diacetylrest\">diacetyl and the diacetyl rest</a>. First consider whether fermentation actually got enough time at the right temperature toward the end (a diacetyl rest) before concluding something is wrong — this is often something the yeast cleans up on its own, given enough time.",
+
+    "hjelp.idx.faqOksidasjonFeilsoking.sporsmal": "My beer tastes papery/stale — could that be oxidation?",
+    "hjelp.idx.faqOksidasjonFeilsoking.svar": "Papery or \"stale\" notes, muted hop aroma, and sometimes a slightly darker color than expected can point to oxidation, see <a href=\"#def-oksidasjon\">oxidation after fermentation</a>. Consider whether the beer may have gotten unnecessary air contact after fermentation was actively underway — splashing during transfers, a poorly sealed cold crash, or long storage at a high temperature are common ways it happens.",
+
+    "hjelp.idx.faqIkkePanikk.sporsmal": "When should I NOT worry?",
+    "hjelp.idx.faqIkkePanikk.svar": "Some observations look dramatic but are often perfectly normal: an airlock going quiet doesn't automatically mean fermentation has stopped (see <a href=\"#faq-gjaring-stoppet\">fermentation seems to have stopped</a>); krausen can drop early without anything being wrong; a sulfur smell can be normal for certain yeast strains (see above); a hazy beer doesn't necessarily mean infection; and strong alcohol heat in strong beers can mellow with a bit of time. Hydrometer/FG readings are a more reliable indicator than airlock activity alone — learn to observe and measure before you \"fix\".",
+
     "hjelp.idx.secF.tittel": "F. Water Chemistry — Brief Introduction",
     "hjelp.idx.secF.intro": "Kvernhaug Brygghus has a dedicated \"💧 Water Chemistry\" module in the recipe builder (Brewmaster) where you can register your source water, set a target profile, and get salt suggestions. This section only explains <em>why</em> these numbers matter — not how to use the module itself step by step.",
     "hjelp.idx.vannPh.tittel": "pH",
@@ -1906,6 +1975,23 @@ const TEKSTER = {
     "hjelp.idx.vannClSo4.tittel": "Cl:SO4 Ratio",
     "hjelp.idx.vannClSo4.tekst": "The ratio between chloride and sulfate (Cl:SO4) gives a rough signal of which direction a water profile leans — more toward malt/fullness, or more toward a dry, sharp hop emphasis.",
     "hjelp.idx.vannClSo4.hvorfor": "<strong>Why you care:</strong> An important nuance: the ratio alone does <strong>not</strong> determine the flavor, and it isn't a universal \"malt vs. hops\" switch. The actual ion concentrations — not just the ratio between them — also matter a great deal. Two water profiles with the same Cl:SO4 ratio but very different absolute levels can taste quite different.",
+
+    "hjelp.idx.secG.tittel": "G. Yeast, Carbonation & Conditioning",
+    "hjelp.idx.gjaerstarter.tittel": "Yeast Starter",
+    "hjelp.idx.gjaerstarter.tekst": "A yeast starter is a small amount of sterile wort you pitch yeast into ahead of time, let multiply for anywhere from a few hours to a couple of days, and use as a \"boosted\" yeast package on brew day itself. Especially relevant for liquid yeast, low cell counts in the package, or ahead of a strong wort that needs a lot of yeast. The goal is primarily more, healthier yeast cells — not necessarily a whole separate process. Hygienic handling throughout is critical, since the starter is an environment where unwanted microorganisms can multiply just as readily as the yeast itself.",
+    "hjelp.idx.gjaerstarter.hvorfor": "<strong>Why you care:</strong> A yeast starter isn't a universal necessity for all yeast — many brews do fine without one. Dry yeast is often handled differently (rehydrated or pitched directly, see <a href=\"bryggedag.html#steg-12\">pitch yeast</a>), and the manufacturer's own recommendations should be followed where they exist.",
+    "hjelp.idx.gjaerhelseTemperatur.tittel": "Yeast Health and Temperature",
+    "hjelp.idx.gjaerhelseTemperatur.tekst": "Too little yeast relative to the wort's size and strength can cause a slow or stressed fermentation. Temperature also plays a major role: a temperature too high or too low for what the yeast strain is built for can affect both how well the yeast works and which flavor compounds it produces along the way. Different yeast strains have different working ranges, and a sharp or sudden temperature rise can create off-flavors that wouldn't otherwise occur. A high OG also gives the yeast a heavier job to do.",
+    "hjelp.idx.gjaerhelseTemperatur.hvorfor": "<strong>Why you care:</strong> The manufacturer's stated temperature range is a sensible starting point — not proof that exactly one temperature suits every beer or every yeast strain. See also <a href=\"bryggedag.html#steg-13\">the fermentation step</a> in a brew day.",
+    "hjelp.idx.naturligTvangskarbonering.tittel": "Natural vs. Forced Carbonation",
+    "hjelp.idx.naturligTvangskarbonering.tekst": "<strong>Natural carbonation:</strong> sugar is added after fermentation is finished, and residual yeast produces CO₂ in a sealed container — most common when bottling, but can also be used in a keg. <strong>Forced carbonation:</strong> CO₂ is supplied directly from a bottle or tank — most common in a keg. With forced carbonation, pressure and temperature determine how much CO₂ actually dissolves into the beer: colder beer holds more CO₂, and higher pressure gives more dissolved CO₂ at a given temperature.",
+    "hjelp.idx.naturligTvangskarbonering.hvorfor": "<strong>Why you care:</strong> Desired carbonation level varies by beer style — there's no single universal psi or bar value that suits every beer. See <a href=\"#priming-flaskekarbonering\">priming/bottle carbonation</a> for the practical side of natural carbonation.",
+    "hjelp.idx.primingFlaskekarbonering.tittel": "Priming / Bottle Carbonation",
+    "hjelp.idx.primingFlaskekarbonering.tekst": "With bottle carbonation (\"priming\"), a calculated amount of sugar is added right before bottling, so that residual yeast produces CO₂ inside the sealed bottle. FG must be stable before doing this (see <a href=\"#faq-gjaring-stoppet\">fermentation seems to have stopped</a>) — the beer may already contain some dissolved CO₂ from fermentation itself, and a correctly calculated priming amount should account for that. The sugar amount should be calculated from the desired carbonation level, not eyeballed.",
+    "hjelp.idx.primingFlaskekarbonering.hvorfor": "<strong>Why you care:</strong> Too much sugar combined with residual fermentation activity can cause dangerous overpressure in the bottle, see the safety warning in the <a href=\"bryggedag.html#steg-15\">brew day guide</a>. Too little sugar instead gives a flatter beer than planned.",
+    "hjelp.idx.modningLagring.tittel": "Conditioning and Storage",
+    "hjelp.idx.modningLagring.tekst": "Beer can keep changing after packaging. Some beers — especially pale, hop-forward styles — are usually best fresh, since hop aroma often fades with time. Others — especially stronger or darker beers — can keep developing and sometimes benefit from longer conditioning. Oxidation (see <a href=\"#def-oksidasjon\">oxidation after fermentation</a>) happens faster at higher temperatures, so a dark, cool storage spot is generally preferable to a warm, bright one.",
+    "hjelp.idx.modningLagring.hvorfor": "<strong>Why you care:</strong> How well a beer suits aging is style- and recipe-dependent — \"older is always better\" doesn't hold as a general rule. Serve fresh beers within a reasonable time, and feel free to give strong/dark beers a bit more time if you're curious how they develop.",
 
     "hjelp.idx.avslutning": "Didn't find what you were looking for? The handbook keeps growing.",
 
@@ -1988,7 +2074,7 @@ const TEKSTER = {
     "hjelp.dag.steg10.tittel": "Take an OG Reading",
     "hjelp.dag.steg10.hva": "Measure the gravity with a hydrometer or refractometer, see <a href=\"index.html#def-og-maling\">OG reading</a>.",
     "hjelp.dag.steg10.hvorfor": "Confirms whether you hit your expected <a href=\"index.html#og\">OG</a> — an important starting point for assessing the whole batch.",
-    "hjelp.dag.steg10.folgMed": "That the sample has cooled to the correct reference temperature for your instrument.",
+    "hjelp.dag.steg10.folgMed": "That the sample has cooled to the correct reference temperature for your instrument — see <a href=\"index.html#def-hydrometer-temperatur\">hydrometer — temperature correction</a> if you're unsure how to correct a deviation.",
     "hjelp.dag.steg10.feil": "Measuring a warm sample and getting a misleading number, see the <a href=\"index.html#faq-traff-ikke-og\">FAQ</a>.",
 
     "hjelp.dag.steg11.tittel": "Transfer to the Fermenter",
@@ -1998,7 +2084,7 @@ const TEKSTER = {
     "hjelp.dag.steg11.feil": "Transferring too gently and giving the yeast too little oxygen for a good start.",
 
     "hjelp.dag.steg12.tittel": "Pitch Yeast",
-    "hjelp.dag.steg12.hva": "Add the right amount of yeast for the batch size and beer strength, per the manufacturer's recommendation. Dry yeast can be pitched rehydrated or directly — follow the manufacturer's instructions, since this varies between products. Liquid yeast and yeast starters are an intermediate-level topic.",
+    "hjelp.dag.steg12.hva": "Add the right amount of yeast for the batch size and beer strength, per the manufacturer's recommendation. Dry yeast can be pitched rehydrated or directly — follow the manufacturer's instructions, since this varies between products. Liquid yeast and yeast starters are an intermediate-level topic, see <a href=\"index.html#gjaerstarter\">yeast starter</a>.",
     "hjelp.dag.steg12.hvorfor": "The faster the yeast gets going, the less time unwanted microorganisms have to establish themselves first.",
     "hjelp.dag.steg12.folgMed": "That the wort is within the yeast's recommended temperature range before you pitch.",
     "hjelp.dag.steg12.feil": "Pitching yeast into wort that's too warm, which can damage or kill the yeast — or using too little yeast for a large or strong batch.",
@@ -2006,7 +2092,7 @@ const TEKSTER = {
     "hjelp.dag.steg13.tittel": "Fermentation",
     "hjelp.dag.steg13.hva": "Let the yeast work undisturbed, at a stable temperature, see <a href=\"index.html#def-gjaering\">fermentation</a>.",
     "hjelp.dag.steg13.hvorfor": "A stable temperature gives a cleaner, more predictable flavor profile than a fluctuating one.",
-    "hjelp.dag.steg13.folgMed": "Activity in the airlock over the first few days, and that the temperature stays within the yeast's recommended range. Toward the end of fermentation, a few extra days at the same (or a slightly higher) temperature can be worthwhile before moving on, see <a href=\"index.html#def-diacetylrest\">diacetyl and diacetyl rest</a>. Avoid disturbing or transferring the beer more than necessary — oxygen contact from this point on can cause <a href=\"index.html#def-oksidasjon\">oxidation</a>, which harms aroma, flavor, and shelf life.",
+    "hjelp.dag.steg13.folgMed": "Activity in the airlock over the first few days, and that the temperature stays within the yeast's recommended range. Temperature along the way affects not just speed, but also the flavor compounds the yeast produces, see <a href=\"index.html#gjaerhelse-temperatur\">yeast health and temperature</a>. Toward the end of fermentation, a few extra days at the same (or a slightly higher) temperature can be worthwhile before moving on, see <a href=\"index.html#def-diacetylrest\">diacetyl and diacetyl rest</a>. Avoid disturbing or transferring the beer more than necessary — oxygen contact from this point on can cause <a href=\"index.html#def-oksidasjon\">oxidation</a>, which harms aroma, flavor, and shelf life.",
     "hjelp.dag.steg13.feil": "Opening the fermenter often \"to check\" — every opening is a new chance for contamination.",
 
     "hjelp.dag.steg14.tittel": "Take an FG Reading",
@@ -2016,10 +2102,10 @@ const TEKSTER = {
     "hjelp.dag.steg14.feil": "Ending fermentation too early because the airlock has gone quiet, without confirming with an actual reading.",
 
     "hjelp.dag.steg15.tittel": "Carbonate / Bottle / Keg",
-    "hjelp.dag.steg15.hva": "Transfer the beer to bottles or a keg and carbonate it, see <a href=\"index.html#def-karbonering\">carbonation</a> and <a href=\"index.html#def-flasking\">bottling/kegging</a>.",
+    "hjelp.dag.steg15.hva": "Transfer the beer to bottles or a keg and carbonate it, see <a href=\"index.html#def-karbonering\">carbonation</a> and <a href=\"index.html#def-flasking\">bottling/kegging</a>. See <a href=\"index.html#naturlig-tvangskarbonering\">natural vs. forced carbonation</a> for the difference between the two methods.",
     "hjelp.dag.steg15.hvorfor": "This is the last step before the beer is ready to drink — and what gives it the right mouthfeel.",
-    "hjelp.dag.steg15.folgMed": "The correct sugar amount for bottle carbonation (too much can cause overpressure/explosion risk), or the correct pressure/time for force-carbonating in a keg.",
-    "hjelp.dag.steg15.feil": "Drinking the beer too soon — most beers improve noticeably after a few weeks of conditioning.",
+    "hjelp.dag.steg15.folgMed": "The correct sugar amount for bottle carbonation (too much can cause overpressure/explosion risk), or the correct pressure/time for force-carbonating in a keg. See <a href=\"index.html#priming-flaskekarbonering\">priming/bottle carbonation</a> for how the sugar amount is calculated.",
+    "hjelp.dag.steg15.feil": "Drinking the beer too soon — most beers improve noticeably after a few weeks of conditioning, see <a href=\"index.html#modning-lagring\">conditioning and storage</a>.",
 
     "hjelp.dag.avslutning": "Build a concrete brew day sheet for your own recipe from the recipe builder's <a href=\"../index.html\">Print</a> panel.",
 

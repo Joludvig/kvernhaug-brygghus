@@ -87,6 +87,7 @@
     <a href="#bryggeprosess" data-i18n="hjelp.idx.toc.d">D. Bryggeprosess</a>
     <a href="#faq" data-i18n-html="hjelp.idx.toc.e">E. Spørsmål &amp; svar</a>
     <a href="#vannkjemi" data-i18n="hjelp.idx.toc.f">F. Vannkjemi</a>
+    <a href="#gjaer-karbonering-lagring" data-i18n="hjelp.idx.toc.g">G. Gjær, karbonering og lagring</a>
   </nav>
 
   <main class="hjelp-side-main">
@@ -339,6 +340,10 @@
       <h3 data-i18n="hjelp.idx.defOgMaling.tittel">OG-måling</h3>
       <p data-i18n-html="hjelp.idx.defOgMaling.tekst">Å måle vørterens tetthet rett før gjæring, med et hydrometer (flytevekt) eller refraktometer — sammenlignes mot beregnet <a href="#og">OG</a>.</p>
     </article>
+    <article class="hjelp-artikkel" id="def-hydrometer-temperatur">
+      <h3 data-i18n="hjelp.idx.defHydrometerTemperatur.tittel">Hydrometer — temperaturkorreksjon</h3>
+      <p data-i18n-html="hjelp.idx.defHydrometerTemperatur.tekst">Et hydrometer er kalibrert for én bestemt temperatur, som normalt står trykt på selve instrumentet — 20 °C er vanlig, men det er instrumentet som bestemmer, ikke en universell regel. Måler du en prøve som avviker vesentlig fra denne kalibreringstemperaturen, kan avlesningen bli misvisende. Sjekk hva som faktisk står på ditt eget hydrometer, og korriger avlesningen (eller avkjøl/varm prøven til referansetemperaturen) ved store avvik.</p>
+    </article>
     <article class="hjelp-artikkel" id="def-gjaering">
       <h3 data-i18n="hjelp.idx.defGjaering.tittel">Gjæring</h3>
       <p data-i18n="hjelp.idx.defGjaering.tekst">Perioden gjæren omdanner sukker til alkohol og CO₂ — varer normalt 1–3 uker avhengig av gjærtype, styrke og temperatur.</p>
@@ -354,6 +359,10 @@
     <article class="hjelp-artikkel" id="def-fg-maling">
       <h3 data-i18n="hjelp.idx.defFgMaling.tittel">FG-måling</h3>
       <p data-i18n-html="hjelp.idx.defFgMaling.tekst">Å måle tettheten når gjæringen har roet seg, for å bekrefte at den er ferdig og regne ut faktisk <a href="#abv">ABV</a>. Et refraktometer virker direkte på ugjæret vørter, men gir en misvisende avlesning så snart det finnes alkohol i prøven — bruk en alkohol-/refraktometerkorreksjon, eller mål med hydrometer i stedet.</p>
+    </article>
+    <article class="hjelp-artikkel" id="def-refraktometer-brix">
+      <h3 data-i18n="hjelp.idx.defRefraktometerBrix.tittel">Refraktometer og Brix</h3>
+      <p data-i18n-html="hjelp.idx.defRefraktometerBrix.tekst">Mange refraktometre viser Brix i stedet for SG. Før gjæring kan Brix regnes om til en tilnærmet SG-verdi uten problemer. Etter at gjæringen har startet holder ikke denne enkle omregningen lenger — alkohol i prøven bøyer lyset annerledes enn sukker, så en korrekt beregning må da bruke både opprinnelig vørterstyrke og den aktuelle Brix-avlesningen sammen, se <a href="#def-fg-maling">FG-måling</a>. Er du usikker på om korreksjonen stemmer, er et hydrometer ofte den enkleste kontrollmålingen.</p>
     </article>
     <article class="hjelp-artikkel" id="def-cold-crash">
       <h3 data-i18n="hjelp.idx.defColdCrash.tittel">Cold crash</h3>
@@ -445,6 +454,41 @@
       <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqKarboneringFeil.sporsmal">For lite eller for mye karbonering — hva gjør jeg?</p>
       <p data-i18n-html="hjelp.idx.faqKarboneringFeil.svar">Ikke tilsett ekstra sukker blindt for å «fikse» lite karbonering — sjekk først at FG faktisk var stabil før flasking (se over), siden en gjæring som ikke var ferdig kan fortsette på flaske. For mye karbonering er ikke bare en smakssak: overkarbonering kan gi farlig overtrykk, se sikkerhetsvarselet i <a href="bryggedag.html#steg-15">bryggedagsguiden</a>.</p>
     </article>
+
+    <article class="hjelp-artikkel" id="faq-lavt-utbytte">
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqLavtUtbytte.sporsmal">Hvorfor ble effektiviteten/OG lavere enn forventet?</p>
+      <p data-i18n-html="hjelp.idx.faqLavtUtbytte.svar">Lav effektivitet er sjelden én enkelt feil — det er som regel resultatet av hele meske- og skylleprosessen sett under ett. Vanlige bidragsytere: knusingsgrad (for grov eller for fin), mesketemperatur, mesketid, vannmengde i forhold til malt, dårlig sirkulasjon i mesken, skyllemetode og -teknikk, feil målt volum, eller en unøyaktig temperatur-/tetthetsmåling. Se også <a href="#faq-traff-ikke-og">hvorfor traff jeg ikke forventet OG</a>.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="faq-hoy-og">
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqHoyOg.sporsmal">Hvorfor ble OG høyere enn forventet?</p>
+      <p data-i18n-html="hjelp.idx.faqHoyOg.svar">Vanlige årsaker er ofte motsatt av lav effektivitet: mindre sluttvolum enn planlagt (for eksempel mer fordamping/boil-off enn ventet, se <a href="bryggedag.html#steg-7">kok</a>), høyere brygghuseffektivitet enn antatt denne dagen, eller en feil i volum- eller tetthetsmålingen. Høy OG er ikke nødvendigvis et problem i seg selv, men det påvirker forventet FG og ABV.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="faq-svovel">
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqSvovel.sporsmal">Ølet lukter svovel under gjæringen — er det feil?</p>
+      <p data-i18n="hjelp.idx.faqSvovel.svar">Enkelte gjærstammer produserer svovelforbindelser som en helt normal del av gjæringen, og lukten avtar ofte med tid og litt modning. Det er ikke automatisk tegn på infeksjon. Vedvarer en kraftig svovellukt lenge etter at gjæringen og noen ukers modning er unnagjort, kan det være verdt å vurdere prosess og hygiene på nytt.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="faq-fusel">
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqFusel.sporsmal">Ølet smaker spritaktig/fuselaktig — hva kan det skyldes?</p>
+      <p data-i18n-html="hjelp.idx.faqFusel.svar">Vanlige bidragsytere er høy gjæringstemperatur, stresset gjær (for eksempel for lite gjær tilsatt), høy OG som gir gjæren en tyngre jobb, eller utilstrekkelig oksygenering/pitch ved oppstart — se <a href="#gjaerhelse-temperatur">gjærhelse og temperatur</a>. Merk at ikke all merkbar alkoholvarme i sterke øl betyr at noe er galt — den kan mykne med noen ukers/måneders modning, se <a href="#modning-lagring">modning og lagring</a>.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="faq-diacetyl-feilsoking">
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqDiacetylFeilsoking.sporsmal">Ølet smaker smør/butterscotch — er det diacetyl?</p>
+      <p data-i18n-html="hjelp.idx.faqDiacetylFeilsoking.svar">Et smør- eller butterscotch-preg peker ofte mot diacetyl, se <a href="#def-diacetylrest">diacetyl og diacetylrest</a>. Vurder først om gjæringen faktisk fikk nok tid ved riktig temperatur mot slutten (en diacetylrest) før du konkluderer med at noe er galt — dette er ofte noe gjæren rydder opp i selv, gitt nok tid.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="faq-oksidasjon-feilsoking">
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqOksidasjonFeilsoking.sporsmal">Ølet smaker papp/dovent — kan det være oksidasjon?</p>
+      <p data-i18n-html="hjelp.idx.faqOksidasjonFeilsoking.svar">Papp- eller «stale»-toner, dempet humlearoma og noen ganger en anelse mørkere farge enn ventet kan pekes mot oksidasjon, se <a href="#def-oksidasjon">oksidasjon etter gjæring</a>. Tenk gjennom om ølet kan ha fått unødvendig luftkontakt etter at gjæringen var aktivt i gang — plasking ved overføringer, en dårlig forseglet cold crash, eller lang lagring ved høy temperatur er vanlige veier inn.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="faq-ikke-panikk">
+      <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqIkkePanikk.sporsmal">Når bør jeg IKKE bekymre meg?</p>
+      <p data-i18n-html="hjelp.idx.faqIkkePanikk.svar">Noen observasjoner ser dramatiske ut, men er ofte helt normale: at gjæringslåsen slutter å boble betyr ikke automatisk at gjæringen har stoppet (se <a href="#faq-gjaring-stoppet">gjæringen virker stoppet</a>); krausen kan falle tidlig uten at noe er galt; svovellukt kan være normalt for enkelte gjærstammer (se over); uklart øl betyr ikke nødvendigvis infeksjon; og sterk alkoholvarme i sterke øl kan mykne med litt tid. Hydrometer/FG-målinger er en mer pålitelig indikator enn gjæringslåsaktivitet alene — lær deg å observere og måle før du «fikser».</p>
+    </article>
   </div>
 
   <div class="hjelp-seksjon" id="vannkjemi">
@@ -496,6 +540,40 @@
       <h3 data-i18n="hjelp.idx.vannClSo4.tittel">Cl:SO4-forhold</h3>
       <p data-i18n="hjelp.idx.vannClSo4.tekst">Forholdet mellom klorid og sulfat (Cl:SO4) gir et grovt signal om hvilken retning en vannprofil peker — mer mot malt/fylde, eller mer mot en tørr, skarp humlefremheving.</p>
       <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.vannClSo4.hvorfor"><strong>Hvorfor du bryr deg:</strong> Viktig presisjon: forholdstallet alene bestemmer <strong>ikke</strong> smaken, og er ikke en universell «malt vs. humle»-bryter. De faktiske ionekonsentrasjonene — ikke bare forholdet mellom dem — betyr også mye. To vannprofiler med samme Cl:SO4-forhold, men svært ulike absolutte nivåer, kan oppleves ganske forskjellig.</p>
+    </article>
+  </div>
+
+  <div class="hjelp-seksjon" id="gjaer-karbonering-lagring">
+    <h2 data-i18n="hjelp.idx.secG.tittel">G. Gjær, karbonering og lagring</h2>
+
+    <article class="hjelp-artikkel" id="gjaerstarter">
+      <h3 data-i18n="hjelp.idx.gjaerstarter.tittel">Gjærstarter</h3>
+      <p data-i18n-html="hjelp.idx.gjaerstarter.tekst">En gjærstarter er en liten mengde steril vørter du tilsetter gjær i på forhånd, lar formere seg noen timer til et par dager, og bruker som en «forsterket» gjærpakke på selve bryggedagen. Særlig relevant for flytende gjær, ved lav cellemengde i pakken, eller foran en sterk vørter som krever mye gjær. Målet er først og fremst flere og friskere gjærceller — ikke nødvendigvis en helt egen prosess. Hygienisk håndtering underveis er kritisk, siden starteren er et miljø der uønskede mikroorganismer like gjerne kan formere seg som gjæren selv.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerstarter.hvorfor"><strong>Hvorfor du bryr deg:</strong> En gjærstarter er ikke en universell nødvendighet for all gjær — mange brygg klarer seg fint uten. Tørrgjær håndteres ofte annerledes (rehydrert eller direkte tilsatt, se <a href="bryggedag.html#steg-12">tilsett gjær</a>), og produsentens egne anbefalinger bør følges der de finnes.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="gjaerhelse-temperatur">
+      <h3 data-i18n="hjelp.idx.gjaerhelseTemperatur.tittel">Gjærhelse og temperatur</h3>
+      <p data-i18n="hjelp.idx.gjaerhelseTemperatur.tekst">For lite gjær i forhold til vørterens størrelse og styrke kan gi en treg eller stresset gjæring. Temperatur spiller også en stor rolle: for høy eller for lav temperatur i forhold til det gjærstammen er laget for kan påvirke både hvor godt gjæren jobber og hvilke smaksstoffer den produserer underveis. Ulike gjærstammer har ulike arbeidsområder, og en kraftig eller brå temperaturøkning kan skape uønskede smaker som ellers ikke ville oppstått. En høy OG gir i tillegg gjæren en tyngre jobb å gjøre.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerhelseTemperatur.hvorfor"><strong>Hvorfor du bryr deg:</strong> Produsentens oppgitte temperaturområde er et fornuftig utgangspunkt — ikke et bevis på at nøyaktig én temperatur passer alle øl eller alle gjærstammer. Se også <a href="bryggedag.html#steg-13">gjæringssteget</a> i en bryggedag.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="naturlig-tvangskarbonering">
+      <h3 data-i18n="hjelp.idx.naturligTvangskarbonering.tittel">Naturlig vs. tvangskarbonering</h3>
+      <p data-i18n-html="hjelp.idx.naturligTvangskarbonering.tekst"><strong>Naturlig karbonering:</strong> sukker tilsettes etter ferdig gjæring, og gjenværende gjær produserer CO₂ i en lukket beholder — vanligst ved flasking, men kan også brukes på fat. <strong>Tvangskarbonering:</strong> CO₂ tilføres direkte fra flaske eller tank — vanligst på fat. Ved tvangskarbonering er det trykket og temperaturen som avgjør hvor mye CO₂ som faktisk løses i ølet: kaldere øl holder på mer CO₂, og høyere trykk gir mer oppløst CO₂ ved en gitt temperatur.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.naturligTvangskarbonering.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ønsket karboneringsnivå varierer med ølstil — det finnes ikke ett universelt psi- eller bar-tall som passer alle øl. Se <a href="#priming-flaskekarbonering">priming/flaskekarbonering</a> for den praktiske siden av naturlig karbonering.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="priming-flaskekarbonering">
+      <h3 data-i18n="hjelp.idx.primingFlaskekarbonering.tittel">Priming / flaskekarbonering</h3>
+      <p data-i18n-html="hjelp.idx.primingFlaskekarbonering.tekst">Ved flaskekarbonering («priming») tilsettes en beregnet mengde sukker rett før flasking, slik at gjenværende gjær produserer CO₂ inne i den lukkede flasken. FG må være stabil før dette gjøres (se <a href="#faq-gjaring-stoppet">gjæringen virker stoppet</a>) — ølet kan allerede inneholde noe løst CO₂ fra selve gjæringen, og det bør en riktig beregnet primingmengde ta hensyn til. Sukkermengden bør beregnes ut fra ønsket karboneringsnivå, ikke anslås etter øyemål.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.primingFlaskekarbonering.hvorfor"><strong>Hvorfor du bryr deg:</strong> For mye sukker kombinert med gjenværende gjæringsaktivitet kan gi farlig overtrykk i flasken, se sikkerhetsvarselet i <a href="bryggedag.html#steg-15">bryggedagsguiden</a>. For lite sukker gir i stedet et flatere øl enn planlagt.</p>
+    </article>
+
+    <article class="hjelp-artikkel" id="modning-lagring">
+      <h3 data-i18n="hjelp.idx.modningLagring.tittel">Modning og lagring</h3>
+      <p data-i18n-html="hjelp.idx.modningLagring.tekst">Øl kan fortsette å endre seg etter pakking. Noen øl — særlig lyse, humledominerte stiler — er som regel best ferske, siden humlearoma ofte avtar med tid. Andre — særlig sterkere eller mørkere øl — kan utvikle seg videre og noen ganger dra nytte av lengre modning. Oksidasjon (se <a href="#def-oksidasjon">oksidasjon etter gjæring</a>) går raskere ved høyere temperatur, så et mørkt og kjølig lagringssted er generelt å foretrekke fremfor et varmt og lyst.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.modningLagring.hvorfor"><strong>Hvorfor du bryr deg:</strong> Hvor godt et øl egner seg for lagring er stil- og oppskriftsavhengig — «eldre er alltid bedre» stemmer ikke som en generell regel. Server ferske øl innen rimelig tid, og gi gjerne sterke/mørke øl litt mer tid om du er nysgjerrig på hvordan de utvikler seg.</p>
     </article>
   </div>
 
