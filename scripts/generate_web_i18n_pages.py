@@ -66,6 +66,14 @@ PAGES = [
 
 GENERATOR_MARKER = "GENERERT AV scripts/generate_web_i18n_pages.py"
 
+# Sider som fortsatt genereres og valideres normalt via PAGES (EN-speiling
+# skal fortsatt finnes og fungere), men som bevisst utelates fra
+# sitemap.xml fordi de ikke har selvstendig søkeverdi for en crawler uten
+# lokal brukerdata (SEO-audit: siden degraderer til en nesten tom
+# tomtilstand for en crawler -- se <meta name="robots"> i NO-kilden, som
+# generatoren kopierer uendret gjennom til EN-speilingen).
+SITEMAP_EKSKLUDERT = {"utskrift.html"}
+
 # Produksjonsdomene -- ENESTE stedet dette er hardkodet. Ingen etablert
 # www.-konvensjon funnet noe sted i repoet ved innføring (Runde 15B.4) --
 # verifisert på nytt før implementasjon.
@@ -426,21 +434,24 @@ def _rens_gammel_output() -> None:
 
 
 # ---------------------------------------------------------------------------
-# sitemap.xml -- én autoritativ sidestruktur (PAGES) for HTML, canonical,
-# hreflang OG sitemap. Ingen egen sitemap-spesifikk liste.
+# sitemap.xml -- PAGES for HTML/canonical/hreflang, med SITEMAP_EKSKLUDERT
+# som eneste unntak for selve sitemap-outputen (se SEO-audit-begrunnelse
+# ved SITEMAP_EKSKLUDERT over).
 # ---------------------------------------------------------------------------
 
 def build_sitemap_xml() -> str:
-    """16 <url>-entries (8 sider x NO/EN), hver med gjensidige hreflang-
-    alternates (xhtml-namespace). Ingen lastmod -- ville gjort output
-    ikke-deterministisk uten å representere ekte innholdsdata (pkt. 9 i
-    Runde 15B.4-oppgaven). Ingen priority/changefreq."""
+    """<url>-entries for PAGES minus SITEMAP_EKSKLUDERT, x2 (NO/EN), hver
+    med gjensidige hreflang-alternates (xhtml-namespace). Ingen lastmod --
+    ville gjort output ikke-deterministisk uten å representere ekte
+    innholdsdata (pkt. 9 i Runde 15B.4-oppgaven). Ingen priority/changefreq."""
     linjer = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         f"<!-- {GENERATOR_MARKER} — IKKE REDIGER MANUELT. -->",
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
     ]
     for page in PAGES:
+        if page in SITEMAP_EKSKLUDERT:
+            continue
         no_url = canonical_url(page, "no")
         en_url = canonical_url(page, "en")
         for loc in (no_url, en_url):
@@ -472,7 +483,8 @@ def main() -> None:
 
     print(f"i18n-nøkler: no={len(tekster['no'])}, en={len(tekster['en'])} (symmetrisk)")
     print(f"Genererte {len(PAGES)} side(r) under {WEB_EN}")
-    print(f"Genererte sitemap.xml med {len(PAGES) * 2} URL-er under {WEB}")
+    sitemap_url_antall = (len(PAGES) - len(SITEMAP_EKSKLUDERT)) * 2
+    print(f"Genererte sitemap.xml med {sitemap_url_antall} URL-er under {WEB}")
 
 
 if __name__ == "__main__":

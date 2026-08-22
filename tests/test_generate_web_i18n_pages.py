@@ -294,7 +294,8 @@ class TestSitemap(unittest.TestCase):
         xml_tekst = gen.build_sitemap_xml()
         root = ET.fromstring(xml_tekst)
         urls = root.findall("sm:url", _SITEMAP_NS)
-        self.assertEqual(len(urls), len(gen.PAGES) * 2)
+        forventet_sideantall = len(gen.PAGES) - len(gen.SITEMAP_EKSKLUDERT)
+        self.assertEqual(len(urls), forventet_sideantall * 2)
 
     def test_sitemap_ingen_duplikater(self):
         xml_tekst = gen.build_sitemap_xml()
@@ -308,9 +309,19 @@ class TestSitemap(unittest.TestCase):
         locs = {u.find("sm:loc", _SITEMAP_NS).text for u in root.findall("sm:url", _SITEMAP_NS)}
         forventede = set()
         for page in gen.PAGES:
+            if page in gen.SITEMAP_EKSKLUDERT:
+                continue
             forventede.add(gen.canonical_url(page, "no"))
             forventede.add(gen.canonical_url(page, "en"))
         self.assertEqual(locs, forventede)
+
+    def test_sitemap_ekskluderer_registrerte_noindex_sider(self):
+        xml_tekst = gen.build_sitemap_xml()
+        root = ET.fromstring(xml_tekst)
+        locs = {u.find("sm:loc", _SITEMAP_NS).text for u in root.findall("sm:url", _SITEMAP_NS)}
+        for page in gen.SITEMAP_EKSKLUDERT:
+            self.assertNotIn(gen.canonical_url(page, "no"), locs, f"{page}: skal IKKE ligge i sitemap (noindex)")
+            self.assertNotIn(gen.canonical_url(page, "en"), locs, f"{page}: EN-motstykket skal IKKE ligge i sitemap (noindex)")
 
     def test_sitemap_ingen_asset_eller_data_urler(self):
         xml_tekst = gen.build_sitemap_xml()
@@ -347,6 +358,47 @@ class TestSitemap(unittest.TestCase):
         forventet = gen.build_sitemap_xml()
         faktisk = sitemap_path.read_text(encoding="utf-8")
         self.assertEqual(faktisk, forventet, "web/sitemap.xml er ikke i sync -- kjør generatoren på nytt")
+
+
+class TestNoindexGuard(unittest.TestCase):
+    """SEO-audit-fix: utskrift.html skal ha noindex (både NO-kilde og
+    EN-speiling, siden generatoren kopierer robots-meta uendret gjennom),
+    mens andre sider -- spesielt importer.html/personvern.html, som
+    audit-en eksplisitt konkluderte skal forbli indekserbare -- ikke skal
+    ha fått den ved en feil."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tekster = gen.parse_tekster()
+        cls.en = cls.tekster["en"]
+
+    @staticmethod
+    def _robots_content(html: str) -> str | None:
+        soup = BeautifulSoup(html, "html.parser")
+        meta = soup.find("meta", attrs={"name": "robots"})
+        return meta.get("content") if meta else None
+
+    def test_utskrift_no_kilde_har_noindex(self):
+        html = (gen.WEB / "utskrift.html").read_text(encoding="utf-8")
+        self.assertEqual(self._robots_content(html), "noindex, follow")
+
+    def test_utskrift_en_speiling_arver_noindex(self):
+        html = gen.generer_side_html("utskrift.html", self.en)
+        self.assertEqual(self._robots_content(html), "noindex, follow")
+
+    def test_importer_og_personvern_har_ikke_noindex(self):
+        for page in ("importer.html", "personvern.html"):
+            no_html = (gen.WEB / page).read_text(encoding="utf-8")
+            self.assertIsNone(self._robots_content(no_html), f"{page}: skal IKKE ha noindex")
+            en_html = gen.generer_side_html(page, self.en)
+            self.assertIsNone(self._robots_content(en_html), f"en/{page}: skal IKKE ha noindex")
+
+    def test_ovrige_pages_har_ikke_noindex(self):
+        for page in gen.PAGES:
+            if page in gen.SITEMAP_EKSKLUDERT:
+                continue
+            no_html = (gen.WEB / page).read_text(encoding="utf-8")
+            self.assertIsNone(self._robots_content(no_html), f"{page}: skal IKKE ha noindex")
 
 
 class TestRobotsTxt(unittest.TestCase):
