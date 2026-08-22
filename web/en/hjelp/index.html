@@ -171,9 +171,9 @@
 <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.ebc.hvorfor"><strong>Why this matters:</strong> Color comes almost entirely from the malt — darker malt (like roasted malt or crystal malt) gives a far bigger EBC increase per kilo than pale base malt. Add just 200 g of roasted malt to an otherwise pale recipe and EBC can jump noticeably even though the amount is small.</p>
 </article>
 <article class="hjelp-artikkel" id="bu-gu">
-<h3 data-i18n="hjelp.idx.buGu.tittel">BU:GU — Bitterness vs. Body</h3>
-<p data-i18n-html="hjelp.idx.buGu.tekst">BU:GU (shown in Brewing Master) is the ratio of IBU to OG (scaled), and says something about the balance between bitterness and malt body. A low number means a malt-forward beer, a high number means a hop-forward beer.</p>
-<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.buGu.hvorfor"><strong>Why this matters:</strong> Two beers can have the same IBU but taste completely different depending on how much malt (OG) stands up to the bitterness. BU:GU is a quick check on whether the balance matches what you're aiming for.</p>
+<h3 data-i18n="hjelp.idx.buGu.tittel">BU:GU — Bitterness vs. Gravity</h3>
+<p data-i18n-html="hjelp.idx.buGu.tekst">BU:GU (shown in Brewing Master) is the ratio of IBU to OG (scaled), and says something about how much bitterness stands up against the beer's original gravity/malt backbone. A low number means a malt-forward beer, a high number means a hop-forward beer.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.buGu.hvorfor"><strong>Why this matters:</strong> Two beers can have the same IBU but taste completely different depending on how strong the wort (OG) was to begin with. BU:GU is a quick check on whether the balance between bitterness and malt backbone matches what you're aiming for. Note that BU:GU uses OG — it isn't a direct measure of the beer's residual sweetness, which is instead governed by <a href="#fg">FG</a>.</p>
 </article>
 <article class="hjelp-artikkel" id="utgjaering">
 <h3 data-i18n="hjelp.idx.utgjaering.tittel">Attenuation</h3>
@@ -258,6 +258,10 @@
 <div class="hjelp-seksjon" id="bryggeprosess">
 <h2 data-i18n="hjelp.idx.secD.tittel">D. Brewing Process — Quick Glossary</h2>
 <p class="hjelp-innledning" data-i18n-html="hjelp.idx.secD.intro">This is a quick glossary. For a full step-by-step walkthrough of the brew day itself, see <a href="bryggedag.html">A Brew Day — From Water to Fermenter</a>.</p>
+<article class="hjelp-artikkel" id="def-renhold">
+<h3 data-i18n="hjelp.idx.defRenhold.tittel">Cleaning and Sanitizing</h3>
+<p data-i18n="hjelp.idx.defRenhold.tekst">Two different steps: cleaning removes visible dirt and residue, sanitizing reduces microorganisms on equipment that's already clean. Dirty equipment can't be "saved" just by sanitizing it — dirt shields bacteria from the sanitizer. Anything that touches the wort/beer after the boil must be both clean and sanitized.</p>
+</article>
 <article class="hjelp-artikkel" id="def-mesking">
 <h3 data-i18n="hjelp.idx.defMesking.tittel">Mashing</h3>
 <p data-i18n="hjelp.idx.defMesking.tekst">Mixing crushed malt with hot water at a specific temperature and time, so the malt's enzymes convert starch into fermentable sugar.</p>
@@ -272,7 +276,7 @@
 </article>
 <article class="hjelp-artikkel" id="def-kok">
 <h3 data-i18n="hjelp.idx.defKok.tittel">Boil</h3>
-<p data-i18n="hjelp.idx.defKok.tekst">The wort is boiled, normally for 60 minutes, to sterilize, drive off unwanted compounds, and let the hops release bitterness and aroma.</p>
+<p data-i18n="hjelp.idx.defKok.tekst">The wort is boiled, normally for 60 minutes, to sterilize, drive off unwanted compounds, and let the hops release bitterness and aroma. Water evaporates during the boil while the sugar stays behind, so the wort becomes more concentrated and OG rises — how much actually evaporates ("boil-off") varies with equipment and boil intensity.</p>
 </article>
 <article class="hjelp-artikkel" id="def-humletilsetning">
 <h3 data-i18n="hjelp.idx.defHumletilsetning.tittel">Hop Additions</h3>
@@ -292,7 +296,7 @@
 </article>
 <article class="hjelp-artikkel" id="def-fg-maling">
 <h3 data-i18n="hjelp.idx.defFgMaling.tittel">FG Reading</h3>
-<p data-i18n-html="hjelp.idx.defFgMaling.tekst">Measuring the gravity once fermentation has settled down, to confirm it's finished and calculate the actual <a href="#abv">ABV</a>.</p>
+<p data-i18n-html="hjelp.idx.defFgMaling.tekst">Measuring the gravity once fermentation has settled down, to confirm it's finished and calculate the actual <a href="#abv">ABV</a>. A refractometer works directly on unfermented wort, but gives a misleading reading as soon as alcohol is present in the sample — use an alcohol/refractometer correction, or measure with a hydrometer instead.</p>
 </article>
 <article class="hjelp-artikkel" id="def-karbonering">
 <h3 data-i18n="hjelp.idx.defKarbonering.tittel">Carbonation</h3>
@@ -301,6 +305,10 @@
 <article class="hjelp-artikkel" id="def-flasking">
 <h3 data-i18n="hjelp.idx.defFlasking.tittel">Bottling/Kegging, in General</h3>
 <p data-i18n="hjelp.idx.defFlasking.tekst">The beer is transferred to bottles or a keg for storage, conditioning, and serving. The choice mainly affects how carbonation is handled.</p>
+</article>
+<article class="hjelp-artikkel" id="def-trykkgjaering-sikkerhet">
+<h3 data-i18n="hjelp.idx.defTrykkgjaeringSikkerhet.tittel">Pressure Fermentation (Safety)</h3>
+<p data-i18n="hjelp.idx.defTrykkgjaeringSikkerhet.tekst">Only use a fermenter that's manufacturer-rated for pressure, with a working spunding/pressure relief valve set up per the manufacturer's specifications. Never exceed the equipment's stated maximum working pressure, and never block a safety valve. Always follow the manufacturer's own instructions — equipment varies. A full guide to pressure fermentation/spunding is coming later.</p>
 </article>
 </div>
 <div class="hjelp-seksjon" id="faq">
@@ -344,6 +352,22 @@
 <article class="hjelp-artikkel" id="faq-faktisk-fg">
 <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqFaktiskFg.sporsmal">Why is the actual FG different from the calculated FG?</p>
 <p data-i18n-html="hjelp.idx.faqFaktiskFg.svar">Calculated FG uses the yeast's <em>typical</em> attenuation percentage. Actual attenuation is affected by fermentation temperature, yeast amount/health, mash temperature (which governs how fermentable the wort actually is), and the yeast strain's variation from batch to batch. A small deviation is normal and no cause for concern.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-gjaring-stoppet">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqGjaringStoppet.sporsmal">Fermentation seems to have stopped — what do I do?</p>
+<p data-i18n-html="hjelp.idx.faqGjaringStoppet.svar">Don't rely solely on the airlock having stopped bubbling — that can just as easily mean a poor seal as a finished fermentation. Measure SG (see <a href="#def-fg-maling">FG reading</a>), check that the temperature is within the yeast's recommended range, and compare several readings over a couple of days. Only bottle or keg once FG is stable.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-for-sott">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqForSott.sporsmal">The beer tastes too sweet / FG is higher than expected — what does that mean?</p>
+<p data-i18n="hjelp.idx.faqForSott.svar">First check that FG is actually stable (see above) — fermentation may simply not be finished yet. If FG is stable and still high, the cause could be the yeast's actual attenuation, fermentation temperature, or a mash temperature that produced a less fermentable wort than planned. Adding more hops doesn't "fix" residual sweetness — it changes the bitterness, not the sugar content.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-mistanke-infeksjon">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqMistankeInfeksjon.sporsmal">I suspect an infection in the beer — what now?</p>
+<p data-i18n-html="hjelp.idx.faqMistankeInfeksjon.svar">Unusual smell, taste, or appearance (e.g. a film on the surface, unexpected sourness) CAN be caused by infection, but can also have other explanations — don't conclude from a single observation alone. Good hygiene throughout the process (see <a href="#def-renhold">cleaning and sanitizing</a>) is the most important prevention.</p>
+</article>
+<article class="hjelp-artikkel" id="faq-karbonering-feil">
+<p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqKarboneringFeil.sporsmal">Too little or too much carbonation — what do I do?</p>
+<p data-i18n-html="hjelp.idx.faqKarboneringFeil.svar">Don't blindly add extra sugar to "fix" low carbonation — first check that FG was actually stable before bottling (see above), since a fermentation that wasn't finished can continue in the bottle. Too much carbonation isn't just a taste issue: overcarbonation can cause dangerous overpressure, see the safety warning in the <a href="bryggedag.html#steg-15">brew day guide</a>.</p>
 </article>
 </div>
 <p class="hjelp-innledning" data-i18n="hjelp.idx.avslutning">Didn't find what you were looking for? The handbook keeps growing.</p>

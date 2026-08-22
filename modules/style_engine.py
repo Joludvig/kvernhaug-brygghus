@@ -687,11 +687,11 @@ def analyser_stil_og_balanse(recipe):
     balanse_notater, problemer = [], []
 
     if bu_gu > 0.85:
-        balanse_notater.append("🔥 **Humledominert:** Bitterheten vil dominere kraftig over maltprofilen din.")
+        balanse_notater.append("🔥 **Humledominert:** Bitterheten vil dominere kraftig over maltgrunnlaget/vørterstyrken.")
     elif bu_gu < 0.38:
-        balanse_notater.append("🌾 **Maltdominert:** Lav bitterhet gjør at restsødmen fra kornene vil merkes godt.")
+        balanse_notater.append("🌾 **Maltdominert:** Lav bitterhet gjør at det fyldige maltgrunnlaget vil merkes godt.")
     else:
-        balanse_notater.append("⚖️ **Harmonisk balansert:** Forholdet mellom sødme og bitterhet oppleves veldig balansert.")
+        balanse_notater.append("⚖️ **Harmonisk balansert:** Forholdet mellom vørterstyrke (malt) og bitterhet oppleves veldig balansert.")
 
     if fg >= 1.018 and abv < 6.0:
         problemer.append("⚠️ **Fare for tung sødme:** Høy FG betyr uforgjærbart sukker. Ølet kan bli klissete.")
