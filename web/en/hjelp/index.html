@@ -89,6 +89,7 @@
 <a data-i18n="hjelp.idx.toc.c" href="#ingredienser">C. Ingredients</a>
 <a data-i18n="hjelp.idx.toc.d" href="#bryggeprosess">D. Brewing Process</a>
 <a data-i18n-html="hjelp.idx.toc.e" href="#faq">E. Questions &amp; Answers</a>
+<a data-i18n="hjelp.idx.toc.f" href="#vannkjemi">F. Water Chemistry</a>
 </nav>
 <main class="hjelp-side-main">
 <p class="hjelp-innledning" data-i18n-html="hjelp.idx.intro">A reference for anyone building a recipe in Kvernhaug Brygghus. Everything here is written to answer two questions: what does this mean, and why should I care? Use the contents menu to jump around, or scroll down like an ordinary handbook.</p>
@@ -274,6 +275,10 @@
 <h3 data-i18n="hjelp.idx.defSkylling.tittel">Sparging</h3>
 <p data-i18n-html="hjelp.idx.defSkylling.tekst">Rinsing remaining sugar out of the grain bed with hot water, so as much of the potential as possible ends up in the kettle — not used in every method (see <a href="bryggemetoder.html">brewing methods</a>).</p>
 </article>
+<article class="hjelp-artikkel" id="def-forkok">
+<h3 data-i18n="hjelp.idx.defForkok.tittel">Pre-Boil Volume and Pre-Boil Gravity</h3>
+<p data-i18n-html="hjelp.idx.defForkok.tekst">The amount of wort (pre-boil volume) and its gravity (pre-boil gravity/SG) right before you start the boil timer — both measured before any water has evaporated through boiling. An early checkpoint against the plan: if the numbers deviate a lot from what you'd planned, it can indicate a mash or sparge efficiency different from expected, long before you reach the <a href="bryggedag.html#steg-10">OG reading</a> after the boil. Water keeps evaporating throughout the boil itself (see <a href="#def-kok">boil</a>), so it's normal for pre-boil gravity to be lower than <a href="#og">OG</a> — that's not a deviation in itself.</p>
+</article>
 <article class="hjelp-artikkel" id="def-kok">
 <h3 data-i18n="hjelp.idx.defKok.tittel">Boil</h3>
 <p data-i18n="hjelp.idx.defKok.tekst">The wort is boiled, normally for 60 minutes, to sterilize, drive off unwanted compounds, and let the hops release bitterness and aroma. Water evaporates during the boil while the sugar stays behind, so the wort becomes more concentrated and OG rises — how much actually evaporates ("boil-off") varies with equipment and boil intensity.</p>
@@ -294,9 +299,21 @@
 <h3 data-i18n="hjelp.idx.defGjaering.tittel">Fermentation</h3>
 <p data-i18n="hjelp.idx.defGjaering.tekst">The period during which yeast converts sugar into alcohol and CO₂ — normally lasts 1–3 weeks depending on yeast type, strength, and temperature.</p>
 </article>
+<article class="hjelp-artikkel" id="def-diacetylrest">
+<h3 data-i18n="hjelp.idx.defDiacetylrest.tittel">Diacetyl and Diacetyl Rest</h3>
+<p data-i18n="hjelp.idx.defDiacetylrest.tekst">Diacetyl is a fermentation byproduct that, in excess, can give a buttery or butterscotch-like impression. Yeast normally cleans up much of this itself toward the end of fermentation, given enough time at the right temperature — "diacetyl rest" is a term used especially in lager brewing, but the principle applies more broadly: don't cool or package the beer too early. There's no single universal temperature or schedule that fits every yeast strain and fermentation course.</p>
+</article>
+<article class="hjelp-artikkel" id="def-oksidasjon">
+<h3 data-i18n="hjelp.idx.defOksidasjon.tittel">Oxidation After Fermentation</h3>
+<p data-i18n-html="hjelp.idx.defOksidasjon.tekst">A bit of oxygen is wanted BEFORE pitching the yeast (see <a href="bryggedag.html#steg-11">transferring to the fermenter</a>) — it helps the yeast get going. Oxygen reaching the beer AFTER fermentation is actively underway is something else entirely: it can cause oxidation, which can dull fresh hop aroma, produce darker/cardboard-like/"stale" notes, and reduce shelf life. Avoid unnecessary splashing during transfers, and use closed transfers where practical — but a single, stray oxygen molecule won't automatically ruin the whole batch.</p>
+</article>
 <article class="hjelp-artikkel" id="def-fg-maling">
 <h3 data-i18n="hjelp.idx.defFgMaling.tittel">FG Reading</h3>
 <p data-i18n-html="hjelp.idx.defFgMaling.tekst">Measuring the gravity once fermentation has settled down, to confirm it's finished and calculate the actual <a href="#abv">ABV</a>. A refractometer works directly on unfermented wort, but gives a misleading reading as soon as alcohol is present in the sample — use an alcohol/refractometer correction, or measure with a hydrometer instead.</p>
+</article>
+<article class="hjelp-artikkel" id="def-cold-crash">
+<h3 data-i18n="hjelp.idx.defColdCrash.tittel">Cold Crash</h3>
+<p data-i18n-html="hjelp.idx.defColdCrash.tekst">Chilling the beer further down once fermentation is actually finished (see <a href="#faq-gjaring-stoppet">fermentation seems stopped</a>) — common examples fall somewhere around 0–4°C for a day to a few days, but this varies with equipment and desired result, and there's no single fixed number. Lower temperature makes yeast, proteins, and other particles settle out faster, often giving a clearer beer. The rapid temperature change can create a vacuum in a closed fermenter, which can in turn draw air/oxygen in if the vessel isn't sealed or handled properly, see <a href="#def-oksidasjon">oxidation after fermentation</a>.</p>
 </article>
 <article class="hjelp-artikkel" id="def-karbonering">
 <h3 data-i18n="hjelp.idx.defKarbonering.tittel">Carbonation</h3>
@@ -368,6 +385,45 @@
 <article class="hjelp-artikkel" id="faq-karbonering-feil">
 <p class="hjelp-faq-sporsmal" data-i18n="hjelp.idx.faqKarboneringFeil.sporsmal">Too little or too much carbonation — what do I do?</p>
 <p data-i18n-html="hjelp.idx.faqKarboneringFeil.svar">Don't blindly add extra sugar to "fix" low carbonation — first check that FG was actually stable before bottling (see above), since a fermentation that wasn't finished can continue in the bottle. Too much carbonation isn't just a taste issue: overcarbonation can cause dangerous overpressure, see the safety warning in the <a href="bryggedag.html#steg-15">brew day guide</a>.</p>
+</article>
+</div>
+<div class="hjelp-seksjon" id="vannkjemi">
+<h2 data-i18n="hjelp.idx.secF.tittel">F. Water Chemistry — Brief Introduction</h2>
+<p class="hjelp-innledning" data-i18n-html="hjelp.idx.secF.intro">Kvernhaug Brygghus has a dedicated "💧 Water Chemistry" module in the recipe builder (Brewmaster) where you can register your source water, set a target profile, and get salt suggestions. This section only explains <em>why</em> these numbers matter — not how to use the module itself step by step.</p>
+<article class="hjelp-artikkel" id="vann-ph">
+<h3 data-i18n="hjelp.idx.vannPh.tittel">pH</h3>
+<p data-i18n="hjelp.idx.vannPh.tekst">Mash pH affects how well the enzymes in the mash work, and therefore how efficiently starch is converted into fermentable sugar.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.idx.vannPh.hvorfor">&lt;strong&gt;Why you care:&lt;/strong&gt; A common target range for mash pH is a guiding direction to aim for, not a magic exact number you must hit to the decimal.</p>
+</article>
+<article class="hjelp-artikkel" id="vann-ca">
+<h3 data-i18n="hjelp.idx.vannCa.tittel">Ca — Calcium</h3>
+<p data-i18n="hjelp.idx.vannCa.tekst">Calcium is arguably the most important single ion in brewing water — it's involved in the brewing process itself, not just in flavor.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.idx.vannCa.hvorfor">&lt;strong&gt;Why you care:&lt;/strong&gt; Calcium can, among other things, contribute to better yeast health/flocculation, and affects water chemistry (including mash pH) indirectly.</p>
+</article>
+<article class="hjelp-artikkel" id="vann-mg">
+<h3 data-i18n="hjelp.idx.vannMg.tittel">Mg — Magnesium</h3>
+<p data-i18n="hjelp.idx.vannMg.tekst">Magnesium is a nutrient the yeast needs, but only in small amounts.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.idx.vannMg.hvorfor">&lt;strong&gt;Why you care:&lt;/strong&gt; Malt itself normally provides enough magnesium for the yeast. High levels in the water can instead give an unwanted flavor — more isn't better here.</p>
+</article>
+<article class="hjelp-artikkel" id="vann-na">
+<h3 data-i18n="hjelp.idx.vannNa.tittel">Na — Sodium</h3>
+<p data-i18n="hjelp.idx.vannNa.tekst">Sodium in moderate amounts can contribute to a rounder, fuller impression in the beer.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.idx.vannNa.hvorfor">&lt;strong&gt;Why you care:&lt;/strong&gt; Too much sodium can instead give a salty or harsh flavor — as with most ions here, it's about a sensible range, not "more is better".</p>
+</article>
+<article class="hjelp-artikkel" id="vann-cl">
+<h3 data-i18n="hjelp.idx.vannCl.tittel">Cl — Chloride</h3>
+<p data-i18n="hjelp.idx.vannCl.tekst">Chloride is often associated with a rounder, fuller malt/mouthfeel.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.idx.vannCl.hvorfor">&lt;strong&gt;Why you care:&lt;/strong&gt; This is a general tendency, not a rule — the actual concentration, not just the ratio to sulfate, also matters for the result.</p>
+</article>
+<article class="hjelp-artikkel" id="vann-so4">
+<h3 data-i18n="hjelp.idx.vannSo4.tittel">SO4 — Sulfate</h3>
+<p data-i18n="hjelp.idx.vannSo4.tekst">Sulfate is often associated with a drier, sharper emphasis on hop bitterness.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.idx.vannSo4.hvorfor">&lt;strong&gt;Why you care:&lt;/strong&gt; As with chloride, this is a tendency, not a rule — very high sulfate levels can themselves come across as a plain, mineral sharpness.</p>
+</article>
+<article class="hjelp-artikkel" id="vann-cl-so4">
+<h3 data-i18n="hjelp.idx.vannClSo4.tittel">Cl:SO4 Ratio</h3>
+<p data-i18n="hjelp.idx.vannClSo4.tekst">The ratio between chloride and sulfate (Cl:SO4) gives a rough signal of which direction a water profile leans — more toward malt/fullness, or more toward a dry, sharp hop emphasis.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.vannClSo4.hvorfor"><strong>Why you care:</strong> An important nuance: the ratio alone does <strong>not</strong> determine the flavor, and it isn't a universal "malt vs. hops" switch. The actual ion concentrations — not just the ratio between them — also matter a great deal. Two water profiles with the same Cl:SO4 ratio but very different absolute levels can taste quite different.</p>
 </article>
 </div>
 <p class="hjelp-innledning" data-i18n="hjelp.idx.avslutning">Didn't find what you were looking for? The handbook keeps growing.</p>

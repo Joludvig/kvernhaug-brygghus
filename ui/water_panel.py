@@ -127,6 +127,21 @@ def render_water_panel(ctx, malt_database=None):
         "endrer aldri vannplanen uten at du selv velger det."
     )
 
+    with st.expander("ℹ️ Hvorfor disse tallene betyr noe (kort intro)"):
+        st.markdown(
+            "- **pH** — påvirker meskeenzymene og hvor godt stivelsen omdannes til sukker. "
+            "Målområdet under er veiledende, ikke et eksakt fasitall.\n"
+            "- **Ca (kalsium)** — trolig det viktigste enkeltionet i bryggevann; bidrar bl.a. "
+            "til gjærhelse/flokkulering og påvirker vannkjemien indirekte.\n"
+            "- **Mg (magnesium)** — næringsstoff i små mengder; høye nivåer kan gi uønsket smak.\n"
+            "- **Na (natrium)** — moderate nivåer kan gi et rundere, fyldigere preg; for mye kan "
+            "bli salt/skarpt.\n"
+            "- **Cl (klorid)** — forbindes ofte med rundere malt-/munnfølelse.\n"
+            "- **SO4 (sulfat)** — forbindes ofte med tørrere, skarpere humlebitterhet.\n"
+            "- **Cl:SO4** — gir et grovt signal om retning (malt vs. humle), men er IKKE en "
+            "fasit alene — de faktiske ionenivåene betyr også noe."
+        )
+
     # ── Resync ved bytte av oppskrift ────────────────────────────────────
     # Samme mønster som ui/process_panel.py: panelets EGET utvalg må
     # resynkes fra den faktisk lastede oppskriftens lagrede vannfelter hver
