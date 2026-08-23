@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sensorikk og feilsøking — Kvernhaug Brygghus</title>
+<meta name="description" content="Bryggmester-guide til sensorikk og vanlige avvik/off-flavours: acetaldehyd, DMS, diacetyl, svovel, fusel, estere, fenoler, oksidasjon, astringens og en praktisk feilsøkingsflyt." data-i18n-content="meta.hjelpSensorikk.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/sensorikk.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html">
+<link rel="icon" href="../assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon/apple-touch-icon.png">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpSensorikk.tittel">
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="sensorikk.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/sensorikk.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="sensorikk.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/sensorikk.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="sensorikk.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/sensorikk.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="../pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="../bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<nav class="hjelp-side-nav">
+  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+  <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+  <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+  <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+  <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+  <a href="sensorikk.html" class="aktiv" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
+  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+</nav>
+
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
+    <a href="#sensorikk-metode" data-i18n="hjelp.sensorikk.toc.metode">Hvordan smake systematisk</a>
+    <a href="#stil-vs-avvik" data-i18n="hjelp.sensorikk.toc.stilAvvik">Stilkarakter vs. off-flavour</a>
+    <a href="#acetaldehyd-dms" data-i18n="hjelp.sensorikk.toc.acetaldehydDms">Acetaldehyd og DMS</a>
+    <a href="#diacetyl-svovel" data-i18n="hjelp.sensorikk.toc.diacetylSvovel">Diacetyl og svovel</a>
+    <a href="#fusel-estere-fenoler" data-i18n="hjelp.sensorikk.toc.fuselEstereFenoler">Fusel, estere og fenoler</a>
+    <a href="#oksidasjon-sensorikk" data-i18n="hjelp.sensorikk.toc.oksidasjon">Oksidasjon</a>
+    <a href="#astringens-metallisk" data-i18n="hjelp.sensorikk.toc.astringensMetallisk">Astringens og metallisk</a>
+    <a href="#sur-syrlig" data-i18n="hjelp.sensorikk.toc.surSyrlig">Sur / syrlig</a>
+    <a href="#sott-bittert" data-i18n="hjelp.sensorikk.toc.sottBittert">Søtt/høy FG og for bittert</a>
+    <a href="#flatt-overkarbonert" data-i18n="hjelp.sensorikk.toc.flattOverkarbonert">Flatt og overkarbonert</a>
+    <a href="#infeksjon" data-i18n="hjelp.sensorikk.toc.infeksjon">Infeksjon</a>
+    <a href="#modnes-bort" data-i18n="hjelp.sensorikk.toc.modnesBort">Kan det modnes bort?</a>
+    <a href="#feilsokingsflyt" data-i18n="hjelp.sensorikk.toc.feilsokingsflyt">Feilsøkingsflyt</a>
+    <a href="#sensorikklogg" data-i18n="hjelp.sensorikk.toc.sensorikklogg">Praktisk sensorikklogg</a>
+  </nav>
+
+  <main class="hjelp-side-main">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.sensorikk.intro">
+    Denne siden er en Bryggmester-utvidelse av feilsøkings-FAQ-en i
+    <a href="index.html#faq">Hjelp &amp; FAQ</a>, som allerede dekker
+    enkeltspørsmål om svovel, fusel, diacetyl og oksidasjon. Her går vi
+    videre til en mer systematisk gjennomgang av sensorikk og vanlige
+    avvik — uten å bygge en fullstendig kjemisk aromadatabase, et
+    automatisk diagnoseverktøy eller et sensorikk-scoresystem.
+  </p>
+
+  <div class="hjelp-metode-kort" id="sensorikk-metode">
+    <h3 data-i18n="hjelp.sensorikk.metode.tittel">Hvordan smake systematisk</h3>
+    <p data-i18n="hjelp.sensorikk.metode.tekst">Bruk fem enkle steg hver gang: se, lukt, smak, munnfølelse, ettersmak. Lukt alltid før du smaker — de korte, rolige sniffene forteller ofte mer enn det første store slurket.</p>
+    <div data-i18n-html="hjelp.sensorikk.metode.liste">
+      <p><strong>Se:</strong> klarhet, farge, skum, synlige partikler.</p>
+      <p><strong>Lukt:</strong> korte, rolige sniff. Vurder først malt-, humle- og gjærpreg — se etter avvik etterpå.</p>
+      <p><strong>Smak:</strong> sødme, bitterhet, syrlighet, malt, humle, gjærpreg, alkohol.</p>
+      <p><strong>Munnfølelse:</strong> kropp, karbonering, varme, astringens, kremet eller tørr.</p>
+      <p><strong>Ettersmak:</strong> hva blir igjen? Bitterhet, alkohol, sødme, metallisk?</p>
+    </div>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.metode.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke start med å lete etter en feil. Start med å beskrive hva som faktisk er der — en diagnose kommer eventuelt etterpå, ikke først.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="stil-vs-avvik">
+    <h3 data-i18n="hjelp.sensorikk.stilAvvik.tittel">Normal stilkarakter vs. off-flavour</h3>
+    <p data-i18n="hjelp.sensorikk.stilAvvik.tekst">Mange smaker og aromaer kan være riktige i én ølstil og uønsket i en annen. Estere, fenoler, svovel, alkoholvarme og til og med enkelte oksidasjonstoner i eldre sterke øl kan alle være en del av en bevisst, ønsket profil — avhengig av hvilket øl det faktisk er.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.stilAvvik.hvorfor"><strong>Hvorfor du bryr deg:</strong> Unngå «denne smaken er alltid feil». Spør heller: er dette forventet for akkurat denne stilen og dette ølet, eller ikke?</p>
+  </div>
+
+  <div id="acetaldehyd-dms">
+  <div class="hjelp-metode-kort" id="acetaldehyd">
+    <h3 data-i18n="hjelp.sensorikk.acetaldehyd.tittel">Acetaldehyd</h3>
+    <p data-i18n="hjelp.sensorikk.acetaldehyd.tekst">Typisk sensorisk inntrykk: grønt eple, rått epleskall, en fersk eller umoden karakter.</p>
+    <p data-i18n="hjelp.sensorikk.acetaldehyd.tekst2">Mulige årsaker inkluderer at ølet ble pakket eller kjølt for tidlig, ufullført gjæring, stresset gjær, og i enkelte sammenhenger kan oksidasjon bidra til tilbakedannelse.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.acetaldehyd.hvorfor"><strong>Hvorfor du bryr deg:</strong> Preget kan ofte reduseres dersom gjæren får tid til å rydde opp selv — ikke cold crash eller pakk før FG er stabil. Grønt eple betyr likevel ikke automatisk acetaldehyd uten resten av konteksten.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="dms">
+    <h3 data-i18n="hjelp.sensorikk.dms.tittel">DMS (dimetylsulfid)</h3>
+    <p data-i18n="hjelp.sensorikk.dms.tekst">Typiske beskrivelser: kokt mais, hermetisk mais, grønnsakaktig — noen opplever et kålaktig preg.</p>
+    <p data-i18n="hjelp.sensorikk.dms.tekst2">DMS-forstadier finnes naturlig i malten og er flyktige under kok. Utilstrekkelig fordamping under koket og langsom nedkjøling etterpå kan i enkelte prosesser bidra til å øke risikoen.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.dms.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke overforenkle til «kok alltid 90 minutter» — malt, prosess og system påvirker risikoen ulikt, og noen malttyper bidrar mer enn andre.</p>
+  </div>
+  </div>
+
+  <div id="diacetyl-svovel">
+  <div class="hjelp-metode-kort" id="diacetyl">
+    <h3 data-i18n="hjelp.sensorikk.diacetyl.tittel">Diacetyl</h3>
+    <p data-i18n="hjelp.sensorikk.diacetyl.tekst">Sensorikk: smør, butterscotch, og i noen tilfeller en glatt eller oljete munnfølelse.</p>
+    <p data-i18n-html="hjelp.sensorikk.diacetyl.tekst2">Bygger videre på <a href="index.html#def-diacetylrest">diacetyl og diacetylrest</a>. Mulige årsaker: gjæren har ikke ryddet opp ferdig, gjæringen ble avbrutt eller kjølt for tidlig, enkelte gjærstammer produserer mer enn andre, og kontaminasjon kan også gi diacetyl.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.diacetyl.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke lær at diacetyl alltid bare trenger mer tid — dersom infeksjon faktisk er årsaken, hjelper ikke lenger lagring alene. Se <a href="#infeksjon">infeksjon</a> under.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="svovel">
+    <h3 data-i18n="hjelp.sensorikk.svovel.tittel">Svovel</h3>
+    <p data-i18n="hjelp.sensorikk.svovel.tekst">Sensorikk: fyrstikk, egg, svovelaktig — ved kraftig nivå kan det noen ganger oppleves kloakkaktig.</p>
+    <p data-i18n-html="hjelp.sensorikk.svovel.tekst2">Se også <a href="index.html#faq-svovel">svovel i FAQ</a>. Enkelte lagergjær og andre stammer produserer merkbart svovel under gjæring, og mye kan forsvinne under videre gjæring og modning — det er ikke automatisk tegn på infeksjon.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.svovel.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ved vedvarende kraftig avvik lenge etter modning, vurder gjærhelse, temperatur, næring og kontaminasjon — men ikke før du har gitt det litt tid først.</p>
+  </div>
+  </div>
+
+  <div id="fusel-estere-fenoler">
+  <div class="hjelp-metode-kort" id="fusel">
+    <h3 data-i18n="hjelp.sensorikk.fusel.tittel">Fusel / høyere alkoholer</h3>
+    <p data-i18n="hjelp.sensorikk.fusel.tekst">Sensorikk: skarp alkohol, løsemiddelaktig, varm eller brennende. En «neglelakk»-assosiasjon kan forekomme, men ikke bland alle løsemiddeltoner sammen uten nyanse.</p>
+    <p data-i18n-html="hjelp.sensorikk.fusel.tekst2">Mulige faktorer: høy gjæringstemperatur, stresset gjær, høy OG, utilstrekkelig pitch, og oksygenering/næring kan spille inn — se <a href="index.html#gjaerhelse-temperatur">gjærhelse og temperatur</a> og <a href="sterke-ol.html">sterke øl / high gravity</a>.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.fusel.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke all alkoholvarme i sterke øl er fusel — noe kan mykne med modning. Se <a href="index.html#faq-fusel">fusel i FAQ</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="estere">
+    <h3 data-i18n="hjelp.sensorikk.estere.tittel">Estere</h3>
+    <p data-i18n="hjelp.sensorikk.estere.tekst">Typiske fruktige toner: banan, pære, eple, steinfrukt, tropisk frukt.</p>
+    <p data-i18n="hjelp.sensorikk.estere.tekst2">Mengden påvirkes av gjærstamme, gjæringstemperatur, pitch-mengde og prosess for øvrig.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.estere.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke presenter «estere = feil» — i mange stiler er dette nettopp ønsket karakter, ikke et avvik.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="fenoler">
+    <h3 data-i18n="hjelp.sensorikk.fenoler.tittel">Fenoler</h3>
+    <p data-i18n="hjelp.sensorikk.fenoler.tekst">Nellik, pepper, krydder — røyk, plast eller medisinsk karakter kan forekomme avhengig av kilde.</p>
+    <p data-i18n="hjelp.sensorikk.fenoler.tekst2">Skill mellom ønskede gjærfenoler i for eksempel saison, weiss og belgiske stiler, og en uønsket plast- eller medisinal karakter. Mulige uønskede kilder kan inkludere kontaminasjon, klor-/kloraminrelaterte forbindelser, eller rett og slett feil gjærkarakter for stilen.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.fenoler.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke lær at all nellik er feil — konteksten (stilen og resten av inntrykket) avgjør.</p>
+  </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="oksidasjon-sensorikk">
+    <h3 data-i18n="hjelp.sensorikk.oksidasjon.tittel">Oksidasjon</h3>
+    <p data-i18n-html="hjelp.sensorikk.oksidasjon.tekst">Bygger videre på <a href="index.html#def-oksidasjon">oksidasjon etter gjæring</a>. Sensorikk kan være papp, «stale» toner, dempet humlearoma, mørkere farge, eller en sherry-/tørket-frukt-karakter i enkelte eldre sterke øl.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.oksidasjon.hvorfor"><strong>Hvorfor du bryr deg:</strong> Noen oksidasjonstoner kan oppleves positivt i lagrede sterke øl, men oksidasjon er fortsatt ikke et mål i seg selv. Unngå unødvendig luftkontakt ved overføringer og lagring.</p>
+  </div>
+
+  <div id="astringens-metallisk">
+  <div class="hjelp-metode-kort" id="astringens">
+    <h3 data-i18n="hjelp.sensorikk.astringens.tittel">Astringens</h3>
+    <p data-i18n-html="hjelp.sensorikk.astringens.tekst">Bygger videre på <a href="vannkjemi.html#tanniner-astringens">tanniner og astringens</a>. Sensorikk: tørr, ru, stram, «tepose»-følelse — tannkjøtt og kinn kan føles stramme.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.astringens.hvorfor"><strong>Hvorfor du bryr deg:</strong> Skill tydelig fra bitterhet og fra en lav FG/tørr smak — det er tre forskjellige ting som lett blandes sammen.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="metallisk">
+    <h3 data-i18n="hjelp.sensorikk.metallisk.tittel">Metallisk</h3>
+    <p data-i18n="hjelp.sensorikk.metallisk.tekst">Typisk: jern, blod, mynt, en metallisk ettersmak.</p>
+    <p data-i18n="hjelp.sensorikk.metallisk.tekst2">Mulige kilder: vann, metallkontakt i utstyret, råvarer — men enkelte sanseinntrykk kan også rett og slett feiltolkes som metallisk.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.metallisk.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke pek automatisk på rust uten å faktisk inspisere utstyret først.</p>
+  </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="sur-syrlig">
+    <h3 data-i18n="hjelp.sensorikk.surSyrlig.tittel">Sur / syrlig</h3>
+    <p data-i18n="hjelp.sensorikk.surSyrlig.tekst">Skill mellom planlagt syrlighet (surøl og enkelte andre stiler) og uventet syrlighet i et øl som ikke skal være surt.</p>
+    <p data-i18n="hjelp.sensorikk.surSyrlig.tekst2">Uventet syrlighet kan skyldes infeksjon, svært lav pH, eller råvare-/prosesspåvirkning.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.surSyrlig.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke lær at «sur = infisert» uten kontekst — se også <a href="#infeksjon">infeksjon</a> under.</p>
+  </div>
+
+  <div id="sott-bittert">
+  <div class="hjelp-metode-kort" id="sott-hoy-fg">
+    <h3 data-i18n="hjelp.sensorikk.sottHoyFg.tittel">Søtt / høy FG</h3>
+    <p data-i18n-html="hjelp.sensorikk.sottHoyFg.tekst">Bygger videre på <a href="index.html#faq-for-sott">FAQ om høy FG</a>. Sensorisk sødme kan komme fra restsukker, dekstriner, maltkarakter, alkohol, lav bitterhet, eller lav karbonering som påvirker opplevelsen.</p>
+    <p data-i18n-html="hjelp.sensorikk.sottHoyFg.tekst2">Høy <a href="index.html#fg">FG</a> kan skyldes lite gjærbar vørter, gjærstress, alkoholtoleranse, temperatur, eller rett og slett en målefeil.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.sottHoyFg.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke bland sensorisk sødme og FG som om de er samme ting — de kan henge sammen, men er ikke identiske.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="bittert-skarpt">
+    <h3 data-i18n="hjelp.sensorikk.bitterSkarpt.tittel">For bittert / skarpt</h3>
+    <p data-i18n="hjelp.sensorikk.bitterSkarpt.tekst">Skill mellom høy IBU, en hard eller skarpt opplevd bitterhet, astringens, en sulfateffekt, og humlepartikler eller polyfenoler.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.bitterSkarpt.hvorfor"><strong>Hvorfor du bryr deg:</strong> Målet er at du ikke automatisk konkluderer «for mye humle» — flere av disse kildene oppleves ganske likt, men har helt ulike løsninger.</p>
+  </div>
+  </div>
+
+  <div id="flatt-overkarbonert">
+  <div class="hjelp-metode-kort" id="flatt-livlost">
+    <h3 data-i18n="hjelp.sensorikk.flattLivlost.tittel">Flatt / livløst</h3>
+    <p data-i18n="hjelp.sensorikk.flattLivlost.tekst">Mulige forklaringer: lav karbonering, oksidasjon, dårlig balanse, for høy eller for lav servetemperatur, eller lite aroma.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.flattLivlost.hvorfor"><strong>Hvorfor du bryr deg:</strong> Dette er ikke en full serveringsguide — bare en påminnelse om at «flatt» sjelden har én enkelt årsak.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="overkarbonert">
+    <h3 data-i18n="hjelp.sensorikk.overkarbonert.tittel">Overkarbonert</h3>
+    <p data-i18n-html="hjelp.sensorikk.overkarbonert.tekst">Se også <a href="index.html#faq-karbonering-feil">karbonering i FAQ</a>. Mulige årsaker: for mye priming-sukker, gjæringen var ikke ferdig ved flasking, ujevn sukkerfordeling, kontaminasjon, eller for høyt trykk ved tvangskarbonering.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.overkarbonert.hvorfor"><strong>Sikkerhet:</strong> Ved mistanke om flasker med farlig overtrykk skal du ikke oppfordres til risikabel håndtering — se sikkerhetsvarselet i <a href="bryggedag.html#steg-15">bryggedagsguiden</a> og håndter med forsiktighet.</p>
+  </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="infeksjon">
+    <h3 data-i18n="hjelp.sensorikk.infeksjon.tittel">Infeksjon — ikke diagnostiser fra én smak</h3>
+    <p data-i18n-html="hjelp.sensorikk.infeksjon.tekst">Se også <a href="index.html#faq-mistanke-infeksjon">mistanke om infeksjon i FAQ</a>. Infeksjon kan gi mange forskjellige sensoriske uttrykk, og én enkelt lukt eller smak er sjelden nok til en sikker diagnose alene.</p>
+    <p data-i18n-html="hjelp.sensorikk.infeksjon.tekst2">Vurder heller flere ting samtidig: utseende, lukt, smak, pH, uventet videre utgjæring, overkarbonering, og prosess-/hygienehistorikken for akkurat dette bryggen — se <a href="index.html#def-renhold">renhold og desinfisering</a>.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.infeksjon.hvorfor"><strong>Hvorfor du bryr deg:</strong> Unngå panikkdiagnoser fra ett enkelt inntrykk — samle flere observasjoner før du konkluderer.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="modnes-bort">
+    <h3 data-i18n="hjelp.sensorikk.modnesBort.tittel">Kan det modnes bort?</h3>
+    <p data-i18n="hjelp.sensorikk.modnesBort.intro">En nyansert, men ikke absolutt vurdering. Ingen garanti — dette er tendenser, ikke faste regler.</p>
+    <table class="hjelp-tabell">
+      <thead><tr><th data-i18n="hjelp.sensorikk.modnesBort.tabell.kategori">Kategori</th><th data-i18n="hjelp.sensorikk.modnesBort.tabell.eksempler">Eksempler</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radA.kategori">Kan ofte reduseres med tid</td><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radA.eksempler">Svovel · noe acetaldehyd dersom gjæren fortsatt er aktiv · alkoholvarme i sterke øl · enkelte grove gjæringspreg</td></tr>
+        <tr><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radB.kategori">Kan noen ganger endre seg</td><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radB.eksempler">Diacetyl, dersom gjæren fortsatt kan rydde opp · enkelte estere · humleskarphet</td></tr>
+        <tr><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radC.kategori">Blir vanligvis ikke «fikset» av lagring</td><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radC.eksempler">Oksidasjon · alvorlig astringens · metallisk kilde · infeksjon · kraftig DMS</td></tr>
+      </tbody>
+    </table>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.modnesBort.hvorfor"><strong>Hvorfor du bryr deg:</strong> Bruk tabellen som en pekepinn på hva som er verdt å vente på — ikke som en garanti for at et bestemt avvik faktisk forsvinner.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="feilsokingsflyt">
+    <h3 data-i18n="hjelp.sensorikk.feilsokingsflyt.tittel">Feilsøkingsflyt</h3>
+    <p data-i18n="hjelp.sensorikk.feilsokingsflyt.intro">En enkel beslutningsrekkefølge når noe virker avvikende:</p>
+    <ol data-i18n-html="hjelp.sensorikk.feilsokingsflyt.liste">
+      <li>Beskriv sanseinntrykket uten diagnose.</li>
+      <li>Sammenlign med stil/oppskrift.</li>
+      <li>Sjekk SG/FG og prosesslogg.</li>
+      <li>Sjekk gjæringstemperatur.</li>
+      <li>Sjekk hygiene/overføringer.</li>
+      <li>Vurder tid/modning.</li>
+      <li>Endre bare én ting neste brygg, hvis mulig.</li>
+    </ol>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.feilsokingsflyt.hvorfor"><strong>Hvorfor du bryr deg:</strong> Dette passer KBH sin egen filosofi — observer, forstå, juster, lær — fremfor å hoppe rett til en tilfeldig løsning.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="sensorikklogg">
+    <h3 data-i18n="hjelp.sensorikk.sensorikklogg.tittel">Praktisk sensorikklogg</h3>
+    <p data-i18n="hjelp.sensorikk.sensorikklogg.tekst">En kort, anbefalt loggstruktur for hver smaking: dato, temperatur på ølet, utseende, aroma, smak, munnfølelse, ettersmak, mistenkt avvik, mulige prosesskoblinger, og endring siden forrige smaking.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.sensorikklogg.hvorfor"><strong>Hvorfor du bryr deg:</strong> Denne siden bygger ingen egen loggfunksjon ennå. Den eksisterende <a href="../bryggelogg.html">Bryggelogg</a>-siden — som allerede dekker hva du planla, hva som faktisk skjedde, og hva du tar med til neste brygg — kan være et naturlig sted å utvide med sensorikkhistorikk senere.</p>
+  </div>
+
+  <p class="hjelp-innledning" data-i18n="hjelp.sensorikk.avslutning">
+    Sensorikk handler om å beskrive før du dømmer. De fleste avvik har mer
+    enn én mulig årsak, og de færreste bør føre til panikk. Bruk
+    feilsøkingsflyten over, noter det du faktisk sanser, og gjør én
+    endring om gangen til neste brygg.
+  </p>
+  </main>
+</div>
+
+<footer class="no-print">
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="../personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
+<script src="../js/chrome.js"></script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/sensorikk.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sensorics and Troubleshooting — Kvernhaug Brygghus</title>
+<meta content="Master Brewer guide to sensory evaluation and common off-flavours: acetaldehyde, DMS, diacetyl, sulfur, fusel, esters, phenols, oxidation, astringency, and a practical troubleshooting flow." data-i18n-content="meta.hjelpSensorikk.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/sensorikk.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/sensorikk.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html" hreflang="x-default" rel="alternate"/>
+<link href="../../assets/favicon/favicon.ico" rel="icon" sizes="any"/>
+<link href="../../assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="../../assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="../../assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpSensorikk.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/sensorikk.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="sensorikk.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavSensorikk">👃 Sensorics</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/sensorikk.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="sensorikk.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/sensorikk.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="sensorikk.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
+<a data-i18n="hjelp.sidenavGjaerhosting" href="gjaerhosting.html">🫙 Yeast Harvesting</a>
+<a data-i18n="hjelp.sidenavVannkjemiAvansert" href="vannkjemi.html">💧 Water Chemistry</a>
+<a class="aktiv" data-i18n="hjelp.sidenavSensorikk" href="sensorikk.html">👃 Sensorics</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.sensorikk.toc.metode" href="#sensorikk-metode">How to taste systematically</a>
+<a data-i18n="hjelp.sensorikk.toc.stilAvvik" href="#stil-vs-avvik">Style character vs. off-flavour</a>
+<a data-i18n="hjelp.sensorikk.toc.acetaldehydDms" href="#acetaldehyd-dms">Acetaldehyde and DMS</a>
+<a data-i18n="hjelp.sensorikk.toc.diacetylSvovel" href="#diacetyl-svovel">Diacetyl and sulfur</a>
+<a data-i18n="hjelp.sensorikk.toc.fuselEstereFenoler" href="#fusel-estere-fenoler">Fusel, esters and phenols</a>
+<a data-i18n="hjelp.sensorikk.toc.oksidasjon" href="#oksidasjon-sensorikk">Oxidation</a>
+<a data-i18n="hjelp.sensorikk.toc.astringensMetallisk" href="#astringens-metallisk">Astringency and metallic</a>
+<a data-i18n="hjelp.sensorikk.toc.surSyrlig" href="#sur-syrlig">Sour / tart</a>
+<a data-i18n="hjelp.sensorikk.toc.sottBittert" href="#sott-bittert">Sweet/high FG and too bitter</a>
+<a data-i18n="hjelp.sensorikk.toc.flattOverkarbonert" href="#flatt-overkarbonert">Flat and overcarbonated</a>
+<a data-i18n="hjelp.sensorikk.toc.infeksjon" href="#infeksjon">Infection</a>
+<a data-i18n="hjelp.sensorikk.toc.modnesBort" href="#modnes-bort">Can it improve with age?</a>
+<a data-i18n="hjelp.sensorikk.toc.feilsokingsflyt" href="#feilsokingsflyt">Troubleshooting flow</a>
+<a data-i18n="hjelp.sensorikk.toc.sensorikklogg" href="#sensorikklogg">Practical sensory log</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.sensorikk.intro">This page is a Master Brewer extension of the troubleshooting FAQ in <a href="index.html#faq">Help &amp; FAQ</a>, which already covers individual questions about sulfur, fusel, diacetyl and oxidation. Here we go further into a more systematic walkthrough of sensory evaluation and common off-flavours — without building a full chemical aroma database, an automatic diagnosis tool, or a sensory scoring system.</p>
+<div class="hjelp-metode-kort" id="sensorikk-metode">
+<h3 data-i18n="hjelp.sensorikk.metode.tittel">How to taste systematically</h3>
+<p data-i18n="hjelp.sensorikk.metode.tekst">Use five simple steps every time: look, smell, taste, mouthfeel, aftertaste. Always smell before you taste — the short, calm sniffs often tell you more than the first big gulp.</p>
+<div data-i18n-html="hjelp.sensorikk.metode.liste"><p><strong>Look:</strong> clarity, colour, head, visible particles.</p><p><strong>Smell:</strong> short, calm sniffs. Assess malt, hop and yeast character first — look for deviations afterward.</p><p><strong>Taste:</strong> sweetness, bitterness, sourness, malt, hops, yeast character, alcohol.</p><p><strong>Mouthfeel:</strong> body, carbonation, warmth, astringency, creamy or dry.</p><p><strong>Aftertaste:</strong> what lingers? Bitterness, alcohol, sweetness, metallic?</p></div>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.metode.hvorfor">Don't start by hunting for a flaw. Start by describing what's actually there — a diagnosis, if any, comes afterward, not first.</p>
+</div>
+<div class="hjelp-metode-kort" id="stil-vs-avvik">
+<h3 data-i18n="hjelp.sensorikk.stilAvvik.tittel">Normal style character vs. off-flavour</h3>
+<p data-i18n="hjelp.sensorikk.stilAvvik.tekst">Many flavours and aromas can be correct in one beer style and unwanted in another. Esters, phenols, sulfur, alcohol warmth, and even certain oxidation notes in aged strong beers can all be part of a deliberate, desired profile — depending on what beer it actually is.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.stilAvvik.hvorfor">Avoid "this flavour is always wrong". Ask instead: is this expected for this particular style and this particular beer, or not?</p>
+</div>
+<div id="acetaldehyd-dms">
+<div class="hjelp-metode-kort" id="acetaldehyd">
+<h3 data-i18n="hjelp.sensorikk.acetaldehyd.tittel">Acetaldehyde</h3>
+<p data-i18n="hjelp.sensorikk.acetaldehyd.tekst">Typical sensory impression: green apple, raw apple skin, a fresh or unripe character.</p>
+<p data-i18n="hjelp.sensorikk.acetaldehyd.tekst2">Possible causes include the beer being packaged or chilled too early, incomplete fermentation, stressed yeast, and in some contexts oxidation can contribute to it forming again.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.acetaldehyd.hvorfor">The character can often be reduced if the yeast gets time to clean up on its own — don't cold crash or package before FG is stable. Green apple still doesn't automatically mean acetaldehyde without the rest of the context.</p>
+</div>
+<div class="hjelp-metode-kort" id="dms">
+<h3 data-i18n="hjelp.sensorikk.dms.tittel">DMS (dimethyl sulfide)</h3>
+<p data-i18n="hjelp.sensorikk.dms.tekst">Typical descriptions: cooked corn, canned corn, vegetal — some perceive a cabbage-like note.</p>
+<p data-i18n="hjelp.sensorikk.dms.tekst2">DMS precursors occur naturally in malt and are volatile during the boil. Insufficient evaporation during the boil and slow cooling afterward can, in some processes, contribute to increasing the risk.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.dms.hvorfor">Don't oversimplify to "always boil 90 minutes" — malt, process and system affect the risk differently, and some malt types contribute more than others.</p>
+</div>
+</div>
+<div id="diacetyl-svovel">
+<div class="hjelp-metode-kort" id="diacetyl">
+<h3 data-i18n="hjelp.sensorikk.diacetyl.tittel">Diacetyl</h3>
+<p data-i18n="hjelp.sensorikk.diacetyl.tekst">Sensory: butter, butterscotch, and in some cases a smooth or oily mouthfeel.</p>
+<p data-i18n-html="hjelp.sensorikk.diacetyl.tekst2">Builds on <a href="index.html#def-diacetylrest">diacetyl and diacetyl rest</a>. Possible causes: the yeast hasn't finished cleaning up, fermentation was interrupted or chilled too early, some yeast strains produce more than others, and contamination can also cause diacetyl.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.diacetyl.hvorfor">Don't assume diacetyl always just needs more time — if infection is actually the cause, ageing alone won't help. See <a href="#infeksjon">infection</a> below.</p>
+</div>
+<div class="hjelp-metode-kort" id="svovel">
+<h3 data-i18n="hjelp.sensorikk.svovel.tittel">Sulfur</h3>
+<p data-i18n="hjelp.sensorikk.svovel.tekst">Sensory: struck match, egg, sulfurous — at strong levels it can sometimes come across as sewage-like.</p>
+<p data-i18n-html="hjelp.sensorikk.svovel.tekst2">See also <a href="index.html#faq-svovel">sulfur in the FAQ</a>. Certain lager yeasts and other strains noticeably produce sulfur during fermentation, and much of it can dissipate with further fermentation and conditioning — it's not automatically a sign of infection.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.svovel.hvorfor">For a persistent, strong deviation long after conditioning, consider yeast health, temperature, nutrients and contamination — but not before you've given it some time first.</p>
+</div>
+</div>
+<div id="fusel-estere-fenoler">
+<div class="hjelp-metode-kort" id="fusel">
+<h3 data-i18n="hjelp.sensorikk.fusel.tittel">Fusel / higher alcohols</h3>
+<p data-i18n="hjelp.sensorikk.fusel.tekst">Sensory: sharp alcohol, solvent-like, hot or burning. A "nail polish" association can occur, but don't lump all solvent notes together without nuance.</p>
+<p data-i18n-html="hjelp.sensorikk.fusel.tekst2">Possible factors: high fermentation temperature, stressed yeast, high OG, insufficient pitch rate, and oxygenation/nutrients can play a role — see <a href="index.html#gjaerhelse-temperatur">yeast health and temperature</a> and <a href="sterke-ol.html">strong beer / high gravity</a>.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.fusel.hvorfor">Not all alcohol warmth in strong beers is fusel — some can mellow with conditioning. See <a href="index.html#faq-fusel">fusel in the FAQ</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="estere">
+<h3 data-i18n="hjelp.sensorikk.estere.tittel">Esters</h3>
+<p data-i18n="hjelp.sensorikk.estere.tekst">Typical fruity notes: banana, pear, apple, stone fruit, tropical fruit.</p>
+<p data-i18n="hjelp.sensorikk.estere.tekst2">The amount is influenced by yeast strain, fermentation temperature, pitch rate and process overall.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.estere.hvorfor">Don't present "esters = flaw" — in many styles this is exactly the desired character, not a deviation.</p>
+</div>
+<div class="hjelp-metode-kort" id="fenoler">
+<h3 data-i18n="hjelp.sensorikk.fenoler.tittel">Phenols</h3>
+<p data-i18n="hjelp.sensorikk.fenoler.tekst">Clove, pepper, spice — smoke, plastic or medicinal character can occur depending on the source.</p>
+<p data-i18n="hjelp.sensorikk.fenoler.tekst2">Distinguish between desired yeast phenols in styles such as saison, weizen and Belgian beers, and an unwanted plastic or medicinal character. Possible unwanted sources can include contamination, chlorine-/chloramine-related compounds, or simply the wrong yeast character for the style.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.fenoler.hvorfor">Don't learn that all clove is a flaw — the context (the style and the rest of the impression) decides.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="oksidasjon-sensorikk">
+<h3 data-i18n="hjelp.sensorikk.oksidasjon.tittel">Oxidation</h3>
+<p data-i18n-html="hjelp.sensorikk.oksidasjon.tekst">Builds on <a href="index.html#def-oksidasjon">oxidation after fermentation</a>. Sensory can be cardboard, stale notes, muted hop aroma, darker colour, or a sherry-/dried-fruit character in some aged strong beers.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.oksidasjon.hvorfor">Some oxidation notes can be perceived positively in aged strong beers, but oxidation is still not a goal in itself. Avoid unnecessary air contact during transfers and storage.</p>
+</div>
+<div id="astringens-metallisk">
+<div class="hjelp-metode-kort" id="astringens">
+<h3 data-i18n="hjelp.sensorikk.astringens.tittel">Astringency</h3>
+<p data-i18n-html="hjelp.sensorikk.astringens.tekst">Builds on <a href="vannkjemi.html#tanniner-astringens">tannins and astringency</a>. Sensory: dry, rough, puckering, a "tea bag" feeling — gums and cheeks can feel tight.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.astringens.hvorfor">Clearly distinguish this from bitterness and from a low-FG/dry taste — three different things that are easily mixed up.</p>
+</div>
+<div class="hjelp-metode-kort" id="metallisk">
+<h3 data-i18n="hjelp.sensorikk.metallisk.tittel">Metallic</h3>
+<p data-i18n="hjelp.sensorikk.metallisk.tekst">Typical: iron, blood, coins, a metallic aftertaste.</p>
+<p data-i18n="hjelp.sensorikk.metallisk.tekst2">Possible sources: water, metal contact in the equipment, ingredients — but some sensory impressions can also simply be misread as metallic.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.metallisk.hvorfor">Don't automatically point to rust without actually inspecting the equipment first.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="sur-syrlig">
+<h3 data-i18n="hjelp.sensorikk.surSyrlig.tittel">Sour / tart</h3>
+<p data-i18n="hjelp.sensorikk.surSyrlig.tekst">Distinguish between planned sourness (sour beers and certain other styles) and unexpected sourness in a beer that isn't meant to be sour.</p>
+<p data-i18n="hjelp.sensorikk.surSyrlig.tekst2">Unexpected sourness can be caused by infection, very low pH, or ingredient/process influence.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.surSyrlig.hvorfor">Don't learn that "sour = infected" without context — see also <a href="#infeksjon">infection</a> below.</p>
+</div>
+<div id="sott-bittert">
+<div class="hjelp-metode-kort" id="sott-hoy-fg">
+<h3 data-i18n="hjelp.sensorikk.sottHoyFg.tittel">Sweet / high FG</h3>
+<p data-i18n-html="hjelp.sensorikk.sottHoyFg.tekst">Builds on the <a href="index.html#faq-for-sott">FAQ on high FG</a>. Sensory sweetness can come from residual sugar, dextrins, malt character, alcohol, low bitterness, or low carbonation affecting the perception.</p>
+<p data-i18n-html="hjelp.sensorikk.sottHoyFg.tekst2">High <a href="index.html#fg">FG</a> can be caused by low-fermentability wort, yeast stress, alcohol tolerance, temperature, or simply a measurement error.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.sottHoyFg.hvorfor">Don't conflate sensory sweetness and FG as if they're the same thing — they can be related, but they aren't identical.</p>
+</div>
+<div class="hjelp-metode-kort" id="bittert-skarpt">
+<h3 data-i18n="hjelp.sensorikk.bitterSkarpt.tittel">Too bitter / harsh</h3>
+<p data-i18n="hjelp.sensorikk.bitterSkarpt.tekst">Distinguish between high IBU, a harsh or sharply perceived bitterness, astringency, a sulfate effect, and hop particles or polyphenols.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.bitterSkarpt.hvorfor">The goal is that you don't automatically conclude "too much hops" — several of these sources feel quite similar but have completely different solutions.</p>
+</div>
+</div>
+<div id="flatt-overkarbonert">
+<div class="hjelp-metode-kort" id="flatt-livlost">
+<h3 data-i18n="hjelp.sensorikk.flattLivlost.tittel">Flat / lifeless</h3>
+<p data-i18n="hjelp.sensorikk.flattLivlost.tekst">Possible explanations: low carbonation, oxidation, poor balance, too high or too low serving temperature, or little aroma.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.flattLivlost.hvorfor">This isn't a full serving guide — just a reminder that "flat" rarely has a single cause.</p>
+</div>
+<div class="hjelp-metode-kort" id="overkarbonert">
+<h3 data-i18n="hjelp.sensorikk.overkarbonert.tittel">Overcarbonated</h3>
+<p data-i18n-html="hjelp.sensorikk.overkarbonert.tekst">See also <a href="index.html#faq-karbonering-feil">carbonation in the FAQ</a>. Possible causes: too much priming sugar, fermentation wasn't finished at bottling, uneven sugar distribution, contamination, or too much pressure with forced carbonation.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.overkarbonert.hvorfor">If you suspect bottles with dangerous overpressure, you should not be encouraged toward risky handling — see the safety warning in the <a href="bryggedag.html#steg-15">brew day guide</a> and handle with care.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="infeksjon">
+<h3 data-i18n="hjelp.sensorikk.infeksjon.tittel">Infection — don't diagnose from a single flavour</h3>
+<p data-i18n-html="hjelp.sensorikk.infeksjon.tekst">See also <a href="index.html#faq-mistanke-infeksjon">suspected infection in the FAQ</a>. Infection can produce many different sensory expressions, and a single smell or taste is rarely enough for a reliable diagnosis on its own.</p>
+<p data-i18n-html="hjelp.sensorikk.infeksjon.tekst2">Consider several things together instead: appearance, smell, taste, pH, unexpected further attenuation, overcarbonation, and the process/hygiene history of this particular batch — see <a href="index.html#def-renhold">cleaning and sanitizing</a>.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.infeksjon.hvorfor">Avoid panic diagnoses from a single impression — gather several observations before you conclude.</p>
+</div>
+<div class="hjelp-metode-kort" id="modnes-bort">
+<h3 data-i18n="hjelp.sensorikk.modnesBort.tittel">Can it improve with age?</h3>
+<p data-i18n="hjelp.sensorikk.modnesBort.intro">A nuanced, but not absolute, assessment. No guarantee — these are tendencies, not fixed rules.</p>
+<table class="hjelp-tabell">
+<thead><tr><th data-i18n="hjelp.sensorikk.modnesBort.tabell.kategori">Category</th><th data-i18n="hjelp.sensorikk.modnesBort.tabell.eksempler">Examples</th></tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radA.kategori">Can often be reduced with time</td><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radA.eksempler">Sulfur · some acetaldehyde if the yeast is still active · alcohol warmth in strong beers · certain rough fermentation notes</td></tr>
+<tr><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radB.kategori">Can sometimes change</td><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radB.eksempler">Diacetyl, if the yeast can still clean it up · certain esters · hop harshness</td></tr>
+<tr><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radC.kategori">Usually not "fixed" by ageing</td><td data-i18n="hjelp.sensorikk.modnesBort.tabell.radC.eksempler">Oxidation · severe astringency · metallic source · infection · strong DMS</td></tr>
+</tbody>
+</table>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.modnesBort.hvorfor">Use the table as a rough guide to what's worth waiting for — not as a guarantee that a particular flaw will actually disappear.</p>
+</div>
+<div class="hjelp-metode-kort" id="feilsokingsflyt">
+<h3 data-i18n="hjelp.sensorikk.feilsokingsflyt.tittel">Troubleshooting flow</h3>
+<p data-i18n="hjelp.sensorikk.feilsokingsflyt.intro">A simple decision sequence when something seems off:</p>
+<ol data-i18n-html="hjelp.sensorikk.feilsokingsflyt.liste"><li>Describe the sensory impression without diagnosing.</li><li>Compare against the style/recipe.</li><li>Check SG/FG and the process log.</li><li>Check fermentation temperature.</li><li>Check hygiene/transfers.</li><li>Consider time/conditioning.</li><li>Change only one thing for the next brew, if possible.</li></ol>
+<p class="hjelp-hvorfor" data-i18n="hjelp.sensorikk.feilsokingsflyt.hvorfor">This fits KBH's own philosophy — observe, understand, adjust, learn — rather than jumping straight to a random fix.</p>
+</div>
+<div class="hjelp-metode-kort" id="sensorikklogg">
+<h3 data-i18n="hjelp.sensorikk.sensorikklogg.tittel">Practical sensory log</h3>
+<p data-i18n="hjelp.sensorikk.sensorikklogg.tekst">A short, recommended log structure for each tasting: date, beer temperature, appearance, aroma, taste, mouthfeel, aftertaste, suspected deviation, possible process links, and change since the last tasting.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.sensorikk.sensorikklogg.hvorfor">This page doesn't build its own logging feature yet. The existing <a href="../bryggelogg.html">Brew log</a> page — which already covers what you planned, what actually happened, and what you'll carry into the next brew — could be a natural place to extend with sensory history later.</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.sensorikk.avslutning">Sensory evaluation is about describing before you judge. Most deviations have more than one possible cause, and few should cause panic. Use the troubleshooting flow above, note what you actually perceive, and make one change at a time for the next brew.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

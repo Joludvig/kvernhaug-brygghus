@@ -158,6 +158,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/vannkjemi.html"/>
   </url>
   <url>
+    <loc>https://kvernhaugbrygghus.no/hjelp/sensorikk.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/sensorikk.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/hjelp/sensorikk.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/sensorikk.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/sensorikk.html"/>
+  </url>
+  <url>
     <loc>https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html</loc>
     <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/utstyr-brewzilla.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/utstyr-brewzilla.html"/>
