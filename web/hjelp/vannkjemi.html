@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avansert vannkjemi — Kvernhaug Brygghus</title>
+<meta name="description" content="Bryggmester-guide til avansert vannkjemi: alkalitet, bikarbonat, meske-pH, syretilsetning, skyllevann og tanniner — hvorfor du faktisk justerer vannet." data-i18n-content="meta.hjelpVannkjemiAvansert.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/hjelp/vannkjemi.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/vannkjemi.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/vannkjemi.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/vannkjemi.html">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpVannkjemiAvansert.tittel">
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="vannkjemi.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/vannkjemi.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="vannkjemi.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/vannkjemi.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="vannkjemi.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/vannkjemi.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="../pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="../bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<nav class="hjelp-side-nav">
+  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+  <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+  <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+  <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+  <a href="vannkjemi.html" class="aktiv" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+</nav>
+
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
+    <a href="#alkalitet-bikarbonat" data-i18n="hjelp.vannkjemi.toc.alkalitetBikarbonat">Alkalitet og bikarbonat</a>
+    <a href="#malt-meske-ph" data-i18n="hjelp.vannkjemi.toc.maltMeskePh">Malt og meske-pH</a>
+    <a href="#syretilsetning" data-i18n="hjelp.vannkjemi.toc.syretilsetning">Syretilsetning</a>
+    <a href="#salter-vs-syre" data-i18n="hjelp.vannkjemi.toc.salterVsSyre">Salter er ikke det samme som syre</a>
+    <a href="#ion-nivaer" data-i18n="hjelp.vannkjemi.toc.ionNivaer">Ionekonsentrasjoner</a>
+    <a href="#skyllevann-oversparging" data-i18n="hjelp.vannkjemi.toc.skyllevannOversparging">Skyllevann og over-sparging</a>
+    <a href="#tanniner-astringens" data-i18n="hjelp.vannkjemi.toc.tanninerAstringens">Tanniner og astringens</a>
+    <a href="#ro-vann" data-i18n="hjelp.vannkjemi.toc.roVann">RO / destillert vann</a>
+    <a href="#vannprofil-helhet" data-i18n="hjelp.vannkjemi.toc.vannprofilHelhet">Vannprofil som helhet</a>
+    <a href="#maling-ph" data-i18n="hjelp.vannkjemi.toc.malingPh">Måling av pH</a>
+    <a href="#feilsoking-ph" data-i18n="hjelp.vannkjemi.toc.feilsokingPh">«Jeg traff ikke pH» — feilsøking</a>
+    <a href="#praktisk-sjekkliste-vann" data-i18n="hjelp.vannkjemi.toc.sjekkliste">Praktisk sjekkliste</a>
+  </nav>
+
+  <main class="hjelp-side-main">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.vannkjemi.intro">
+    Denne siden er en Bryggmester-utvidelse av den korte vannkjemi-innføringen
+    i <a href="index.html#vannkjemi">Hjelp &amp; FAQ</a>, som allerede dekker
+    pH, Ca, Mg, Na, Cl, SO4 og Cl:SO4-forholdet. Her går vi videre til det som
+    ofte mangler mellom «jeg kjenner ionene» og «jeg forstår hvorfor jeg
+    faktisk justerer vannet» — uten å bygge en full kjemilærebok eller nye
+    beregningsmotorer i appens «💧 Vannkjemi»-modul.
+  </p>
+
+  <div id="alkalitet-bikarbonat">
+  <div class="hjelp-metode-kort" id="alkalitet">
+    <h3 data-i18n="hjelp.vannkjemi.alkalitet.tittel">Alkalitet</h3>
+    <p data-i18n="hjelp.vannkjemi.alkalitet.tekst">Alkalitet beskriver vannets evne til å motstå en endring i pH — altså vannets bufferkapasitet, ikke selve pH-verdien. Høy alkalitet gjør det vanskeligere for malten og eventuell syre å senke meske-pH ned mot ønsket område; lav alkalitet gir vannet mindre buffring å jobbe mot.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.alkalitet.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke bland alkalitet og pH sammen — de måler to forskjellige ting. To vannprøver kan ha omtrent samme pH, men svært forskjellig alkalitet, og det er alkaliteten som avgjør hvor mye motstand malten/syren faktisk må jobbe mot for å flytte pH dit du vil.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="bikarbonat">
+    <h3 data-i18n="hjelp.vannkjemi.bikarbonat.tittel">Bikarbonat (HCO3-)</h3>
+    <p data-i18n="hjelp.vannkjemi.bikarbonat.tekst">Bikarbonat er ofte en viktig bidragsyter til alkalitet i bryggevann. Høyt bikarbonat kan motvirke det pH-fallet malten normalt gir i mesken, og hvor mye som faktisk trengs avhenger av både maltprofilen og resten av vannprofilen — ikke av bikarbonat alene.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.bikarbonat.hvorfor"><strong>Hvorfor du bryr deg:</strong> Mørkt øl forbindes historisk ofte med mer alkalisk vann, fordi mørk/ristet malt selv bidrar med mer syre til mesken — mer alkalitet kan i noen tilfeller balansere denne syren. Dette er IKKE en regel om at «mørkt øl alltid trenger mye bikarbonat» — det avhenger av akkurat hvor mørk og hvor mye ristet malt oppskriften faktisk bruker. Merk også at alkalitet finnes i tre ulike, ofte forvekslede former (HCO3 i mg/L, alkalitet «som CaCO3» i mg/L, og alkalitet i mmol/L) — appens interne vannberegning kan konvertere mellom dem, men de tre tallene er ikke det samme og skal ikke blandes uten en slik omregning.</p>
+  </div>
+  </div>
+
+  <div id="malt-meske-ph">
+  <div class="hjelp-metode-kort" id="malttyper">
+    <h3 data-i18n="hjelp.vannkjemi.malttyper.tittel">Malt og meske-pH</h3>
+    <p data-i18n="hjelp.vannkjemi.malttyper.tekst">Ulike malttyper påvirker meskens pH forskjellig. Grovt sett: lys basemalt har relativt liten egen syreeffekt, karamell-/crystalmalt ligger et sted i mellom, og mørk/ristet malt bidrar oftest mest til å senke pH på egen hånd.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.malttyper.hvorfor"><strong>Hvorfor du bryr deg:</strong> Samme vann kan derfor oppføre seg ganske ulikt i to forskjellige oppskrifter — en lys pils og en mørk stout med identisk vannprofil vil ofte trenge helt forskjellig syre-/salttilnærming for å treffe samme meske-pH-mål. Dette er en overordnet tommelfingerregel, ikke en malt-spesifikk syremodell.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="meske-ph-utvidet">
+    <h3 data-i18n="hjelp.vannkjemi.meskePhUtvidet.tittel">Meske-pH — hva bryggeren faktisk ser etter</h3>
+    <p data-i18n-html="hjelp.vannkjemi.meskePhUtvidet.tekst">Meske-pH påvirker mer enn bare enzymaktivitet: den henger sammen med ekstraksjonseffektivitet, smak, klarhet/prosess senere i bryggingen, og hvor lett tanniner trekkes ut av kornet (se <a href="#tanniner-astringens">tanniner og astringens</a> under).</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.meskePhUtvidet.hvorfor"><strong>Hvorfor du bryr deg:</strong> Unngå å lete etter «ett magisk tall». KBH sine egne målprofiler i «💧 Vannkjemi»-modulen bruker forskjellige meske-pH-arbeidsområder for ulike ølstiler (typisk et sted mellom ca. 5,2 og 5,6, avhengig av profil) — dette er veiledende arbeidsområder, ikke universelle fasitverdier. Appens eget måleskjema registrerer om prøven ble avkjølt til romtemperatur før avlesning, nettopp fordi en varm meskeprøve normalt gir en annen pH-avlesning enn en avkjølt prøve av akkurat samme vørter — ikke fordi et pH-meter med temperaturkompensasjon «lyver», men fordi selve pH-verdien i praksis kan endre seg med temperaturen. Bland derfor aldri sammen «elektroden er temperaturkompensert» med «pH er identisk uansett temperatur» — det er to forskjellige ting. Se <a href="#maling-ph">måling av pH</a>.</p>
+  </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="syretilsetning">
+    <h3 data-i18n="hjelp.vannkjemi.syretilsetning.tittel">Syretilsetning</h3>
+    <p data-i18n="hjelp.vannkjemi.syretilsetning.tekst">Syre brukes for å senke meske-pH, redusere effekten av høy alkalitet i vannet, og eventuelt behandle skyllevannet slik at det ikke ligger med for høy pH mot kornet. KBH sin «💧 Vannkjemi»-modul støtter registrering av melkesyre og fosforsyre som egne syretilsetninger, i tillegg til at syremalt er et vanlig alternativ mange bryggere bruker i stedet for eller sammen med flytende syre.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.syretilsetning.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ingen syre er universelt best — de har forskjellig styrke og finnes i ulike konsentrasjoner (både melkesyre og fosforsyre selges for eksempel i flere ulike styrker), og for mye syre kan påvirke smaken. Doseringen må baseres på en kombinasjon av vannet, maltprofilen og ønsket meske-pH — appen ber deg derfor alltid oppgi konsentrasjonen (%) for hver syretilsetning selv, i stedet for å anta en fast styrke ut fra bare navnet. Denne siden gir ingen universelle mL-doser.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="salter-vs-syre">
+    <h3 data-i18n="hjelp.vannkjemi.salterVsSyre.tittel">Salter er ikke det samme som syre</h3>
+    <p data-i18n="hjelp.vannkjemi.salterVsSyre.tekst">CaCl2 (kalsiumklorid) og CaSO4 (gips) brukes primært for å justere ionprofilen — altså smaks-/prosesseffekten av Ca, Cl og SO4 — ikke som en syreerstatning.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.salterVsSyre.hvorfor"><strong>Hvorfor du bryr deg:</strong> Salter kan påvirke vannkjemien og dermed meske-pH indirekte (særlig via kalsium, se <a href="#ion-nivaer">ionekonsentrasjoner</a> under), men de er ikke det samme som å tilsette syre. Unngå å lære «mer gips = lavere pH, ferdig» — sammenhengen er indirekte og langt fra så enkel. Natron (NaHCO3) er et godt eksempel på det motsatte: det er et salt appens saltdatabase tilbyr for å HEVE HCO3/alkalitet, ikke for å senke pH direkte.</p>
+  </div>
+
+  <div id="ion-nivaer">
+  <div class="hjelp-metode-kort" id="cl-so4-nivaer">
+    <h3 data-i18n="hjelp.vannkjemi.clSo4Nivaer.tittel">Klorid og sulfat — nivåer før forhold</h3>
+    <p data-i18n="hjelp.vannkjemi.clSo4Nivaer.tekst">Hjelp &amp; FAQ viser at Cl:SO4-forholdet gir et grovt signal om retning — mer mot malt/fylde, eller mer mot en tørr, skarp humlefremheving. Det forholdstallet forteller derimot ingenting om intensitet:</p>
+    <table class="hjelp-tabell">
+      <thead><tr><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.profil">Vannprofil</th><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.cl">Cl (ppm)</th><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.so4">SO4 (ppm)</th><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.forhold">Cl:SO4</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.vannA">Vann A</td><td>10</td><td>20</td><td>0,5</td></tr>
+        <tr><td data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.vannB">Vann B</td><td>100</td><td>200</td><td>0,5</td></tr>
+      </tbody>
+    </table>
+    <p data-i18n="hjelp.vannkjemi.clSo4Nivaer.eksempel">Begge disse to vannprofilene har nøyaktig samme Cl:SO4-forhold (0,5), men vil ikke nødvendigvis oppleves eller oppføre seg likt — Vann B har ti ganger så høy faktisk konsentrasjon av begge ioner.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.clSo4Nivaer.hvorfor"><strong>Hvorfor du bryr deg:</strong> Forholdet sier noe om retning, mens de faktiske konsentrasjonene sier noe om intensitet. Se begge tallene i appens tabell for forventet sluttprofil — ikke bare forholdstallet. Denne siden bygger ingen egen smaksligning basert på forholdet.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="kalsium-utvidet">
+    <h3 data-i18n="hjelp.vannkjemi.kalsiumUtvidet.tittel">Kalsium — utvidet</h3>
+    <p data-i18n="hjelp.vannkjemi.kalsiumUtvidet.tekst">Utover det Hjelp &amp; FAQ allerede nevner, spiller kalsium flere roller: det er involvert i selve meske-/vannkjemien, i gjærhelse og flokkulering, i utfelling/klaringsprosesser senere, og det kan bidra til å senke pH indirekte sammen med fosfater som naturlig finnes i malten.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.kalsiumUtvidet.hvorfor"><strong>Hvorfor du bryr deg:</strong> Mer kalsium er ikke automatisk bedre. Appens vannmodul varsler for eksempel ved lavt kalsium — en intern, praktisk tommelfingerregel for brygging i denne appen, ikke en offisiell drikkevannsgrense — men det finnes ingen tilsvarende «jo høyere jo bedre»-regel i den andre retningen. Sikt mot en fornuftig målprofil, ikke et maksimalt tall.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="magnesium-natrium">
+    <h3 data-i18n="hjelp.vannkjemi.magnesiumNatrium.tittel">Magnesium og natrium</h3>
+    <p data-i18n="hjelp.vannkjemi.magnesiumNatrium.tekst">Magnesium er et næringsstoff gjæren trenger i små/moderate mengder, og malten bidrar normalt allerede med noe magnesium på egen hånd. Natrium i moderate mengder kan støtte en rundere, fyldigere munnfølelse.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.magnesiumNatrium.hvorfor"><strong>Hvorfor du bryr deg:</strong> Høye nivåer av begge kan derimot bli et problem: mye magnesium kan gi en hard, bitter eller mineralaktig karakter, og mye natrium kan bli salt eller skarpt. Appens varsler bruker interne, praktiske tommelfingerregler for brygging (ikke offisielle grenser for drikkevann) til å flagge uvanlig høye nivåer av begge — men dette er varsler, ikke harde grenser.</p>
+  </div>
+  </div>
+
+  <div id="skyllevann-oversparging">
+  <div class="hjelp-metode-kort" id="skyllevann">
+    <h3 data-i18n="hjelp.vannkjemi.skyllevann.tittel">Skyllevann</h3>
+    <p data-i18n-html="hjelp.vannkjemi.skyllevann.tekst">Etter hvert som mesken skylles, blir det som kommer ut gradvis svakere — både i sukkerkonsentrasjon og i bufferstyrke. Høy pH i skyllevannet eller i selve kornlaget mot slutten av skyllingen øker risikoen for uønsket tanninuttrekk, se <a href="#tanniner-astringens">tanniner og astringens</a> under.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.skyllevann.hvorfor"><strong>Hvorfor du bryr deg:</strong> Svært mye skylling kan derfor gi dårligere kvalitet på ølet, selv om du får ut litt mer sukker underveis — mer utbytte er ikke automatisk verdt prisen. Se <a href="bryggemetoder.html#batch-sparge">batch sparge</a> og <a href="bryggemetoder.html#fly-sparge">fly sparge</a> for hvordan selve skyllemetoden fungerer i KBH.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="over-sparging">
+    <h3 data-i18n="hjelp.vannkjemi.overSparging.tittel">Over-sparging</h3>
+    <p data-i18n="hjelp.vannkjemi.overSparging.tekst">Tegn på for mye skylling inkluderer stadig svakere runnings (det som renner ut blir tynnere og tynnere), lavere sukkerkonsentrasjon i det som kommer ut, og at pH i det gjenværende kornlaget/vannet kan stige mot slutten — noe som igjen kan gjøre uttrekk av polyfenoler/tanniner mer sannsynlig.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.overSparging.hvorfor"><strong>Hvorfor du bryr deg:</strong> Unngå å gjøre dette til en fast regel som «X liter skylling er alltid for mye» — det avhenger av maltmengde, vannprofil, pH, systemet ditt og faktisk oppnådd effektivitet. Bruk tegnene over som en praktisk pekepinn, ikke et eksakt stoppunkt.</p>
+  </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="tanniner-astringens">
+    <h3 data-i18n="hjelp.vannkjemi.tanninerAstringens.tittel">Tanniner og astringens</h3>
+    <p data-i18n="hjelp.vannkjemi.tanninerAstringens.tekst">Bitterhet er en smak — den kommer typisk fra humle. Astringens er noe annet: en munnfølelse, ofte beskrevet som tørr, stram eller «tepose-aktig», og kan komme fra tanniner/polyfenoler som trekkes ut av kornskallet.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.tanninerAstringens.hvorfor"><strong>Hvorfor du bryr deg:</strong> Mulige bidragsytere til astringens inkluderer høy pH under skylling, overdreven skylling, svært varm behandling av kornet under ugunstige pH-forhold, og til dels hvordan malten er knust/håndtert. Ikke lær at «for varmt skyllevann alene» automatisk gir tanniner — pH og resten av prosesskonteksten spiller minst like stor rolle som temperaturen alene.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="ro-vann">
+    <h3 data-i18n="hjelp.vannkjemi.roVann.tittel">RO / destillert vann</h3>
+    <p data-i18n="hjelp.vannkjemi.roVann.tekst">RO- eller destillert vann har svært lav mineralbelastning — det gir deg i praksis et «blankere lerret» å bygge en vannprofil på, uten ukjente eller uønskede bidrag fra kildevannet.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.roVann.hvorfor"><strong>Hvorfor du bryr deg:</strong> RO-vann er ikke automatisk «bedre vann» — det betyr også at ønskede ioner ofte må bygges helt opp igjen fra bunnen med salter, i stedet for å justere et kildevann som allerede har noe å bygge videre på. Denne siden bygger ingen egen RO-blandingskalkulator; bruk appens vanlige kildevann-/målprofil-felter uansett hvilket utgangsvann du velger.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="vannprofil-helhet">
+    <h3 data-i18n="hjelp.vannkjemi.vannprofilHelhet.tittel">Vannprofil som helhet</h3>
+    <p data-i18n="hjelp.vannkjemi.vannprofilHelhet.tekst">pH, alkalitet, Ca, Mg, Na, Cl og SO4 kan ikke justeres helt uavhengig av hverandre — en endring i én kan påvirke flere andre samtidig. Kalsiumklorid tilfører for eksempel BÅDE kalsium og klorid samtidig, gips tilfører BÅDE kalsium og sulfat samtidig, og syre påvirker både alkalitet og pH på én gang.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.vannprofilHelhet.hvorfor"><strong>Hvorfor du bryr deg:</strong> Dette er trolig hovedpoenget på hele denne siden: målet er en fornuftig, balansert helhetsprofil — ikke å «jage» hvert enkelttall i isolasjon. Legg merke til at appens eget saltforslag i «💧 Vannkjemi»-modulen bevisst kun løser for klorid og sulfat med kalsiumklorid og gips — det justerer verken alkalitet/HCO3, magnesium eller natrium, og sier tydelig fra i måloppnåelsen når målprofilen derfor IKKE er fullt nådd med akkurat de valgte saltene alene. Det er ikke en feil i appen — det er nettopp et eksempel på at ingen enkeltjustering løser hele bildet av seg selv.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="maling-ph">
+    <h3 data-i18n="hjelp.vannkjemi.malingPh.tittel">Måling av pH</h3>
+    <p data-i18n="hjelp.vannkjemi.malingPh.tekst">pH-strips kan gi en grov indikasjon, men er normalt langt mindre presise enn et elektronisk pH-meter. Et elektronisk pH-meter må kalibreres — appens egen utstyrssjekkliste for vannmåling nevner kalibrering med pH 4,01- og 7,00-bufferløsning som eksempel.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.malingPh.hvorfor"><strong>Hvorfor du bryr deg:</strong> Elektroden må også vedlikeholdes og lagres korrekt mellom bruk, og temperaturen påvirker både selve målingen og prøvens faktiske pH, se <a href="#meske-ph-utvidet">meske-pH</a> over. Følg alltid produsentens egne anvisninger for oppbevaringsvæske/-metode for akkurat din elektrode — ikke et generelt råd om for eksempel destillert vann dersom det strider mot det produsenten faktisk sier. Denne siden anbefaler ingen bestemt merkevare eller pH-metermodell.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="feilsoking-ph">
+    <h3 data-i18n="hjelp.vannkjemi.feilsokingPh.tittel">«Jeg traff ikke pH» — hva nå?</h3>
+    <p data-i18n="hjelp.vannkjemi.feilsokingPh.tekst">Traff du ikke ønsket meske-pH? For HØY meske-pH kan blant annet skyldes høy alkalitet i vannet, en maltprofil med lite eget syrebidrag (f.eks. en svært lys oppskrift), for lite syre tilsatt, eller vannprofilen for øvrig. For LAV meske-pH kan blant annet skyldes mye mørk/ristet malt, for mye syre tilsatt, eller svært lav alkalitet i utgangsvannet.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.feilsokingPh.hvorfor"><strong>Hvorfor du bryr deg:</strong> Ikke bare hell i syre eller bikarbonat tilfeldig fordi et tall så feil ut. Gjør endringer gradvis, mål på nytt etterpå, og dokumenter hva du faktisk endret — appens felt for målt meske-pH, måletidspunkt og salt-/syrevalg er nettopp laget for å støtte akkurat denne typen dokumentasjon over tid.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="praktisk-sjekkliste-vann">
+    <h3 data-i18n="hjelp.vannkjemi.sjekkliste.tittel">Praktisk sjekkliste</h3>
+    <p data-i18n="hjelp.vannkjemi.sjekkliste.intro">Tre korte sjekklister som dekker hele kjeden, fra planlegging til vurdering etter brygg:</p>
+    <div data-i18n-html="hjelp.vannkjemi.sjekkliste.liste">
+      <p><strong>Før brygg:</strong></p>
+      <ul>
+        <li>Kjenner du utgangsvannet ditt?</li>
+        <li>Er alkalitet/bikarbonat kjent — eller bevisst registrert som ukjent?</li>
+        <li>Hvilken maltprofil har oppskriften (lys/karamell/mørk)?</li>
+        <li>Hva er ønsket ionprofil for akkurat denne stilen?</li>
+        <li>Trenger du syre i mesken?</li>
+        <li>Skal skyllevannet behandles?</li>
+      </ul>
+      <p><strong>Under mesk:</strong></p>
+      <ul>
+        <li>Mål pH på en konsistent måte (samme tidspunkt, samme prøvebehandling)</li>
+        <li>Noter tidspunkt, temperatur og prøvemetode</li>
+        <li>Gjør små justeringer, ikke store spontane doser</li>
+      </ul>
+      <p><strong>Etter brygg:</strong></p>
+      <ul>
+        <li>Logg faktisk målt pH</li>
+        <li>Logg hvilke salter og syrer du faktisk brukte, og mengdene</li>
+        <li>Sammenlign med smak og utbytte neste gang du brygger samme eller lignende oppskrift</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="hjelp-innledning" data-i18n="hjelp.vannkjemi.avslutning">
+    Vannkjemi er sjelden det første stedet en nybryggerfeil oppstår, men det
+    er ofte stedet der et allerede godt brygg blir enda bedre. Start enkelt:
+    kjenn utgangsvannet ditt, mål meske-pH konsistent, og gjør små,
+    dokumenterte justeringer — helhetlig balanse slår som regel jaging av
+    enkelttall.
+  </p>
+  </main>
+</div>
+
+<footer class="no-print">
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="../personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
+<script src="../js/chrome.js"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/vannkjemi.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Advanced Water Chemistry — Kvernhaug Brygghus</title>
+<meta content="Master Brewer guide to advanced water chemistry: alkalinity, bicarbonate, mash pH, acid additions, sparge water and tannins — why you actually adjust your water." data-i18n-content="meta.hjelpVannkjemiAvansert.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/vannkjemi.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/vannkjemi.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/vannkjemi.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/vannkjemi.html" hreflang="x-default" rel="alternate"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpVannkjemiAvansert.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/vannkjemi.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="vannkjemi.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Water Chemistry</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/vannkjemi.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="vannkjemi.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/vannkjemi.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="vannkjemi.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
+<a data-i18n="hjelp.sidenavGjaerhosting" href="gjaerhosting.html">🫙 Yeast Harvesting</a>
+<a class="aktiv" data-i18n="hjelp.sidenavVannkjemiAvansert" href="vannkjemi.html">💧 Water Chemistry</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.vannkjemi.toc.alkalitetBikarbonat" href="#alkalitet-bikarbonat">Alkalinity and Bicarbonate</a>
+<a data-i18n="hjelp.vannkjemi.toc.maltMeskePh" href="#malt-meske-ph">Malt and Mash pH</a>
+<a data-i18n="hjelp.vannkjemi.toc.syretilsetning" href="#syretilsetning">Acid Additions</a>
+<a data-i18n="hjelp.vannkjemi.toc.salterVsSyre" href="#salter-vs-syre">Salts Are Not The Same As Acid</a>
+<a data-i18n="hjelp.vannkjemi.toc.ionNivaer" href="#ion-nivaer">Ion Concentrations</a>
+<a data-i18n="hjelp.vannkjemi.toc.skyllevannOversparging" href="#skyllevann-oversparging">Sparge Water and Over-Sparging</a>
+<a data-i18n="hjelp.vannkjemi.toc.tanninerAstringens" href="#tanniner-astringens">Tannins and Astringency</a>
+<a data-i18n="hjelp.vannkjemi.toc.roVann" href="#ro-vann">RO / Distilled Water</a>
+<a data-i18n="hjelp.vannkjemi.toc.vannprofilHelhet" href="#vannprofil-helhet">Water Profile As A Whole</a>
+<a data-i18n="hjelp.vannkjemi.toc.malingPh" href="#maling-ph">Measuring pH</a>
+<a data-i18n="hjelp.vannkjemi.toc.feilsokingPh" href="#feilsoking-ph">"I Didn't Hit My pH" — Troubleshooting</a>
+<a data-i18n="hjelp.vannkjemi.toc.sjekkliste" href="#praktisk-sjekkliste-vann">Practical Checklist</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.vannkjemi.intro">This page is a Master Brewer extension of the short water chemistry introduction in <a href="index.html#vannkjemi">Help &amp; FAQ</a>, which already covers pH, Ca, Mg, Na, Cl, SO4 and the Cl:SO4 ratio. Here we go further into what's often missing between "I know the ions" and "I understand why I'm actually adjusting the water" — without building a full chemistry textbook or new calculation engines in the app's "💧 Water Chemistry" module.</p>
+<div id="alkalitet-bikarbonat">
+<div class="hjelp-metode-kort" id="alkalitet">
+<h3 data-i18n="hjelp.vannkjemi.alkalitet.tittel">Alkalinity</h3>
+<p data-i18n="hjelp.vannkjemi.alkalitet.tekst">Alkalinity describes water's ability to resist a change in pH — its buffering capacity, not the pH value itself. High alkalinity makes it harder for the malt and any acid to lower mash pH toward the desired range; low alkalinity gives the water less buffering to work against.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.alkalitet.hvorfor">Don't mix up alkalinity and pH — they measure two different things. Two water samples can have roughly the same pH but very different alkalinity, and it's the alkalinity that determines how much resistance the malt/acid actually has to work against to move pH where you want it.</p>
+</div>
+<div class="hjelp-metode-kort" id="bikarbonat">
+<h3 data-i18n="hjelp.vannkjemi.bikarbonat.tittel">Bicarbonate (HCO3-)</h3>
+<p data-i18n="hjelp.vannkjemi.bikarbonat.tekst">Bicarbonate is often a major contributor to alkalinity in brewing water. High bicarbonate can counteract the pH drop malt normally causes in the mash, and how much is actually needed depends on both the malt profile and the rest of the water profile — not on bicarbonate alone.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.bikarbonat.hvorfor">Dark beer is historically often associated with more alkaline water, because dark/roasted malt itself contributes more acid to the mash — more alkalinity can in some cases balance out this acid. This is NOT a rule that "dark beer always needs lots of bicarbonate" — it depends on exactly how dark and how much roasted malt the recipe actually uses. Note also that alkalinity exists in three different, often-confused forms (HCO3 in mg/L, alkalinity "as CaCO3" in mg/L, and alkalinity in mmol/L) — the app's internal water calculation can convert between them, but the three figures aren't the same number and shouldn't be mixed without such a conversion.</p>
+</div>
+</div>
+<div id="malt-meske-ph">
+<div class="hjelp-metode-kort" id="malttyper">
+<h3 data-i18n="hjelp.vannkjemi.malttyper.tittel">Malt and Mash pH</h3>
+<p data-i18n="hjelp.vannkjemi.malttyper.tekst">Different malt types affect mash pH differently. Roughly speaking: pale base malt has a relatively small acid effect of its own, caramel/crystal malt sits somewhere in between, and dark/roasted malt usually contributes the most toward lowering pH on its own.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.malttyper.hvorfor">The same water can therefore behave quite differently in two different recipes — a pale pilsner and a dark stout with an identical water profile will often need a completely different acid/salt approach to hit the same mash-pH target. This is a general rule of thumb, not a malt-specific acid model.</p>
+</div>
+<div class="hjelp-metode-kort" id="meske-ph-utvidet">
+<h3 data-i18n="hjelp.vannkjemi.meskePhUtvidet.tittel">Mash pH — What The Brewer Is Actually Looking For</h3>
+<p data-i18n-html="hjelp.vannkjemi.meskePhUtvidet.tekst">Mash pH affects more than just enzyme activity: it's tied to extraction efficiency, flavour, clarity/process later in brewing, and how easily tannins are extracted from the grain (see <a href="#tanniner-astringens">tannins and astringency</a> below).</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.meskePhUtvidet.hvorfor">Avoid hunting for "one magic number". KBH's own target profiles in the "💧 Water Chemistry" module use different mash-pH working ranges for different beer styles (typically somewhere between about 5.2 and 5.6, depending on the profile) — these are guiding working ranges, not universal correct answers. The app's own measurement form records whether the sample was cooled to room temperature before reading, precisely because a hot mash sample normally gives a different pH reading than a cooled sample of the exact same wort — not because a pH meter with temperature compensation is "lying", but because the pH value itself can genuinely shift with temperature. So never conflate "the electrode is temperature-compensated" with "pH is identical at every temperature" — those are two different things. See <a href="#maling-ph">measuring pH</a>.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="syretilsetning">
+<h3 data-i18n="hjelp.vannkjemi.syretilsetning.tittel">Acid Additions</h3>
+<p data-i18n="hjelp.vannkjemi.syretilsetning.tekst">Acid is used to lower mash pH, reduce the effect of high alkalinity in the water, and optionally treat sparge water so it doesn't sit at too high a pH against the grain bed. KBH's "💧 Water Chemistry" module supports registering lactic acid and phosphoric acid as separate acid additions, in addition to acid malt being a common alternative many brewers use instead of, or alongside, liquid acid.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.syretilsetning.hvorfor">No acid is universally best — they have different strengths and come in different concentrations (both lactic acid and phosphoric acid, for example, are sold in several different strengths), and too much acid can affect flavour. Dosing must be based on a combination of the water, the malt profile and the desired mash pH — the app therefore always asks you to enter the concentration (%) for each acid addition yourself, rather than assuming a fixed strength from the name alone. This page gives no universal mL doses.</p>
+</div>
+<div class="hjelp-metode-kort" id="salter-vs-syre">
+<h3 data-i18n="hjelp.vannkjemi.salterVsSyre.tittel">Salts Are Not The Same As Acid</h3>
+<p data-i18n="hjelp.vannkjemi.salterVsSyre.tekst">CaCl2 (calcium chloride) and CaSO4 (gypsum) are used primarily to adjust the ion profile — the flavour/process effect of Ca, Cl and SO4 — not as a substitute for acid.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.salterVsSyre.hvorfor">Salts can affect water chemistry and therefore mash pH indirectly (particularly via calcium, see <a href="#ion-nivaer">ion concentrations</a> below), but they are not the same as adding acid. Avoid learning "more gypsum = lower pH, done" — the relationship is indirect and far from that simple. Baking soda (NaHCO3) is a good example of the opposite: it's a salt the app's salt database offers to RAISE HCO3/alkalinity, not to lower pH directly.</p>
+</div>
+<div id="ion-nivaer">
+<div class="hjelp-metode-kort" id="cl-so4-nivaer">
+<h3 data-i18n="hjelp.vannkjemi.clSo4Nivaer.tittel">Chloride and Sulfate — Levels Before Ratios</h3>
+<p data-i18n="hjelp.vannkjemi.clSo4Nivaer.tekst">Help &amp;amp; FAQ shows that the Cl:SO4 ratio gives a rough signal of direction — more toward malt/fullness, or more toward a dry, sharp hop emphasis. That ratio alone says nothing about intensity, though:</p>
+<table class="hjelp-tabell">
+<thead><tr><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.profil">Water Profile</th><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.cl">Cl (ppm)</th><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.so4">SO4 (ppm)</th><th data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.forhold">Cl:SO4</th></tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.vannA">Water A</td><td>10</td><td>20</td><td>0,5</td></tr>
+<tr><td data-i18n="hjelp.vannkjemi.clSo4Nivaer.tabell.vannB">Water B</td><td>100</td><td>200</td><td>0,5</td></tr>
+</tbody>
+</table>
+<p data-i18n="hjelp.vannkjemi.clSo4Nivaer.eksempel">Both of these water profiles have exactly the same Cl:SO4 ratio (0.5), but won't necessarily be perceived or behave the same way — Water B has ten times the actual concentration of both ions.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.clSo4Nivaer.hvorfor">The ratio says something about direction, while the actual concentrations say something about intensity. Look at both figures in the app's expected end-profile table — not just the ratio. This page builds no flavour equation based on the ratio.</p>
+</div>
+<div class="hjelp-metode-kort" id="kalsium-utvidet">
+<h3 data-i18n="hjelp.vannkjemi.kalsiumUtvidet.tittel">Calcium — Extended</h3>
+<p data-i18n="hjelp.vannkjemi.kalsiumUtvidet.tekst">Beyond what Help &amp;amp; FAQ already mentions, calcium plays several roles: it's involved in the mash/water chemistry itself, in yeast health and flocculation, in later precipitation/clarification processes, and it can help lower pH indirectly together with phosphates naturally present in the malt.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.kalsiumUtvidet.hvorfor">More calcium isn't automatically better. The app's water module warns, for example, at low calcium — an internal, practical rule of thumb for brewing in this app, not an official drinking-water limit — but there's no equivalent "the higher the better" rule in the other direction. Aim for a sensible target profile, not a maximum figure.</p>
+</div>
+<div class="hjelp-metode-kort" id="magnesium-natrium">
+<h3 data-i18n="hjelp.vannkjemi.magnesiumNatrium.tittel">Magnesium and Sodium</h3>
+<p data-i18n="hjelp.vannkjemi.magnesiumNatrium.tekst">Magnesium is a nutrient yeast needs in small/moderate amounts, and malt normally already contributes some magnesium on its own. Sodium in moderate amounts can support a rounder, fuller mouthfeel.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.magnesiumNatrium.hvorfor">High levels of both can become a problem, though: a lot of magnesium can give a harsh, bitter or mineral character, and a lot of sodium can become salty or sharp. The app's warnings use internal, practical rules of thumb for brewing (not official drinking-water limits) to flag unusually high levels of both — but these are warnings, not hard limits.</p>
+</div>
+</div>
+<div id="skyllevann-oversparging">
+<div class="hjelp-metode-kort" id="skyllevann">
+<h3 data-i18n="hjelp.vannkjemi.skyllevann.tittel">Sparge Water</h3>
+<p data-i18n-html="hjelp.vannkjemi.skyllevann.tekst">As the mash is sparged, what comes out gradually gets weaker — both in sugar concentration and in buffering strength. High pH in the sparge water or in the grain bed itself toward the end of sparging increases the risk of unwanted tannin extraction, see <a href="#tanniner-astringens">tannins and astringency</a> below.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.skyllevann.hvorfor">Sparging a lot more can therefore give worse beer quality, even if you extract a little more sugar along the way — more yield isn't automatically worth the cost. See <a href="bryggemetoder.html#batch-sparge">batch sparge</a> and <a href="bryggemetoder.html#fly-sparge">fly sparge</a> for how the sparging method itself works in KBH.</p>
+</div>
+<div class="hjelp-metode-kort" id="over-sparging">
+<h3 data-i18n="hjelp.vannkjemi.overSparging.tittel">Over-Sparging</h3>
+<p data-i18n="hjelp.vannkjemi.overSparging.tekst">Signs of over-sparging include steadily weaker runnings (what comes out gets thinner and thinner), lower sugar concentration in the runoff, and pH in the remaining grain bed/water possibly rising toward the end — which in turn can make extraction of polyphenols/tannins more likely.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.overSparging.hvorfor">Avoid turning this into a fixed rule like "X litres of sparging is always too much" — it depends on grain bill, water profile, pH, your system, and the efficiency actually achieved. Use the signs above as a practical pointer, not an exact cutoff.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="tanniner-astringens">
+<h3 data-i18n="hjelp.vannkjemi.tanninerAstringens.tittel">Tannins and Astringency</h3>
+<p data-i18n="hjelp.vannkjemi.tanninerAstringens.tekst">Bitterness is a flavour — it typically comes from hops. Astringency is something else: a mouthfeel, often described as dry, puckering or "tea-bag-like", and can come from tannins/polyphenols extracted from the grain husk.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.tanninerAstringens.hvorfor">Possible contributors to astringency include high pH during sparging, over-sparging (see above), very hot handling of the grain under unfavourable pH conditions, and to some extent how the malt is milled/handled. Don't learn that "sparge water that's too hot alone" automatically causes tannins — pH and the rest of the process context matter at least as much as temperature alone.</p>
+</div>
+<div class="hjelp-metode-kort" id="ro-vann">
+<h3 data-i18n="hjelp.vannkjemi.roVann.tittel">RO / Distilled Water</h3>
+<p data-i18n="hjelp.vannkjemi.roVann.tekst">RO or distilled water has a very low mineral load — in practice it gives you a "blanker canvas" to build a water profile on, without unknown or unwanted contributions from the source water.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.roVann.hvorfor">RO water isn't automatically "better water" — it also means desired ions often have to be built back up from scratch with salts, instead of adjusting a source water that already has something to build on. This page builds no RO-blending calculator of its own; use the app's normal source-water/target-profile fields no matter which starting water you choose.</p>
+</div>
+<div class="hjelp-metode-kort" id="vannprofil-helhet">
+<h3 data-i18n="hjelp.vannkjemi.vannprofilHelhet.tittel">Water Profile As A Whole</h3>
+<p data-i18n="hjelp.vannkjemi.vannprofilHelhet.tekst">pH, alkalinity, Ca, Mg, Na, Cl and SO4 can't be adjusted completely independently of each other — a change to one can affect several others at once. Calcium chloride, for example, adds BOTH calcium and chloride at the same time, gypsum adds BOTH calcium and sulfate at the same time, and acid affects both alkalinity and pH at once.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.vannprofilHelhet.hvorfor">This is probably the main point of this entire page: the goal is a sensible, balanced overall profile — not "chasing" each individual number in isolation. Notice that the app's own salt suggestion in the "💧 Water Chemistry" module deliberately only solves for chloride and sulfate using calcium chloride and gypsum — it adjusts neither alkalinity/HCO3, magnesium, nor sodium, and clearly flags in the goal-achievement assessment when the target profile is therefore NOT fully reached with exactly the salts chosen. That's not a bug in the app — it's precisely an example of how no single adjustment solves the whole picture by itself.</p>
+</div>
+<div class="hjelp-metode-kort" id="maling-ph">
+<h3 data-i18n="hjelp.vannkjemi.malingPh.tittel">Measuring pH</h3>
+<p data-i18n="hjelp.vannkjemi.malingPh.tekst">pH strips can give a rough indication, but are normally far less precise than an electronic pH meter. An electronic pH meter must be calibrated — the app's own water-measurement equipment checklist mentions calibration with pH 4.01 and 7.00 buffer solution as an example.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.malingPh.hvorfor">The electrode also needs to be maintained and stored correctly between uses, and temperature affects both the measurement itself and the sample's actual pH, see <a href="#meske-ph-utvidet">mash pH</a> above. Always follow the manufacturer's own instructions for storage solution/method for your specific electrode — not a general tip about, say, distilled water if that contradicts what the manufacturer actually says. This page recommends no specific brand or pH meter model.</p>
+</div>
+<div class="hjelp-metode-kort" id="feilsoking-ph">
+<h3 data-i18n="hjelp.vannkjemi.feilsokingPh.tittel">"I Didn't Hit My pH" — Now What?</h3>
+<p data-i18n="hjelp.vannkjemi.feilsokingPh.tekst">Didn't hit your target mash pH? Mash pH too HIGH can be caused by high alkalinity in the water, a malt profile with little acid contribution of its own (e.g. a very pale recipe), too little acid added, or the water profile in general. Mash pH too LOW can be caused by a lot of dark/roasted malt, too much acid added, or very low alkalinity in the source water.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.feilsokingPh.hvorfor">Don't just pour in acid or baking soda at random because a number looked wrong. Make changes gradually, re-measure afterward, and document what you actually changed — the app's fields for measured mash pH, measurement time, and salt/acid choices exist precisely to support this kind of documentation over time.</p>
+</div>
+<div class="hjelp-metode-kort" id="praktisk-sjekkliste-vann">
+<h3 data-i18n="hjelp.vannkjemi.sjekkliste.tittel">Practical Checklist</h3>
+<p data-i18n="hjelp.vannkjemi.sjekkliste.intro">Three short checklists covering the whole chain, from planning to assessment after the brew:</p>
+<div data-i18n-html="hjelp.vannkjemi.sjekkliste.liste"><p><strong>Before brewing:</strong></p><ul><li>Do you know your source water?</li><li>Is alkalinity/bicarbonate known — or deliberately registered as unknown?</li><li>What malt profile does the recipe have (pale/caramel/dark)?</li><li>What's the desired ion profile for this particular style?</li><li>Do you need acid in the mash?</li><li>Should the sparge water be treated?</li></ul><p><strong>During the mash:</strong></p><ul><li>Measure pH in a consistent way (same timing, same sample handling)</li><li>Note the time, temperature and sample method</li><li>Make small adjustments, not large spontaneous doses</li></ul><p><strong>After brewing:</strong></p><ul><li>Log the actual measured pH</li><li>Log which salts and acids you actually used, and the amounts</li><li>Compare with flavour and yield the next time you brew the same or a similar recipe</li></ul></div>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.vannkjemi.avslutning">Water chemistry is rarely the first place a beginner mistake happens, but it's often the place where an already-good brew becomes even better. Start simple: know your source water, measure mash pH consistently, and make small, documented adjustments — overall balance usually beats chasing individual numbers.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>
