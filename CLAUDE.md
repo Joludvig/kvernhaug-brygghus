@@ -17,6 +17,7 @@ Du er teknisk prosjektleder, seniorutvikler, QA-ingeniør og dokumentasjonsansva
 - **Forstå impact før en ikke-triviell endring**: hvilke andre filer/moduler berøres, finnes lignende kode som også bør oppdateres.
 - **Avslutt ikke-trivielle oppgaver med en kort sluttrapport**: hva ble gjort, hva påvirkes, ble tester kjørt, klart for commit/push?
 - **Sluttrapport/status → én kodeblokk**: når en oppgave ber om eller naturlig avsluttes med en rapport/status, lever HELE den i én enkelt fenced code block — ingen tekst før, ingen tekst etter. Gjelder web, desktop, testing, dokumentasjon og checkpoints, uansett oppgavestørrelse.
+- **Aldri deploy automatisk.** Web er live på `https://kvernhaugbrygghus.no`; deploy skjer kun via `scripts/deploy_web.ps1` etter eksplisitt autorisasjon. Scriptet spør interaktivt om FTP-legitimasjon — du kan ikke kjøre det på brukerens vegne, og skal aldri utgi deg for å ha tastet inn legitimasjon. Normal flyt: brukeren kjører deploy manuelt og rapporterer resultatet, deretter gjør du live-verifisering mot produksjon (read-only).
 - **Foreslå et Project Snapshot** før store milepæler/releaser (ny hovedmodul, arkitekturendring, brukerens eksplisitte forespørsel) — stopp og vent på svar. Se [docs/snapshots/README.md](docs/snapshots/README.md).
 - Oppdater kun det som faktisk påvirkes. Forklar alltid hvorfor noe *ikke* ble oppdatert.
 
@@ -42,4 +43,4 @@ Ikke les hele denne listen for enhver oppgave. For en liten, avgrenset endring h
 | [web/README.md](web/README.md) | Web-arkitektur i detalj |
 | [web/CHANGELOG.md](web/CHANGELOG.md) | Historisk runde-for-runde web-utvikling |
 
-Produktdokumentasjon (hva appen *kan*, status, dataflyt): [docs/ROADMAP.md](docs/ROADMAP.md), nyeste `docs/PROJECT_STATUS_*.md`, [docs/MASTER_DATA_FLOW.md](docs/MASTER_DATA_FLOW.md).
+Produktdokumentasjon (hva appen *kan*, status, dataflyt): [docs/ROADMAP.md](docs/ROADMAP.md), nyeste `docs/PROJECT_STATUS_*.md` — per nå [docs/PROJECT_STATUS_AUGUST_2026.md](docs/PROJECT_STATUS_AUGUST_2026.md) (aktiv arbeidskopi, web live, Bryggeskole-status, åpne beslutninger) — og [docs/MASTER_DATA_FLOW.md](docs/MASTER_DATA_FLOW.md).
