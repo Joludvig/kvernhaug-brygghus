@@ -14,7 +14,9 @@ Ved siste kjente fulle kjøring (jf. `docs/PROJECT_STATUS_JULI_2026.md`, punkt-i
 
 ## Full suite vs. avgrenset kjøring
 
-`tests/` dekker kun desktop-appen (`app.py`/`modules/`/`ui/`) — ingen tester overlapper med `web/`. Se testpolicy i [`.claude/rules/testing.md`](../../.claude/rules/testing.md) for når full suite faktisk trengs kontra en avgrenset/intermediate runde.
+`tests/` dekker i hovedsak desktop-appen (`app.py`/`modules/`/`ui/`), men **ikke bare** den: `tests/test_generate_web_i18n_pages.py` (49 tester) dekker `web/**` gjennom i18n-generatoren — TEKSTER-parsing og NO/EN-nøkkelsymmetri, `PAGES`-guarden mot uregistrerte sider, asset-/språkvelger-stier, determinisme, canonical/hreflang-gjensidighet, meta-description, `sitemap.xml`, `robots.txt`, noindex og favicon-dekning — inkludert at committet `web/en/**` og `sitemap.xml` er byte-identiske med en fersk generatorkjøring. En endring i `web/**` kan derfor bryte suiten.
+
+Det finnes derimot ingen browser-/E2E-dekning i `tests/`: funksjonell, responsiv og konsollfeil-verifisering i ekte nettleser er en egen, manuell Playwright-sveip (se `.claude/skills/web-full-regression/SKILL.md`). Se testpolicy i [`.claude/rules/testing.md`](../../.claude/rules/testing.md) for når full suite faktisk trengs kontra en avgrenset/intermediate runde.
 
 ## Isolasjonsprinsipp
 

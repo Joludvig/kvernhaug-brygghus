@@ -107,12 +107,14 @@ Core Contract (`.kbhrecipe`, `.kbhbrew`, passthrough-law, kanoniske enheter, eie
 
 ---
 
-## Kjent dokumentasjonsgjeld
+## Kjent dokumentasjonsgjeld — lukket 2026-08-23 (Documentation Stabilization V1)
 
-- **`web/CHANGELOG.md`** stopper ved Runde 15B.1 (2026-08-14) og dekker ikke favicon-runden eller Bryggeskole P0–P3A.
-- **`web/README.md`** beskriver fortsatt bare de fire opprinnelige hjelpesidene og det opprinnelige i18n-namespace-settet.
+Gjelden slik den sto ved statusskrivingen:
 
-Begge ligger under `web/` og ble bevisst ikke endret i dokumentasjonsrunden 2026-08-23, som hadde eksplisitt krav om null diff i `web/`. Bør tas som en egen, autorisert dokumentasjonsrunde.
+- **`web/CHANGELOG.md`** dekket rundene til og med Runde 25C (2026-08-15), men ikke favicon-runden eller Bryggeskole P0–P3A.
+- **`web/README.md`** beskrev fortsatt bare de fire opprinnelige hjelpesidene og det opprinnelige i18n-namespace-settet, og hadde utdaterte sidetall for generator/sitemap/canonical.
+
+Begge ligger under `web/` og ble bevisst ikke endret i den første dokumentasjonsrunden 2026-08-23, som hadde eksplisitt krav om null diff i `web/`. De ble deretter lukket i en egen, autorisert dokumentasjonsrunde samme dag: `web/CHANGELOG.md` fikk én kompakt samlepost for lansering, favicon og Bryggeskole P0–P3A, og `web/README.md` fikk oppdatert hjelpestruktur (10 sider), i18n-namespaces og generator-/sitemap-tall. Ingen funksjonell web-endring.
 
 ---
 

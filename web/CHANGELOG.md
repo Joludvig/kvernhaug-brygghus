@@ -4,6 +4,57 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Lansering, favicon og Bryggeskole P0–P3A (2026-08-14 → 2026-08-23)
+
+Samlepost for milepælene etter Runde 25C. Disse rundene ble dokumentert per
+commit og i `docs/PROJECT_STATUS_AUGUST_2026.md` framfor som egne changelog-
+seksjoner; posten her lukker historikk-hullet uten å duplisere statusdokumentet.
+
+**Produksjon.** `web/` er deployet og live på `https://kvernhaugbrygghus.no`
+(statisk hosting, Domeneshop). Deploy er en eksplisitt, manuell handling via
+`scripts/deploy_web.ps1` (interaktiv FTPS-innlogging, `-DryRun` tilgjengelig) —
+ingen CI/CD, ingen automatisk deploy.
+
+**Favicon** (`cee2a76`). Fullt favicon-sett integrert på alle sider, committet og
+live. Generatoren justerer favicon-stiene for `/en/`-dybden på samme måte som
+øvrige asset-stier, og `tests/test_generate_web_i18n_pages.py` har egen
+favicon-dekning (alle NO- og EN-sider har lenkene, filene finnes faktisk, stiene
+er dybdejustert).
+
+**Bryggeskole P0–P3A** — et sammenhengende innholdsprogram som utvidet hjelpe-
+delen fra 4 til 10 hjelpesider:
+
+| Runde | Innhold | Commit |
+|---|---|---|
+| P0 | Nybegynnerfundament | `e050b67` |
+| P1A | Prosess, vann, etter gjæring | `744cd5e` |
+| P1B | Gjær, karbonering, lagring, feilsøking | `708294e` |
+| P2A | Avanserte meskemetoder | `d0e0aef` |
+| P2B | Trykkgjæring, spunding, closed transfer | `e6831f4` |
+| P2C | Sterke øl / high gravity | `cc986f0` |
+| P2D | Gjærhøsting og gjenbruk | `a2a35b1` |
+| P2E | Avansert vannkjemi | `d58c591` |
+| P2F | Sensorikk og off-flavours | `f03be9f` |
+| P3A | Humle i dybden + generell bryggesikkerhet | `beeb94c` |
+
+Nye sider: `hjelp/trykkgjaering.html`, `sterke-ol.html`, `gjaerhosting.html`,
+`vannkjemi.html`, `sensorikk.html`, `humle.html` — hver med engelsk speiling
+under `web/en/hjelp/` og eget i18n-namespace (`hjelp.trykk.*`, `hjelp.sterkeOl.*`,
+`hjelp.gjaerhosting.*`, `hjelp.vannkjemi.*`, `hjelp.sensorikk.*`, `hjelp.humle.*`).
+`hjelp/index.html` er kanonisk hub for begrepsforklaringer/FAQ; guidesidene lenker
+dit framfor å gjenta definisjonene. `hjelp-side-nav` er fortsatt flat med
+flex-wrap — bevisst beholdt ved P3A etter reell vurdering, gruppering vurderes på
+nytt rundt side 11–12.
+
+**Gap Audit V1** (utført før P3A): fundamentet er COMPLETE, ingen større
+innholdshull, og retningen er «B — én til to målrettede runder» framfor fortsatt
+storstilt innholdsbygging. P3A var den første av disse. En mulig P3B (gjærvalg +
+klaring) er kandidat, ikke besluttet.
+
+**Testbaseline** ved P3A: 938 tester, 0 skipped / 0 errors / 0 failures
+(Python 3.12.10, repoets `.venv`). Av disse ligger 49 i
+`tests/test_generate_web_i18n_pages.py` og dekker web/**-generatoren direkte.
+
 ## Runde 25C — Bryggeloggen som brukeropplevelse (2026-08-15)
 
 Første synlige lag over 25B-datamodellen: ny side `bryggelogg.html`

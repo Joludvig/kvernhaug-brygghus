@@ -1,6 +1,6 @@
 # Kvernhaug Brygghus — Roadmap
 
-*Sist oppdatert: 2026-08-14 (Web Runde 14B — engelsk hjelp/bryggehåndbok, full NO/EN-dekning). Se `docs/PROJECT_STATUS_JULI_2026.md` for full status, nøkkeltall og kjent teknisk gjeld.*
+*Sist oppdatert: 2026-08-14 (Web Runde 14B — engelsk hjelp/bryggehåndbok, full NO/EN-dekning). Se `docs/PROJECT_STATUS_AUGUST_2026.md` for full status, nøkkeltall og kjent teknisk gjeld (`docs/PROJECT_STATUS_JULI_2026.md` beholdes som historikk).*
 
 Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkefølge — features flyttes mellom kategoriene etter hvert som virkelig bruk avgjør hva som trengs.
 
