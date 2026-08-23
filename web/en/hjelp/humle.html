@@ -1,0 +1,191 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/humle.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hops in Depth — Whirlpool, Dry Hop and Hop Creep — Kvernhaug Brygghus</title>
+<meta content="A practical Master Brewer guide to hops: bittering hops and the boil, whirlpool/hopstand, dry hopping, hop creep, oxidation and troubleshooting." data-i18n-content="meta.hjelpHumle.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/humle.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/humle.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/humle.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/humle.html" hreflang="x-default" rel="alternate"/>
+<link href="../../assets/favicon/favicon.ico" rel="icon" sizes="any"/>
+<link href="../../assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="../../assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="../../assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpHumle.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/humle.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="humle.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavHumle">🌿 Hops</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/humle.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="humle.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/humle.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="humle.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
+<a data-i18n="hjelp.sidenavGjaerhosting" href="gjaerhosting.html">🫙 Yeast Harvesting</a>
+<a data-i18n="hjelp.sidenavVannkjemiAvansert" href="vannkjemi.html">💧 Water Chemistry</a>
+<a data-i18n="hjelp.sidenavSensorikk" href="sensorikk.html">👃 Sensorics</a>
+<a class="aktiv" data-i18n="hjelp.sidenavHumle" href="humle.html">🌿 Hops</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.humle.toc.bidrag" href="#humle-bidrag">What Hops Contribute</a>
+<a data-i18n="hjelp.humle.toc.kok" href="#bitterhumle-kok">Bittering Hops and the Boil</a>
+<a data-i18n="hjelp.humle.toc.senKok" href="#sen-koketilsetning">Late Boil Additions</a>
+<a data-i18n="hjelp.humle.toc.whirlpool" href="#whirlpool-hopstand">Whirlpool and Hopstand</a>
+<a data-i18n="hjelp.humle.toc.dryhop" href="#dry-hop">Dry Hop</a>
+<a data-i18n="hjelp.humle.toc.hopCreep" href="#hop-creep">Hop Creep</a>
+<a data-i18n="hjelp.humle.toc.oksidasjon" href="#oksidasjon-dryhop">Oxidation During Dry Hop</a>
+<a data-i18n="hjelp.humle.toc.mengde" href="#humlemengde">Hop Quantity</a>
+<a data-i18n="hjelp.humle.toc.stil" href="#humle-stil">Hops and Style</a>
+<a data-i18n="hjelp.humle.toc.lagring" href="#humle-lagring">Hops and Aging</a>
+<a data-i18n="hjelp.humle.toc.feilsoking" href="#feilsoking-humle">Hop Troubleshooting</a>
+<a data-i18n="hjelp.humle.toc.plan" href="#humleplan">Practical Hop Plan</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.humle.intro">This page builds on the short introduction in <a href="index.html#om-humle">Help &amp; FAQ</a> with a deeper, practical look at hop use: bittering hops and the boil, whirlpool/hopstand, dry hopping, hop creep and troubleshooting. The goal is understanding the principles — not a single fixed recipe, since equipment, hop variety and process all affect the actual result.</p>
+<div class="hjelp-metode-kort" id="humle-bidrag">
+<h3 data-i18n="hjelp.humle.bidrag.tittel">Bitterness, Flavor and Aroma — Not the Same Thing</h3>
+<p data-i18n="hjelp.humle.bidrag.tekst">Hops can contribute three different things: bitterness, flavor and aroma. How much of each a given hop actually delivers depends on several factors together — timing of the addition, temperature, contact time, quantity, the hop's alpha acid content, and the rest of the process around it. The same hop variety can therefore come across completely differently from one brew to another.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.bidrag.hvorfor"><strong>Why you care:</strong> This builds on the distinction between <a href="index.html#bitterhumle-aromahumle">bittering hops and aroma/flavor hops</a> in the main help — here we go further into the mechanisms that explain why timing and temperature matter so much.</p>
+</div>
+<div class="hjelp-metode-kort" id="bitterhumle-kok">
+<h3 data-i18n="hjelp.humle.kok.tittel">Bittering Hops and the Boil</h3>
+<p data-i18n="hjelp.humle.kok.tekst">Alpha acid in hops is not very soluble in wort to begin with. During boiling, alpha acid is gradually converted (isomerized) into compounds that are actually soluble and perceived as bitterness. The longer the hops boil, the more alpha acid normally gets a chance to isomerize — which is the main reason an early addition (typically around 60 minutes) usually contributes more bitterness than the same amount of hops added late.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.kok.hvorfor"><strong>Important nuance:</strong> IBU models like Tinseth (used in the <a href="index.html#ibu">IBU calculation</a>) are exactly that — models, not a physical fact. Actual alpha acid utilization is affected by boil vigor, wort gravity, kettle geometry and other system-specific factors, and can therefore deviate somewhat from the calculated number. No universal percentage for "how much you actually get" applies to all equipment. This page does not change the actual IBU calculation in the recipe builder.</p>
+</div>
+<div class="hjelp-metode-kort" id="sen-koketilsetning">
+<h3 data-i18n="hjelp.humle.senKok.tittel">Late Boil Additions</h3>
+<p data-i18n="hjelp.humle.senKok.tekst">The later in the boil hops are added — for example at 20, 10 or 5 minutes, or right at flameout — the less time alpha acid has to isomerize, and the less bitterness the addition normally contributes. At the same time, volatile aroma compounds in the hops are less likely to boil off the shorter the time and the lower the heat they're exposed to toward the end.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.humle.senKok.hvorfor">&lt;strong&gt;Think of it as a continuum, not fixed categories:&lt;/strong&gt; There's no sharp line where "20 minutes is flavor" and "5 minutes is aroma" — the transition is gradual, and is affected by boil vigor and wort volume. More heat and time generally means more loss of volatile aroma compounds and potentially more bitterness contribution; less heat and time generally preserves more of the volatile compounds. Use the minute figures as a starting point, not a sensory law.</p>
+</div>
+<div class="hjelp-metode-kort" id="whirlpool-hopstand">
+<h3 data-i18n="hjelp.humle.whirlpool.tittel">Whirlpool and Hopstand</h3>
+<p data-i18n-html="hjelp.humle.whirlpool.tekst">Whirlpool and hopstand are often used interchangeably, but are strictly speaking two different things. <strong>Whirlpool</strong> is the actual circulation of the wort after the boil — the motion that collects trub (protein and hop debris) into a cone in the middle of the kettle, typically to keep it out of the way when the wort is later drained or pumped onward. <strong>Hopstand</strong> is the practice of letting hops sit in the still-hot wort for a period after the boil itself has ended, often (but not necessarily) at the same time as a whirlpool.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.humle.whirlpool.hvorfor">&lt;strong&gt;Why it matters:&lt;/strong&gt; At higher temperature, isomerization — and therefore bitterness contribution — can still occur during a hopstand, even though the boil is over. At lower temperature, bitterness contribution is reduced while a larger share of the volatile aroma compounds can be preserved. Contact time and hop quantity play in the same way as during the boil itself. Example temperature ranges can be found in many brewing sources, but no single temperature is a universal answer for KBH or for all equipment — this depends on kettle, insulation, and how long the wort actually takes to cool.</p>
+</div>
+<div class="hjelp-metode-kort" id="dry-hop">
+<h3 data-i18n="hjelp.humle.dryhop.tittel">Dry Hop</h3>
+<p data-i18n="hjelp.humle.dryhop.tekst">Dry hopping is adding hops after the boil, usually during or after fermentation, with aroma as the main goal — not bitterness, since meaningful isomerization normally doesn't occur at fermentation temperature. Contact time affects how much aroma is actually extracted, and temperature affects extraction of both aroma and certain undesirable compounds.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.dryhop.hvorfor"><strong>More/longer isn't automatically better:</strong> Too long a contact time or too large a quantity of dry hops can produce a green/vegetal character (see <a href="sensorikk.html#bittert-skarpt">troubleshooting bitter/harsh</a>), contribute to polyphenols and astringency (see <a href="vannkjemi.html#tanniner-astringens">tannins and astringency</a>), and leave hop particles in the beer. Opening a fermenter to add hops also introduces an oxidation risk, see <a href="#oksidasjon-dryhop">oxidation during dry hop</a> below.</p>
+</div>
+<div class="hjelp-metode-kort" id="hop-creep">
+<h3 data-i18n="hjelp.humle.hopCreep.tittel">Hop Creep</h3>
+<p data-i18n="hjelp.humle.hopCreep.tekst">Dry hops can, in some cases, introduce enzymes (from the hops themselves) that make carbohydrates in the beer — which the yeast previously couldn't use — more available. The yeast can then start working on them again: FG can drop further, and CO2 production can resume even though fermentation looked finished before dry hopping.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.hopCreep.hvorfor"><strong>Practical consequences:</strong> Don't assume the beer is fully fermented out just because FG was stable before dry hopping — take a new FG reading after dry hop when the process calls for it, especially before bottling/packaging, see <a href="index.html#faq-karbonering-feil">why overcarbonation is a safety issue, not just a flavor issue</a>. Renewed yeast activity can also bring back diacetyl or increase what was already there, see <a href="index.html#def-diacetylrest">diacetyl and the diacetyl rest</a> — don't automatically assume infection if this happens. Hop creep doesn't happen with every dry hop — it depends on hop variety, quantity, and how fermentable the beer was before dry hopping.</p>
+</div>
+<div class="hjelp-metode-kort" id="oksidasjon-dryhop">
+<h3 data-i18n="hjelp.humle.oksidasjon.tittel">Oxidation During Dry Hop</h3>
+<p data-i18n-html="hjelp.humle.oksidasjon.tekst">Opening a fermenter to add hops introduces a chance for oxygen to come into contact with the beer. Once fermentation is actively underway, oxygen contact is generally undesirable, see <a href="index.html#def-oksidasjon">oxidation after fermentation</a>.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.oksidasjon.hvorfor"><strong>Practical:</strong> Plan the addition ahead of time rather than improvising, limit how long and how often the vessel is open, and avoid unnecessary splashing or stirring when adding hops. If your equipment and process support it, a closed or CO2-assisted addition method can reduce air exposure further, in the same spirit as <a href="trykkgjaering.html#closed-transfer">closed transfer</a> — but pressure equipment isn't a requirement for dry hopping safely.</p>
+</div>
+<div class="hjelp-metode-kort" id="humlemengde">
+<h3 data-i18n="hjelp.humle.mengde.tittel">Hop Quantity</h3>
+<p data-i18n="hjelp.humle.mengde.tekst">More hops doesn't linearly mean "more good aroma". The effect often flattens out past a certain point (diminishing returns), and too large a quantity can instead give a more vegetal character, more polyphenols, and more hop material that soaks up beer (absorption).</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.humle.mengde.hvorfor">&lt;strong&gt;Other practical considerations:&lt;/strong&gt; Hops cost money, and some of the beer gets left behind in trub and hop material regardless of quantity. This page doesn't build a grams-per-liter table as a universal answer — the right quantity depends on hop variety, style target, and the rest of the recipe.</p>
+</div>
+<div class="hjelp-metode-kort" id="humle-stil">
+<h3 data-i18n="hjelp.humle.stil.tittel">Hops and Style</h3>
+<p data-i18n="hjelp.humle.stil.tekst">Hop use can't be judged in complete isolation — it connects to the malt base, yeast, alcohol strength, desired bitterness and drinkability, and the style itself. The same dry hop level that works well in a modern, hop-forward IPA isn't automatically right for a pilsner, a stout, or a historical Märzen.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.stil.hvorfor">See <a href="index.html#stilgrenser">style boundaries in the main help</a> for how Kvernhaug Brygghus treats style as a framework to orient by, not a rule you must follow slavishly. This page doesn't build a separate style guide beyond what's already there.</p>
+</div>
+<div class="hjelp-metode-kort" id="humle-lagring">
+<h3 data-i18n="hjelp.humle.lagring.tittel">Hops and Aging</h3>
+<p data-i18n="hjelp.humle.lagring.tekst">Hop aroma is often among the less storage-stable character traits in beer — it can fade noticeably faster than other flavor elements over time. A fresh, hop-forward beer therefore has a different goal than a beer intended for longer aging.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.lagring.hvorfor">Oxygen and heat accelerate the loss of hop aroma, the same way they accelerate oxidation in general, see <a href="index.html#def-oksidasjon">oxidation after fermentation</a>. Drink hop-forward beers fresh if aroma is the main point.</p>
+</div>
+<div id="feilsoking-humle">
+<h3 data-i18n="hjelp.humle.feilsoking.tittel">Hop Troubleshooting</h3>
+<p class="hjelp-innledning" data-i18n="hjelp.humle.feilsoking.intro">A short practical troubleshooting guide — not a full sensory analysis, but typical starting points.</p>
+<table class="hjelp-tabell">
+<thead><tr><th data-i18n="hjelp.humle.feilsoking.kolonneSituasjon">Situation</th><th data-i18n="hjelp.humle.feilsoking.kolonneVurder">Consider</th></tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.humle.feilsoking.a.situasjon">A. Too bitter</td><td data-i18n-html="hjelp.humle.feilsoking.a.vurder">Boil time and timing of additions, quantity, alpha acid (calculated vs. perceived bitterness), a sulfate effect (see <a href="vannkjemi.html">water chemistry</a>), and astringency that can be perceived as a harsher bitterness.</td></tr>
+<tr><td data-i18n="hjelp.humle.feilsoking.b.situasjon">B. Little hop aroma</td><td data-i18n="hjelp.humle.feilsoking.b.vurder">Timing/temperature of the late addition, whirlpool/hopstand conditions, oxidation, storage time, yeast activity during dry hop, and the raw material itself (fresh vs. old hops).</td></tr>
+<tr><td data-i18n="hjelp.humle.feilsoking.c.situasjon">C. Green/vegetal character</td><td data-i18n-html="hjelp.humle.feilsoking.c.vurder">Hop quantity, contact time, hop particles in the beer, and whether it could be a sensory misattribution of something else, see <a href="sensorikk.html">sensory evaluation</a>.</td></tr>
+<tr><td data-i18n="hjelp.humle.feilsoking.d.situasjon">D. FG drops after dry hop</td><td data-i18n-html="hjelp.humle.feilsoking.d.vurder">Possible <a href="#hop-creep">hop creep</a>. Take a new FG reading and wait for stability before packaging.</td></tr>
+<tr><td data-i18n="hjelp.humle.feilsoking.e.situasjon">E. Diacetyl after dry hop</td><td data-i18n-html="hjelp.humle.feilsoking.e.vurder">Possible renewed yeast activity/<a href="#hop-creep">hop creep</a>. Give the yeast time to clean up even if the process allows it — don't automatically assume infection.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="hjelp-metode-kort" id="humleplan">
+<h3 data-i18n="hjelp.humle.plan.tittel">Practical Hop Plan</h3>
+<p data-i18n-html="hjelp.humle.plan.tekst"><strong>Before brewing:</strong> Set goals for bitterness and aroma, choose hops and alpha acid, and plan addition timing. <strong>During brewing:</strong> Note actual boil time, actual whirlpool/hopstand temperature, and contact time. <strong>Fermentation:</strong> Plan any dry hop — timing, temperature and contact time. <strong>Afterward:</strong> Assess aroma, bitterness, astringency and vegetal character, and how they change over time.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.humle.plan.hvorfor">This is a planning structure, not a logging or database feature — use your own brew log or notebook for the actual tracking.</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.humle.avslutning">Hop use is an interplay between timing, temperature, contact time, quantity and the rest of the recipe — not one isolated variable. The principles above give you tools to reason about why a result turned out the way it did, not a formula that guarantees a specific outcome.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

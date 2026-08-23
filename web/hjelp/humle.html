@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Humle i dybden — whirlpool, dry hop og hop creep — Kvernhaug Brygghus</title>
+<meta name="description" content="Praktisk Bryggmester-guide til humle: bitterhumle og kok, whirlpool/hopstand, dry hop, hop creep, oksidasjon og feilsøking." data-i18n-content="meta.hjelpHumle.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/hjelp/humle.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/humle.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/humle.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/humle.html">
+<link rel="icon" href="../assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon/apple-touch-icon.png">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpHumle.tittel">
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="humle.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/humle.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavHumle">🌿 Humle</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="humle.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/humle.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="humle.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/humle.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="../pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="../bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<nav class="hjelp-side-nav">
+  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+  <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+  <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+  <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+  <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+  <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
+  <a href="humle.html" class="aktiv" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
+  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+</nav>
+
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
+    <a href="#humle-bidrag" data-i18n="hjelp.humle.toc.bidrag">Hva humle bidrar med</a>
+    <a href="#bitterhumle-kok" data-i18n="hjelp.humle.toc.kok">Bitterhumle og kok</a>
+    <a href="#sen-koketilsetning" data-i18n="hjelp.humle.toc.senKok">Sen koketilsetning</a>
+    <a href="#whirlpool-hopstand" data-i18n="hjelp.humle.toc.whirlpool">Whirlpool og hopstand</a>
+    <a href="#dry-hop" data-i18n="hjelp.humle.toc.dryhop">Dry hop / tørrhumle</a>
+    <a href="#hop-creep" data-i18n="hjelp.humle.toc.hopCreep">Hop creep</a>
+    <a href="#oksidasjon-dryhop" data-i18n="hjelp.humle.toc.oksidasjon">Oksidasjon under dry hop</a>
+    <a href="#humlemengde" data-i18n="hjelp.humle.toc.mengde">Humlemengde</a>
+    <a href="#humle-stil" data-i18n="hjelp.humle.toc.stil">Humle og stil</a>
+    <a href="#humle-lagring" data-i18n="hjelp.humle.toc.lagring">Humle og lagring</a>
+    <a href="#feilsoking-humle" data-i18n="hjelp.humle.toc.feilsoking">Feilsøking humle</a>
+    <a href="#humleplan" data-i18n="hjelp.humle.toc.plan">Praktisk humleplan</a>
+  </nav>
+
+  <main class="hjelp-side-main">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.humle.intro">
+    Denne siden bygger videre på den korte innføringen i
+    <a href="index.html#om-humle">Hjelp &amp; FAQ</a> med en dypere,
+    praktisk gjennomgang av humlebruk: bitterhumle og kok,
+    whirlpool/hopstand, dry hop, hop creep og feilsøking. Målet er
+    forståelse av prinsippene — ikke én fasit-oppskrift, siden utstyr,
+    humlesort og prosess påvirker det faktiske resultatet.
+  </p>
+
+  <div class="hjelp-metode-kort" id="humle-bidrag">
+    <h3 data-i18n="hjelp.humle.bidrag.tittel">Bitterhet, smak og aroma — ikke det samme</h3>
+    <p data-i18n="hjelp.humle.bidrag.tekst">Humle kan bidra med tre forskjellige ting: bitterhet, smak og aroma. Hvor mye av hver humlen faktisk gir, avhenger av flere faktorer sammen — tidspunkt for tilsetning, temperatur, kontakttid, mengde, humlens alfasyre, og resten av prosessen rundt den. Samme humlesort kan derfor oppleves helt forskjellig fra ett bryggpunkt til et annet.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.bidrag.hvorfor"><strong>Hvorfor du bryr deg:</strong> Dette bygger videre på skillet mellom <a href="index.html#bitterhumle-aromahumle">bitterhumle og aroma-/smakshumle</a> i hovedhjelpen — her går vi videre inn i mekanismene som avgjør hvorfor timing og temperatur betyr så mye.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="bitterhumle-kok">
+    <h3 data-i18n="hjelp.humle.kok.tittel">Bitterhumle og kok</h3>
+    <p data-i18n="hjelp.humle.kok.tekst">Alfasyren i humle er i utgangspunktet lite løselig i vørter. Under koking omdannes (isomeriseres) alfasyre gradvis til stoffer som faktisk er løselige og oppleves som bitterhet. Jo lenger humlen koker, desto mer alfasyre rekker normalt å isomeriseres — det er hovedgrunnen til at en tidlig tilsetning (typisk rundt 60 minutter) vanligvis gir mer bitterbidrag enn samme mengde humle tilsatt sent.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.kok.hvorfor"><strong>Viktig nyansering:</strong> IBU-modeller som Tinseth (brukt i <a href="index.html#ibu">IBU-beregningen</a>) er nettopp det — modeller, ikke en fysisk fasit. Faktisk utnyttelse av alfasyren påvirkes av kokestyrke, vørtetetthet, kjelegeometri og andre systemspesifikke faktorer, og kan derfor avvike noe fra det beregnede tallet. Ingen universell prosentsats for «hvor mye du får ut» gjelder for alt utstyr. Denne siden endrer ikke selve IBU-beregningen i oppskriftsbyggeren.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="sen-koketilsetning">
+    <h3 data-i18n="hjelp.humle.senKok.tittel">Sen koketilsetning</h3>
+    <p data-i18n="hjelp.humle.senKok.tekst">Jo senere i koket humle tilsettes — for eksempel ved 20, 10 eller 5 minutter, eller helt ved flameout — desto mindre tid får alfasyren til å isomeriseres, og desto mindre bitterbidrag gir tilsetningen normalt. Samtidig rekker flyktige aromastoffer i humlen i mindre grad å fordampe bort jo kortere tid og jo lavere varme de utsettes for mot slutten.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.humle.senKok.hvorfor"><strong>Se det som et kontinuum, ikke faste kategorier:</strong> Det finnes ingen skarp grense der «20 minutter er smak» og «5 minutter er aroma» — overgangen er gradvis, og påvirkes av kokestyrke og vørtevolum. Mer varme og tid gir generelt mer tap av flyktige aromastoffer og potensielt mer bitterbidrag; mindre varme og tid bevarer generelt mer av de flyktige stoffene. Bruk minuttallene som et startpunkt, ikke en sensorisk lov.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="whirlpool-hopstand">
+    <h3 data-i18n="hjelp.humle.whirlpool.tittel">Whirlpool og hopstand</h3>
+    <p data-i18n-html="hjelp.humle.whirlpool.tekst">Whirlpool og hopstand blir ofte brukt om hverandre, men er strengt tatt to forskjellige ting. <strong>Whirlpool</strong> er selve sirkulasjonen av vørteren etter kok — bevegelsen som samler trub (protein- og humlerester) i en haug midt i kjelen, typisk for å holde det unna når vørteren senere tappes eller pumpes videre. <strong>Hopstand</strong> er praksisen med å la humle bli liggende i den fortsatt varme vørteren en periode etter at selve koket er avsluttet, ofte (men ikke nødvendigvis) samtidig med whirlpool.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.humle.whirlpool.hvorfor"><strong>Hvorfor det betyr noe:</strong> Ved høyere temperatur kan isomerisering — og dermed bitterbidrag — fortsatt skje under en hopstand, selv om koket er ferdig. Ved lavere temperatur reduseres bitterbidraget mens en større andel av de flyktige aromastoffene kan bevares. Kontakttid og humlemengde spiller inn på samme måte som under selve koket. Eksempler på temperaturområder finnes i mange bryggerkilder, men ingen enkelt temperatur er en universell fasit for KBH eller for alt utstyr — dette avhenger av kjele, isolasjon og hvor lang tid vørteren faktisk bruker på å kjøles.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="dry-hop">
+    <h3 data-i18n="hjelp.humle.dryhop.tittel">Dry hop / tørrhumle</h3>
+    <p data-i18n="hjelp.humle.dryhop.tekst">Dry hop er tilsetning av humle etter kok, som oftest under eller etter gjæring, med aroma som hovedmål — ikke bitterhet, siden det normalt ikke skjer nevneverdig isomerisering ved gjæringstemperatur. Kontakttid påvirker hvor mye aroma som faktisk trekkes ut, og temperaturen påvirker både ekstraksjonen av aroma og av enkelte uønskede forbindelser.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.dryhop.hvorfor"><strong>Mer/lengre er ikke automatisk bedre:</strong> For lang kontakttid eller for store mengder tørrhumle kan gi et grønt/vegetalt preg (se <a href="sensorikk.html#bittert-skarpt">feilsøking av bittert/skarpt</a>), bidra til polyfenoler og astringens (se <a href="vannkjemi.html#tanniner-astringens">tanniner og astringens</a>), og etterlate humlepartikler i ølet. Å åpne et gjæringskar for å tilsette humle introduserer også en oksidasjonsrisiko, se <a href="#oksidasjon-dryhop">oksidasjon under dry hop</a> under.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="hop-creep">
+    <h3 data-i18n="hjelp.humle.hopCreep.tittel">Hop creep</h3>
+    <p data-i18n="hjelp.humle.hopCreep.tekst">Tørrhumle kan i noen tilfeller introdusere enzymer (fra humlen selv) som gjør karbohydrater i ølet — som gjæren tidligere ikke klarte å bruke — mer tilgjengelige. Gjæren kan da begynne å arbeide videre på dem: FG kan falle ytterligere, og CO₂-produksjonen kan starte opp igjen selv om gjæringen så ferdig ut før dry hop.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.hopCreep.hvorfor"><strong>Praktiske konsekvenser:</strong> Ikke anta at ølet er ferdig utgjæret bare fordi FG var stabil før tørrhumling — mål FG på nytt etter dry hop når prosessen tilsier det, spesielt før flasking/pakking, se <a href="index.html#faq-karbonering-feil">hvorfor overkarbonering er en sikkerhetssak, ikke bare en smakssak</a>. Fornyet gjæraktivitet kan også gi diacetyl på nytt eller forsterke det som allerede var der, se <a href="index.html#def-diacetylrest">diacetyl og diacetylrest</a> — ikke automatisk anta infeksjon om dette skjer. Hop creep skjer ikke ved hver eneste tørrhumling — det avhenger av humlesort, mengde og ølets gjærbarhet før dry hop.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="oksidasjon-dryhop">
+    <h3 data-i18n="hjelp.humle.oksidasjon.tittel">Oksidasjon under dry hop</h3>
+    <p data-i18n-html="hjelp.humle.oksidasjon.tekst">Å åpne et gjæringskar for å tilsette humle introduserer en mulighet for at oksygen kommer i kontakt med ølet. Etter at gjæringen er aktivt i gang er oksygenkontakt generelt uønsket, se <a href="index.html#def-oksidasjon">oksidasjon etter gjæring</a>.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.oksidasjon.hvorfor"><strong>Praktisk:</strong> Planlegg tilsetningen på forhånd i stedet for å improvisere, begrens hvor lenge og hvor ofte karet står åpent, og unngå unødvendig plasking eller omrøring når humlen tilsettes. Har utstyret og prosessen støtte for det, kan en lukket eller CO₂-assistert tilsetningsmetode redusere lufteksponeringen ytterligere, i samme ånd som <a href="trykkgjaering.html#closed-transfer">closed transfer</a> — men trykkutstyr er ikke et krav for å dry hoppe forsvarlig.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="humlemengde">
+    <h3 data-i18n="hjelp.humle.mengde.tittel">Humlemengde</h3>
+    <p data-i18n="hjelp.humle.mengde.tekst">Mer humle gir ikke lineært «mer god aroma». Effekten flater ofte ut etter et visst punkt (diminishing returns), og for store mengder kan i stedet gi et mer vegetalt preg, mer polyfenoler, og mer humlemateriale som binder opp øl (absorpsjon).</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.humle.mengde.hvorfor"><strong>Andre praktiske hensyn:</strong> Humle koster, og en del av ølet blir liggende igjen i trub og humlemateriale uansett mengde. Denne siden bygger ingen gram-per-liter-tabell som universell fasit — riktig mengde avhenger av humlesort, mål for stil, og resten av oppskriften.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="humle-stil">
+    <h3 data-i18n="hjelp.humle.stil.tittel">Humle og stil</h3>
+    <p data-i18n="hjelp.humle.stil.tekst">Humlebruk kan ikke vurderes helt isolert — den henger sammen med maltbase, gjær, alkoholstyrke, ønsket bitterhet og drikkbarhet, og selve stilen. Samme tørrhumlingsnivå som fungerer godt i en moderne, humledrevet IPA er ikke automatisk riktig i en pils, en stout eller en historisk Märzen.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.stil.hvorfor">Se <a href="index.html#stilgrenser">stilgrenser i hovedhjelpen</a> for hvordan Kvernhaug Brygghus behandler stil som et rammeverk å orientere seg etter, ikke en fasit du må følge slavisk. Denne siden bygger ingen egen stilguide utover det som allerede finnes der.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="humle-lagring">
+    <h3 data-i18n="hjelp.humle.lagring.tittel">Humle og lagring</h3>
+    <p data-i18n="hjelp.humle.lagring.tekst">Humlearoma er ofte blant de mindre lagringsstabile karaktertrekkene i øl — den kan avta merkbart raskere enn andre smakselementer over tid. Et fersk, humledrevet øl har derfor et annet mål enn et øl beregnet for lengre lagring.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.lagring.hvorfor">Oksygen og varme akselererer tap av humlearoma, på samme måte som de akselererer oksidasjon generelt, se <a href="index.html#def-oksidasjon">oksidasjon etter gjæring</a>. Drikk humledrevne øl mens de er ferske hvis aroma er hovedpoenget.</p>
+  </div>
+
+  <div id="feilsoking-humle">
+  <h3 data-i18n="hjelp.humle.feilsoking.tittel">Feilsøking humle</h3>
+  <p class="hjelp-innledning" data-i18n="hjelp.humle.feilsoking.intro">Kort praktisk feilsøking — ikke en fullstendig sensorisk analyse, men typiske startpunkter.</p>
+  <table class="hjelp-tabell">
+    <thead><tr><th data-i18n="hjelp.humle.feilsoking.kolonneSituasjon">Situasjon</th><th data-i18n="hjelp.humle.feilsoking.kolonneVurder">Vurder</th></tr></thead>
+    <tbody>
+      <tr><td data-i18n="hjelp.humle.feilsoking.a.situasjon">A. For bittert</td><td data-i18n-html="hjelp.humle.feilsoking.a.vurder">Koketid og tidspunkt for tilsetningene, mengde, alfasyre (beregnet vs. opplevd bitterhet), sulfateffekt (se <a href="vannkjemi.html">vannkjemi</a>), og astringens som kan oppleves som en hardere bitterhet.</td></tr>
+      <tr><td data-i18n="hjelp.humle.feilsoking.b.situasjon">B. Lite humlearoma</td><td data-i18n="hjelp.humle.feilsoking.b.vurder">Tidspunkt/temperatur for sen tilsetning, whirlpool-/hopstand-forhold, oksidasjon, lagringstid, gjæringsaktivitet under dry hop, og selve råvaren (fersk vs. gammel humle).</td></tr>
+      <tr><td data-i18n="hjelp.humle.feilsoking.c.situasjon">C. Grønt/vegetalt preg</td><td data-i18n-html="hjelp.humle.feilsoking.c.vurder">Humlemengde, kontakttid, humlepartikler i ølet, og om det kan være en sensorisk feiltolkning av noe annet, se <a href="sensorikk.html">sensorikk</a>.</td></tr>
+      <tr><td data-i18n="hjelp.humle.feilsoking.d.situasjon">D. FG faller etter dry hop</td><td data-i18n-html="hjelp.humle.feilsoking.d.vurder">Mulig <a href="#hop-creep">hop creep</a>. Mål FG på nytt og vent på stabilitet før pakking.</td></tr>
+      <tr><td data-i18n="hjelp.humle.feilsoking.e.situasjon">E. Diacetyl etter dry hop</td><td data-i18n-html="hjelp.humle.feilsoking.e.vurder">Mulig fornyet gjæraktivitet/<a href="#hop-creep">hop creep</a>. Gi gjæren tid til å rydde opp selv om prosessen tillater det — ikke anta automatisk at det er infeksjon.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="hjelp-metode-kort" id="humleplan">
+    <h3 data-i18n="hjelp.humle.plan.tittel">Praktisk humleplan</h3>
+    <p data-i18n-html="hjelp.humle.plan.tekst"><strong>Før brygg:</strong> Sett mål for bitterhet og aroma, velg humle og alfasyre, og planlegg tilsetningstidspunkt. <strong>Under brygg:</strong> Noter faktisk koketid, faktisk whirlpool-/hopstand-temperatur, og kontakttid. <strong>Gjæring:</strong> Planlegg en eventuell dry hop — tidspunkt, temperatur og kontakttid. <strong>Etterpå:</strong> Vurder aroma, bitterhet, astringens og vegetalt preg, og hvordan de endrer seg over tid.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.humle.plan.hvorfor">Dette er en planleggingsstruktur, ikke en logg- eller databasefunksjon — bruk egen bryggelogg eller notatbok til selve sporingen.</p>
+  </div>
+
+  <p class="hjelp-innledning" data-i18n="hjelp.humle.avslutning">
+    Humlebruk er et samspill mellom timing, temperatur, kontakttid, mengde
+    og resten av oppskriften — ikke én isolert variabel. Prinsippene over
+    gir deg verktøy til å resonnere om hvorfor et resultat ble som det
+    ble, ikke en fasit som garanterer et bestemt utfall.
+  </p>
+  </main>
+</div>
+
+<footer class="no-print">
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="../personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
+<script src="../js/chrome.js"></script>
+</body>
+</html>
