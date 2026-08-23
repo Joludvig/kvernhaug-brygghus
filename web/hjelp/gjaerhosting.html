@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gjærhøsting, gjenbruk og slurry — Kvernhaug Brygghus</title>
+<meta name="description" content="Bryggmester-guide til høsting, lagring og gjenbruk av bryggergjær: hva slurry faktisk er, praktisk høsting, generasjoner, lagring og når gjæren bør kastes." data-i18n-content="meta.hjelpGjaerhosting.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/hjelp/gjaerhosting.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/gjaerhosting.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/gjaerhosting.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/gjaerhosting.html">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpGjaerhosting.tittel">
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="gjaerhosting.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/gjaerhosting.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="gjaerhosting.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/gjaerhosting.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="gjaerhosting.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/gjaerhosting.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="../pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="../bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<nav class="hjelp-side-nav">
+  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+  <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+  <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+  <a href="gjaerhosting.html" class="aktiv" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+</nav>
+
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
+    <a href="#slurry-hva" data-i18n="hjelp.gjaerhosting.toc.slurryHva">Hva er gjærslurry?</a>
+    <a href="#hosting-metode" data-i18n="hjelp.gjaerhosting.toc.hostingMetode">Høsting — enkel metode</a>
+    <a href="#vasking-vs-hosting" data-i18n="hjelp.gjaerhosting.toc.vaskingVsHosting">«Gjærvasking» vs. høsting</a>
+    <a href="#slurry-vurdering" data-i18n="hjelp.gjaerhosting.toc.slurryVurdering">Lagene i glasset og hvilken slurry er best</a>
+    <a href="#generasjoner-drift" data-i18n="hjelp.gjaerhosting.toc.generasjonerDrift">Generasjoner, mutasjon og drift</a>
+    <a href="#lagring-beholder" data-i18n="hjelp.gjaerhosting.toc.lagringBeholder">Lagring og beholder</a>
+    <a href="#nar-kastes" data-i18n="hjelp.gjaerhosting.toc.narKastes">Når skal gjæren kastes?</a>
+    <a href="#starter-repitch" data-i18n="hjelp.gjaerhosting.toc.starterRepitch">Starter og direkte repitch</a>
+    <a href="#cropping" data-i18n="hjelp.gjaerhosting.toc.cropping">Top og bottom cropping</a>
+    <a href="#hosting-spesialtilfeller" data-i18n="hjelp.gjaerhosting.toc.hostingSpesialtilfeller">Høsting: trykkgjæring og high gravity</a>
+    <a href="#sjekkliste-logging" data-i18n="hjelp.gjaerhosting.toc.sjekklisteLogging">Sjekkliste og sporbarhet</a>
+  </nav>
+
+  <main class="hjelp-side-main">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.gjaerhosting.intro">
+    Denne siden er en Bryggmester-guide til høsting, lagring og gjenbruk av
+    bryggergjær — fra hva som faktisk ligger i bunnfallet etter gjæring, via
+    praktisk høsting, til når slurryen bør kastes i stedet for gjenbrukes.
+    Dette er ikke en laboratorieprotokoll, og bygger ingen automatisk
+    slurry-/pitch-kalkulator.
+  </p>
+
+  <div class="hjelp-metode-kort" id="slurry-hva">
+    <h3 data-i18n="hjelp.gjaerhosting.slurryHva.tittel">Hva er gjærslurry?</h3>
+    <p data-i18n="hjelp.gjaerhosting.slurryHva.tekst">Bunnfallet som blir igjen etter gjæring er ikke «ren gjær» — det er typisk en blanding av gjærceller, trub, humlerester, proteiner og andre partikler fra resten av bryggeprosessen.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.slurryHva.hvorfor">Hvor mye av hver bestanddel som faktisk er til stede varierer mye: ølstil, humlemengde, gjærstamme, om du cold crashet, hva slags fermenter du brukte, og hvordan ølet ble overført påvirker alle sammen hvordan slurryen ender opp med å se ut.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="hosting-metode">
+    <h3 data-i18n="hjelp.gjaerhosting.hostingMetode.tittel">Høsting — enkel praktisk metode</h3>
+    <p data-i18n="hjelp.gjaerhosting.hostingMetode.tekst">En realistisk høyt-nivå-prosedyre for hjemmebryggeren: fullfør gjæringen normalt, overfør ølet hygienisk, la passende slurry bli igjen i karet, bruk et rent/desinfisert glass eller annen egnet beholder, overfør slurryen med minst mulig unødvendig eksponering, lukk og merk beholderen, og kjøl den ned raskt.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.hostingMetode.hvorfor">Målet er ikke sterilitet — det er urealistisk på et vanlig hjemmebryggeri — men svært god hygiene gjennom hele prosessen. Dette trenger ikke være en komplisert laboratorieprosess for å fungere godt.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="vasking-vs-hosting">
+    <h3 data-i18n="hjelp.gjaerhosting.vaskingVsHosting.tittel">«Gjærvasking» vs. høsting</h3>
+    <p data-i18n="hjelp.gjaerhosting.vaskingVsHosting.tekst">«Gjærvasking» brukes ofte, litt upresist, om å blande slurry med vann og la lagene separere seg. Dette er egentlig ikke ekte acid washing slik enkelte kommersielle bryggerier kan bruke — for hjemmebryggeren er enkel høsting av frisk slurry ofte både enklere og mindre risikabelt.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.vaskingVsHosting.hvorfor">Unødvendig vannbehandling introduserer mer håndtering, mer oksygeneksponering, flere kontaktflater og dermed større infeksjonsrisiko — uten at det nødvendigvis gir noe tilbake. Dette betyr ikke at vannseparasjon alltid er feil, bare at det ikke automatisk er nødvendig for en frisk, sunn slurry.</p>
+  </div>
+
+  <div id="slurry-vurdering">
+  <div class="hjelp-metode-kort" id="lagene-i-glasset">
+    <h3 data-i18n="hjelp.gjaerhosting.lageneIGlasset.tittel">Lagene i glasset</h3>
+    <p data-i18n="hjelp.gjaerhosting.lageneIGlasset.tekst">Etter litt tid i kjøleskapet kan du typisk se noe lagdeling: væske/øl øverst, et lysere krem-/beigefarget lag som ofte inneholder mye gjær, og et mørkere, tyngre lag nederst med mer trub.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.lageneIGlasset.hvorfor">Lagdelingen er ikke perfekt — det øverste lyse laget er ikke 100 % gjær, og det mørke laget er ikke bare søppel. Det er en blanding begge veier, og ulike gjærstammer flokkulerer forskjellig, så slurry kan se svært ulik ut fra brygg til brygg selv med samme fremgangsmåte.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="hvilken-slurry-best">
+    <h3 data-i18n="hjelp.gjaerhosting.hvilkenSlurryBest.tittel">Hvilken slurry er best å høste?</h3>
+    <p data-i18n="hjelp.gjaerhosting.hvilkenSlurryBest.tekst">Generelt foretrekkes frisk slurry fra en sunn, normal gjæring, uten mistanke om infeksjon, uten ekstremt mye humle/trub, og fra et øl som ikke har utsatt gjæren for svært høy alkohol eller annet kraftig stress.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.hvilkenSlurryBest.hvorfor">Gjær fra ekstrem high-gravity, svært alkoholsterkt øl, kraftig humlet øl, surt øl eller en infisert/mistenkelig batch kan være mindre egnet til videre standardbruk. Det finnes ingen universell ABV-grense her — det er en vurdering, ikke et fasttall.</p>
+  </div>
+  </div>
+
+  <div id="generasjoner-drift">
+  <div class="hjelp-metode-kort" id="generasjoner">
+    <h3 data-i18n="hjelp.gjaerhosting.generasjoner.tittel">Generasjoner og passasjer</h3>
+    <p data-i18n="hjelp.gjaerhosting.generasjoner.tekst">En generasjon (eller passasje) telles typisk slik: originalpakken brukes i første fermentering, høstet slurry brukt i et nytt brygg blir neste generasjon, og høstes den igjen blir det enda en generasjon.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.generasjoner.hvorfor">Gjær kan endre karakter over tid — seleksjon skjer i bryggerens eget system, og flokkulering, gjæringshastighet og smaksprofil kan alle sammen drive litt over tid, mens risikoen for kontaminasjon akkumuleres med hver runde håndtering. Det finnes ikke ett universelt «maks antall generasjoner» — bruk konservativ vurdering, og dokumenter hvordan gjæren faktisk oppfører seg fra gang til gang, se <a href="#sjekkliste-logging">sjekkliste og sporbarhet</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="mutasjon-drift">
+    <h3 data-i18n="hjelp.gjaerhosting.mutasjonDrift.tittel">Mutasjon, drift og seleksjon</h3>
+    <p data-i18n="hjelp.gjaerhosting.mutasjonDrift.tekst">Gjæren blir ikke nødvendigvis «en helt ny gjær» bare fordi den er brukt i noen få brygg.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.mutasjonDrift.hvorfor">Over flere generasjoner kan derimot genetisk drift, seleksjon, kontaminasjon og forskjeller i nøyaktig hvilke celler som blir høstet hver gang, gradvis påvirke kulturen. Ikke overdramatiser dette — for de fleste hjemmebryggere handler det om praktisk konsistens og dokumentasjon, ikke om et akutt problem som oppstår etter et bestemt antall brygg.</p>
+  </div>
+  </div>
+
+  <div id="lagring-beholder">
+  <div class="hjelp-metode-kort" id="lagring-slurry">
+    <h3 data-i18n="hjelp.gjaerhosting.lagringSlurry.tittel">Lagring</h3>
+    <p data-i18n="hjelp.gjaerhosting.lagringSlurry.tekst">Kjølig lagring reduserer aktiviteten i slurryen, og gjærens vitalitet faller gradvis med tiden — eldre slurry krever mer vurdering før bruk enn fersk slurry gjør.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.lagringSlurry.hvorfor">Hvor lenge slurry faktisk holder seg brukbar påvirkes av hygiene, temperatur, gjærstamme og hvor sunn gjæringen var i utgangspunktet — det finnes ingen universell «gjær holder X måneder»-regel. Nevnes typiske tidsvinduer et sted, er de grove eksempler, ikke en fasit. Merk gjerne beholderen med dato, gjærstamme, øl/batch, generasjon og eventuell OG/ABV.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="headspace-beholder">
+    <h3 data-i18n="hjelp.gjaerhosting.headspaceBeholder.tittel">Headspace og beholder</h3>
+    <p data-i18n="hjelp.gjaerhosting.headspaceBeholder.tekst">Bruk en egnet ren/desinfisert beholder, og ikke overfyll den — slurry kan fortsatt produsere noe CO₂ etter overføring.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.headspaceBeholder.hvorfor">En helt rigid, tett lukket beholder kan bygge opp trykk dersom fortsatt aktiv gjær jobber videre inni den. Lagringsbeholder og lukking må håndteres på en måte som er trygg for eventuell restaktivitet — ikke bare «skru lokket halvveis» som en tilfeldig universalløsning; vurder faktisk beholder, mengde restaktivitet og hvor lenge den skal stå.</p>
+  </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="nar-kastes">
+    <h3 data-i18n="hjelp.gjaerhosting.narKastes.tittel">Når skal gjæren kastes?</h3>
+    <p data-i18n="hjelp.gjaerhosting.narKastes.tekst">Ikke bruk slurryen videre dersom du merker en tydelig uvanlig eller mistenkelig lukt, ser synlige tegn på mugg, mistenker infeksjon, beholderen har vært dårlig hygienisk håndtert, gjæren kommer fra en batch med en kjent alvorlig prosessfeil eller forurensning, eller gjæren oppfører seg klart unormalt over flere bruk.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.narKastes.hvorfor">Er du i tvil om mikrobiologisk sikkerhet eller kontaminasjon: ny gjær er billigere enn å risikere å ødelegge en hel batch. Bruk tvilen til fordel for forsiktighet, ikke til fordel for å spare en pakke gjær.</p>
+  </div>
+
+  <div id="starter-repitch">
+  <div class="hjelp-metode-kort" id="starter-fra-lagret-gjaer">
+    <h3 data-i18n="hjelp.gjaerhosting.starterFraLagretGjaer.tittel">Starter fra lagret gjær</h3>
+    <p data-i18n-html="hjelp.gjaerhosting.starterFraLagretGjaer.tekst">Lagret slurry kan ha mistet noe vitalitet, og en <a href="index.html#gjaerstarter">gjærstarter</a> kan brukes til å vekke og vurdere gjæren før et nytt brygg — det er også en praktisk mulighet til å observere aktivitet og lukt før du forplikter deg til en hel batch.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.starterFraLagretGjaer.hvorfor">En starter gjør ikke kontaminert gjær «ren» — den er ikke en sikker laboratorietest for kontaminasjon, bare en praktisk indikasjon på om gjæren i det hele tatt jobber som forventet. Denne siden bygger ingen starter-/pitch-kalkulator.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="direkte-repitch">
+    <h3 data-i18n="hjelp.gjaerhosting.direkteRepitch.tittel">Direkte repitch</h3>
+    <p data-i18n="hjelp.gjaerhosting.direkteRepitch.tekst">Direkte repitch av relativt fersk slurry gir vanligvis mindre lagringstid og ofte en høy cellemengde — men cellekonsentrasjonen er fortsatt ukjent uten faktisk måling.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.direkteRepitch.hvorfor">Ett glass slurry er ikke automatisk en perfekt pitch — mengde slurry alene sier ikke noe eksakt om celleantallet, fordi andel gjær, vitalitet og trubmengde alle varierer fra glass til glass. Se <a href="sterke-ol.html#pitch-rate-frisk-gjaer">pitch rate / nok frisk gjær</a> for den bredere sammenhengen, særlig ved sterkere øl.</p>
+  </div>
+  </div>
+
+  <div id="cropping">
+  <div class="hjelp-metode-kort" id="top-cropping">
+    <h3 data-i18n="hjelp.gjaerhosting.topCropping.tittel">Top cropping</h3>
+    <p data-i18n="hjelp.gjaerhosting.topCropping.tekst">Enkelte ale-gjærstammer kan høstes fra krausen under aktiv gjæring, ikke bare fra bunnfallet etter at gjæringen er ferdig. Dette kan gi relativt frisk gjær med mindre trub, og fungerer bedre med enkelte gjærstammer og fermenteringsoppsett enn andre.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.topCropping.hvorfor">Top cropping krever svært god hygiene siden du håndterer aktivt gjærende øl direkte. Dette er en kort Bryggmester-oversikt, ikke hovedmetoden for de fleste hjemmebryggere, og siden bygger ingen detaljert top-cropping-protokoll.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="bottom-cropping">
+    <h3 data-i18n="hjelp.gjaerhosting.bottomCropping.tittel">Bottom cropping / bunnhøsting</h3>
+    <p data-i18n="hjelp.gjaerhosting.bottomCropping.tekst">Høsting fra bunnfallet etter gjæring er den vanligste metoden for hjemmebryggere — en enkel prosess, men den gir alltid en blanding av gjær og trub snarere enn ren gjær.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.bottomCropping.hvorfor">Se <a href="#lagene-i-glasset">lagene i glasset</a> og <a href="#hvilken-slurry-best">hvilken slurry er best å høste</a> over for hvordan du vurderer akkurat den blandingen du sitter igjen med.</p>
+  </div>
+  </div>
+
+  <div id="hosting-spesialtilfeller">
+  <div class="hjelp-metode-kort" id="hosting-trykkgjaering">
+    <h3 data-i18n="hjelp.gjaerhosting.hostingTrykkgjaering.tittel">Gjærhøsting fra trykkgjæring</h3>
+    <p data-i18n="hjelp.gjaerhosting.hostingTrykkgjaering.tekst">Trykkgjæring endrer ikke grunnprinsippet for høsting — hygiene og vurdering av gjærens tilstand er fortsatt like avgjørende som ellers.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.hostingTrykkgjaering.hvorfor">Høsting fra et trykksatt system må gjøres etter sikker trykkavlastning — demonter aldri trykksatt utstyr uten kontrollert depressurisering, se <a href="trykkgjaering.html#sikkerhet-trykk">sikkerhet</a> i trykkgjæringsguiden. Denne siden bygger ingen utstyrsmerke-spesifikk prosedyre.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="hosting-high-gravity">
+    <h3 data-i18n="hjelp.gjaerhosting.hostingHighGravity.tittel">Gjærhøsting etter high gravity</h3>
+    <p data-i18n-html="hjelp.gjaerhosting.hostingHighGravity.tekst">Høy OG og høy alkohol kan gi en mer stresset gjær, se <a href="sterke-ol.html#utfordringer-hoy-og">utfordringene ved høy OG</a>, som igjen kan gjøre slurryen mindre attraktiv for videre gjenbruk.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.hostingHighGravity.hvorfor">Dette betyr ikke at all gjær fra sterke øl automatisk er ubrukelig — vurder gjærhelse og batchhistorikk konkret for akkurat den gjæringen, se <a href="sterke-ol.html#alkoholtoleranse">alkoholtoleranse</a>, i stedet for å avskrive eller gjenbruke automatisk.</p>
+  </div>
+  </div>
+
+  <div id="sjekkliste-logging">
+  <div class="hjelp-metode-kort" id="praktisk-sjekkliste-hosting">
+    <h3 data-i18n="hjelp.gjaerhosting.sjekkliste.tittel">Praktisk sjekkliste</h3>
+    <p data-i18n="hjelp.gjaerhosting.sjekkliste.intro">Tre korte sjekklister som dekker hele kjeden, fra vurdering før høsting til vurdering før gjenbruk:</p>
+    <div data-i18n-html="hjelp.gjaerhosting.sjekkliste.liste">
+      <p><strong>Før høsting:</strong></p>
+      <ul>
+        <li>Var gjæringen sunn?</li>
+        <li>Mistanke om infeksjon?</li>
+        <li>Ekstrem høy OG/ABV?</li>
+        <li>Mye humle/trub?</li>
+        <li>Har du en ren/desinfisert beholder klar?</li>
+      </ul>
+      <p><strong>Ved høsting:</strong></p>
+      <ul>
+        <li>Minst mulig unødvendig håndtering</li>
+        <li>Merk glasset</li>
+        <li>Dato</li>
+        <li>Gjærstamme</li>
+        <li>Batch</li>
+        <li>Generasjon</li>
+      </ul>
+      <p><strong>Før gjenbruk:</strong></p>
+      <ul>
+        <li>Hvor gammel er slurryen?</li>
+        <li>Hvordan ser/lukter den?</li>
+        <li>Hvordan var forrige gjæring?</li>
+        <li>Trenger du en starter?</li>
+        <li>Passer gjæren til neste øl?</li>
+        <li>Er du komfortabel med usikkerheten?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hjelp-metode-kort" id="logging-sporbarhet">
+    <h3 data-i18n="hjelp.gjaerhosting.logging.tittel">Logging og sporbarhet</h3>
+    <p data-i18n="hjelp.gjaerhosting.logging.tekst">Dokumenter gjerne gjærstamme, original batch, høstedato, generasjon, ølets OG/FG/ABV, hvordan gjæringen oppførte seg, og hvilket neste batch slurryen ble brukt i.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.logging.hvorfor">Målet er at du skal kunne se om gjæren endrer seg over tid — ikke at du må føre et fullstendig gjærbank-register. Denne runden bygger ingen full inventory-/gjærbank-funksjon.</p>
+  </div>
+  </div>
+
+  <p class="hjelp-innledning" data-i18n="hjelp.gjaerhosting.avslutning">
+    God gjærhøsting handler mer om jevn, hygienisk rutine og ærlig vurdering
+    av hvert enkelt glass enn om avansert utstyr — de fleste hjemmebryggere
+    klarer seg langt med rene hender, et rent glass, et kjøleskap og litt
+    sunn skepsis.
+  </p>
+  </main>
+</div>
+
+<footer class="no-print">
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="../personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
+<script src="../js/chrome.js"></script>
+</body>
+</html>

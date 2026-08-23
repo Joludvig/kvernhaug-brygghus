@@ -1,0 +1,218 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/gjaerhosting.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yeast Harvesting, Reuse and Slurry — Kvernhaug Brygghus</title>
+<meta content="A Master Brewer guide to harvesting, storing and reusing brewing yeast: what slurry actually is, practical harvesting, generations, storage and when to discard the yeast." data-i18n-content="meta.hjelpGjaerhosting.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/gjaerhosting.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/gjaerhosting.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/gjaerhosting.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/gjaerhosting.html" hreflang="x-default" rel="alternate"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpGjaerhosting.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/gjaerhosting.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="gjaerhosting.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavGjaerhosting">🫙 Yeast Harvesting</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/gjaerhosting.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="gjaerhosting.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/gjaerhosting.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="gjaerhosting.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav class="hjelp-side-nav">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+<a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
+<a class="aktiv" data-i18n="hjelp.sidenavGjaerhosting" href="gjaerhosting.html">🫙 Yeast Harvesting</a>
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.gjaerhosting.toc.slurryHva" href="#slurry-hva">What Is Yeast Slurry?</a>
+<a data-i18n="hjelp.gjaerhosting.toc.hostingMetode" href="#hosting-metode">Harvesting — A Simple Method</a>
+<a data-i18n="hjelp.gjaerhosting.toc.vaskingVsHosting" href="#vasking-vs-hosting">"Yeast Washing" vs. Harvesting</a>
+<a data-i18n="hjelp.gjaerhosting.toc.slurryVurdering" href="#slurry-vurdering">The Layers In The Jar And Which Slurry Is Best</a>
+<a data-i18n="hjelp.gjaerhosting.toc.generasjonerDrift" href="#generasjoner-drift">Generations, Mutation and Drift</a>
+<a data-i18n="hjelp.gjaerhosting.toc.lagringBeholder" href="#lagring-beholder">Storage and Container</a>
+<a data-i18n="hjelp.gjaerhosting.toc.narKastes" href="#nar-kastes">When Should The Yeast Be Discarded?</a>
+<a data-i18n="hjelp.gjaerhosting.toc.starterRepitch" href="#starter-repitch">Starter and Direct Repitch</a>
+<a data-i18n="hjelp.gjaerhosting.toc.cropping" href="#cropping">Top and Bottom Cropping</a>
+<a data-i18n="hjelp.gjaerhosting.toc.hostingSpesialtilfeller" href="#hosting-spesialtilfeller">Harvesting: Pressure Fermentation and High Gravity</a>
+<a data-i18n="hjelp.gjaerhosting.toc.sjekklisteLogging" href="#sjekkliste-logging">Checklist and Traceability</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.gjaerhosting.intro">This page is a Master Brewer guide to harvesting, storing and reusing brewing yeast — from what's actually in the sediment after fermentation, through practical harvesting, to when the slurry should be discarded rather than reused. This is not a laboratory protocol, and it doesn't build an automatic slurry/pitch calculator.</p>
+<div class="hjelp-metode-kort" id="slurry-hva">
+<h3 data-i18n="hjelp.gjaerhosting.slurryHva.tittel">What Is Yeast Slurry?</h3>
+<p data-i18n="hjelp.gjaerhosting.slurryHva.tekst">The sediment left after fermentation isn't "pure yeast" — it's typically a mix of yeast cells, trub, hop debris, proteins and other particles from the rest of the brewing process.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.slurryHva.hvorfor">How much of each component is actually present varies a lot: beer style, hop amount, yeast strain, whether you cold crashed, what kind of fermenter you used, and how the beer was transferred all affect how the slurry ends up looking.</p>
+</div>
+<div class="hjelp-metode-kort" id="hosting-metode">
+<h3 data-i18n="hjelp.gjaerhosting.hostingMetode.tittel">Harvesting — A Simple Practical Method</h3>
+<p data-i18n="hjelp.gjaerhosting.hostingMetode.tekst">A realistic high-level procedure for the homebrewer: finish fermentation normally, transfer the beer hygienically, leave suitable slurry behind in the vessel, use a clean/sanitized jar or other suitable container, transfer the slurry with as little unnecessary exposure as possible, close and label the container, and cool it down quickly.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.hostingMetode.hvorfor">The goal isn't sterility — that's unrealistic on a typical home brewery — but very good hygiene throughout the process. This doesn't need to be a complicated laboratory process to work well.</p>
+</div>
+<div class="hjelp-metode-kort" id="vasking-vs-hosting">
+<h3 data-i18n="hjelp.gjaerhosting.vaskingVsHosting.tittel">"Yeast Washing" vs. Harvesting</h3>
+<p data-i18n="hjelp.gjaerhosting.vaskingVsHosting.tekst">"Yeast washing" is often used, a bit loosely, to mean mixing slurry with water and letting the layers separate. This isn't really true acid washing the way some commercial breweries can use — for the homebrewer, simply harvesting fresh slurry is often both simpler and less risky.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.vaskingVsHosting.hvorfor">Unnecessary water treatment introduces more handling, more oxygen exposure, more contact surfaces, and therefore greater infection risk — without necessarily giving anything back. This doesn't mean water separation is always wrong, just that it isn't automatically necessary for fresh, healthy slurry.</p>
+</div>
+<div id="slurry-vurdering">
+<div class="hjelp-metode-kort" id="lagene-i-glasset">
+<h3 data-i18n="hjelp.gjaerhosting.lageneIGlasset.tittel">The Layers In The Jar</h3>
+<p data-i18n="hjelp.gjaerhosting.lageneIGlasset.tekst">After some time in the fridge you can typically see some layering: liquid/beer on top, a lighter cream/beige layer that often contains a lot of yeast, and a darker, heavier layer at the bottom with more trub.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.lageneIGlasset.hvorfor">The layering isn't perfect — the top light layer isn't 100% yeast, and the dark layer isn't just junk. It's a mix both ways, and different yeast strains flocculate differently, so slurry can look very different from brew to brew even with the same procedure.</p>
+</div>
+<div class="hjelp-metode-kort" id="hvilken-slurry-best">
+<h3 data-i18n="hjelp.gjaerhosting.hvilkenSlurryBest.tittel">Which Slurry Is Best To Harvest?</h3>
+<p data-i18n="hjelp.gjaerhosting.hvilkenSlurryBest.tekst">Generally, fresh slurry from a healthy, normal fermentation is preferred, with no suspicion of infection, without an extreme amount of hops/trub, and from a beer that hasn't exposed the yeast to very high alcohol or other severe stress.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.hvilkenSlurryBest.hvorfor">Yeast from extreme high-gravity, very high-alcohol beer, heavily hopped beer, sour beer, or an infected/suspicious batch can be less suited to further standard use. There's no universal ABV cutoff here — it's a judgment call, not a fixed figure.</p>
+</div>
+</div>
+<div id="generasjoner-drift">
+<div class="hjelp-metode-kort" id="generasjoner">
+<h3 data-i18n="hjelp.gjaerhosting.generasjoner.tittel">Generations and Passages</h3>
+<p data-i18n="hjelp.gjaerhosting.generasjoner.tekst">A generation (or passage) is typically counted like this: the original package is used in the first fermentation, harvested slurry used in a new brew becomes the next generation, and harvesting it again becomes yet another generation.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.generasjoner.hvorfor">Yeast can change character over time — selection happens within the brewer's own system, and flocculation, fermentation speed and flavour profile can all drift somewhat over time, while contamination risk accumulates with each round of handling. There's no single universal "maximum number of generations" — use conservative judgment, and document how the yeast actually behaves each time, see <a href="#sjekkliste-logging">checklist and traceability</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="mutasjon-drift">
+<h3 data-i18n="hjelp.gjaerhosting.mutasjonDrift.tittel">Mutation, Drift and Selection</h3>
+<p data-i18n="hjelp.gjaerhosting.mutasjonDrift.tekst">The yeast doesn't necessarily become "a whole new yeast" just because it's been used for a few brews.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.mutasjonDrift.hvorfor">Over several generations, however, genetic drift, selection, contamination, and differences in exactly which cells get harvested each time can gradually affect the culture. Don't overdramatize this — for most homebrewers it's about practical consistency and documentation, not an acute problem that appears after a specific number of brews.</p>
+</div>
+</div>
+<div id="lagring-beholder">
+<div class="hjelp-metode-kort" id="lagring-slurry">
+<h3 data-i18n="hjelp.gjaerhosting.lagringSlurry.tittel">Storage</h3>
+<p data-i18n="hjelp.gjaerhosting.lagringSlurry.tekst">Cold storage reduces activity in the slurry, and the yeast's vitality gradually declines over time — older slurry needs more assessment before use than fresh slurry does.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.lagringSlurry.hvorfor">How long slurry actually stays usable is affected by hygiene, temperature, yeast strain, and how healthy the fermentation was to begin with — there's no universal "yeast keeps for X months" rule. If typical time windows are mentioned anywhere, they're rough examples, not a fixed answer. Feel free to label the container with date, yeast strain, beer/batch, generation, and any OG/ABV.</p>
+</div>
+<div class="hjelp-metode-kort" id="headspace-beholder">
+<h3 data-i18n="hjelp.gjaerhosting.headspaceBeholder.tittel">Headspace and Container</h3>
+<p data-i18n="hjelp.gjaerhosting.headspaceBeholder.tekst">Use a suitable clean/sanitized container, and don't overfill it — slurry can still produce some CO₂ after transfer.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.headspaceBeholder.hvorfor">A completely rigid, tightly sealed container can build up pressure if still-active yeast keeps working inside it. The storage container and how it's closed need to be handled in a way that's safe for any residual activity — not just a random one-size-fits-all "turn the lid halfway" fix; assess the actual container, the amount of residual activity, and how long it will sit.</p>
+</div>
+</div>
+<div class="hjelp-metode-kort" id="nar-kastes">
+<h3 data-i18n="hjelp.gjaerhosting.narKastes.tittel">When Should The Yeast Be Discarded?</h3>
+<p data-i18n="hjelp.gjaerhosting.narKastes.tekst">Don't reuse the slurry if you notice a clearly unusual or suspicious smell, see visible signs of mould, suspect infection, the container has been poorly handled hygienically, the yeast comes from a batch with a known serious process fault or contamination, or the yeast behaves clearly abnormally over several uses.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.narKastes.hvorfor">If you're in doubt about microbiological safety or contamination: fresh yeast is cheaper than risking ruining a whole batch. Let doubt weigh in favour of caution, not in favour of saving a packet of yeast.</p>
+</div>
+<div id="starter-repitch">
+<div class="hjelp-metode-kort" id="starter-fra-lagret-gjaer">
+<h3 data-i18n="hjelp.gjaerhosting.starterFraLagretGjaer.tittel">Starter From Stored Yeast</h3>
+<p data-i18n-html="hjelp.gjaerhosting.starterFraLagretGjaer.tekst">Stored slurry may have lost some vitality, and a <a href="index.html#gjaerstarter">yeast starter</a> can be used to wake up and assess the yeast before a new brew — it's also a practical opportunity to observe activity and smell before committing to a whole batch.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.starterFraLagretGjaer.hvorfor">A starter doesn't make contaminated yeast "clean" — it isn't a reliable lab test for contamination, just a practical indication of whether the yeast is working as expected at all. This page doesn't build a starter/pitch calculator.</p>
+</div>
+<div class="hjelp-metode-kort" id="direkte-repitch">
+<h3 data-i18n="hjelp.gjaerhosting.direkteRepitch.tittel">Direct Repitch</h3>
+<p data-i18n="hjelp.gjaerhosting.direkteRepitch.tekst">Direct repitching of relatively fresh slurry usually means less storage time and often a high cell count — but the cell concentration is still unknown without an actual measurement.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.direkteRepitch.hvorfor">One jar of slurry isn't automatically a perfect pitch — the amount of slurry alone doesn't tell you the exact cell count, because the yeast percentage, vitality and trub amount all vary from jar to jar. See <a href="sterke-ol.html#pitch-rate-frisk-gjaer">pitch rate / enough fresh yeast</a> for the broader context, especially for stronger beers.</p>
+</div>
+</div>
+<div id="cropping">
+<div class="hjelp-metode-kort" id="top-cropping">
+<h3 data-i18n="hjelp.gjaerhosting.topCropping.tittel">Top Cropping</h3>
+<p data-i18n="hjelp.gjaerhosting.topCropping.tekst">Some ale yeast strains can be harvested from the krausen during active fermentation, not just from the sediment after fermentation is done. This can give relatively fresh yeast with less trub, and works better with some yeast strains and fermenter setups than others.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.topCropping.hvorfor">Top cropping requires very good hygiene since you're handling actively fermenting beer directly. This is a brief Master Brewer overview, not the main method for most homebrewers, and the page doesn't build a detailed top-cropping protocol.</p>
+</div>
+<div class="hjelp-metode-kort" id="bottom-cropping">
+<h3 data-i18n="hjelp.gjaerhosting.bottomCropping.tittel">Bottom Cropping / Sediment Harvesting</h3>
+<p data-i18n="hjelp.gjaerhosting.bottomCropping.tekst">Harvesting from the sediment after fermentation is the most common method for homebrewers — a simple process, but it always gives a mix of yeast and trub rather than pure yeast.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.bottomCropping.hvorfor">See <a href="#lagene-i-glasset">the layers in the jar</a> and <a href="#hvilken-slurry-best">which slurry is best to harvest</a> above for how to assess exactly the mix you end up with.</p>
+</div>
+</div>
+<div id="hosting-spesialtilfeller">
+<div class="hjelp-metode-kort" id="hosting-trykkgjaering">
+<h3 data-i18n="hjelp.gjaerhosting.hostingTrykkgjaering.tittel">Yeast Harvesting From Pressure Fermentation</h3>
+<p data-i18n="hjelp.gjaerhosting.hostingTrykkgjaering.tekst">Pressure fermentation doesn't change the basic principle of harvesting — hygiene and assessing the yeast's condition are still just as critical as otherwise.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.hostingTrykkgjaering.hvorfor">Harvesting from a pressurized system must be done after safe depressurization — never disassemble pressurized equipment without controlled depressurization, see <a href="trykkgjaering.html#sikkerhet-trykk">safety</a> in the pressure fermentation guide. This page doesn't build an equipment-brand-specific procedure.</p>
+</div>
+<div class="hjelp-metode-kort" id="hosting-high-gravity">
+<h3 data-i18n="hjelp.gjaerhosting.hostingHighGravity.tittel">Yeast Harvesting After High Gravity</h3>
+<p data-i18n-html="hjelp.gjaerhosting.hostingHighGravity.tekst">High OG and high alcohol can produce more stressed yeast, see <a href="sterke-ol.html#utfordringer-hoy-og">the challenges of high OG</a>, which can in turn make the slurry less attractive for further reuse.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaerhosting.hostingHighGravity.hvorfor">This doesn't mean all yeast from strong beers is automatically unusable — assess yeast health and batch history specifically for that particular fermentation, see <a href="sterke-ol.html#alkoholtoleranse">alcohol tolerance</a>, rather than automatically writing it off or reusing it.</p>
+</div>
+</div>
+<div id="sjekkliste-logging">
+<div class="hjelp-metode-kort" id="praktisk-sjekkliste-hosting">
+<h3 data-i18n="hjelp.gjaerhosting.sjekkliste.tittel">Practical Checklist</h3>
+<p data-i18n="hjelp.gjaerhosting.sjekkliste.intro">Three short checklists covering the whole chain, from assessment before harvesting to assessment before reuse:</p>
+<div data-i18n-html="hjelp.gjaerhosting.sjekkliste.liste"><p><strong>Before harvesting:</strong></p><ul><li>Was the fermentation healthy?</li><li>Any suspicion of infection?</li><li>Extremely high OG/ABV?</li><li>A lot of hops/trub?</li><li>Do you have a clean/sanitized container ready?</li></ul><p><strong>When harvesting:</strong></p><ul><li>As little unnecessary handling as possible</li><li>Label the jar</li><li>Date</li><li>Yeast strain</li><li>Batch</li><li>Generation</li></ul><p><strong>Before reuse:</strong></p><ul><li>How old is the slurry?</li><li>How does it look/smell?</li><li>How did the previous fermentation go?</li><li>Do you need a starter?</li><li>Does the yeast suit the next beer?</li><li>Are you comfortable with the uncertainty?</li></ul></div>
+</div>
+<div class="hjelp-metode-kort" id="logging-sporbarhet">
+<h3 data-i18n="hjelp.gjaerhosting.logging.tittel">Logging and Traceability</h3>
+<p data-i18n="hjelp.gjaerhosting.logging.tekst">Consider documenting yeast strain, original batch, harvest date, generation, the beer's OG/FG/ABV, how the fermentation behaved, and which next batch the slurry was used in.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaerhosting.logging.hvorfor">The goal is for you to be able to see whether the yeast changes over time — not that you have to keep a full yeast-bank register. This round doesn't build a full inventory/yeast-bank feature.</p>
+</div>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.gjaerhosting.avslutning">Good yeast harvesting is more about a consistent, hygienic routine and honest assessment of each individual jar than about advanced equipment — most homebrewers get a long way with clean hands, a clean jar, a fridge, and a bit of healthy skepticism.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>
