@@ -76,17 +76,34 @@
   <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
 </nav>
 
-<nav class="hjelp-side-nav">
-  <a href="index.html" class="aktiv" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
-  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
-  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
-  <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
-  <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
-  <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
-  <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
-  <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
-  <a href="humle.html" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
-  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+<nav class="hjelp-side-nav" aria-label="Hjelpesider" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Kom i gang</span>
+    <div class="hjelp-nav-lenker">
+      <a href="index.html" class="aktiv" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+      <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+      <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Bryggmester</span>
+    <div class="hjelp-nav-lenker">
+      <a href="gjaervalg.html" data-i18n="hjelp.sidenavGjaervalg">🦠 Gjærvalg</a>
+      <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+      <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+      <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+      <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+      <a href="humle.html" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
+      <a href="klaring.html" data-i18n="hjelp.sidenavKlaring">🔎 Klaring</a>
+      <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Utstyr</span>
+    <div class="hjelp-nav-lenker">
+      <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+    </div>
+  </div>
 </nav>
 
 <div class="hjelp-layout">
@@ -285,7 +302,7 @@
     <article class="hjelp-artikkel" id="gjaer-pavirkning">
       <h3 data-i18n="hjelp.idx.gjaerPavirkning.tittel">Hvordan gjær påvirker ølet</h3>
       <p data-i18n-html="hjelp.idx.gjaerPavirkning.tekst">Gjærvalget påvirker ikke bare <a href="#utgjaering">utgjæring</a> (og dermed FG/ABV), men også smaksstoffer gjæren selv produserer — estere (fruktighet), fenoler (krydder/klove i enkelte hvete- og belgiske stiler) og gjæringstemperaturens innvirkning på begge deler.</p>
-      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerPavirkning.hvorfor"><strong>Hvorfor du bryr deg:</strong> To identiske oppskrifter kan smake påfallende forskjellig med to ulike gjærstammer — selv om OG, FG og IBU er tilnærmet like.</p>
+      <p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerPavirkning.hvorfor"><strong>Hvorfor du bryr deg:</strong> To identiske oppskrifter kan smake påfallende forskjellig med to ulike gjærstammer — selv om OG, FG og IBU er tilnærmet like. Se <a href="gjaervalg.html">gjærvalg</a> for en full gjennomgang av hva stammen faktisk påvirker.</p>
     </article>
 
     <article class="hjelp-artikkel" id="egendefinerte-ingredienser">
@@ -376,7 +393,7 @@
     </article>
     <article class="hjelp-artikkel" id="def-cold-crash">
       <h3 data-i18n="hjelp.idx.defColdCrash.tittel">Cold crash</h3>
-      <p data-i18n-html="hjelp.idx.defColdCrash.tekst">Å kjøle ølet ytterligere ned etter at gjæringen faktisk er ferdig (se <a href="#faq-gjaring-stoppet">gjæringen virker stoppet</a>) — vanlige eksempler ligger et sted mellom 0–4 °C i ett til noen få døgn, men dette varierer med utstyr og ønsket resultat, og er ikke ett fasitall. Lavere temperatur får gjær, proteiner og andre partikler til å sedimentere raskere, som ofte gir et klarere øl. Den raske temperaturendringen kan skape undertrykk i et lukket gjæringskar, som igjen kan trekke inn luft/oksygen dersom karet ikke er tett eller håndtert riktig, se <a href="#def-oksidasjon">oksidasjon etter gjæring</a>.</p>
+      <p data-i18n-html="hjelp.idx.defColdCrash.tekst">Å kjøle ølet ytterligere ned etter at gjæringen faktisk er ferdig (se <a href="#faq-gjaring-stoppet">gjæringen virker stoppet</a>) — vanlige eksempler ligger et sted mellom 0–4 °C i ett til noen få døgn, men dette varierer med utstyr og ønsket resultat, og er ikke ett fasitall. Lavere temperatur får gjær, proteiner og andre partikler til å sedimentere raskere, som ofte gir et klarere øl. Den raske temperaturendringen kan skape undertrykk i et lukket gjæringskar, som igjen kan trekke inn luft/oksygen dersom karet ikke er tett eller håndtert riktig, se <a href="#def-oksidasjon">oksidasjon etter gjæring</a>. Se <a href="klaring.html#cold-crash-klaring">klaring</a> for hva cold crash faktisk virker på — og hva den ikke fikser.</p>
     </article>
     <article class="hjelp-artikkel" id="def-karbonering">
       <h3 data-i18n="hjelp.idx.defKarbonering.tittel">Karbonering</h3>

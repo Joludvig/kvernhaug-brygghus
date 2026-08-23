@@ -67,6 +67,8 @@ PAGES = [
     "hjelp/vannkjemi.html",
     "hjelp/sensorikk.html",
     "hjelp/humle.html",
+    "hjelp/gjaervalg.html",
+    "hjelp/klaring.html",
     "hjelp/utstyr-brewzilla.html",
 ]
 

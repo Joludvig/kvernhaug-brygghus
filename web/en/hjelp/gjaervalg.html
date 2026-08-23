@@ -1,0 +1,325 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/gjaervalg.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yeast Selection — Attenuation, Flocculation, Esters and Phenols — Kvernhaug Brygghus</title>
+<meta content="A practical Master Brewer guide to yeast selection: what the strain actually affects, ale/lager/kveik, attenuation, flocculation, esters and phenols, alcohol tolerance, dry vs. liquid yeast and troubleshooting." data-i18n-content="meta.hjelpGjaervalg.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/gjaervalg.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/gjaervalg.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/gjaervalg.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/gjaervalg.html" hreflang="x-default" rel="alternate"/>
+<link href="../../assets/favicon/favicon.ico" rel="icon" sizes="any"/>
+<link href="../../assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="../../assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="../../assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpGjaervalg.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/gjaervalg.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="gjaervalg.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavGjaervalg">🦠 Yeast Choice</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/gjaervalg.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="gjaervalg.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/gjaervalg.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="gjaervalg.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav aria-label="Help pages" class="hjelp-side-nav" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Getting started</span>
+<div class="hjelp-nav-lenker">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+</div>
+</div>
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Master brewer</span>
+<div class="hjelp-nav-lenker">
+<a class="aktiv" data-i18n="hjelp.sidenavGjaervalg" href="gjaervalg.html">🦠 Yeast Choice</a>
+<a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
+<a data-i18n="hjelp.sidenavGjaerhosting" href="gjaerhosting.html">🫙 Yeast Harvesting</a>
+<a data-i18n="hjelp.sidenavVannkjemiAvansert" href="vannkjemi.html">💧 Water Chemistry</a>
+<a data-i18n="hjelp.sidenavHumle" href="humle.html">🌿 Hops</a>
+<a data-i18n="hjelp.sidenavKlaring" href="klaring.html">🔎 Clarity</a>
+<a data-i18n="hjelp.sidenavSensorikk" href="sensorikk.html">👃 Sensorics</a>
+</div>
+</div>
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Equipment</span>
+<div class="hjelp-nav-lenker">
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</div>
+</div>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.gjaervalg.toc.pavirker" href="#gjaer-pavirker">What yeast choice affects</a>
+<a data-i18n="hjelp.gjaervalg.toc.familier" href="#ale-lager-kveik">Ale, lager and kveik</a>
+<a data-i18n="hjelp.gjaervalg.toc.utgjaering" href="#utgjaering-attenuation">Attenuation: stated vs. actual</a>
+<a data-i18n="hjelp.gjaervalg.toc.flokkulering" href="#flokkulering">Flocculation</a>
+<a data-i18n="hjelp.gjaervalg.toc.estere" href="#estere">Esters</a>
+<a data-i18n="hjelp.gjaervalg.toc.fenoler" href="#fenoler-pof">Phenols and POF</a>
+<a data-i18n="hjelp.gjaervalg.toc.alkoholtoleranse" href="#alkoholtoleranse-gjaer">Alcohol tolerance</a>
+<a data-i18n="hjelp.gjaervalg.toc.temperatur" href="#temperaturomrade">Temperature range</a>
+<a data-i18n="hjelp.gjaervalg.toc.torrFlytende" href="#torr-vs-flytende">Dry vs. liquid yeast</a>
+<a data-i18n="hjelp.gjaervalg.toc.pitch" href="#pakke-vs-pitch">One packet is not a pitch rate</a>
+<a data-i18n="hjelp.gjaervalg.toc.beslutning" href="#velge-til-oppskrift">Choosing yeast for the recipe</a>
+<a data-i18n="hjelp.gjaervalg.toc.sammeVort" href="#samme-vort-ulik-gjaer">Same wort, different yeast</a>
+<a data-i18n="hjelp.gjaervalg.toc.produsentark" href="#lese-produsentark">Reading a spec sheet</a>
+<a data-i18n="hjelp.gjaervalg.toc.trykk" href="#gjaer-og-trykk">Yeast choice and pressure</a>
+<a data-i18n="hjelp.gjaervalg.toc.gjenbruk" href="#gjaer-og-gjenbruk">Yeast choice and reuse</a>
+<a data-i18n="hjelp.gjaervalg.toc.feilsoking" href="#feilsoking-gjaervalg">Yeast troubleshooting</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.gjaervalg.intro">This page builds on the short introduction in <a href="index.html#om-gjaer">Help &amp; FAQ</a> and works through what a yeast choice actually does to the beer: attenuation, flocculation, ester and phenol character, alcohol tolerance and working temperature range. The goal is to be able to reason your way to a strain that fits the recipe — not to name one "best" yeast. Equipment, wort and process affect the result just as much as the name on the packet.</p>
+<div class="hjelp-metode-kort" id="gjaer-pavirker">
+<h3 data-i18n="hjelp.gjaervalg.pavirker.tittel">Yeast Choice Affects More Than "Ale or Lager"</h3>
+<p data-i18n="hjelp.gjaervalg.pavirker.tekst">It is easy to think of yeast as a binary choice between ale and lager. In practice the strain is one of the most formative ingredients in the recipe: it decides not just whether the beer ferments, but to a large degree how it tastes, how dry it comes across, how quickly it clears and how much sediment you end up with.</p>
+<ul data-i18n-html="hjelp.gjaervalg.pavirker.liste"><li><strong>Attenuation</strong> — how much of the fermentable sugar is actually used up, and therefore FG, perceived dryness and residual sweetness.</li><li><strong>Flocculation</strong> — how quickly the yeast clumps and drops out, which in turn affects clarity and sediment.</li><li><strong>Ester profile</strong> — fruity aromas such as banana, pear, apple, stone fruit or tropical notes.</li><li><strong>Phenol profile</strong> — clove, pepper and spice notes in strains that produce them.</li><li><strong>Alcohol tolerance</strong> — how well the strain typically works its way through a strong wort.</li><li><strong>Working temperature range</strong> — the range the strain normally ferments in, and where within that range the character shifts.</li><li><strong>Fermentation speed</strong> — how quickly the process typically starts and finishes.</li><li><strong>Sulfur production</strong> — some strains give a noticeable sulfur note during the process.</li><li><strong>Mouthfeel and residual sweetness</strong> — via attenuation, glycerol and which sugars the strain leaves behind.</li><li><strong>Clarity and sedimentation</strong> — how long the yeast stays in suspension.</li><li><strong>Fit for style and recipe</strong> — whether the character pulls in the same direction as the rest of the recipe.</li></ul>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.pavirker.hvorfor"><strong>Why you care:</strong> The main help briefly explains <a href="index.html#gjaer-pavirkning">what the yeast affects</a>. Here we go further: every point above is a dial you can turn when picking a strain. The numbers on a spec sheet are decision support, not guarantees — they were measured in the producer's wort and process, not in yours.</p>
+</div>
+<div class="hjelp-metode-kort" id="ale-lager-kveik">
+<h3 data-i18n="hjelp.gjaervalg.familier.tittel">Ale, Lager and Kveik — Practical Differences</h3>
+<p data-i18n="hjelp.gjaervalg.familier.tekst">The three big families differ mainly in the temperature range they typically work in, and in how much character they usually contribute. Within each family the spread is wide — the variation between two strains in the same family can be larger than the difference between the families.</p>
+<table class="hjelp-tabell">
+<thead><tr>
+<th data-i18n="hjelp.gjaervalg.familietabell.kol1">Family</th>
+<th data-i18n="hjelp.gjaervalg.familietabell.kol2">Typical working range</th>
+<th data-i18n="hjelp.gjaervalg.familietabell.kol3">Often associated with</th>
+</tr></thead>
+<tbody>
+<tr>
+<td data-i18n="hjelp.gjaervalg.familietabell.r1c1">Ale</td>
+<td data-i18n="hjelp.gjaervalg.familietabell.r1c2">Typically warmer fermentation than lager.</td>
+<td data-i18n="hjelp.gjaervalg.familietabell.r1c3">Often more ester contribution, but entirely dependent on strain and temperature. The spread runs from very neutral strains to very expressive ones.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.familietabell.r2c1">Lager</td>
+<td data-i18n="hjelp.gjaervalg.familietabell.r2c2">Typically cooler fermentation.</td>
+<td data-i18n="hjelp.gjaervalg.familietabell.r2c3">Often a cleaner profile with less ester. Some strains give noticeable sulfur along the way, and maturation/lagering can be an important part of the process.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.familietabell.r3c1">Kveik</td>
+<td data-i18n="hjelp.gjaervalg.familietabell.r3c2">Many strains tolerate high temperatures.</td>
+<td data-i18n="hjelp.gjaervalg.familietabell.r3c3">Fast fermentation can occur. The profile varies enormously between cultures — from clean to strongly fruity. Not one flavor and not one process.</td>
+</tr>
+</tbody>
+</table>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.familier.hvorfor"><strong>Avoid the three most common oversimplifications:</strong> "ale = fruity", "lager = flavorless" and "kveik = always tropical" are not true as absolutes. There are very neutral ale strains, lager strains with distinct character of their own, and kveik strains that range from clean and simple to strongly fruity. "Kveik" is also an umbrella term for many different cultures of different origin — not one flavor and not one process. Use the producer's description of the specific strain, not the family name, as your starting point.</p>
+</div>
+<div class="hjelp-metode-kort" id="utgjaering-attenuation">
+<h3 data-i18n="hjelp.gjaervalg.utgjaering.tittel">Attenuation — The Producer's Number Is Not Your FG</h3>
+<p data-i18n-html="hjelp.gjaervalg.utgjaering.tekst">A spec sheet usually gives attenuation as a range, for example "75–80%". That number describes what the strain typically achieved in the producer's standard wort. Your actual <a href="index.html#fg">FG</a> depends just as much on the wort you make as on the strain you pick — see also <a href="index.html#utgjaering">attenuation</a> in the main help.</p>
+<ul data-i18n-html="hjelp.gjaervalg.utgjaering.liste"><li><strong>Fermentability of the wort</strong> — how much of the sugar is fermentable at all.</li><li><strong>Mash temperature and time</strong> — directly shapes the sugar profile, see <a href="index.html#def-mesking">mashing</a> and <a href="bryggemetoder.html">brewing methods</a>.</li><li><strong>Sugar profile</strong> — the share of simple, readily fermentable sugars versus longer chains.</li><li><strong>OG</strong> — a high starting gravity stresses the yeast more, see <a href="sterke-ol.html">strong beers</a>.</li><li><strong>Yeast health and quantity</strong> — see <a href="index.html#gjaerhelse-temperatur">yeast health and temperature</a>.</li><li><strong>Oxygenation at pitch</strong> — see <a href="sterke-ol.html#oksygenering">oxygenation</a>.</li><li><strong>Temperature during fermentation</strong> — too cold can slow or stall the process.</li><li><strong>Alcohol tolerance</strong> — can become limiting in strong beers.</li><li><strong>Time</strong> — the fermentation may have more left to give than you think.</li></ul>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.utgjaering.hvorfor"><strong>This is why two strains can give different FG in the same recipe:</strong> They do not necessarily use the same sugars. Some strains can break down longer sugar chains that others leave alone, and they differ in how well they tolerate alcohol and a temperature drop towards the end. The same wort can therefore land on two different FG values — both "correct" for their strain. If FG falls much lower than expected without explanation, it is worth considering <a href="sensorikk.html#infeksjon">other activity</a> or <a href="humle.html#hop-creep">hop creep</a> as well.</p>
+</div>
+<div class="hjelp-metode-kort" id="flokkulering">
+<h3 data-i18n="hjelp.gjaervalg.flokkulering.tittel">Flocculation — How Willingly the Yeast Drops Out</h3>
+<p data-i18n="hjelp.gjaervalg.flokkulering.tekst">Flocculation describes how readily yeast cells clump together and sink once they are done working. Producers usually state it as low, medium or high. High flocculation means the yeast packs quickly and firmly at the bottom; low flocculation means the cells stay in suspension longer.</p>
+<ul data-i18n-html="hjelp.gjaervalg.flokkulering.liste"><li><strong>High flocculation</strong> — the beer often clears faster on its own, and the sediment tends to be more compact. On the other hand, very flocculent strains can under some conditions drop out before they have finished the job, so fermentation appears to stall high.</li><li><strong>Low flocculation</strong> — the yeast stays in suspension longer. That can mean longer-lasting haze and more yeast in the finished beer, but also a yeast that keeps working in the wort for longer.</li><li><strong>Medium</strong> — a compromise, and the most common starting point for many styles.</li></ul>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.flokkulering.hvorfor"><strong>High flocculation is not automatically "better":</strong> What is desirable depends on style and process. If the beer clears quickly but FG sits higher than expected, a flocculent strain may have settled too early — gentle rousing or slightly higher temperature towards the end can help, but always measure FG over time before concluding. Flocculation is also the single most important link between yeast choice and <a href="klaring.html">clarity</a>, see <a href="klaring.html#klaring-og-gjaervalg">clarity and yeast choice</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="estere">
+<h3 data-i18n="hjelp.gjaervalg.estere.tittel">Esters — The Fruitiness the Yeast Makes</h3>
+<p data-i18n-html="hjelp.gjaervalg.estere.tekst">Esters are aroma compounds the yeast produces during fermentation, and they typically come across as fruit: banana, pear, apple, stone fruit or more tropical notes. The <a href="sensorikk.html#estere">sensory guide</a> describes how to recognize them in the glass — here the focus is how strain and process affect how much you get.</p>
+<ul data-i18n-html="hjelp.gjaervalg.estere.liste"><li><strong>Strain</strong> — the single biggest factor. Some strains are built for ester expression, others are chosen precisely because they give little.</li><li><strong>Temperature</strong> — higher fermentation temperature often gives more ester expression in many strains.</li><li><strong>Pitch rate</strong> — too little yeast can give more ester character because the cells have to multiply more.</li><li><strong>Oxygenation</strong> — affects cell growth, and thereby indirectly ester production.</li><li><strong>Pressure</strong> — can suppress ester expression in some strains, see <a href="trykkgjaering.html">pressure fermentation</a>.</li><li><strong>Wort strength</strong> — high OG can give more ester character, see <a href="sterke-ol.html">strong beers</a>.</li></ul>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaervalg.estere.hvorfor">Wanted, neutral or unwanted? It depends on style and intensity. Banana in a weissbier is a style-appropriate signature; the same note in a pilsner quickly reads as a fault. Esters are therefore not a fault category in themselves — the question is always whether the amount and type suit the beer you are trying to make.</p>
+</div>
+<div class="hjelp-metode-kort" id="fenoler-pof">
+<h3 data-i18n="hjelp.gjaervalg.fenoler.tittel">Phenols and POF — Clove, Pepper and Spice</h3>
+<p data-i18n-html="hjelp.gjaervalg.fenoler.tekst">Some yeast strains produce phenolic compounds perceived as clove, pepper or spice. Such strains are usually described as <strong>POF+</strong> (phenolic off-flavour positive); strains that do not, as <strong>POF−</strong>. The term "off-flavour" is historical and slightly misleading: in weissbier, saison and many Belgian styles this character is exactly what is wanted.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.fenoler.hvorfor"><strong>Practical significance for yeast selection:</strong> If you are brewing a style that lives on spice character, you have to pick a strain that actually makes it — it cannot be mashed or hopped into existence. If you are brewing a clean pilsner or a modern IPA, a POF+ strain is the wrong tool. At the same time, note that a <em>medicinal or plastic</em> character does not automatically come from the yeast: chlorine- and chloramine-related compounds or contamination can give a similar impression, see <a href="sensorikk.html#fenoler">phenols in the sensory guide</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="alkoholtoleranse-gjaer">
+<h3 data-i18n="hjelp.gjaervalg.alkoholtoleranse.tittel">Alcohol Tolerance — Indicative, Not a Guarantee</h3>
+<p data-i18n-html="hjelp.gjaervalg.alkoholtoleranse.tekst">The producer usually states an alcohol tolerance, for example "up to 10%". That is an indicative figure for how far the strain typically works under good conditions — not a guarantee that your particular wort will ferment cleanly out to that strength. See <a href="sterke-ol.html#alkoholtoleranse">alcohol tolerance in strong beers</a> for the full treatment.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.alkoholtoleranse.hvorfor"><strong>What decides whether you get there:</strong> High OG puts osmotic stress on the yeast even before alcohol builds up. The amount and freshness of the yeast you pitch, oxygenation, yeast nutrient, temperature control and the sugar profile of the wort all affect whether the strain actually holds out. Two brews with the same strain and the same target ABV can therefore end up completely differently. If you are planning a strong beer, pick a strain with some margin — and give it the conditions it needs, see <a href="sterke-ol.html#gjaer-forberedelse">preparing the yeast</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="temperaturomrade">
+<h3 data-i18n="hjelp.gjaervalg.temperatur.tittel">Temperature Range — "Can Ferment At" Is Not "Tastes Best At"</h3>
+<p data-i18n="hjelp.gjaervalg.temperatur.tekst">The producer states a recommended temperature range for the strain. It is worth reading as two pieces of information in one: where the strain works at all, and where it gives the character the producer describes. The lower and upper parts of the same range can give noticeably different beer from the same wort.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.temperatur.hvorfor"><strong>Practical consequence:</strong> Some strains tolerate a wide range without the whole range giving the desired profile. A strain that "can ferment up to 30 °C" says nothing about tasting best there. So pick a strain to match the temperature you can actually hold stable through the whole process — not the one you hope to hit. If your temperature control is limited, it is often wiser to pick a strain that is forgiving in your range than to force a demanding strain into the wrong conditions. See <a href="index.html#gjaerhelse-temperatur">yeast health and temperature</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="torr-vs-flytende">
+<h3 data-i18n="hjelp.gjaervalg.torrFlytende.tittel">Dry and Liquid Yeast — Two Formats, Not a Quality Hierarchy</h3>
+<table class="hjelp-tabell">
+<thead><tr>
+<th data-i18n="hjelp.gjaervalg.formattabell.kol1">Format</th>
+<th data-i18n="hjelp.gjaervalg.formattabell.kol2">Practical properties</th>
+</tr></thead>
+<tbody>
+<tr>
+<td data-i18n="hjelp.gjaervalg.formattabell.r1c1">Dry yeast</td>
+<td data-i18n="hjelp.gjaervalg.formattabell.r1c2">Often robust and forgiving to handle. A high cell count per packet can occur. Easy storage and transport, and a long shelf life when stored correctly. The selection is large, but not every strain exists in dried form.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.formattabell.r2c1">Liquid yeast</td>
+<td data-i18n="hjelp.gjaervalg.formattabell.r2c2">Gives access to a wider selection of strains, including many style-typical and specialized cultures. Freshness and cell count can matter more, and a starter may be relevant depending on age, volume and OG.</td>
+</tr>
+</tbody>
+</table>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.torrFlytende.hvorfor"><strong>Neither format is "better":</strong> They have different practical properties. Dry yeast is easy to store and transport and is often robust; liquid yeast gives access to a wider selection of strains. Whether you need a <a href="index.html#gjaerstarter">yeast starter</a> depends on cell count, freshness, batch volume and OG — not on the format alone. Follow the producer's instructions for rehydration or direct pitching for the specific packet you have.</p>
+</div>
+<div class="hjelp-metode-kort" id="pakke-vs-pitch">
+<h3 data-i18n="hjelp.gjaervalg.pitch.tittel">One Packet Is Not a Pitch Rate</h3>
+<p data-i18n="hjelp.gjaervalg.pitch.tekst">"I pitched one packet" says little on its own. How much yeast is actually needed depends on batch volume, OG, the cell count in the packet, how fresh it is, and what type of yeast it is. Two brews with "one packet" can therefore start from completely different positions.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.pitch.hvorfor"><strong>The principle, not a calculation:</strong> This page gives you no pitch-rate calculator, and the recipe builder does not compute cell counts. The point is to know which factors matter, and to use the producer's own recommendations for the packet you actually have. A strong beer normally requires more healthy yeast than an ordinary beer of the same volume — see <a href="sterke-ol.html#pitch-rate-frisk-gjaer">pitch rate and fresh yeast</a>. If you are pitching harvested slurry instead, see <a href="gjaerhosting.html#slurry-vurdering">assessing slurry</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="velge-til-oppskrift">
+<h3 data-i18n="hjelp.gjaervalg.beslutning.tittel">Choosing Yeast for the Recipe — A Practical Order</h3>
+<p data-i18n="hjelp.gjaervalg.beslutning.tekst">A workable flow is to move from desired outcome towards practical constraints, in this order. The answers narrow the field as you go, and the last points act as a reality check.</p>
+<ol data-i18n-html="hjelp.gjaervalg.beslutning.liste"><li><strong>What end profile do I want?</strong> Clean, fruity, phenolic, malt-driven, dry or full.</li><li><strong>What OG and expected ABV?</strong> Sets requirements for alcohol tolerance and yeast quantity.</li><li><strong>What fermentation temperature can I actually hold?</strong> Stably, through the whole process — not in theory.</li><li><strong>How dry should the beer come across?</strong> Points towards a desired attenuation level.</li><li><strong>How important are clarity and low sediment?</strong> Points towards a desired flocculation.</li><li><strong>Do I want ester and phenol character, or do I want to avoid it?</strong></li><li><strong>Do I need high alcohol tolerance?</strong> Only relevant for stronger beers.</li><li><strong>Dry or liquid yeast?</strong> Based on availability, storage and what the strain exists as.</li><li><strong>Can I pitch enough healthy yeast?</strong> If not, adjust ambition, plan a starter, or pick another strain.</li></ol>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.beslutning.hvorfor"><strong>Yeast selection is recipe design:</strong> The order above is deliberate — profile and strength first, practical constraints last, so you discover early if the ambition does not match the equipment. If you swap yeast in an existing recipe, you potentially change FG, aroma and clarity, not just "the yeast line". See <a href="index.html#faq-bytte-gjaer">can I change yeast?</a> in the FAQ.</p>
+</div>
+<div class="hjelp-metode-kort" id="samme-vort-ulik-gjaer">
+<h3 data-i18n="hjelp.gjaervalg.sammeVort.tittel">Same Wort, Two Strains — Two Different Beers</h3>
+<p data-i18n="hjelp.gjaervalg.sammeVort.tekst">Split the same wort into two fermenters and pitch two different strains, and you do not get two variants of the same beer — you get two beers. This is one of the most instructive exercises a homebrewer can do, and it shows concretely how much of the "recipe" is actually decided during fermentation.</p>
+<ul data-i18n-html="hjelp.gjaervalg.sammeVort.liste"><li><strong>FG</strong> can end differently because the strains use the sugars differently.</li><li><strong>Aroma</strong> can go from neutral to distinctly fruity or spicy.</li><li><strong>Mouthfeel</strong> can come across thinner or fuller, partly as a result of different FG.</li><li><strong>Clarity</strong> can develop at a completely different pace because of flocculation.</li><li><strong>The perception of alcohol</strong> can vary even at the same ABV, depending on residual sweetness and character.</li><li><strong>Maturation time</strong> can differ — some profiles need longer to settle.</li></ul>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaervalg.sammeVort.hvorfor">No particular commercial yeast is a universal answer here, and Kvernhaug Brygghus does not recommend any single strain as "the standard yeast". The point is the principle: if you want to understand what the yeast does, a split wort teaches you more than reading ten spec sheets.</p>
+</div>
+<div class="hjelp-metode-kort" id="lese-produsentark">
+<h3 data-i18n="hjelp.gjaervalg.produsentark.tittel">Reading a Spec Sheet — A Simple Checklist</h3>
+<p data-i18n="hjelp.gjaervalg.produsentark.tekst">Most yeast producers state the same information, though in slightly different words. Going through them in this order gives you the basis for a deliberate choice.</p>
+<table class="hjelp-tabell">
+<thead><tr>
+<th data-i18n="hjelp.gjaervalg.arktabell.kol1">Field on the sheet</th>
+<th data-i18n="hjelp.gjaervalg.arktabell.kol2">What you use it for</th>
+</tr></thead>
+<tbody>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r1c1">Type / family</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r1c2">Ale, lager, kveik or other — gives a first indication of temperature range and expected character.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r2c1">Temperature</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r2c2">Recommended range. Remember that the lower and upper parts can give a different profile, and that "can ferment at" is not "tastes best at".</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r3c1">Attenuation</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r3c2">An indicative range measured in the producer's wort. Use it to compare strains, not to predict your FG.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r4c1">Flocculation</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r4c2">Low, medium or high. Points towards expected clarity, sediment and how long the yeast stays in suspension.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r5c1">Alcohol tolerance</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r5c2">How far the strain typically works under good conditions. Indicative, not a guarantee.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r6c1">Ester and phenol description</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r6c2">The producer's own words about the character, often the most useful part of the sheet. Note whether the strain is POF+ or POF−.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r7c1">Pitch guidance</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r7c2">The producer's recommendation for quantity, rehydration and any starter for this specific packet.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r8c1">Storage and best-before</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r8c2">How the packet should be stored, and how old it is. Affects how much viable yeast you are actually pitching.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.gjaervalg.arktabell.r9c1">Recommended styles</td>
+<td data-i18n="hjelp.gjaervalg.arktabell.r9c2">Useful as a starting point, but not a limitation. The list says where the strain is proven, not where it is allowed.</td>
+</tr>
+</tbody>
+</table>
+<p class="hjelp-hvorfor" data-i18n="hjelp.gjaervalg.produsentark.hvorfor">The spec sheet is decision support, not a guarantee. The numbers were measured in the producer's wort, with the producer's pitch rate and process. Your result can deviate without anything being wrong — with the yeast or with you. Use the sheet to compare strains with each other, and your own log to learn what the strain does in your system.</p>
+</div>
+<div class="hjelp-metode-kort" id="gjaer-og-trykk">
+<h3 data-i18n="hjelp.gjaervalg.trykk.tittel">Yeast Choice and Pressure</h3>
+<p data-i18n-html="hjelp.gjaervalg.trykk.tekst">If you ferment under pressure, strain choice becomes an extra variable. Pressure can suppress ester expression in some strains, and thereby offers a way to ferment warmer without getting as much fruit character. See <a href="trykkgjaering.html">pressure fermentation</a> for the method, equipment and safety.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.trykk.hvorfor"><strong>Do not assume the same pressure suits every strain:</strong> Strains respond differently, both in how much pressure they tolerate and in how much of the character is actually suppressed. Too much pressure can inhibit or stress the yeast and give a slower or incomplete fermentation. When in the process the pressure is applied also matters, see <a href="trykkgjaering.html#nar-trykket-pafores">when pressure is applied</a>. Use the producer's recommendation for the strain if there is one, and treat the first brew with a new combination as an experiment.</p>
+</div>
+<div class="hjelp-metode-kort" id="gjaer-og-gjenbruk">
+<h3 data-i18n="hjelp.gjaervalg.gjenbruk.tittel">Yeast Choice and Reuse</h3>
+<p data-i18n-html="hjelp.gjaervalg.gjenbruk.tekst">If you harvest yeast for the next brew, you inherit the strain's properties — but not necessarily exactly the same behavior. See <a href="gjaerhosting.html">yeast harvesting and reuse</a> for method, storage and slurry assessment.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.gjenbruk.hvorfor"><strong>Consequence for the choice:</strong> If you plan to reuse the yeast across several brews, it is worth picking a strain you actually want to brew repeatedly, and thinking through the order of the brews. Yeast health, generation number and cleanliness affect the result, see <a href="gjaerhosting.html#generasjoner-drift">generations and drift</a>. "The same yeast" does not automatically mean an identical result after many passages — traceability and notes are what separate reuse from guesswork.</p>
+</div>
+<div id="feilsoking-gjaervalg">
+<h3 data-i18n="hjelp.gjaervalg.feilsoking.tittel">Troubleshooting — Yeast and Yeast Selection</h3>
+<p class="hjelp-innledning" data-i18n="hjelp.gjaervalg.feilsoking.intro">Short practical troubleshooting with yeast selection as the angle. This does not replace sensory troubleshooting, but points at what is worth considering first.</p>
+<table class="hjelp-tabell">
+<thead><tr>
+<th data-i18n="hjelp.gjaervalg.feilsoking.kol1">Situation</th>
+<th data-i18n="hjelp.gjaervalg.feilsoking.kol2">Consider</th>
+</tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.gjaervalg.feilsoking.a.situasjon">A. Too sweet / FG higher than expected</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.a.vurder">The strain's stated attenuation, the fermentability of the wort and mash temperature, fermentation temperature, yeast health and pitch rate, alcohol tolerance if OG was high, whether a flocculent strain has settled too early, and plain measurement error — see <a href="index.html#faq-for-sott">too sweet</a> and <a href="sensorikk.html#sott-hoy-fg">sweetness and high FG</a>.</td></tr>
+<tr><td data-i18n="hjelp.gjaervalg.feilsoking.b.situasjon">B. Too fruity for the style</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.b.vurder">The strain's ester profile, fermentation temperature (especially early in the process), pitch rate, oxygenation, pressure if used, and wort strength — see <a href="sensorikk.html#estere">esters</a>.</td></tr>
+<tr><td data-i18n="hjelp.gjaervalg.feilsoking.c.situasjon">C. Too spicy / phenolic</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.c.vurder">Whether the strain is POF+, whether the character is actually style-appropriate, possible contamination, and chlorine/chloramine-related compounds from the water — see <a href="sensorikk.html#fenoler">phenols</a>.</td></tr>
+<tr><td data-i18n="hjelp.gjaervalg.feilsoking.d.situasjon">D. The beer takes a long time to clear</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.d.vurder">The strain's flocculation, temperature, yeast still in suspension, protein and polyphenols, and which clarification process you are actually using — see <a href="klaring.html">clarity and haze</a>.</td></tr>
+<tr><td data-i18n="hjelp.gjaervalg.feilsoking.e.situasjon">E. Stalled fermentation in a strong beer</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.e.vurder">Alcohol tolerance, pitch rate and yeast health, yeast nutrient, oxygenation at pitch, and temperature control through the process — see <a href="sterke-ol.html#nar-gjaeringen-stopper-hoyt">when fermentation stalls high</a>.</td></tr>
+<tr><td data-i18n="hjelp.gjaervalg.feilsoking.f.situasjon">F. Noticeable sulfur during fermentation</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.f.vurder">Some strains, particularly in the lager family, give sulfur as a normal part of the process. Consider strain, temperature and time before treating it as a fault — see <a href="index.html#faq-svovel">sulfur</a> and <a href="sensorikk.html#svovel">sulfur in the sensory guide</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.gjaervalg.avslutning">Yeast selection is part of recipe design, not an afterthought. The strain, the temperature you can actually hold, the amount of healthy yeast you can pitch and the fermentability of the wort all work together — and it is the combination, not any single spec sheet, that decides what ends up in the glass.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klaring og haze — break, finings, cold crash og chill haze — Kvernhaug Brygghus</title>
+<meta name="description" content="Praktisk Bryggmester-guide til klaring: hva som gjør øl uklart, hot og cold break, trub, kettle finings, cold crash, gelatin, chill haze og feilsøking." data-i18n-content="meta.hjelpKlaring.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/hjelp/klaring.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/klaring.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/klaring.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/klaring.html">
+<link rel="icon" href="../assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon/apple-touch-icon.png">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpKlaring.tittel">
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="klaring.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/klaring.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavKlaring">🔎 Klaring</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="klaring.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/klaring.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="klaring.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/klaring.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="../pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="../bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<nav class="hjelp-side-nav" aria-label="Hjelpesider" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Kom i gang</span>
+    <div class="hjelp-nav-lenker">
+      <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+      <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+      <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Bryggmester</span>
+    <div class="hjelp-nav-lenker">
+      <a href="gjaervalg.html" data-i18n="hjelp.sidenavGjaervalg">🦠 Gjærvalg</a>
+      <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+      <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+      <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+      <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+      <a href="humle.html" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
+      <a href="klaring.html" class="aktiv" data-i18n="hjelp.sidenavKlaring">🔎 Klaring</a>
+      <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Utstyr</span>
+    <div class="hjelp-nav-lenker">
+      <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
+    <a href="#hva-er-klart" data-i18n="hjelp.klaring.toc.hvaErKlart">Hva betyr «klart øl»?</a>
+    <a href="#haze-kilder" data-i18n="hjelp.klaring.toc.kilder">Hva gjør øl uklart?</a>
+    <a href="#hot-break" data-i18n="hjelp.klaring.toc.hotBreak">Hot break</a>
+    <a href="#cold-break" data-i18n="hjelp.klaring.toc.coldBreak">Cold break</a>
+    <a href="#trub" data-i18n="hjelp.klaring.toc.trub">Trub</a>
+    <a href="#whirlpool-klaring" data-i18n="hjelp.klaring.toc.whirlpool">Whirlpool og trub</a>
+    <a href="#kettle-finings" data-i18n="hjelp.klaring.toc.kettleFinings">Irish moss / Whirlfloc</a>
+    <a href="#cold-crash-klaring" data-i18n="hjelp.klaring.toc.coldCrash">Cold crash</a>
+    <a href="#gelatin" data-i18n="hjelp.klaring.toc.gelatin">Gelatin</a>
+    <a href="#andre-finings" data-i18n="hjelp.klaring.toc.andreFinings">Andre finings</a>
+    <a href="#chill-haze" data-i18n="hjelp.klaring.toc.chillHaze">Chill haze</a>
+    <a href="#haze-stabilitet" data-i18n="hjelp.klaring.toc.stabilitet">Haze over tid</a>
+    <a href="#klarhet-og-stil" data-i18n="hjelp.klaring.toc.stil">Klarhet og stil</a>
+    <a href="#klaring-og-gjaervalg" data-i18n="hjelp.klaring.toc.gjaervalg">Klaring og gjærvalg</a>
+    <a href="#feilsoking-klaring" data-i18n="hjelp.klaring.toc.feilsoking">Feilsøking klaring</a>
+    <a href="#klaringsplan" data-i18n="hjelp.klaring.toc.plan">Praktisk klaringsplan</a>
+  </nav>
+
+  <main class="hjelp-side-main">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.klaring.intro">
+    Klarhet er en av de mest synlige egenskapene ved et øl — og en av de mest misforståtte. Denne siden går gjennom hva som faktisk gjør øl uklart, hvilke verktøy du har for å påvirke det, og når uklarhet ikke er et problem i det hele tatt. Den henger tett sammen med <a href="gjaervalg.html">gjærvalg</a>, siden flokkulering er en av de sterkeste enkeltfaktorene for hvor lett et øl klarner.
+  </p>
+
+  <div class="hjelp-metode-kort" id="hva-er-klart">
+    <h3 data-i18n="hjelp.klaring.hvaErKlart.tittel">Hva betyr egentlig «klart øl»?</h3>
+    <p data-i18n="hjelp.klaring.hvaErKlart.tekst">«Klart» brukes ofte som om det var det samme som «ferdig» eller «bra». Det er fire forskjellige egenskaper, og de henger ikke nødvendigvis sammen.</p>
+    <ul data-i18n-html="hjelp.klaring.hvaErKlart.liste"><li><strong>Visuelt klart</strong> — du ser gjennom ølet. Sier noe om partikler i suspensjon, ikke om smak.</li><li><strong>Stabilt</strong> — utseende og smak endrer seg lite over tid ved riktig lagring.</li><li><strong>Ferdig gjæret</strong> — FG har stått stabilt over flere målinger, se <a href="index.html#def-fg-maling">FG-måling</a>.</li><li><strong>Sensorisk godt</strong> — ølet smaker slik du ville det skulle smake.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.hvaErKlart.hvorfor"><strong>Klart er ikke automatisk bedre, og uklart er ikke automatisk feil.</strong> Et krystallklart øl kan være underkarbonert, oksidert eller kjedelig; et uklart øl kan være helt slik stilen skal være. Et klart øl er heller ikke et bevis på at gjæringen er ferdig — bare FG-målinger over tid sier det. Bruk klarhet som én observasjon blant flere, ikke som en kvalitetsdom.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="haze-kilder">
+    <h3 data-i18n="hjelp.klaring.kilder.tittel">Hva kan gjøre ølet uklart?</h3>
+    <p data-i18n="hjelp.klaring.kilder.tekst">Uklarhet er ikke én ting. Å finne ut hvilken type du har, er hele poenget — for verktøyene virker på forskjellige årsaker.</p>
+    <ul data-i18n-html="hjelp.klaring.kilder.liste"><li><strong>Gjær i suspensjon</strong> — den vanligste årsaken kort tid etter gjæring. Henger sammen med flokkulering, se <a href="gjaervalg.html#flokkulering">flokkulering</a>.</li><li><strong>Protein</strong> — fra malten, i samspill med prosessen.</li><li><strong>Polyfenoler</strong> — fra malt og humle, se <a href="vannkjemi.html#tanniner-astringens">tanniner og astringens</a>.</li><li><strong>Humlepartikler</strong> — særlig etter <a href="humle.html#dry-hop">dry hop</a>.</li><li><strong>Stivelse</strong> — ved ufullstendig konvertering i mesken, se <a href="index.html#def-mesking">mesking</a>.</li><li><strong>Chill haze</strong> — protein- og polyfenolinteraksjoner som viser seg i kaldt øl, se <a href="#chill-haze">chill haze</a>.</li><li><strong>Mikrobiologisk aktivitet</strong> — i enkelte tilfeller, men langt fra den vanligste forklaringen.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.kilder.hvorfor"><strong>Uklart er ikke det samme som infeksjon.</strong> Det er en av de vanligste feilslutningene blant nye bryggere. Gjær, protein og humlepartikler forklarer det store flertallet av uklare hjemmebrygg. Mistenker du faktisk kontaminasjon, er det andre tegn som teller mer enn utseendet — se <a href="sensorikk.html#infeksjon">infeksjon i sensorikk-guiden</a> og <a href="index.html#faq-mistanke-infeksjon">mistanke om infeksjon</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="hot-break">
+    <h3 data-i18n="hjelp.klaring.hotBreak.tittel">Hot break</h3>
+    <p data-i18n-html="hjelp.klaring.hotBreak.tekst">Under oppvarming og <a href="index.html#def-kok">kok</a> koagulerer proteiner og andre forbindelser i vørteren og danner synlige flak — det som kalles hot break. Et godt, rullende kok bidrar til at dette skjer, og materialet blir en del av trub i kjelen.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.hotBreak.hvorfor">Hot break er en normal og ønsket del av koket, men betydningen skal ikke overdrives. Det er ikke slik at hot break «må fjernes perfekt» for at ølet skal bli bra — hjemmebryggere har laget utmerket øl i alle grader av trub-håndtering. Se det som ett av flere bidrag til klarhet, ikke som et krav du enten oppfyller eller mislykkes med.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="cold-break">
+    <h3 data-i18n="hjelp.klaring.coldBreak.tittel">Cold break</h3>
+    <p data-i18n-html="hjelp.klaring.coldBreak.tekst">Cold break dannes når den varme vørteren <a href="index.html#def-kjoling">kjøles ned</a>. Proteiner og polyfenoler som var løselige i varm vørter, flokkulerer og faller ut når temperaturen synker. Rask nedkjøling kan gi en tydeligere cold break enn langsom.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.coldBreak.hvorfor">Unngå absolutten «all trub må bort». En del cold break som følger med over i gjæringskaret er ikke automatisk et problem, og noen bryggere mener til og med at litt av det er gunstig for gjæren. Hvor mye du velger å la ligge igjen i kjelen er et prosessvalg, ikke en regel — men det påvirker hvor mye sediment du senere må forholde deg til.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="trub">
+    <h3 data-i18n="hjelp.klaring.trub.tittel">Trub — to forskjellige ting</h3>
+    <p data-i18n-html="hjelp.klaring.trub.tekst">Trub er en samlebetegnelse for bunnfall, og består typisk av proteinmateriale, break-materiale, humlerester og annet partikkelmateriale. Det er nyttig å skille mellom to steder det opptrer.</p>
+    <ul data-i18n-html="hjelp.klaring.trub.liste"><li><strong>Kettle trub</strong> — det som samler seg i kjelen etter kok og kjøling: hot break, cold break og humlerester.</li><li><strong>Gjær og sediment etter fermentering</strong> — hovedsakelig gjærceller, sammen med det som eventuelt fulgte med fra kjelen og partikler fra dry hop.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.trub.hvorfor">Trub er ikke i seg selv negativt. Kettle trub som følger med over er en avveining, ikke en feil; gjærsedimentet etter gjæring er nødvendig for at ølet skulle bli til i det hele tatt, og er dessuten råvaren for <a href="gjaerhosting.html">gjærhøsting</a>. Det som betyr noe praktisk er hvor mye som følger med videre til fat eller flaske, og hvor forsiktig du overfører.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="whirlpool-klaring">
+    <h3 data-i18n="hjelp.klaring.whirlpool.tittel">Whirlpool som trub-håndtering</h3>
+    <p data-i18n-html="hjelp.klaring.whirlpool.tekst"><a href="humle.html#whirlpool-hopstand">Whirlpool</a> er kjent som en humleteknikk, men sirkulasjonen har også en rent mekanisk funksjon: den kan samle trub i en haug midt i kjelen, slik at mindre grovt materiale følger med når vørteren tappes eller pumpes videre til gjæringskaret.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.whirlpool.hvorfor">Whirlpool er ikke nødvendig for å lage godt øl, og resultatet avhenger sterkt av kjelens geometri, uttakets plassering, hvor kraftig sirkulasjonen er og hvor lenge vørteren får stå. I noen oppsett samler trub-en seg pent; i andre gjør den det ikke. Prøv det i ditt eget utstyr og se hva som faktisk skjer, framfor å regne med et bestemt resultat.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="kettle-finings">
+    <h3 data-i18n="hjelp.klaring.kettleFinings.tittel">Irish moss og Whirlfloc — kettle finings</h3>
+    <p data-i18n="hjelp.klaring.kettleFinings.tekst">Kettle finings er hjelpemidler som tilsettes i kjelen, vanligvis sent i koket, og som fremmer flokkulering av proteinmateriale slik at mer av det faller ut som break. Irish moss og Whirlfloc-tabletter er de vanligste blant hjemmebryggere.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.kettleFinings.hvorfor"><strong>Hva de er, og hva de ikke er:</strong> Dette er prosesshjelpemidler som virker på proteinmateriale i kjelen — ikke «klaringskjemi som filtrerer ølet» og ikke noe som fjerner all haze. De gjør ingenting med gjær i suspensjon, humlepartikler eller stivelse. Dose og tidspunkt bør følge produsentens anvisning for det konkrete produktet: mengden avhenger av produktform og vørtervolum, og det finnes ingen universell fasit som gjelder alle merker. Bruker du dem, noter faktisk dose og tidspunkt i loggen, slik at du kan sammenligne mellom brygg.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="cold-crash-klaring">
+    <h3 data-i18n="hjelp.klaring.coldCrash.tittel">Cold crash</h3>
+    <p data-i18n-html="hjelp.klaring.coldCrash.tekst">Cold crash — å kjøle ølet kraftig ned etter ferdig gjæring, se <a href="index.html#def-cold-crash">definisjonen i hovedhjelpen</a> — er det mest brukte enkeltgrepet for å få et øl til å klarne. Lav temperatur får gjær til å sedimentere raskere og hjelper en del andre partikler å falle ut.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.coldCrash.hvorfor"><strong>Men cold crash «fikser» ikke all uklarhet.</strong> Det virker godt på gjær i suspensjon og en del partikler, men gjør lite med stivelse fra en ufullstendig mesk, og kan i seg selv utløse <a href="#chill-haze">chill haze</a> framfor å fjerne den. Vær også oppmerksom på to praktiske forhold: nedkjøling reduserer volumet i karet og kan trekke luft inn (suck-back) med <a href="index.html#def-oksidasjon">oksidasjonsrisiko</a>, og hvilke løsninger som er trygge avhenger helt av utstyret ditt. Bruker du trykksatt utstyr, gjelder <a href="trykkgjaering.html#sikkerhet-trykk">sikkerhetsreglene for trykk</a> — de gjentas ikke her.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="gelatin">
+    <h3 data-i18n="hjelp.klaring.gelatin.tittel">Gelatin</h3>
+    <p data-i18n="hjelp.klaring.gelatin.tekst">Gelatin er en av de mest brukte finings blant hjemmebryggere. Den kan binde og trekke partikler — særlig gjær — ut av suspensjon, og brukes vanligvis etter ferdig gjæring og gjerne på kaldt øl, ofte i kombinasjon med cold crash.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.gelatin.hvorfor"><strong>To ting å ta stilling til.</strong> For det første: gelatin er et animalsk produkt, og er derfor relevant for vegetarianere og veganere — både for deg selv og for dem du deler ølet med. Det bør nevnes hvis ølet gis bort. For det andre: resultatet varierer med prosess, råvarer, temperatur og hvilken type uklarhet du har. Gelatin gjør ikke automatisk ethvert øl klart. Følg produsentens anvisning for det produktet du har, og vær forsiktig med varme væsker under tilberedning — denne siden gir bevisst ingen oppskrift med eksakte doser eller temperaturer.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="andre-finings">
+    <h3 data-i18n="hjelp.klaring.andreFinings.tittel">Andre finings — kort oversikt</h3>
+    <p data-i18n="hjelp.klaring.andreFinings.tekst">Det finnes flere kommersielle klaringsmidler, og de retter seg mot forskjellige partikler og årsaker. Dette er en praktisk oversikt, ikke en kjemigjennomgang.</p>
+    <ul data-i18n-html="hjelp.klaring.andreFinings.liste"><li><strong>Isinglass</strong> — tradisjonell fining, særlig kjent fra britisk bryggetradisjon. Også et animalsk produkt.</li><li><strong>Silikatbaserte finings</strong> — retter seg typisk mot proteinmateriale.</li><li><strong>PVPP</strong> — retter seg typisk mot polyfenoler, og brukes gjerne mot chill haze.</li><li><strong>Andre kommersielle produkter</strong> — finnes i mange varianter, ofte som kombinasjonsprodukter.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.andreFinings.hvorfor">Poenget er ikke å kjenne kjemien, men å velge riktig verktøy til riktig årsak: et middel som virker på protein gjør lite med gjær i suspensjon, og omvendt. Følg alltid produsentens anbefaling for dose, temperatur og tidspunkt — de varierer mellom produkter, og et hjemmebryggeri har sjelden grunnlag for å improvisere her. Kvernhaug Brygghus har ingen egen anbefalt fining, og oppskriftsbyggeren regner ikke på klaringsmidler.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="chill-haze">
+    <h3 data-i18n="hjelp.klaring.chillHaze.tittel">Chill haze og permanent haze</h3>
+    <p data-i18n="hjelp.klaring.chillHaze.tekst">Chill haze er uklarhet som viser seg når ølet blir kaldt, og som ofte avtar igjen når det varmes opp. Den knyttes vanligvis til interaksjoner mellom protein og polyfenoler, som binder seg til hverandre ved lav temperatur og danner partikler som er store nok til å spre lys.</p>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.chillHaze.hvorfor"><strong>Skillet mot permanent haze:</strong> Chill haze er temperaturavhengig og reversibel — den kommer og går med temperaturen. Permanent haze er der uansett temperatur. En enkel test er derfor å la et glass stå til det er romtemperert og se om uklarheten forsvinner. Chill haze påvirker først og fremst utseendet og trenger ikke bety noe for smaken, og i mange sammenhenger er det helt greit å la den være.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="haze-stabilitet">
+    <h3 data-i18n="hjelp.klaring.stabilitet.tittel">Uklarhet endrer seg over tid</h3>
+    <p data-i18n-html="hjelp.klaring.stabilitet.tekst">Et øls utseende er ikke statisk. Det som er sant en uke etter pakking, er ikke nødvendigvis sant tre måneder senere — i begge retninger.</p>
+    <ul data-i18n-html="hjelp.klaring.stabilitet.liste"><li>Gjær kan fortsette å sedimentere, slik at ølet gradvis klarner i fat eller flaske.</li><li>Chill haze kan bli mer permanent over lengre lagring.</li><li>Humledrevne øl kan ha vedvarende polyfenol- og proteinbidrag fra <a href="humle.html#dry-hop">dry hop</a>.</li><li>Oksidasjon og lagringsforhold kan endre både utseende og smak, se <a href="index.html#def-oksidasjon">oksidasjon</a> og <a href="index.html#modning-lagring">modning og lagring</a>.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.stabilitet.hvorfor">Dette er hjemmebryggerperspektivet, ikke industriell holdbarhetskjemi. Poenget er praktisk: vurder klarhet på det tidspunktet ølet faktisk skal drikkes, og ikke bli overrasket om et øl ser annerledes ut etter noen måneder enn det gjorde da du pakket det.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="klarhet-og-stil">
+    <h3 data-i18n="hjelp.klaring.stil.tittel">Klarhet og stil</h3>
+    <p data-i18n="hjelp.klaring.stil.tekst">Om klarhet i det hele tatt er et mål, avhenger av hva du brygger. Det første spørsmålet er derfor ikke «hvordan får jeg ølet klart», men «skal dette ølet være klart».</p>
+  <table class="hjelp-tabell">
+    <thead><tr>
+      <th data-i18n="hjelp.klaring.stiltabell.kol1">Klarhet ofte ønsket</th>
+      <th data-i18n="hjelp.klaring.stiltabell.kol2">Uklarhet kan være normal eller ønsket</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td data-i18n="hjelp.klaring.stiltabell.r1c1">Pils og mange lagerøl, der et rent, blankt uttrykk er en del av stilbildet.</td>
+        <td data-i18n="hjelp.klaring.stiltabell.r1c2">Weissbier, der gjær i suspensjon er en del av tradisjonen.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.klaring.stiltabell.r2c1">Enkelte britiske ales, der klarhet tradisjonelt vektlegges.</td>
+        <td data-i18n="hjelp.klaring.stiltabell.r2c2">Witbier, med sitt karakteristiske melkeaktige preg.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.klaring.stiltabell.r3c1">Øl der utseendet er en uttalt del av presentasjonen.</td>
+        <td data-i18n="hjelp.klaring.stiltabell.r3c2">Hazy IPA, der uklarheten er selve poenget — og enkelte farmhouse-stiler.</td>
+      </tr>
+    </tbody>
+  </table>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.stil.hvorfor">Klarhet er ikke en kvalitetsdom. En hazy IPA er ikke et mislykket forsøk på en klar IPA, og en weissbier med gjær i suspensjon er ikke feilbrygget. Se <a href="index.html#stilmatching">stilmatching</a> for hvordan Kvernhaug Brygghus behandler stilgrenser generelt — som veiledning, ikke som en dom. Merk også at oppskriftsbyggeren ikke beregner eller vurderer klarhet i det hele tatt; dette er en ren kunnskapsside.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="klaring-og-gjaervalg">
+    <h3 data-i18n="hjelp.klaring.gjaervalg.tittel">Klaring og gjærvalg henger sammen</h3>
+    <p data-i18n-html="hjelp.klaring.gjaervalg.tekst">Den enkeltfaktoren som oftest avgjør hvor lett et øl klarner, er valgt allerede før gjæringen starter: <a href="gjaervalg.html#flokkulering">gjærens flokkulering</a>.</p>
+    <ul data-i18n-html="hjelp.klaring.gjaervalg.liste"><li>Stammer med høy flokkulering pakker seg ofte raskt og hardt i bunnen, og ølet klarner gjerne av seg selv.</li><li>Stammer med lav flokkulering kan holde seg lenge i suspensjon, og ølet kan forbli uklart i uker uten at noe er galt.</li><li>Temperatur og tid virker sammen med flokkuleringen — kaldere og lenger gir normalt mer sedimentering.</li><li>Finings og cold crash brukes gjerne nettopp for å hjelpe en lite flokkulent gjær ut av suspensjon.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.gjaervalg.hvorfor">Dette er grunnen til at gjærvalg og klaring hører sammen: velger du stamme etter smaksprofil alene og deretter blir overrasket over uklarheten, har du oppdaget koblingen for sent. Tenk klarhet allerede i <a href="gjaervalg.html#velge-til-oppskrift">gjærvalget</a>, ikke først i glasset.</p>
+  </div>
+
+  <div id="feilsoking-klaring">
+  <h3 data-i18n="hjelp.klaring.feilsoking.tittel">Feilsøking — uklarhet og sediment</h3>
+  <p class="hjelp-innledning" data-i18n="hjelp.klaring.feilsoking.intro">Start med å finne ut hvilken type uklarhet du har. Verktøyene under virker på forskjellige årsaker, og feil verktøy gir ingen effekt.</p>
+  <table class="hjelp-tabell">
+    <thead><tr>
+      <th data-i18n="hjelp.klaring.feilsoking.kol1">Situasjon</th>
+      <th data-i18n="hjelp.klaring.feilsoking.kol2">Vurder</th>
+    </tr></thead>
+    <tbody>
+      <tr><td data-i18n="hjelp.klaring.feilsoking.a.situasjon">A. Ølet er uklart rett etter gjæring</td><td data-i18n-html="hjelp.klaring.feilsoking.a.vurder">Gjær fortsatt i suspensjon er den vanligste årsaken. Vurder <a href="gjaervalg.html#flokkulering">flokkulering</a>, temperatur, hvor lang tid det har fått, protein og polyfenoler, humlepartikler — og først og fremst om ølet faktisk trenger å være klart.</td></tr>
+      <tr><td data-i18n="hjelp.klaring.feilsoking.b.situasjon">B. Klart når det er varmt, uklart når det er kaldt</td><td data-i18n-html="hjelp.klaring.feilsoking.b.vurder">Dette er det klassiske bildet på <a href="#chill-haze">chill haze</a>. La et glass bli romtemperert og se om uklarheten forsvinner igjen.</td></tr>
+      <tr><td data-i18n="hjelp.klaring.feilsoking.c.situasjon">C. Permanent uklarhet uansett temperatur</td><td data-i18n="hjelp.klaring.feilsoking.c.vurder">Vurder gjær som ikke vil felle ut, protein og polyfenoler, stivelse fra ufullstendig konvertering i mesken, prosessen generelt — og om stilen faktisk er ment å være uklar.</td></tr>
+      <tr><td data-i18n="hjelp.klaring.feilsoking.d.situasjon">D. Mye sediment i fat eller flaske</td><td data-i18n-html="hjelp.klaring.feilsoking.d.vurder">Vurder gjærens flokkulering, hvor forsiktig du overførte, om finings ble brukt, om ølet fikk cold crash, og at naturlig flaskekondisjonering alltid gir et lag gjær i bunnen — se <a href="index.html#priming-flaskekarbonering">flaskekarbonering</a>.</td></tr>
+      <tr><td data-i18n="hjelp.klaring.feilsoking.e.situasjon">E. Ølet ble uklart etter tørrhumling</td><td data-i18n-html="hjelp.klaring.feilsoking.e.vurder">Vurder humlepartikler, polyfenolbidrag fra humlen, og <a href="humle.html#hop-creep">hop creep</a> med fornyet gjæraktivitet som holder gjæren i suspensjon. Mål FG på nytt før du pakker.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="hjelp-metode-kort" id="klaringsplan">
+    <h3 data-i18n="hjelp.klaring.plan.tittel">Praktisk klaringsplan</h3>
+  <table class="hjelp-tabell">
+    <thead><tr>
+      <th data-i18n="hjelp.klaring.plantabell.kol1">Fase</th>
+      <th data-i18n="hjelp.klaring.plantabell.kol2">Vurder</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td data-i18n="hjelp.klaring.plantabell.r1c1">Før brygg</td>
+        <td data-i18n="hjelp.klaring.plantabell.r1c2">Trenger denne stilen egentlig høy klarhet? Hvilken flokkulering har gjæren du har valgt? Hvor stor er malt- og humlebelastningen?</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.klaring.plantabell.r2c1">Under brygg</td>
+        <td data-i18n="hjelp.klaring.plantabell.r2c2">Fullført konvertering i mesken, et godt kok, eventuelle kettle finings, effektiv kjøling, og hvordan du håndterer trub ved overføring til gjæringskaret.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.klaring.plantabell.r3c1">Gjæring</td>
+        <td data-i18n="hjelp.klaring.plantabell.r3c2">La gjæringen bli ferdig — stabil FG over tid. Gi den tid, hold temperaturen, og vurder en eventuell cold crash når ølet faktisk er ferdig.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.klaring.plantabell.r4c1">Etter gjæring</td>
+        <td data-i18n="hjelp.klaring.plantabell.r4c2">Eventuell fining, forsiktig overføring som ikke virvler opp sedimentet, og lagring ved en temperatur som lar partikler fortsette å falle ut.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.klaring.plantabell.r5c1">I glasset</td>
+        <td data-i18n="hjelp.klaring.plantabell.r5c2">Hvordan ser ølet ut ved den temperaturen det faktisk drikkes? Er det chill haze? Hvor mye sediment følger med? Og viktigst: hvordan smaker det?</td>
+      </tr>
+    </tbody>
+  </table>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.klaring.plan.hvorfor">Dette er en planleggingsstruktur, ikke en logg- eller databasefunksjon — bruk egen bryggelogg eller notatbok til selve sporingen. Ingen av punktene er obligatoriske: en klaringsplan for en hazy IPA kan gjerne stoppe ved «trenger ikke være klart».</p>
+  </div>
+
+  <p class="hjelp-innledning" data-i18n="hjelp.klaring.avslutning">
+    Klaring er en kjede av små valg fra kok til glass, ikke ett grep på slutten. Vet du hvilken type uklarhet du har med å gjøre, vet du også hvilket verktøy som er relevant — og om det i det hele tatt er verdt å bruke det på akkurat dette ølet.
+  </p>
+  </main>
+</div>
+
+<footer class="no-print">
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="../personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
+<script src="../js/chrome.js"></script>
+</body>
+</html>

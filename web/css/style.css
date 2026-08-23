@@ -2115,12 +2115,39 @@ footer {
    Deler style.css med byggeren for samme visuelle identitet, men er egne,
    frittstående sider (åpnes i ny fane) -- ikke en del av oppskriftsbyggeren. */
 
+/* Bryggeskole P3B: hjelpe-nav gruppert i KOM I GANG / BRYGGMESTER / UTSTYR.
+   Beholdt som ren flex/wrap innenfor eksisterende designsystem -- ingen
+   dropdown, ingen JS. Gruppene er kolonner som selv wrapper; hele raden
+   wrapper videre paa smale skjermer. Chip-reglene under gjelder uendret
+   for lenkene, siden de er descendant-selektorer. */
 .hjelp-side-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.9rem 1.6rem;
   justify-content: center;
+  align-items: flex-start;
   padding: 1rem 1rem 0;
+}
+
+.hjelp-nav-gruppe {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hjelp-nav-gruppe-tittel {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.7;
+  padding-left: 0.2rem;
+}
+
+.hjelp-nav-lenker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .hjelp-side-nav a {
@@ -2140,6 +2167,29 @@ footer {
 .hjelp-side-nav a:focus-visible {
   color: var(--gold);
   border-color: var(--gold);
+}
+
+/* Gruppeoverskriftene koster for mye vertikal plass paa smale skjermer:
+   maalt 293px nav (4 rader) ved 768px og 449px (7 rader) ved 375px, som
+   dyttet foerste innhold under folden paa en 375x667-telefon. Under
+   hjelpesidenes etablerte 900px-brekkpunkt flates derfor grupperingen ut
+   til én wrappende chip-rad -- samme 12 chips, samme aktive state, samme
+   44px touch-target, bare uten titlenes hoeyde. display:contents loefter
+   lenkene opp som direkte flex-barn av nav-en; grupperingen beholdes
+   uendret paa desktop, der den koster ca. 21px. */
+@media (max-width: 900px) {
+  .hjelp-nav-gruppe,
+  .hjelp-nav-lenker {
+    display: contents;
+  }
+
+  .hjelp-nav-gruppe-tittel {
+    display: none;
+  }
+
+  .hjelp-side-nav {
+    gap: 0.5rem;
+  }
 }
 
 /* ── Lokal innholdsmeny (TOC) + hovedinnhold, side ved side på desktop ──

@@ -1,0 +1,288 @@
+<!--
+  GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
+  Kilde: web/hjelp/klaring.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
+  overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
+-->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clarity and Haze — Break, Finings, Cold Crash and Chill Haze — Kvernhaug Brygghus</title>
+<meta content="A practical Master Brewer guide to clarity: what makes beer hazy, hot and cold break, trub, kettle finings, cold crash, gelatin, chill haze and troubleshooting." data-i18n-content="meta.hjelpKlaring.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/klaring.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/klaring.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/hjelp/klaring.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/hjelp/klaring.html" hreflang="x-default" rel="alternate"/>
+<link href="../../assets/favicon/favicon.ico" rel="icon" sizes="any"/>
+<link href="../../assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="../../assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="../../assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="../../css/style.css" rel="stylesheet"/>
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpKlaring.tittel">
+<header class="hero">
+<img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../../assets/branding/kvernhaug_header_banner.jpg"/>
+<div class="hero-scrim"></div>
+<div class="hero-topprad">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-hero" type="button">
+<span></span><span></span><span></span>
+</button>
+<div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/klaring.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="klaring.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+<div class="hero-tekst">
+<div class="hero-navn">Kvernhaug Brygghus</div>
+<h1 class="hero-sidetittel" data-i18n="hjelp.sidenavKlaring">🔎 Clarity</h1>
+</div>
+</header>
+<nav aria-label="Main navigation (compact)" class="kompaktnav" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+<div class="kompaktnav-inner">
+<button aria-controls="sidemeny" aria-expanded="false" aria-label="Open menu" class="meny-knapp" data-i18n-aria-label="chrome.apneMeny" id="meny-knapp-kompakt" type="button">
+<span></span><span></span><span></span>
+</button>
+<img alt="" class="kompaktnav-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/klaring.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="klaring.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+</div>
+</nav>
+<div class="sidemeny-bakteppe"></div>
+<nav aria-label="Main navigation" class="sidemeny" data-i18n-aria-label="chrome.navAriaLabel" id="sidemeny">
+<div class="sidemeny-topp">
+<img alt="" class="sidemeny-logo" src="../../assets/branding/kbh_icon_v1.png"/>
+<span class="sidemeny-tittel">Kvernhaug<br/>Brygghus</span>
+<button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
+</div>
+<div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
+<a class="sprak-knapp" data-sprak="no" href="../../hjelp/klaring.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="klaring.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../../assets/ui/flag-gb.webp"/>EN</a>
+</div>
+<div class="enhetsvelger-blokk">
+<span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
+<div aria-label="Switch units" class="enhetsvelger" data-i18n-aria-label="enhet.ariaLabel" role="group">
+<button class="enhet-knapp" data-enhet="metric" type="button"><span data-i18n="enhet.metrisk">Metric</span></button>
+<button class="enhet-knapp" data-enhet="us" type="button"><span data-i18n="enhet.us">US customary</span></button>
+</div>
+</div>
+<a class="sidemeny-lenke" href="../index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
+<a class="sidemeny-lenke" href="../mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
+<a class="sidemeny-lenke" href="../importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
+<a class="sidemeny-lenke" href="../utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="../pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
+<a class="sidemeny-lenke" href="../bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
+<hr class="sidemeny-skille"/>
+<a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
+</nav>
+<nav aria-label="Help pages" class="hjelp-side-nav" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Getting started</span>
+<div class="hjelp-nav-lenker">
+<a data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
+<a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
+<a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+</div>
+</div>
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Master brewer</span>
+<div class="hjelp-nav-lenker">
+<a data-i18n="hjelp.sidenavGjaervalg" href="gjaervalg.html">🦠 Yeast Choice</a>
+<a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
+<a data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
+<a data-i18n="hjelp.sidenavGjaerhosting" href="gjaerhosting.html">🫙 Yeast Harvesting</a>
+<a data-i18n="hjelp.sidenavVannkjemiAvansert" href="vannkjemi.html">💧 Water Chemistry</a>
+<a data-i18n="hjelp.sidenavHumle" href="humle.html">🌿 Hops</a>
+<a class="aktiv" data-i18n="hjelp.sidenavKlaring" href="klaring.html">🔎 Clarity</a>
+<a data-i18n="hjelp.sidenavSensorikk" href="sensorikk.html">👃 Sensorics</a>
+</div>
+</div>
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Equipment</span>
+<div class="hjelp-nav-lenker">
+<a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</div>
+</div>
+</nav>
+<div class="hjelp-layout">
+<nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
+<a data-i18n="hjelp.klaring.toc.hvaErKlart" href="#hva-er-klart">What does "clear beer" mean?</a>
+<a data-i18n="hjelp.klaring.toc.kilder" href="#haze-kilder">What makes beer hazy?</a>
+<a data-i18n="hjelp.klaring.toc.hotBreak" href="#hot-break">Hot break</a>
+<a data-i18n="hjelp.klaring.toc.coldBreak" href="#cold-break">Cold break</a>
+<a data-i18n="hjelp.klaring.toc.trub" href="#trub">Trub</a>
+<a data-i18n="hjelp.klaring.toc.whirlpool" href="#whirlpool-klaring">Whirlpool and trub</a>
+<a data-i18n="hjelp.klaring.toc.kettleFinings" href="#kettle-finings">Irish moss / Whirlfloc</a>
+<a data-i18n="hjelp.klaring.toc.coldCrash" href="#cold-crash-klaring">Cold crash</a>
+<a data-i18n="hjelp.klaring.toc.gelatin" href="#gelatin">Gelatin</a>
+<a data-i18n="hjelp.klaring.toc.andreFinings" href="#andre-finings">Other finings</a>
+<a data-i18n="hjelp.klaring.toc.chillHaze" href="#chill-haze">Chill haze</a>
+<a data-i18n="hjelp.klaring.toc.stabilitet" href="#haze-stabilitet">Haze over time</a>
+<a data-i18n="hjelp.klaring.toc.stil" href="#klarhet-og-stil">Clarity and style</a>
+<a data-i18n="hjelp.klaring.toc.gjaervalg" href="#klaring-og-gjaervalg">Clarity and yeast choice</a>
+<a data-i18n="hjelp.klaring.toc.feilsoking" href="#feilsoking-klaring">Clarity troubleshooting</a>
+<a data-i18n="hjelp.klaring.toc.plan" href="#klaringsplan">Practical clarity plan</a>
+</nav>
+<main class="hjelp-side-main">
+<p class="hjelp-innledning" data-i18n-html="hjelp.klaring.intro">Clarity is one of the most visible properties of a beer — and one of the most misunderstood. This page works through what actually makes beer hazy, which tools you have to influence it, and when haze is not a problem at all. It is closely tied to <a href="gjaervalg.html">yeast selection</a>, since flocculation is one of the strongest single factors in how easily a beer clears.</p>
+<div class="hjelp-metode-kort" id="hva-er-klart">
+<h3 data-i18n="hjelp.klaring.hvaErKlart.tittel">What Does "Clear Beer" Actually Mean?</h3>
+<p data-i18n="hjelp.klaring.hvaErKlart.tekst">"Clear" is often used as if it meant the same as "finished" or "good". These are four different properties, and they do not necessarily go together.</p>
+<ul data-i18n-html="hjelp.klaring.hvaErKlart.liste"><li><strong>Visually clear</strong> — you can see through the beer. Says something about particles in suspension, not about flavor.</li><li><strong>Stable</strong> — appearance and flavor change little over time under correct storage.</li><li><strong>Fully fermented</strong> — FG has held steady across several readings, see <a href="index.html#def-fg-maling">measuring FG</a>.</li><li><strong>Sensorily good</strong> — the beer tastes the way you wanted it to taste.</li></ul>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.hvaErKlart.hvorfor">&lt;strong&gt;Clear is not automatically better, and hazy is not automatically a fault.&lt;/strong&gt; A crystal-clear beer can be under-carbonated, oxidized or dull; a hazy beer can be exactly what the style calls for. Nor is a clear beer proof that fermentation is finished — only FG readings over time tell you that. Use clarity as one observation among several, not as a verdict on quality.</p>
+</div>
+<div class="hjelp-metode-kort" id="haze-kilder">
+<h3 data-i18n="hjelp.klaring.kilder.tittel">What Can Make the Beer Hazy?</h3>
+<p data-i18n="hjelp.klaring.kilder.tekst">Haze is not one thing. Working out which kind you have is the whole point — because the tools work on different causes.</p>
+<ul data-i18n-html="hjelp.klaring.kilder.liste"><li><strong>Yeast in suspension</strong> — the most common cause shortly after fermentation. Tied to flocculation, see <a href="gjaervalg.html#flokkulering">flocculation</a>.</li><li><strong>Protein</strong> — from the malt, interacting with the process.</li><li><strong>Polyphenols</strong> — from malt and hops, see <a href="vannkjemi.html#tanniner-astringens">tannins and astringency</a>.</li><li><strong>Hop particles</strong> — particularly after <a href="humle.html#dry-hop">dry hopping</a>.</li><li><strong>Starch</strong> — from incomplete conversion in the mash, see <a href="index.html#def-mesking">mashing</a>.</li><li><strong>Chill haze</strong> — protein and polyphenol interactions that show up in cold beer, see <a href="#chill-haze">chill haze</a>.</li><li><strong>Microbiological activity</strong> — in some cases, but far from the most common explanation.</li></ul>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.kilder.hvorfor"><strong>Hazy is not the same as infected.</strong> This is one of the most common wrong conclusions among new brewers. Yeast, protein and hop particles explain the great majority of hazy homebrews. If you genuinely suspect contamination, other signs matter more than appearance — see <a href="sensorikk.html#infeksjon">infection in the sensory guide</a> and <a href="index.html#faq-mistanke-infeksjon">suspected infection</a>.</p>
+</div>
+<div class="hjelp-metode-kort" id="hot-break">
+<h3 data-i18n="hjelp.klaring.hotBreak.tittel">Hot Break</h3>
+<p data-i18n-html="hjelp.klaring.hotBreak.tekst">During heating and the <a href="index.html#def-kok">boil</a>, proteins and other compounds in the wort coagulate and form visible flakes — what is called hot break. A good rolling boil helps this happen, and the material becomes part of the trub in the kettle.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.hotBreak.hvorfor">Hot break is a normal and desirable part of the boil, but its importance should not be overstated. It is not the case that hot break "must be removed perfectly" for the beer to be good — homebrewers have made excellent beer with every degree of trub handling. See it as one of several contributions to clarity, not as a requirement you either meet or fail.</p>
+</div>
+<div class="hjelp-metode-kort" id="cold-break">
+<h3 data-i18n="hjelp.klaring.coldBreak.tittel">Cold Break</h3>
+<p data-i18n-html="hjelp.klaring.coldBreak.tekst">Cold break forms when the hot wort is <a href="index.html#def-kjoling">cooled down</a>. Proteins and polyphenols that were soluble in hot wort flocculate and drop out as the temperature falls. Rapid cooling can give a more pronounced cold break than slow cooling.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.coldBreak.hvorfor">Avoid the absolute "all trub must go". Some cold break carrying over into the fermenter is not automatically a problem, and some brewers even consider a little of it beneficial for the yeast. How much you choose to leave behind in the kettle is a process choice, not a rule — but it does affect how much sediment you have to deal with later.</p>
+</div>
+<div class="hjelp-metode-kort" id="trub">
+<h3 data-i18n="hjelp.klaring.trub.tittel">Trub — Two Different Things</h3>
+<p data-i18n-html="hjelp.klaring.trub.tekst">Trub is an umbrella term for sediment, and typically consists of protein material, break material, hop residue and other particulate matter. It is useful to distinguish between two places it appears.</p>
+<ul data-i18n-html="hjelp.klaring.trub.liste"><li><strong>Kettle trub</strong> — what collects in the kettle after boiling and cooling: hot break, cold break and hop residue.</li><li><strong>Yeast and sediment after fermentation</strong> — mainly yeast cells, along with whatever carried over from the kettle and particles from dry hopping.</li></ul>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.trub.hvorfor">Trub is not negative in itself. Kettle trub carrying over is a trade-off, not a fault; the yeast sediment after fermentation is what made the beer in the first place, and is also the raw material for <a href="gjaerhosting.html">yeast harvesting</a>. What matters practically is how much follows on into keg or bottle, and how carefully you transfer.</p>
+</div>
+<div class="hjelp-metode-kort" id="whirlpool-klaring">
+<h3 data-i18n="hjelp.klaring.whirlpool.tittel">Whirlpool as Trub Handling</h3>
+<p data-i18n-html="hjelp.klaring.whirlpool.tekst"><a href="humle.html#whirlpool-hopstand">Whirlpool</a> is known as a hop technique, but the circulation also has a purely mechanical function: it can gather trub into a cone in the middle of the kettle, so that less coarse material follows the wort as it is drained or pumped into the fermenter.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.whirlpool.hvorfor">Whirlpooling is not necessary to make good beer, and the result depends heavily on kettle geometry, the position of the outlet, how vigorous the circulation is and how long the wort is allowed to settle. In some setups the trub gathers neatly; in others it does not. Try it in your own equipment and see what actually happens, rather than counting on a particular outcome.</p>
+</div>
+<div class="hjelp-metode-kort" id="kettle-finings">
+<h3 data-i18n="hjelp.klaring.kettleFinings.tittel">Irish Moss and Whirlfloc — Kettle Finings</h3>
+<p data-i18n="hjelp.klaring.kettleFinings.tekst">Kettle finings are aids added in the kettle, usually late in the boil, that promote flocculation of protein material so that more of it drops out as break. Irish moss and Whirlfloc tablets are the most common among homebrewers.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.kettleFinings.hvorfor"><strong>What they are, and what they are not:</strong> These are process aids that act on protein material in the kettle — not "clarifying chemistry that filters the beer" and not something that removes all haze. They do nothing about yeast in suspension, hop particles or starch. Dose and timing should follow the producer's instructions for the specific product: the amount depends on the product form and wort volume, and there is no universal figure that applies to every brand. If you use them, record the actual dose and timing in your log so you can compare between brews.</p>
+</div>
+<div class="hjelp-metode-kort" id="cold-crash-klaring">
+<h3 data-i18n="hjelp.klaring.coldCrash.tittel">Cold Crash</h3>
+<p data-i18n-html="hjelp.klaring.coldCrash.tekst">Cold crashing — chilling the beer hard after fermentation is complete, see <a href="index.html#def-cold-crash">the definition in the main help</a> — is the most commonly used single move to make a beer clear. Low temperature makes yeast sediment faster and helps some other particles drop out.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.coldCrash.hvorfor"><strong>But cold crashing does not "fix" every kind of haze.</strong> It works well on yeast in suspension and some particles, but does little about starch from an incomplete mash, and can itself bring out <a href="#chill-haze">chill haze</a> rather than removing it. Note two practical points as well: chilling reduces the volume in the vessel and can draw air in (suck-back) with a risk of <a href="index.html#def-oksidasjon">oxidation</a>, and which solutions are safe depends entirely on your equipment. If you use pressurized equipment, the <a href="trykkgjaering.html#sikkerhet-trykk">pressure safety rules</a> apply — they are not repeated here.</p>
+</div>
+<div class="hjelp-metode-kort" id="gelatin">
+<h3 data-i18n="hjelp.klaring.gelatin.tittel">Gelatin</h3>
+<p data-i18n="hjelp.klaring.gelatin.tekst">Gelatin is one of the most widely used finings among homebrewers. It can bind and pull particles — especially yeast — out of suspension, and is usually used after fermentation is complete and typically on cold beer, often in combination with a cold crash.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.gelatin.hvorfor">&lt;strong&gt;Two things to consider.&lt;/strong&gt; First: gelatin is an animal product, and is therefore relevant to vegetarians and vegans — both for yourself and for those you share the beer with. It is worth mentioning if the beer is given away. Second: the result varies with process, ingredients, temperature and which kind of haze you have. Gelatin does not automatically make every beer clear. Follow the producer's instructions for the product you have, and be careful with hot liquids during preparation — this page deliberately gives no recipe with exact doses or temperatures.</p>
+</div>
+<div class="hjelp-metode-kort" id="andre-finings">
+<h3 data-i18n="hjelp.klaring.andreFinings.tittel">Other Finings — A Short Overview</h3>
+<p data-i18n="hjelp.klaring.andreFinings.tekst">There are several commercial clarifying agents, and they target different particles and causes. This is a practical overview, not a chemistry review.</p>
+<ul data-i18n-html="hjelp.klaring.andreFinings.liste"><li><strong>Isinglass</strong> — a traditional fining, particularly associated with British brewing. Also an animal product.</li><li><strong>Silica-based finings</strong> — typically target protein material.</li><li><strong>PVPP</strong> — typically targets polyphenols, and is often used against chill haze.</li><li><strong>Other commercial products</strong> — exist in many variants, often as combination products.</li></ul>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.andreFinings.hvorfor">The point is not to know the chemistry, but to match the tool to the cause: an agent that works on protein does little about yeast in suspension, and vice versa. Always follow the producer's recommendation for dose, temperature and timing — they vary between products, and a homebrewery rarely has grounds to improvise here. Kvernhaug Brygghus has no preferred fining of its own, and the recipe builder does not calculate clarifying agents.</p>
+</div>
+<div class="hjelp-metode-kort" id="chill-haze">
+<h3 data-i18n="hjelp.klaring.chillHaze.tittel">Chill Haze and Permanent Haze</h3>
+<p data-i18n="hjelp.klaring.chillHaze.tekst">Chill haze is haze that appears when the beer gets cold, and often recedes again as it warms up. It is usually associated with interactions between protein and polyphenols, which bind to each other at low temperature and form particles large enough to scatter light.</p>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.chillHaze.hvorfor">&lt;strong&gt;The distinction from permanent haze:&lt;/strong&gt; Chill haze is temperature-dependent and reversible — it comes and goes with temperature. Permanent haze is there regardless of temperature. A simple test is therefore to let a glass come up to room temperature and see whether the haze disappears. Chill haze mainly affects appearance and need not mean anything for flavor, and in many contexts it is perfectly fine to leave it alone.</p>
+</div>
+<div class="hjelp-metode-kort" id="haze-stabilitet">
+<h3 data-i18n="hjelp.klaring.stabilitet.tittel">Haze Changes Over Time</h3>
+<p data-i18n-html="hjelp.klaring.stabilitet.tekst">A beer's appearance is not static. What is true a week after packaging is not necessarily true three months later — in either direction.</p>
+<ul data-i18n-html="hjelp.klaring.stabilitet.liste"><li>Yeast can keep sedimenting, so the beer gradually clears in keg or bottle.</li><li>Chill haze can become more permanent over longer storage.</li><li>Hop-driven beers can have persistent polyphenol and protein contributions from <a href="humle.html#dry-hop">dry hopping</a>.</li><li>Oxidation and storage conditions can change both appearance and flavor, see <a href="index.html#def-oksidasjon">oxidation</a> and <a href="index.html#modning-lagring">maturation and storage</a>.</li></ul>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.stabilitet.hvorfor">This is the homebrewer's perspective, not industrial shelf-life chemistry. The point is practical: judge clarity at the time the beer is actually going to be drunk, and do not be surprised if a beer looks different after a few months than it did when you packaged it.</p>
+</div>
+<div class="hjelp-metode-kort" id="klarhet-og-stil">
+<h3 data-i18n="hjelp.klaring.stil.tittel">Clarity and Style</h3>
+<p data-i18n="hjelp.klaring.stil.tekst">Whether clarity is a goal at all depends on what you are brewing. The first question is therefore not "how do I make the beer clear", but "should this beer be clear".</p>
+<table class="hjelp-tabell">
+<thead><tr>
+<th data-i18n="hjelp.klaring.stiltabell.kol1">Clarity often desired</th>
+<th data-i18n="hjelp.klaring.stiltabell.kol2">Haze can be normal or desired</th>
+</tr></thead>
+<tbody>
+<tr>
+<td data-i18n="hjelp.klaring.stiltabell.r1c1">Pilsner and many lagers, where a clean, bright appearance is part of the style picture.</td>
+<td data-i18n="hjelp.klaring.stiltabell.r1c2">Weissbier, where yeast in suspension is part of the tradition.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.klaring.stiltabell.r2c1">Some British ales, where clarity has traditionally been emphasized.</td>
+<td data-i18n="hjelp.klaring.stiltabell.r2c2">Witbier, with its characteristic milky appearance.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.klaring.stiltabell.r3c1">Beers where appearance is an explicit part of the presentation.</td>
+<td data-i18n="hjelp.klaring.stiltabell.r3c2">Hazy IPA, where the haze is the whole point — and some farmhouse styles.</td>
+</tr>
+</tbody>
+</table>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.stil.hvorfor">Clarity is not a verdict on quality. A hazy IPA is not a failed attempt at a clear IPA, and a weissbier with yeast in suspension is not mis-brewed. See <a href="index.html#stilmatching">style matching</a> for how Kvernhaug Brygghus treats style boundaries in general — as guidance, not as a verdict. Note also that the recipe builder does not calculate or assess clarity at all; this is purely a knowledge page.</p>
+</div>
+<div class="hjelp-metode-kort" id="klaring-og-gjaervalg">
+<h3 data-i18n="hjelp.klaring.gjaervalg.tittel">Clarity and Yeast Choice Go Together</h3>
+<p data-i18n-html="hjelp.klaring.gjaervalg.tekst">The single factor that most often decides how easily a beer clears is chosen before fermentation even starts: <a href="gjaervalg.html#flokkulering">the yeast's flocculation</a>.</p>
+<ul data-i18n-html="hjelp.klaring.gjaervalg.liste"><li>Strains with high flocculation often pack quickly and firmly at the bottom, and the beer tends to clear on its own.</li><li>Strains with low flocculation can stay in suspension for a long time, and the beer may remain hazy for weeks without anything being wrong.</li><li>Temperature and time work together with flocculation — colder and longer normally means more sedimentation.</li><li>Finings and cold crashing are often used precisely to help a low-flocculating yeast out of suspension.</li></ul>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.klaring.gjaervalg.hvorfor">This is why yeast selection and clarity belong together: if you pick a strain on flavor profile alone and are then surprised by the haze, you have discovered the connection too late. Think about clarity already at the <a href="gjaervalg.html#velge-til-oppskrift">yeast selection</a> stage, not first in the glass.</p>
+</div>
+<div id="feilsoking-klaring">
+<h3 data-i18n="hjelp.klaring.feilsoking.tittel">Troubleshooting — Haze and Sediment</h3>
+<p class="hjelp-innledning" data-i18n="hjelp.klaring.feilsoking.intro">Start by working out which kind of haze you have. The tools below act on different causes, and the wrong tool has no effect.</p>
+<table class="hjelp-tabell">
+<thead><tr>
+<th data-i18n="hjelp.klaring.feilsoking.kol1">Situation</th>
+<th data-i18n="hjelp.klaring.feilsoking.kol2">Consider</th>
+</tr></thead>
+<tbody>
+<tr><td data-i18n="hjelp.klaring.feilsoking.a.situasjon">A. The beer is hazy right after fermentation</td><td data-i18n-html="hjelp.klaring.feilsoking.a.vurder">Yeast still in suspension is the most common cause. Consider <a href="gjaervalg.html#flokkulering">flocculation</a>, temperature, how much time it has had, protein and polyphenols, hop particles — and above all whether the beer actually needs to be clear.</td></tr>
+<tr><td data-i18n="hjelp.klaring.feilsoking.b.situasjon">B. Clear when warm, hazy when cold</td><td data-i18n-html="hjelp.klaring.feilsoking.b.vurder">This is the classic picture of <a href="#chill-haze">chill haze</a>. Let a glass warm to room temperature and see whether the haze disappears again.</td></tr>
+<tr><td data-i18n="hjelp.klaring.feilsoking.c.situasjon">C. Permanent haze at any temperature</td><td data-i18n="hjelp.klaring.feilsoking.c.vurder">Consider yeast that will not drop out, protein and polyphenols, starch from incomplete conversion in the mash, the process in general — and whether the style is in fact meant to be hazy.</td></tr>
+<tr><td data-i18n="hjelp.klaring.feilsoking.d.situasjon">D. Lots of sediment in keg or bottle</td><td data-i18n-html="hjelp.klaring.feilsoking.d.vurder">Consider the yeast's flocculation, how carefully you transferred, whether finings were used, whether the beer was cold crashed, and that natural bottle conditioning always leaves a layer of yeast at the bottom — see <a href="index.html#priming-flaskekarbonering">bottle conditioning</a>.</td></tr>
+<tr><td data-i18n="hjelp.klaring.feilsoking.e.situasjon">E. The beer went hazy after dry hopping</td><td data-i18n-html="hjelp.klaring.feilsoking.e.vurder">Consider hop particles, polyphenol contribution from the hops, and <a href="humle.html#hop-creep">hop creep</a> with renewed yeast activity keeping the yeast in suspension. Re-measure FG before packaging.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="hjelp-metode-kort" id="klaringsplan">
+<h3 data-i18n="hjelp.klaring.plan.tittel">Practical Clarity Plan</h3>
+<table class="hjelp-tabell">
+<thead><tr>
+<th data-i18n="hjelp.klaring.plantabell.kol1">Phase</th>
+<th data-i18n="hjelp.klaring.plantabell.kol2">Consider</th>
+</tr></thead>
+<tbody>
+<tr>
+<td data-i18n="hjelp.klaring.plantabell.r1c1">Before the brew</td>
+<td data-i18n="hjelp.klaring.plantabell.r1c2">Does this style actually need high clarity? What flocculation does the yeast you picked have? How heavy are the malt and hop loads?</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.klaring.plantabell.r2c1">During the brew</td>
+<td data-i18n="hjelp.klaring.plantabell.r2c2">Complete conversion in the mash, a good boil, kettle finings if used, effective cooling, and how you handle trub when transferring to the fermenter.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.klaring.plantabell.r3c1">Fermentation</td>
+<td data-i18n="hjelp.klaring.plantabell.r3c2">Let fermentation finish — stable FG over time. Give it time, hold the temperature, and consider a cold crash once the beer is actually done.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.klaring.plantabell.r4c1">After fermentation</td>
+<td data-i18n="hjelp.klaring.plantabell.r4c2">Finings if used, a careful transfer that does not stir up the sediment, and storage at a temperature that lets particles keep dropping out.</td>
+</tr>
+<tr>
+<td data-i18n="hjelp.klaring.plantabell.r5c1">In the glass</td>
+<td data-i18n="hjelp.klaring.plantabell.r5c2">How does the beer look at the temperature it is actually served? Is it chill haze? How much sediment comes along? And most importantly: how does it taste?</td>
+</tr>
+</tbody>
+</table>
+<p class="hjelp-hvorfor" data-i18n="hjelp.klaring.plan.hvorfor">This is a planning structure, not a logging or database feature — use your own brew log or notebook for the actual tracking. None of the points are mandatory: a clarity plan for a hazy IPA can quite reasonably stop at "does not need to be clear".</p>
+</div>
+<p class="hjelp-innledning" data-i18n="hjelp.klaring.avslutning">Clarification is a chain of small choices from boil to glass, not a single move at the end. If you know which kind of haze you are dealing with, you also know which tool is relevant — and whether it is worth using at all on this particular beer.</p>
+</main>
+</div>
+<footer class="no-print">
+<p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="../personvern.html">Contact &amp; Privacy</a></p>
+</footer>
+<script src="../../js/i18n.js"></script>
+<script src="../../js/preferences.js"></script>
+<script src="../../js/chrome.js"></script>
+</body>
+</html>

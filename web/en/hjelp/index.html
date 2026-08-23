@@ -80,17 +80,34 @@
 <hr class="sidemeny-skille"/>
 <a class="sidemeny-lenke aktiv" href="index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
 </nav>
-<nav class="hjelp-side-nav">
+<nav aria-label="Help pages" class="hjelp-side-nav" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Getting started</span>
+<div class="hjelp-nav-lenker">
 <a class="aktiv" data-i18n="hjelp.sidenavFaq" href="index.html">📖 Help &amp; FAQ</a>
 <a data-i18n="hjelp.sidenavBryggedag" href="bryggedag.html">🗓️ A Brew Day</a>
 <a data-i18n="hjelp.sidenavBryggemetoder" href="bryggemetoder.html">⚗️ Brewing Methods</a>
+</div>
+</div>
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Master brewer</span>
+<div class="hjelp-nav-lenker">
+<a data-i18n="hjelp.sidenavGjaervalg" href="gjaervalg.html">🦠 Yeast Choice</a>
 <a data-i18n="hjelp.sidenavTrykkgjaering" href="trykkgjaering.html">🫧 Pressure Fermentation</a>
 <a data-i18n="hjelp.sidenavSterkeOl" href="sterke-ol.html">🥃 Strong Beer</a>
 <a data-i18n="hjelp.sidenavGjaerhosting" href="gjaerhosting.html">🫙 Yeast Harvesting</a>
 <a data-i18n="hjelp.sidenavVannkjemiAvansert" href="vannkjemi.html">💧 Water Chemistry</a>
-<a data-i18n="hjelp.sidenavSensorikk" href="sensorikk.html">👃 Sensorics</a>
 <a data-i18n="hjelp.sidenavHumle" href="humle.html">🌿 Hops</a>
+<a data-i18n="hjelp.sidenavKlaring" href="klaring.html">🔎 Clarity</a>
+<a data-i18n="hjelp.sidenavSensorikk" href="sensorikk.html">👃 Sensorics</a>
+</div>
+</div>
+<div class="hjelp-nav-gruppe">
+<span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Equipment</span>
+<div class="hjelp-nav-lenker">
 <a data-i18n="hjelp.sidenavUtstyr" href="utstyr-brewzilla.html">🛠️ Equipment: BrewZilla</a>
+</div>
+</div>
 </nav>
 <div class="hjelp-layout">
 <nav aria-label="Contents of this page" class="hjelp-toc" data-i18n-aria-label="hjelp.innholdAriaLabel">
@@ -250,7 +267,7 @@
 <article class="hjelp-artikkel" id="gjaer-pavirkning">
 <h3 data-i18n="hjelp.idx.gjaerPavirkning.tittel">How Yeast Affects the Beer</h3>
 <p data-i18n-html="hjelp.idx.gjaerPavirkning.tekst">Your yeast choice affects not just <a href="#utgjaering">attenuation</a> (and therefore FG/ABV), but also flavor compounds the yeast itself produces — esters (fruitiness), phenols (spice/clove in certain wheat and Belgian styles), and how fermentation temperature influences both.</p>
-<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerPavirkning.hvorfor"><strong>Why this matters:</strong> Two identical recipes can taste strikingly different with two different yeast strains — even when OG, FG, and IBU are nearly the same.</p>
+<p class="hjelp-hvorfor" data-i18n-html="hjelp.idx.gjaerPavirkning.hvorfor"><strong>Why this matters:</strong> Two identical recipes can taste strikingly different with two different yeast strains — even when OG, FG, and IBU are nearly the same. See <a href="gjaervalg.html">yeast selection</a> for a full walkthrough of what the strain actually affects.</p>
 </article>
 <article class="hjelp-artikkel" id="egendefinerte-ingredienser">
 <h3 data-i18n="hjelp.idx.egendefinerte.tittel">Custom Ingredients</h3>
@@ -332,7 +349,7 @@
 </article>
 <article class="hjelp-artikkel" id="def-cold-crash">
 <h3 data-i18n="hjelp.idx.defColdCrash.tittel">Cold Crash</h3>
-<p data-i18n-html="hjelp.idx.defColdCrash.tekst">Chilling the beer further down once fermentation is actually finished (see <a href="#faq-gjaring-stoppet">fermentation seems stopped</a>) — common examples fall somewhere around 0–4°C for a day to a few days, but this varies with equipment and desired result, and there's no single fixed number. Lower temperature makes yeast, proteins, and other particles settle out faster, often giving a clearer beer. The rapid temperature change can create a vacuum in a closed fermenter, which can in turn draw air/oxygen in if the vessel isn't sealed or handled properly, see <a href="#def-oksidasjon">oxidation after fermentation</a>.</p>
+<p data-i18n-html="hjelp.idx.defColdCrash.tekst">Chilling the beer further down once fermentation is actually finished (see <a href="#faq-gjaring-stoppet">fermentation seems stopped</a>) — common examples fall somewhere around 0–4°C for a day to a few days, but this varies with equipment and desired result, and there's no single fixed number. Lower temperature makes yeast, proteins, and other particles settle out faster, often giving a clearer beer. The rapid temperature change can create a vacuum in a closed fermenter, which can in turn draw air/oxygen in if the vessel isn't sealed or handled properly, see <a href="#def-oksidasjon">oxidation after fermentation</a>. See <a href="klaring.html#cold-crash-klaring">clarity</a> for what cold crashing actually works on — and what it does not fix.</p>
 </article>
 <article class="hjelp-artikkel" id="def-karbonering">
 <h3 data-i18n="hjelp.idx.defKarbonering.tittel">Carbonation</h3>

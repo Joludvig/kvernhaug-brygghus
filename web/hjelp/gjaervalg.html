@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gjærvalg — utgjæring, flokkulering, ester og fenol — Kvernhaug Brygghus</title>
+<meta name="description" content="Praktisk Bryggmester-guide til gjærvalg: hva stammen faktisk påvirker, ale/lager/kveik, utgjæring, flokkulering, ester og fenol, alkoholtoleranse, tørr vs. flytende og feilsøking." data-i18n-content="meta.hjelpGjaervalg.beskrivelse">
+<link rel="canonical" href="https://kvernhaugbrygghus.no/hjelp/gjaervalg.html">
+<link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/hjelp/gjaervalg.html">
+<link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/hjelp/gjaervalg.html">
+<link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/hjelp/gjaervalg.html">
+<link rel="icon" href="../assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon/apple-touch-icon.png">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-i18n-tittel-nokkel="meta.hjelpGjaervalg.tittel">
+<header class="hero">
+  <img class="hero-img" src="../assets/branding/kvernhaug_header_banner.jpg" alt="Kvernhaug Brygghus — kråke ved kvernhuset i gyllen fjelldal" data-i18n-alt="brand.heroAlt">
+  <div class="hero-scrim"></div>
+  <div class="hero-topprad">
+    <button type="button" class="meny-knapp" id="meny-knapp-hero" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="sprakvelger" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="gjaervalg.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/gjaervalg.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+  <div class="hero-tekst">
+    <div class="hero-navn">Kvernhaug Brygghus</div>
+    <h1 class="hero-sidetittel" data-i18n="hjelp.sidenavGjaervalg">🦠 Gjærvalg</h1>
+  </div>
+</header>
+
+<nav class="kompaktnav" aria-label="Hovednavigasjon (kompakt)" data-i18n-aria-label="chrome.navKompaktAriaLabel">
+  <div class="kompaktnav-inner">
+    <button type="button" class="meny-knapp" id="meny-knapp-kompakt" aria-expanded="false" aria-controls="sidemeny" aria-label="Åpne meny" data-i18n-aria-label="chrome.apneMeny">
+      <span></span><span></span><span></span>
+    </button>
+    <img class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
+    <div class="sprakvelger sprakvelger-kompakt" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+      <a class="sprak-knapp aktiv" data-sprak="no" href="gjaervalg.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/gjaervalg.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  </div>
+</nav>
+
+<div class="sidemeny-bakteppe"></div>
+<nav class="sidemeny" id="sidemeny" aria-label="Hovednavigasjon" data-i18n-aria-label="chrome.navAriaLabel">
+  <div class="sidemeny-topp">
+    <img class="sidemeny-logo" src="../assets/branding/kbh_icon_v1.png" alt="">
+    <span class="sidemeny-tittel">Kvernhaug<br>Brygghus</span>
+    <button type="button" class="sidemeny-lukk" aria-label="Lukk meny" data-i18n-aria-label="chrome.lukkMeny">✕</button>
+  </div>
+  <div class="sprakvelger sprakvelger-drawer" role="group" aria-label="Bytt språk" data-i18n-aria-label="sprak.ariaLabel">
+    <a class="sprak-knapp aktiv" data-sprak="no" href="gjaervalg.html" aria-current="page"><img class="sprak-flagg" src="../assets/ui/flag-no.webp" alt="" aria-hidden="true">NO</a>
+      <a class="sprak-knapp" data-sprak="en" href="../en/hjelp/gjaervalg.html"><img class="sprak-flagg" src="../assets/ui/flag-gb.webp" alt="" aria-hidden="true">EN</a>
+    </div>
+  <div class="enhetsvelger-blokk">
+    <span class="enhetsvelger-label" data-i18n="enhet.label">Måleenheter</span>
+    <div class="enhetsvelger" role="group" aria-label="Bytt måleenheter" data-i18n-aria-label="enhet.ariaLabel">
+      <button type="button" class="enhet-knapp" data-enhet="metric"><span data-i18n="enhet.metrisk">Metrisk</span></button>
+      <button type="button" class="enhet-knapp" data-enhet="us"><span data-i18n="enhet.us">US customary</span></button>
+    </div>
+  </div>
+  <a href="../index.html" class="sidemeny-lenke"><span data-i18n="nav.bygger">🍺 Oppskriftsbygger</span></a>
+  <a href="../mine-oppskrifter.html" class="sidemeny-lenke"><span data-i18n="nav.mineOppskrifter">📂 Mine oppskrifter</span></a>
+  <a href="../importer.html" class="sidemeny-lenke"><span data-i18n="nav.importer">📥 Importer oppskrift</span></a>
+  <a href="../utskrift.html" class="sidemeny-lenke"><span data-i18n="nav.utskrift">🖨️ Utskrift</span></a>
+  <a href="../pantry.html" class="sidemeny-lenke"><span data-i18n="nav.pantry">📦 Lager</span></a>
+  <a href="../bryggelogg.html" class="sidemeny-lenke"><span data-i18n="nav.bryggelogg">🪓 Bryggelogg</span></a>
+  <hr class="sidemeny-skille">
+  <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
+</nav>
+
+<nav class="hjelp-side-nav" aria-label="Hjelpesider" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Kom i gang</span>
+    <div class="hjelp-nav-lenker">
+      <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+      <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+      <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Bryggmester</span>
+    <div class="hjelp-nav-lenker">
+      <a href="gjaervalg.html" class="aktiv" data-i18n="hjelp.sidenavGjaervalg">🦠 Gjærvalg</a>
+      <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+      <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+      <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+      <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+      <a href="humle.html" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
+      <a href="klaring.html" data-i18n="hjelp.sidenavKlaring">🔎 Klaring</a>
+      <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Utstyr</span>
+    <div class="hjelp-nav-lenker">
+      <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hjelp-layout">
+  <nav class="hjelp-toc" aria-label="Innhold på denne siden" data-i18n-aria-label="hjelp.innholdAriaLabel">
+    <a href="#gjaer-pavirker" data-i18n="hjelp.gjaervalg.toc.pavirker">Hva gjærvalget påvirker</a>
+    <a href="#ale-lager-kveik" data-i18n="hjelp.gjaervalg.toc.familier">Ale, lager og kveik</a>
+    <a href="#utgjaering-attenuation" data-i18n="hjelp.gjaervalg.toc.utgjaering">Utgjæring: oppgitt vs. faktisk</a>
+    <a href="#flokkulering" data-i18n="hjelp.gjaervalg.toc.flokkulering">Flokkulering</a>
+    <a href="#estere" data-i18n="hjelp.gjaervalg.toc.estere">Estere</a>
+    <a href="#fenoler-pof" data-i18n="hjelp.gjaervalg.toc.fenoler">Fenoler og POF</a>
+    <a href="#alkoholtoleranse-gjaer" data-i18n="hjelp.gjaervalg.toc.alkoholtoleranse">Alkoholtoleranse</a>
+    <a href="#temperaturomrade" data-i18n="hjelp.gjaervalg.toc.temperatur">Temperaturområde</a>
+    <a href="#torr-vs-flytende" data-i18n="hjelp.gjaervalg.toc.torrFlytende">Tørrgjær vs. flytende</a>
+    <a href="#pakke-vs-pitch" data-i18n="hjelp.gjaervalg.toc.pitch">Én pakke er ikke en pitch rate</a>
+    <a href="#velge-til-oppskrift" data-i18n="hjelp.gjaervalg.toc.beslutning">Velge gjær til oppskriften</a>
+    <a href="#samme-vort-ulik-gjaer" data-i18n="hjelp.gjaervalg.toc.sammeVort">Samme vørter, ulik gjær</a>
+    <a href="#lese-produsentark" data-i18n="hjelp.gjaervalg.toc.produsentark">Lese et produsentark</a>
+    <a href="#gjaer-og-trykk" data-i18n="hjelp.gjaervalg.toc.trykk">Gjærvalg og trykk</a>
+    <a href="#gjaer-og-gjenbruk" data-i18n="hjelp.gjaervalg.toc.gjenbruk">Gjærvalg og gjenbruk</a>
+    <a href="#feilsoking-gjaervalg" data-i18n="hjelp.gjaervalg.toc.feilsoking">Feilsøking gjærvalg</a>
+  </nav>
+
+  <main class="hjelp-side-main">
+  <p class="hjelp-innledning" data-i18n-html="hjelp.gjaervalg.intro">
+    Denne siden bygger videre på den korte innføringen i <a href="index.html#om-gjaer">Hjelp &amp; FAQ</a> og går praktisk gjennom hva et gjærvalg faktisk gjør med ølet: utgjæring, flokkulering, ester- og fenolkarakter, alkoholtoleranse og temperaturarbeidsområde. Målet er å kunne resonnere seg fram til en stamme som passer oppskriften — ikke å peke ut én «beste» gjær. Utstyr, vørter og prosess påvirker resultatet like mye som navnet på pakken.
+  </p>
+
+  <div class="hjelp-metode-kort" id="gjaer-pavirker">
+    <h3 data-i18n="hjelp.gjaervalg.pavirker.tittel">Gjærvalget påvirker mer enn «ale eller lager»</h3>
+    <p data-i18n="hjelp.gjaervalg.pavirker.tekst">Det er lett å tenke på gjær som et binært valg mellom ale og lager. I praksis er stammen en av de mest formende ingrediensene i oppskriften: den avgjør ikke bare om ølet gjærer, men i stor grad hvordan det smaker, hvor tørt det oppleves, hvor raskt det klarner og hvor mye sediment du sitter igjen med.</p>
+    <ul data-i18n-html="hjelp.gjaervalg.pavirker.liste"><li><strong>Utgjæring</strong> — hvor mye av det gjærbare sukkeret som faktisk brukes opp, og dermed FG, opplevd tørrhet og restsødme.</li><li><strong>Flokkulering</strong> — hvor raskt gjæren klumper seg og faller ut, som igjen påvirker klarhet og sediment.</li><li><strong>Esterprofil</strong> — fruktige aromaer som banan, pære, eple, steinfrukt eller tropisk.</li><li><strong>Fenolprofil</strong> — nellik-, pepper- og kryddertoner hos stammer som produserer dem.</li><li><strong>Alkoholtoleranse</strong> — hvor godt stammen typisk arbeider seg gjennom en sterk vørter.</li><li><strong>Temperaturarbeidsområde</strong> — hvilket intervall stammen normalt gjærer i, og hvor i intervallet karakteren endrer seg.</li><li><strong>Gjæringshastighet</strong> — hvor raskt forløpet typisk går i gang og blir ferdig.</li><li><strong>Svovelproduksjon</strong> — enkelte stammer gir tydelig svovelpreg underveis i prosessen.</li><li><strong>Munnfølelse og restsødme</strong> — via utgjæring, glyserol og hvilke sukkerarter stammen etterlater.</li><li><strong>Klarhet og sedimentering</strong> — hvor lenge gjæren blir hengende i suspensjon.</li><li><strong>Egnethet for stil og oppskrift</strong> — om karakteren trekker i samme retning som resten av oppskriften.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.pavirker.hvorfor"><strong>Hvorfor du bryr deg:</strong> Hovedhjelpen forklarer kort <a href="index.html#gjaer-pavirkning">hva gjæren påvirker</a>. Her går vi videre: hvert av punktene over er en knapp du kan skru på når du velger stamme. Tallene i et produsentark er beslutningsgrunnlag, ikke garantier — de er målt i produsentens vørter og prosess, ikke i din.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="ale-lager-kveik">
+    <h3 data-i18n="hjelp.gjaervalg.familier.tittel">Ale, lager og kveik — praktiske forskjeller</h3>
+    <p data-i18n="hjelp.gjaervalg.familier.tekst">De tre store familiene skiller seg først og fremst i hvilket temperaturområde de typisk arbeider i, og i hvor mye karakter de vanligvis bidrar med. Innenfor hver familie er spennet stort — variasjonen mellom to stammer i samme familie kan være større enn forskjellen mellom familiene.</p>
+  <table class="hjelp-tabell">
+    <thead><tr>
+      <th data-i18n="hjelp.gjaervalg.familietabell.kol1">Familie</th>
+      <th data-i18n="hjelp.gjaervalg.familietabell.kol2">Typisk arbeidsområde</th>
+      <th data-i18n="hjelp.gjaervalg.familietabell.kol3">Ofte forbundet med</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r1c1">Ale</td>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r1c2">Typisk varmere gjæring enn lager.</td>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r1c3">Ofte mer esterbidrag, men helt avhengig av stamme og temperatur. Spennet går fra svært nøytrale stammer til svært uttrykksfulle.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r2c1">Lager</td>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r2c2">Typisk kjøligere gjæring.</td>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r2c3">Ofte en renere profil med mindre ester. Enkelte stammer gir tydelig svovel underveis, og modning/lagring kan være en viktig del av prosessen.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r3c1">Kveik</td>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r3c2">Mange stammer tåler høy temperatur.</td>
+        <td data-i18n="hjelp.gjaervalg.familietabell.r3c3">Rask gjæring kan forekomme. Profilen varierer svært mye mellom kulturer — fra ren til kraftig fruktig. Ikke én smak og ikke én prosess.</td>
+      </tr>
+    </tbody>
+  </table>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.familier.hvorfor"><strong>Unngå de tre vanligste forenklingene:</strong> «ale = fruktig», «lager = smakløs» og «kveik = alltid tropisk» er ikke sanne som absolutter. Det finnes svært nøytrale alestammer, lagerstammer med tydelig egenkarakter, og kveikstammer som gir alt fra ren og enkel til kraftig fruktig profil. «Kveik» er dessuten en samlebetegnelse for mange ulike kulturer med ulik opprinnelse — ikke én smak og ikke én prosess. Bruk produsentens beskrivelse av den konkrete stammen, ikke familienavnet, som utgangspunkt.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="utgjaering-attenuation">
+    <h3 data-i18n="hjelp.gjaervalg.utgjaering.tittel">Utgjæring — produsentens tall er ikke din FG</h3>
+    <p data-i18n-html="hjelp.gjaervalg.utgjaering.tekst">Et produsentark oppgir gjerne utgjæring som et intervall, for eksempel «75–80 %». Det tallet beskriver hva stammen typisk klarte i produsentens standardvørter. Din faktiske <a href="index.html#fg">FG</a> avhenger like mye av vørteren du lager som av stammen du velger — se også <a href="index.html#utgjaering">utgjæring</a> i hovedhjelpen.</p>
+    <ul data-i18n-html="hjelp.gjaervalg.utgjaering.liste"><li><strong>Vørterens gjærbarhet</strong> — hvor stor andel av sukkeret som i det hele tatt er gjærbart.</li><li><strong>Mesketemperatur og -tid</strong> — påvirker sukkerprofilen direkte, se <a href="index.html#def-mesking">mesking</a> og <a href="bryggemetoder.html">bryggemetoder</a>.</li><li><strong>Sukkerprofil</strong> — andelen enkle, lett gjærbare sukkerarter kontra lengre kjeder.</li><li><strong>OG</strong> — en høy startverdi stresser gjæren mer, se <a href="sterke-ol.html">sterke øl</a>.</li><li><strong>Gjærhelse og mengde</strong> — se <a href="index.html#gjaerhelse-temperatur">gjærhelse og temperatur</a>.</li><li><strong>Oksygenering ved pitch</strong> — se <a href="sterke-ol.html#oksygenering">oksygenering</a>.</li><li><strong>Temperatur under gjæring</strong> — for kaldt kan bremse eller stanse forløpet.</li><li><strong>Alkoholtoleranse</strong> — kan bli begrensende i sterke øl.</li><li><strong>Tid</strong> — gjæringen kan ha mer igjen å gi enn du tror.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.utgjaering.hvorfor"><strong>Derfor kan to stammer gi ulik FG i samme oppskrift:</strong> De bruker ikke nødvendigvis de samme sukkerartene. Enkelte stammer kan bryte ned lengre sukkerkjeder som andre lar ligge, og de skiller seg i hvor godt de tåler alkohol og temperaturfall mot slutten. Samme vørter kan derfor ende på to forskjellige FG-verdier — begge «riktige» for sin stamme. Faller FG mye lavere enn ventet uten forklaring, er det verdt å vurdere <a href="sensorikk.html#infeksjon">annen aktivitet</a> eller <a href="humle.html#hop-creep">hop creep</a> også.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="flokkulering">
+    <h3 data-i18n="hjelp.gjaervalg.flokkulering.tittel">Flokkulering — hvor villig gjæren er til å falle ut</h3>
+    <p data-i18n="hjelp.gjaervalg.flokkulering.tekst">Flokkulering beskriver hvor lett gjærcellene klumper seg sammen og synker til bunns når de er ferdige med å arbeide. Produsenter oppgir det gjerne som lav, middels eller høy. Høy flokkulering betyr at gjæren pakker seg raskt og hardt i bunnen; lav flokkulering betyr at cellene blir hengende lenger i suspensjon.</p>
+    <ul data-i18n-html="hjelp.gjaervalg.flokkulering.liste"><li><strong>Høy flokkulering</strong> — ølet klarner ofte raskere av seg selv, og sedimentet blir gjerne mer kompakt. Til gjengjeld kan svært flokkulente stammer i enkelte forhold falle ut før de er ferdige med jobben, slik at gjæringen ser ut til å stanse høyt.</li><li><strong>Lav flokkulering</strong> — gjæren blir lenger i suspensjon. Det kan gi lengre uklarhet og mer gjær i det ferdige ølet, men også en gjær som holder ut lenger i vørteren.</li><li><strong>Middels</strong> — et kompromiss, og det vanligste utgangspunktet for mange stiler.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.flokkulering.hvorfor"><strong>Høy flokkulering er ikke automatisk «bedre»:</strong> Hva som er ønskelig avhenger av stil og prosess. Klarner ølet raskt, men FG står høyere enn ventet, kan en flokkulent stamme ha satt seg for tidlig — forsiktig oppvirvling eller litt høyere temperatur mot slutten kan hjelpe, men mål alltid FG over tid før du konkluderer. Flokkulering er også den viktigste enkeltkoblingen mellom gjærvalg og <a href="klaring.html">klaring</a>, se <a href="klaring.html#klaring-og-gjaervalg">klaring og gjærvalg</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="estere">
+    <h3 data-i18n="hjelp.gjaervalg.estere.tittel">Estere — fruktigheten gjæren lager</h3>
+    <p data-i18n-html="hjelp.gjaervalg.estere.tekst">Estere er aromaforbindelser gjæren produserer under gjæringen, og de oppleves typisk som frukt: banan, pære, eple, steinfrukt eller mer tropiske toner. <a href="sensorikk.html#estere">Sensorikk-guiden</a> beskriver hvordan de kjennes igjen i glasset — her handler det om hvordan valget av stamme og prosess påvirker hvor mye du får.</p>
+    <ul data-i18n-html="hjelp.gjaervalg.estere.liste"><li><strong>Stamme</strong> — den største enkeltfaktoren. Noen stammer er bygget for esteruttrykk, andre er valgt nettopp fordi de gir lite.</li><li><strong>Temperatur</strong> — høyere gjæringstemperatur gir ofte mer esteruttrykk hos mange stammer.</li><li><strong>Pitchmengde</strong> — for lite gjær kan gi mer esterpreg fordi cellene må formere seg mer.</li><li><strong>Oksygenering</strong> — påvirker cellevekst, og dermed indirekte esterproduksjonen.</li><li><strong>Trykk</strong> — kan dempe esteruttrykk hos enkelte stammer, se <a href="trykkgjaering.html">trykkgjæring</a>.</li><li><strong>Vørterstyrke</strong> — høy OG kan gi mer esterpreg, se <a href="sterke-ol.html">sterke øl</a>.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaervalg.estere.hvorfor">Ønsket, nøytralt eller uønsket? Det avhenger av stil og intensitet. Banan i en weissbier er en stilriktig signatur; det samme preget i en pils oppleves fort som en feil. Estere er derfor ikke en feilkategori i seg selv — spørsmålet er alltid om mengden og typen passer til ølet du prøver å lage.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="fenoler-pof">
+    <h3 data-i18n="hjelp.gjaervalg.fenoler.tittel">Fenoler og POF — nellik, pepper og krydder</h3>
+    <p data-i18n-html="hjelp.gjaervalg.fenoler.tekst">Enkelte gjærstammer produserer fenoliske forbindelser som oppleves som nellik, pepper eller krydder. Slike stammer omtales gjerne som <strong>POF+</strong> (phenolic off-flavour positive); stammer som ikke gjør det, som <strong>POF−</strong>. Betegnelsen «off-flavour» er historisk og litt misvisende: i weissbier, saison og mange belgiske stiler er nettopp dette preget ønsket.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.fenoler.hvorfor"><strong>Praktisk betydning ved gjærvalg:</strong> Skal du brygge en stil som lever på krydderpreget, må du velge en stamme som faktisk lager det — det kan ikke meskes eller humles fram. Skal du brygge en ren pils eller en moderne IPA, er en POF+ stamme feil verktøy. Vær samtidig oppmerksom på at en <em>medisinal eller plastisk</em> karakter ikke automatisk kommer fra gjæren: klor- og kloraminrelaterte forbindelser eller kontaminasjon kan gi lignende inntrykk, se <a href="sensorikk.html#fenoler">fenoler i sensorikk-guiden</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="alkoholtoleranse-gjaer">
+    <h3 data-i18n="hjelp.gjaervalg.alkoholtoleranse.tittel">Alkoholtoleranse — retningsgivende, ikke en garanti</h3>
+    <p data-i18n-html="hjelp.gjaervalg.alkoholtoleranse.tekst">Produsenten oppgir gjerne en alkoholtoleranse, for eksempel «opptil 10 %». Det er et retningsgivende tall for hvor langt stammen typisk arbeider under gode forhold — ikke en garanti for at akkurat din vørter gjærer rent ut til den styrken. Se <a href="sterke-ol.html#alkoholtoleranse">alkoholtoleranse i sterke øl</a> for den fulle behandlingen.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.alkoholtoleranse.hvorfor"><strong>Hva som avgjør om du kommer dit:</strong> Høy OG legger osmotisk stress på gjæren allerede før alkoholen bygger seg opp. Mengde og friskhet på gjæren du pitcher, oksygenering, gjærnæring, temperaturstyring og sukkerprofilen i vørteren påvirker alle om stammen faktisk holder ut. To brygg med samme stamme og samme mål-ABV kan derfor ende helt forskjellig. Planlegger du et sterkt øl, velg gjerne en stamme med margin — og gi den forholdene den trenger, se <a href="sterke-ol.html#gjaer-forberedelse">forberedelse av gjær</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="temperaturomrade">
+    <h3 data-i18n="hjelp.gjaervalg.temperatur.tittel">Temperaturområde — «kan gjære ved» er ikke «smaker best ved»</h3>
+    <p data-i18n="hjelp.gjaervalg.temperatur.tekst">Produsenten oppgir et anbefalt temperaturintervall for stammen. Det er verdt å lese som to opplysninger i én: hvor stammen i det hele tatt arbeider, og hvor den gir den karakteren produsenten beskriver. Nedre og øvre del av samme intervall kan gi merkbart forskjellig øl fra samme vørter.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.temperatur.hvorfor"><strong>Praktisk konsekvens:</strong> Enkelte stammer tåler et bredt intervall uten at hele intervallet gir ønsket profil. En stamme som «kan gjære opp til 30 °C» sier ingenting om at den smaker best der. Velg derfor stamme etter den temperaturen du faktisk klarer å holde stabil gjennom hele forløpet — ikke etter den du håper å treffe. Har du begrenset temperaturkontroll, er det ofte klokere å velge en stamme som er tilgivende i ditt område enn å tvinge en kravstor stamme inn i feil forhold. Se <a href="index.html#gjaerhelse-temperatur">gjærhelse og temperatur</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="torr-vs-flytende">
+    <h3 data-i18n="hjelp.gjaervalg.torrFlytende.tittel">Tørrgjær og flytende gjær — to formater, ikke et kvalitetshierarki</h3>
+  <table class="hjelp-tabell">
+    <thead><tr>
+      <th data-i18n="hjelp.gjaervalg.formattabell.kol1">Format</th>
+      <th data-i18n="hjelp.gjaervalg.formattabell.kol2">Praktiske egenskaper</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.formattabell.r1c1">Tørrgjær</td>
+        <td data-i18n="hjelp.gjaervalg.formattabell.r1c2">Ofte robust og tilgivende i håndtering. Høyt celletall per pakke kan forekomme. Enkel lagring og transport, og lang holdbarhet ved riktig oppbevaring. Utvalget er stort, men ikke alle stammer finnes i tørket form.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.formattabell.r2c1">Flytende gjær</td>
+        <td data-i18n="hjelp.gjaervalg.formattabell.r2c2">Gir tilgang til et bredere stammeutvalg, inkludert mange stiltypiske og spesialiserte kulturer. Friskhet og celletall kan være mer avgjørende, og en starter kan være aktuell avhengig av alder, volum og OG.</td>
+      </tr>
+    </tbody>
+  </table>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.torrFlytende.hvorfor"><strong>Ingen av formatene er «bedre»:</strong> De har ulike praktiske egenskaper. Tørrgjær er enkel å lagre og transportere og er ofte robust; flytende gjær gir tilgang til et bredere stammeutvalg. Om du trenger en <a href="index.html#gjaerstarter">gjærstarter</a>, avhenger av celletall, friskhet, batchvolum og OG — ikke av formatet alene. Følg produsentens anvisning for rehydrering eller direkte pitch for den konkrete pakken du har.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="pakke-vs-pitch">
+    <h3 data-i18n="hjelp.gjaervalg.pitch.tittel">Én pakke er ikke en pitch rate</h3>
+    <p data-i18n="hjelp.gjaervalg.pitch.tekst">«Jeg pitchet én pakke» sier lite alene. Hvor mye gjær som faktisk trengs avhenger av batchvolum, OG, celletallet i pakken, hvor fersk den er, og hvilken type gjær det er. To brygg med «én pakke» kan derfor ha helt ulik utgangsposisjon.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.pitch.hvorfor"><strong>Prinsippet, ikke et regnestykke:</strong> Denne siden gir deg ingen pitch-rate-kalkulator, og oppskriftsbyggeren regner ikke ut celletall. Poenget er å vite hvilke faktorer som spiller inn, og å bruke produsentens egne anbefalinger for den pakken du faktisk har. Et sterkt øl krever normalt mer frisk gjær enn et vanlig øl i samme volum — se <a href="sterke-ol.html#pitch-rate-frisk-gjaer">pitch rate og frisk gjær</a>. Skal du pitche høstet slurry i stedet, se <a href="gjaerhosting.html#slurry-vurdering">vurdering av slurry</a>.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="velge-til-oppskrift">
+    <h3 data-i18n="hjelp.gjaervalg.beslutning.tittel">Velge gjær til oppskriften — en praktisk rekkefølge</h3>
+    <p data-i18n="hjelp.gjaervalg.beslutning.tekst">En brukbar arbeidsflyt er å gå fra ønsket resultat mot praktiske begrensninger, i denne rekkefølgen. Svarene snevrer inn utvalget etter hvert, og de siste punktene fungerer som en realitetssjekk.</p>
+    <ol data-i18n-html="hjelp.gjaervalg.beslutning.liste"><li><strong>Hvilken sluttprofil vil jeg ha?</strong> Ren, fruktig, fenolisk, maltdrevet, tørr eller fyldig.</li><li><strong>Hvilken OG og forventet ABV?</strong> Setter krav til alkoholtoleranse og gjærmengde.</li><li><strong>Hvilken gjæringstemperatur kan jeg faktisk holde?</strong> Stabilt, gjennom hele forløpet — ikke i teorien.</li><li><strong>Hvor tørt skal ølet oppleves?</strong> Peker mot ønsket utgjæringsnivå.</li><li><strong>Hvor viktig er klarhet og lite sediment?</strong> Peker mot ønsket flokkulering.</li><li><strong>Ønsker jeg ester- og fenolkarakter, eller vil jeg unngå det?</strong></li><li><strong>Trenger jeg høy alkoholtoleranse?</strong> Bare relevant for sterkere øl.</li><li><strong>Tørr eller flytende gjær?</strong> Ut fra tilgjengelighet, lagring og hva stammen finnes som.</li><li><strong>Kan jeg pitche nok frisk gjær?</strong> Hvis ikke, juster ambisjonsnivå, planlegg starter, eller velg en annen stamme.</li></ol>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.beslutning.hvorfor"><strong>Gjærvalg er oppskriftsdesign:</strong> Rekkefølgen over er bevisst — profil og styrke først, praktiske begrensninger sist, slik at du oppdager tidlig hvis ambisjonen ikke passer utstyret. Bytter du gjær i en eksisterende oppskrift, endrer du potensielt både FG, aroma og klarhet, ikke bare «gjærlinjen». Se <a href="index.html#faq-bytte-gjaer">kan jeg bytte gjær?</a> i FAQ-en.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="samme-vort-ulik-gjaer">
+    <h3 data-i18n="hjelp.gjaervalg.sammeVort.tittel">Samme vørter, to stammer — to forskjellige øl</h3>
+    <p data-i18n="hjelp.gjaervalg.sammeVort.tekst">Del den samme vørteren i to gjæringskar og pitch to ulike stammer, og du får ikke to varianter av samme øl — du får to øl. Dette er en av de mest lærerike øvelsene en hjemmebrygger kan gjøre, og den viser konkret hvor mye av «oppskriften» som faktisk bestemmes under gjæringen.</p>
+    <ul data-i18n-html="hjelp.gjaervalg.sammeVort.liste"><li><strong>FG</strong> kan ende ulikt fordi stammene bruker sukkerartene forskjellig.</li><li><strong>Aroma</strong> kan gå fra nøytral til tydelig fruktig eller krydret.</li><li><strong>Munnfølelse</strong> kan oppleves tynnere eller fyldigere, delvis som følge av ulik FG.</li><li><strong>Klarhet</strong> kan utvikle seg i helt ulikt tempo på grunn av flokkulering.</li><li><strong>Alkoholopplevelsen</strong> kan variere selv ved lik ABV, avhengig av restsødme og karakter.</li><li><strong>Modningstid</strong> kan være ulik — noen profiler trenger lengre tid på å falle på plass.</li></ul>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaervalg.sammeVort.hvorfor">Ingen bestemt kommersiell gjær er en universell fasit her, og Kvernhaug Brygghus anbefaler ingen enkelt stamme som «standardgjæren». Poenget er prinsippet: vil du forstå hva gjæren gjør, er en delt vørter mer lærerik enn å lese ti datablader.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="lese-produsentark">
+    <h3 data-i18n="hjelp.gjaervalg.produsentark.tittel">Lese et produsentark — enkel sjekkliste</h3>
+    <p data-i18n="hjelp.gjaervalg.produsentark.tekst">De fleste gjærprodusenter oppgir de samme opplysningene, om enn med litt ulike ord. Går du gjennom dem i denne rekkefølgen, har du grunnlaget for et bevisst valg.</p>
+  <table class="hjelp-tabell">
+    <thead><tr>
+      <th data-i18n="hjelp.gjaervalg.arktabell.kol1">Felt på arket</th>
+      <th data-i18n="hjelp.gjaervalg.arktabell.kol2">Hva du bruker det til</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r1c1">Type / familie</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r1c2">Ale, lager, kveik eller annet — gir første pekepinn på temperaturområde og forventet karakter.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r2c1">Temperatur</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r2c2">Anbefalt intervall. Husk at nedre og øvre del kan gi ulik profil, og at «kan gjære ved» ikke er «smaker best ved».</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r3c1">Attenuation / utgjæring</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r3c2">Retningsgivende intervall målt i produsentens vørter. Brukes til å sammenligne stammer, ikke til å forutsi din FG.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r4c1">Flocculation / flokkulering</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r4c2">Lav, middels eller høy. Peker mot forventet klarhet, sediment og hvor lenge gjæren blir i suspensjon.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r5c1">Alcohol tolerance</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r5c2">Hvor langt stammen typisk arbeider under gode forhold. Retningsgivende, ikke en garanti.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r6c1">Ester- og fenolbeskrivelse</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r6c2">Produsentens egne ord om karakteren, ofte den mest nyttige delen av arket. Merk om stammen er POF+ eller POF−.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r7c1">Pitch guidance</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r7c2">Produsentens anbefaling for mengde, rehydrering og eventuell starter for akkurat denne pakken.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r8c1">Lagring og holdbarhet</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r8c2">Hvordan pakken skal oppbevares, og hvor gammel den er. Påvirker hvor mye levende gjær du faktisk pitcher.</td>
+      </tr>
+      <tr>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r9c1">Anbefalte stiler</td>
+        <td data-i18n="hjelp.gjaervalg.arktabell.r9c2">Nyttig som utgangspunkt, men ikke en begrensning. Listen sier hvor stammen er utprøvd, ikke hvor den er tillatt.</td>
+      </tr>
+    </tbody>
+  </table>
+    <p class="hjelp-hvorfor" data-i18n="hjelp.gjaervalg.produsentark.hvorfor">Produsentarket er beslutningsgrunnlag, ikke en garanti. Tallene er målt i produsentens vørter, med produsentens pitchmengde og prosess. Ditt resultat kan avvike uten at noe er galt — verken med gjæren eller med deg. Bruk arket til å sammenligne stammer med hverandre, og din egen logg til å lære hva stammen gjør i ditt system.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="gjaer-og-trykk">
+    <h3 data-i18n="hjelp.gjaervalg.trykk.tittel">Gjærvalg og trykk</h3>
+    <p data-i18n-html="hjelp.gjaervalg.trykk.tekst">Gjærer du under trykk, blir stammevalget en ekstra variabel. Trykk kan dempe esteruttrykk hos enkelte stammer, og gir dermed en mulighet til å gjære varmere uten å få like mye fruktkarakter. Se <a href="trykkgjaering.html">trykkgjæring</a> for selve metoden, utstyret og sikkerheten.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.trykk.hvorfor"><strong>Ikke anta at samme trykk passer alle stammer:</strong> Stammer reagerer ulikt, både på hvor mye trykk de tåler og på hvor mye av karakteren som faktisk dempes. For mye trykk kan hemme eller stresse gjæren og gi et tregere eller ufullstendig forløp. Når trykket påføres i forløpet betyr også noe, se <a href="trykkgjaering.html#nar-trykket-pafores">når trykket påføres</a>. Bruk produsentens eventuelle anbefaling for stammen, og behandle første brygg med en ny kombinasjon som et forsøk.</p>
+  </div>
+
+  <div class="hjelp-metode-kort" id="gjaer-og-gjenbruk">
+    <h3 data-i18n="hjelp.gjaervalg.gjenbruk.tittel">Gjærvalg og gjenbruk</h3>
+    <p data-i18n-html="hjelp.gjaervalg.gjenbruk.tekst">Høster du gjær til neste brygg, arver du stammens egenskaper — men ikke nødvendigvis nøyaktig samme oppførsel. Se <a href="gjaerhosting.html">gjærhøsting og gjenbruk</a> for metode, lagring og vurdering av slurry.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.gjaervalg.gjenbruk.hvorfor"><strong>Konsekvens for valget:</strong> Planlegger du å gjenbruke gjæren over flere brygg, er det verdt å velge en stamme du faktisk vil brygge flere ganger, og å tenke gjennom rekkefølgen på bryggene. Gjærhelse, generasjonsnummer og renhet påvirker resultatet, se <a href="gjaerhosting.html#generasjoner-drift">generasjoner og drift</a>. «Samme gjær» betyr ikke automatisk identisk resultat etter mange passasjer — sporbarhet og notater er det som gjør forskjellen mellom gjenbruk og gjetning.</p>
+  </div>
+
+  <div id="feilsoking-gjaervalg">
+  <h3 data-i18n="hjelp.gjaervalg.feilsoking.tittel">Feilsøking — gjær og gjærvalg</h3>
+  <p class="hjelp-innledning" data-i18n="hjelp.gjaervalg.feilsoking.intro">Kort praktisk feilsøking med gjærvalget som innfallsvinkel. Dette erstatter ikke den sensoriske feilsøkingen, men peker på hva som er verdt å vurdere først.</p>
+  <table class="hjelp-tabell">
+    <thead><tr>
+      <th data-i18n="hjelp.gjaervalg.feilsoking.kol1">Situasjon</th>
+      <th data-i18n="hjelp.gjaervalg.feilsoking.kol2">Vurder</th>
+    </tr></thead>
+    <tbody>
+      <tr><td data-i18n="hjelp.gjaervalg.feilsoking.a.situasjon">A. For søtt / FG høyere enn ventet</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.a.vurder">Stammens oppgitte utgjæring, vørterens gjærbarhet og mesketemperatur, gjæringstemperatur, gjærhelse og pitchmengde, alkoholtoleranse hvis OG var høy, om en flokkulent stamme har satt seg for tidlig, og rene målefeil — se <a href="index.html#faq-for-sott">for søtt</a> og <a href="sensorikk.html#sott-hoy-fg">sødme og høy FG</a>.</td></tr>
+      <tr><td data-i18n="hjelp.gjaervalg.feilsoking.b.situasjon">B. For fruktig for stilen</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.b.vurder">Stammens esterprofil, gjæringstemperatur (særlig tidlig i forløpet), pitchmengde, oksygenering, eventuelt trykk, og vørterstyrke — se <a href="sensorikk.html#estere">estere</a>.</td></tr>
+      <tr><td data-i18n="hjelp.gjaervalg.feilsoking.c.situasjon">C. For krydret / fenolisk</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.c.vurder">Om stammen er POF+, om preget faktisk er stilriktig, mulig kontaminasjon, og klor-/kloraminrelaterte forbindelser fra vannet — se <a href="sensorikk.html#fenoler">fenoler</a>.</td></tr>
+      <tr><td data-i18n="hjelp.gjaervalg.feilsoking.d.situasjon">D. Ølet bruker lang tid på å klarne</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.d.vurder">Stammens flokkulering, temperatur, gjær fortsatt i suspensjon, protein og polyfenoler, og hvilken klaringsprosess du faktisk bruker — se <a href="klaring.html">klaring og haze</a>.</td></tr>
+      <tr><td data-i18n="hjelp.gjaervalg.feilsoking.e.situasjon">E. Stanset gjæring i et sterkt øl</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.e.vurder">Alkoholtoleranse, pitchmengde og gjærhelse, gjærnæring, oksygenering ved pitch, og temperaturstyring gjennom forløpet — se <a href="sterke-ol.html#nar-gjaeringen-stopper-hoyt">når gjæringen stopper høyt</a>.</td></tr>
+      <tr><td data-i18n="hjelp.gjaervalg.feilsoking.f.situasjon">F. Tydelig svovelpreg under gjæring</td><td data-i18n-html="hjelp.gjaervalg.feilsoking.f.vurder">Enkelte stammer, særlig i lagerfamilien, gir svovel som en normal del av prosessen. Vurder stamme, temperatur og tid før du behandler det som en feil — se <a href="index.html#faq-svovel">svovel</a> og <a href="sensorikk.html#svovel">svovel i sensorikk</a>.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="hjelp-innledning" data-i18n="hjelp.gjaervalg.avslutning">
+    Gjærvalg er en del av oppskriftsdesignet, ikke et ettertankevalg. Stammen, temperaturen du faktisk kan holde, mengden frisk gjær du kan pitche og vørterens gjærbarhet virker sammen — og det er kombinasjonen, ikke ett enkelt datablad, som avgjør hva du får i glasset.
+  </p>
+  </main>
+</div>
+
+<footer class="no-print">
+  <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a href="../personvern.html" data-i18n="footer.kontaktLenke">Kontakt og personvern</a></p>
+</footer>
+
+<script src="../js/i18n.js"></script>
+<script src="../js/preferences.js"></script>
+<script src="../js/chrome.js"></script>
+</body>
+</html>

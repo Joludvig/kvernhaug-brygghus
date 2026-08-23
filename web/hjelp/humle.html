@@ -76,17 +76,34 @@
   <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
 </nav>
 
-<nav class="hjelp-side-nav">
-  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
-  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
-  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
-  <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
-  <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
-  <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
-  <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
-  <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
-  <a href="humle.html" class="aktiv" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
-  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+<nav class="hjelp-side-nav" aria-label="Hjelpesider" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Kom i gang</span>
+    <div class="hjelp-nav-lenker">
+      <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+      <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+      <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Bryggmester</span>
+    <div class="hjelp-nav-lenker">
+      <a href="gjaervalg.html" data-i18n="hjelp.sidenavGjaervalg">🦠 Gjærvalg</a>
+      <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+      <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+      <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+      <a href="vannkjemi.html" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+      <a href="humle.html" class="aktiv" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
+      <a href="klaring.html" data-i18n="hjelp.sidenavKlaring">🔎 Klaring</a>
+      <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Utstyr</span>
+    <div class="hjelp-nav-lenker">
+      <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+    </div>
+  </div>
 </nav>
 
 <div class="hjelp-layout">
@@ -142,7 +159,7 @@
   <div class="hjelp-metode-kort" id="dry-hop">
     <h3 data-i18n="hjelp.humle.dryhop.tittel">Dry hop / tørrhumle</h3>
     <p data-i18n="hjelp.humle.dryhop.tekst">Dry hop er tilsetning av humle etter kok, som oftest under eller etter gjæring, med aroma som hovedmål — ikke bitterhet, siden det normalt ikke skjer nevneverdig isomerisering ved gjæringstemperatur. Kontakttid påvirker hvor mye aroma som faktisk trekkes ut, og temperaturen påvirker både ekstraksjonen av aroma og av enkelte uønskede forbindelser.</p>
-    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.dryhop.hvorfor"><strong>Mer/lengre er ikke automatisk bedre:</strong> For lang kontakttid eller for store mengder tørrhumle kan gi et grønt/vegetalt preg (se <a href="sensorikk.html#bittert-skarpt">feilsøking av bittert/skarpt</a>), bidra til polyfenoler og astringens (se <a href="vannkjemi.html#tanniner-astringens">tanniner og astringens</a>), og etterlate humlepartikler i ølet. Å åpne et gjæringskar for å tilsette humle introduserer også en oksidasjonsrisiko, se <a href="#oksidasjon-dryhop">oksidasjon under dry hop</a> under.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.humle.dryhop.hvorfor"><strong>Mer/lengre er ikke automatisk bedre:</strong> For lang kontakttid eller for store mengder tørrhumle kan gi et grønt/vegetalt preg (se <a href="sensorikk.html#bittert-skarpt">feilsøking av bittert/skarpt</a>), bidra til polyfenoler og astringens (se <a href="vannkjemi.html#tanniner-astringens">tanniner og astringens</a>), og etterlate humlepartikler i ølet. Å åpne et gjæringskar for å tilsette humle introduserer også en oksidasjonsrisiko, se <a href="#oksidasjon-dryhop">oksidasjon under dry hop</a> under. Humlepartikler og polyfenoler fra dry hop er også en vanlig kilde til uklarhet, se <a href="klaring.html#haze-kilder">klaring</a>.</p>
   </div>
 
   <div class="hjelp-metode-kort" id="hop-creep">

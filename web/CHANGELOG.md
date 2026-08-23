@@ -4,6 +4,71 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## Bryggeskole P3B — Gjærvalg, Klaring og responsiv navigasjon (2026-08-23)
+
+Den andre og siste av de målrettede rundene Gap Audit V1 pekte ut. **P3B er
+ferdigstilt** — den er ikke lenger en kandidat.
+
+**To nye hjelpesider.** `hjelp/gjaervalg.html` dekker hva stammen faktisk
+påvirker, ale/lager/kveik uten de vanlige forenklingene, utgjæring (oppgitt vs.
+faktisk FG), flokkulering, ester- og fenolkarakter/POF, alkoholtoleranse,
+temperaturarbeidsområde, tørr vs. flytende gjær, «én pakke er ikke en pitch
+rate», en beslutningsflyt for stammevalg, lesing av produsentark, trykk og
+gjenbruk, samt feilsøking. `hjelp/klaring.html` dekker hva «klart øl» betyr,
+haze-kilder, hot og cold break, trub, whirlpool som trub-håndtering, kettle
+finings (Irish moss/Whirlfloc), cold crash, gelatin og andre finings, chill haze
+kontra permanent haze, haze over tid, klarhet vs. stil, koblingen til gjærvalg,
+feilsøking og en praktisk klaringsplan.
+
+Hjelpedelen går dermed fra 10 til **12 sider**. Ingen beregningslogikk er rørt:
+oppskriftsbyggeren vurderer verken gjærstammer eller klarhet, og det står
+eksplisitt på begge sidene.
+
+**NO/EN.** Begge sidene har full engelsk speiling under `web/en/hjelp/`, generert
+som vanlig av `scripts/generate_web_i18n_pages.py`. Nye namespaces
+`hjelp.gjaervalg.*` (122 nøkler) og `hjelp.klaring.*` (102 nøkler); i18n er
+1586 NO / 1586 EN og symmetrisk. NO og EN ble forfattet parvis, ikke
+maskinoversatt.
+
+**Registrering og SEO.** `PAGES` 17 → 19, `sitemap.xml` 32 → **36 URL-er**
+(18 sider × NO/EN, `utskrift.html` fortsatt ekskludert), canonical/hreflang og
+meta-description på plass for begge nye sider, favicon arvet fra sidemalen.
+Generatoren er deterministisk verifisert: byte-identisk output ved re-kjøring.
+
+**Krysslenker.** Sidene lenker til eksisterende Bryggeskole framfor å duplisere
+den (gjærhelse, starter, sterke øl, trykkgjæring, gjærhøsting, sensorikk, humle,
+vannkjemi, OG/FG, mesking). Sju reverse-lenker er lagt inn fra eksisterende
+sider — bevisst begrenset for å unngå link-spaghetti. Kontroll av alle interne
+href-er over de 24 hjelpesidene: 0 brutte lenker, 0 manglende ankere.
+
+**Navigasjon — gruppering ved side 12.** Den permanente beslutningen fra P3A var
+å vurdere nav-en på nytt rundt side 11–12. Det er nå gjort, og `hjelp-side-nav`
+er gruppert i **KOM I GANG / BRYGGMESTER / UTSTYR**. Gruppene speiler appens egne
+to modi (Bryggelærling/Bryggmester) og er ren HTML/CSS uten JS — ingen
+dropdown-engine, ingen ny avhengighet. Chip-reglene (padding, font-size,
+`min-height: 44px`) er uendret.
+
+**Responsiv tilpasning.** Grupperingen kostet for mye vertikal plass på smale
+skjermer: målt 293 px nav (4 rader) ved 768 px og 449 px (7 rader) ved 375 px,
+som dyttet første innhold under folden på en 375×667-telefon. Løst med én media
+query under hjelpesidenes etablerte 900 px-brekkpunkt, som skjuler gruppetitlene
+og lar chipsene flyte ut som én wrappende rad (`display: contents`). Målt effekt:
+768 px 293 → **164 px** (4 → 3 rader), 375 px 449 → **320 px** (7 → 6 rader),
+hovedinnholdet 129 px lenger opp i begge. Desktop er uendret.
+
+**Verifikasjon.** Full visuell regresjon etter `web-full-regression`-skillet:
+Chromium 151 + Firefox 153 × 1920/1280/900/768/375 px, 90 sidelastinger. 0
+horisontal overflow, 0 klippede chips, 0 chip-overlapp, 44 px minste
+touch-target, nøyaktig én korrekt aktiv chip per side, 0 tabeller utenfor
+viewport, 0 rå i18n-nøkler, 0 «undefined», 0 konsollfeil, 0 nettverksfeil.
+Testbaseline **942/942 PASS** (938 + 4 nye nav-kontrakttester som låser at alle
+hjelpesider er representert i nav-en og at aktiv chip peker på siden selv).
+
+*Kjent kosmetisk detalj:* ved nøyaktig 900 px overlapper nav-ens
+`max-width: 900px` med TOC-ens `min-width: 900px`, slik at nav-en er flat mens
+resten er i desktop-modus. Alt fungerer; en eventuell justering til `899.98px`
+er ikke gjort.
+
 ## Lansering, favicon og Bryggeskole P0–P3A (2026-08-14 → 2026-08-23)
 
 Samlepost for milepælene etter Runde 25C. Disse rundene ble dokumentert per
@@ -42,14 +107,14 @@ Nye sider: `hjelp/trykkgjaering.html`, `sterke-ol.html`, `gjaerhosting.html`,
 under `web/en/hjelp/` og eget i18n-namespace (`hjelp.trykk.*`, `hjelp.sterkeOl.*`,
 `hjelp.gjaerhosting.*`, `hjelp.vannkjemi.*`, `hjelp.sensorikk.*`, `hjelp.humle.*`).
 `hjelp/index.html` er kanonisk hub for begrepsforklaringer/FAQ; guidesidene lenker
-dit framfor å gjenta definisjonene. `hjelp-side-nav` er fortsatt flat med
-flex-wrap — bevisst beholdt ved P3A etter reell vurdering, gruppering vurderes på
-nytt rundt side 11–12.
+dit framfor å gjenta definisjonene. `hjelp-side-nav` var ved P3A fortsatt
+flat med flex-wrap — bevisst beholdt etter reell vurdering, med gruppering
+utsatt til rundt side 11–12 (gjennomført i P3B, se posten over).
 
 **Gap Audit V1** (utført før P3A): fundamentet er COMPLETE, ingen større
 innholdshull, og retningen er «B — én til to målrettede runder» framfor fortsatt
-storstilt innholdsbygging. P3A var den første av disse. En mulig P3B (gjærvalg +
-klaring) er kandidat, ikke besluttet.
+storstilt innholdsbygging. P3A var den første av disse; P3B (gjærvalg + klaring)
+ble den andre og siste — se posten over.
 
 **Testbaseline** ved P3A: 938 tester, 0 skipped / 0 errors / 0 failures
 (Python 3.12.10, repoets `.venv`). Av disse ligger 49 i

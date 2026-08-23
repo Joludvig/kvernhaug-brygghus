@@ -476,5 +476,79 @@ class TestFaviconCoverage(unittest.TestCase):
                 self.assertIn(forventet, self._favicon_hrefs(en_soup), f"{page}: {no_href} ikke korrekt dybdejustert i EN")
 
 
+class TestHjelpNavGruppering(unittest.TestCase):
+    """Bryggeskole P3B: hjelp-side-nav ble gruppert (KOM I GANG /
+    BRYGGMESTER / UTSTYR) da hjelpedelen passerte 10 sider. Grupperingen er
+    ren HTML/CSS uten JS, men innfører en ny kontrakt som er lett å bryte
+    når side 13 legges til: hver hjelpeside må vise ALLE hjelpesider i
+    nav-en, og nøyaktig én chip skal være markert aktiv -- den som peker på
+    siden selv. Testene sjekker kontrakten, ikke gruppenavn eller rekkefølge,
+    så en senere omgruppering ikke knekker dem unødig."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hjelpesider = {
+            Path(page).name for page in gen.PAGES if page.startswith("hjelp/")
+        }
+
+    def _nav(self, html):
+        soup = BeautifulSoup(html, "html.parser")
+        nav = soup.find("nav", class_="hjelp-side-nav")
+        self.assertIsNotNone(nav, "fant ingen nav.hjelp-side-nav")
+        return nav
+
+    def test_alle_hjelpesider_er_representert_i_nav(self):
+        for navn in sorted(self.hjelpesider):
+            nav = self._nav((gen.WEB / "hjelp" / navn).read_text(encoding="utf-8"))
+            hrefs = {a["href"] for a in nav.find_all("a")}
+            self.assertEqual(
+                hrefs, self.hjelpesider,
+                f"hjelp/{navn}: nav-en mangler eller har ekstra hjelpesider")
+
+    def test_nav_er_gruppert_med_tittel_per_gruppe(self):
+        for navn in sorted(self.hjelpesider):
+            nav = self._nav((gen.WEB / "hjelp" / navn).read_text(encoding="utf-8"))
+            grupper = nav.find_all("div", class_="hjelp-nav-gruppe")
+            self.assertGreaterEqual(
+                len(grupper), 2, f"hjelp/{navn}: nav-en er ikke gruppert")
+            for gruppe in grupper:
+                tittel = gruppe.find("span", class_="hjelp-nav-gruppe-tittel")
+                self.assertIsNotNone(
+                    tittel, f"hjelp/{navn}: gruppe uten tittel")
+                self.assertTrue(
+                    tittel.get("data-i18n"),
+                    f"hjelp/{navn}: gruppetittel uten data-i18n-nøkkel")
+                self.assertTrue(
+                    gruppe.find("div", class_="hjelp-nav-lenker"),
+                    f"hjelp/{navn}: gruppe uten lenkecontainer")
+
+    def test_aktiv_chip_peker_pa_egen_side(self):
+        for navn in sorted(self.hjelpesider):
+            nav = self._nav((gen.WEB / "hjelp" / navn).read_text(encoding="utf-8"))
+            aktive = [a for a in nav.find_all("a") if "aktiv" in a.get("class", [])]
+            self.assertEqual(
+                len(aktive), 1, f"hjelp/{navn}: forventet nøyaktig én aktiv chip")
+            self.assertEqual(
+                aktive[0]["href"], navn,
+                f"hjelp/{navn}: aktiv chip peker på feil side")
+
+    def test_en_speiling_beholder_gruppering_og_aktiv_chip(self):
+        for navn in sorted(self.hjelpesider):
+            nav = self._nav((gen.WEB / "en" / "hjelp" / navn).read_text(encoding="utf-8"))
+            hrefs = {a["href"] for a in nav.find_all("a")}
+            self.assertEqual(
+                hrefs, self.hjelpesider,
+                f"en/hjelp/{navn}: nav-en mangler eller har ekstra hjelpesider")
+            self.assertTrue(
+                nav.find_all("div", class_="hjelp-nav-gruppe"),
+                f"en/hjelp/{navn}: gruppering tapt i generert output")
+            aktive = [a for a in nav.find_all("a") if "aktiv" in a.get("class", [])]
+            self.assertEqual(
+                len(aktive), 1, f"en/hjelp/{navn}: forventet nøyaktig én aktiv chip")
+            self.assertEqual(
+                aktive[0]["href"], navn,
+                f"en/hjelp/{navn}: aktiv chip peker på feil side")
+
+
 if __name__ == "__main__":
     unittest.main()

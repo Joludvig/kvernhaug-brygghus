@@ -76,17 +76,34 @@
   <a href="index.html" class="sidemeny-lenke aktiv"><span data-i18n="nav.hjelp">📖 Hjelp / Bryggehåndbok</span></a>
 </nav>
 
-<nav class="hjelp-side-nav">
-  <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
-  <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
-  <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
-  <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
-  <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
-  <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
-  <a href="vannkjemi.html" class="aktiv" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
-  <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
-  <a href="humle.html" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
-  <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+<nav class="hjelp-side-nav" aria-label="Hjelpesider" data-i18n-aria-label="hjelp.sidenavAriaLabel">
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.komIGang">Kom i gang</span>
+    <div class="hjelp-nav-lenker">
+      <a href="index.html" data-i18n="hjelp.sidenavFaq">📖 Hjelp &amp; FAQ</a>
+      <a href="bryggedag.html" data-i18n="hjelp.sidenavBryggedag">🗓️ En bryggedag</a>
+      <a href="bryggemetoder.html" data-i18n="hjelp.sidenavBryggemetoder">⚗️ Bryggemetoder</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.bryggmester">Bryggmester</span>
+    <div class="hjelp-nav-lenker">
+      <a href="gjaervalg.html" data-i18n="hjelp.sidenavGjaervalg">🦠 Gjærvalg</a>
+      <a href="trykkgjaering.html" data-i18n="hjelp.sidenavTrykkgjaering">🫧 Trykkgjæring</a>
+      <a href="sterke-ol.html" data-i18n="hjelp.sidenavSterkeOl">🥃 Sterke øl</a>
+      <a href="gjaerhosting.html" data-i18n="hjelp.sidenavGjaerhosting">🫙 Gjærhøsting</a>
+      <a href="vannkjemi.html" class="aktiv" data-i18n="hjelp.sidenavVannkjemiAvansert">💧 Vannkjemi</a>
+      <a href="humle.html" data-i18n="hjelp.sidenavHumle">🌿 Humle</a>
+      <a href="klaring.html" data-i18n="hjelp.sidenavKlaring">🔎 Klaring</a>
+      <a href="sensorikk.html" data-i18n="hjelp.sidenavSensorikk">👃 Sensorikk</a>
+    </div>
+  </div>
+  <div class="hjelp-nav-gruppe">
+    <span class="hjelp-nav-gruppe-tittel" data-i18n="hjelp.navGruppe.utstyr">Utstyr</span>
+    <div class="hjelp-nav-lenker">
+      <a href="utstyr-brewzilla.html" data-i18n="hjelp.sidenavUtstyr">🛠️ Utstyr: BrewZilla</a>
+    </div>
+  </div>
 </nav>
 
 <div class="hjelp-layout">
@@ -200,7 +217,7 @@
   <div class="hjelp-metode-kort" id="tanniner-astringens">
     <h3 data-i18n="hjelp.vannkjemi.tanninerAstringens.tittel">Tanniner og astringens</h3>
     <p data-i18n="hjelp.vannkjemi.tanninerAstringens.tekst">Bitterhet er en smak — den kommer typisk fra humle. Astringens er noe annet: en munnfølelse, ofte beskrevet som tørr, stram eller «tepose-aktig», og kan komme fra tanniner/polyfenoler som trekkes ut av kornskallet.</p>
-    <p class="hjelp-hvorfor" data-i18n="hjelp.vannkjemi.tanninerAstringens.hvorfor"><strong>Hvorfor du bryr deg:</strong> Mulige bidragsytere til astringens inkluderer høy pH under skylling, overdreven skylling, svært varm behandling av kornet under ugunstige pH-forhold, og til dels hvordan malten er knust/håndtert. Ikke lær at «for varmt skyllevann alene» automatisk gir tanniner — pH og resten av prosesskonteksten spiller minst like stor rolle som temperaturen alene.</p>
+    <p class="hjelp-hvorfor" data-i18n-html="hjelp.vannkjemi.tanninerAstringens.hvorfor"><strong>Hvorfor du bryr deg:</strong> Mulige bidragsytere til astringens inkluderer høy pH under skylling, overdreven skylling, svært varm behandling av kornet under ugunstige pH-forhold, og til dels hvordan malten er knust/håndtert. Ikke lær at «for varmt skyllevann alene» automatisk gir tanniner — pH og resten av prosesskonteksten spiller minst like stor rolle som temperaturen alene. Polyfenoler bidrar også til uklarhet i det ferdige ølet, se <a href="klaring.html#haze-kilder">klaring</a>.</p>
   </div>
 
   <div class="hjelp-metode-kort" id="ro-vann">
