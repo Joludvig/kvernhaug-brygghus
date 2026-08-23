@@ -417,5 +417,64 @@ class TestRobotsTxt(unittest.TestCase):
         self.assertNotIn("Disallow: /data", innhold)
 
 
+class TestFaviconCoverage(unittest.TestCase):
+    """Favicon-integrasjon: alle registrerte offentlige sider skal ha
+    favicon-link-tagger (rel="icon" + rel="apple-touch-icon"), og filene de
+    faktisk peker på skal finnes på disk under web/assets/favicon/. Sjekker
+    kun tilstedeværelse/gyldig referanse -- ikke hele <head> ordrett, for
+    ikke å bli en skjør test som knekker ved uskyldige head-endringer."""
+
+    _FAVICON_FILNAVN = {
+        "favicon.ico", "favicon-32x32.png", "favicon-16x16.png", "apple-touch-icon.png",
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tekster = gen.parse_tekster()
+        cls.en = cls.tekster["en"]
+
+    def _favicon_hrefs(self, soup):
+        lenker = soup.find_all("link", rel=("icon", "apple-touch-icon"))
+        return {l["href"] for l in lenker}
+
+    def test_alle_no_sider_har_favicon_lenker(self):
+        for page in gen.PAGES:
+            html = (gen.WEB / page).read_text(encoding="utf-8")
+            soup = BeautifulSoup(html, "html.parser")
+            hrefs = self._favicon_hrefs(soup)
+            filnavn = {Path(h).name for h in hrefs}
+            self.assertEqual(filnavn, self._FAVICON_FILNAVN, f"{page}: mangler forventede favicon-lenker")
+
+    def test_alle_en_sider_har_favicon_lenker(self):
+        for page in gen.PAGES:
+            html = gen.generer_side_html(page, self.en)
+            soup = BeautifulSoup(html, "html.parser")
+            hrefs = self._favicon_hrefs(soup)
+            filnavn = {Path(h).name for h in hrefs}
+            self.assertEqual(filnavn, self._FAVICON_FILNAVN, f"en/{page}: mangler forventede favicon-lenker")
+
+    def test_favicon_lenker_peker_pa_filer_som_faktisk_finnes(self):
+        favicon_mappe = gen.WEB / "assets" / "favicon"
+        for page in gen.PAGES:
+            html = (gen.WEB / page).read_text(encoding="utf-8")
+            soup = BeautifulSoup(html, "html.parser")
+            for href in self._favicon_hrefs(soup):
+                filsti = favicon_mappe / Path(href).name
+                self.assertTrue(filsti.is_file(), f"{page}: {href} -> {filsti} finnes ikke")
+
+    def test_favicon_stier_justeres_korrekt_for_en_dybde(self):
+        # Samme dybde-logikk som resten av _rewrite_asset_paths(): en
+        # rotside får "assets/..." -> "../assets/...", en hjelpeside får
+        # "../assets/..." -> "../../assets/...".
+        for page in gen.PAGES:
+            no_html = (gen.WEB / page).read_text(encoding="utf-8")
+            no_soup = BeautifulSoup(no_html, "html.parser")
+            en_html = gen.generer_side_html(page, self.en)
+            en_soup = BeautifulSoup(en_html, "html.parser")
+            for no_href in self._favicon_hrefs(no_soup):
+                forventet = "../" + no_href
+                self.assertIn(forventet, self._favicon_hrefs(en_soup), f"{page}: {no_href} ikke korrekt dybdejustert i EN")
+
+
 if __name__ == "__main__":
     unittest.main()
