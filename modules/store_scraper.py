@@ -4,6 +4,7 @@ import os
 import time
 from modules.product_link_scraper import (
     finn_produktsider, finn_gjær_fra_sitemap, finn_humle_fra_sitemap,
+    finn_malt_fra_sitemap,
     parse_produktside, finn_vestbrygg_malt_med_varianter,
 )
 
@@ -28,10 +29,24 @@ def _skann_maltprodukter():
     # Vestbrygg selger mange malter som mor-side + faktiske barn-/
     # variantprodukter (1 kg hel/knust, 100g knust, 25 kg hel/knust) —
     # se Steg E/F1. Erstatter enhver mor-URL med sine ekte barn-URL-er
-    # (kun for Vestbrygg-malt; Ølbrygging er uendret, se linjen under).
+    # (kun for Vestbrygg-malt; Ølbrygging har sin egen discovery under).
     malt_lenker_vest = finn_vestbrygg_malt_med_varianter(malt_lenker_vest)
-    # Oppdatert til den korrekte råvarebanen hos Ølbrygging: ol/raavarer/malt
-    malt_lenker_ol = finn_produktsider("https://www.olbrygging.no", "ol/ingredienser/malt", "malt")
+    # ØLBRYGGING: sitemap er PRIMÆRKILDE, kategorisiden er supplement -- samme
+    # mønster som humle og gjær allerede bruker (se blokkene lenger nede).
+    #
+    # Bakgrunn (Ølbrygging Malt Discovery V1): kategorisiden
+    # /ol/ingredienser/malt ignorerer ?page-parameteren -- side 1, 2 og 3
+    # returnerer byte-identisk innhold med de samme 28 produktlenkene. Alene
+    # ga den derfor alltid 28 malter, uansett hvor stort sortimentet er.
+    #
+    # Kategorisiden beholdes fordi den finner produkter sitemapet IKKE har
+    # (verifisert: fire CaraRed-varianter), så de to kildene utfyller hverandre.
+    # Unionen er et set -- samme produkt fra begge kilder skrapes én gang.
+    malt_urls_ol = set(finn_malt_fra_sitemap("https://www.olbrygging.no"))
+    malt_urls_ol |= set(finn_produktsider("https://www.olbrygging.no", "ol/ingredienser/malt", "malt"))
+    # Sortert for deterministisk skraperekkefølge -- et set har vilkårlig orden,
+    # og raw_data/malt_raw.json skal ikke endre rekkefølge mellom like kjøringer.
+    malt_lenker_ol = sorted(malt_urls_ol)
 
     malt_data = []
     for url in malt_lenker_vest:

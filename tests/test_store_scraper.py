@@ -48,6 +48,7 @@ class TestKjorFullSkanning(unittest.TestCase):
         os.chdir(self._opprinnelig_cwd)
         self._tmpdir.cleanup()
 
+    @patch("modules.store_scraper.finn_malt_fra_sitemap")
     @patch("modules.store_scraper.parse_produktside")
     @patch("modules.store_scraper.finn_gjær_fra_sitemap")
     @patch("modules.store_scraper.finn_humle_fra_sitemap")
@@ -55,7 +56,7 @@ class TestKjorFullSkanning(unittest.TestCase):
     @patch("modules.store_scraper.finn_produktsider")
     def test_skanning_uten_nettverk_skriver_gyldige_raw_filer(
         self, mock_finn_produktsider, mock_finn_variant_utvidelse, mock_finn_humle_sitemap,
-        mock_finn_gjaer_sitemap, mock_parse_produktside,
+        mock_finn_gjaer_sitemap, mock_parse_produktside, mock_finn_malt_sitemap,
     ):
         # kjor_full_skanning() kaller finn_produktsider separat per butikk
         # (vestbrygg og olbrygging), og malt-lista dedupliserer IKKE på tvers
@@ -91,6 +92,12 @@ class TestKjorFullSkanning(unittest.TestCase):
         mock_finn_variant_utvidelse.side_effect = lambda urls: urls
         mock_finn_humle_sitemap.return_value = []
         mock_finn_gjaer_sitemap.return_value = []
+        # Ølbrygging-malt hentes nå også fra sitemap (Ølbrygging Malt Discovery
+        # V1), i tillegg til kategorisiden. Uten denne mocken ville testen gjøre
+        # et ekte nettverkskall — nøyaktig det denne testfilen finnes for å
+        # forhindre. Tom liste her betyr at malt-tellingen under fortsatt måler
+        # KUN kategoriside-bidraget, slik den alltid har gjort.
+        mock_finn_malt_sitemap.return_value = []
         mock_parse_produktside.side_effect = _fake_produktside
 
         antall_malt, antall_humle, antall_gjaer = kjor_full_skanning()
@@ -153,6 +160,7 @@ class TestKjorMaltSkanning(unittest.TestCase):
         os.chdir(self._opprinnelig_cwd)
         self._tmpdir.cleanup()
 
+    @patch("modules.store_scraper.finn_malt_fra_sitemap")
     @patch("modules.store_scraper.parse_produktside")
     @patch("modules.store_scraper.finn_gjær_fra_sitemap")
     @patch("modules.store_scraper.finn_humle_fra_sitemap")
@@ -160,7 +168,7 @@ class TestKjorMaltSkanning(unittest.TestCase):
     @patch("modules.store_scraper.finn_produktsider")
     def test_skanner_vestbrygg_og_olbrygging_malt_og_skriver_samlet(
         self, mock_finn_produktsider, mock_finn_variant_utvidelse, mock_finn_humle_sitemap,
-        mock_finn_gjaer_sitemap, mock_parse_produktside,
+        mock_finn_gjaer_sitemap, mock_parse_produktside, mock_finn_malt_sitemap,
     ):
         malt_urls = {
             "https://vestbrygg.no":      ["https://fixture.test/malt/1", "https://fixture.test/malt/2"],
@@ -173,6 +181,11 @@ class TestKjorMaltSkanning(unittest.TestCase):
 
         mock_finn_produktsider.side_effect = _finn_produktsider
         mock_finn_variant_utvidelse.side_effect = lambda urls: urls
+        # Tom sitemap her, slik at denne testens eksisterende kontrakt
+        # (kategoriside-bidraget fra begge butikker = 3 malt) står uendret.
+        # Selve sitemap+kategoriside-unionen dekkes av
+        # tests/test_malt_discovery_sitemap.py.
+        mock_finn_malt_sitemap.return_value = []
         mock_parse_produktside.side_effect = _fake_produktside
 
         antall_malt = kjor_malt_skanning()

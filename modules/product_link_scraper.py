@@ -92,58 +92,114 @@ def _lagerstatus_fra_html(raw_html):
     return "ukjent"
 
 
+# Kanonisk vertsnavn per butikk. Vestbrygg publiserer sitemap-URL-ene sine med
+# www-prefiks, mens resten av kodebasen (og butikkens egne produktlenker) bruker
+# apex-domenet -- uten denne normaliseringen ville samme produkt kunne opptre som
+# to ulike URL-er og bli skrapet to ganger. Ølbrygging er motsatt: der ER www den
+# kanoniske formen, og skal stå urørt. Derfor et eksplisitt oppslag fremfor en
+# generell "strip www"-regel.
+_SITEMAP_VERT_NORMALISERING = {
+    "www.vestbrygg.no": "vestbrygg.no",
+}
+
+# Merke-/kategorisegmenter i produkt-URL-en som identifiserer en råvaretype hos
+# McWeb-butikkene (Vestbrygg og Ølbrygging kjører begge McWeb 3.15.2 og deler
+# URL-grammatikk: /<merke-eller-kategori>/<varenummer>/<slug>).
+#
+# Dette er BEVISST en bred kandidatliste, ikke et presist filter: sitemapet sier
+# ingenting om produkttype, så discovery skal ha høy RECALL, mens presisjonen
+# kommer nedstrøms i parse_produktside() -- som avgjør produkttype på butikkens
+# EGEN brødsmule-taksonomi (dataLayer/DOM) før noe nøkkelordlogikk vurderes.
+# Et sukker- eller ekstraktsett-produkt fra et maltmerke blir derfor forkastet
+# der, ikke her.
+#
+# Listene må vedlikeholdes når butikkene tar inn nye merker. Det er den kjente
+# kostnaden ved sitemap-basert discovery, og grunnen til at de ligger som data
+# øverst i modulen fremfor spredt i koden.
+GJAER_SITEMAP_PATHS = [
+    "/fermentis/", "/lallemand/", "/mangrove-jack-s/",
+    "/white-labs/", "/whitelabs/", "/cellarscience/",
+    "/t%c3%b8rrgj%c3%a6r/", "/fersk-gj%c3%a6r/", "/lalvin/",
+]
+
+HUMLE_SITEMAP_PATHS = ["/pellets/", "/humle/"]
+
+MALT_SITEMAP_PATHS = [
+    "/weyermann/", "/viking-malt/", "/castle-malting/", "/muntons/",
+    "/simpsons-malt/", "/thomas-fawcett/", "/thomas-fawcetts/",
+    "/bonsak-g%c3%a5rdsmalteri/", "/bonsak/", "/j%c3%a6rmalt/",
+    "/crisp-malting/", "/crisp/", "/bestmalz/", "/ireks/", "/briess/",
+    "/bairds/", "/malt/",
+]
+
+
+def _produkt_urls_fra_sitemap(base_url, stier, etikett):
+    """
+    Felles sitemap-oppslag for alle råvaretyper: henter <loc>-oppføringer og
+    beholder dem som både har et McWeb-varenummer (/<4+ siffer>/) og treffer et
+    av `stier`-segmentene.
+
+    Sitemap er primærkilden hos begge McWeb-butikkene fordi kategorisidene ikke
+    støtter ?page=N-paginering -- de returnerer første side uansett sidetall, og
+    en paginerende skanner stopper derfor på det første skjermbildet.
+
+    Returnerer alltid en liste; enhver feil (HTTP != 200, nettverk, parsing) gir
+    tom liste slik at en kaller kan supplere med kategorisider i stedet for å
+    krasje midt i en skanning.
+    """
+    try:
+        res = requests.get(f"{base_url}/sitemap.xml", headers=HEADERS, timeout=10)
+        if res.status_code != 200:
+            print(f"[SITEMAP] Feil HTTP {res.status_code}")
+            return []
+        res.encoding = res.apparent_encoding
+        alle = re.findall(r"<loc>([^<]+)</loc>", unescape(res.text))
+        produkt_urls = []
+        for u in alle:
+            ul = u.lower()
+            if re.search(r"/\d{4,}/", ul) and any(p in ul for p in stier):
+                for vert, kanonisk in _SITEMAP_VERT_NORMALISERING.items():
+                    u = u.replace(vert, kanonisk)
+                produkt_urls.append(u)
+        print(f"[SITEMAP] Fant {len(produkt_urls)} {etikett}-produkt-URLer")
+        return produkt_urls
+    except Exception as e:
+        print(f"[SITEMAP] Feil: {e}")
+        return []
+
+
 def finn_gjær_fra_sitemap(base_url):
     """
     Henter alle gjær-produkt-URLer fra sitemap.
     Brukes fordi brandsider/kategorisider bare viser kryssalg.
     """
-    GJAER_PATHS = [
-        "/fermentis/", "/lallemand/", "/mangrove-jack-s/",
-        "/white-labs/", "/whitelabs/", "/cellarscience/",
-        "/t%c3%b8rrgj%c3%a6r/", "/fersk-gj%c3%a6r/", "/lalvin/",
-    ]
-    try:
-        res = requests.get(f"{base_url}/sitemap.xml", headers=HEADERS, timeout=10)
-        if res.status_code != 200:
-            print(f"[SITEMAP] Feil HTTP {res.status_code}")
-            return []
-        res.encoding = res.apparent_encoding
-        alle = re.findall(r"<loc>([^<]+)</loc>", unescape(res.text))
-        produkt_urls = []
-        for u in alle:
-            ul = u.lower()
-            if re.search(r"/\d{4,}/", ul) and any(p in ul for p in GJAER_PATHS):
-                produkt_urls.append(u.replace("www.vestbrygg.no", "vestbrygg.no"))
-        print(f"[SITEMAP] Fant {len(produkt_urls)} gjær-produkt-URLer")
-        return produkt_urls
-    except Exception as e:
-        print(f"[SITEMAP] Feil: {e}")
-        return []
+    return _produkt_urls_fra_sitemap(base_url, GJAER_SITEMAP_PATHS, "gjær")
 
 
 def finn_humle_fra_sitemap(base_url):
     """
-    Henter alle humle-produkt-URLer fra vestbrygg sitemap.
-    Brukes fordi vestbrygg (ASP.NET) ikke støtter ?page=N-paginering.
+    Henter alle humle-produkt-URLer fra sitemap.
+    Brukes fordi McWeb-butikkene ikke støtter ?page=N-paginering.
     """
-    HUMLE_PATHS = ["/pellets/", "/humle/"]
-    try:
-        res = requests.get(f"{base_url}/sitemap.xml", headers=HEADERS, timeout=10)
-        if res.status_code != 200:
-            print(f"[SITEMAP] Feil HTTP {res.status_code}")
-            return []
-        res.encoding = res.apparent_encoding
-        alle = re.findall(r"<loc>([^<]+)</loc>", unescape(res.text))
-        produkt_urls = []
-        for u in alle:
-            ul = u.lower()
-            if re.search(r"/\d{4,}/", ul) and any(p in ul for p in HUMLE_PATHS):
-                produkt_urls.append(u.replace("www.vestbrygg.no", "vestbrygg.no"))
-        print(f"[SITEMAP] Fant {len(produkt_urls)} humle-produkt-URLer")
-        return produkt_urls
-    except Exception as e:
-        print(f"[SITEMAP] Feil: {e}")
-        return []
+    return _produkt_urls_fra_sitemap(base_url, HUMLE_SITEMAP_PATHS, "humle")
+
+
+def finn_malt_fra_sitemap(base_url):
+    """
+    Henter alle malt-produkt-URLer fra sitemap.
+
+    Bakgrunn (Ølbrygging Malt Discovery V1): Ølbrygging-malt ble tidligere KUN
+    oppdaget via kategorisiden /ol/ingredienser/malt?page=N. Den siden ignorerer
+    ?page-parameteren -- side 1, 2 og 3 returnerer byte-identisk innhold med de
+    samme 28 produktlenkene -- så skanneren stoppet på 28 produkter mens
+    sitemapet inneholder vesentlig flere. Sitemap er derfor primærkilde her, på
+    nøyaktig samme måte som for humle og gjær.
+
+    Kategorisiden er fortsatt et nødvendig SUPPLEMENT, ikke en erstatning: den
+    inneholder produkter som mangler i sitemapet (verifisert: fire CaraRed-
+    varianter). Kalleren tar unionen.
+    """
+    return _produkt_urls_fra_sitemap(base_url, MALT_SITEMAP_PATHS, "malt")
 
 
 def finn_produktsider(base_url, kategori_path, kategori):

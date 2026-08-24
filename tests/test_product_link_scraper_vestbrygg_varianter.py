@@ -296,10 +296,26 @@ class Test12OlbryggingUendret(unittest.TestCase):
         # kjor_full_skanning() og kjor_malt_skanning() — se
         # modules/store_scraper.py sin moduldokstreng.
         kilde = inspect.getsource(store_scraper._skann_maltprodukter)
-        malt_ol_linje = next(
-            linje for linje in kilde.splitlines() if "malt_lenker_ol" in linje and "finn_produktsider" in linje
+        # Ølbrygging Malt Discovery V1: Ølbrygging-lenkene bygges nå over FLERE
+        # linjer (sitemap + kategoriside, forent i et set) i stedet for én
+        # enkelt finn_produktsider-linje. Testens hensikt er uendret — ingen av
+        # linjene som bygger Ølbrygging-lenkene skal røre Vestbryggs
+        # mor-/barn-variantutvidelse — så vi ser på hele Ølbrygging-blokken.
+        ol_linjer = [
+            linje for linje in kilde.splitlines()
+            if "malt_urls_ol" in linje or "malt_lenker_ol" in linje
+        ]
+        self.assertTrue(ol_linjer, "fant ingen Ølbrygging-malt-linjer i kilden")
+        self.assertTrue(
+            any("finn_produktsider" in linje for linje in ol_linjer),
+            "kategorisiden skal fortsatt være en av Ølbrygging-kildene",
         )
-        self.assertNotIn("finn_vestbrygg_malt_med_varianter", malt_ol_linje)
+        self.assertTrue(
+            any("finn_malt_fra_sitemap" in linje for linje in ol_linjer),
+            "sitemap skal være primærkilde for Ølbrygging-malt",
+        )
+        for linje in ol_linjer:
+            self.assertNotIn("finn_vestbrygg_malt_med_varianter", linje)
         # Selve variant-utvidelsen skal kun stå koblet til malt_lenker_vest:
         self.assertIn("finn_vestbrygg_malt_med_varianter(malt_lenker_vest)", kilde)
         # kjor_full_skanning() skal selv ikke lenger inneholde egen
