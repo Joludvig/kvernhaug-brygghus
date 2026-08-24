@@ -190,14 +190,36 @@ def _opprett_og_fjern(kat, ny_id, ny_entry, index):
     _fjern_fra_unmatched(kat, index)
 
 
+def _forslagsindeks(item, master, sorterte_navn):
+    """Indeksen til master-forslaget matcheren allerede fant, slik at
+    selectboxen kan forhåndsvelge det. Gjelder review_required-elementer
+    (se modules/store_matcher.py::vurder_maltmatch) -- matcheren nektet å
+    SKRIVE forslaget uten menneskelig godkjenning, men kandidaten er
+    fortsatt den beste utgangsposisjonen for mennesket som skal avgjøre.
+
+    Returnerer 0 (første alternativ, uendret oppførsel) når det ikke
+    finnes noe forslag, eller når forslaget peker på en master-ID som
+    ikke lenger ligger i den innlastede masteren."""
+    master_id = item.get("foreslatt_master_id")
+    if not master_id or master_id not in master:
+        return 0
+    navn = master[master_id].get("display_name", master_id)
+    try:
+        return sorterte_navn.index(navn)
+    except ValueError:
+        return 0
+
+
 def _render_match_tab(kat, item, index, master):
     if not master:
         st.info("Master-fil ikke funnet.")
         return
     options = {v.get("display_name", k): k for k, v in master.items()}
+    sorterte_navn = sorted(options.keys())
     valgt = st.selectbox(
         "Match mot eksisterende entry:",
-        sorted(options.keys()),
+        sorterte_navn,
+        index=_forslagsindeks(item, master, sorterte_navn),
         key=f"sel_{kat}_{index}",
     )
     st.caption("Produktnavnet legges til som alias, og pris/URL oppdateres i master.")
@@ -209,6 +231,28 @@ def _render_match_tab(kat, item, index, master):
         else:
             st.toast(f"Matchet til «{valgt}»", icon="✅")
             st.rerun()
+
+
+def _render_konfliktvarsel(item):
+    """Viser HVORFOR et element ligger til review når matcheren fant en
+    god navnekandidat, men avslo å skrive den automatisk (Steg F11).
+    Elementer som rett og slett ikke matchet noe (status pending_review)
+    har ingen slike felter og får ingen ekstra boks."""
+    master_id = item.get("foreslatt_master_id")
+    if not master_id:
+        return
+    foreslatt = item.get("foreslatt_navn") or master_id
+    st.warning(
+        f"⚠️ Matcheren fant «{foreslatt}», men skrev den IKKE automatisk — "
+        "navnelikheten motsies av produktdataene:"
+    )
+    for konflikt in item.get("konflikter") or []:
+        forklaring = konflikt.get("forklaring") or konflikt.get("signal", "")
+        st.caption(f"• **{konflikt.get('signal', '?')}** — {forklaring}")
+    st.caption(
+        "Forslaget er forhåndsvalgt under «🔗 Match eksisterende». "
+        "Godkjenn det bare hvis det faktisk er samme produkt."
+    )
 
 
 def _render_avvis_tab(kat, item, index):
@@ -386,6 +430,7 @@ def _render_kategori(kat, label, emoji):
         with st.expander(f"{emoji} **{navn}** — {butikk} — {pris} kr"):
             if url:
                 st.markdown(f"[Åpne produktside]({url})")
+            _render_konfliktvarsel(item)
 
             tab_match, tab_ny, tab_avvis = st.tabs(["🔗 Match eksisterende", "➕ Ny ingrediens", "🚫 Avvis"])
 

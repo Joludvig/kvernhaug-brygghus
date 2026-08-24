@@ -2,6 +2,7 @@ import copy
 import json
 import re
 from difflib import SequenceMatcher
+from urllib.parse import unquote, urlparse
 
 from modules.master_data_io import skriv_master_json_atomisk
 
@@ -341,6 +342,285 @@ def _bygg_vestbrygg_variantliste(kandidater):
 _GYLDIGE_MALT_BUTIKKER = {"vestbrygg", "olbrygging"}
 
 
+# ══════════════════════════════════════════════════════════════════════
+#  MATCHING PRECISION GUARD (Steg F11)
+# ══════════════════════════════════════════════════════════════════════
+# Bakgrunn: match_product_to_master() er ren strenglikhet (SequenceMatcher
+# over master-aliaser, terskel 0,7). Et treff over terskelen ble tidligere
+# skrevet DIREKTE inn i master["butikk_match"] uten noe menneskelig ledd.
+# En live validering av Ølbrygging-malt viste at 14+ av 63 treff pekte på
+# et helt annet produkt — f.eks. "Carafa 1 Malt" (900 EBC, brent) mot
+# aliaset "Cara Malt" på caramalt_30 (30 EBC) med likhet 0,818.
+#
+# Prinsippet her er IKKE å fjerne fuzzy matching — den er fortsatt god
+# til kandidatrangering. Prinsippet er at fuzzy score ALENE ikke skal
+# være nok til en direkte skriving når det finnes sterke MOTSTRIDENDE
+# identitetssignaler. Da går treffet til review i stedet, der mennesket
+# allerede har et etablert verktøy (ui/review_panel.py).
+#
+# Alle tre signalene under er bevisst NEGATIVE: de kan bare nedgradere et
+# treff fra AUTO_MATCH til REVIEW_REQUIRED. De kan aldri skape en match,
+# aldri velge mellom kandidater, og aldri forkaste noe helt — butikkdata
+# kan være feil og master kan være generisk, så et konfliktsignal betyr
+# "et menneske må se på dette", ikke "dette er galt".
+# Jf. KBH_CORE_CONTRACT § 9: ingen smart gjetting.
+
+MATCH_AUTO = "auto_match"
+MATCH_REVIEW = "review_required"
+MATCH_UNMATCHED = "unmatched"
+
+# ── Signal 1: EBC ─────────────────────────────────────────────────────
+# EBC er den ene tallfestede, sammenlignbare egenskapen både butikk og
+# master oppgir for malt, og den skiller produkttyper skarpt (pilsner 3,
+# karamell 120, brent 1400).
+#
+# Ren absoluttdifferanse er ubrukelig over hele skalaen (3 mot 8 er en
+# reell forskjell; 1175 mot 1300 er støy). Ren ratio er ubrukelig i
+# bunnen (1 mot 4 EBC er ratio 4, men begge er lyse basismalter).
+# Derfor kreves BEGGE terskler overskredet før noe regnes som konflikt:
+#
+#   _EBC_ABSOLUTT_SLINGRINGSMONN = 8 EBC
+#       Under dette er avviket alltid innenfor normal variasjon mellom
+#       produsenter og partier av samme malttype. Dekker hele
+#       basismaltområdet, der ratioen er upålitelig.
+#   _EBC_RATIO_GRENSE = 2.0
+#       Over 8 EBC differanse kreves i tillegg at den ene er mer enn
+#       DOBBELT så mørk som den andre. Bryggefaglig er en dobling av
+#       farge en kategoriforskjell, ikke en variant av samme malt.
+#
+# Kalibrert mot ekte data (84 Ølbrygging-malter + de 119 radene i
+# raw_data/malt_raw.json): fanger alle de dokumenterte fargekollisjonene
+# (900/30, 320/3, 350/7, 150/10, 120/5, 90/15, 60/5, 200/70) uten å
+# flagge reelle treff som Chocolate 1000/1175, Special B 300/350,
+# Caraamber 80/70 eller Flaket mais 4/1.
+#
+# EBC = None (butikken oppga ingen — helt legitimt etter Supplier Data
+# Cleanup V1) og EBC <= 0 (ingen reell måling, f.eks. den kjente
+# URL-intervall-parsefeilen på "Torrified Wheat") gir ALDRI konflikt.
+# Ukjent skal forbli ukjent, ikke bli til et negativt bevis.
+_EBC_ABSOLUTT_SLINGRINGSMONN = 8.0
+_EBC_RATIO_GRENSE = 2.0
+
+
+def _ebc_konflikt(ebc_butikk, ebc_master):
+    """True bare når to KJENTE, positive EBC-verdier er uforenlige."""
+    if ebc_butikk is None or ebc_master is None:
+        return False
+    try:
+        a, b = float(ebc_butikk), float(ebc_master)
+    except (TypeError, ValueError):
+        return False
+    if a <= 0 or b <= 0:
+        return False
+    lav, hoy = min(a, b), max(a, b)
+    if hoy - lav <= _EBC_ABSOLUTT_SLINGRINGSMONN:
+        return False
+    return (hoy / lav) > _EBC_RATIO_GRENSE
+
+
+# ── Signal 2: produsent ───────────────────────────────────────────────
+# McWeb (plattformen både vestbrygg.no og olbrygging.no kjører, se
+# modules/product_link_scraper.py) bruker URL-grammatikken
+# /<merke-eller-kategori>/<varenummer>/<slug>. Første segment er ofte
+# produsenten — men IKKE alltid ("ekstrakt-spraymalt", "young-s",
+# "tilbud" og lignende er kategorier, ikke merker).
+#
+# Segmentet godtas derfor bare som produsentsignal hvis det finnes i
+# masterdatabasens EGET produsentvokabular (alle "produsent"-verdier i
+# master, normalisert). Dette er datadrevet framfor en hardkodet liste:
+# ukjente segmenter gir rett og slett INGEN signal, aldri en konflikt.
+# Ingen enkeltprodukter er hardkodet noe sted.
+_MCWEB_PRODUKTSTI_RE = re.compile(r"^/([^/]+)/\d{4,}/[^/]+/?$")
+
+# Generiske produsentverdier er en eksplisitt "vi vet ikke / flere
+# leverandører"-markering i master (f.eks. flaked_corn, roasted_barley)
+# og skal aldri kunne stå i konflikt med noe.
+_GENERISKE_PRODUSENTER = {"", "diverse", "ukjent", "unknown", "annet", "n/a"}
+
+# Suffikser som beskriver SELSKAPSFORMEN, ikke merket: "Viking Malt",
+# "viking-malt" og "Viking" er samme produsent. Lengst suffiks først, så
+# "gaardsmalteri" ikke halveres av "malteri".
+_PRODUSENT_SUFFIKS = (
+    "gaardsmalteri", "gardsmalteri", "malteri", "maltings", "malting", "malz", "malt",
+)
+
+
+def _normaliser_produsentnavn(tekst):
+    """Reduserer ett produsentnavn til én sammenlignbar nøkkel.
+
+    Samme funksjon brukes på BEGGE sider (URL-segment og master sin
+    "produsent"-verdi), slik at de aldri kan normaliseres ulikt:
+      "simpsons-malt" / "Simpson's" / "Simpsons"   -> "simpson"
+      "castle-malting" / "Castle Malting"          -> "castle"
+      "bonsak-gårdsmalteri" / "Bonsak"             -> "bonsak"
+      "jærmalt" / "Jærmalt"                        -> "jaer"
+      "thomas-fawcetts" / "Thomas Fawcett"         -> "thomasfawcett"
+
+    Rekkefølgen er viktig: selskapsform-suffikset fjernes FØR en
+    avsluttende genitiv-/flertalls-s, ellers ender "simpsons-malt" på
+    "simpsons" mens "Simpson's" ender på "simpson".
+    """
+    t = tekst.lower()
+    for fra, til in (("æ", "ae"), ("ø", "o"), ("å", "aa"), ("ä", "a"),
+                     ("ö", "o"), ("ü", "u"), ("é", "e"), ("è", "e")):
+        t = t.replace(fra, til)
+    t = re.sub(r"[^a-z0-9]+", "", t)
+    for suffiks in _PRODUSENT_SUFFIKS:
+        if t.endswith(suffiks) and len(t) > len(suffiks) + 2:
+            t = t[: -len(suffiks)]
+            break
+    if t.endswith("s") and len(t) > 4:
+        t = t[:-1]
+    return t
+
+
+def _produsenttokens(produsent_tekst):
+    """Master lagrer noen ganger FLERE produsenter i ett felt ("Viking /
+    Weyermann", "Brewferm / Castle Malting") — da er alle gyldige, og et
+    treff mot én av dem er nok. Returnerer derfor et sett."""
+    if not produsent_tekst:
+        return frozenset()
+    tokens = set()
+    for bit in re.split(r"[/,+&]| og ", str(produsent_tekst)):
+        bit = bit.strip()
+        if not bit or bit.lower() in _GENERISKE_PRODUSENTER:
+            continue
+        normalisert = _normaliser_produsentnavn(bit)
+        if normalisert:
+            tokens.add(normalisert)
+    return frozenset(tokens)
+
+
+def _produsentvokabular(master):
+    """Alle produsenter masterdatabasen faktisk kjenner til. Brukes som
+    filter på URL-segmenter — se _produsentsignal()."""
+    vokabular = set()
+    for entry in master.values():
+        vokabular |= _produsenttokens(entry.get("produsent"))
+    return frozenset(vokabular)
+
+
+def _produsentsignal(raw, vokabular):
+    """Produsenten butikkraden faktisk gir uttrykk for, eller et tomt
+    sett når vi ikke vet. URL-segmentet er primærkilden (mest pålitelig
+    — butikken plasserer selv produktet under merket); rå-radens
+    "produsent"-felt (utledet fra navn/beskrivelse i
+    product_link_scraper) er sekundært. Begge må ligge i master sitt eget
+    vokabular for å telle."""
+    sti = urlparse(raw.get("url") or "").path
+    treff = _MCWEB_PRODUKTSTI_RE.match(sti)
+    if treff:
+        token = _normaliser_produsentnavn(unquote(treff.group(1)))
+        if token in vokabular:
+            return frozenset([token])
+    fra_felt = _produsenttokens(raw.get("produsent"))
+    return frozenset(t for t in fra_felt if t in vokabular)
+
+
+def _produsentkonflikt(raw, master_entry, vokabular):
+    """True bare når BEGGE sider oppgir en kjent, ikke-generisk produsent
+    og settene er disjunkte. Ukjent produsent på én av sidene er aldri en
+    konflikt — fravær av bevis er ikke motbevis."""
+    butikk = _produsentsignal(raw, vokabular)
+    master = _produsenttokens(master_entry.get("produsent"))
+    if not butikk or not master:
+        return False
+    return not (butikk & master)
+
+
+# ── Signal 3: råvare/korntype ─────────────────────────────────────────
+# Fuzzy matching er blind for at "Flaket ris" og "Flaket mais" er to
+# ulike råvarer — likhet 0,857, og begge har lav EBC og generisk
+# produsent, så verken signal 1 eller 2 fanger dem.
+#
+# Bevisst holdt til ÉN liten, lukket gruppe: hvilket korn/råstoff
+# produktet er laget av. Dette er en objektiv, gjensidig utelukkende
+# egenskap, ikke en smakstolkning. Det er IKKE starten på en generell
+# regelmotor — adjektivpar som light/dark, pilsner/special og cara/carafa
+# dekkes allerede av EBC-signalet, og er derfor bevisst utelatt framfor å
+# bygge stadig flere navnespesifikke regler.
+_KORNORD = {
+    "ris": "ris", "rice": "ris",
+    "mais": "mais", "maize": "mais", "corn": "mais",
+    "hvete": "hvete", "hvetemalt": "hvete", "wheat": "hvete", "weizen": "hvete",
+    "rug": "rug", "rugmalt": "rug", "rye": "rug", "roggen": "rug",
+    "havre": "havre", "havremalt": "havre", "oat": "havre", "oats": "havre",
+    "bygg": "bygg", "barley": "bygg",
+    "spelt": "spelt", "speltmalt": "spelt",
+}
+_KORN_TOKEN_RE = re.compile(r"[a-zæøåA-ZÆØÅ]+")
+
+
+def _kornsignal(tekst):
+    """Tokenbasert (aldri substreng): "Crisp" inneholder bokstavrekken
+    "ris", men er et annet ord og skal ikke telle som råvaren ris."""
+    return frozenset(
+        _KORNORD[t.lower()] for t in _KORN_TOKEN_RE.findall(tekst or "")
+        if t.lower() in _KORNORD
+    )
+
+
+def _master_korntekst(master_entry):
+    """Master-siden leses fra display_name + ALLE aliaser, ikke bare det
+    ene aliaset som tilfeldigvis ga treffet — korntypen står ofte bare i
+    ett av dem ("Flaked Corn", "Flaket Mais", "Maize")."""
+    return " ".join(
+        [master_entry.get("display_name") or ""]
+        + list(master_entry.get("aliases") or [])
+    )
+
+
+def _kornkonflikt(raw, master_entry):
+    butikk = _kornsignal(raw.get("navn"))
+    if not butikk:
+        return False
+    master = _kornsignal(_master_korntekst(master_entry))
+    if not master:
+        return False
+    return not (butikk & master)
+
+
+def vurder_maltmatch(raw, master_entry, produsent_vokabular):
+    """Vurderer ETT fuzzy-treff og returnerer listen over motstridende
+    identitetssignaler. Tom liste => AUTO_MATCH, ellers REVIEW_REQUIRED.
+
+    Ren funksjon: leser bare, muterer ingenting, og kaller aldri
+    matcheren selv — den får treffet inn og sier bare om det er trygt nok
+    til å skrives uten menneskelig godkjenning."""
+    konflikter = []
+    if _ebc_konflikt(raw.get("ebc"), master_entry.get("ebc")):
+        konflikter.append({
+            "signal": "ebc",
+            "butikk": raw.get("ebc"),
+            "master": master_entry.get("ebc"),
+            "forklaring": (
+                "EBC {} (butikk) mot {} (master) — mer enn {:g}x forskjell "
+                "og over {:g} EBC i absolutt avvik.".format(
+                    raw.get("ebc"), master_entry.get("ebc"),
+                    _EBC_RATIO_GRENSE, _EBC_ABSOLUTT_SLINGRINGSMONN,
+                )
+            ),
+        })
+    if _produsentkonflikt(raw, master_entry, produsent_vokabular):
+        konflikter.append({
+            "signal": "produsent",
+            "butikk": sorted(_produsentsignal(raw, produsent_vokabular)),
+            "master": sorted(_produsenttokens(master_entry.get("produsent"))),
+            "forklaring": (
+                "Butikken fører produktet under en annen produsent enn "
+                "master oppgir ({}).".format(master_entry.get("produsent"))
+            ),
+        })
+    if _kornkonflikt(raw, master_entry):
+        konflikter.append({
+            "signal": "korn",
+            "butikk": sorted(_kornsignal(raw.get("navn"))),
+            "master": sorted(_kornsignal(_master_korntekst(master_entry))),
+            "forklaring": "Produktene er laget av ulikt korn/råstoff.",
+        })
+    return konflikter
+
+
 def _bygg_malt_matchresultat(malt_raw, master_malt, butikker):
     """Kjører selve matcher-hovedløkken (Steg F10D) — brukt IDENTISK av
     både den filskrivende og den lesende (dry-run) veien i
@@ -357,14 +637,25 @@ def _bygg_malt_matchresultat(malt_raw, master_malt, butikker):
     statistikk-tallene alltid reflekterer hele rådatasettet (se Fase 4/6
     i F10D-oppdraget). Filteret er allerede validert av kalleren.
 
+    Steg F11 (matching precision guard): et fuzzy-treff skrives bare inn
+    i master_forslag når vurder_maltmatch() ikke finner noe motstridende
+    identitetssignal (EBC, produsent, korntype). Treff MED konflikt blir
+    ikke forkastet -- de legges i den samme `unmatched`-lista med
+    status=MATCH_REVIEW og feltene "foreslatt_master_id"/"foreslatt_navn"/
+    "konflikter", slik at den eksisterende review-flyten
+    (raw_data/unmatched_*.json -> ui/review_panel.py) plukker dem opp uten
+    noe nytt UI. Ingenting skrives til butikk_match for slike rader.
+
     Returnerer {"master_forslag", "unmatched", "statistikk"}."""
     master_forslag = copy.deepcopy(master_malt)
+    produsent_vokabular = _produsentvokabular(master_forslag)
 
     unmatched = []
     kandidater_per_slot = {}
     raw_per_butikk = {}
     matchet_per_butikk = {}
     unmatched_per_butikk = {}
+    review_per_butikk = {}
 
     for raw in malt_raw:
         navn = raw.get("navn", "")
@@ -379,7 +670,18 @@ def _bygg_malt_matchresultat(malt_raw, master_malt, butikker):
         master_id, _ = match_product_to_master(_strip_size(navn), master_forslag)
         logg_match_resultat(navn, master_id, butikk_key)
 
-        if master_id:
+        # Et fuzzy-treff er en KANDIDAT, ikke et vedtak. Precision guard
+        # (Steg F11) ser etter motstridende identitetssignaler før noe
+        # får lov til å bli skrevet inn i butikk_match — se
+        # vurder_maltmatch(). Treff med konflikt går til review i stedet
+        # for å bli forkastet: butikkdata kan være feil, master kan være
+        # generisk, og bare et menneske kan avgjøre hvilken det er.
+        konflikter = (
+            vurder_maltmatch(raw, master_forslag[master_id], produsent_vokabular)
+            if master_id else []
+        )
+
+        if master_id and not konflikter:
             valider_url_match(master_id, master_forslag[master_id].get("display_name", master_id), url)
             kandidater_per_slot.setdefault((master_id, butikk_key), []).append({
                 "navn": navn, "pris_kg": pris_kg, "pris_raw": pris_raw, "url": url,
@@ -387,6 +689,23 @@ def _bygg_malt_matchresultat(malt_raw, master_malt, butikker):
                 "lagerstatus": raw.get("lagerstatus"),
             })
             matchet_per_butikk[butikk_key] = matchet_per_butikk.get(butikk_key, 0) + 1
+        elif master_id:
+            print(f"[REVIEW] {butikk_key}: '{navn}' -> '{master_id}' holdt tilbake "
+                  f"({', '.join(k['signal'] for k in konflikter)})")
+            unmatched.append({
+                "navn": navn, "butikk": butikk_key,
+                "pris": pris_kg, "url": url,
+                "kategori": raw.get("kategori", "malt"),
+                "ebc": raw.get("ebc"), "status": MATCH_REVIEW,
+                # Kandidaten kastes IKKE — den følger med som forslag, så
+                # review-panelet kan forhåndsvelge den og vise hvorfor den
+                # ikke ble skrevet automatisk.
+                "foreslatt_master_id": master_id,
+                "foreslatt_navn": master_forslag[master_id].get("display_name", master_id),
+                "konflikter": konflikter,
+            })
+            review_per_butikk[butikk_key] = review_per_butikk.get(butikk_key, 0) + 1
+            unmatched_per_butikk[butikk_key] = unmatched_per_butikk.get(butikk_key, 0) + 1
         else:
             unmatched.append({
                 "navn": navn, "butikk": butikk_key,
@@ -450,6 +769,14 @@ def _bygg_malt_matchresultat(malt_raw, master_malt, butikker):
         "slots_oppdatert_per_butikk": slots_oppdatert_per_butikk,
         "berorte_master_ider": sorted(berorte_master_ider),
         "matchet_totalt": sum(matchet_per_butikk.values()),
+        # Steg F11: "matchet" over betyr fortsatt NØYAKTIG det samme som
+        # før -- rader som faktisk får skrive et butikk_match-forslag,
+        # dvs. AUTO_MATCH. Review-tallene kommer i tillegg, additivt, og
+        # er allerede talt med i unmatched_per_butikk (review-elementene
+        # havner i den samme unmatched-lista, se _bygg_malt_matchresultat).
+        "review_required_per_butikk": review_per_butikk,
+        "review_required_totalt": sum(review_per_butikk.values()),
+        "auto_match_totalt": sum(matchet_per_butikk.values()),
     }
 
     return {
@@ -464,6 +791,13 @@ def match_store_data_to_master_malt(malt_raw_path, master_malt_path, output_unma
     """
     Matcher scrapede malter mot master_malt aliases.
     Oppdaterer BARE pris/URL i master. Umatched → pending_review.
+
+    Steg F11: en match må i tillegg passere precision guarden
+    (vurder_maltmatch()) for å bli skrevet. Kandidater med motstridende
+    identitetssignal går til review_required i unmatched-fila i stedet.
+    Returverdien (matchet_totalt, len(unmatched)) beholder sin
+    opprinnelige betydning: antall rader som FAKTISK ble skrevet, og
+    antall rader som venter på et menneske.
 
     Flere rå rader (ulike pakningsstørrelser/format hos samme butikk)
     kan matche samme (master_id, butikk) — se
