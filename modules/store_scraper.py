@@ -149,6 +149,13 @@ def kjor_full_skanning():
         print(f"[FAST INJEKSJON] Henter offisielle data for Wyeast 1318...")
         res_1318 = parse_produktside(london_1318_url, "gjaer", "litebrygg")
         if res_1318:
+            # EKSPLISITT MANUELL OVERRIDE, ikke en fallback: 0.73 er Wyeasts
+            # egen oppgitte attenuation for 1318, satt bevisst her fordi
+            # butikksiden ikke oppgir den. Etter at den generelle
+            # 0.75-defaulten ble fjernet fra parse_produktside() er dette
+            # skillet også synlig i dataene -- alle andre gjærprodukter får
+            # attenuation None, så en verdi her BETYR "noen har bestemt
+            # dette", ikke "systemet gjettet". Samme for produsent.
             res_1318["attenuation"] = 0.73
             res_1318["produsent"] = "Wyeast"
             gjaer_data.append(res_1318)

@@ -162,7 +162,7 @@ def match_store_data_to_master(humle_raw_path, master_humle_path, output_matched
     for raw_produkt in humle_raw:
         navn = raw_produkt.get("navn", "")
         butikk_key = _normaliser_butikk(raw_produkt.get("butikk", ""))
-        pris = raw_produkt.get("pris", 0)
+        pris = raw_produkt.get("pris")
         url = raw_produkt.get("url", "")
         pakke_gram = raw_produkt.get("pakke_gram") or float("inf")
 
@@ -206,7 +206,15 @@ def _normaliser_butikk(butikk_str):
     return b
 
 def _pris_per_kg(pris, pakke_gram, kategori):
-    """Regner om råpris til kr/kg. Gjær returneres uendret."""
+    """Regner om råpris til kr/kg. Gjær returneres uendret.
+
+    pris kan være None: scraperen skriver ikke lenger en fallback-pris
+    når butikken ikke oppga noen (se modules/product_link_scraper.py).
+    En ukjent pris skal forbli ukjent hele veien -- den skal ALDRI bli
+    0 eller et regnestykke -- så None returneres uendret.
+    """
+    if pris is None:
+        return None
     if kategori == "gjaer":
         return pris
     if pakke_gram and pakke_gram > 0:
@@ -361,7 +369,7 @@ def _bygg_malt_matchresultat(malt_raw, master_malt, butikker):
     for raw in malt_raw:
         navn = raw.get("navn", "")
         butikk_key = _normaliser_butikk(raw.get("butikk", ""))
-        pris_raw = raw.get("pris", 0)
+        pris_raw = raw.get("pris")
         pakke_gram = raw.get("pakke_gram")
         url = raw.get("url", "")
 
@@ -553,7 +561,7 @@ def match_store_data_to_master_gjaer(gjaer_raw_path, master_gjaer_path, output_u
     for raw in gjaer_raw:
         navn = raw.get("navn", "")
         butikk_key = _normaliser_butikk(raw.get("butikk", ""))
-        pris = raw.get("pris", 0)
+        pris = raw.get("pris")
         url = raw.get("url", "")
 
         master_id, _ = match_product_to_master(navn, master_gjaer)

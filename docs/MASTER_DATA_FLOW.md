@@ -99,7 +99,7 @@ malt_database / humle_database / gjaer_database (dict i minnet)
          │
          ├── malt_panel.py / hop_panel.py / yeast_panel.py → dropdown + pris-visning
          ├── recipe_context.py → OG, EBC, IBU, ABV, flavor-beregninger
-         └── shopping_list_panel.py / supplier_panel.py → priser og URL-er
+         └── shopping_list_panel.py → priser og URL-er
 ```
 
 ---

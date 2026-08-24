@@ -58,11 +58,11 @@ Konsekvens for nytt arbeid: hvis du er usikker på om kode hører hjemme i `modu
 | Oppskriftslagring | `recipe_storage.py` |
 | Eksport | `export_format.py`, `card_template.py`, `shopping_template.py` |
 | Masterdata / import | `master_data_io.py`, `recipe_importer.py`, `ingredient_matcher.py`, `ingredient_normalizer.py`, `validation.py`, `db_cleanup.py` |
-| Scraper / prissynk | `store_scraper.py`, `store_sync.py`, `store_matcher.py`, `product_link_scraper.py`, `validate_sync.py` |
+| Scraper / prissynk | `store_scraper.py`, `store_matcher.py`, `product_link_scraper.py`, `validate_sync.py` |
 
 ## Panel­oversikt (`ui/`)
 
-Ett panel per fane-seksjon; navnet forteller ansvaret (`malt_panel.py`, `hop_panel.py`, `yeast_panel.py`, `pantry_panel.py`, `smart_shopping_list_panel.py`, `humle_lager_panel.py`, `water_panel.py`, `process_panel.py`, `brewday_panel.py`, `equipment_panel.py`, `recipe_card.py`, `style_panel.py`, `supplier_panel.py`, `import_panel.py`, `review_panel.py`, `shopping_list_panel.py`, `sidebar.py`, `branding.py`). `ui/demo_state.py` er unntaket — ingen render-funksjon, kun session-state-hjelpere for Demo Mode (se [DEMO_MODE.md](DEMO_MODE.md)).
+Ett panel per fane-seksjon; navnet forteller ansvaret (`malt_panel.py`, `hop_panel.py`, `yeast_panel.py`, `pantry_panel.py`, `smart_shopping_list_panel.py`, `humle_lager_panel.py`, `water_panel.py`, `process_panel.py`, `brewday_panel.py`, `equipment_panel.py`, `recipe_card.py`, `style_panel.py`, `import_panel.py`, `review_panel.py`, `shopping_list_panel.py`, `sidebar.py`, `branding.py`). `ui/demo_state.py` er unntaket — ingen render-funksjon, kun session-state-hjelpere for Demo Mode (se [DEMO_MODE.md](DEMO_MODE.md)).
 
 ## Fire tabs (definert i `app.py`)
 
@@ -71,7 +71,7 @@ Ett panel per fane-seksjon; navnet forteller ansvaret (`malt_panel.py`, `hop_pan
 | 🍺 Oppskrift | malt/hop/yeast-paneler, recipe_card, style_panel |
 | 🛒 Innkjøp & Lager | pantry_panel, smart_shopping_list_panel, (eldre) shopping_list_panel + humle_lager_panel |
 | 🧪 Bryggdag | process_panel, water_panel, brewday_panel, equipment_panel |
-| 🔧 Verktøy | supplier_panel, import_panel |
+| 🔧 Verktøy | import_panel |
 
 ## Datalag (`data/`)
 

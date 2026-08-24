@@ -16,7 +16,6 @@ from ui.hop_panel import render_hop_panel
 from ui.yeast_panel import render_yeast_panel
 from ui.recipe_card import render_recipe_card
 from ui.style_panel import render_style_panel
-from ui.supplier_panel import render_supplier_panel
 from ui.import_panel import render_import_panel
 from ui.shopping_list_panel import render_shopping_list_panel
 from ui.humle_lager_panel import render_humle_lager_panel
@@ -167,5 +166,4 @@ with tab_bryggdag:
 # === TAB 4: VERKTØY =============================
 # ==================================================
 with tab_verktoy:
-    render_supplier_panel(malt_database, humle_database, gjaer_database)
     render_import_panel()

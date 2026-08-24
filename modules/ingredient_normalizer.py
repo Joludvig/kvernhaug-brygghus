@@ -46,7 +46,13 @@ def _rens_display_navn(navn):
     return _re.sub(r"\s+", " ", navn).strip()
 
 def _pris_per_kg(pris, pakke_gram, kategori=""):
-    """Regner om råpris til kr/kg for malt/humle. Gjær returneres uendret (pris per pakke)."""
+    """Regner om råpris til kr/kg for malt/humle. Gjær returneres uendret (pris per pakke).
+
+    pris kan være None etter at fallback-prisen ble fjernet fra
+    modules/product_link_scraper.py -- ukjent pris skal forbli ukjent.
+    """
+    if pris is None:
+        return None
     if kategori == "gjaer":
         return pris
     if pakke_gram and pakke_gram > 0:
@@ -114,20 +120,30 @@ def ai_normaliser_tekst(raw_item):
     }
 
     if kategori == "malt":
-        ebc = raw_item["ebc"]
-        master_struktur["ebc"] = ebc
-        if ebc <= 10:
-            master_struktur["potensiale"] = 1.037
-        elif ebc <= 50:
-            master_struktur["potensiale"] = 1.034
-        elif ebc <= 150:
-            master_struktur["potensiale"] = 1.030
-        else:
-            master_struktur["potensiale"] = 1.025
+        # ebc kan være None når butikken ikke oppga EBC (fallback-verdien 4.0
+        # er fjernet fra scraperen). Uten kjent EBC kan potensialet ikke
+        # utledes -- da settes verken "ebc" eller "potensiale", slik at et
+        # menneske må fylle dem inn i review fremfor at en gjettet verdi
+        # skrives inn i masterdata.
+        ebc = raw_item.get("ebc")
+        if ebc is not None:
+            master_struktur["ebc"] = ebc
+            if ebc <= 10:
+                master_struktur["potensiale"] = 1.037
+            elif ebc <= 50:
+                master_struktur["potensiale"] = 1.034
+            elif ebc <= 150:
+                master_struktur["potensiale"] = 1.030
+            else:
+                master_struktur["potensiale"] = 1.025
         master_struktur["kategori"] = _malt_kategori(navn)
-    if kategori == "humle": master_struktur["alfa"] = raw_item["alfa"]
+    # Kun felt med en faktisk verdi skrives -- None betyr "butikken oppga det
+    # ikke", og et fraværende felt er ærligere enn en oppdiktet verdi.
+    if kategori == "humle" and raw_item.get("alfa") is not None:
+        master_struktur["alfa"] = raw_item["alfa"]
     if kategori == "gjaer":
-        master_struktur["attenuation"] = raw_item["attenuation"]
-        master_struktur["pris_per_pakke"] = raw_item["pris"]
+        if raw_item.get("attenuation") is not None:
+            master_struktur["attenuation"] = raw_item["attenuation"]
+        master_struktur["pris_per_pakke"] = raw_item.get("pris")
 
     return m_id, master_struktur

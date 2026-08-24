@@ -475,8 +475,14 @@ def parse_produktside(url, kategori, butikk_navn):
         if pris == 0.0:
             pris = _extract_price(full_text)
 
-        if pris == 0.0:
-            pris = 45.0 if kategori == "malt" else 69.0
+        # INGEN FALLBACK-PRIS. Tidligere ble en ikke-funnet pris satt til
+        # 45,- (malt) / 69,- (annet). Den verdien var umulig å skille fra en
+        # ekte skrapet pris nedstrøms, og gjorde hele prisfeltet upålitelig.
+        # Manglende pris er nå eksplisitt None -- "ukjent" fremfor falsk
+        # presisjon. Trenger en konsument likevel et estimat, skal det
+        # innføres DER, eksplisitt merket, slik modules/smart_shopping_list.py
+        # allerede gjør med sitt "er_estimat"-flagg.
+        pris = pris if pris != 0.0 else None
 
         beskrivelse = schema_data.get("description", "")
         if not beskrivelse:
@@ -518,7 +524,10 @@ def parse_produktside(url, kategori, butikk_navn):
         ebc_match = re.search(r"(\d+[\.,]?\d*)\s*EBC", f"{navn} {beskrivelse}", re.IGNORECASE)
         if not ebc_match:
             ebc_match = re.search(r"-(\d+[\.,]?\d*)-ebc", url.lower())
-        ebc = float(ebc_match.group(1).replace(",", ".")) if ebc_match else 4.0
+        # INGEN FALLBACK-EBC. Tidligere ga manglende treff 4.0, som er en
+        # helt vanlig, ekte EBC-verdi for lys basemalt -- gjetningen var
+        # derfor usynlig i dataene. None betyr nå "butikken oppga ikke EBC".
+        ebc = float(ebc_match.group(1).replace(",", ".")) if ebc_match else None
 
         # Gjær-spesifikk filtrering: ekskluder gjærnæring, nutrient, ølsett, utstyr
         # (siste sikkerhetsnett — kun når brødsmule ikke kunne avgjøre saken, se over)
@@ -554,10 +563,15 @@ def parse_produktside(url, kategori, butikk_navn):
                 print(f"[FORKASTET] Ikke gjær: {navn}")
                 return None
 
-        alfa = 0.0
+        # INGEN FALLBACK-ALFA. Tidligere ga manglende treff 5.0 % -- en fullt
+        # plausibel alfasyreverdi, og dermed en gjetning ingen konsument kunne
+        # oppdage. Den slo direkte inn i IBU-grunnlaget. None betyr nå
+        # "ukjent alfasyre"; 0.0-initialiseringen for ikke-humle er også
+        # fjernet, siden feltet ikke er relevant utenfor humle.
+        alfa = None
         if kategori == "humle":
             alfa_match = re.search(r"(\d+[\.,]?\d*)\s*(?:%|pcnt|prosent|aa)", f"{navn} {beskrivelse}", re.IGNORECASE)
-            alfa = float(alfa_match.group(1).replace(",", ".")) if alfa_match else 5.0
+            alfa = float(alfa_match.group(1).replace(",", ".")) if alfa_match else None
 
         navn_clean = re.sub(r"([a-zA-ZæøåÆØÅ])(\d)", r"\1 \2", navn)
         navn_clean = re.sub(r"(\d)([a-zA-ZæøåÆØÅ])", r"\1 \2", navn_clean)
@@ -594,7 +608,13 @@ def parse_produktside(url, kategori, butikk_navn):
             "produsent": produsent,
             "ebc": ebc,
             "alfa": alfa,
-            "attenuation": 0.75,
+            # INGEN GENERELL ATTENUATION. Butikkene oppgir ikke dette, og
+            # 0.75 ble tidligere skrevet på ALLE produkter -- også malt og
+            # humle. Attenuation er en bryggefaglig egenskap ved gjæren og
+            # eies av masterdata, ikke av et butikkprodukt. En kaller som
+            # bevisst kjenner verdien kan fortsatt sette den eksplisitt
+            # etterpå (se modules/store_scraper.py, Wyeast 1318).
+            "attenuation": None,
         }
 
     except Exception as e:
