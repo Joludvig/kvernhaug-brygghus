@@ -387,6 +387,18 @@ def render_water_panel(ctx, malt_database=None):
     # 4. FORESLÅTTE SALTER
     # ══════════════════════════════════════════════════════════════════
     st.markdown("**4. Foreslåtte salter**")
+    # Water Recommendation Quality Audit V1 fant at et grønt/innenfor-treff
+    # på HCO3 lett kan leses som "meske-pH er i orden", selv om appen aldri
+    # regner ut meske-pH -- foreslaa_salter() løser kun Cl/SO4 og ser aldri
+    # kornregningen. Én stille, alltid synlig setning her (ikke bare etter
+    # klikk) rammer inn HELE seksjonen riktig, uten å gjøre selve forslaget
+    # alarmerende -- det er fortsatt et brukbart førsteutkast.
+    st.caption(
+        "Saltforslaget justerer klorid og sulfat ut fra kildevann og valgt "
+        "målprofil (kalsiumklorid + gips). Det tar ikke hensyn til "
+        "kornregningens innvirkning på meske-pH, så alkalitet/HCO3 kan "
+        "fortsatt kreve egen vurdering. Kontroller meske-pH på bryggedagen."
+    )
     if st.button("🧮 Beregn saltforslag", key="vann_beregn_forslag_btn", disabled=aktiv_maal is None):
         forslag, forklaring = foreslaa_salter(aktiv_kilde_ioner, aktiv_maal, totalvann_l)
         st.session_state["vann_salter"] = forslag

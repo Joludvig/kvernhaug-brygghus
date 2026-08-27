@@ -424,5 +424,49 @@ class Test21StatusForIon(unittest.TestCase):
         self.assertEqual(status_for_ion(50, None, None), "ukjent")
 
 
+class Test22HoytOgLavtKalsiumVarsel(unittest.TestCase):
+    """Water V1 Safety Clarification V1 (Steg F12): Ca hadde tidligere KUN
+    en lav-terskel i STANDARD_VARSELGRENSER -- Na/Mg/Cl/SO4 hadde alle en
+    egen høy-terskel. Dette dekker den nye, symmetriske ca_hoy_ppm-grensen,
+    og bekrefter samtidig at den eksisterende lav-Ca-varselen (som ikke
+    hadde noen egen test fra før) fortsatt virker uendret."""
+
+    def _sluttprofil_med_ca(self, ca_ppm):
+        # hco3 lik målets egen sone unngår at et urelatert HCO3-varsel
+        # blander seg inn i testens antall/innhold av varsler.
+        kildevann = {"ca": ca_ppm, "mg": 0.5, "na": 4.5, "cl": 9.7, "so4": 8.1, "hco3": 40.0}
+        return kildevann, beregn_sluttprofil(kildevann, [], 20.0)
+
+    def test_under_terskel_gir_ingen_hoy_ca_varsel(self):
+        kildevann, sluttprofil = self._sluttprofil_med_ca(STANDARD_VARSELGRENSER["ca_hoy_ppm"] - 1.0)
+        varsler = generer_varsler(kildevann, _KVERNHAUG_MAAL, sluttprofil, [])
+        self.assertFalse(any("Høyt kalsium" in v for v in varsler))
+
+    def test_paa_terskelen_gir_ingen_hoy_ca_varsel(self):
+        # Samme streng-større-enn-konvensjon som Na/Mg/Cl/SO4 (se
+        # generer_varsler): akkurat 150 ppm er IKKE "over" 150 ppm.
+        kildevann, sluttprofil = self._sluttprofil_med_ca(STANDARD_VARSELGRENSER["ca_hoy_ppm"])
+        varsler = generer_varsler(kildevann, _KVERNHAUG_MAAL, sluttprofil, [])
+        self.assertFalse(any("Høyt kalsium" in v for v in varsler))
+
+    def test_over_terskel_gir_hoy_ca_varsel(self):
+        kildevann, sluttprofil = self._sluttprofil_med_ca(STANDARD_VARSELGRENSER["ca_hoy_ppm"] + 1.0)
+        varsler = generer_varsler(kildevann, _KVERNHAUG_MAAL, sluttprofil, [])
+        self.assertTrue(any("Høyt kalsium" in v and "151" in v for v in varsler))
+
+    def test_eksisterende_lavt_kalsium_varsel_virker_fortsatt(self):
+        kildevann, sluttprofil = self._sluttprofil_med_ca(STANDARD_VARSELGRENSER["ca_lav_ppm"] - 1.0)
+        varsler = generer_varsler(kildevann, _KVERNHAUG_MAAL, sluttprofil, [])
+        self.assertTrue(any("Lavt kalsium" in v for v in varsler))
+        self.assertFalse(any("Høyt kalsium" in v for v in varsler))
+
+    def test_hoy_terskel_kan_overstyres_via_grenser_parameter(self):
+        # Samme mønster som resten av STANDARD_VARSELGRENSER -- fritt
+        # konfigurerbar per kall, ikke hardkodet inn i selve varselet.
+        kildevann, sluttprofil = self._sluttprofil_med_ca(120.0)
+        varsler = generer_varsler(kildevann, _KVERNHAUG_MAAL, sluttprofil, [], grenser={"ca_hoy_ppm": 100.0})
+        self.assertTrue(any("Høyt kalsium" in v for v in varsler))
+
+
 if __name__ == "__main__":
     unittest.main()

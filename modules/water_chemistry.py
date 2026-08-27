@@ -448,6 +448,15 @@ STANDARD_VARSELGRENSER = {
     "cl_svaert_hoy_ppm": 150.0,
     "so4_svaert_hoy_ppm": 150.0,
     "ca_lav_ppm": 40.0,
+    # Na/Mg/Cl/SO4 har alle en "høy"-terskel over — Ca hadde tidligere KUN
+    # en lav-terskel (Water Recommendation Quality Audit V1, Steg F12).
+    # 150 ppm er ingen kjemisk faregrense (se moduldokstrengen over: dette
+    # er husregler, ikke helsegrenser) -- det er nøyaktig toppen av det
+    # høyeste ca_max blant KBHs egne målprofiler i dag
+    # (data/water_targets.json::humledrevet_ol), så varselet utløses ALDRI
+    # av en Ca-verdi noen eksisterende husprofil selv regner som normal —
+    # kun når kalsium går tydelig UTOVER det enhver husprofil ber om.
+    "ca_hoy_ppm": 150.0,
     "vekt_opplosning_g": 0.1,
 }
 
@@ -485,6 +494,8 @@ def generer_varsler(kildevann, maalprofil, sluttprofil, salt_fordeling, syrer=No
         varsler.append(f"Svært høyt sulfat: {slutt['so4']:.1f} ppm (grense {grenser['so4_svaert_hoy_ppm']:.0f} ppm) — kan gi skarp/tørr bitterhet.")
     if slutt.get("ca") is not None and slutt["ca"] < grenser["ca_lav_ppm"]:
         varsler.append(f"Lavt kalsium: {slutt['ca']:.1f} ppm (grense {grenser['ca_lav_ppm']:.0f} ppm) — kan gi svakere enzym-/gjæraktivitet og dårligere klaring.")
+    if slutt.get("ca") is not None and slutt["ca"] > grenser["ca_hoy_ppm"]:
+        varsler.append(f"Høyt kalsium: {slutt['ca']:.1f} ppm (grense {grenser['ca_hoy_ppm']:.0f} ppm) — trolig unødvendig høy mineralbelastning, vurder å redusere saltmengden.")
 
     if maalprofil:
         for row in bygg_ionrapport(sluttprofil, maalprofil):
