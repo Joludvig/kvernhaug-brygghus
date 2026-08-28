@@ -203,353 +203,410 @@ def render_water_panel(ctx, malt_database=None):
         st.session_state["vann_kilde_valgt_id"] = _pending_ny_kilde_id
 
     # ══════════════════════════════════════════════════════════════════
-    # 1. KILDEVANN
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**1. Kildevann**")
-    kilde_id_valg = [_UKJENT_KILDE_ID] + list(kilder.keys()) + [_NY_KILDE_SENTINEL]
-    _kilde_navn = {**{kid: k["name"] for kid, k in kilder.items()},
-                   _UKJENT_KILDE_ID: "❓ Ukjent kildevann", _NY_KILDE_SENTINEL: "➕ Ny egendefinert kilde …"}
+    # VANNBEHANDLING (FORBEREDELSE) -- Brewday Tab UX Cleanup V1 (MUST 2):
+    # kildevann, målprofil, vannmengder, saltforslag, fordeling,
+    # forventet sluttprofil, varsler og syrer er alle
+    # FORBEREDELSE/PLANLEGGING som normalt gjøres FØR selve bryggedagen --
+    # lagt bak én lukket expander for å redusere støy i selve
+    # bryggedagsverktøyet. Meske-pH (under) er BEVISST utenfor: en faktisk
+    # målt verdi er relevant DER OG DA, under selve mesking. Ren
+    # visuell/strukturell endring -- ALL beregning, alle session_state-
+    # oppdateringer og selve snapshot-bygget under kjører nøyaktig som før,
+    # uavhengig av om expanderen er åpen eller lukket.
+    with st.expander("💧 Vannbehandling (forberedelse)", expanded=False):
+        # ══════════════════════════════════════════════════════════════════
+        # KILDEVANN
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Kildevann**")
+        kilde_id_valg = [_UKJENT_KILDE_ID] + list(kilder.keys()) + [_NY_KILDE_SENTINEL]
+        _kilde_navn = {**{kid: k["name"] for kid, k in kilder.items()},
+                       _UKJENT_KILDE_ID: "❓ Ukjent kildevann", _NY_KILDE_SENTINEL: "➕ Ny egendefinert kilde …"}
 
-    valgt_kilde_id = st.selectbox(
-        "Velg kildevann", options=kilde_id_valg,
-        format_func=lambda k: _kilde_navn.get(k, k),
-        key="vann_kilde_valgt_id",
-    )
+        valgt_kilde_id = st.selectbox(
+            "Velg kildevann", options=kilde_id_valg,
+            format_func=lambda k: _kilde_navn.get(k, k),
+            key="vann_kilde_valgt_id",
+        )
 
-    if valgt_kilde_id == _NY_KILDE_SENTINEL:
-        nytt_navn = st.text_input("Navn på ny kilde", key="vann_ny_kilde_navn", placeholder="f.eks. Egen brønn 2026")
-        if st.button("➕ Opprett kilde", key="vann_opprett_kilde_btn") and nytt_navn.strip():
-            ny_id = _slug(nytt_navn.strip())
-            while ny_id in kilder:
-                ny_id += "_2"
-            kilder[ny_id] = _tom_kilde(nytt_navn.strip(), ny_id)
-            _lagre_vannkilder(kilder)
-            st.session_state["_vann_pending_ny_kilde_id"] = ny_id
-            melding = f"Opprettet kilde «{nytt_navn.strip()}» — fyll inn ionverdier under."
-            if DEMO_MODE:
-                melding += _DEMO_SUFFIKS
-            st.toast(melding, icon="💧")
-            st.rerun()
-        aktiv_kilde_full = _tom_kilde("(ny, ikke opprettet ennå)", _NY_KILDE_SENTINEL)
-        aktiv_kilde_ioner = tomt_kildevann()
-    elif valgt_kilde_id == _UKJENT_KILDE_ID:
-        st.caption("Ingen ionverdier registrert — appen dikter ikke opp tall for en ukjent kilde.")
-        aktiv_kilde_full = _tom_kilde("Ukjent kildevann", _UKJENT_KILDE_ID)
-        aktiv_kilde_ioner = tomt_kildevann()
-    else:
-        if st.session_state.get("_vann_forrige_kilde_id") != valgt_kilde_id:
-            _init_kilde_widgets(kilder[valgt_kilde_id])
-            st.session_state["_vann_forrige_kilde_id"] = valgt_kilde_id
-
-        with st.expander("🔬 Rediger kildeprofil", expanded=False):
-            m1, m2 = st.columns(2)
-            with m1:
-                st.text_input("Navn", key="vann_kilde_navn_input")
-                st.text_input("Sted/lokasjon", key="vann_kilde_lokasjon_input")
-            with m2:
-                st.number_input("Analyseår", min_value=0, max_value=2100, step=1, key="vann_kilde_aar_input")
-                ph_ukjent = st.checkbox("pH ukjent", key="vann_kilde_ph_ukjent")
-                st.number_input("pH", min_value=0.0, max_value=14.0, step=0.1, key="vann_kilde_ph_input", disabled=ph_ukjent)
-
-            ion_kols = st.columns(3)
-            ioner_verdier = {}
-            for i, ion in enumerate(IONER):
-                ioner_verdier[ion] = _ion_felt(ion_kols[i % 3], ion)
-
-            st.text_area("Notater (laboratorium/kilde, måletype osv.)", key="vann_kilde_notater_input", height=68)
-
-            if st.button("💾 Lagre denne kildeprofilen", key="vann_lagre_kilde_btn"):
-                kilder[valgt_kilde_id] = {
-                    "water_id": valgt_kilde_id,
-                    "name": st.session_state["vann_kilde_navn_input"] or valgt_kilde_id,
-                    "location": st.session_state["vann_kilde_lokasjon_input"],
-                    "source_type": kilder[valgt_kilde_id].get("source_type", "ukjent"),
-                    "source_year": st.session_state["vann_kilde_aar_input"] or None,
-                    **ioner_verdier,
-                    "ph": None if ph_ukjent else st.session_state["vann_kilde_ph_input"],
-                    "notes": st.session_state["vann_kilde_notater_input"],
-                    "is_default": kilder[valgt_kilde_id].get("is_default", False),
-                }
+        if valgt_kilde_id == _NY_KILDE_SENTINEL:
+            nytt_navn = st.text_input("Navn på ny kilde", key="vann_ny_kilde_navn", placeholder="f.eks. Egen brønn 2026")
+            if st.button("➕ Opprett kilde", key="vann_opprett_kilde_btn") and nytt_navn.strip():
+                ny_id = _slug(nytt_navn.strip())
+                while ny_id in kilder:
+                    ny_id += "_2"
+                kilder[ny_id] = _tom_kilde(nytt_navn.strip(), ny_id)
                 _lagre_vannkilder(kilder)
-                st.toast("Kildeprofil lagret!" + (_DEMO_SUFFIKS if DEMO_MODE else ""), icon="💾")
+                st.session_state["_vann_pending_ny_kilde_id"] = ny_id
+                melding = f"Opprettet kilde «{nytt_navn.strip()}» — fyll inn ionverdier under."
+                if DEMO_MODE:
+                    melding += _DEMO_SUFFIKS
+                st.toast(melding, icon="💧")
+                st.rerun()
+            aktiv_kilde_full = _tom_kilde("(ny, ikke opprettet ennå)", _NY_KILDE_SENTINEL)
+            aktiv_kilde_ioner = tomt_kildevann()
+        elif valgt_kilde_id == _UKJENT_KILDE_ID:
+            st.caption("Ingen ionverdier registrert — appen dikter ikke opp tall for en ukjent kilde.")
+            aktiv_kilde_full = _tom_kilde("Ukjent kildevann", _UKJENT_KILDE_ID)
+            aktiv_kilde_ioner = tomt_kildevann()
+        else:
+            if st.session_state.get("_vann_forrige_kilde_id") != valgt_kilde_id:
+                _init_kilde_widgets(kilder[valgt_kilde_id])
+                st.session_state["_vann_forrige_kilde_id"] = valgt_kilde_id
 
-        aktiv_kilde_full = kilder[valgt_kilde_id]
-        aktiv_kilde_ioner = {ion: aktiv_kilde_full.get(ion) for ion in IONER}
+            with st.expander("🔬 Rediger kildeprofil", expanded=False):
+                m1, m2 = st.columns(2)
+                with m1:
+                    st.text_input("Navn", key="vann_kilde_navn_input")
+                    st.text_input("Sted/lokasjon", key="vann_kilde_lokasjon_input")
+                with m2:
+                    st.number_input("Analyseår", min_value=0, max_value=2100, step=1, key="vann_kilde_aar_input")
+                    ph_ukjent = st.checkbox("pH ukjent", key="vann_kilde_ph_ukjent")
+                    st.number_input("pH", min_value=0.0, max_value=14.0, step=0.1, key="vann_kilde_ph_input", disabled=ph_ukjent)
 
-    # ══════════════════════════════════════════════════════════════════
-    # 2. MÅLPROFIL
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**2. Målprofil**")
-    st.caption(
-        "Målprofilen er en HELT ANNEN ting enn kildevannet over — kildevannet "
-        "er hva som faktisk kommer ut av springen/brønnen din, målprofilen er "
-        "hva du ØNSKER å oppnå etter salttilsetning. Jordalsvatnet 2025 er "
-        "aldri et valg her, kun under «1. Kildevann»."
-    )
-    if not maalprofiler:
-        st.info("Ingen målprofiler er lagret ennå.")
-        aktiv_maal = None
-    else:
-        maal_id_valg = list(maalprofiler.keys())
-        if st.session_state.get("vann_maal_valgt_id") not in maal_id_valg:
-            st.session_state["vann_maal_valgt_id"] = maal_id_valg[0]
+                ion_kols = st.columns(3)
+                ioner_verdier = {}
+                for i, ion in enumerate(IONER):
+                    ioner_verdier[ion] = _ion_felt(ion_kols[i % 3], ion)
 
-        stil_navn = (ctx.get("brygger_stil") or "").strip() or ctx.get("style_analysis", {}).get("stil", "")
-        anbefalt_maal_id, maal_begrunnelse = anbefal_vannmaal(stil_navn, maalprofiler)
-        if anbefalt_maal_id:
-            anbefalt_maal_navn = maalprofiler[anbefalt_maal_id].get("name", anbefalt_maal_id)
-            st.info(
-                f"💡 **Anbefalt målprofil: {anbefalt_maal_navn}**\n\n"
-                + "\n".join(f"- {b}" for b in maal_begrunnelse)
+                st.text_area("Notater (laboratorium/kilde, måletype osv.)", key="vann_kilde_notater_input", height=68)
+
+                if st.button("💾 Lagre denne kildeprofilen", key="vann_lagre_kilde_btn"):
+                    kilder[valgt_kilde_id] = {
+                        "water_id": valgt_kilde_id,
+                        "name": st.session_state["vann_kilde_navn_input"] or valgt_kilde_id,
+                        "location": st.session_state["vann_kilde_lokasjon_input"],
+                        "source_type": kilder[valgt_kilde_id].get("source_type", "ukjent"),
+                        "source_year": st.session_state["vann_kilde_aar_input"] or None,
+                        **ioner_verdier,
+                        "ph": None if ph_ukjent else st.session_state["vann_kilde_ph_input"],
+                        "notes": st.session_state["vann_kilde_notater_input"],
+                        "is_default": kilder[valgt_kilde_id].get("is_default", False),
+                    }
+                    _lagre_vannkilder(kilder)
+                    st.toast("Kildeprofil lagret!" + (_DEMO_SUFFIKS if DEMO_MODE else ""), icon="💾")
+
+            aktiv_kilde_full = kilder[valgt_kilde_id]
+            aktiv_kilde_ioner = {ion: aktiv_kilde_full.get(ion) for ion in IONER}
+
+        # ══════════════════════════════════════════════════════════════════
+        # MÅLPROFIL
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Målprofil**")
+        st.caption(
+            "Målprofilen er en HELT ANNEN ting enn kildevannet over — kildevannet "
+            "er hva som faktisk kommer ut av springen/brønnen din, målprofilen er "
+            "hva du ØNSKER å oppnå etter salttilsetning. Jordalsvatnet 2025 er "
+            "aldri et valg her, kun under «Kildevann»."
+        )
+        if not maalprofiler:
+            st.info("Ingen målprofiler er lagret ennå.")
+            aktiv_maal = None
+        else:
+            maal_id_valg = list(maalprofiler.keys())
+            if st.session_state.get("vann_maal_valgt_id") not in maal_id_valg:
+                st.session_state["vann_maal_valgt_id"] = maal_id_valg[0]
+
+            stil_navn = (ctx.get("brygger_stil") or "").strip() or ctx.get("style_analysis", {}).get("stil", "")
+            anbefalt_maal_id, maal_begrunnelse = anbefal_vannmaal(stil_navn, maalprofiler)
+            if anbefalt_maal_id:
+                anbefalt_maal_navn = maalprofiler[anbefalt_maal_id].get("name", anbefalt_maal_id)
+                st.info(
+                    f"💡 **Anbefalt målprofil: {anbefalt_maal_navn}**\n\n"
+                    + "\n".join(f"- {b}" for b in maal_begrunnelse)
+                )
+
+            valgt_maal_id = st.selectbox(
+                "Velg målprofil (anbefalingen setter ALDRI valget automatisk — du må selv velge)",
+                options=maal_id_valg,
+                format_func=lambda k: maalprofiler[k].get("name", k) + ("  ⭐ anbefalt" if k == anbefalt_maal_id else ""),
+                key="vann_maal_valgt_id",
+            )
+            aktiv_maal_mal = maalprofiler[valgt_maal_id]
+
+            # Kompakt hjelpetekst rett under valget — ALDRI en del av selve
+            # navnet/dropdown-teksten (den skal forbli ryddig, se format_func
+            # over) eller av eksportenes "Målprofil: <navn>"-linje. Faller
+            # tilbake til den lengre beskrivelsen for profiler som mangler
+            # den nye, korte teksten (f.eks. en eldre egendefinert profil).
+            if aktiv_maal_mal.get("kort_hjelpetekst"):
+                st.caption(aktiv_maal_mal["kort_hjelpetekst"])
+            elif aktiv_maal_mal.get("description"):
+                st.caption(aktiv_maal_mal["description"])
+
+            if st.session_state.get("_vann_forrige_maal_id") != valgt_maal_id:
+                _init_maal_widgets(aktiv_maal_mal)
+                st.session_state["_vann_forrige_maal_id"] = valgt_maal_id
+
+            with st.expander("🎯 Rediger målprofil (min/maks per ion)", expanded=False):
+                if aktiv_maal_mal.get("description"):
+                    st.caption(aktiv_maal_mal["description"])
+                _herkomst_deler = []
+                if aktiv_maal_mal.get("origin"):
+                    _herkomst_deler.append(f"Opprinnelse: {aktiv_maal_mal['origin']}")
+                if aktiv_maal_mal.get("profile_type"):
+                    _herkomst_deler.append(f"Type: {aktiv_maal_mal['profile_type']}")
+                if aktiv_maal_mal.get("historical_profile"):
+                    _herkomst_deler.append("Historisk profil")
+                if _herkomst_deler:
+                    st.caption(" · ".join(_herkomst_deler))
+
+                maal_verdier = {}
+                for ion in IONER:
+                    c1, c2 = st.columns(2)
+                    maal_verdier[f"{ion}_min"] = c1.number_input(
+                        f"{_ION_LABELS[ion]} min (ppm)", min_value=0.0, max_value=1000.0, step=1.0,
+                        key=f"vann_maal_{ion}_min",
+                    )
+                    maal_verdier[f"{ion}_max"] = c2.number_input(
+                        f"{_ION_LABELS[ion]} maks (ppm)", min_value=0.0, max_value=1000.0, step=1.0,
+                        key=f"vann_maal_{ion}_max",
+                    )
+                c1, c2 = st.columns(2)
+                maal_verdier["mash_ph_min"] = c1.number_input("Meske-pH min", min_value=4.0, max_value=7.0, step=0.01, format="%.2f", key="vann_maal_ph_min_input")
+                maal_verdier["mash_ph_max"] = c2.number_input("Meske-pH maks", min_value=4.0, max_value=7.0, step=0.01, format="%.2f", key="vann_maal_ph_max_input")
+
+                if st.button("💾 Lagre målprofil", key="vann_lagre_maal_btn"):
+                    maalprofiler[valgt_maal_id] = {
+                        **aktiv_maal_mal, **maal_verdier,
+                        "target_id": valgt_maal_id,
+                        "name": aktiv_maal_mal.get("name", valgt_maal_id),
+                    }
+                    _lagre_vannmaal(maalprofiler)
+                    st.toast("Målprofil lagret!" + (_DEMO_SUFFIKS if DEMO_MODE else ""), icon="💾")
+
+            aktiv_maal = maalprofiler[valgt_maal_id]
+
+        # ══════════════════════════════════════════════════════════════════
+        # VANNMENGDER (fra bryggedagsplanen)
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Vannmengder (fra bryggedagsplanen)**")
+        eq = last_equipment()
+        total_malt_kg = sum(m.get("mengde", 0.0) for m in st.session_state.get("valgt_malt", []))
+        _kandidat_prosess = st.session_state.get("aktiv_prosessprofil")
+        prosess_profil = normaliser_prosessprofil(_kandidat_prosess) if _kandidat_prosess else None
+        boil_min = (prosess_profil or {}).get("boil_minutes") or eq["default_boil_time_min"]
+        sparge_method = (prosess_profil or {}).get("sparge_method")
+        vann_est = beregn_vann(total_malt_kg, ctx["volum"], boil_min, eq, sparge_method=sparge_method)
+        meskevann_l, skyllevann_l = vann_est["mash_vann_l"], vann_est["sparge_vann_l"]
+        totalvann_l = meskevann_l + skyllevann_l
+
+        # Full metric-visning (Meskevann/Skyllevann/Totalt) ligger prominent i
+        # Bryggeplan (ui/brewday_panel.py, Steg 1) -- der tallene faktisk
+        # brukes under selve bryggingen. Her, i forberedelsesdelen, holder en
+        # kompakt tekstlinje -- beregn_vann()-kallet og alle tre variablene
+        # over er UENDRET og brukes fortsatt videre av saltberegningen,
+        # fordelingen mesk/skyll og snapshotene lenger ned.
+        st.caption(
+            f"Meskevann {meskevann_l:.1f} L · Skyllevann {skyllevann_l:.1f} L · "
+            f"Totalt {totalvann_l:.1f} L (samme tall som i Bryggeplan)."
+        )
+
+        # ══════════════════════════════════════════════════════════════════
+        # FORESLÅTTE SALTER
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Foreslåtte salter**")
+        # Water Recommendation Quality Audit V1 fant at et grønt/innenfor-treff
+        # på HCO3 lett kan leses som "meske-pH er i orden", selv om appen aldri
+        # regner ut meske-pH -- foreslaa_salter() løser kun Cl/SO4 og ser aldri
+        # kornregningen. Én stille, alltid synlig setning her (ikke bare etter
+        # klikk) rammer inn HELE seksjonen riktig, uten å gjøre selve forslaget
+        # alarmerende -- det er fortsatt et brukbart førsteutkast.
+        st.caption(
+            "Saltforslaget justerer klorid og sulfat ut fra kildevann og valgt "
+            "målprofil (kalsiumklorid + gips). Det tar ikke hensyn til "
+            "kornregningens innvirkning på meske-pH, så alkalitet/HCO3 kan "
+            "fortsatt kreve egen vurdering. Kontroller meske-pH på bryggedagen."
+        )
+        if st.button("🧮 Beregn saltforslag", key="vann_beregn_forslag_btn", disabled=aktiv_maal is None):
+            forslag, forklaring = foreslaa_salter(aktiv_kilde_ioner, aktiv_maal, totalvann_l)
+            st.session_state["vann_salter"] = forslag
+            _ny_vann_widget_revisjon()
+            st.info(forklaring)
+            st.toast("Saltforslag beregnet — fritt redigerbart under.", icon="🧮")
+
+        revisjon = st.session_state.get("_vann_widget_revisjon", 0)
+        salt_liste = st.session_state.get("vann_salter", [])
+        salt_valg = [s["salt_id"] for s in alle_salter()]
+        salt_navn = {s["salt_id"]: f"{s['navn']} ({s['formel']})" for s in alle_salter()}
+
+        slett_salt_idx = None
+        for i, s in enumerate(salt_liste):
+            c1, c2, c3, c4 = st.columns([2.2, 1, 1, 0.5])
+            s["salt_id"] = c1.selectbox(
+                "Salt", options=salt_valg, format_func=lambda k: salt_navn[k],
+                index=salt_valg.index(s["salt_id"]) if s["salt_id"] in salt_valg else 0,
+                key=f"vann_salt_id_{revisjon}_{i}", label_visibility="collapsed" if i else "visible",
+            )
+            s["gram"] = c2.number_input(
+                "Gram (totalt)", min_value=0.0, max_value=200.0, step=0.05, format="%.2f",
+                value=float(s.get("gram", 0.0)), key=f"vann_salt_gram_{revisjon}_{i}",
+                label_visibility="collapsed" if i else "visible",
+            )
+            s["renhet"] = c3.number_input(
+                "Renhet (%)", min_value=1.0, max_value=100.0, step=1.0,
+                value=float(s.get("renhet", 1.0)) * 100.0, key=f"vann_salt_renhet_{revisjon}_{i}",
+                label_visibility="collapsed" if i else "visible",
+            ) / 100.0
+            if c4.button("🗑️", key=f"vann_salt_slett_{revisjon}_{i}", help="Fjern salt"):
+                slett_salt_idx = i
+
+        if slett_salt_idx is not None:
+            salt_liste.pop(slett_salt_idx)
+            _ny_vann_widget_revisjon()
+            st.rerun()
+
+        if st.button("➕ Legg til salt manuelt", key="vann_legg_til_salt_btn"):
+            salt_liste.append({"salt_id": salt_valg[0], "gram": 0.0, "renhet": 1.0})
+            _ny_vann_widget_revisjon()
+            st.rerun()
+
+        for salt in alle_salter():
+            if salt["salt_id"] in {s["salt_id"] for s in salt_liste} and salt["advarsler"]:
+                for a in salt["advarsler"]:
+                    st.caption(f"⚠️ {salt['navn']}: {a}")
+
+        # ══════════════════════════════════════════════════════════════════
+        # FORDELING MESK / SKYLLING
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Fordeling mellom meske- og skyllevann**")
+        _FORDELING_NAVN = {
+            PROPORSJONAL: "Proporsjonalt (etter vannmengde)",
+            ALT_I_MESK: "Alt i meskevannet",
+            EGENDEFINERT_FORDELING: "Egendefinert andel",
+        }
+        fordelingsmetode = st.selectbox(
+            "Fordelingsmetode", options=[PROPORSJONAL, ALT_I_MESK, EGENDEFINERT_FORDELING],
+            format_func=lambda k: _FORDELING_NAVN[k], key="vann_fordelingsmetode",
+        )
+        egendefinert_andel = None
+        if fordelingsmetode == EGENDEFINERT_FORDELING:
+            egendefinert_andel = st.slider(
+                "Andel av hvert salt i meskevannet", min_value=0.0, max_value=1.0, step=0.05,
+                key="vann_fordeling_egendefinert_andel",
             )
 
-        valgt_maal_id = st.selectbox(
-            "Velg målprofil (anbefalingen setter ALDRI valget automatisk — du må selv velge)",
-            options=maal_id_valg,
-            format_func=lambda k: maalprofiler[k].get("name", k) + ("  ⭐ anbefalt" if k == anbefalt_maal_id else ""),
-            key="vann_maal_valgt_id",
-        )
-        aktiv_maal_mal = maalprofiler[valgt_maal_id]
+        salt_fordelt = fordel_alle_salter(salt_liste, meskevann_l, skyllevann_l, metode=fordelingsmetode, egendefinert_meskeandel=egendefinert_andel)
+        if salt_fordelt:
+            header = "| Salt | Totalt | Meskevann | Skyllevann |\n|---|---|---|---|"
+            rows = "\n".join(
+                f"| {hent_salt(s['salt_id'])['navn']} | {s['gram']:.2f} g | {s['gram_mesk']:.2f} g | {s['gram_skyll']:.2f} g |"
+                for s in salt_fordelt
+            )
+            st.markdown(f"{header}\n{rows}")
+        else:
+            st.caption("Ingen salter lagt til ennå.")
 
-        # Kompakt hjelpetekst rett under valget — ALDRI en del av selve
-        # navnet/dropdown-teksten (den skal forbli ryddig, se format_func
-        # over) eller av eksportenes "Målprofil: <navn>"-linje. Faller
-        # tilbake til den lengre beskrivelsen for profiler som mangler
-        # den nye, korte teksten (f.eks. en eldre egendefinert profil).
-        if aktiv_maal_mal.get("kort_hjelpetekst"):
-            st.caption(aktiv_maal_mal["kort_hjelpetekst"])
-        elif aktiv_maal_mal.get("description"):
-            st.caption(aktiv_maal_mal["description"])
+        # ══════════════════════════════════════════════════════════════════
+        # FORVENTET SLUTTPROFIL
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Forventet sluttprofil**")
+        sluttprofil = beregn_sluttprofil(aktiv_kilde_ioner, salt_liste, totalvann_l)
+        rapport = bygg_ionrapport(sluttprofil, aktiv_maal)
+        _STATUS_IKON = {"innenfor": "✅", "under": "🔽", "over": "🔼", "ukjent": "❔"}
 
-        if st.session_state.get("_vann_forrige_maal_id") != valgt_maal_id:
-            _init_maal_widgets(aktiv_maal_mal)
-            st.session_state["_vann_forrige_maal_id"] = valgt_maal_id
-
-        with st.expander("🎯 Rediger målprofil (min/maks per ion)", expanded=False):
-            if aktiv_maal_mal.get("description"):
-                st.caption(aktiv_maal_mal["description"])
-            _herkomst_deler = []
-            if aktiv_maal_mal.get("origin"):
-                _herkomst_deler.append(f"Opprinnelse: {aktiv_maal_mal['origin']}")
-            if aktiv_maal_mal.get("profile_type"):
-                _herkomst_deler.append(f"Type: {aktiv_maal_mal['profile_type']}")
-            if aktiv_maal_mal.get("historical_profile"):
-                _herkomst_deler.append("Historisk profil")
-            if _herkomst_deler:
-                st.caption(" · ".join(_herkomst_deler))
-
-            maal_verdier = {}
-            for ion in IONER:
-                c1, c2 = st.columns(2)
-                maal_verdier[f"{ion}_min"] = c1.number_input(
-                    f"{_ION_LABELS[ion]} min (ppm)", min_value=0.0, max_value=1000.0, step=1.0,
-                    key=f"vann_maal_{ion}_min",
+        # Overordnet måloppnåelse — MÅ vises tydelig og ALDRI kunne forveksles:
+        # fullt oppnådd / delvis / uoppnåelig med de FAKTISK VALGTE saltene
+        # (se modules/water_chemistry.py sin vurder_maaloppnaelse()). Ingen
+        # automatisk syre-/fortynnings-/RO-korreksjon foreslås her i V1 — kun
+        # tydelig informasjon om hva som IKKE er løst med gjeldende salgvalg.
+        _MAALOPPNAELSE_VISNING = {
+            "full_match": ("✅", "Målprofilen er fullt oppnådd med de valgte saltene."),
+            "delvis_match": ("🟡", "Delvis måloppnåelse — noen ioner er utenfor, men kan justeres ved å endre mengden av de valgte saltene."),
+            "uoppnaelig_med_valgte_salter": ("🔴", "Målprofilen kan IKKE nås fullt ut med de valgte saltene alene."),
+            "ukjent": ("❔", "Ingen målprofil valgt — måloppnåelse kan ikke vurderes."),
+        }
+        maaloppnaelse = vurder_maaloppnaelse(sluttprofil, aktiv_maal, salt_liste)
+        ikon, tekst = _MAALOPPNAELSE_VISNING[maaloppnaelse["status"]]
+        st.markdown(f"{ikon} **{tekst}**")
+        if maaloppnaelse["avvik"]:
+            for a in maaloppnaelse["avvik"]:
+                merknad = (
+                    "kan justeres med et av de valgte saltene"
+                    if a["kan_justeres_med_valgte_salter"]
+                    else "IKKE oppnåelig med de valgte saltene (krever andre salter, eller kildevannet er allerede utenfor i en retning salter ikke kan rette)"
                 )
-                maal_verdier[f"{ion}_max"] = c2.number_input(
-                    f"{_ION_LABELS[ion]} maks (ppm)", min_value=0.0, max_value=1000.0, step=1.0,
-                    key=f"vann_maal_{ion}_max",
-                )
-            c1, c2 = st.columns(2)
-            maal_verdier["mash_ph_min"] = c1.number_input("Meske-pH min", min_value=4.0, max_value=7.0, step=0.01, format="%.2f", key="vann_maal_ph_min_input")
-            maal_verdier["mash_ph_max"] = c2.number_input("Meske-pH maks", min_value=4.0, max_value=7.0, step=0.01, format="%.2f", key="vann_maal_ph_max_input")
+                st.caption(f"– {_ION_LABELS[a['ion']]}: {a['status']} målområdet — {merknad}.")
 
-            if st.button("💾 Lagre målprofil", key="vann_lagre_maal_btn"):
-                maalprofiler[valgt_maal_id] = {
-                    **aktiv_maal_mal, **maal_verdier,
-                    "target_id": valgt_maal_id,
-                    "name": aktiv_maal_mal.get("name", valgt_maal_id),
-                }
-                _lagre_vannmaal(maalprofiler)
-                st.toast("Målprofil lagret!" + (_DEMO_SUFFIKS if DEMO_MODE else ""), icon="💾")
+        def _f(v):
+            return "—" if v is None else f"{v:.1f}"
 
-        aktiv_maal = maalprofiler[valgt_maal_id]
+        def _maal_str(r):
+            if r["maal_min"] is None:
+                return "—"
+            return f"{r['maal_min']:.0f}–{r['maal_maks']:.0f}"
 
-    # ══════════════════════════════════════════════════════════════════
-    # 3. VANNMENGDER (fra bryggedagsplanen)
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**3. Vannmengder (fra bryggedagsplanen)**")
-    eq = last_equipment()
-    total_malt_kg = sum(m.get("mengde", 0.0) for m in st.session_state.get("valgt_malt", []))
-    _kandidat_prosess = st.session_state.get("aktiv_prosessprofil")
-    prosess_profil = normaliser_prosessprofil(_kandidat_prosess) if _kandidat_prosess else None
-    boil_min = (prosess_profil or {}).get("boil_minutes") or eq["default_boil_time_min"]
-    sparge_method = (prosess_profil or {}).get("sparge_method")
-    vann_est = beregn_vann(total_malt_kg, ctx["volum"], boil_min, eq, sparge_method=sparge_method)
-    meskevann_l, skyllevann_l = vann_est["mash_vann_l"], vann_est["sparge_vann_l"]
-
-    vc1, vc2, vc3 = st.columns(3)
-    vc1.metric("Meskevann", f"{meskevann_l:.1f} L")
-    vc2.metric("Skyllevann", f"{skyllevann_l:.1f} L")
-    vc3.metric("Totalt", f"{meskevann_l + skyllevann_l:.1f} L")
-    totalvann_l = meskevann_l + skyllevann_l
-
-    # ══════════════════════════════════════════════════════════════════
-    # 4. FORESLÅTTE SALTER
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**4. Foreslåtte salter**")
-    # Water Recommendation Quality Audit V1 fant at et grønt/innenfor-treff
-    # på HCO3 lett kan leses som "meske-pH er i orden", selv om appen aldri
-    # regner ut meske-pH -- foreslaa_salter() løser kun Cl/SO4 og ser aldri
-    # kornregningen. Én stille, alltid synlig setning her (ikke bare etter
-    # klikk) rammer inn HELE seksjonen riktig, uten å gjøre selve forslaget
-    # alarmerende -- det er fortsatt et brukbart førsteutkast.
-    st.caption(
-        "Saltforslaget justerer klorid og sulfat ut fra kildevann og valgt "
-        "målprofil (kalsiumklorid + gips). Det tar ikke hensyn til "
-        "kornregningens innvirkning på meske-pH, så alkalitet/HCO3 kan "
-        "fortsatt kreve egen vurdering. Kontroller meske-pH på bryggedagen."
-    )
-    if st.button("🧮 Beregn saltforslag", key="vann_beregn_forslag_btn", disabled=aktiv_maal is None):
-        forslag, forklaring = foreslaa_salter(aktiv_kilde_ioner, aktiv_maal, totalvann_l)
-        st.session_state["vann_salter"] = forslag
-        _ny_vann_widget_revisjon()
-        st.info(forklaring)
-        st.toast("Saltforslag beregnet — fritt redigerbart under.", icon="🧮")
-
-    revisjon = st.session_state.get("_vann_widget_revisjon", 0)
-    salt_liste = st.session_state.get("vann_salter", [])
-    salt_valg = [s["salt_id"] for s in alle_salter()]
-    salt_navn = {s["salt_id"]: f"{s['navn']} ({s['formel']})" for s in alle_salter()}
-
-    slett_salt_idx = None
-    for i, s in enumerate(salt_liste):
-        c1, c2, c3, c4 = st.columns([2.2, 1, 1, 0.5])
-        s["salt_id"] = c1.selectbox(
-            "Salt", options=salt_valg, format_func=lambda k: salt_navn[k],
-            index=salt_valg.index(s["salt_id"]) if s["salt_id"] in salt_valg else 0,
-            key=f"vann_salt_id_{revisjon}_{i}", label_visibility="collapsed" if i else "visible",
-        )
-        s["gram"] = c2.number_input(
-            "Gram (totalt)", min_value=0.0, max_value=200.0, step=0.05, format="%.2f",
-            value=float(s.get("gram", 0.0)), key=f"vann_salt_gram_{revisjon}_{i}",
-            label_visibility="collapsed" if i else "visible",
-        )
-        s["renhet"] = c3.number_input(
-            "Renhet (%)", min_value=1.0, max_value=100.0, step=1.0,
-            value=float(s.get("renhet", 1.0)) * 100.0, key=f"vann_salt_renhet_{revisjon}_{i}",
-            label_visibility="collapsed" if i else "visible",
-        ) / 100.0
-        if c4.button("🗑️", key=f"vann_salt_slett_{revisjon}_{i}", help="Fjern salt"):
-            slett_salt_idx = i
-
-    if slett_salt_idx is not None:
-        salt_liste.pop(slett_salt_idx)
-        _ny_vann_widget_revisjon()
-        st.rerun()
-
-    if st.button("➕ Legg til salt manuelt", key="vann_legg_til_salt_btn"):
-        salt_liste.append({"salt_id": salt_valg[0], "gram": 0.0, "renhet": 1.0})
-        _ny_vann_widget_revisjon()
-        st.rerun()
-
-    for salt in alle_salter():
-        if salt["salt_id"] in {s["salt_id"] for s in salt_liste} and salt["advarsler"]:
-            for a in salt["advarsler"]:
-                st.caption(f"⚠️ {salt['navn']}: {a}")
-
-    # ══════════════════════════════════════════════════════════════════
-    # 5. FORDELING MESK / SKYLLING
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**5. Fordeling mellom meske- og skyllevann**")
-    _FORDELING_NAVN = {
-        PROPORSJONAL: "Proporsjonalt (etter vannmengde)",
-        ALT_I_MESK: "Alt i meskevannet",
-        EGENDEFINERT_FORDELING: "Egendefinert andel",
-    }
-    fordelingsmetode = st.selectbox(
-        "Fordelingsmetode", options=[PROPORSJONAL, ALT_I_MESK, EGENDEFINERT_FORDELING],
-        format_func=lambda k: _FORDELING_NAVN[k], key="vann_fordelingsmetode",
-    )
-    egendefinert_andel = None
-    if fordelingsmetode == EGENDEFINERT_FORDELING:
-        egendefinert_andel = st.slider(
-            "Andel av hvert salt i meskevannet", min_value=0.0, max_value=1.0, step=0.05,
-            key="vann_fordeling_egendefinert_andel",
-        )
-
-    salt_fordelt = fordel_alle_salter(salt_liste, meskevann_l, skyllevann_l, metode=fordelingsmetode, egendefinert_meskeandel=egendefinert_andel)
-    if salt_fordelt:
-        header = "| Salt | Totalt | Meskevann | Skyllevann |\n|---|---|---|---|"
+        header = "| Ion | Start | Tilført | Ferdig | Mål | Status |\n|---|---|---|---|---|---|"
         rows = "\n".join(
-            f"| {hent_salt(s['salt_id'])['navn']} | {s['gram']:.2f} g | {s['gram_mesk']:.2f} g | {s['gram_skyll']:.2f} g |"
-            for s in salt_fordelt
+            f"| {_ION_LABELS[r['ion']]} | {_f(r['start'])} | {_f(r['tilfort'])} | {_f(r['slutt'])} | "
+            f"{_maal_str(r)} | {_STATUS_IKON[r['status']]} {r['status']} |"
+            for r in rapport
         )
         st.markdown(f"{header}\n{rows}")
-    else:
-        st.caption("Ingen salter lagt til ennå.")
 
-    # ══════════════════════════════════════════════════════════════════
-    # 6. FORVENTET SLUTTPROFIL
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**6. Forventet sluttprofil**")
-    sluttprofil = beregn_sluttprofil(aktiv_kilde_ioner, salt_liste, totalvann_l)
-    rapport = bygg_ionrapport(sluttprofil, aktiv_maal)
-    _STATUS_IKON = {"innenfor": "✅", "under": "🔽", "over": "🔼", "ukjent": "❔"}
+        forhold = cl_so4_forhold(sluttprofil["slutt"].get("cl"), sluttprofil["slutt"].get("so4"))
+        fc1, fc2 = st.columns(2)
+        fc1.metric("Klorid (Cl)", _f(sluttprofil["slutt"].get("cl")) + " ppm")
+        fc2.metric("Sulfat (SO4)", _f(sluttprofil["slutt"].get("so4")) + " ppm")
+        st.caption(
+            f"Cl:SO4-forhold ≈ {forhold:.2f}" if forhold else "Cl:SO4-forhold: —"
+            " — kun en referanse, ikke det eneste kvalitetsmålet. Se de absolutte ionnivåene over."
+        )
 
-    # Overordnet måloppnåelse — MÅ vises tydelig og ALDRI kunne forveksles:
-    # fullt oppnådd / delvis / uoppnåelig med de FAKTISK VALGTE saltene
-    # (se modules/water_chemistry.py sin vurder_maaloppnaelse()). Ingen
-    # automatisk syre-/fortynnings-/RO-korreksjon foreslås her i V1 — kun
-    # tydelig informasjon om hva som IKKE er løst med gjeldende salgvalg.
-    _MAALOPPNAELSE_VISNING = {
-        "full_match": ("✅", "Målprofilen er fullt oppnådd med de valgte saltene."),
-        "delvis_match": ("🟡", "Delvis måloppnåelse — noen ioner er utenfor, men kan justeres ved å endre mengden av de valgte saltene."),
-        "uoppnaelig_med_valgte_salter": ("🔴", "Målprofilen kan IKKE nås fullt ut med de valgte saltene alene."),
-        "ukjent": ("❔", "Ingen målprofil valgt — måloppnåelse kan ikke vurderes."),
-    }
-    maaloppnaelse = vurder_maaloppnaelse(sluttprofil, aktiv_maal, salt_liste)
-    ikon, tekst = _MAALOPPNAELSE_VISNING[maaloppnaelse["status"]]
-    st.markdown(f"{ikon} **{tekst}**")
-    if maaloppnaelse["avvik"]:
-        for a in maaloppnaelse["avvik"]:
-            merknad = (
-                "kan justeres med et av de valgte saltene"
-                if a["kan_justeres_med_valgte_salter"]
-                else "IKKE oppnåelig med de valgte saltene (krever andre salter, eller kildevannet er allerede utenfor i en retning salter ikke kan rette)"
+        # ══════════════════════════════════════════════════════════════════
+        # VARSLER
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Varsler**")
+        syrer = st.session_state.get("vann_syrer", [])
+        varsler = generer_varsler(aktiv_kilde_ioner, aktiv_maal, sluttprofil, salt_fordelt, syrer=syrer)
+        if varsler:
+            for v in varsler:
+                st.warning(f"⚠️ {v}")
+        else:
+            st.success("Ingen varsler.")
+
+        # ══════════════════════════════════════════════════════════════════
+        # SYRER
+        # ══════════════════════════════════════════════════════════════════
+        st.markdown("**Syrer**")
+        syre_valg = list(SYRER.keys())
+        slett_syre_idx = None
+        for i, syre in enumerate(syrer):
+            c1, c2, c3 = st.columns([1.5, 1, 1])
+            syre["syre_id"] = c1.selectbox(
+                "Syre", options=syre_valg, format_func=lambda k: SYRER[k]["navn"],
+                index=syre_valg.index(syre["syre_id"]) if syre["syre_id"] in syre_valg else 0,
+                key=f"vann_syre_id_{revisjon}_{i}", label_visibility="collapsed" if i else "visible",
             )
-            st.caption(f"– {_ION_LABELS[a['ion']]}: {a['status']} målområdet — {merknad}.")
+            prosent = c2.number_input(
+                "Konsentrasjon (%)", min_value=0.0, max_value=100.0, step=1.0,
+                value=float(syre.get("prosent") or 0.0), key=f"vann_syre_prosent_{revisjon}_{i}",
+                label_visibility="collapsed" if i else "visible", help="0 = ikke angitt.",
+            )
+            syre["prosent"] = prosent or None
+            syre["mengde_ml"] = c3.number_input(
+                "Mengde (mL)", min_value=0.0, max_value=200.0, step=0.5,
+                value=float(syre.get("mengde_ml", 0.0)), key=f"vann_syre_ml_{revisjon}_{i}",
+                label_visibility="collapsed" if i else "visible",
+            )
+            syre["navn"] = SYRER[syre["syre_id"]]["navn"]
+            syre["formel"] = SYRER[syre["syre_id"]]["formel"]
+            if st.button("🗑️ Fjern syre", key=f"vann_syre_slett_{revisjon}_{i}"):
+                slett_syre_idx = i
 
-    def _f(v):
-        return "—" if v is None else f"{v:.1f}"
+        if slett_syre_idx is not None:
+            syrer.pop(slett_syre_idx)
+            _ny_vann_widget_revisjon()
+            st.rerun()
 
-    def _maal_str(r):
-        if r["maal_min"] is None:
-            return "—"
-        return f"{r['maal_min']:.0f}–{r['maal_maks']:.0f}"
-
-    header = "| Ion | Start | Tilført | Ferdig | Mål | Status |\n|---|---|---|---|---|---|"
-    rows = "\n".join(
-        f"| {_ION_LABELS[r['ion']]} | {_f(r['start'])} | {_f(r['tilfort'])} | {_f(r['slutt'])} | "
-        f"{_maal_str(r)} | {_STATUS_IKON[r['status']]} {r['status']} |"
-        for r in rapport
-    )
-    st.markdown(f"{header}\n{rows}")
-
-    forhold = cl_so4_forhold(sluttprofil["slutt"].get("cl"), sluttprofil["slutt"].get("so4"))
-    fc1, fc2 = st.columns(2)
-    fc1.metric("Klorid (Cl)", _f(sluttprofil["slutt"].get("cl")) + " ppm")
-    fc2.metric("Sulfat (SO4)", _f(sluttprofil["slutt"].get("so4")) + " ppm")
-    st.caption(
-        f"Cl:SO4-forhold ≈ {forhold:.2f}" if forhold else "Cl:SO4-forhold: —"
-        " — kun en referanse, ikke det eneste kvalitetsmålet. Se de absolutte ionnivåene over."
-    )
-
-    # ══════════════════════════════════════════════════════════════════
-    # 7. VARSLER
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**7. Varsler**")
-    syrer = st.session_state.get("vann_syrer", [])
-    varsler = generer_varsler(aktiv_kilde_ioner, aktiv_maal, sluttprofil, salt_fordelt, syrer=syrer)
-    if varsler:
-        for v in varsler:
-            st.warning(f"⚠️ {v}")
-    else:
-        st.success("Ingen varsler.")
+        if st.button("➕ Legg til syre", key="vann_legg_til_syre_btn"):
+            syrer.append(bygg_syretilsetning(syre_valg[0]))
+            _ny_vann_widget_revisjon()
+            st.rerun()
 
     # ══════════════════════════════════════════════════════════════════
-    # 8. MÅLT MESKE-pH
+    # MÅLT MESKE-pH
     # ══════════════════════════════════════════════════════════════════
-    st.markdown("**8. Meske-pH**")
+    st.markdown("**Meske-pH**")
     if aktiv_maal and aktiv_maal.get("mash_ph_min") is not None:
         st.caption(f"🎯 Ønsket meske-pH: **{aktiv_maal['mash_ph_min']:.2f}–{aktiv_maal['mash_ph_max']:.2f}**")
     ph1, ph2, ph3 = st.columns(3)
@@ -574,45 +631,6 @@ def render_water_panel(ctx, malt_database=None):
         for item in _UTSTYR_SJEKKLISTE:
             st.write(f"- {item}")
         st.caption("Informasjonstekst, ikke produktanbefaling.")
-
-    # ══════════════════════════════════════════════════════════════════
-    # 9. SYRER
-    # ══════════════════════════════════════════════════════════════════
-    st.markdown("**9. Syrer**")
-    syre_valg = list(SYRER.keys())
-    slett_syre_idx = None
-    for i, syre in enumerate(syrer):
-        c1, c2, c3 = st.columns([1.5, 1, 1])
-        syre["syre_id"] = c1.selectbox(
-            "Syre", options=syre_valg, format_func=lambda k: SYRER[k]["navn"],
-            index=syre_valg.index(syre["syre_id"]) if syre["syre_id"] in syre_valg else 0,
-            key=f"vann_syre_id_{revisjon}_{i}", label_visibility="collapsed" if i else "visible",
-        )
-        prosent = c2.number_input(
-            "Konsentrasjon (%)", min_value=0.0, max_value=100.0, step=1.0,
-            value=float(syre.get("prosent") or 0.0), key=f"vann_syre_prosent_{revisjon}_{i}",
-            label_visibility="collapsed" if i else "visible", help="0 = ikke angitt.",
-        )
-        syre["prosent"] = prosent or None
-        syre["mengde_ml"] = c3.number_input(
-            "Mengde (mL)", min_value=0.0, max_value=200.0, step=0.5,
-            value=float(syre.get("mengde_ml", 0.0)), key=f"vann_syre_ml_{revisjon}_{i}",
-            label_visibility="collapsed" if i else "visible",
-        )
-        syre["navn"] = SYRER[syre["syre_id"]]["navn"]
-        syre["formel"] = SYRER[syre["syre_id"]]["formel"]
-        if st.button("🗑️ Fjern syre", key=f"vann_syre_slett_{revisjon}_{i}"):
-            slett_syre_idx = i
-
-    if slett_syre_idx is not None:
-        syrer.pop(slett_syre_idx)
-        _ny_vann_widget_revisjon()
-        st.rerun()
-
-    if st.button("➕ Legg til syre", key="vann_legg_til_syre_btn"):
-        syrer.append(bygg_syretilsetning(syre_valg[0]))
-        _ny_vann_widget_revisjon()
-        st.rerun()
 
     # ══════════════════════════════════════════════════════════════════
     # BYGG AKTIV VANNBEHANDLING (lagres sammen med oppskriften)

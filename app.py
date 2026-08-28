@@ -160,10 +160,15 @@ with tab_bryggdag:
     render_water_panel(ctx, malt_database)
     st.write("---")
     render_brewday_panel(ctx, humle_database, gjaer_database, malt_database)
-    render_equipment_panel()
 
 # ==================================================
 # === TAB 4: VERKTØY =============================
 # ==================================================
 with tab_verktoy:
     render_import_panel()
+    # Utstyrsprofil er ren konfigurasjon (aldri brukt under aktiv brygging)
+    # -- flyttet hit fra Bryggdag-fanen i Brewday Tab UX Cleanup V1 for å
+    # redusere planleggings-/konfigstøy i selve bryggedagsverktøyet. Ren
+    # visuell flytting: samme funksjon, samme render_equipment_panel()-kall,
+    # samme egen "st.write('---')" innledningsvis i funksjonen selv.
+    render_equipment_panel()

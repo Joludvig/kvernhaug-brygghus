@@ -240,7 +240,7 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
     # rendres fra den (eventuelt nettopp reparerte) prosess_mash_steps satt
     # over, og aldri kan vise en fysisk gjenværende, gammel widget-verdi.
     revisjon = st.session_state.get("_process_widget_revision", 0)
-    with st.expander("🌡️ Meskesteg (redigerbare)", expanded=True):
+    with st.expander("🌡️ Meskesteg (redigerbare)", expanded=False):
         steg_liste = st.session_state["prosess_mash_steps"]
         slett_indeks = None
         for i, steg in enumerate(steg_liste):
@@ -321,7 +321,7 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
 
     # ── Dekoksjon ────────────────────────────────────────────────────────
     if valgt_id == "enkel_dekoksjon":
-        with st.expander("🔥 Dekoksjonsdetaljer", expanded=True):
+        with st.expander("🔥 Dekoksjonsdetaljer", expanded=False):
             vann_est = beregn_vann(total_malt_kg, ctx["volum"], st.session_state["prosess_boil_minutes"], eq,
                                     sparge_method=st.session_state["prosess_sparge_method"])
             d1, d2, d3 = st.columns(3)
@@ -349,7 +349,7 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
 
     # ── Reiterated mash ──────────────────────────────────────────────────
     if valgt_id == "reiterated_mash":
-        with st.expander("🔁 Dobbelmesk — vann- og volumflyt", expanded=True):
+        with st.expander("🔁 Dobbelmesk — vann- og volumflyt", expanded=False):
             andel = st.slider(
                 "Andel av maltmengden i mesk 1", min_value=0.1, max_value=0.9, step=0.05,
                 value=float(st.session_state["prosess_mesk1_andel"]), key="prosess_mesk1_andel_input",
