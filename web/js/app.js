@@ -235,7 +235,13 @@ function stilItems() {
 // deler klassen .modus-knapp og data-modus, samme mønster som
 // .meny-knapp/chrome.js bruker for flere hamburger-triggere.
 
-function settModus(modus) {
+// persister skiller "bruk denne modusen i UI-et nå" (false -- initModus()
+// sin gjenoppretting/default, og sprakendret-lytteren sin ren visnings-
+// oppdatering under) fra "brukeren tok et aktivt valg" (true, standard --
+// modus-knapp-klikk under). Kun det siste skal skrive til localStorage:
+// Web Mode Storage Fix V1 -- se initModus() for hvorfor "laerling" som
+// ren default aldri skal opprette kvernhaug_web_modus av seg selv.
+function settModus(modus, persister = true) {
   document.body.classList.toggle("modus-laerling", modus === "laerling");
   document.body.classList.toggle("modus-mester", modus === "mester");
   for (const knapp of document.querySelectorAll(".modus-knapp")) {
@@ -243,7 +249,7 @@ function settModus(modus) {
   }
   const statusEl = document.getElementById("sidemeny-modus-status");
   if (statusEl) statusEl.textContent = t(modus === "mester" ? "modus.statusMester" : "modus.statusLaerling");
-  localStorage.setItem(MODUS_NOKKEL, modus);
+  if (persister) localStorage.setItem(MODUS_NOKKEL, modus);
 }
 
 function _lukkModusForstegang() {
@@ -255,7 +261,15 @@ function _lukkModusForstegang() {
 
 function initModus() {
   const lagret = localStorage.getItem(MODUS_NOKKEL);
-  settModus(lagret === "mester" ? "mester" : "laerling");
+  // persister:false -- dette er UI-et som gjenoppretter eksisterende
+  // tilstand (eller viser "laerling" som ren default når INGENTING er
+  // lagret ennå), ikke et brukervalg. Uten dette ville hvert eneste
+  // førstegangsbesøk skrevet kvernhaug_web_modus med default-verdien
+  // FØR brukeren har foretatt seg noe -- se
+  // LOCAL STORAGE LEGAL MODEL CORRECTION V1. Et allerede lagret gyldig
+  // valg leses og brukes uendret; denne linjen skriver aldri over det,
+  // sletter det aldri og migrerer det aldri.
+  settModus(lagret === "mester" ? "mester" : "laerling", false);
 
   // Førstegangsvalg: vis KUN når ingen preferanse er lagret ennå -- lagres
   // valget forsvinner dialogen for godt (samme localStorage-nøkkel som før).
@@ -1550,8 +1564,12 @@ window.addEventListener("kvernhaug:sprakendret", () => {
   // modus-avhengig -- applyI18n() alene ville alltid tvunget den tilbake
   // til laerling-teksten. settModus() med GJELDENDE modus (lest fra
   // body-klassen settModus selv setter) gjenoppretter riktig tekst uten
-  // å røre modus-state.
-  settModus(document.body.classList.contains("modus-mester") ? "mester" : "laerling");
+  // å røre modus-state. persister:false av samme grunn som i
+  // initModus() -- dette er en visningsoppdatering, ikke et brukervalg,
+  // og skal ikke kunne skrive kvernhaug_web_modus for en bruker som
+  // ennå ikke har valgt modus (f.eks. bytter språk mens
+  // førstegangsdialogen fortsatt står åpen).
+  settModus(document.body.classList.contains("modus-mester") ? "mester" : "laerling", false);
   for (const rad of maltRaderEl.querySelectorAll(".ingrediens-rad")) {
     const cb = rad._combobox;
     if (!cb) continue;
