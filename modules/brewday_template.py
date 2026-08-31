@@ -399,6 +399,8 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     min-height: 17mm;
     display: flex;
     flex-direction: column;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }}
   .stat-label {{
     font-size: 8.5pt;
@@ -449,6 +451,21 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
   .eff-field .eff-val {{
     font-size: 11pt;
     font-weight: bold;
+  }}
+
+  /* ── MÅLINGER-BLOKK (Brewday Print Pagination Fix V1): overskrift +
+     4×2-målebokser (.stats-4) + effektivitetsrad (.eff-row) holdes ALLTID
+     samlet ved sideskift under utskrift. Uten en regel på DENNE
+     wrapper-nivået kan nettleseren splitte selve CSS-gridet midt mellom
+     rad 1 og rad 2 (ingen grid-/flex-barn har i seg selv noen
+     fragmenteringsregel som hindrer det) -- det er nettopp det som gjorde
+     at "andre rad" og effektivitetsraden havnet visuelt komprimert/
+     overlappende rundt sideskiftet. Med regelen her flyttes i stedet HELE
+     blokken samlet til neste side dersom den ikke får plass på
+     gjenværende del av forrige side. ── */
+  .maalinger-block {{
+    break-inside: avoid;
+    page-break-inside: avoid;
   }}
 
   /* ── NOTER: fyller gjenværende høyde ── */
@@ -598,8 +615,11 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
   <div class="check-item"><span class="cb">☐</span> Gjæring</div>
 </div>
 
-<!-- MÅLINGER: 4×2 grid -->
+<!-- MÅLINGER: 4×2 grid + effektivitet -- samlet i én wrapper
+     (.maalinger-block) slik at hele blokken holdes sammen ved
+     sideskift under utskrift, se .maalinger-block i <style>. -->
 <div class="divider"></div>
+<div class="maalinger-block">
 <h2>Målinger</h2>
 <div class="stats-4">
   {stat_box("Pre-boil SG",  "",                              pre_sg_v)}
@@ -627,6 +647,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     <div class="eff-line"></div>
   </div>
 </div>
+</div><!-- /maalinger-block -->
 
 <!-- NOTATER -->
 <div class="notes-section">
