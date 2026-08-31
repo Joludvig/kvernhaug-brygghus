@@ -510,6 +510,34 @@ main {
   max-width: 20rem;
 }
 
+/* Web Identity Remember Opt-in V1 -- egen rad, IKKE .felt-rad (som setter
+   width:9rem på alle input/select inni seg -- ville gjort avkrysnings-
+   boksen unaturlig bred). Checkbox og tekst ligger i SAMME <label> (klikk
+   på teksten treffer boksen, ingen ekstra aria-wiring nødvendig). */
+.identitet-husk-rad {
+  margin-bottom: 0.7rem;
+}
+
+.identitet-husk-rad label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--body);
+  font-size: 0.96rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.identitet-husk-rad input[type="checkbox"] {
+  width: auto;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.identitet-husk-rad .hjelpetekst {
+  margin: 0.3rem 0 0 1.6rem;
+}
+
 /* Runde 10B: KUN i Oppskriftsbyggeren (.byggerlayout) -- label rett over
    feltet (Streamlits egen widget-konvensjon: st.text_input()/
    st.number_input() rendrer alltid label OVER feltet, ikke ved siden av)

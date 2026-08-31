@@ -20,6 +20,10 @@
 
 const MODUS_NOKKEL = "kvernhaug_web_modus";
 const IDENTITET_NOKKEL = "kvernhaug_web_identitet";
+// Web Identity Remember Opt-in V1 -- eksplisitt brukersamtykke til at
+// IDENTITET_NOKKEL skal brukes/oppdateres. Fravær = AV, se
+// _harIdentitetHusk() i identitets-seksjonen under.
+const IDENTITET_HUSK_NOKKEL = "kvernhaug_web_identitet_husk";
 const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
 
 // Runde 25A -- hvilken LAGRET oppskrift den aktive kladden redigerer, eller
@@ -140,11 +144,37 @@ function nyEgendefinertId(prefiks) {
 
 // ─── Brukeridentitet (brygger/bryggeri) ──────────────────────────────────
 // Oppskriften er brukerens, ikke Kvernhaug sin: brygger/bryggeri lagres på
-// selve oppskriften (localStorage + JSON), OG som en egen, lett
-// brukerpreferanse som kun brukes til å forhåndsutfylle NYE oppskrifter --
-// den overstyrer aldri en allerede lastet eller importert oppskrift.
+// selve oppskriften (localStorage + JSON, se samleOppskrift()/
+// recipe_storage.js), OG -- KUN når brukeren eksplisitt har krysset av
+// "Husk bryggerinformasjon på denne enheten" -- som en egen, lett
+// brukerpreferanse som kun brukes til å forhåndsutfylle NYE oppskrifter.
+// Web Identity Remember Opt-in V1: denne separate cachen er ALDRI
+// oppskriftens eneste lagringssted (brygger/bryggeri lever alltid også i
+// selve kladden/lagrede raden/eksporterte filen), og den overstyrer aldri
+// en allerede lastet, importert eller gjenopprettet oppskrift.
+
+// Fravær av denne nøkkelen = AV. Kun et eksplisitt avkryss (se
+// _settIdentitetHusk() under) kan sette den -- aldri det å skrive i
+// navnefeltene, og aldri tilstedeværelsen av gammel IDENTITET_NOKKEL-data
+// alene (se _ryddLegacyIdentitetHvisIkkeOptInn()).
+function _harIdentitetHusk() {
+  return localStorage.getItem(IDENTITET_HUSK_NOKKEL) === "1";
+}
+
+// Engangs privacy-opprydding: eldre KBH-versjoner skrev IDENTITET_NOKKEL
+// automatisk, uten noe eksplisitt samtykke. Tilstedeværelsen av slik
+// gammel data betyr IKKE at brukeren har bedt om fremtidig husking --
+// finnes ingen eksplisitt opt-in-nøkkel ennå, fjernes den gamle separate
+// cachen. Oppskriftsdata (kladd/lagrede rader/eksporterte filer) røres
+// ALDRI av dette -- kun den redundante forhåndsutfyllings-cachen.
+function _ryddLegacyIdentitetHvisIkkeOptInn() {
+  if (localStorage.getItem(IDENTITET_HUSK_NOKKEL) === null) {
+    localStorage.removeItem(IDENTITET_NOKKEL);
+  }
+}
 
 function lagreIdentitetsPreferanse() {
+  if (!_harIdentitetHusk()) return;
   const brygger = document.getElementById("brygger-navn").value.trim();
   const bryggeri = document.getElementById("bryggeri-navn").value.trim();
   if (!brygger && !bryggeri) {
@@ -155,6 +185,7 @@ function lagreIdentitetsPreferanse() {
 }
 
 function forhandsutfyllIdentitetsPreferanse() {
+  if (!_harIdentitetHusk()) return;
   try {
     const lagret = JSON.parse(localStorage.getItem(IDENTITET_NOKKEL));
     if (!lagret) return;
@@ -162,6 +193,24 @@ function forhandsutfyllIdentitetsPreferanse() {
     if (lagret.bryggeri) document.getElementById("bryggeri-navn").value = lagret.bryggeri;
   } catch {
     // Korrupt/manglende preferanse -- ufarlig å ignorere, feltene forblir tomme.
+  }
+}
+
+// Checkbox-handler ("Husk bryggerinformasjon på denne enheten").
+// PÅ: setter opt-in-nøkkelen FØR lagreIdentitetsPreferanse() kalles, slik
+//     at gjeldende feltverdier fanges som prefill med samme ordinære
+//     lagrefunksjon -- ingen egen skrivelogikk å holde i sync.
+// AV: fjerner BÅDE opt-in-nøkkelen og den separate IDENTITET_NOKKEL-
+//     cachen. Rører ALDRI verdiene i brygger-navn/bryggeri-navn selv --
+//     "husk av" betyr "ikke bruk en separat profil til fremtidig
+//     prefill", IKKE "fjern navnet fra oppskriften jeg jobber med".
+function _settIdentitetHusk(paa) {
+  if (paa) {
+    localStorage.setItem(IDENTITET_HUSK_NOKKEL, "1");
+    lagreIdentitetsPreferanse();
+  } else {
+    localStorage.removeItem(IDENTITET_HUSK_NOKKEL);
+    localStorage.removeItem(IDENTITET_NOKKEL);
   }
 }
 
@@ -1500,6 +1549,17 @@ async function init() {
   document.getElementById("effektivitet").addEventListener("input", beregnOgVisResultat);
   attenuationOverrideInput.addEventListener("input", beregnOgVisResultat);
   document.getElementById("oppskrift-notater").addEventListener("input", beregnOgVisResultat);
+
+  // Web Identity Remember Opt-in V1 -- kjøres FØR checkboxen leser sin
+  // tilstand og FØR forhandsutfyllIdentitetsPreferanse() under, slik at
+  // gammel, ikke-samtykket data aldri rekker å bli brukt eller å bli
+  // liggende igjen.
+  _ryddLegacyIdentitetHvisIkkeOptInn();
+  const identitetHuskCheckbox = document.getElementById("identitet-husk-checkbox");
+  identitetHuskCheckbox.checked = _harIdentitetHusk();
+  identitetHuskCheckbox.addEventListener("change", () => {
+    _settIdentitetHusk(identitetHuskCheckbox.checked);
+  });
 
   document.getElementById("brygger-navn").addEventListener("input", () => {
     lagreIdentitetsPreferanse();
