@@ -1,0 +1,244 @@
+{
+  "bohemian_pilsner_floor": {
+    "display_name": "Bohemian Pilsner Floor",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "kjeks",
+      "lyst korn",
+      "honning"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 1,
+      "Maltfylde": 3
+    },
+    "ebc": 4.0,
+    "potensiale": 1.037,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Pilsner",
+      "Lys Lager",
+      "Bock"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Bohemian Pilsner Floor Malt",
+      "Bohemian Pilsner Floor",
+      "Bohemian Pilsner",
+      "Pilsner Floor Malt",
+      "Floor Malted Pilsner",
+      "Weyermann Bohemian Pilsner"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 49.0,
+        "url": "https://vestbrygg.no/weyermann/20110/bohemian-pilsner-floor-malt-1-kg-hel-4-ebc--weyermann",
+        "varianter": [
+          {
+            "pakningsstorrelse_gram": 100.0,
+            "malttype": "knust",
+            "pris": 7.0,
+            "url": "https://vestbrygg.no/weyermann/23110/bohemian-pilsner-floor-malt--100g-knust-4-ebc--weyermann",
+            "lagerstatus": "pa_lager"
+          },
+          {
+            "pakningsstorrelse_gram": 1000.0,
+            "malttype": "hel",
+            "pris": 49.0,
+            "url": "https://vestbrygg.no/weyermann/20110/bohemian-pilsner-floor-malt-1-kg-hel-4-ebc--weyermann",
+            "lagerstatus": "pa_lager"
+          },
+          {
+            "pakningsstorrelse_gram": 1000.0,
+            "malttype": "knust",
+            "pris": 54.0,
+            "url": "https://vestbrygg.no/weyermann/21110/bohemian-pilsner-floor-malt--1-kg-knust-4-ebc--weyermann",
+            "lagerstatus": "pa_lager"
+          },
+          {
+            "pakningsstorrelse_gram": 25000.0,
+            "malttype": "hel",
+            "pris": 799.0,
+            "url": "https://vestbrygg.no/weyermann/24110/bohemian-pilsner-floor-malt--25kg-hel-4-ebc--weyermann",
+            "lagerstatus": "pa_lager"
+          },
+          {
+            "pakningsstorrelse_gram": 25000.0,
+            "malttype": "knust",
+            "pris": 824.0,
+            "url": "https://vestbrygg.no/weyermann/25110/bohemian-pilsner-floor-malt--25kg-knust-4-ebc--weyermann",
+            "lagerstatus": "pa_lager"
+          }
+        ]
+      },
+      "olbrygging": {
+        "pris": 39.0,
+        "url": "https://www.olbrygging.no/weyermann/101046/bohemian-pilsner-malt-4-ebc-weyermann"
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1",
+    "display_group": "PALE / PILSNER",
+    "canonical_style": "pilsner"
+  },
+  "crystal_maple_carapils": {
+    "display_name": "Carapils",
+    "produsent": "Viking / Weyermann",
+    "kategori": "Karamell- / Krystallmalt",
+    "smakstags": [
+      "nøytral",
+      "kropp",
+      "skum",
+      "lys"
+    ],
+    "kategorier": {
+      "Maltfylde": 4,
+      "Brød": 1
+    },
+    "ebc": 8.0,
+    "potensiale": 1.037,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Alle øl (kropp og skum)"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Carapils",
+      "Carapils Malt",
+      "Crystal Maple",
+      "Crystal Maple Malt",
+      "Dextrin Malt",
+      "Cara Pils"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 50.0,
+        "url": "https://vestbrygg.no/viking-malt/26222/crystal-maple-carapils-malt-4-8-ebc--viking"
+      },
+      "olbrygging": {
+        "pris": 36.0,
+        "url": "https://www.olbrygging.no/weyermann/101833/carapils-malt-4-ebc-weyermann"
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1",
+    "display_group": "KARAMELL / CRYSTAL",
+    "canonical_style": "caramel"
+  },
+  "weyermann_pilsner": {
+    "display_name": "Pilsner Malt",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "korn",
+      "lys honning",
+      "mild malt"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 2,
+      "Maltfylde": 3
+    },
+    "ebc": 3.5,
+    "potensiale": 1.037,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Pilsner",
+      "Lys Lager",
+      "Belgisk Ale"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Pilsner Malt",
+      "Weyermann Pilsner",
+      "Weyermann Pilsner Malt",
+      "Lager Malt",
+      "Base Malt"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "bruker_forslag_v0_1",
+    "display_group": "PALE / PILSNER",
+    "canonical_style": "pilsner"
+  },
+  "vienna": {
+    "display_name": "Vienna Malt",
+    "produsent": "Weyermann",
+    "kategori": "Basemalt",
+    "smakstags": [
+      "brød",
+      "honning",
+      "kjeks",
+      "mild karamell"
+    ],
+    "kategorier": {
+      "Brød": 4,
+      "Honning": 3,
+      "Maltfylde": 4,
+      "Toast": 2
+    },
+    "ebc": 7.0,
+    "potensiale": 1.036,
+    "maks_prosent": 100,
+    "anbefalte_stiler": [
+      "Vienna Lager",
+      "Märzen",
+      "Altbier",
+      "Amber Lager"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Vienna Malt",
+      "Vienna",
+      "Weyermann Vienna",
+      "Weyermann Vienna Malt",
+      "Vienna Malt Weyermann"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "coverage_expansion_p1",
+    "display_group": "MUNICH / VIENNA",
+    "canonical_style": "vienna"
+  },
+  "flaket_havre": {
+    "display_name": "Flaket Havre",
+    "produsent": "Diverse",
+    "kategori": "Flakes / Korn",
+    "smakstags": [
+      "kremete",
+      "fyldig",
+      "silkemyk",
+      "nøytralt korn"
+    ],
+    "kategorier": {
+      "Maltfylde": 5
+    },
+    "ebc": 2.0,
+    "potensiale": 1.037,
+    "maks_prosent": 20,
+    "anbefalte_stiler": [
+      "Stout",
+      "Porter",
+      "Wheat Beer",
+      "Hazy IPA"
+    ],
+    "knust_tilgjengelig": false,
+    "aliases": [
+      "Flaket Havre",
+      "flaket havre",
+      "flaked oats",
+      "oat flakes",
+      "havreflak",
+      "havre",
+      "oats"
+    ],
+    "butikk_match": {},
+    "verified": true,
+    "source": "bruker_forslag_v0_2",
+    "display_group": "FLAKES / UMALTET",
+    "canonical_style": "flaked"
+  }
+}

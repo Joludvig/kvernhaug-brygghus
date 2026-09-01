@@ -1,0 +1,81 @@
+{
+  "format": "kbhrecipe",
+  "version": 1,
+  "exportedAt": "2026-01-01T00:00:00.000000",
+  "generator": "Kvernhaug Brygghus (Streamlit)",
+  "recipe": {
+    "recipeSchemaVersion": 1,
+    "navn": "Testbrygg Full (syntetisk fixture)",
+    "volum": 23.0,
+    "effektivitet": 75.0,
+    "malt": [
+      {
+        "id": "bohemian_pilsner_floor",
+        "mengde": 4.0
+      },
+      {
+        "id": "vienna",
+        "mengde": 1.5
+      }
+    ],
+    "humle": [
+      {
+        "id": "east_kent_goldings",
+        "gram": 40.0,
+        "tid": 60
+      },
+      {
+        "id": "amarillo",
+        "gram": 15.0,
+        "tid": 10
+      }
+    ],
+    "gjaerId": "lalbrew_diamond_lager",
+    "bryggerStil": "Testbryggerens egen stil (syntetisk)",
+    "prosess": {
+      "process_id": "enkel_infusjon",
+      "navn": "Enkel infusjon",
+      "vanskelighetsgrad": "Lett",
+      "mash_steps": [
+        {
+          "temperatur": 66.0,
+          "varighet": 60,
+          "stegtype": "infusjon",
+          "kommentar": "Hovedmesk"
+        }
+      ],
+      "sparge_method": "batch_sparge",
+      "boil_minutes": 60,
+      "decoction_steps": null,
+      "reiterated_mash": null
+    },
+    "vann": {
+      "kilde": {
+        "water_id": "__syntetisk_testkilde__",
+        "ca": 20.0,
+        "mg": 4.0
+      },
+      "maal": {
+        "target_id": "__syntetisk_testmaal__",
+        "ca_min": 50,
+        "ca_max": 65
+      },
+      "behandling": {
+        "vannkilde_id": null,
+        "fordelingsmetode": "proporsjonal",
+        "salter": [
+          {
+            "id": "gips",
+            "gram": 4.0
+          }
+        ]
+      },
+      "maalinger": {
+        "maalt_mash_ph": 5.3,
+        "maaletidspunkt_min": 12,
+        "malt_ved_romtemperatur": false,
+        "syrer": []
+      }
+    }
+  }
+}

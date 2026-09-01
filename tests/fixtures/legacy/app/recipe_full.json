@@ -1,0 +1,128 @@
+{
+  "name": "Testbrygg Full (syntetisk fixture)",
+  "batch_size": 23.0,
+  "efficiency": 0.75,
+  "brygger_stil": "Testbryggerens egen stil (syntetisk)",
+  "malts": [
+    {
+      "id": "bohemian_pilsner_floor",
+      "mengde": 4.0
+    },
+    {
+      "id": "vienna",
+      "mengde": 1.5
+    }
+  ],
+  "hops": [
+    {
+      "id": "east_kent_goldings",
+      "gram": 40.0,
+      "tid": 60
+    },
+    {
+      "id": "amarillo",
+      "gram": 15.0,
+      "tid": 10
+    }
+  ],
+  "yeast": "lalbrew_diamond_lager",
+  "stats": {
+    "og": 1.052,
+    "fg": 1.011,
+    "abv": 5.4,
+    "ibu": 24.0,
+    "ebc": 12.0
+  },
+  "flavor_profile": {
+    "Maltfylde": 5.0,
+    "Sitrus": 2.0,
+    "Bitterhet": 3.0
+  },
+  "process_profile": {
+    "process_id": "enkel_infusjon",
+    "navn": "Enkel infusjon",
+    "beskrivelse": "Én mesketemperatur (single-infusion). Raskest og enklest — passer de aller fleste ales og de fleste moderne lagerstiler.",
+    "vanskelighetsgrad": "Lett",
+    "mash_steps": [
+      {
+        "temperatur": 66.0,
+        "varighet": 60,
+        "stegtype": "infusjon",
+        "kommentar": "Hovedmesk — enzymatisk konvertering"
+      },
+      {
+        "temperatur": 78.0,
+        "varighet": 5,
+        "stegtype": "mashout",
+        "kommentar": "Mashout — stopper enzymaktivitet"
+      }
+    ],
+    "sparge_method": "batch_sparge",
+    "boil_minutes": 60,
+    "decoction_steps": null,
+    "reiterated_mash": null,
+    "anbefalte_stiler": [],
+    "utstyrsbegrensninger": "Ingen spesielle krav utover vanlig meskekar.",
+    "forventet_paavirkning": "Nøytral referanse — verken ekstra kropp eller ekstra tørrhet utover det maltbill og gjær selv gir.",
+    "ekstra_tid_min": 0
+  },
+  "water_source_profile": {
+    "water_id": "__syntetisk_testkilde__",
+    "name": "Syntetisk testkilde (fixture)",
+    "location": "",
+    "source_type": "municipal",
+    "source_year": 2025,
+    "ca": 20.0,
+    "mg": 4.0,
+    "na": 8.0,
+    "cl": 10.0,
+    "so4": 6.0,
+    "hco3": 40.0,
+    "ph": 7.8,
+    "notes": "Syntetisk testverdi -- ikke ekte vannanalyse.",
+    "is_default": false
+  },
+  "water_target_profile": {
+    "target_id": "__syntetisk_testmaal__",
+    "name": "Syntetisk testmål (fixture)",
+    "description": "Oppdiktet målprofil kun til fixture-formål.",
+    "profile_type": "house_profile",
+    "origin": "Fixture",
+    "historical_profile": false,
+    "kort_hjelpetekst": "Syntetisk testprofil.",
+    "anbefalte_stiler": [
+      "Testøl"
+    ],
+    "ca_min": 50,
+    "ca_max": 65,
+    "mg_min": 0,
+    "mg_max": 8,
+    "na_min": 0,
+    "na_max": 20,
+    "cl_min": 50,
+    "cl_max": 70,
+    "so4_min": 30,
+    "so4_max": 45,
+    "hco3_min": 25,
+    "hco3_max": 60,
+    "mash_ph_min": 5.3,
+    "mash_ph_max": 5.4
+  },
+  "water_treatment": {
+    "vannkilde_id": null,
+    "fordelingsmetode": "proporsjonal",
+    "egendefinert_meskeandel": null,
+    "salter": [
+      {
+        "id": "gips",
+        "gram": 4.0
+      }
+    ]
+  },
+  "water_measurements": {
+    "maalt_mash_ph": 5.3,
+    "maaletidspunkt_min": 12,
+    "malt_ved_romtemperatur": false,
+    "syrer": []
+  }
+}

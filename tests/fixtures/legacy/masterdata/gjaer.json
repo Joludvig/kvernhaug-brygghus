@@ -1,0 +1,109 @@
+{
+  "saflager_w3470": {
+    "display_name": "SafLager W-34/70",
+    "produsent": "Fermentis",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "tradisjonell lager",
+      "standard lager"
+    ],
+    "attenuation": 0.82,
+    "aliases": [
+      "W-34/70",
+      "SafLager W-34/70",
+      "W34/70"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/fermentis/40317/saflager-w-34-70-11-5gr-t%c3%b8rrgj%c3%a6r-til-%c3%b8lbrygging"
+      },
+      "olbrygging": {
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/fermentis/100496/saflager-w34-70-11-5g-t%c3%b8rrgj%c3%a6r-for-tyske-lager%c3%b8l"
+      }
+    },
+    "verified": true,
+    "source": "bruker_forslag_v0_1",
+    "kategorier": {
+      "Fruktighet": 1.0,
+      "Maltfylde": 1.0
+    }
+  },
+  "wlp_810": {
+    "display_name": "WLP 810 San Francisco Lager",
+    "produsent": "White Labs",
+    "kategori": "Flytende gjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "nøytral",
+      "ren",
+      "hybrid"
+    ],
+    "attenuation": 0.73,
+    "aliases": [
+      "WLP 810",
+      "WLP810",
+      "WLP 810 San Francisco Lager"
+    ],
+    "butikk_match": {
+      "olbrygging": {
+        "pris": 199.0,
+        "url": "https://www.olbrygging.no/whitelabs/107077/wlp810-san-francisco-lager-70ml-purepitch-next-generation"
+      }
+    }
+  },
+  "lalvin_ec1118": {
+    "display_name": "Lalvin EC-1118",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Spesialgjær",
+    "smakstags": [
+      "nøytral",
+      "vin",
+      "sider",
+      "flaskegjæring",
+      "høy alkoholtoleranse"
+    ],
+    "attenuation": 0.95,
+    "aliases": [
+      "Lalvin EC-1118",
+      "EC-1118",
+      "Lallemand EC-1118"
+    ],
+    "beskrivelse": "Nøytral vin-/champagnegjær (tørrgjær) fra Lallemand/Lalvin. Standard pakningsstørrelse 5 g. Gjæringstemperatur 10–30 °C, alkoholtoleranse opptil 18 %. Brukes til vin, sider, flaskegjæring og eventuell restart av sterk/stoppet gjæring. IKKE anbefalt automatisk som vanlig primær ølgjær.",
+    "source": "bruker_forslag_v0_1"
+  },
+  "lalbrew_diamond_lager": {
+    "display_name": "LalBrew Diamond Lager",
+    "produsent": "Lallemand",
+    "kategori": "Tørrgjær",
+    "gjaertype": "Lager",
+    "smakstags": [
+      "ren",
+      "klar",
+      "profesjonell lager",
+      "nøytral"
+    ],
+    "attenuation": 0.8,
+    "aliases": [
+      "Lalbrew Diamond Lager - 11 g",
+      "LalBrew Diamond Lager"
+    ],
+    "butikk_match": {
+      "vestbrygg": {
+        "pris": 59.0,
+        "url": "https://vestbrygg.no/t%c3%b8rrgj%c3%a6r/40380/lalbrew-diamond-lager-11g-t%c3%b8rrgj%c3%a6r"
+      },
+      "olbrygging": {
+        "pris": 59.0,
+        "url": "https://www.olbrygging.no/lallemand/103163/lalbrew-diamond-lager-11g-t%c3%b8rrgj%c3%a6r-for-lager"
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  }
+}

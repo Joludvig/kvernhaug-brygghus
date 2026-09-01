@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "updated_at": null,
+  "items": [
+    {
+      "pantry_item_id": "00000000-0000-4000-8000-000000000001",
+      "ingredient_type": "malt",
+      "ingredient_id": "weyermann_pilsner",
+      "name_snapshot": "Weyermann Pilsner",
+      "quantity": 5.0,
+      "unit": "kg",
+      "base_quantity": 5000.0,
+      "base_unit": "g",
+      "opened": false,
+      "best_before": null,
+      "lot_number": "",
+      "storage_location": "",
+      "notes": "Eksempelpost — se data/pantry.json for din egen, ekte beholdning."
+    },
+    {
+      "pantry_item_id": "00000000-0000-4000-8000-000000000002",
+      "ingredient_type": "malt",
+      "ingredient_id": "rauchmalz",
+      "name_snapshot": "Weyermann Rauchmalz",
+      "quantity": 2.0,
+      "unit": "kg",
+      "base_quantity": 2000.0,
+      "base_unit": "g",
+      "opened": true,
+      "best_before": null,
+      "lot_number": "",
+      "storage_location": "Fryser",
+      "notes": "Eksempelpost — se data/pantry.json for din egen, ekte beholdning."
+    },
+    {
+      "pantry_item_id": "00000000-0000-4000-8000-000000000003",
+      "ingredient_type": "humle",
+      "ingredient_id": "east_kent_goldings",
+      "name_snapshot": "East Kent Goldings",
+      "quantity": 30.0,
+      "unit": "g",
+      "base_quantity": 30.0,
+      "base_unit": "g",
+      "opened": true,
+      "best_before": null,
+      "lot_number": "",
+      "storage_location": "Fryser",
+      "notes": "Eksempelpost — se data/pantry.json for din egen, ekte beholdning."
+    },
+    {
+      "pantry_item_id": "00000000-0000-4000-8000-000000000004",
+      "ingredient_type": "gjaer",
+      "ingredient_id": "wyeast_1318",
+      "name_snapshot": "Wyeast 1318",
+      "quantity": 2.0,
+      "unit": "pakke",
+      "base_quantity": 2.0,
+      "base_unit": "pakke",
+      "opened": false,
+      "best_before": null,
+      "lot_number": "",
+      "storage_location": "Kjøleskap",
+      "notes": "Eksempelpost — se data/pantry.json for din egen, ekte beholdning."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+[
+  {
+    "date": "2026-01-15",
+    "actual_volume_l": 20.0,
+    "actual_og": 1.049,
+    "actual_fg": 1.013,
+    "actual_abv": 4.7,
+    "note": ""
+  },
+  {
+    "date": "2026-02-20",
+    "actual_volume_l": 23.0,
+    "actual_og": 1.053,
+    "actual_fg": 1.011,
+    "actual_abv": 5.5,
+    "note": "Syntetisk testnotat (fixture).",
+    "process_profile_navn": "Enkel infusjon"
+  }
+]

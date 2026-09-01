@@ -1,0 +1,26 @@
+{
+  "Testbrygg Legacy A (syntetisk fixture)": {
+    "navn": "Testbrygg Legacy A (syntetisk fixture)",
+    "volum": 20,
+    "effektivitet": 72,
+    "malt": [
+      { "id": "weyermann_pilsner", "mengde": 4.0 }
+    ],
+    "humle": [
+      { "id": "tettnang", "gram": 30.0, "tid": 60 }
+    ],
+    "gjaerId": "saflager_w3470"
+  },
+  "Testbrygg Legacy B (syntetisk fixture)": {
+    "navn": "Testbrygg Legacy B (syntetisk fixture)",
+    "volum": 23,
+    "effektivitet": 75,
+    "malt": [
+      { "id": "bohemian_pilsner_floor", "mengde": 4.5 }
+    ],
+    "humle": [
+      { "id": "east_kent_goldings", "gram": 40.0, "tid": 60 }
+    ],
+    "gjaerId": "lalbrew_diamond_lager"
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "amarillo": {
+    "display_name": "Amarillo",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Amarillo 2024 Humle Pellets - 100g USA",
+      "Amarillo 2023 100g 7,5% AA",
+      "Amarillo 2024 100g 11% AA",
+      "Amarillo 2024 5 kg"
+    ],
+    "smakstags": [
+      "appelsin",
+      "mandarin",
+      "aprikos",
+      "blomst"
+    ],
+    "kategorier": {
+      "Sitrus": 6,
+      "Fruktighet": 5,
+      "Steinfrukt": 5
+    },
+    "alfa_typisk": 11.0,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [],
+        "pris": 109.0,
+        "url": "https://vestbrygg.no/pellets/30195/amarillo-2025-humle-pellets-100g-usa",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 89.0,
+        "url": "https://www.olbrygging.no/humle/111097/amarillo-2024-100g-11pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "comet": {
+    "display_name": "Comet",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "USA",
+    "aliases": [
+      "Comet",
+      "Comet 2021",
+      "Comet 2022"
+    ],
+    "smakstags": [
+      "grapefrukt",
+      "sitrus",
+      "urter"
+    ],
+    "kategorier": {
+      "Sitrus": 5,
+      "Jordlig": 3
+    },
+    "alfa_typisk": 9.3,
+    "butikk_match": {
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 40.0,
+        "url": "https://www.olbrygging.no/humle/107380/comet-2022-100g-9-3pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": false,
+    "source": "auto_added"
+  },
+  "east_kent_goldings": {
+    "display_name": "East Kent Goldings",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "England",
+    "aliases": [
+      "East Kent Goldings 2025 Pellets - 100g UK",
+      "EKG"
+    ],
+    "smakstags": [
+      "honning",
+      "urter",
+      "blomster",
+      "mild krydder"
+    ],
+    "kategorier": {
+      "Krydder": 5,
+      "Jordlig": 3
+    },
+    "alfa_typisk": 5.8,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [],
+        "pris": 89.0,
+        "url": "https://vestbrygg.no/pellets/30230/east-kent-goldings-2025-pellets-100g-uk-storbritannia",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/109503/east-kent-golding-2023-100g-5-8-aapcnt-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  },
+  "tettnang": {
+    "display_name": "Tettnang",
+    "kategori": "humle",
+    "type": "T90 Pellets",
+    "opprinnelse": "Germany",
+    "aliases": [
+      "Tettnang Humle Pellets - 100g Tyskland"
+    ],
+    "smakstags": [
+      "urter",
+      "blomst",
+      "krydder"
+    ],
+    "kategorier": {
+      "Krydder": 4,
+      "Jordlig": 3
+    },
+    "alfa_typisk": 3.1,
+    "butikk_match": {
+      "vestbrygg": {
+        "search_terms": [],
+        "pris": 79.0,
+        "url": "https://vestbrygg.no/pellets/30648/tettnang-humle-pellets-100g-tyskland",
+        "pakke_gram": 100.0
+      },
+      "olbrygging": {
+        "search_terms": [],
+        "pris": 79.0,
+        "url": "https://www.olbrygging.no/humle/111530/tettnanger-2024-100g-3-1pcnt-aa-nitrogenpakket",
+        "pakke_gram": 100.0
+      }
+    },
+    "verified": true,
+    "source": "master_seed_v0_1"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "Testbrygg Minimal (syntetisk fixture)",
+  "batch_size": 20.0,
+  "efficiency": 0.72,
+  "brygger_stil": "",
+  "malts": [
+    {
+      "id": "weyermann_pilsner",
+      "mengde": 4.0
+    }
+  ],
+  "hops": [
+    {
+      "id": "tettnang",
+      "gram": 30.0,
+      "tid": 60
+    }
+  ],
+  "yeast": "saflager_w3470",
+  "stats": {
+    "og": 1.048,
+    "fg": 1.012,
+    "abv": 4.7,
+    "ibu": 18.0,
+    "ebc": 9.0
+  },
+  "flavor_profile": {},
+  "process_profile": null,
+  "water_source_profile": null,
+  "water_target_profile": null,
+  "water_treatment": null,
+  "water_measurements": null
+}

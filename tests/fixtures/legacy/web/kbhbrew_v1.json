@@ -1,0 +1,241 @@
+{
+  "format": "kbhbrew",
+  "version": 1,
+  "exportedAt": "2026-01-01T00:00:00.000Z",
+  "generator": "Kvernhaug Brygghus",
+  "brew": {
+    "originBrewId": "brew-22222222-2222-4222-8222-222222222222",
+    "parentBrewId": null,
+    "status": "done",
+    "createdAt": "2026-02-20T09:00:00.000Z",
+    "brewedAt": "2026-02-20T09:30:00.000Z",
+    "snapshot": {
+      "recipe": {
+        "recipeSchemaVersion": 1,
+        "navn": "Testbrygg Web Custom (syntetisk fixture)",
+        "brygger": "Testbrygger",
+        "bryggeri": "Testbryggeri",
+        "notater": "Syntetisk testnotat (fixture).",
+        "volum": 23,
+        "effektivitet": 75,
+        "malt": [
+          {
+            "id": "bohemian_pilsner_floor",
+            "mengde": 4.0
+          },
+          {
+            "id": "egen_malt_1700000000000_1",
+            "mengde": 0.3,
+            "custom": {
+              "navn": "Egendefinert testmalt (fixture)",
+              "produsent": "Testprodusent",
+              "ebc": 20,
+              "potensiale": 1.035
+            }
+          }
+        ],
+        "humle": [
+          {
+            "id": "east_kent_goldings",
+            "gram": 40.0,
+            "tid": 60
+          }
+        ],
+        "gjaerId": null,
+        "gjaerCustom": {
+          "navn": "Egendefinert testgjær (fixture)",
+          "produsent": "Testprodusent",
+          "gjaertype": "Ale",
+          "attenuation": 0.78
+        },
+        "attenuationOverride": 78,
+        "valgtStil": null,
+        "lagretDato": "2026-02-20T08:55:00.000Z"
+      },
+      "ingredients": {
+        "malt": {
+          "bohemian_pilsner_floor": {
+            "display_name": "Bohemian Pilsner Floor",
+            "produsent": "Weyermann",
+            "kategori": "Basemalt",
+            "smakstags": [
+              "brød",
+              "kjeks",
+              "lyst korn",
+              "honning"
+            ],
+            "kategorier": {
+              "Brød": 4,
+              "Honning": 1,
+              "Maltfylde": 3
+            },
+            "ebc": 4.0,
+            "potensiale": 1.037,
+            "maks_prosent": 100,
+            "anbefalte_stiler": [
+              "Pilsner",
+              "Lys Lager",
+              "Bock"
+            ],
+            "knust_tilgjengelig": false,
+            "aliases": [
+              "Bohemian Pilsner Floor Malt",
+              "Bohemian Pilsner Floor",
+              "Bohemian Pilsner",
+              "Pilsner Floor Malt",
+              "Floor Malted Pilsner",
+              "Weyermann Bohemian Pilsner"
+            ],
+            "butikk_match": {
+              "vestbrygg": {
+                "pris": 49.0,
+                "url": "https://vestbrygg.no/weyermann/20110/bohemian-pilsner-floor-malt-1-kg-hel-4-ebc--weyermann",
+                "varianter": [
+                  {
+                    "pakningsstorrelse_gram": 100.0,
+                    "malttype": "knust",
+                    "pris": 7.0,
+                    "url": "https://vestbrygg.no/weyermann/23110/bohemian-pilsner-floor-malt--100g-knust-4-ebc--weyermann",
+                    "lagerstatus": "pa_lager"
+                  },
+                  {
+                    "pakningsstorrelse_gram": 1000.0,
+                    "malttype": "hel",
+                    "pris": 49.0,
+                    "url": "https://vestbrygg.no/weyermann/20110/bohemian-pilsner-floor-malt-1-kg-hel-4-ebc--weyermann",
+                    "lagerstatus": "pa_lager"
+                  },
+                  {
+                    "pakningsstorrelse_gram": 1000.0,
+                    "malttype": "knust",
+                    "pris": 54.0,
+                    "url": "https://vestbrygg.no/weyermann/21110/bohemian-pilsner-floor-malt--1-kg-knust-4-ebc--weyermann",
+                    "lagerstatus": "pa_lager"
+                  },
+                  {
+                    "pakningsstorrelse_gram": 25000.0,
+                    "malttype": "hel",
+                    "pris": 799.0,
+                    "url": "https://vestbrygg.no/weyermann/24110/bohemian-pilsner-floor-malt--25kg-hel-4-ebc--weyermann",
+                    "lagerstatus": "pa_lager"
+                  },
+                  {
+                    "pakningsstorrelse_gram": 25000.0,
+                    "malttype": "knust",
+                    "pris": 824.0,
+                    "url": "https://vestbrygg.no/weyermann/25110/bohemian-pilsner-floor-malt--25kg-knust-4-ebc--weyermann",
+                    "lagerstatus": "pa_lager"
+                  }
+                ]
+              },
+              "olbrygging": {
+                "pris": 39.0,
+                "url": "https://www.olbrygging.no/weyermann/101046/bohemian-pilsner-malt-4-ebc-weyermann"
+              }
+            },
+            "verified": true,
+            "source": "master_seed_v0_1",
+            "display_group": "PALE / PILSNER",
+            "canonical_style": "pilsner"
+          }
+        },
+        "humle": {
+          "east_kent_goldings": {
+            "display_name": "East Kent Goldings",
+            "kategori": "humle",
+            "type": "T90 Pellets",
+            "opprinnelse": "England",
+            "aliases": [
+              "East Kent Goldings 2025 Pellets - 100g UK",
+              "EKG"
+            ],
+            "smakstags": [
+              "honning",
+              "urter",
+              "blomster",
+              "mild krydder"
+            ],
+            "kategorier": {
+              "Krydder": 5,
+              "Jordlig": 3
+            },
+            "alfa_typisk": 5.8,
+            "butikk_match": {
+              "vestbrygg": {
+                "search_terms": [],
+                "pris": 89.0,
+                "url": "https://vestbrygg.no/pellets/30230/east-kent-goldings-2025-pellets-100g-uk-storbritannia",
+                "pakke_gram": 100.0
+              },
+              "olbrygging": {
+                "search_terms": [],
+                "pris": 79.0,
+                "url": "https://www.olbrygging.no/humle/109503/east-kent-golding-2023-100g-5-8-aapcnt-nitrogenpakket",
+                "pakke_gram": 100.0
+              }
+            },
+            "verified": true,
+            "source": "master_seed_v0_1"
+          }
+        },
+        "gjaer": {}
+      },
+      "equipment": {
+        "id": "brewzilla-35-gen4-1",
+        "name": "BrewZilla 35L Gen 4.1",
+        "type": "preset",
+        "manufacturer": "KegLand",
+        "model": "BrewZilla 35L Gen 4.1",
+        "kettleCapacityL": 35,
+        "maxRecommendedBatchL": 30
+      },
+      "predicted": {
+        "og": 1.052,
+        "fg": 1.011,
+        "abv": 5.4,
+        "ibu": 24.0,
+        "ebc": 12.0,
+        "buGu": 0.9,
+        "flavorProfile": {
+          "Maltfylde": 5.0,
+          "Sitrus": 2.0,
+          "Bitterhet": 3.0
+        },
+        "style": {
+          "stil": "Testøl",
+          "score": 0.8
+        }
+      },
+      "provenance": {
+        "engineVersion": 1,
+        "recipeSchemaVersion": 1,
+        "masterdata": {
+          "maltCount": 53,
+          "humleCount": 60,
+          "gjaerCount": 103
+        },
+        "capturedAt": "2026-02-20T09:00:00.000Z"
+      }
+    },
+    "actuals": {
+      "og": 1.053,
+      "fg": 1.01,
+      "volumeL": 22.5,
+      "notes": "Syntetisk testnotat (fixture)."
+    },
+    "sensing": {
+      "judgment": "yes",
+      "flavorProfile": {
+        "Maltfylde": 5.0,
+        "Sitrus": 2.0,
+        "Bitterhet": 3.0
+      },
+      "notes": "Syntetisk smaksnotat (fixture)."
+    },
+    "learning": {
+      "whatWorked": "Syntetisk testtekst -- hva som fungerte.",
+      "whatChanged": "Syntetisk testtekst -- hva som ble endret.",
+      "nextTime": "Syntetisk testtekst -- neste gang."
+    }
+  }
+}

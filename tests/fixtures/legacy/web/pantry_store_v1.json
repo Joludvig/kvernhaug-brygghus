@@ -1,0 +1,23 @@
+{
+  "format": "kbh-pantry",
+  "version": 1,
+  "items": [
+    {
+      "pantryItemId": "pantryitem-11111111-1111-4111-8111-111111111111",
+      "ingredientType": "malt",
+      "id": "weyermann_pilsner",
+      "mengde": 5.0
+    },
+    {
+      "pantryItemId": "pantryitem-22222222-2222-4222-8222-222222222222",
+      "ingredientType": "humle",
+      "id": "egen_pantry_humle_1700000000000_1",
+      "mengde": 50.0,
+      "custom": {
+        "navn": "Egendefinert testhumle (fixture)",
+        "produsent": "Testprodusent"
+      },
+      "notat": "Syntetisk testnotat (fixture)."
+    }
+  ]
+}

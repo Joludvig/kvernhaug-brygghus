@@ -1,0 +1,25 @@
+{
+  "format": "kbhrecipe",
+  "version": 1,
+  "exportedAt": "2026-01-01T00:00:00.000000",
+  "generator": "Kvernhaug Brygghus (Streamlit)",
+  "recipe": {
+    "recipeSchemaVersion": 1,
+    "navn": "Testbrygg Minimal (syntetisk fixture)",
+    "volum": 20.0,
+    "effektivitet": 72.0,
+    "malt": [
+      {
+        "id": "weyermann_pilsner",
+        "mengde": 4.0
+      }
+    ],
+    "humle": [
+      {
+        "id": "tettnang",
+        "gram": 30.0,
+        "tid": 60
+      }
+    ]
+  }
+}
