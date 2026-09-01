@@ -520,6 +520,8 @@ const TEKSTER = {
     "kbhrecipe.nyereVersjon": "Denne oppskriftsfilen er laget med en nyere versjon av Kvernhaug Brygghus og kan ikke åpnes sikkert her ennå.",
     "kbhrecipe.ustottetVersjon": "Denne oppskriftsfilen bruker en versjon av oppskriftsformatet som ikke støttes her.",
     "kbhrecipe.manglerOppskrift": "Denne oppskriftsfilen mangler selve oppskriften.",
+    "kbhrecipe.manglerRecipeSchemaVersion": "Denne oppskriftsfilen mangler informasjon om oppskriftens schema-versjon (recipeSchemaVersion) og kan ikke åpnes sikkert her.",
+    "kbhrecipe.ustottetRecipeSchemaVersion": "Denne oppskriften bruker en nyere eller ukjent schema-versjon (recipeSchemaVersion) som ikke støttes her ennå.",
 
     "meta.mineOppskrifter.sidetittel": "📂 Mine oppskrifter",
     "mineOppskrifter.tittel": "Mine lagrede oppskrifter",
@@ -2236,6 +2238,8 @@ const TEKSTER = {
     "kbhrecipe.nyereVersjon": "This recipe file was made with a newer version of Kvernhaug Brygghus and can't be safely opened here yet.",
     "kbhrecipe.ustottetVersjon": "This recipe file uses a version of the recipe format that isn't supported here.",
     "kbhrecipe.manglerOppskrift": "This recipe file is missing the actual recipe.",
+    "kbhrecipe.manglerRecipeSchemaVersion": "This recipe file is missing recipe schema version information (recipeSchemaVersion) and can't be safely opened here.",
+    "kbhrecipe.ustottetRecipeSchemaVersion": "This recipe uses a newer or unknown recipe schema version (recipeSchemaVersion) that isn't supported here yet.",
 
     "meta.mineOppskrifter.sidetittel": "📂 My Recipes",
     "mineOppskrifter.tittel": "My saved recipes",

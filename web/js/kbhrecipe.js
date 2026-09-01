@@ -16,6 +16,16 @@
 const KBHRECIPE_FORMAT = "kbhrecipe";
 const KBHRECIPE_VERSION = 1;
 
+// PRI 2B (KBHR-008) -- støttet recipe-PAYLOAD-schema (ikke å forveksle med
+// KBHRECIPE_VERSION over, som styrer selve ENVELOPE-formatet). Egen,
+// lokal konstant -- IKKE recipe_storage.js sin RECIPE_SCHEMA_VERSION,
+// fordi denne filen også lastes ALENE på importer.html (uten
+// recipe_storage.js lastet i det hele tatt) -- samme begrunnelse som
+// hvorfor KBHRECIPE_VERSION og OPPSKRIFT_STORE_VERSION allerede er to
+// atskilte konstanter i to filer. Begge er 1 i dag og MÅ oppdateres
+// sammen hvis/når Web noensinne innfører et nytt recipe-schema.
+const KBHRECIPE_STOTTET_RECIPE_SCHEMA_VERSION = 1;
+
 // PRI 2A -- kjente felt (docs/development/CORE_KBHRECIPE_V1.md). Brukes
 // til å avgjøre hva Web GJENKJENNER ved import -- altså hva som IKKE skal
 // fanges til passthrough (se KBHRECIPE_PASSTHROUGH_NOKKEL under). Dette er
@@ -243,10 +253,32 @@ function parseKbhRecipeInnhold(tekst) {
     if (!parsed.recipe || typeof parsed.recipe !== "object" || Array.isArray(parsed.recipe)) {
       return { ok: false, melding: t("kbhrecipe.manglerOppskrift") };
     }
+
+    // PRI 2B (KBHR-008) -- envelope `version` (sjekket over) og
+    // `recipeSchemaVersion` (payloadens EGET schema) er to ULIKE ting. En
+    // helt gyldig envelope kan likevel bære en recipe-payload med et nyere
+    // eller ukjent schema Web ikke skal late som den forstår. Avvises HER,
+    // FØR oppskriften noensinne når vanlig redigerbar flyt
+    // (_gjenopprettOppskrift()) eller lagres lokalt -- se
+    // docs/development/CORE_KBHRECIPE_V1.md §9. Egen, distinkt melding fra
+    // envelope-avvisningen over, slik at de to feilårsakene ikke blandes
+    // sammen.
+    const recipeSchemaVersion = parsed.recipe.recipeSchemaVersion;
+    if (typeof recipeSchemaVersion !== "number" || !Number.isFinite(recipeSchemaVersion)) {
+      return { ok: false, melding: t("kbhrecipe.manglerRecipeSchemaVersion") };
+    }
+    if (recipeSchemaVersion !== KBHRECIPE_STOTTET_RECIPE_SCHEMA_VERSION) {
+      return { ok: false, melding: t("kbhrecipe.ustottetRecipeSchemaVersion") };
+    }
+
     return { ok: true, oppskrift: _normaliserOppskriftForImport(parsed.recipe), legacy: false };
   }
 
-  // Ingen wrapper -- prøv som eldre, rå oppskrifts-JSON.
+  // Ingen wrapper -- prøv som eldre, rå oppskrifts-JSON. recipeSchemaVersion
+  // fantes ikke i formatet før wrapperen ble innført, så denne veien
+  // beholder sin eksisterende, mer tolerante oppførsel UENDRET (§12 --
+  // "preserved as-is") -- IKKE den nye, strenge recipeSchemaVersion-
+  // kontrollen over, som kun gjelder den wrappede .kbhrecipe-formen.
   if (_erGyldigOppskriftForm(parsed)) {
     return { ok: true, oppskrift: _normaliserOppskriftForImport(parsed), legacy: true };
   }

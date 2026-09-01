@@ -336,23 +336,109 @@ kjor('full syklus MED ukjent fremtidig felt overlever save/load/export (KBHR-002
   assert.strictEqual('_kbhUkjenteFelt' in eksportert.recipe, false);
 });
 
-// ─── KBHR-008: dokumenterer dagens IKKE-fiksede recipeSchemaVersion-gap ─
+// ─── PRI 2B (KBHR-008): recipeSchemaVersion safety ─────────────────────
+//
+// KBHR-008: recipeSchemaVersion skal aldri nedgraderes/overskrives stille.
+// Egen konstant her (ikke recipe_storage.js sin RECIPE_SCHEMA_VERSION --
+// se KBHRECIPE_STOTTET_RECIPE_SCHEMA_VERSION i kbhrecipe.js) siden en
+// `const` uansett ikke eksponeres som en egenskap på vm-contexten (kun
+// `var`/funksjonsdeklarasjoner blir det) -- verdien 1 er derfor hardkodet
+// i disse testene, matchende de faktiske, gjeldende konstantene i
+// produksjonsfilene.
 
-kjor('KBHR-008: recipeSchemaVersion overskrives fortsatt stille ved lagring (kjent, udekket gap)', () => {
-  const ctx = nyContext(true);
-  const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [], recipeSchemaVersion: 99 };
-  const res = ctx.lagreOppskriftIStore(oppskrift, null);
+kjor('PRI2B (1): recipeSchemaVersion 1 parses/importeres normalt', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(lastFixture('minimal'));
   assert.strictEqual(res.ok, true);
-  const funnet = ctx.finnOppskrift(res.recipeId);
-  // Dette IKKE er ønsket sluttadferd (se docs/development/
-  // CORE_KBHRECIPE_V1.md §9) -- testen dokumenterer dagens faktiske,
-  // uendrede oppførsel. Korreksjonen kommer i PRI 2B (KBHR-008).
-  // Merk: RECIPE_SCHEMA_VERSION er en `const` i recipe_storage.js og blir
-  // derfor IKKE eksponert som en egenskap på vm-contexten (kun `var`/
-  // funksjonsdeklarasjoner blir det) -- verdien 1 er derfor hardkodet her,
-  // matchende den faktiske, gjeldende konstanten i produksjonsfilen.
-  assert.strictEqual(funnet.recipe.recipeSchemaVersion, 1);
-  assert.notStrictEqual(funnet.recipe.recipeSchemaVersion, 99);
+  assert.strictEqual(res.oppskrift.recipeSchemaVersion, 1);
+});
+
+kjor('PRI2B (2): recipeSchemaVersion 2 avvises eksplisitt FØR redigerbar flyt', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.recipe.recipeSchemaVersion = 2;
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, false);
+  assert.ok(res.melding);
+  // oppskrift skal IKKE finnes på et avvist resultat -- ingenting for
+  // app.js/importer_page.js å sende inn i _gjenopprettOppskrift() med.
+  assert.strictEqual(res.oppskrift, undefined);
+});
+
+kjor('PRI2B: unsupported recipe-schema-melding er DISTINKT fra unsupported envelope-versjon-melding', () => {
+  const ctx = nyContext(false);
+  const raaSchema = JSON.parse(lastFixture('minimal'));
+  raaSchema.recipe.recipeSchemaVersion = 2;
+  const resSchema = ctx.parseKbhRecipeInnhold(JSON.stringify(raaSchema));
+
+  const raaEnvelope = JSON.parse(lastFixture('minimal'));
+  raaEnvelope.version = 2;
+  const resEnvelope = ctx.parseKbhRecipeInnhold(JSON.stringify(raaEnvelope));
+
+  assert.strictEqual(resSchema.ok, false);
+  assert.strictEqual(resEnvelope.ok, false);
+  assert.notStrictEqual(resSchema.melding, resEnvelope.melding);
+});
+
+kjor('PRI2B (3): recipeSchemaVersion 2 blir aldri omskrevet til 1 (lagringslaget, forbi parseren)', () => {
+  const ctx = nyContext(true);
+  // Kaller lagreOppskriftIStore() DIREKTE -- forbi parseKbhRecipeInnhold(),
+  // som er den PRIMÆRE sperren. Dette beviser det UAVHENGIGE andre
+  // forsvarslaget i selve recipe_storage.js.
+  const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [], recipeSchemaVersion: 2 };
+  const lagreRes = ctx.lagreOppskriftIStore(oppskrift, null);
+  assert.strictEqual(lagreRes.ok, true);
+  const funnet = ctx.finnOppskrift(lagreRes.recipeId);
+  assert.strictEqual(funnet.recipe.recipeSchemaVersion, 2);
+
+  // Og overlever en ny lesning av hele lageret (lesOppskriftState()
+  // normaliserer HVER rad på HVER lesing -- det var nettopp her den gamle
+  // stille nedgraderingen skjedde).
+  const funnetIgjen = ctx.finnOppskrift(lagreRes.recipeId);
+  assert.strictEqual(funnetIgjen.recipe.recipeSchemaVersion, 2);
+});
+
+kjor('PRI2B (4): manglende recipeSchemaVersion på wrappet payload avvises eksplisitt', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('minimal'));
+  delete raa.recipe.recipeSchemaVersion;
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, false);
+  assert.ok(res.melding);
+});
+
+kjor('PRI2B (5): ugyldig (non-number) recipeSchemaVersion avvises eksplisitt', () => {
+  const ctx = nyContext(false);
+  for (const ugyldigVerdi of ['1', null, true, {}, NaN]) {
+    const raa = JSON.parse(lastFixture('minimal'));
+    raa.recipe.recipeSchemaVersion = ugyldigVerdi;
+    const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+    assert.strictEqual(res.ok, false, `recipeSchemaVersion ${JSON.stringify(ugyldigVerdi)} skal avvises`);
+  }
+});
+
+kjor('PRI2B (9): vanlig Web-native oppskrift lagres fortsatt med schema version 1', () => {
+  const ctx = nyContext(true);
+  // (a) eksplisitt satt til 1 (slik samleOppskrift() faktisk gjør det).
+  const medVersjon = { navn: 'A', volum: 20, effektivitet: 75, malt: [], humle: [], recipeSchemaVersion: 1 };
+  const res1 = ctx.lagreOppskriftIStore(medVersjon, null);
+  assert.strictEqual(ctx.finnOppskrift(res1.recipeId).recipe.recipeSchemaVersion, 1);
+
+  // (b) helt uten feltet (f.eks. en rad migrert fra det gamle flate
+  // lageret) -- skal fortsatt få lokal schema version 1, ikke avvises.
+  const utenVersjon = { navn: 'B', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  const res2 = ctx.lagreOppskriftIStore(utenVersjon, null);
+  assert.strictEqual(res2.ok, true);
+  assert.strictEqual(ctx.finnOppskrift(res2.recipeId).recipe.recipeSchemaVersion, 1);
+});
+
+kjor('PRI2B (10): legacy V1-fixtures (recipeSchemaVersion: 1) importeres fortsatt korrekt', () => {
+  const ctx = nyContext(false);
+  for (const navn of ['minimal', 'full', 'partial_water']) {
+    const res = ctx.parseKbhRecipeInnhold(lastFixture(navn));
+    assert.strictEqual(res.ok, true, `${navn} skal fortsatt importeres`);
+    assert.strictEqual(res.oppskrift.recipeSchemaVersion, 1);
+  }
 });
 
 // ─── Oppsummering ───────────────────────────────────────────────────────

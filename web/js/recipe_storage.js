@@ -67,10 +67,30 @@ function _erOppskriftForm(o) {
 // beregnOppskrift() og _gjenopprettOppskrift() itererer over dem.
 // recipeId strippes bevisst HER også: lokal lagringsidentitet skal aldri
 // ligge inne i payloaden (se _importertRecipeUtenLokalId under).
+//
+// PRI 2B (KBHR-008) -- recipeSchemaVersion skal ALDRI nedgraderes eller
+// overskrives stille. Denne funksjonen satte tidligere ubetinget
+// RECIPE_SCHEMA_VERSION uansett hva payloaden allerede hadde -- siden
+// lesOppskriftState() kjører DENNE på hver eneste lagrede rad ved HVER
+// lesing (via _normalisertItem under), ble en importert/lagret høyere
+// eller ukjent verdi dermed usynlig nullstilt til 1 igjen og igjen. Nå:
+// en gyldig tallverdi beholdes UENDRET, uansett om den er 1 eller høyere
+// -- kun en manglende/ugyldig verdi (en fersk Web-oppskrift som aldri har
+// hatt feltet, eller en rad migrert fra det gamle, pre-schema-version
+// flate lageret, se _migrerLegacy under) får satt lokal
+// RECIPE_SCHEMA_VERSION. Dette er bevisst IKKE en migrator (ingen
+// omregning/tolkning av en høyere versjon) -- kun "ikke lyv om hva
+// payloaden faktisk er". Den EGENTLIGE sperren mot at en nyere
+// recipeSchemaVersion i det hele tatt når vanlig redigerbar flyt er i
+// web/js/kbhrecipe.js::parseKbhRecipeInnhold() -- dette er et uavhengig
+// andre forsvarslag i selve lagringslaget (samme mønster som de forbudte
+// feltene i kbhrecipe.js).
 function _normalisertRecipe(recipe) {
   const ut = { ...recipe };
   delete ut.recipeId;
-  ut.recipeSchemaVersion = RECIPE_SCHEMA_VERSION;
+  if (typeof ut.recipeSchemaVersion !== "number" || !Number.isFinite(ut.recipeSchemaVersion)) {
+    ut.recipeSchemaVersion = RECIPE_SCHEMA_VERSION;
+  }
   if (!Array.isArray(ut.malt)) ut.malt = [];
   if (!Array.isArray(ut.humle)) ut.humle = [];
   return ut;

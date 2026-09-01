@@ -185,25 +185,60 @@ container itself (e.g. a hand-edited local draft).
   the legacy raw-JSON heuristic (§11) rather than being read as a V1
   envelope.
 
-## 9. `recipeSchemaVersion` — known gap, not fixed here
+## 9. `recipeSchemaVersion` — normative policy (PRI 2B, KBHR-008)
 
 `recipeSchemaVersion` travels **inside** the payload (with the
 payload, not the envelope) so it survives extraction into a
-`.kbhrecipe` file or a future `.kbhbrew` snapshot on its own.
+`.kbhrecipe` file or a future `.kbhbrew` snapshot on its own. It is
+**required** on the wrapped `.kbhrecipe` payload (§2) — a distinct
+thing from the envelope's `version` (§8): envelope `version` governs
+the `.kbhrecipe` file format itself; `recipeSchemaVersion` governs the
+shape of the `recipe` payload inside it. The two are validated
+independently, with independent, distinct rejection messages.
 
-**Today's actual behavior (unchanged by PRI 2A):**
-`web/js/recipe_storage.js::_normalisertRecipe()` unconditionally
-overwrites `recipeSchemaVersion` to the current
-`RECIPE_SCHEMA_VERSION` on every save, regardless of what value was
-present on the incoming object (imported, or from an older stored
-row). An unknown or higher `recipeSchemaVersion` is therefore never
-detected or preserved — it is silently normalized away.
+**Policy:**
 
-**Normative rule going forward:** an unknown or higher
-`recipeSchemaVersion` must never be silently downgraded/overwritten.
-**The correction to Web's behavior is out of scope for PRI 2A and is
-deferred to PRI 2B** (KBHR-008). This section documents the rule and
-the current gap; it does not change any code.
+- `recipeSchemaVersion === 1` — fully supported. Can be edited/saved
+  normally.
+- `recipeSchemaVersion` present but not `1` (higher, or any other
+  numeric value) — the file is identified as a `.kbhrecipe` file, but
+  Web does **not** enter the normal editable flow with it: import is
+  **rejected explicitly**
+  (`web/js/kbhrecipe.js::parseKbhRecipeInnhold()`, before
+  `_gjenopprettOppskrift()` is ever reached), with a message distinct
+  from an unsupported *envelope* version
+  (`kbhrecipe.ustottetRecipeSchemaVersion` vs.
+  `kbhrecipe.ustottetVersjon`/`kbhrecipe.nyereVersjon`). It is never
+  saved as a local schema-1 recipe.
+- `recipeSchemaVersion` missing, non-numeric, or otherwise invalid on
+  a wrapped `.kbhrecipe` payload — rejected explicitly
+  (`kbhrecipe.manglerRecipeSchemaVersion`), **never guessed to be 1**
+  (the wrapped V1 contract requires the field — §2).
+- The pre-wrapper legacy raw-JSON fallback (§12) predates
+  `recipeSchemaVersion`'s existence entirely and is explicitly
+  preserved as-is — this policy applies only to the wrapped
+  `{format: "kbhrecipe", ...}` envelope path, not to that fallback.
+
+**No silent downgrade, anywhere, ever:**
+`web/js/recipe_storage.js::_normalisertRecipe()` — which runs on every
+save **and** on every read of the local recipe store
+(`lesOppskriftState()` normalizes every stored row on every load) —
+previously overwrote `recipeSchemaVersion` to the current
+`RECIPE_SCHEMA_VERSION` unconditionally, regardless of the incoming
+value. **Fixed (PRI 2B):** a present, valid numeric
+`recipeSchemaVersion` is now left **unchanged**, whatever its value —
+only a missing/invalid one (a fresh Web-native recipe, or a row
+migrated from the old pre-schema-version flat dictionary, §"Migrering
+fra flat, navne-nøklet ordbok" in that file) is assigned the local
+`RECIPE_SCHEMA_VERSION`. This is a second, independent line of
+defense in the storage layer itself — the primary gate is the import
+rejection above, which normally prevents an unsupported schema from
+ever reaching storage at all.
+
+**No migration built.** A future migrator that can actually interpret
+and upgrade an older/newer `recipeSchemaVersion` is explicitly out of
+scope here — today Web only ever produces and understands schema `1`.
+This document does not define a V2 recipe schema.
 
 ## 10. Custom ingredient boundary
 
@@ -246,7 +281,7 @@ predates the wrapper format and lets old exports keep working.
   version.
 - Does not implement App import.
 - Does not implement `recipeId`/`originRecipeId` end-to-end identity.
-- Does not correct the `recipeSchemaVersion` overwrite (§9) — deferred
-  to PRI 2B.
+- Does not build a `recipeSchemaVersion` migrator — an unsupported
+  schema is rejected explicitly (§9), never interpreted or upgraded.
 - Does not standardize custom-ingredient identity — owned by PRI 4.
 - Does not touch `.kbhbrew`.
