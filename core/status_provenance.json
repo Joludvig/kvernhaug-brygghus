@@ -1,0 +1,52 @@
+{
+  "policy_schema_version": 1,
+  "description": "Minimum Core status and provenance policy/contract. Documents semantics only -- no workflow engine, no migration, no masterdata changes. See docs/development/CORE_STATUS_PROVENANCE.md for the normative explanation and docs/development/CORE_VERSIONING.md for the related version model.",
+  "status": {
+    "values": ["draft", "reviewed", "verified", "deprecated"],
+    "definitions": {
+      "draft": "Proposed or in progress. Must not be treated as verified canonical truth by products or agents.",
+      "reviewed": "Reviewed by a human/professional process. Not necessarily documented well enough yet to be verified.",
+      "verified": "Approved as Core's best verified representation at this point in time. Requires sufficient provenance for the kind of claim/data involved. Does not mean eternal truth.",
+      "deprecated": "Must not be used as the current canonical representation. Kept when history/backward-compatibility requires it. Should reference a replacement/superseding entry where relevant."
+    },
+    "allowed_transitions": [
+      ["draft", "reviewed"],
+      ["reviewed", "verified"],
+      ["verified", "deprecated"]
+    ],
+    "rollback_or_reopen_transitions_defined": false,
+    "rollback_or_reopen_note": "Not decided in this round. If a real need arises, report it rather than pre-designing it here."
+  },
+  "claim_evidence_types": {
+    "values": [
+      "documented_fact",
+      "documented_observation",
+      "interpretation",
+      "assumption",
+      "proposal"
+    ],
+    "definitions": {
+      "documented_fact": "A directly documented, sourced fact (e.g. a value taken from a supplier datasheet).",
+      "documented_observation": "A recorded observation, not necessarily a settled fact (e.g. Brew Lab sensory notes on a specific batch).",
+      "interpretation": "A reasoned interpretation of underlying facts/observations.",
+      "assumption": "An explicit, stated assumption, not yet confirmed.",
+      "proposal": "A suggested change or addition (e.g. from a future crawler/import step) that has not been reviewed or accepted."
+    }
+  },
+  "provenance_fields": {
+    "source_type": {"type": "opaque_string_or_null", "required": false},
+    "source_ref": {"type": "opaque_string_or_null", "required": false},
+    "source_date": {"type": "iso8601_date_or_null", "required": false},
+    "captured_at": {"type": "iso8601_timestamp_or_null", "required": false},
+    "reviewed_at": {"type": "iso8601_timestamp_or_null", "required": false},
+    "verified_at": {"type": "iso8601_timestamp_or_null", "required": false},
+    "reviewer_ref": {"type": "opaque_string_or_null", "required": false},
+    "notes": {"type": "string_or_null", "required": false}
+  },
+  "confidence_field": {
+    "included": false,
+    "note": "Deliberately excluded -- would duplicate either status (quality-assurance progress) or claim_evidence_type (kind of claim). See docs/development/CORE_STATUS_PROVENANCE.md section 4."
+  },
+  "legacy_verified_mapping": "requires_review",
+  "legacy_verified_mapping_note": "No automatic mapping exists from the legacy per-entry verified:true/false boolean in data/master_*.json to any Core status value. verified:true does not imply Core status verified; verified:false does not imply Core status draft; a missing verified field implies no Core status. Any future mapping requires a separate, explicit, reviewed rule -- this policy does not perform or authorize one."
+}

@@ -1,0 +1,99 @@
+{
+  "manifest_schema_version": 1,
+  "generated_at": "2026-09-01T11:49:11Z",
+  "description": "Minimum Core manifest -- identifies canonical Core datasets and their generated distribution artifacts. Does not redefine, migrate, or reinterpret any existing data. See docs/development/CORE_VERSIONING.md for the version model and docs/development/KBH_CORE_CONTRACT.md for domain ownership.",
+  "status_provenance_policy": {
+    "doc": "docs/development/CORE_STATUS_PROVENANCE.md",
+    "machine_policy": "core/status_provenance.json",
+    "note": "Reference only, for discoverability of the status/provenance model each dataset's own 'provenance' field below will eventually point into. Does not itself assign a status or provenance record to any dataset -- every dataset's 'provenance' field below remains null in this round."
+  },
+  "datasets": {
+    "malt": {
+      "name": "Malt canonical master",
+      "type": "canonical_dataset",
+      "schema_version": 1,
+      "data_version": 1,
+      "data_version_note": "stabilization baseline -- first revision tracked under this model, not a claim about prior history",
+      "source_path": "data/master_malt.json",
+      "generated_at": null,
+      "verified_at": null,
+      "verified_at_note": "unknown -- must not be inferred from legacy per-entry verified:true/false in the source file",
+      "provenance": null,
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "36af89a45c0cc79eecb343da2f3fc210b863ec6b28bbb12fb69f475c2ab516dd"
+      },
+      "artifacts": [
+        {
+          "path": "web/data/malt.json",
+          "type": "generated_artifact",
+          "generated_by": "scripts/generate_web_data.py",
+          "generated_at": null,
+          "generated_at_note": "not recorded by the current generator -- not fabricated here",
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "6c0d148cb77785bee45076f16d215694dadb19220a836b5f30e33e57c890cc18"
+          }
+        }
+      ]
+    },
+    "humle": {
+      "name": "Humle canonical master",
+      "type": "canonical_dataset",
+      "schema_version": 1,
+      "data_version": 1,
+      "data_version_note": "stabilization baseline -- first revision tracked under this model, not a claim about prior history",
+      "source_path": "data/master_humle_v2.json",
+      "generated_at": null,
+      "verified_at": null,
+      "verified_at_note": "unknown -- must not be inferred from legacy per-entry verified:true/false in the source file",
+      "provenance": null,
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "98ba322d74974eefaca9a1f222c91fda97fc936c61dfa3a788b132adb424ee69"
+      },
+      "artifacts": [
+        {
+          "path": "web/data/humle.json",
+          "type": "generated_artifact",
+          "generated_by": "scripts/generate_web_data.py",
+          "generated_at": null,
+          "generated_at_note": "not recorded by the current generator -- not fabricated here",
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "888366defc7b62d312dab289ee8e7303a6798faaab5582c479aaee8ff2c07ec6"
+          }
+        }
+      ]
+    },
+    "gjaer": {
+      "name": "Gjær canonical master",
+      "type": "canonical_dataset",
+      "schema_version": 1,
+      "data_version": 1,
+      "data_version_note": "stabilization baseline -- first revision tracked under this model, not a claim about prior history",
+      "source_path": "data/master_gjaer_v2.json",
+      "generated_at": null,
+      "verified_at": null,
+      "verified_at_note": "unknown -- must not be inferred from legacy per-entry verified:true/false in the source file",
+      "provenance": null,
+      "checksum": {
+        "algorithm": "sha256",
+        "value": "18d5c408e1ff649c7a0984cbdfa06f7c2c91f553617d50502df9556a64e25434"
+      },
+      "artifacts": [
+        {
+          "path": "web/data/gjaer.json",
+          "type": "generated_artifact",
+          "generated_by": "scripts/generate_web_data.py",
+          "generated_at": null,
+          "generated_at_note": "not recorded by the current generator -- not fabricated here",
+          "checksum": {
+            "algorithm": "sha256",
+            "value": "099f92102e3224899f1f94353c4ec4577a6c4114a00f2f663f006385e0adb919"
+          }
+        }
+      ]
+    }
+  }
+}
