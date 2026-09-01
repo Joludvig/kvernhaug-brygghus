@@ -166,8 +166,9 @@ during that merge, alongside the forbidden fields) — the key itself
 never appears in an exported file (regression-tested, see PRI 2A QA-
 korreksjon report).
 
-App does not currently have a passthrough mechanism (no reader — see
-§10). This document does not change that.
+App's own passthrough mechanism (PRI 2C1, `modules/kbh_import.py`) is
+built on the same principle — see §13. It is not yet wired into any
+UI/session_state/storage (PRI 2C2/2C3).
 
 ## 7. Forbidden export fields
 
@@ -290,11 +291,90 @@ checks for at least one known top-level field). This existing,
 undocumented-in-V1 fallback is preserved as-is by this document — it
 predates the wrapper format and lets old exports keep working.
 
-## 13. What this document does not do
+## 13. App reader (PRI 2C1) — current App capability, not a universal V1 rule
+
+`modules/kbh_import.py` is App's pure, side-effect-free `.kbhrecipe` V1
+reader (parse + validate + reverse-adapt to App-native recipe data —
+the mirror of `modules/kbh_contract.py`'s writer direction). **Not yet
+wired into any UI, session_state, or storage write** — that is PRI
+2C2/2C3.
+
+**This section describes what today's App reader accepts or rejects.
+It is a statement of current App capability, not a new normative rule
+for the `.kbhrecipe` V1 format itself** — a different reader (a future
+App version, or another system entirely) may legitimately accept more
+than this without violating V1. Where this section would conflict with
+§1–§13 above, §1–§13 (the actual Core V1 contract) governs.
+
+- **No wrapperless legacy fallback.** §12 documents Web's own,
+  Web-specific, undocumented-in-V1-proper compatibility path
+  (`_erGyldigOppskriftForm()`); nothing in this document requires other
+  readers to replicate it. App's reader requires the full
+  `{format: "kbhrecipe", version: 1, ...}` envelope.
+- **Strict canonical ID validation, no fuzzy matching.** Every
+  `malt[].id`/`humle[].id`/`gjaerId` must exist verbatim in App's
+  currently loaded master data (KBHR-013). No near-match, no
+  display-name lookup, no default substitution — an unresolved ID
+  rejects the whole import, with every unresolved ID listed together.
+- **Unsupported custom ingredients and calculation overrides are
+  rejected, not silently dropped or silently applied.** Actual content
+  in `malt[].custom`, `humle[].custom`, `humle[].alfaOverride`,
+  `gjaerCustom`, or `attenuationOverride` rejects the import (KBHR-012,
+  KBHR-016, KBHR-017) — today's App has no calculation path that can
+  honor them correctly. This is an App capability gap, not a V1
+  restriction; PRI 4 (custom identity) may lift parts of it later.
+- **`effektivitet` (percent) is converted to App's native fraction**
+  (`68` → `0.68`) after validation — see §4/KBHR-019. The App-local
+  equipment/brewhouse default profile is never read from or written to
+  by the parser itself.
+- **`prosess` is only imported when App's own normalization would not
+  change its semantics** — a known `process_id` must match App's
+  canonical standard profile exactly (structurally), or be
+  `"egendefinert"` (custom steps are that mode's entire point, always
+  safe); an unknown `process_id` — which would otherwise silently fall
+  back to `enkel_infusjon` — rejects the import instead (KBHR-018).
+  This is strict because of how `modules/process_profiles.py::
+  normaliser_prosessprofil()` already behaves today, not a new
+  restriction invented by the importer.
+- **Non-calculation-affecting metadata is preserved opaquely via
+  passthrough**, not dropped (KBHR-011/KBHR-014): `brygger`, `bryggeri`,
+  `notater`, `valgtStil`, and any currently-unknown top-level payload
+  field. `bryggerStil` and `valgtStil` are **not** the same thing
+  (KBHR-015, see also PRI 2C's D6) — `bryggerStil` maps to App's native
+  `brygger_stil`; `valgtStil` has no native App slot and goes to
+  passthrough unchanged. `stats`, `flavor_profile`, and `recipeId` are
+  never native-imported and never passed through, regardless of what a
+  file contains under those names (same two-independent-points defense
+  already used on the Web writer side).
+
+**Frozen legacy fixtures are compatibility evidence, not an import-safety
+guarantee (KBHR-020).** `tests/fixtures/legacy/kbhrecipe/*.json` (frozen
+in Core Stabilization, commit `b25276c`) prove that a historical writer
+actually produced that exact text — they are not, by that fact alone,
+proof that every current or future reader can import that text
+losslessly. A reader is entitled to reject a syntactically valid,
+historically genuine V1 payload if importing it would make the reader's
+own native model silently diverge from what the file says — this is the
+same principle §9/KBHR-018 already states for `recipeSchemaVersion` and
+process-profile normalization, just spelled out explicitly for fixture
+handling: `tests/fixtures/legacy/kbhrecipe/full.json`'s `prosess` block
+(one mash step) does not structurally match today's App canonical
+`enkel_infusjon` (two steps, `modules/process_profiles.py`), so App's
+reader correctly rejects that one field with `unsupported_process`
+(`tests/test_kbh_import.py`, `test_2`) rather than either silently
+renormalizing it or weakening the equality check to accommodate it. The
+fixture itself is not touched, and today's App process-profile shape is
+still not a universal Core rule (see above) — this is a statement about
+how a strict reader must treat old evidence, not a redefinition of what
+V1 process data must look like.
+
+## 14. What this document does not do
 
 - Does not define `.kbhrecipe` V2, and does not add a new envelope
   version.
-- Does not implement App import.
+- Does not implement App import UI, storage writes, or session_state
+  integration — PRI 2C1 is a pure parser only (§14); wiring is PRI
+  2C2/2C3.
 - Does not implement `recipeId`/`originRecipeId` end-to-end identity.
 - Does not build a `recipeSchemaVersion` migrator — an unsupported
   schema is rejected explicitly (§9), never interpreted or upgraded.
