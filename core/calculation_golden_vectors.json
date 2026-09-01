@@ -1,0 +1,376 @@
+{
+  "vectors_schema_version": 1,
+  "description": "Core-owned, technology-independent golden vectors proving that today's Python (modules/calculations.py) and JavaScript (web/js/calc.js) implementations of six shared calculations produce the same result on the same valid input. Tests raw calculation semantics, not UI/display formatting -- except for inverse Tinseth, whose production functions round to 1 decimal internally (see tolerance_principle below).",
+  "governed_by": "docs/development/CORE_CALCULATION_CONTRACT.md",
+  "calculations_covered": ["og", "fg_abv", "ebc_morey", "tinseth_ibu", "inverse_tinseth"],
+  "tolerance_principle": "Absolute tolerance per calculation type, chosen as the smallest value robust across Python (CPython math/pow) and JavaScript (V8 Math.exp/Math.pow) double-precision floating point -- not a large tolerance chosen to hide a real deviation. og/fg_abv use only +,-,*,/ (no transcendental functions), so both runtimes are expected to agree to full double precision: tolerance 1e-9. ebc_morey and tinseth_ibu involve a fractional-exponent power (Math.pow/** 0.6859) and/or exp (Math.exp/math.exp), which can differ by a few ULPs between runtimes' underlying libm/JS-engine implementations: tolerance 1e-6 absolute, still ~7-8 significant digits of agreement at these calculations' typical magnitude (10-70). inverse_tinseth's production functions (beregn_gram_fra_ibu / beregnGramFraIBU) round their own output to 1 decimal as part of the existing, unchanged calculation contract (not a UI-layer concern) -- as of the PRI 1 QA correction (CALC-002), BOTH implementations round with decimal half-up, so golden vectors now require near-exact agreement against that already-rounded contractual output: tolerance 1e-9, deliberately NOT 0.05 (half the 0.1 rounding grain), since a tolerance that wide could let two adjacent, equally-plausible-looking 1-decimal contractual results both pass the same vector -- see inverse_tinseth_tie_case_half_up, which is deliberately constructed to land exactly on a .x5 tie boundary and would have caught the old Python round-half-to-even vs JS Math.round-half-up divergence this correction fixed.",
+  "canonical_units": {
+    "amount_kg": "kilograms of grain",
+    "amount_g": "grams of hops",
+    "potential_sg": "malt potential as specific gravity, e.g. 1.037",
+    "ebc": "malt or beer color in degrees EBC",
+    "batch_volume_l": "batch volume in liters",
+    "efficiency_fraction": "mash efficiency as a 0-1 fraction, e.g. 0.75 for 75%",
+    "attenuation_fraction": "yeast apparent attenuation as a 0-1 fraction",
+    "alpha_acid_percent": "hop alpha acid as a percent number, e.g. 12.0 for 12%",
+    "boil_time_min": "boil time in minutes",
+    "wort_gravity_sg": "wort gravity (typically OG) as specific gravity",
+    "target_ibu": "desired IBU contribution from one hop addition",
+    "og_sg": "Original Gravity as specific gravity",
+    "fg_sg": "Final Gravity as specific gravity",
+    "abv_percent": "alcohol by volume as a percent number",
+    "hop_amount_g": "grams of hops, rounded to 1 decimal by the production functions themselves"
+  },
+  "cases": [
+    {
+      "id": "og_multi_malt_normal",
+      "calculation": "og",
+      "description": "Representative normal recipe: two malts with different potential, moderate efficiency.",
+      "inputs": {
+        "malts": [
+          {"amount_kg": 3.0, "potential_sg": 1.037},
+          {"amount_kg": 2.0, "potential_sg": 1.030}
+        ],
+        "batch_volume_l": 20.0,
+        "efficiency_fraction": 0.70
+      },
+      "expected": {"og_sg": 1.0499472189999999},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "og_low_efficiency",
+      "calculation": "og",
+      "description": "Same single-malt recipe as og_high_efficiency, but with low (55%) mash efficiency.",
+      "inputs": {
+        "malts": [{"amount_kg": 5.0, "potential_sg": 1.037}],
+        "batch_volume_l": 20.0,
+        "efficiency_fraction": 0.55
+      },
+      "expected": {"og_sg": 1.0424572225},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "og_high_efficiency",
+      "calculation": "og",
+      "description": "Same single-malt recipe as og_low_efficiency, but with high (90%) mash efficiency.",
+      "inputs": {
+        "malts": [{"amount_kg": 5.0, "potential_sg": 1.037}],
+        "batch_volume_l": 20.0,
+        "efficiency_fraction": 0.90
+      },
+      "expected": {"og_sg": 1.0694754549999999},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "og_batch_volume_15l",
+      "calculation": "og",
+      "description": "Same malt bill/efficiency as og_batch_volume_30l, smaller (15L) batch volume -- OG rises as volume falls.",
+      "inputs": {
+        "malts": [{"amount_kg": 5.0, "potential_sg": 1.037}],
+        "batch_volume_l": 15.0,
+        "efficiency_fraction": 0.75
+      },
+      "expected": {"og_sg": 1.0771949499999998},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "og_batch_volume_30l",
+      "calculation": "og",
+      "description": "Same malt bill/efficiency as og_batch_volume_15l, larger (30L) batch volume -- OG falls as volume rises.",
+      "inputs": {
+        "malts": [{"amount_kg": 5.0, "potential_sg": 1.037}],
+        "batch_volume_l": 30.0,
+        "efficiency_fraction": 0.75
+      },
+      "expected": {"og_sg": 1.038597475},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "fg_abv_attenuation_70_pct",
+      "calculation": "fg_abv",
+      "description": "Lower (70%) attenuation at a fixed OG.",
+      "inputs": {"og_sg": 1.060, "attenuation_fraction": 0.70},
+      "expected": {"fg_sg": 1.018, "abv_percent": 5.512500000000005},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "fg_abv_attenuation_75_pct_normal",
+      "calculation": "fg_abv",
+      "description": "Normal/typical (75%) attenuation at a fixed OG.",
+      "inputs": {"og_sg": 1.060, "attenuation_fraction": 0.75},
+      "expected": {"fg_sg": 1.0150000000000001, "abv_percent": 5.906249999999991},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "fg_abv_attenuation_80_pct",
+      "calculation": "fg_abv",
+      "description": "Higher (80%) attenuation at a fixed OG.",
+      "inputs": {"og_sg": 1.060, "attenuation_fraction": 0.80},
+      "expected": {"fg_sg": 1.012, "abv_percent": 6.300000000000006},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "fg_abv_attenuation_85_pct",
+      "calculation": "fg_abv",
+      "description": "Even higher (85%) attenuation at a fixed OG.",
+      "inputs": {"og_sg": 1.060, "attenuation_fraction": 0.85},
+      "expected": {"fg_sg": 1.0090000000000001, "abv_percent": 6.693749999999992},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "fg_abv_moderate_beer_og_1050",
+      "calculation": "fg_abv",
+      "description": "Moderate-strength beer (OG 1.050) at normal attenuation.",
+      "inputs": {"og_sg": 1.050, "attenuation_fraction": 0.75},
+      "expected": {"fg_sg": 1.0125, "abv_percent": 4.9218750000000115},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "fg_abv_strong_beer_og_1100",
+      "calculation": "fg_abv",
+      "description": "Strong beer (OG 1.100) at normal attenuation.",
+      "inputs": {"og_sg": 1.100, "attenuation_fraction": 0.75},
+      "expected": {"fg_sg": 1.025, "abv_percent": 9.843750000000023},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "ebc_light",
+      "calculation": "ebc_morey",
+      "description": "Light single-malt case (8.0 EBC malt).",
+      "inputs": {
+        "malts": [{"amount_kg": 5.0, "ebc": 8.0}],
+        "batch_volume_l": 20.0
+      },
+      "expected": {"ebc": 11.43191018616525},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "ebc_medium_three_malt_recipe",
+      "calculation": "ebc_morey",
+      "description": "Medium-color, realistic three-malt recipe (same malt bill as the Wiesn-Marzen reference used in tests/test_ebc_calculation.py).",
+      "inputs": {
+        "malts": [
+          {"amount_kg": 0.644, "ebc": 14.5},
+          {"amount_kg": 4.232, "ebc": 23.0},
+          {"amount_kg": 1.656, "ebc": 7.0}
+        ],
+        "batch_volume_l": 23.0
+      },
+      "expected": {"ebc": 20.743948714358822},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "ebc_dark_small_fraction_dominant",
+      "calculation": "ebc_morey",
+      "description": "Dark case: a small fraction (0.2kg of 4.7kg total) of very dark 1400 EBC malt still dominates the resulting color.",
+      "inputs": {
+        "malts": [
+          {"amount_kg": 4.5, "ebc": 4.0},
+          {"amount_kg": 0.2, "ebc": 1400.0}
+        ],
+        "batch_volume_l": 20.0
+      },
+      "expected": {"ebc": 41.71413413549375},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "ebc_morey_nonlinearity_2kg",
+      "calculation": "ebc_morey",
+      "description": "Non-linearity demonstration, part 1 of 2: same single malt/volume as ebc_morey_nonlinearity_4kg, but half the grain amount. Compare the two -- doubling the grain amount does NOT double the EBC (Morey's MCU^0.6859 is sub-linear), it multiplies it by 2^0.6859 (~1.608).",
+      "inputs": {
+        "malts": [{"amount_kg": 2.0, "ebc": 20.0}],
+        "batch_volume_l": 20.0
+      },
+      "expected": {"ebc": 10.810441926146916},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "ebc_morey_nonlinearity_4kg",
+      "calculation": "ebc_morey",
+      "description": "Non-linearity demonstration, part 2 of 2: double the grain amount of ebc_morey_nonlinearity_2kg, same malt/volume. Expected EBC is NOT double the 2kg case's EBC -- proves the shared implementations both apply Morey's fractional exponent to the SUMMED MCU, not linearly to mass.",
+      "inputs": {
+        "malts": [{"amount_kg": 4.0, "ebc": 20.0}],
+        "batch_volume_l": 20.0
+      },
+      "expected": {"ebc": 17.390814476767517},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "tinseth_ibu_baseline_normal",
+      "calculation": "tinseth_ibu",
+      "description": "Representative normal bittering hop addition (production regression value, see tests/test_calculations_ibu_alfa.py::TestTinsethUavhengigReferanse).",
+      "inputs": {
+        "hops": [{"amount_g": 50.0, "alpha_acid_percent": 12.0, "boil_time_min": 60}],
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"ibu": 66.15851816172872},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "tinseth_ibu_second_realistic_addition",
+      "calculation": "tinseth_ibu",
+      "description": "A second realistic addition differing simultaneously in amount/alpha/time/volume from the baseline (production regression value, see tests/test_calculations_ibu_alfa.py::test_e_vanlig_positiv_alfa_uendret).",
+      "inputs": {
+        "hops": [{"amount_g": 40.0, "alpha_acid_percent": 10.0, "boil_time_min": 45}],
+        "batch_volume_l": 22.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"ibu": 36.807320318853144},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "tinseth_ibu_short_boil_time",
+      "calculation": "tinseth_ibu",
+      "description": "Isolates a different boil time (20 min instead of the baseline's 60 min) -- all other inputs match tinseth_ibu_baseline_normal.",
+      "inputs": {
+        "hops": [{"amount_g": 50.0, "alpha_acid_percent": 12.0, "boil_time_min": 20}],
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"ibu": 40.06631370363399},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "tinseth_ibu_different_alpha",
+      "calculation": "tinseth_ibu",
+      "description": "Isolates a different alpha acid (6.0% instead of the baseline's 12.0%) -- all other inputs match tinseth_ibu_baseline_normal.",
+      "inputs": {
+        "hops": [{"amount_g": 50.0, "alpha_acid_percent": 6.0, "boil_time_min": 60}],
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"ibu": 33.07925908086436},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "tinseth_ibu_different_wort_gravity",
+      "calculation": "tinseth_ibu",
+      "description": "Isolates a different wort gravity (1.090 instead of the baseline's 1.055) -- all other inputs match tinseth_ibu_baseline_normal.",
+      "inputs": {
+        "hops": [{"amount_g": 50.0, "alpha_acid_percent": 12.0, "boil_time_min": 60}],
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.090
+      },
+      "expected": {"ibu": 48.30339093771938},
+      "tolerance": 1e-6,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "inverse_tinseth_target_20",
+      "calculation": "inverse_tinseth",
+      "description": "First target-IBU level (20 IBU) for one hop addition.",
+      "inputs": {
+        "target_ibu": 20.0,
+        "alpha_acid_percent": 12.0,
+        "boil_time_min": 60,
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"hop_amount_g": 15.1},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute",
+      "note": "Compares against the production function's own rounded (1 decimal) output -- see tolerance_principle. Both Python and JavaScript now round with decimal half-up (CALC-002), so this and the other non-tie inverse_tinseth cases require near-exact agreement (1e-9). Raw pre-rounding value verified to sit well away from a .x5 rounding tie boundary -- see inverse_tinseth_tie_case_half_up for a case that deliberately sits ON one."
+    },
+    {
+      "id": "inverse_tinseth_target_40",
+      "calculation": "inverse_tinseth",
+      "description": "Second, higher target-IBU level (40 IBU) for the same hop/time/volume/gravity as inverse_tinseth_target_20.",
+      "inputs": {
+        "target_ibu": 40.0,
+        "alpha_acid_percent": 12.0,
+        "boil_time_min": 60,
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"hop_amount_g": 30.2},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute",
+      "note": "See inverse_tinseth_target_20 note. Verified well away from a .x5 rounding tie boundary."
+    },
+    {
+      "id": "inverse_tinseth_different_boil_time",
+      "calculation": "inverse_tinseth",
+      "description": "Isolates a different boil time (20 min instead of 60 min) at the same 20 IBU target as inverse_tinseth_target_20.",
+      "inputs": {
+        "target_ibu": 20.0,
+        "alpha_acid_percent": 12.0,
+        "boil_time_min": 20,
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"hop_amount_g": 25.0},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute",
+      "note": "See inverse_tinseth_target_20 note. Verified well away from a .x5 rounding tie boundary."
+    },
+    {
+      "id": "inverse_tinseth_different_alpha",
+      "calculation": "inverse_tinseth",
+      "description": "Isolates a different alpha acid (6.0% instead of 12.0%) at the same 20 IBU target as inverse_tinseth_target_20.",
+      "inputs": {
+        "target_ibu": 20.0,
+        "alpha_acid_percent": 6.0,
+        "boil_time_min": 60,
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"hop_amount_g": 30.2},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute",
+      "note": "See inverse_tinseth_target_20 note. Verified well away from a .x5 rounding tie boundary."
+    },
+    {
+      "id": "inverse_tinseth_different_wort_gravity",
+      "calculation": "inverse_tinseth",
+      "description": "Isolates a different wort gravity (1.090 instead of 1.055) at the same 20 IBU target as inverse_tinseth_target_20.",
+      "inputs": {
+        "target_ibu": 20.0,
+        "alpha_acid_percent": 12.0,
+        "boil_time_min": 60,
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.090
+      },
+      "expected": {"hop_amount_g": 20.7},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute",
+      "note": "See inverse_tinseth_target_20 note. Verified well away from a .x5 rounding tie boundary."
+    },
+    {
+      "id": "inverse_tinseth_tie_case_half_up",
+      "calculation": "inverse_tinseth",
+      "description": "CALC-002 (PRI 1 QA correction): target_ibu is deliberately chosen so the RAW pre-rounding gram value is exactly 10.25 (raw*10 = 102.5, an exact 1-decimal rounding tie in IEEE754 double precision -- verified programmatically, not approximate). Old Python round(10.25, 1) [bankers'/half-even rounding] gave 10.2; JavaScript's existing Math.round(102.5)/10 [half-up] gives 10.3. This vector proves the corrected Python implementation (decimal half-up, matching JavaScript) now also gives 10.3 -- it would have failed against the pre-CALC-002 Python code.",
+      "inputs": {
+        "target_ibu": 13.562496223154389,
+        "alpha_acid_percent": 12.0,
+        "boil_time_min": 60,
+        "batch_volume_l": 20.0,
+        "wort_gravity_sg": 1.055
+      },
+      "expected": {"hop_amount_g": 10.3},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute",
+      "note": "Deliberately ON a .x5 rounding tie boundary (raw value 10.25 exactly) -- the opposite of every other inverse_tinseth case, which are deliberately verified to sit AWAY from one. This is the case that actually exercises the half-up vs half-even distinction."
+    }
+  ]
+}
