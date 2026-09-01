@@ -2,7 +2,9 @@
 Tester for modules/kbh_contract.py — ren Python, ingen Streamlit-
 avhengighet, ingen disk-I/O. Dekker oversettelsen fra Streamlit sitt
 interne Recipe Object til KBH Core Recipe Payload V1
-(docs/development/KBH_CORE_CONTRACT.md).
+(docs/development/KBH_CORE_CONTRACT_V1.md §3–§11 — den operative
+legacy .kbhrecipe-kontrakten; docs/development/KBH_CORE_CONTRACT.md er
+dagens aktive, styrende Core Contract for øvrig).
 
 Kjøres med:
     py -3 -m unittest discover -s tests

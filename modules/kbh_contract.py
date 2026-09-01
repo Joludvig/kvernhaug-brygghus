@@ -2,7 +2,10 @@
 """
 Oversetter Streamlit sitt interne Recipe Object (modules/recipe.py::
 bygg_recipe_object) til en KBH Core Recipe Payload V1, slik denne er
-definert i docs/development/KBH_CORE_CONTRACT.md.
+definert i docs/development/KBH_CORE_CONTRACT_V1.md §3–§11 (den
+operative legacy .kbhrecipe-kontrakten; docs/development/
+KBH_CORE_CONTRACT.md er dagens aktive, styrende Core Contract for
+øvrig — se dens Section 3 for status på §3–§11).
 
 Ren modul: ingen filsystem-tilgang, ingen Streamlit-avhengighet, ingen
 sideeffekter (jf. .claude/rules/desktop.md — testbar uten Streamlit-
@@ -13,7 +16,7 @@ recipe}) bygges av bygg_kbhrecipe_konvolutt() — også den uten
 sideeffekter; eksporttidspunktet sendes inn av kalleren i stedet for
 at modulen selv leser systemklokken.
 
-Payloaden bygges felt for felt (KBH Core Contract §4 — hvitelisten):
+Payloaden bygges felt for felt (KBH_CORE_CONTRACT_V1.md §4 — hvitelisten):
 `stats` og `flavor_profile` blir aldri lest ut av `recipe` og finnes
 derfor aldri i output, uansett hva `recipe` for øvrig inneholder.
 """
@@ -29,7 +32,7 @@ _GENERATOR = "Kvernhaug Brygghus (Streamlit)"
 class UgyldigOppskriftForEksport(ValueError):
     """
     Kastes når et Recipe Object ikke kan oversettes til en gyldig KBH
-    Core Recipe Payload. KBH Core Contract §9: data som ikke kan
+    Core Recipe Payload. KBH_CORE_CONTRACT_V1.md §9: data som ikke kan
     forstås skal markeres som feil, aldri gjettes eller fylles med
     fallback-verdier.
     """
@@ -81,7 +84,7 @@ def _bygg_humle_rader(hops):
 def _bygg_vann_blokk(recipe):
     """
     Slår sammen de fire water_*-feltene (modules/water_chemistry.py) til
-    én `vann`-blokk (KBH Core Contract §3: kilde/maal/behandling/
+    én `vann`-blokk (KBH_CORE_CONTRACT_V1.md §3: kilde/maal/behandling/
     maalinger). Returnerer None hvis ingen av de fire er satt, slik at
     en oppskrift uten vannkjemi gir en payload helt uten `vann`-nøkkel
     — ikke en nøkkel med tomme/null-verdier.
@@ -100,7 +103,7 @@ def _bygg_vann_blokk(recipe):
 def recipe_to_kbhrecipe_payload(recipe):
     """
     Oversetter et Streamlit Recipe Object til en KBH Core Recipe
-    Payload V1 (docs/development/KBH_CORE_CONTRACT.md §3).
+    Payload V1 (docs/development/KBH_CORE_CONTRACT_V1.md §3).
 
     Ren funksjon: leser kun `recipe`, skriver ingenting til disk,
     viser ingen UI, har ingen sideeffekter. Kaster
@@ -167,7 +170,7 @@ def recipe_to_kbhrecipe_payload(recipe):
 
 def bygg_kbhrecipe_konvolutt(recipe, generert_tidspunkt):
     """
-    Bygger en komplett .kbhrecipe-konvolutt (KBH_CORE_CONTRACT.md §3):
+    Bygger en komplett .kbhrecipe-konvolutt (KBH_CORE_CONTRACT_V1.md §3):
         {format, version, exportedAt, generator, recipe}
 
     `generert_tidspunkt` sendes inn eksplisitt (ISO 8601-streng) i

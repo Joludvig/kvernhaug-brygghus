@@ -117,7 +117,16 @@ Kjernefilosofi: **plan → brew → observe → learn → next brew**
 | Web (statisk) | Bryggedag, gjennomføring, læring/hjelp, opplevelse/logging |
 | Filer | Bro mellom flatene |
 
-Core Contract (`.kbhrecipe`, `.kbhbrew`, passthrough-law, kanoniske enheter, eierskapsgrenser): `docs/development/KBH_CORE_CONTRACT.md`.
+Core Contract — styrende baseline (domeneeierskap: Core / App-Web /
+Bryggeskole / Brew Lab / Sóti): `docs/development/KBH_CORE_CONTRACT.md`
+(kanonisk sti — alltid gjeldende aktiv versjon, p.t. v2.0). Historiske
+kontrakter bruker versjonert filnavn. Den tekniske, operative legacy
+`.kbhrecipe`/`.kbhbrew`-kontrakten (passthrough-law, kanoniske enheter,
+whitelist-regel, identitetspolicy) som dagens kode faktisk bruker, står
+i `docs/development/KBH_CORE_CONTRACT_V1.md` §3–§11 — respektert for
+bakoverkompatibilitet, men IKKE en styrende Core-baseline; V1 er
+superseded i sin helhet. Legacy-kontraktens fremtid avgjøres av en egen
+Core-review.
 
 ---
 
