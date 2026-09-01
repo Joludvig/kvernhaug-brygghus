@@ -99,6 +99,21 @@ file. `effektivitet` is stored as a **percent number** in the file
 the adapter layer (App: `modules/kbh_contract.py`; Web: the field is
 already a percent number in the DOM).
 
+**`effektivitet` is recipe-scoped, not equipment-scoped (PRI 2C0,
+KBHR-019).** A concrete recipe's `effektivitet` is that recipe's own
+value — an equipment/brewhouse profile (App:
+`modules/equipment.py::last_equipment()`; a global, App-local setting
+with no `.kbhrecipe` representation of its own) is only ever a
+**default for a genuinely new recipe that has no value of its own**.
+Opening/importing a recipe must never overwrite the global equipment
+profile, and must never silently replace a recipe's own `efficiency`
+with the equipment default — see
+`modules/recipe.py::resolve_recipe_efficiency()` and
+`modules/recipe_context.py`, and the PRI 2C0 report for the concrete,
+proven before/after behavior. This section documents the policy; it
+does not change the wire format — `effektivitet` was already a
+required payload field (§2).
+
 ## 5. Writer rule — explicit whitelist
 
 Both writers build the payload **field by field**, from an explicit

@@ -82,6 +82,15 @@ if "batch_volum_input" not in st.session_state:
     st.session_state.batch_volum_input = st.session_state.get("_batch_volum_preserved", 20.0)
 if "brygger_stil" not in st.session_state:
     st.session_state.brygger_stil = ""
+if "_aktiv_recipe_efficiency" not in st.session_state:
+    # PRI 2C0 (KBHR-019) -- None = "ingen recipe-scoped override ennå",
+    # ikke en verdi. En helt ny/blank oppskrift skal fortsatt følge
+    # utstyrsprofilen live (samme oppførsel som før denne rettelsen) --
+    # se modules/recipe_context.py. Ikke widget-bundet (ingen UI-widget
+    # skriver direkte til denne nøkkelen), så den kan settes direkte her
+    # og i ui/recipe_card.py sin arkiver-/blank-flyt uten "pending"-mønsteret
+    # gjeldende_navn/brygger_stil trenger.
+    st.session_state["_aktiv_recipe_efficiency"] = None
 
 # Løs opp pending batch-volum fra skalering (må skje før widgeten instansieres)
 if "_pending_batch_volum" in st.session_state:

@@ -209,6 +209,11 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                                 st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
                                 st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
                                 st.session_state.valgt_gjaer_id = "safale_us_05"
+                                # PRI 2C0 (KBHR-019) -- en ny, blank oppskrift skal
+                                # igjen følge utstyrsprofilen, ikke arve efficiency
+                                # fra oppskriften som nettopp ble arkivert. Ikke
+                                # widget-bundet -- kan settes direkte (se app.py).
+                                st.session_state["_aktiv_recipe_efficiency"] = None
                                 # "gjeldende_navn" er bundet til Bryggnavn-widgeten
                                 # (instansiert lenger opp i DENNE samme renderingen)
                                 # -- kan derfor ikke settes direkte her (Streamlit
