@@ -220,6 +220,50 @@ refspec trick like `<branch>:master` can match either rule — see
 `gh api`/`git *`/arbitrary shell (no bare `Bash` or `Bash(*)` rule
 exists here).
 
+## Permission model: Bash allowlist + acceptEdits (V1.3, issue #15)
+
+**The bug this fixes:** the first live E2E run (issue #14) got past the
+V1.2 Bash allowlist cleanly — guard, auth, and branch creation all
+worked — and then failed closed one step later: Claude reported `Write`
+denied both inside the repo and in `/tmp`, so no file could be created
+or edited at all. Root cause: `--allowedTools` never listed `Write`/
+`Edit`, and this action's headless SDK has no interactive prompt
+handler, so any permission request that falls through to `ask` is
+denied by default with nothing to grant it.
+
+**The fix:** `claude_args` on the "Run Claude Code" step now also
+carries `--permission-mode acceptEdits`, verified against the official
+tag-mode implementation at the exact `anthropics/claude-code-action@v1`
+revision the failed run used
+(`8251c103ac8c1d761882c86aba1412c7f583c844`) — which deliberately does
+the same thing, and states explicitly *why*: `acceptEdits` allows file
+edits inside `$GITHUB_WORKSPACE` (the checked-out repo) and denies
+writes anywhere else on the runner, while listing `Write`/`Edit`
+directly in `--allowedTools` would grant blanket write access to the
+whole runner instead of scoping it to the workspace.
+
+**The complete permission model, stated plainly:**
+
+| Concern | Mechanism | Result |
+|---|---|---|
+| File edits inside `$GITHUB_WORKSPACE` | `--permission-mode acceptEdits` | Allowed |
+| Writes anywhere else on the runner | `--permission-mode acceptEdits` (its denial side) | Denied |
+| Bash commands | The explicit `--allowedTools` list above | Only the listed exact/prefix commands; everything else denied |
+| Direct push to `master` | No wildcard destination in either push rule (V1.2) | Denied |
+| `git merge` / `gh pr merge` | Not present in `--allowedTools` at all | Denied |
+
+This does not change the Bash allowlist, the branch-scoped push rules,
+or any other V1.2 control — it closes a separate, independent gap
+(file writes) that V1.2 never addressed. Regression coverage:
+[`tests/test_agent_bridge_permission_config.py`](../../tests/test_agent_bridge_permission_config.py),
+which inspects the workflow's own source text (no PyYAML dependency —
+none of this suite's other tests require one either) and proves:
+`--permission-mode acceptEdits` is present on the Claude step;
+`Write`/`Edit`/`MultiEdit` are not explicitly in `--allowedTools`; the
+two branch-scoped exact push rules from V1.2 are unchanged and are the
+*only* `git push` rules present; and no `git merge`, `gh pr merge`, bare
+`Bash`, or `Bash(*)` rule has been introduced.
+
 ## Branch naming is deterministic and enforced (Chief review, PR #13)
 
 **The bug this fixes:** the original V1.2 draft granted `Bash(git push
