@@ -133,8 +133,8 @@ def vurder_leveranse(*, trigger_label, prs, forrige_head_sha=None, forrige_pr_nu
 
     if not kandidater:
         return False, None, (
-            "Ingen åpen PR mot master funnet assosiert med issuen "
-            "(GitHub-tidslinjens kryssreferanser) -- ingen leveranse å vise til."
+            "Ingen åpen PR mot master funnet på issuens deterministiske branch "
+            "(eksakt head-branch-oppslag, gh pr list --head) -- ingen leveranse å vise til."
         )
 
     if len(kandidater) > 1:

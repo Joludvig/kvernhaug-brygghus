@@ -272,6 +272,24 @@ jobs:
       # refspec/flag variant can ever target `master`. Rationale for
       # every entry: docs/development/AGENT_WORKFLOW.md → "Claude's
       # allowed tools (V1.2, issue #12)".
+      #
+      # V1.3 (issue #15): the first live E2E run (issue #14) got past
+      # V1.2's Bash allowlist cleanly but then failed closed a step
+      # later -- Claude reported `Write` denied both in-repo and in
+      # `/tmp`, so no file could ever be created/edited at all. `Write`/
+      # `Edit`/`MultiEdit` were never in `--allowedTools`, and this
+      # action's headless SDK has no interactive prompt handler, so any
+      # permission request that falls through to `ask` is denied by
+      # default. The official tag-mode implementation (verified against
+      # the exact `anthropics/claude-code-action@v1` revision that ran,
+      # `8251c103ac8c1d761882c86aba1412c7f583c844`) deliberately does NOT
+      # list `Write`/`Edit` in `--allowedTools` for this reason -- it
+      # adds `--permission-mode acceptEdits` instead, which allows file
+      # edits inside `$GITHUB_WORKSPACE` (the checked-out repo) only, and
+      # still denies writes anywhere else on the runner. This does not
+      # touch the Bash allowlist, the branch-scoped push rules, or any
+      # other V1.2 control -- see AGENT_WORKFLOW.md → "Permission model:
+      # Bash allowlist + acceptEdits (V1.3, issue #15)".
       - name: Run Claude Code
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: claude
@@ -282,6 +300,7 @@ jobs:
           base_branch: master
           claude_args: |
             --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *)"
+            --permission-mode acceptEdits
           prompt: |
             You are running as the automated Claude side of the Kvernhaug
             Agent Bridge (docs/development/AGENT_WORKFLOW.md — read it in
