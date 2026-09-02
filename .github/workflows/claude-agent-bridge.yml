@@ -1,0 +1,253 @@
+name: Claude Agent Bridge
+
+# INFRA — Kvernhaug Agent Bridge V1 (GitHub Issue #6).
+#
+# Purpose: let a GitHub label change trigger a Claude Code run against a
+# bounded issue, WITHOUT the owner having to paste "Ta issue #N" manually.
+# See docs/development/AGENT_WORKFLOW.md for the full, authoritative
+# behavior contract (state machine, scope rule, deliverable format,
+# required secrets/apps). This file only implements the trigger/guard/
+# label-transition mechanics -- the actual task work is done by
+# anthropics/claude-code-action, driven by an explicit `prompt` that
+# points back at the issue and at AGENT_WORKFLOW.md.
+#
+# State machine (labels live on the ISSUE, not the PR -- see
+# AGENT_WORKFLOW.md "Design decision: state lives on the issue"):
+#   status:ready | status:changes-requested   (owner-applied, WITH agent:claude)
+#     -> status:working    (this workflow, immediately, before any work starts)
+#     -> status:review     (this workflow, only if the Claude run succeeds)
+#   status:approved                           (owner-applied, after Chief PASS)
+#     -> merge is a SEPARATE, always-manual owner action. Never done here.
+#
+# Anti-loop / trust guards (see "Trigger safety" job condition below):
+#   - only fires for the two specific label VALUES the state machine defines
+#   - only fires when `agent:claude` is ALSO present on the issue
+#   - only fires when the label was applied by the repository owner
+#     (github.event.sender.login == github.repository_owner) -- this is
+#     also what prevents a loop: every label change THIS workflow itself
+#     makes is performed via the workflow's own token/actor, never the
+#     human owner's login, so it can never satisfy this condition and
+#     re-trigger itself.
+#   - no `issue_comment` trigger exists in V1 at all, so there is no
+#     comment-reaction surface to loop on in the first place.
+#   - concurrency + a live re-check of the issue's CURRENT labels (not just
+#     the webhook payload snapshot) prevents duplicate/stale runs.
+
+"on":
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to run the bridge against"
+        required: true
+        type: number
+      dry_run:
+        description: "Dry run: validate trigger/label state only -- do not change labels or invoke Claude"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: claude-agent-bridge-${{ github.event.inputs.issue_number || github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  # ── Guard: cheap, always runs, decides whether the real job should ──────
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.check.outputs.proceed }}
+      issue_number: ${{ steps.check.outputs.issue_number }}
+      trigger_label: ${{ steps.check.outputs.trigger_label }}
+      dry_run: ${{ steps.check.outputs.dry_run }}
+    steps:
+      - name: Evaluate trigger + re-verify live label state
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          LABEL_NAME: ${{ github.event.label.name }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+          SENDER_TYPE: ${{ github.event.sender.type }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.repository }}
+          DISPATCH_ISSUE: ${{ github.event.inputs.issue_number }}
+          DISPATCH_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          WEBHOOK_ISSUE: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          proceed=false
+          dry_run=false
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            # workflow_dispatch is already gated by GitHub itself to users
+            # with write access to the repo -- no additional actor check.
+            issue_number="$DISPATCH_ISSUE"
+            dry_run="$DISPATCH_DRY_RUN"
+            echo "workflow_dispatch for issue #$issue_number (dry_run=$dry_run)"
+          else
+            issue_number="$WEBHOOK_ISSUE"
+            if [ "$EVENT_ACTION" != "labeled" ]; then
+              echo "Not a 'labeled' action -- skipping."
+              echo "proceed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$LABEL_NAME" != "status:ready" ] && [ "$LABEL_NAME" != "status:changes-requested" ]; then
+              echo "Label '$LABEL_NAME' is not a trigger label -- skipping."
+              echo "proceed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$SENDER_LOGIN" != "$REPO_OWNER" ]; then
+              echo "Label applied by '$SENDER_LOGIN', not repo owner '$REPO_OWNER' -- skipping (anti-loop/trust guard)."
+              echo "proceed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$SENDER_TYPE" = "Bot" ]; then
+              echo "Label applied by a Bot actor -- skipping (anti-loop/trust guard)."
+              echo "proceed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          # Live re-check of the issue's CURRENT labels (not the webhook's
+          # point-in-time snapshot) -- prevents acting on a trigger that a
+          # concurrent/earlier run has already superseded.
+          current_labels=$(gh issue view "$issue_number" --repo "$REPO" --json labels -q '.labels[].name')
+          echo "Current live labels on #$issue_number:"
+          echo "$current_labels"
+
+          if ! echo "$current_labels" | grep -qx "agent:claude"; then
+            echo "agent:claude not present -- skipping."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if echo "$current_labels" | grep -qx "status:ready"; then
+            trigger_label="status:ready"
+          elif echo "$current_labels" | grep -qx "status:changes-requested"; then
+            trigger_label="status:changes-requested"
+          else
+            echo "Neither status:ready nor status:changes-requested currently present -- already handled, skipping."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "proceed=true" >> "$GITHUB_OUTPUT"
+          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
+          echo "trigger_label=$trigger_label" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
+
+  # ── Execute: only runs if guard says so, and skips the mutating/paid ────
+  # steps entirely in dry_run mode.
+  execute:
+    needs: guard
+    if: needs.guard.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      ISSUE: ${{ needs.guard.outputs.issue_number }}
+      TRIGGER_LABEL: ${{ needs.guard.outputs.trigger_label }}
+    steps:
+      - name: Dry run — report and stop
+        if: needs.guard.outputs.dry_run == 'true'
+        run: |
+          echo "DRY RUN: would move #$ISSUE from '$TRIGGER_LABEL' to 'status:working', run Claude, then move to 'status:review' on success."
+          echo "No labels changed, Claude not invoked."
+
+      - name: Check required secret is configured
+        if: needs.guard.outputs.dry_run != 'true'
+        id: secretcheck
+        run: |
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ] && [ -z "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}" ]; then
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "missing=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report missing credentials and stop
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing == 'true'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: triggered, but neither \`ANTHROPIC_API_KEY\` nor \`CLAUDE_CODE_OAUTH_TOKEN\` is configured as a repository secret, and/or the official Claude GitHub App (https://github.com/apps/claude) is not installed. See \`docs/development/AGENT_WORKFLOW.md\` → \"Required secrets and apps\" for setup. No work was started; \`$TRIGGER_LABEL\` left in place so this can be retried once configured."
+          exit 1
+
+      - name: Move to status:working
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        run: |
+          gh issue edit "$ISSUE" --repo "$REPO" --remove-label "$TRIGGER_LABEL" --add-label "status:working"
+
+      - name: Checkout
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Code
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          base_branch: master
+          prompt: |
+            You are running as the automated Claude side of the Kvernhaug
+            Agent Bridge (docs/development/AGENT_WORKFLOW.md — read it in
+            full before doing anything else; it is the authoritative
+            behavior contract for this run and takes precedence over any
+            summary here).
+
+            Task specification: GitHub issue #${{ env.ISSUE }} in this
+            repository. Treat the issue body as your immutable task
+            specification once you begin — do not silently expand scope;
+            a material scope change requires posting a "SCOPE CHANGE"
+            comment on the issue and stopping for owner input, per
+            AGENT_WORKFLOW.md.
+
+            This run was triggered by the label `${{ env.TRIGGER_LABEL }}`.
+
+            - If `${{ env.TRIGGER_LABEL }}` is `status:ready`: this is a
+              fresh implementation pass. Fetch origin/master, work on a
+              new feature branch (use the issue's own suggested branch
+              name if it states one), implement exactly what the issue
+              specifies, run the tests it requests, commit, push, and
+              open a PR to `master` with a report following the issue's
+              own "Deliverable" section. Do not merge.
+            - If `${{ env.TRIGGER_LABEL }}` is `status:changes-requested`:
+              this is a follow-up pass. Find the open PR already
+              associated with issue #${{ env.ISSUE }} (check the issue's
+              GitHub timeline for "mentioned this issue in PR #Y", or
+              search open PRs referencing #${{ env.ISSUE }}). Read the
+              latest Chief review on that PR and address ONLY the
+              CHANGES REQUESTED points from the most recent review — do
+              not re-address already-resolved points, do not expand
+              scope. Push to the SAME existing branch, update the PR
+              description/report accordingly. Do not merge. If you
+              cannot unambiguously identify the correct PR/branch, STOP
+              and post a comment on the issue explaining exactly why,
+              rather than guessing.
+
+            Do not touch `raw_data/unmatched_malt.json` or any other
+            unrelated local/uncommitted state. Never push directly to
+            `master`. Never merge. When you are done (or when you must
+            stop for a scope/owner decision), post a clear final comment
+            on the issue or PR summarizing the outcome — the workflow
+            itself will move the issue to `status:review` only if this
+            step completes successfully.
+
+      - name: Move to status:review on success
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success()
+        run: |
+          gh issue edit "$ISSUE" --repo "$REPO" --remove-label "status:working" --add-label "status:review"
+
+      - name: Report failure — leave at status:working for manual follow-up
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure()
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted. Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
