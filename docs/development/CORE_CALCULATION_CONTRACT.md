@@ -56,9 +56,14 @@ not a large tolerance chosen to hide a real deviation. Full reasoning
 and the exact values used are documented in the golden vectors file's
 own `tolerance_principle` field (`og`/`fg_abv`: 1e-9, no transcendental
 functions involved; `ebc_morey`/`tinseth_ibu`: 1e-6, involves a
-fractional-exponent power and/or `exp`; `inverse_tinseth`: 0.05,
+fractional-exponent power and/or `exp`; `inverse_tinseth`: 1e-9,
 compared against the production functions' own contractual 1-decimal
-rounded output).
+rounded output — now that both implementations round that output with
+the same decimal half-up rule, CALC-002 below — a wider tolerance such
+as `0.05` is deliberately **not** used here, since it would be wide
+enough to let two adjacent, equally-plausible 1-decimal contractual
+results both pass the same vector, silently hiding exactly the kind of
+rounding-rule divergence CALC-002 exists to catch).
 
 ## Golden vectors as the compatibility baseline
 
@@ -117,11 +122,20 @@ either runtime is **not** harmonized by this document or by PRI 1 —
 per explicit Core-Chief instruction, that code is left exactly as it
 is.
 
-### CALC-002 — inverse Tinseth rounding: FIXED to decimal half-up
+### CALC-002 — inverse Tinseth rounding: escalated production semantic change, decimal half-up (owner GO obtained)
 
-**Resolved in this QA correction; no longer an open cross-runtime
-difference.**
+**This is a production semantic change, not test plumbing.** PRI 1's
+locked instruction was that existing formulas/semantics must not be
+changed unless an existing discrepancy is documented and escalated to
+the owner. This entry is that escalation. It was reviewed and
+**explicitly approved by the owner (Joludvig) on 2026-09-02**, in
+response to Chief review feedback on this PR (PR #1) requesting one of:
+(A) document as an escalated deliberate decision and wait for explicit
+owner GO, or (B) revert the production change and record the
+divergence as an unresolved finding outside PRI 1. The owner chose (A)
+and gave explicit GO to keep the change described below.
 
+**Concrete before/after production behavior change:**
 `beregn_gram_fra_ibu()`'s contractual final-rounding step previously
 used Python's built-in `round(x, 1)`, which rounds ties to even
 (banker's rounding). `beregnGramFraIBU()`'s JS
