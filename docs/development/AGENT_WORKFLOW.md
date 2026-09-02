@@ -43,7 +43,7 @@ the automation, not a substitute for reading the PR itself.
 |---|---|---|
 | `status:ready` | Owner | Issue is a bounded, authorized task; start a fresh Claude run. |
 | `status:working` | Workflow (automatic) | A Claude run is currently executing for this issue. |
-| `status:review` | Workflow (automatic, only on success) | Claude's run finished; a PR exists and is ready for Chief review. |
+| `status:review` | Workflow (automatic, only on success **and** a passed deliverable check, V1.2) | Claude's run finished, and a real PR with a non-empty diff was independently verified to exist; ready for Chief review. |
 | `status:changes-requested` | Owner (after reading a Chief review) | Trigger Claude again to address *only* that review's CHANGES REQUESTED points. |
 | `status:approved` | Owner (after a Chief PASS) | Signals the PR is approved. **Never auto-merged** — merge is always a separate, manual owner action. |
 | `agent:claude` | Owner | Routing label: marks an issue as one Claude should react to at all. Required on **every** trigger, alongside a status label. |
@@ -152,6 +152,225 @@ superseded or disarmed). `workflow_dispatch` keeps its V1 semantics: it
 is already gated by GitHub to users with repo write access, so the
 event-snapshot requirement does not apply to manual runs — only the
 live state must be valid.
+
+## Claude's allowed tools (V1.2, issue #12)
+
+**The bug this fixes (found on the first real E2E bridge run, issue
+#11):** workflow run `33646938966` finished `conclusion: success` —
+guard OK, secret OK, OIDC OK, Claude GitHub App token OK, Claude Code
+2.1.258 ran and returned `subtype: success` — but the repo afterward
+showed **no new branch, no open PR, no issue/PR comment**, and the
+requested deliverable file was never written. The same run recorded
+`permission_denials_count: 14`. The root cause: the "Run Claude Code"
+step passed **no `--allowedTools` at all**. Anthropic's own docs are
+explicit on both halves of why that is fatal here:
+
+- *"Run Arbitrary Bash Commands: By default, Claude cannot execute Bash
+  commands unless explicitly allowed using the `allowed_tools`
+  configuration."* (capabilities-and-limitations.md) — so every `git`/
+  `gh` command the prompt asked for was denied.
+- *"Claude does not automatically create pull requests… it commits
+  code changes to a new branch and provides a link to the GitHub PR
+  creation page in its response."* (security.md) — so even a
+  successful Claude turn, on its own, was never going to produce an
+  **open** PR; that always requires an explicit `gh pr create` call,
+  which itself requires Bash access.
+
+V1 then treated `conclusion: success` from the Claude action as "the
+task is done" and moved the issue straight to `status:review`. That is
+wrong for this state machine: a green process is a **necessary, never
+sufficient**, condition. See "Deliverable verification gate" below for
+the other half of this fix.
+
+**The allowlist itself** (`claude_args: --allowedTools "..."` on the
+"Run Claude Code" step) is the minimum explicit git/gh/test command set
+this bounded workflow's two run types (`status:ready` fresh
+implementation, `status:changes-requested` follow-up) actually need,
+each scoped as tightly as the official permission-rule syntax allows
+(`Bash(cmd *)` prefix rules where arguments genuinely vary per run;
+exact, argument-free/argument-fixed rules where they don't):
+
+| Rule | Why |
+|---|---|
+| `Bash(git fetch *)` | Start from current `origin/master`. |
+| `Bash(git checkout *)` | Create/switch to the task's feature branch. |
+| `Bash(git branch *)` | Inspect/name branches. |
+| `Bash(git status *)` | Sanity-check working tree state (also matches bare `git status`). |
+| `Bash(git diff *)` | Review its own changes before committing. |
+| `Bash(git add *)` | Stage files. |
+| `Bash(git commit *)` | Commit staged changes. |
+| `Bash(git push -u origin <branch>)` / `Bash(git push origin <branch>)` | Push the feature branch — **exact match, no wildcard**, `<branch>` filled in per-run from the "Compute deterministic bridge branch name" step. See "Branch naming is deterministic and enforced" below. |
+| `Bash(git log *)` | Inspect history/context. |
+| `Bash(gh issue view *)` | Read the task issue. |
+| `Bash(gh issue comment *)` | Post the required `SCOPE CHANGE` / "cannot identify PR" / final-outcome comments. |
+| `Bash(gh pr create *)` | Actually open the PR — the step this bug was named for. |
+| `Bash(gh pr view *)` | Read an existing PR (state, latest Chief review) for `changes-requested`. |
+| `Bash(gh pr edit *)` | Update the PR description/report. |
+| `Bash(gh pr comment *)` | Post the PR-side report. |
+| `Bash(gh pr list *)` | Look up the PR associated with this run's fixed branch. |
+| `Bash(pip install -r requirements.txt)` | Install project dependencies before running tests — **exact match, no wildcard**: this and only this invocation, deliberately not `pip install <anything>`. |
+| `Bash(python3 -m unittest *)` | Run the project's test suite (full `discover -s tests -b` or a focused module). |
+
+**Deliberately NOT granted**, as a defense-in-depth backstop to the
+"never merge" rule the prompt also states in plain language:
+`git merge`, `gh pr merge`, any `git push` outside the two exact
+commands above (in particular: no wildcard on the destination, so no
+refspec trick like `<branch>:master` can match either rule — see
+"Branch naming is deterministic and enforced" below), and any unscoped
+`gh api`/`git *`/arbitrary shell (no bare `Bash` or `Bash(*)` rule
+exists here).
+
+## Branch naming is deterministic and enforced (Chief review, PR #13)
+
+**The bug this fixes:** the original V1.2 draft granted `Bash(git push
+*)` — a wildcard that, despite the prompt's plain-language "never push
+master" instruction, was **not actually enforced**. `git push origin
+master`, or a refspec trick like `git push origin <branch>:master`,
+textually matches that rule just as well as a legitimate feature-branch
+push. Relying on model behavior for the one operation this bridge must
+never allow is exactly the kind of gap issue #12 was written to close.
+
+**The fix:** every bridge run for an issue uses **one fixed,
+deterministic branch name for that issue's entire lifecycle** —
+`agent/issue-<N>`, computed once by
+[`.github/scripts/branch_policy.py`](../../.github/scripts/branch_policy.py)
+(`agent_branch_navn`) and exposed as a step output
+(`steps.branch.outputs.name`) that the "Run Claude Code" step, its
+prompt, and the evidence-gathering steps all reference — never
+recomputed or restated, so they cannot drift apart. `status:ready`
+creates this branch from `origin/master`; every later
+`status:changes-requested` round reuses the identical name.
+
+That fixed name is then used for two independent things:
+
+1. **Push permission** (`tillatte_push_kommandoer` in the same module)
+   becomes two **exact-match** `--allowedTools` rules —
+   `git push -u origin <branch>` and `git push origin <branch>` — for
+   that literal string only. Since `<branch>` can never equal
+   `"master"` (it is always `agent/issue-<N>` for an integer `N`), no
+   refspec, flag, or destination variant of a master-push can ever be
+   textually identical to either allowed command; an attempt is simply
+   a different string and gets denied by construction, not by model
+   obedience. Regression coverage:
+   [`tests/test_agent_bridge_branch_policy.py`](../../tests/test_agent_bridge_branch_policy.py)
+   `test_4_...`, which checks a battery of adversarial push strings
+   (`git push origin master`, `git push origin HEAD:master`,
+   `git push origin agent/issue-12:master`, `--force` variants, wrong
+   issue's branch, …) against the two allowed strings and asserts none
+   of them match.
+2. **Deliverable association** (see below) looks the PR up by exact
+   head-branch match instead of a text heuristic.
+
+## Deliverable verification gate (V1.2, issue #12)
+
+A successful "Run Claude Code" step is no longer sufficient by itself
+to reach `status:review`. Two new steps run after it, only on
+`success()`:
+
+1. **Gather evidence** — **(Chief review fix, PR #13, blocker 2)**:
+   the first version of this gate found candidate PRs via GitHub's
+   issue timeline (`cross-referenced` events — the *"mentioned this
+   issue in PR #Y"* signal), a text heuristic the `status:ready` prompt
+   never actually forced Claude to satisfy, so a fully correct PR could
+   still be rejected as "no deliverable" if its body happened not to
+   contain a reference GitHub's own parser recognized. Fixed:
+   `gh pr list --head <branch> --base master --state open --json …`
+   (exact argument shape: `gh_pr_list_args` in `branch_policy.py`,
+   tested in `test_agent_bridge_branch_policy.py` `test_6_...`) looks
+   the PR up by the same fixed branch name from "Branch naming is
+   deterministic and enforced" — exact string equality in GitHub's own
+   PR index, with zero dependency on PR body/title content. `gh pr
+   list --json` already returns the array in exactly the shape
+   `deliverable_guard.py` expects (`number`, `state`, `baseRefName`,
+   `headRefOid`, `additions`, `deletions`, `changedFiles`), so no
+   per-PR loop or JSON assembly is needed.
+2. **Decide** — [`.github/scripts/deliverable_guard.py`](../../.github/scripts/deliverable_guard.py),
+   one pure function (`vurder_leveranse`), unit-tested in
+   [`tests/test_agent_bridge_deliverable_guard.py`](../../tests/test_agent_bridge_deliverable_guard.py)
+   without touching GitHub — unchanged by the PR #13 fix, since it only
+   evaluates whatever PR list it's given, independent of how that list
+   was gathered. Rules:
+   - **`status:ready`**: the pre-run `before_head_sha` (see "Branch
+     naming is deterministic and enforced" above and the "Capture
+     pre-run PR state" step) must be **empty** — proof no PR already
+     existed on this issue's fixed branch before this run started — and
+     exactly one **open** PR against `master` must exist afterward, with
+     a **non-empty diff** (`additions + deletions > 0` and
+     `changedFiles > 0`). Zero candidates, more than one (ambiguous), a
+     non-`master` base, an already-merged/closed PR, or (see below) a
+     **non-empty `before_head_sha`** all fail the gate.
+   - **`status:changes-requested`**: the same, single associated open
+     PR — with its `number` matching the `before_pr_number` also
+     captured by that step (see round 4 below) — **and** its
+     `headRefOid` must differ from `before_head_sha`, proving new
+     commits were actually pushed to *that same PR* this run — not
+     merely that an open PR with a different HEAD exists on the branch.
+
+   **Chief review fix (PR #13, round 3):** because the branch name is
+   *deliberately* deterministic and reused across an issue's whole
+   lifecycle (previous fix, above), a `status:ready` run could otherwise
+   be fooled by a PR left over from an earlier failed/interrupted/manual
+   run on the *same* branch — Claude does nothing useful, returns
+   `success()`, and the post-run `gh pr list --head <branch>` finds the
+   **old** PR, which already has a non-empty diff, and the gate would
+   have approved it as if this run had produced it. `status:ready`
+   means *"start a fresh run"* (see the label table above); a PR that
+   existed *before* the run started can never be evidence of what *this*
+   run delivered, regardless of its diff size or whether its HEAD
+   happened to change during the run too. The fix is the single
+   `before_head_sha` check above, reusing the same pre-run capture that
+   already existed for `status:changes-requested` (`deliverable_guard.py`
+   `vurder_leveranse`) — no new workflow step was needed. Regression
+   coverage: `tests/test_agent_bridge_deliverable_guard.py`
+   `test_3c`/`test_3d` (rejects both the same-HEAD and the
+   HEAD-changed-anyway cases) and `test_11e` (the CLI contract).
+
+   **Chief review fix (PR #13, round 4):** a changed `headRefOid` alone
+   still didn't prove it was the *same* PR — the gate compared only the
+   HEAD SHA of "whatever open PR the query finds now" against the
+   before-value, never the PR's identity. Because `--allowedTools` still
+   permits `gh pr edit`/`gh pr create`, a `status:changes-requested` run
+   could in principle re-target the original PR's base away from
+   `master` and open a **new** PR from the same branch — post-run
+   `gh pr list --head <branch> --base master` would then find that new
+   PR, with a HEAD SHA that differs from `before_head_sha` "by
+   coincidence" (it's simply a different PR), and the gate would have
+   approved it as "the same PR, new commits." Fixed: the "Capture
+   pre-run PR state" step now captures `before_pr_number` from the exact
+   same `gh pr list` query, and the gate requires **both** — unchanged
+   PR number (identity) **and** changed HEAD SHA (progress) — rejecting
+   with a specific reason if the number differs, or if no
+   `before_pr_number` was captured at all. Regression coverage:
+   `test_9c` (same PR, changed HEAD → pass, the review's explicit
+   happy-path requirement), `test_9d` (different PR number, changed HEAD
+   → reject, the review's explicit core requirement), `test_9e`/`test_9f`
+   (missing `before_pr_number` rejects; string/int PR-number comparison
+   doesn't false-negative), and `test_11f`/`test_11g` (the CLI contract).
+
+If the gate passes, the existing "Move to status:review" step runs
+exactly as before. If Claude's step succeeded but the gate fails, a
+**new** step posts a comment explaining exactly why (the gate's
+`reason`, e.g. "no open PR found" or "HEAD SHA unchanged") and leaves
+the issue at `status:working` — deliberately not a new lifecycle label
+(per the issue's own instruction not to invent one unless necessary),
+but a distinguishable message from a hard failure. A genuine step
+failure (`failure()`) is unaffected and still goes through the
+pre-existing generic failure path.
+
+This is a fail-closed design: the default, on any ambiguity or missing
+evidence, is to **not** advance the issue.
+
+**Testability boundary, stated plainly:** the exact `gh pr list --head
+<branch> --base master --state open --json …` argument shape is
+unit-tested (`gh_pr_list_args` in `branch_policy.py`), and the decision
+function it feeds is unit-tested against synthetic PR data — but
+whether that live `gh` call actually returns Claude's real PR on a real
+run can only be proven by an actual E2E bridge run, the same honest
+limit noted for `workflow_dispatch` testing elsewhere in this document.
+What changed with the PR #13 fix is *what* that live call depends on:
+exact head-branch equality in GitHub's own PR index, not a natural-
+language heuristic — strictly more reliable by construction, not merely
+by assumption.
 
 ## Scope-change rule
 
