@@ -159,9 +159,24 @@ exported `.kbhbrew` file).
   internal name since brew passthrough is per-layer rather than a single
   recipe-wide container. The frozen `snapshot` layer never needed this
   fix: it is stored as an unfiltered deep copy already, so it was always
-  effectively passthrough-safe (see Section 5.13). This closes the gap
-  Section 6 previously documented as open — see Owner decision #2's
-  ratified outcome above.
+  effectively passthrough-safe (see Section 5.13). The **file envelope**
+  (`format`/`version`/`exportedAt`/`generator`/`brew`) is preserved the
+  same way, via a distinct container (`_kbhBrewEnvelopeUkjenteFelt`,
+  captured on import in `parseKbhBrewInnhold()`, carried on the
+  persisted brew object, and merged back into a freshly built envelope
+  on export in `byggKbhBrewInnhold()`) — added in the Chief review round
+  on PR #23 after the initial implementation was found to preserve
+  unknown fields on the brew and its three sub-layers but not on the
+  envelope itself. **Forbidden derived values are filtered even through
+  passthrough**: `actual_abv`/`abv`/`actualAbv` are not in
+  `BREW_ACTUALS_KJENTE_FELT`, so an imported/hand-edited value under one
+  of those names is captured like any other unknown `actuals` field, but
+  a dedicated export-time filter (`BREW_ACTUALS_FORBUDTE_EKSPORTFELT`,
+  same PR #23 fix) still strips it before it ever reaches a written file
+  — closing a gap where the generic passthrough guarantee would
+  otherwise have let a forbidden Core field (Section 8 #3) leak back
+  onto the wire. This closes the gap Section 6 previously documented as
+  open — see Owner decision #2's ratified outcome above.
 - **Derived values — never stored, always computed at display time**:
   `faktiskAbv()` ((actual OG − actual FG) × 131.25), `planVsFaktisk()`
   (plan-vs-actual deltas for OG/FG/ABV/volume), `faktiskEffektivitet()`
@@ -407,10 +422,11 @@ recomputes ABV from `actuals.{og,fg}` and never trusts a carried value
 as authoritative; a canonical `.kbhbrew` exporter must either omit
 `actual_abv` entirely or mark it explicitly non-authoritative, treating
 any App-side cached value it disregards on export as safely
-discardable, not as data loss. Section 8 #3 records the narrower,
-still-open question this leaves: whether the wire schema should
-tolerate an optional, explicitly non-authoritative `actual_abv` field
-at all, or omit the concept from the wire entirely.
+discardable, not as data loss. Section 8 #3 records this as **ratified:
+Option A, omit entirely** — the wire schema does not define an
+`actual_abv`/`abv` field at all, and a canonical `.kbhbrew` writer must
+never emit one, including via generic unknown-field passthrough (see
+Section 2's "forbidden derived-ABV spellings" filter).
 
 ### 5.8 Sensory/documented observations vs. instrument measurements
 
@@ -500,13 +516,17 @@ tradeoff also turns on what the manifest can and cannot reconstruct.
 
 ### 5.13 Unknown-field preservation policy
 
-**Proposed, not yet implemented anywhere**: a Core-compliant
-`.kbhbrew` reader/writer should preserve unknown fields on every layer,
-the same way `.kbhrecipe` already does via its passthrough container
-(`_kbhUkjenteFelt` / `_kbh_passthrough`). Today's Web implementation
-does **not** do this (Section 2) — see Section 8 #2 for the explicit
-owner decision on whether V1 requires closing this gap before being
-called "Active," or defers it.
+**Required (ratified, Section 8 #2, Option A)**: a Core-compliant
+`.kbhbrew` reader/writer must preserve unknown fields on every layer —
+the envelope, the top-level `brew` object, and `actuals`/`sensing`/
+`learning` — the same way `.kbhrecipe` already does via its passthrough
+container (`_kbhUkjenteFelt` / `_kbh_passthrough`). **Implemented as of
+PRI 3A.2** (issue #22) in `web/js/brew_storage.js` (Section 2) via a
+per-layer passthrough container (`_kbhBrewUkjenteFelt` on the top-level
+`brew` object and each of `actuals`/`sensing`/`learning`; a distinct
+`_kbhBrewEnvelopeUkjenteFelt` for the file envelope itself, added in the
+PR #23 review round), round-trip-tested in
+`tests/js/test_kbhbrew_contract.js`.
 
 ### 5.14 Import identity / duplicate/copy behavior
 
@@ -518,12 +538,14 @@ silent overwrite/merge.
 
 A reader that only understands `version: 1` must detect and reject
 (never silently misinterpret) any other envelope `version`, mirroring
-the existing `.kbhrecipe` pattern. Because today's Web normalizers
-whitelist fields rather than preserving unknowns (§5.13), a *future*
-additive V1.1 field would currently be silently dropped by today's Web
-reader on any round-trip through it — this is a real, existing forward-
-compatibility gap, not a hypothetical one, and is part of why passthrough
-(Section 8 #2) matters even for a same-major-version evolution.
+the existing `.kbhrecipe` pattern. Because Web's normalizers now
+preserve unknown fields on every layer rather than silently dropping
+them (§5.13, implemented as of PRI 3A.2), a *future* additive V1.1
+field survives a round trip through today's Web reader instead of being
+lost — the forward-compatibility gap this section used to document is
+closed for Web; the passthrough requirement (Section 8 #2) remains the
+mechanism that makes same-major-version evolution safe for any other
+implementation too.
 
 ### 5.16 Validation: reject vs. normalize vs. preserve
 
@@ -535,8 +557,8 @@ compatibility gap, not a hypothetical one, and is part of why passthrough
   (accept a parseable number/non-empty trimmed string, drop otherwise) —
   this is tolerant-input normalization, not silent semantic
   reinterpretation.
-- **Preserve**: everything else — see §5.13 (proposed policy) and
-  Section 8 #2 (open question on whether V1 requires it).
+- **Preserve**: everything else — see §5.13 (required policy, ratified
+  and implemented) and Section 8 #2 (ratified: Option A, required).
 
 ### 5.17 Explicit ownership boundaries — Core / App / Web / Brew Lab
 
@@ -710,11 +732,11 @@ below for the one documented Web gap).
   Already implicitly rejected by Web's own code comment (§ `web/js/
   brew_storage.js` lines 60–67): a hand-picked subset "would quietly
   become wrong the day a calculation starts using one more field."
-- **Recommendation for the owner's consideration** (not a decision
-  made here): Option A, pragmatically, until Option B's prerequisite
-  (a real historical masterdata archive) exists — but this is exactly
-  the kind of "irreversible-ish wire format decision" this document
-  must not make unilaterally.
+- **Ratified outcome**: Option A, pragmatically, until Option B's
+  prerequisite (a real historical masterdata archive) exists — this was
+  the discovery round's recommendation, and the owner has since made it
+  the binding decision (see the ratified outcome stated at the top of
+  this entry).
 
 ### 2. Is unknown-field passthrough required for `.kbhbrew` V1?
 

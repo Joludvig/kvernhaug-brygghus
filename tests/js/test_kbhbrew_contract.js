@@ -7,15 +7,18 @@
 // package.json, ingen testrammeverk. Kun Node sine egne innebygde
 // moduler (fs, path, vm, assert).
 //
-// Dekker: den nye unknown-field-passthrough-implementasjonen (Owner
-// decision #2, ratifisert i CORE_KBHBREW_V1.md §8) på alle relevante lag
-// (topp-brew, actuals, sensing, learning) gjennom
+// Dekker: unknown-field-passthrough-implementasjonen (Owner decision #2,
+// ratifisert i CORE_KBHBREW_V1.md §8) på ALLE relevante lag -- envelopen
+// selv, topp-brew, actuals, sensing, learning -- gjennom
 // import -> lagring -> lesning -> eksport, at forbudte felt (brewId/
-// recipeId) aldri kan lekke til en eksportert fil, at faktisk ABV aldri
-// er et lagret/eksportert felt, at den frosne legacy Web-fixturen
-// (tests/fixtures/legacy/web/kbhbrew_v1.json) fortsatt leses og
-// eksporteres uendret, og import-identitetspolicyen (dedup på
-// originBrewId) er upåvirket av denne rundens endring.
+// recipeId, samt actual_abv/abv/actualAbv spesifikt på actuals-laget) aldri
+// kan lekke til en eksportert fil selv via passthrough-containeren, at
+// faktisk ABV aldri er et lagret/eksportert felt, at den frosne legacy
+// Web-fixturen (tests/fixtures/legacy/web/kbhbrew_v1.json) fortsatt leses
+// og eksporteres uendret, og import-identitetspolicyen (dedup på
+// originBrewId) er upåvirket av denne rundens endring. Utvidet i Chief
+// review-runden (PR #23) med testene for envelope-passthrough og de
+// forbudte ABV-stavemåtene -- se testene lengst nede i filen.
 //
 // Kjøres med:
 //     node tests/js/test_kbhbrew_contract.js
@@ -324,6 +327,75 @@ kjor('full syklus: opprett -> oppdater med ukjent actuals-felt -> lagre -> les -
   const eksportert = ctx.byggKbhBrewInnhold(funnet);
   assert.strictEqual(eksportert.brew.actuals.mashPh, 5.3);
   assert.strictEqual(eksportert.brew.actuals.og, 1.05);
+});
+
+// ─── 15-16: Chief review (PR #23) -- forbudte ABV-stavemåter kan ikke ──────
+// ─── lekke tilbake via den generiske ukjent-felt-passthroughen ────────────
+
+kjor('actual_abv i importert fil kan ikke lekke tilbake til eksport via passthrough', () => {
+  const ctx = nyContext();
+  const raa = JSON.parse(lastLegacyFixture());
+  raa.brew.actuals.actual_abv = 5.5; // forbudt: skal ALDRI eksporteres, selv om filen bærer den
+  const res = ctx.parseKbhBrewInnhold(JSON.stringify(raa));
+  const imp = ctx.importerBrygg(res.brew);
+  // Fanges midlertidig i containeren ved normalisering (generisk ukjent felt) --
+  // det er selve EKSPORT-filteret (BREW_ACTUALS_FORBUDTE_EKSPORTFELT) som
+  // må hindre at det noen gang skrives til fil, se assert under.
+  assert.strictEqual(imp.brew.actuals[BREW_PASSTHROUGH_NOKKEL].actual_abv, 5.5);
+
+  const eksportert = ctx.byggKbhBrewInnhold(imp.brew);
+  assert.strictEqual('actual_abv' in eksportert.brew.actuals, false);
+  assert.strictEqual(JSON.stringify(eksportert).includes('actual_abv'), false);
+  // kjente actuals-felt fortsatt riktige -- filteret skal ikke ramme dem.
+  assert.strictEqual(eksportert.brew.actuals.og, 1.053);
+});
+
+kjor('abv/actualAbv-alias i importert fil kan heller ikke lekke tilbake til eksport', () => {
+  const ctx = nyContext();
+  const raa = JSON.parse(lastLegacyFixture());
+  raa.brew.actuals.abv = 5.5;
+  raa.brew.actuals.actualAbv = 5.5;
+  const res = ctx.parseKbhBrewInnhold(JSON.stringify(raa));
+  const imp = ctx.importerBrygg(res.brew);
+  const eksportert = ctx.byggKbhBrewInnhold(imp.brew);
+  assert.strictEqual('abv' in eksportert.brew.actuals, false);
+  assert.strictEqual('actualAbv' in eksportert.brew.actuals, false);
+});
+
+// ─── 17-18: Chief review (PR #23) -- envelope-nivå ukjente felt overlever ──
+
+kjor('ukjent ENVELOPE-nivå felt (utenfor format/version/exportedAt/generator/brew) overlever import -> eksport', () => {
+  const ctx = nyContext();
+  const raa = JSON.parse(lastLegacyFixture());
+  raa.checksum = 'sha256:deadbeef'; // fremtidig envelope-felt, ikke i V1 i dag
+  const res = ctx.parseKbhBrewInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  const imp = ctx.importerBrygg(res.brew);
+  assert.strictEqual(imp.ok, true);
+
+  const eksportert = ctx.byggKbhBrewInnhold(imp.brew);
+  assert.strictEqual(eksportert.checksum, 'sha256:deadbeef');
+  // Skal ligge på ENVELOPEN, ikke bli feilplassert inn i brew-objektet, og
+  // containernøkkelen selv skal aldri eksporteres bokstavelig noe sted.
+  assert.strictEqual('checksum' in eksportert.brew, false);
+  assert.strictEqual('_kbhBrewEnvelopeUkjenteFelt' in eksportert, false);
+  assert.strictEqual('_kbhBrewEnvelopeUkjenteFelt' in eksportert.brew, false);
+  // De fem kjente envelope-feltene er fortsatt uendret.
+  assert.strictEqual(eksportert.format, 'kbhbrew');
+  assert.strictEqual(eksportert.version, 1);
+});
+
+kjor('kjent envelope-felt (format) kan aldri overstyres av en forfalsket envelope-passthrough-verdi', () => {
+  const ctx = nyContext();
+  const opprettet = ctx.opprettBrygg({ snapshot: minimalSnapshot('X'), recipeId: null });
+  assert.strictEqual(opprettet.ok, true);
+  const forfalsket = {
+    ...opprettet.brew,
+    _kbhBrewEnvelopeUkjenteFelt: { format: 'SKAL-ALDRI-VINNE', ekteUkjentFelt: 'skal-overleve' },
+  };
+  const eksportert = ctx.byggKbhBrewInnhold(forfalsket);
+  assert.strictEqual(eksportert.format, 'kbhbrew');
+  assert.strictEqual(eksportert.ekteUkjentFelt, 'skal-overleve');
 });
 
 // ─── Oppsummering ───────────────────────────────────────────────────────

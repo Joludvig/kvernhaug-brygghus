@@ -42,13 +42,32 @@ const BREW_FIL_VERSION = 1;
 // under), så det er passthrough-sikkert av konstruksjon.
 const BREW_PASSTHROUGH_NOKKEL = "_kbhBrewUkjenteFelt";
 
+// Chief review (PR #23) -- ukjent-felt-passthroughen over dekket kun
+// brew-objektet og dets tre underlag, ikke ENVELOPEN
+// ({format,version,exportedAt,generator,brew}) et .kbhbrew-fil faktisk
+// er. Et ukjent envelope-felt (skjemaets `additionalProperties:true`
+// tillater det på toppnivå også) ble derfor mistet i
+// parseKbhBrewInnhold()/byggKbhBrewInnhold(), selv om §5.13 sier "hvert
+// lag". Løsningen bruker EGEN containernøkkel (ikke BREW_PASSTHROUGH_NOKKEL
+// -- den brukes allerede av det normaliserte brew-objektet som lever
+// UNDER samme fil-envelope, og de to må ikke kollidere), lagret PÅ det
+// normaliserte brew-objektet siden det er det eneste som faktisk
+// persisteres (se lesBrewState()/state.items) -- envelopen selv bygges
+// på nytt for hver eksport, se byggKbhBrewInnhold().
+const BREW_ENVELOPE_PASSTHROUGH_NOKKEL = "_kbhBrewEnvelopeUkjenteFelt";
+const BREW_KJENTE_ENVELOPEFELT = new Set(["format", "version", "exportedAt", "generator", "brew"]);
+
 // Kjente felt per normalisert lag -- alt annet fanges til
 // BREW_PASSTHROUGH_NOKKEL i stedet for å slippes stille, se
 // _fangUkjenteFelt()/_normaliserActuals()/_normaliserSensing()/
-// _normaliserLearning()/_normaliserBrew() under.
+// _normaliserLearning()/_normaliserBrew() under. BREW_ENVELOPE_PASSTHROUGH_NOKKEL
+// står også her, IKKE fordi den er et ekte brew-felt, men for å hindre at
+// _normaliserBrew() sveiper den inn i den generiske BREW_PASSTHROUGH_NOKKEL-
+// containeren i stedet for å la den kopieres gjennom eksplisitt (se der).
 const BREW_KJENTE_TOPPFELT = new Set([
   "brewId", "recipeId", "parentBrewId", "originBrewId", "status",
   "createdAt", "brewedAt", "snapshot", "actuals", "sensing", "learning",
+  BREW_ENVELOPE_PASSTHROUGH_NOKKEL,
 ]);
 const BREW_ACTUALS_KJENTE_FELT = new Set(["og", "fg", "volumeL", "notes"]);
 const BREW_SENSING_KJENTE_FELT = new Set(["judgment", "flavorProfile", "notes"]);
@@ -60,6 +79,20 @@ const BREW_LEARNING_KJENTE_FELT = new Set(["whatWorked", "whatChanged", "nextTim
 // objekt skulle inneholde dem der. Andre forsvarslinje, samme mønster som
 // KBHRECIPE_FORBUDTE_FELT i kbhrecipe.js.
 const BREW_FORBUDTE_EKSPORTFELT = new Set(["brewId", "recipeId"]);
+
+// Faktisk ABV er ALDRI en lagret/eksportert verdi (Core V1 §8#3 ratifisert:
+// utelates helt, se filhodet og faktiskAbv()) -- men fordi den ikke står i
+// BREW_ACTUALS_KJENTE_FELT, ville en importert/håndredigert
+// `actuals.actual_abv` (eller alias `abv`/`actualAbv`) ellers bli fanget av
+// den GENERISKE ukjent-felt-passthroughen og lekke rett ut igjen ved neste
+// eksport -- det ville motsi den ratifiserte kontrakten. Denne tredje
+// forsvarslinjen (i tillegg til BREW_FORBUDTE_EKSPORTFELT over) filtrerer
+// derfor bort disse stavemåtene spesifikt fra actuals-laget ved eksport,
+// selv om de skulle ligge i passthrough-containeren.
+const BREW_ACTUALS_FORBUDTE_EKSPORTFELT = new Set([
+  ...BREW_FORBUDTE_EKSPORTFELT,
+  "actual_abv", "abv", "actualAbv",
+]);
 
 // Bumpes MANUELT når calc.js/flavor.js/style.js endrer seg på en måte som
 // gir andre tall for samme input. Da kan et gammelt brygg fortsatt leses
@@ -314,6 +347,12 @@ function _normaliserBrew(b) {
   };
   const brewedAt = _tekstEllerUndefined(b.brewedAt);
   if (brewedAt) ut.brewedAt = brewedAt;
+  // Kopieres gjennom ufiltrert, samme prinsipp som snapshot over -- dette
+  // er allerede en fanget container (bygget i parseKbhBrewInnhold()), ikke
+  // rå input som selv skal normaliseres på nytt her.
+  if (_erObjekt(b[BREW_ENVELOPE_PASSTHROUGH_NOKKEL])) {
+    ut[BREW_ENVELOPE_PASSTHROUGH_NOKKEL] = b[BREW_ENVELOPE_PASSTHROUGH_NOKKEL];
+  }
   const ukjent = _fangUkjenteFelt(b, BREW_KJENTE_TOPPFELT);
   if (ukjent) ut[BREW_PASSTHROUGH_NOKKEL] = ukjent;
   return ut;
@@ -565,22 +604,28 @@ function bryggFase(brew) {
 // duplikat, og et fremtidig UI-lag avgjør hva som skal skje.
 
 // PRI 3A.2 (issue #22) -- flater ut ETT normalisert lag til eksportform:
-// kjente felt uendret + bevart passthrough (BREW_PASSTHROUGH_NOKKEL)
-// flettet inn KUN for nøkler et kjent felt ikke allerede dekker (samme
-// presedens som kbhrecipe.js: et kjent, eksplisitt satt felt vinner alltid
-// over en gammel passthrough-verdi med samme navn). Containernøkkelen selv
-// skrives ALDRI ut som et bokstavelig felt. `forbudt` er andre forsvarslinje
-// (se BREW_FORBUDTE_EKSPORTFELT) -- filtrerer bort felt som aldri skal
-// lekke til en fil, selv om de skulle stå i passthrough-containeren.
-function _flatEksportfelt(lag, forbudt) {
+// kjente felt uendret + bevart passthrough flettet inn KUN for nøkler et
+// kjent felt ikke allerede dekker (samme presedens som kbhrecipe.js: et
+// kjent, eksplisitt satt felt vinner alltid over en gammel passthrough-
+// verdi med samme navn). Containernøkkelen selv skrives ALDRI ut som et
+// bokstavelig felt. `forbudt` er andre forsvarslinje (se
+// BREW_FORBUDTE_EKSPORTFELT/BREW_ACTUALS_FORBUDTE_EKSPORTFELT) --
+// filtrerer bort felt som aldri skal lekke til en fil, selv om de skulle
+// stå i passthrough-containeren. `passthroughNokkel` er hvilken
+// containernøkkel som gjelder for DETTE laget -- default
+// BREW_PASSTHROUGH_NOKKEL (de fire normaliserte brew-lagene), men Chief
+// review (PR #23) -- gjenbrukes også for selve filenvelopen med
+// BREW_ENVELOPE_PASSTHROUGH_NOKKEL, se byggKbhBrewInnhold().
+function _flatEksportfelt(lag, forbudt, passthroughNokkel) {
+  const containerNokkel = passthroughNokkel || BREW_PASSTHROUGH_NOKKEL;
   const ut = {};
   if (!_erObjekt(lag)) return ut;
   for (const [nokkel, verdi] of Object.entries(lag)) {
-    if (nokkel === BREW_PASSTHROUGH_NOKKEL) continue;
+    if (nokkel === containerNokkel) continue;
     if (forbudt && forbudt.has(nokkel)) continue;
     ut[nokkel] = verdi;
   }
-  const ukjent = lag[BREW_PASSTHROUGH_NOKKEL];
+  const ukjent = lag[containerNokkel];
   if (_erObjekt(ukjent)) {
     for (const [nokkel, verdi] of Object.entries(ukjent)) {
       if (forbudt && forbudt.has(nokkel)) continue;
@@ -602,19 +647,31 @@ function byggKbhBrewInnhold(brew) {
     },
     BREW_FORBUDTE_EKSPORTFELT
   );
-  return {
-    format: BREW_FIL_FORMAT,
-    version: BREW_FIL_VERSION,
-    exportedAt: new Date().toISOString(),
-    generator: "Kvernhaug Brygghus",
-    brew: {
-      ...toppfelt,
-      snapshot: brew.snapshot,
-      actuals: _flatEksportfelt(brew.actuals, BREW_FORBUDTE_EKSPORTFELT),
-      sensing: _flatEksportfelt(brew.sensing, BREW_FORBUDTE_EKSPORTFELT),
-      learning: _flatEksportfelt(brew.learning, BREW_FORBUDTE_EKSPORTFELT),
+  // Chief review (PR #23) -- envelopen selv (ikke bare brew-objektet) kan
+  // bære et bevart ukjent felt (BREW_ENVELOPE_PASSTHROUGH_NOKKEL, satt av
+  // parseKbhBrewInnhold() ved import). `forbudt: null` her -- de fem kjente
+  // envelope-feltene (format/version/exportedAt/generator/brew) vinner
+  // uansett siden de allerede står eksplisitt i objektet under (samme
+  // "kjent felt vinner alltid"-presedens som _flatEksportfelt håndhever for
+  // alle andre lag), det finnes ingen forbudt-liste på selve envelope-nivå.
+  return _flatEksportfelt(
+    {
+      format: BREW_FIL_FORMAT,
+      version: BREW_FIL_VERSION,
+      exportedAt: new Date().toISOString(),
+      generator: "Kvernhaug Brygghus",
+      brew: {
+        ...toppfelt,
+        snapshot: brew.snapshot,
+        actuals: _flatEksportfelt(brew.actuals, BREW_ACTUALS_FORBUDTE_EKSPORTFELT),
+        sensing: _flatEksportfelt(brew.sensing, BREW_FORBUDTE_EKSPORTFELT),
+        learning: _flatEksportfelt(brew.learning, BREW_FORBUDTE_EKSPORTFELT),
+      },
+      [BREW_ENVELOPE_PASSTHROUGH_NOKKEL]: brew[BREW_ENVELOPE_PASSTHROUGH_NOKKEL],
     },
-  };
+    null,
+    BREW_ENVELOPE_PASSTHROUGH_NOKKEL
+  );
 }
 
 // Returnerer { ok: true, brew } eller { ok: false, melding }. Wrapper-feil
@@ -637,7 +694,16 @@ function parseKbhBrewInnhold(tekst) {
   if (!_erObjekt(parsed.brew) || !_gyldigSnapshot(parsed.brew.snapshot)) {
     return { ok: false, melding: t("brygg.feilUgyldigFil") };
   }
-  return { ok: true, brew: parsed.brew };
+  // Chief review (PR #23) -- envelope-nivå ukjente felt (utenfor
+  // format/version/exportedAt/generator/brew) fanges her og bæres videre
+  // PÅ det returnerte brew-objektet under BREW_ENVELOPE_PASSTHROUGH_NOKKEL,
+  // siden brew-objektet er det eneste som til slutt persisteres
+  // (importerBrygg() -> _normaliserBrew() kopierer den gjennom eksplisitt,
+  // se der). Selve fil-envelopen bygges alltid på nytt ved eksport.
+  const brew = { ...parsed.brew };
+  const envelopeUkjent = _fangUkjenteFelt(parsed, BREW_KJENTE_ENVELOPEFELT);
+  if (envelopeUkjent) brew[BREW_ENVELOPE_PASSTHROUGH_NOKKEL] = envelopeUkjent;
+  return { ok: true, brew };
 }
 
 // Skriver en importert brew til lageret med FERSK lokal brewId. Returnerer
