@@ -232,6 +232,17 @@ jobs:
       # branch before this run -- otherwise a stale PR from an earlier
       # failed/manual run could be mistaken for this run's own
       # deliverable, see deliverable_guard.py's module docstring).
+      #
+      # Chief review fix (PR #13, round 4): HEAD-SHA alone doesn't prove
+      # it's the SAME PR -- the allowlist still permits `gh pr edit`/
+      # `gh pr create`, so a status:changes-requested run could in
+      # principle re-target the original PR's base away from `master`
+      # and open a NEW PR from the same branch, which post-run `gh pr
+      # list --head <branch> --base master` would then find with a HEAD
+      # SHA that differs from before_head_sha "by coincidence" -- wrongly
+      # approved as "the same PR, new commits". Captures the PR NUMBER
+      # alongside its HEAD SHA from the exact same query, so the gate can
+      # require both: unchanged identity AND changed HEAD.
       - name: Capture pre-run PR state (used by both trigger labels — see deliverable_guard.py)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: before
@@ -239,9 +250,10 @@ jobs:
           BRANCH: ${{ steps.branch.outputs.name }}
         run: |
           set -euo pipefail
-          before_sha=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
-            --json headRefOid -q '.[0].headRefOid // empty')
-          echo "before_head_sha=$before_sha" >> "$GITHUB_OUTPUT"
+          before_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+            --json number,headRefOid)
+          echo "before_pr_number=$(echo "$before_json" | jq -r '.[0].number // empty')" >> "$GITHUB_OUTPUT"
+          echo "before_head_sha=$(echo "$before_json" | jq -r '.[0].headRefOid // empty')" >> "$GITHUB_OUTPUT"
 
       # V1.2 (issue #12): the first real E2E run (issue #11) finished
       # `conclusion: success` with `permission_denials_count: 14` and
@@ -386,6 +398,7 @@ jobs:
         id: deliverable
         env:
           BEFORE_HEAD_SHA: ${{ steps.before.outputs.before_head_sha }}
+          BEFORE_PR_NUMBER: ${{ steps.before.outputs.before_pr_number }}
         run: |
           set -euo pipefail
           python3 .github/scripts/deliverable_guard.py < "$RUNNER_TEMP/deliverable_prs.json" >> "$GITHUB_OUTPUT"

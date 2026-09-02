@@ -199,8 +199,9 @@ class TestDeliverableGuard(unittest.TestCase):
     def test_8_changes_requested_uendret_head_avvises(self):
         ok, nummer, begrunnelse = _DG.vurder_leveranse(
             trigger_label="status:changes-requested",
-            prs=[_pr(head="samme-sha")],
+            prs=[_pr(number=42, head="samme-sha")],
             forrige_head_sha="samme-sha",
+            forrige_pr_nummer=42,
         )
         self.assertFalse(ok)
         self.assertEqual(nummer, 42)
@@ -209,8 +210,9 @@ class TestDeliverableGuard(unittest.TestCase):
     def test_9_changes_requested_endret_head_godkjennes(self):
         ok, nummer, begrunnelse = _DG.vurder_leveranse(
             trigger_label="status:changes-requested",
-            prs=[_pr(head="ny-sha-etter-push")],
+            prs=[_pr(number=42, head="ny-sha-etter-push")],
             forrige_head_sha="gammel-sha-for-run",
+            forrige_pr_nummer=42,
         )
         self.assertTrue(ok, begrunnelse)
         self.assertEqual(nummer, 42)
@@ -220,9 +222,65 @@ class TestDeliverableGuard(unittest.TestCase):
             trigger_label="status:changes-requested",
             prs=[_pr(number=1, head="x"), _pr(number=2, head="y")],
             forrige_head_sha="gammel",
+            forrige_pr_nummer=1,
         )
         self.assertFalse(ok)
         self.assertIsNone(nummer)
+
+    # ─── 9c-9e: KJERNEN I RUNDE 4-FIKSEN -- PR-IDENTITET, ikke bare HEAD ─
+    # (Chief review, PR #13: allowlisten gir fortsatt `gh pr edit`/
+    # `gh pr create`, så porten må bekrefte at det faktisk er SAMME PR
+    # som fikk de nye commit-ene, ikke bare at "en eller annen PR" på
+    # branchen har en annen HEAD-SHA enn før.)
+
+    def test_9c_changes_requested_samme_pr_nummer_og_endret_head_godkjennes(self):
+        # Reviewets eksplisitte happy-path-krav: samme PR + endret head => pass.
+        ok, nummer, begrunnelse = _DG.vurder_leveranse(
+            trigger_label="status:changes-requested",
+            prs=[_pr(number=42, head="ny-sha")],
+            forrige_head_sha="gammel-sha",
+            forrige_pr_nummer=42,
+        )
+        self.assertTrue(ok, begrunnelse)
+        self.assertEqual(nummer, 42)
+
+    def test_9d_changes_requested_annet_pr_nummer_selv_med_endret_head_avvises(self):
+        # Reviewets eksplisitte kjernekrav: en ANNEN PR på samme branch,
+        # selv med en HEAD-SHA som avviker fra forrige_head_sha, skal
+        # ALDRI godkjennes som om det var oppfølgingen av den opprinnelige.
+        ok, nummer, begrunnelse = _DG.vurder_leveranse(
+            trigger_label="status:changes-requested",
+            prs=[_pr(number=99, head="en-helt-annen-sha")],
+            forrige_head_sha="gammel-sha-for-pr-42",
+            forrige_pr_nummer=42,
+        )
+        self.assertFalse(ok, "Ulik PR-identitet skal aldri godkjennes, uansett HEAD-endring.")
+        self.assertEqual(nummer, 99)
+        self.assertIn("PR-identiteten endret seg", begrunnelse)
+
+    def test_9e_changes_requested_manglende_forrige_pr_nummer_avvises(self):
+        ok, nummer, begrunnelse = _DG.vurder_leveranse(
+            trigger_label="status:changes-requested",
+            prs=[_pr(number=42, head="ny-sha")],
+            forrige_head_sha="gammel-sha",
+            forrige_pr_nummer=None,
+        )
+        self.assertFalse(ok)
+        self.assertEqual(nummer, 42)
+        self.assertIn("ingen PR-nummer", begrunnelse)
+
+    def test_9f_changes_requested_pr_nummer_som_streng_matcher_int(self):
+        # Workflowen sender BEFORE_PR_NUMBER som en shell-streng via
+        # miljøvariabler; PR-listens `number`-felt er derimot et
+        # JSON-heltall. Sammenligningen må ikke feile pga. typeforskjell.
+        ok, nummer, begrunnelse = _DG.vurder_leveranse(
+            trigger_label="status:changes-requested",
+            prs=[_pr(number=42, head="ny-sha")],
+            forrige_head_sha="gammel-sha",
+            forrige_pr_nummer="42",
+        )
+        self.assertTrue(ok, begrunnelse)
+        self.assertEqual(nummer, 42)
 
     # ─── 10: ukjent trigger-etikett ─────────────────────────────────────
 
@@ -280,13 +338,39 @@ class TestDeliverableGuard(unittest.TestCase):
 
     def test_11c_cli_bruker_before_head_sha_for_changes_requested(self):
         res = self._kjor_cli(
-            {"TRIGGER_LABEL": "status:changes-requested", "BEFORE_HEAD_SHA": "old"},
+            {"TRIGGER_LABEL": "status:changes-requested", "BEFORE_HEAD_SHA": "old", "BEFORE_PR_NUMBER": "3"},
             '[{"number": 3, "state": "OPEN", "baseRefName": "master", '
             '"headRefOid": "new", "additions": 1, "deletions": 0, "changedFiles": 1}]',
         )
         self.assertEqual(res.returncode, 0)
         self.assertIn("ok=true", res.stdout)
         self.assertIn("pr_number=3", res.stdout)
+
+    def test_11f_cli_avviser_annen_pr_selv_med_endret_head(self):
+        # Chief review, PR #13 runde 4: den ende-til-ende CLI-kontrakten
+        # for identitetssjekken -- BEFORE_PR_NUMBER=3, men PR-en
+        # workflowen faktisk finner etterpå er #8 (f.eks. fordi den
+        # opprinnelige PR-ens base ble endret og en ny PR ble opprettet
+        # mot master fra samme branch) -- skal ALDRI godkjennes.
+        res = self._kjor_cli(
+            {"TRIGGER_LABEL": "status:changes-requested", "BEFORE_HEAD_SHA": "old", "BEFORE_PR_NUMBER": "3"},
+            '[{"number": 8, "state": "OPEN", "baseRefName": "master", '
+            '"headRefOid": "new", "additions": 1, "deletions": 0, "changedFiles": 1}]',
+        )
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("ok=false", res.stdout)
+        self.assertIn("pr_number=8", res.stdout)
+        self.assertIn("PR-identiteten endret seg", res.stderr)
+
+    def test_11g_cli_avviser_changes_requested_uten_before_pr_number(self):
+        res = self._kjor_cli(
+            {"TRIGGER_LABEL": "status:changes-requested", "BEFORE_HEAD_SHA": "old", "BEFORE_PR_NUMBER": ""},
+            '[{"number": 3, "state": "OPEN", "baseRefName": "master", '
+            '"headRefOid": "new", "additions": 1, "deletions": 0, "changedFiles": 1}]',
+        )
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("ok=false", res.stdout)
+        self.assertIn("ingen PR-nummer", res.stderr)
 
     def test_11d_cli_tolererer_tom_stdin(self):
         res = self._kjor_cli({"TRIGGER_LABEL": "status:ready"}, "")

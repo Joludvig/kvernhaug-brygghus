@@ -300,9 +300,11 @@ to reach `status:review`. Two new steps run after it, only on
      non-`master` base, an already-merged/closed PR, or (see below) a
      **non-empty `before_head_sha`** all fail the gate.
    - **`status:changes-requested`**: the same, single associated open
-     PR, **and** its `headRefOid` must differ from the `before_head_sha`
-     value captured by that same step, proving new commits were
-     actually pushed this run — not merely that an old PR still exists.
+     PR — with its `number` matching the `before_pr_number` also
+     captured by that step (see round 4 below) — **and** its
+     `headRefOid` must differ from `before_head_sha`, proving new
+     commits were actually pushed to *that same PR* this run — not
+     merely that an open PR with a different HEAD exists on the branch.
 
    **Chief review fix (PR #13, round 3):** because the branch name is
    *deliberately* deterministic and reused across an issue's whole
@@ -322,6 +324,28 @@ to reach `status:review`. Two new steps run after it, only on
    coverage: `tests/test_agent_bridge_deliverable_guard.py`
    `test_3c`/`test_3d` (rejects both the same-HEAD and the
    HEAD-changed-anyway cases) and `test_11e` (the CLI contract).
+
+   **Chief review fix (PR #13, round 4):** a changed `headRefOid` alone
+   still didn't prove it was the *same* PR — the gate compared only the
+   HEAD SHA of "whatever open PR the query finds now" against the
+   before-value, never the PR's identity. Because `--allowedTools` still
+   permits `gh pr edit`/`gh pr create`, a `status:changes-requested` run
+   could in principle re-target the original PR's base away from
+   `master` and open a **new** PR from the same branch — post-run
+   `gh pr list --head <branch> --base master` would then find that new
+   PR, with a HEAD SHA that differs from `before_head_sha` "by
+   coincidence" (it's simply a different PR), and the gate would have
+   approved it as "the same PR, new commits." Fixed: the "Capture
+   pre-run PR state" step now captures `before_pr_number` from the exact
+   same `gh pr list` query, and the gate requires **both** — unchanged
+   PR number (identity) **and** changed HEAD SHA (progress) — rejecting
+   with a specific reason if the number differs, or if no
+   `before_pr_number` was captured at all. Regression coverage:
+   `test_9c` (same PR, changed HEAD → pass, the review's explicit
+   happy-path requirement), `test_9d` (different PR number, changed HEAD
+   → reject, the review's explicit core requirement), `test_9e`/`test_9f`
+   (missing `before_pr_number` rejects; string/int PR-number comparison
+   doesn't false-negative), and `test_11f`/`test_11g` (the CLI contract).
 
 If the gate passes, the existing "Move to status:review" step runs
 exactly as before. If Claude's step succeeded but the gate fails, a

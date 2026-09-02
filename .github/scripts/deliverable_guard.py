@@ -79,6 +79,22 @@ leverte, uansett innhold. Rettelsen: for status:ready skal
 `forrige_head_sha` derfor være TOM -- enhver ikke-tom verdi betyr en
 pre-eksisterende PR og avviser porten, uavhengig av diff-størrelse eller
 om HEAD-en endret seg underveis.
+
+Chief review-fiks (PR #13, runde 4): `status:changes-requested` beviste
+fortsatt ikke PR-IDENTITET -- porten sammenlignet kun HEAD-SHA, ikke
+PR-nummer. Siden branchen er den samme gjennom hele issuens levetid, og
+allowlisten fortsatt gir `gh pr edit`/`gh pr create`, kunne i prinsippet
+en ANNEN PR på samme branch (f.eks. hvis den opprinnelige PR-ens base
+ble endret bort fra master, og en NY PR ble opprettet mot master fra
+samme branch) bli funnet av post-run `gh pr list --head ... --base
+master` med en HEAD-SHA som tilfeldigvis avviker fra `forrige_head_sha`
+-- og bli feilaktig godkjent som "samme PR, nye commits", selv om det
+faktisk var en helt annen PR. Rettelsen: workflowen fanger nå
+`forrige_pr_nummer` sammen med `forrige_head_sha` (samme pre-run steg,
+samme spørring), og porten krever at PR-NUMMERET er UENDRET i tillegg
+til at HEAD-SHA-en har endret seg -- identiteten OG fremdriften må begge
+bekreftes. Manglende PR-nummer (fanget FØR eller funnet ETTER kjøringen)
+avviser porten på samme måte som manglende HEAD-SHA alltid har gjort.
 """
 import json
 import os
@@ -94,18 +110,21 @@ def _apne_prs_mot_master(prs):
     ]
 
 
-def vurder_leveranse(*, trigger_label, prs, forrige_head_sha=None):
+def vurder_leveranse(*, trigger_label, prs, forrige_head_sha=None, forrige_pr_nummer=None):
     """
     Returnerer (ok: bool, pr_number: int|None, begrunnelse: str).
 
     `prs`: liste av dicts for PR-er funnet på issuens deterministiske
-    branch (`gh pr list --head agent/issue-N`). `forrige_head_sha`:
-    PR-ens HEAD-SHA slik den var FØR denne kjøringen startet, fanget
-    uavhengig av trigger-etikett -- brukt av BEGGE grenene, på motsatte
-    måter: for `status:changes-requested` skal den finnes og ha endret
-    seg (bevis på nye commits); for `status:ready` skal den derimot
-    være TOM (bevis på at ingen PR lå der FØR denne kjøringen -- se
-    moduldocstringen, "Chief review-fiks (PR #13, runde 3)").
+    branch (`gh pr list --head agent/issue-N`). `forrige_head_sha` og
+    `forrige_pr_nummer`: PR-ens HEAD-SHA og nummer slik de var FØR denne
+    kjøringen startet, fanget sammen, uavhengig av trigger-etikett --
+    brukt av BEGGE grenene, på motsatte måter:
+    - `status:changes-requested`: begge skal finnes, PR-NUMMERET skal
+      være UENDRET (samme PR-identitet), og HEAD-SHA-en skal ha endret
+      seg (bevis på nye commits til DEN SAMME PR-en -- runde 4).
+    - `status:ready`: `forrige_head_sha` skal derimot være TOM (bevis
+      på at ingen PR lå der FØR denne kjøringen -- runde 3);
+      `forrige_pr_nummer` er ikke relevant for denne grenen.
     """
     if trigger_label not in GYLDIGE_TRIGGER_ETIKETTER:
         return False, None, f"Ukjent trigger-etikett {trigger_label!r} -- kan ikke verifisere leveranse."
@@ -148,6 +167,19 @@ def vurder_leveranse(*, trigger_label, prs, forrige_head_sha=None):
             "kjøringen startet -- kan ikke bekrefte at noe nytt ble pushet."
         )
 
+    if not forrige_pr_nummer:
+        return False, nummer, (
+            f"PR #{nummer} finnes, men ingen PR-nummer ble fanget FØR denne kjøringen "
+            "startet -- kan ikke bekrefte at det er samme PR som får godkjenningen."
+        )
+
+    if str(nummer) != str(forrige_pr_nummer):
+        return False, nummer, (
+            f"PR-identiteten endret seg underveis: FØR kjøringen var det PR "
+            f"#{forrige_pr_nummer}, nå er det PR #{nummer} på samme branch -- kan ikke "
+            "bekrefte at dette er samme PR som skulle fått endringene."
+        )
+
     head_na = pr.get("headRefOid")
     if head_na == forrige_head_sha:
         return False, nummer, (
@@ -156,14 +188,16 @@ def vurder_leveranse(*, trigger_label, prs, forrige_head_sha=None):
         )
 
     return True, nummer, (
-        f"PR #{nummer} sin HEAD-SHA endret seg fra {forrige_head_sha} til {head_na} -- leveranse verifisert."
+        f"PR #{nummer} (samme PR-identitet bekreftet) sin HEAD-SHA endret seg fra "
+        f"{forrige_head_sha} til {head_na} -- leveranse verifisert."
     )
 
 
 def main():
     """
-    Miljøvariabler: TRIGGER_LABEL, BEFORE_HEAD_SHA (valgfri/tom streng).
-    stdin: JSON-array av PR-dicts (se moduldocstring for feltnavn).
+    Miljøvariabler: TRIGGER_LABEL, BEFORE_HEAD_SHA, BEFORE_PR_NUMBER
+    (begge valgfrie/tomme strenger). stdin: JSON-array av PR-dicts (se
+    moduldocstring for feltnavn).
 
     Skriver GITHUB_OUTPUT-linjer til stdout (`ok`, `pr_number` hvis
     kjent, `reason`) og samme begrunnelse til stderr for loggen.
@@ -180,6 +214,7 @@ def main():
         trigger_label=os.environ.get("TRIGGER_LABEL", ""),
         prs=prs,
         forrige_head_sha=os.environ.get("BEFORE_HEAD_SHA") or None,
+        forrige_pr_nummer=os.environ.get("BEFORE_PR_NUMBER") or None,
     )
 
     print(begrunnelse, file=sys.stderr)
