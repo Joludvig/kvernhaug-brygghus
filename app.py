@@ -91,6 +91,12 @@ if "_aktiv_recipe_efficiency" not in st.session_state:
     # og i ui/recipe_card.py sin arkiver-/blank-flyt uten "pending"-mønsteret
     # gjeldende_navn/brygger_stil trenger.
     st.session_state["_aktiv_recipe_efficiency"] = None
+if "_aktiv_kbh_passthrough" not in st.session_state:
+    # PRI 2C2 (KBHR-011/KBHR-014) -- None = "ingen bevart import-
+    # metadata ennå" for en helt ny/blank økt. Ikke widget-bundet, kan
+    # settes direkte her og i ui/recipe_card.py sin arkiver-/blank-flyt,
+    # samme mønster som _aktiv_recipe_efficiency over.
+    st.session_state["_aktiv_kbh_passthrough"] = None
 
 # Løs opp pending batch-volum fra skalering (må skje før widgeten instansieres)
 if "_pending_batch_volum" in st.session_state:

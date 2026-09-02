@@ -1,3 +1,4 @@
+import copy
 import json
 import streamlit as st
 from config import DEMO_MODE
@@ -64,6 +65,23 @@ def render_sidebar():
             # gjeldende utstyrsprofil, akkurat som OPPGAVE D krever. Selve
             # utstyrsprofilen leses/endres ALDRI her.
             st.session_state["_aktiv_recipe_efficiency"] = resolve_recipe_efficiency(r_data.get("efficiency"))
+            # PRI 2C2 (KBHR-011/KBHR-014) -- ikke-beregningspåvirkende
+            # metadata bevart opakt fra en tidligere .kbhrecipe-import
+            # (se modules/kbh_import.py sin "passthrough",
+            # modules/recipe.py sin `_kbh_passthrough`-nøkkel) må følge
+            # oppskriften videre gjennom load, akkurat som
+            # _aktiv_recipe_efficiency over. Nøkkelen settes UBETINGET på
+            # HVERT load -- enten til den nylastede oppskriftens egen
+            # (deep-copierte) passthrough, eller til None -- slik at en
+            # tidligere lastet oppskrifts passthrough ALDRI kan henge
+            # igjen etter et bytte til en oppskrift som mangler feltet
+            # (vanlig, ikke-importert oppskrift, eller en eldre lagring).
+            _lagret_passthrough = r_data.get("_kbh_passthrough")
+            st.session_state["_aktiv_kbh_passthrough"] = (
+                copy.deepcopy(_lagret_passthrough)
+                if isinstance(_lagret_passthrough, dict) and _lagret_passthrough
+                else None
+            )
             # Normaliser en EVENTUELT lagret prosessprofil FØR den blir
             # aktiv — en kjent standardprofil (Hochkurz osv.) kan da
             # ALDRI hydreres inn med en korrupt/hybrid meskeplan fra en

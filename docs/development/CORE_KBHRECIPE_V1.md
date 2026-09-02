@@ -166,9 +166,21 @@ during that merge, alongside the forbidden fields) — the key itself
 never appears in an exported file (regression-tested, see PRI 2A QA-
 korreksjon report).
 
-App's own passthrough mechanism (PRI 2C1, `modules/kbh_import.py`) is
-built on the same principle — see §13. It is not yet wired into any
-UI/session_state/storage (PRI 2C2/2C3).
+App's own passthrough mechanism (PRI 2C1 reader, PRI 2C2
+recipe/session_state/writer wiring) is built on the same principle —
+see §13. App represents it as a single internal recipe field,
+`_kbh_passthrough` (`modules/recipe.py::bygg_recipe_object()`'s
+`kbh_passthrough` parameter — a plain dict, deep-copied at every
+boundary, omitted entirely from the recipe object when empty), mirrored
+by one internal, non-widget-bound `session_state` key,
+`_aktiv_kbh_passthrough` (same lifecycle pattern as
+`_aktiv_recipe_efficiency`, PRI 2C0). Like Web's `_kbhUkjenteFelt`, it
+is never itself a V1 field — `modules/kbh_contract.py`'s writer merges
+its *contents* back into a fresh export as unknown top-level fields
+(`_flett_inn_passthrough()`), and a known Core field the writer already
+builds always wins over a stale passthrough value with the same key.
+**Not yet wired into a Streamlit import UI** (no file uploader, no
+import preview, no save-on-import) — that is PRI 2C3.
 
 ## 7. Forbidden export fields
 
@@ -295,9 +307,12 @@ predates the wrapper format and lets old exports keep working.
 
 `modules/kbh_import.py` is App's pure, side-effect-free `.kbhrecipe` V1
 reader (parse + validate + reverse-adapt to App-native recipe data —
-the mirror of `modules/kbh_contract.py`'s writer direction). **Not yet
-wired into any UI, session_state, or storage write** — that is PRI
-2C2/2C3.
+the mirror of `modules/kbh_contract.py`'s writer direction). Its
+`passthrough` result is wired into the App-native recipe object,
+`session_state`, `recipe_storage`, and the writer's re-export (PRI
+2C2 — see §6 and the bullet below). **Not yet wired into a Streamlit
+import UI** (no file uploader, no import preview, no save-on-import)
+— that is PRI 2C3.
 
 **This section describes what today's App reader accepts or rejects.
 It is a statement of current App capability, not a new normative rule
@@ -346,6 +361,21 @@ than this without violating V1. Where this section would conflict with
   never native-imported and never passed through, regardless of what a
   file contains under those names (same two-independent-points defense
   already used on the Web writer side).
+- **The App writer can re-emit preserved passthrough on export (PRI
+  2C2).** `modules/kbh_contract.py::recipe_to_kbhrecipe_payload()`
+  builds all known Core fields first, exactly as before, then merges in
+  `recipe["_kbh_passthrough"]`'s contents as unknown top-level fields
+  (`_flett_inn_passthrough()`) — never with a blind `dict.update()`.
+  Any key already in App's known-field list (§2/§3) is skipped
+  unconditionally, whether or not the writer actually populated it this
+  round, so a known Core field the user has genuinely changed always
+  wins over a stale passthrough value with the same key (e.g. an edited
+  `navn`/`volum` always overrides an old passthrough copy of the same
+  name). `recipeId`, `stats`, `flavor_profile`, and the
+  `_kbh_passthrough` container name itself are filtered out
+  independently of the known-field list, so they can never leak back
+  out even if they somehow ended up inside a hand-edited passthrough
+  dict.
 
 **Frozen legacy fixtures are compatibility evidence, not an import-safety
 guarantee (KBHR-020).** `tests/fixtures/legacy/kbhrecipe/*.json` (frozen
@@ -372,9 +402,11 @@ V1 process data must look like.
 
 - Does not define `.kbhrecipe` V2, and does not add a new envelope
   version.
-- Does not implement App import UI, storage writes, or session_state
-  integration — PRI 2C1 is a pure parser only (§14); wiring is PRI
-  2C2/2C3.
+- Does not implement a Streamlit import UI (file uploader, import
+  preview, save-on-import) — PRI 2C1 is a pure parser only, and PRI 2C2
+  only wires its `passthrough` result into the recipe object,
+  `session_state`, storage, and the writer (§13); the UI itself is PRI
+  2C3.
 - Does not implement `recipeId`/`originRecipeId` end-to-end identity.
 - Does not build a `recipeSchemaVersion` migrator — an unsupported
   schema is rejected explicitly (§9), never interpreted or upgraded.

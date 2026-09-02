@@ -1,4 +1,5 @@
 # modules/recipe.py
+import copy
 
 # PRI 2C0 (KBHR-019) -- efficiency er recipe-scoped semantikk NAR en
 # konkret recipe faktisk har en gyldig verdi. Ren, testbar policy-funksjon
@@ -36,7 +37,8 @@ def resolve_recipe_efficiency(recipe_efficiency):
 def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg, abv, ibu, ebc, flavor_profile,
                         brygger_stil="", process_profile=None,
                         water_source_profile=None, water_target_profile=None,
-                        water_treatment=None, water_measurements=None):
+                        water_treatment=None, water_measurements=None,
+                        kbh_passthrough=None):
     """
     `process_profile` (se modules/process_profiles.py) er bevisst et helt
     separat, valgfritt felt — HVORDAN ølet brygges (meskesteg, skyllemetode,
@@ -50,6 +52,21 @@ def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg,
     endre malt/humle/gjær, prosessprofilen eller utstyrsprofilen, og
     omvendt. Gamle oppskrifter uten disse feltene (None) må fortsatt kunne
     åpnes uendret.
+
+    `kbh_passthrough` (PRI 2C2, KBHR-011/KBHR-014) — ikke-beregnings-
+    påvirkende metadata App selv ikke forstår/eier, bevart opakt fra en
+    tidligere `.kbhrecipe`-import (se modules/kbh_import.py sin
+    "passthrough"-returverdi: `brygger`/`bryggeri`/`notater`/`valgtStil`/
+    ukjente fremtidige felt). Rent App-internt felt (`_kbh_passthrough`
+    på selve recipe-objektet) — IKKE et Core V1-payload-felt i seg selv
+    (KBHR-009: containeren skal aldri selv bli et V1-felt) og ALDRI
+    beregningsinput; kun lagret (session_state, recipe_storage) og
+    re-eksportert opakt av modules/kbh_contract.py. Skrives KUN inn i
+    recipe-objektet hvis den faktisk er en ikke-tom dict (deep-copiert,
+    slik at en senere mutasjon av kallerens egen dict ikke kan lekke inn
+    i det lagrede recipe-objektet) — en tom/manglende verdi betyr "ingen
+    bevart import-metadata for denne oppskriften", og feltet utelates da
+    helt, i stedet for å skrive en tom/None-verdi.
     """
     recipe = {
         "name": navn if navn else "Navnløs Brygg",
@@ -73,4 +90,6 @@ def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg,
         "water_treatment": water_treatment,
         "water_measurements": water_measurements,
     }
+    if isinstance(kbh_passthrough, dict) and kbh_passthrough:
+        recipe["_kbh_passthrough"] = copy.deepcopy(kbh_passthrough)
     return recipe
