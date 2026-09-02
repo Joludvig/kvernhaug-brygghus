@@ -191,6 +191,35 @@ class TestApplyKbhrecipeImportTilSessionState(unittest.TestCase):
         self.assertNotIn("_last_loaded_recipe", st.session_state)
         self.assertNotIn("_last_loaded_recipe_file", st.session_state)
 
+    # ─── 12b-12d: Chief review-fiks (PR #5) -- prosess-/vann-panelenes
+    # egne "synced_for"-markører må fjernes, ikke bare stå igjen som None,
+    # slik at ui/process_panel.py/ui/water_panel.py tvinges til å resynke
+    # fra den importerte prosessen/vannet selv når forrige aktive
+    # oppskrift OGSÅ allerede var ny/ulagret (_last_loaded_recipe var
+    # None BÅDE før og etter -- se
+    # tests/test_kbh_import_process_water_resync_apptest.py for det fulle,
+    # ekte UI-nivå-beviset via AppTest; dette er kun den raske,
+    # isolerte bekreftelsen på selve markør-fjerningen).
+
+    def test_12b_prosess_synced_for_fjernes(self):
+        st.session_state["_prosess_synced_for"] = None  # simulerer "allerede synket mot en ulagret oppskrift"
+        apply_kbhrecipe_import_to_session_state(_import_resultat())
+        self.assertNotIn("_prosess_synced_for", st.session_state)
+
+    def test_12c_vann_synced_for_fjernes(self):
+        st.session_state["_vann_synced_for"] = None
+        apply_kbhrecipe_import_to_session_state(_import_resultat())
+        self.assertNotIn("_vann_synced_for", st.session_state)
+
+    def test_12d_markorer_fjernes_ogsaa_naar_de_pekte_paa_en_navngitt_lagret_oppskrift(self):
+        # Samme fjerning uansett hvilken verdi markørene hadde FØR importen
+        # -- ikke bare relevant for None -> None-tilfellet.
+        st.session_state["_prosess_synced_for"] = "En Tidligere Lagret Oppskrift"
+        st.session_state["_vann_synced_for"] = "En Tidligere Lagret Oppskrift"
+        apply_kbhrecipe_import_to_session_state(_import_resultat())
+        self.assertNotIn("_prosess_synced_for", st.session_state)
+        self.assertNotIn("_vann_synced_for", st.session_state)
+
     # ─── 13: gammel state kan ikke lekke inn i den importerte oppskriften ─
 
     def test_13_stale_state_fra_forrige_aktiv_oppskrift_lekker_ikke(self):

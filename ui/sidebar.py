@@ -221,6 +221,24 @@ def render_sidebar():
             label_visibility="collapsed",
         )
 
+        # Chief review-fiks (PR #5): en forhåndsvisning/feil skal ALDRI
+        # kunne overleve at brukeren bytter til en ANNEN fil eller fjerner
+        # filen fra opplasteren -- Streamlit sitt file_uploader-widget
+        # trigger en rerun uansett ved slike endringer (uavhengig av om
+        # "Analyser"-knappen noensinne trykkes på nytt), men
+        # kbhrecipe_import_preview/-_feil lever videre i session_state fra
+        # forrige analyse med mindre vi eksplisitt sjekker dette HER, FØR
+        # forhåndsvisningen/bekreft-knappen under i det hele tatt vurderer
+        # å vise noe. `file_id` er en unik, per-opplasting-identitet
+        # Streamlit selv tildeler (endres selv ved re-opplasting av samme
+        # fil) -- et strengt, konservativt signaturvalg: enhver endring i
+        # opplasterens tilstand ugyldiggjør en gammel forhåndsvisning.
+        _kbhrecipe_fil_id = getattr(kbhrecipe_fil, "file_id", None) if kbhrecipe_fil is not None else None
+        if st.session_state.get("kbhrecipe_import_preview_file_id") != _kbhrecipe_fil_id:
+            st.session_state.pop("kbhrecipe_import_preview", None)
+            st.session_state.pop("kbhrecipe_import_feil", None)
+            st.session_state["kbhrecipe_import_preview_file_id"] = _kbhrecipe_fil_id
+
         if st.button("🔍 Analyser .kbhrecipe-fil", key="kbhrecipe_analyser_btn", width="stretch"):
             if kbhrecipe_fil is None:
                 st.warning("Velg en fil først.")
@@ -277,5 +295,6 @@ def render_sidebar():
                 apply_kbhrecipe_import_to_session_state(kbhrecipe_preview)
                 st.session_state.pop("kbhrecipe_import_preview", None)
                 st.session_state.pop("kbhrecipe_import_feil", None)
+                st.session_state.pop("kbhrecipe_import_preview_file_id", None)
                 st.sidebar.success(f"Importert: {_r['name']}")
                 st.rerun()

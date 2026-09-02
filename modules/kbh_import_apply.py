@@ -100,3 +100,23 @@ def apply_kbhrecipe_import_to_session_state(import_resultat):
     # aldri "Lagre endringer" på en fremmed fil.
     st.session_state.pop("_last_loaded_recipe", None)
     st.session_state.pop("_last_loaded_recipe_file", None)
+
+    # Chief review-fiks (PR #5): ui/process_panel.py og ui/water_panel.py
+    # bruker HVER SIN egen "synced_for"-markør
+    # (_prosess_synced_for/_vann_synced_for) som de sammenligner mot
+    # _last_loaded_recipe for å avgjøre om de skal resynke sin EGEN,
+    # panel-lokale widget-state fra aktiv_prosessprofil/_lastet_water_*.
+    # Siden importen over BEVISST tømmer _last_loaded_recipe (den skal jo
+    # forbli None for en "ny, ulagret" oppskrift), ville et bytte fra "en
+    # ANNEN allerede ulagret oppskrift" (der _last_loaded_recipe også
+    # allerede var None) til "nettopp importert oppskrift" sett ut som
+    # None -> None for begge panelene -- ingen synlig endring, og de ville
+    # IKKE resynket, slik at forrige, nå stale panel-lokale prosess-/
+    # vann-widget-state kunne overleve og overskrive akkurat de feltene vi
+    # nettopp satte over. Ved eksplisitt å FJERNE begge markørene tvinges
+    # BEGGE panelene til å resynke ubetinget på neste rendering, uansett
+    # hva _last_loaded_recipe måtte være før/etter -- uten å måtte
+    # gjeninnføre/late som en lagret identitet (som ville brutt "import
+    # as new"). Ren, minimal fiks: INGEN endring i selve panelfilene.
+    st.session_state.pop("_prosess_synced_for", None)
+    st.session_state.pop("_vann_synced_for", None)

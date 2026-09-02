@@ -237,6 +237,64 @@ class TestKbhrecipeImportUiAppTest(unittest.TestCase):
         analyser_knapper = [b for b in at.sidebar.button if b.key == "import_analyser_btn"]
         self.assertEqual(len(analyser_knapper), 1)
 
+    # ─── 7-9: Chief review-fiks (PR #5) -- forhåndsvisning bundet til
+    # GJELDENDE opplasting, ikke bare "forrige analyse" ────────────────
+    #
+    # Reprodusert av reviewet: analyser fil A -> forhåndsvisning A vises
+    # -> BYTT/FJERN filen i opplasteren UTEN å trykke Analyser på nytt ->
+    # den GAMLE forhåndsvisningen (og bekreft-knappen for den) sto
+    # tidligere igjen, uendret, selv om opplasteren nå viste noe helt
+    # annet (eller ingenting). Fikset i ui/sidebar.py ved å binde
+    # forhåndsvisningen til opplasterens `file_id` (en unik, per-fil-
+    # identitet Streamlit selv tildeler) og ugyldiggjøre den øyeblikkelig
+    # hvis `file_id` ikke lenger matcher, FØR forhåndsvisnings-/
+    # bekreft-blokken i det hele tatt vurderer å vise noe.
+
+    def test_7_bytte_fil_uten_ny_analyse_ugyldiggjor_gammel_forhandsvisning(self):
+        at = self._ny_apptest()
+        self._last_opp(at, "a.kbhrecipe", _kbhrecipe_tekst(navn="Fil A"))
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self.assertEqual(_ss(at, "kbhrecipe_import_preview", {}).get("recipe", {}).get("name"), "Fil A")
+
+        # Bytt til en ANNEN fil UTEN å trykke Analyser på nytt -- selve
+        # opplastingen alene trigger allerede en Streamlit-rerun.
+        self._last_opp(at, "b.kbhrecipe", _kbhrecipe_tekst(navn="Fil B"))
+
+        self.assertIsNone(_ss(at, "kbhrecipe_import_preview"))
+        self.assertIsNone(_ss(at, "kbhrecipe_import_feil"))
+        self.assertEqual([b for b in at.sidebar.button if b.key == "kbhrecipe_bekreft_btn"], [])
+        # Og selve den aktive oppskriften er fortsatt urørt -- ingen
+        # "stille import" av verken A eller B skjedde.
+        self.assertEqual(_ss(at, "gjeldende_navn"), "Kvernhaug Spesial")
+
+    def test_8_fjernet_fil_ugyldiggjor_gammel_forhandsvisning(self):
+        at = self._ny_apptest()
+        self._last_opp(at, "a.kbhrecipe", _kbhrecipe_tekst())
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self.assertIsNotNone(_ss(at, "kbhrecipe_import_preview"))
+
+        uploader = at.sidebar.file_uploader[0]
+        uploader.clear()
+        at.run()
+
+        self.assertIsNone(_ss(at, "kbhrecipe_import_preview"))
+        self.assertEqual([b for b in at.sidebar.button if b.key == "kbhrecipe_bekreft_btn"], [])
+
+    def test_9_analyser_med_ingen_fil_etter_tidligere_forhandsvisning_rydder_ogsaa(self):
+        at = self._ny_apptest()
+        self._last_opp(at, "a.kbhrecipe", _kbhrecipe_tekst())
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self.assertIsNotNone(_ss(at, "kbhrecipe_import_preview"))
+
+        uploader = at.sidebar.file_uploader[0]
+        uploader.clear()
+        at.run()
+        # Klikk Analyser IGJEN, nå uten noen valgt fil -- skal fortsatt
+        # ikke la den gamle forhåndsvisningen stå igjen bekreftbar.
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self.assertIsNone(_ss(at, "kbhrecipe_import_preview"))
+        self.assertEqual([b for b in at.sidebar.button if b.key == "kbhrecipe_bekreft_btn"], [])
+
 
 if __name__ == "__main__":
     unittest.main()
