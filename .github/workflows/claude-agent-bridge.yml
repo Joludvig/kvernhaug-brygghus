@@ -76,82 +76,62 @@ jobs:
       trigger_label: ${{ steps.check.outputs.trigger_label }}
       dry_run: ${{ steps.check.outputs.dry_run }}
     steps:
-      - name: Evaluate trigger + re-verify live label state
-        id: check
+      # The guard's decision logic lives in .github/scripts/trigger_guard.py
+      # (pure, unit-tested — see tests/test_agent_bridge_trigger_guard.py),
+      # so it has to be checked out before it can be called.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve issue number and read live labels
+        id: context
         env:
           GH_TOKEN: ${{ github.token }}
-          EVENT_NAME: ${{ github.event_name }}
-          EVENT_ACTION: ${{ github.event.action }}
-          LABEL_NAME: ${{ github.event.label.name }}
-          SENDER_LOGIN: ${{ github.event.sender.login }}
-          SENDER_TYPE: ${{ github.event.sender.type }}
-          REPO_OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
           DISPATCH_ISSUE: ${{ github.event.inputs.issue_number }}
           DISPATCH_DRY_RUN: ${{ github.event.inputs.dry_run }}
           WEBHOOK_ISSUE: ${{ github.event.issue.number }}
         run: |
           set -euo pipefail
-          proceed=false
-          dry_run=false
-
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            # workflow_dispatch is already gated by GitHub itself to users
-            # with write access to the repo -- no additional actor check.
             issue_number="$DISPATCH_ISSUE"
             dry_run="$DISPATCH_DRY_RUN"
-            echo "workflow_dispatch for issue #$issue_number (dry_run=$dry_run)"
           else
             issue_number="$WEBHOOK_ISSUE"
-            if [ "$EVENT_ACTION" != "labeled" ]; then
-              echo "Not a 'labeled' action -- skipping."
-              echo "proceed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            if [ "$LABEL_NAME" != "status:ready" ] && [ "$LABEL_NAME" != "status:changes-requested" ]; then
-              echo "Label '$LABEL_NAME' is not a trigger label -- skipping."
-              echo "proceed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            if [ "$SENDER_LOGIN" != "$REPO_OWNER" ]; then
-              echo "Label applied by '$SENDER_LOGIN', not repo owner '$REPO_OWNER' -- skipping (anti-loop/trust guard)."
-              echo "proceed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            if [ "$SENDER_TYPE" = "Bot" ]; then
-              echo "Label applied by a Bot actor -- skipping (anti-loop/trust guard)."
-              echo "proceed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
+            dry_run=false
           fi
-
-          # Live re-check of the issue's CURRENT labels (not the webhook's
-          # point-in-time snapshot) -- prevents acting on a trigger that a
-          # concurrent/earlier run has already superseded.
-          current_labels=$(gh issue view "$issue_number" --repo "$REPO" --json labels -q '.labels[].name')
-          echo "Current live labels on #$issue_number:"
-          echo "$current_labels"
-
-          if ! echo "$current_labels" | grep -qx "agent:claude"; then
-            echo "agent:claude not present -- skipping."
-            echo "proceed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if echo "$current_labels" | grep -qx "status:ready"; then
-            trigger_label="status:ready"
-          elif echo "$current_labels" | grep -qx "status:changes-requested"; then
-            trigger_label="status:changes-requested"
-          else
-            echo "Neither status:ready nor status:changes-requested currently present -- already handled, skipping."
-            echo "proceed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "proceed=true" >> "$GITHUB_OUTPUT"
+          live_labels=$(gh issue view "$issue_number" --repo "$REPO" --json labels -q '[.labels[].name]')
+          echo "Issue #$issue_number live labels: $live_labels"
           echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
-          echo "trigger_label=$trigger_label" >> "$GITHUB_OUTPUT"
           echo "dry_run=$dry_run" >> "$GITHUB_OUTPUT"
+          echo "live_labels=$live_labels" >> "$GITHUB_OUTPUT"
+
+      # V1.1 (issue #9): authorization must be ATOMIC with respect to the
+      # triggering webhook. V1 only checked the LIVE labels when the guard
+      # happened to run, so on issue #8 a `status:ready` applied BEFORE
+      # `agent:claude` was still accepted — the runner started late enough
+      # that `agent:claude` had appeared by the time the guard looked.
+      # trigger_guard.py now requires `agent:claude` to have been present in
+      # the labels carried by THAT event (github.event.issue.labels) as well
+      # as still live, so adding `agent:claude` afterwards can never
+      # retroactively authorize an older status event. No sleeps, no polling,
+      # no PAT — just the two independent snapshots.
+      - name: Evaluate trigger authorization (event-time + live)
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          LABEL_NAME: ${{ github.event.label.name }}
+          EVENT_LABELS: ${{ toJSON(github.event.issue.labels.*.name) }}
+          LIVE_LABELS: ${{ steps.context.outputs.live_labels }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+          SENDER_TYPE: ${{ github.event.sender.type }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/trigger_guard.py >> "$GITHUB_OUTPUT"
+          echo "issue_number=${{ steps.context.outputs.issue_number }}" >> "$GITHUB_OUTPUT"
+          echo "dry_run=${{ steps.context.outputs.dry_run }}" >> "$GITHUB_OUTPUT"
 
   # ── Execute: only runs if guard says so, and skips the mutating/paid ────
   # steps entirely in dry_run mode.
