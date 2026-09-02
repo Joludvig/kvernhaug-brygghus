@@ -370,25 +370,33 @@ section — corrected to point to the preceding normative sections.)*
   equipment/brewhouse default profile is never read from or written to
   by the parser itself.
 - **`prosess` is only imported when App's own normalization would not
-  silently change its semantics** — a known `process_id` must match
-  App's canonical standard profile exactly (structurally), or be
+  change its semantics** — a known `process_id` must match App's
+  canonical standard profile exactly (structurally), or be
   `"egendefinert"` (custom steps are that mode's entire point, always
-  safe). An unknown `process_id` — which would otherwise silently fall
-  back to `enkel_infusjon` — still rejects the import (KBHR-018), since
-  there is no canonical profile to preserve data against in the first
-  place. **A known `process_id` whose structural fields *diverge* from
-  App's canonical profile is no longer rejected (PR #3 Chief review,
-  owner decision, 2026-09-02): it is imported losslessly as an
-  App-safe `"egendefinert"` process instead** — `mash_steps` and any
-  other structural field actually present in the file are preserved
-  verbatim (never normalized to the canonical profile's own steps,
-  never claimed to *be* that canonical profile); a structural field
-  genuinely absent from the file falls back to the canonical profile's
-  value for that one field only. This uses `"egendefinert"` exactly as
-  designed — the one mode `normaliser_prosessprofil()` never
-  overwrites — so it required no new representation and no change to
-  `modules/process_profiles.py`. See
-  `modules/kbh_import.py::_bygg_egendefinert_fra_avvikende_standard()`.
+  safe); an unknown `process_id` — which would otherwise silently fall
+  back to `enkel_infusjon` — rejects the import instead (KBHR-018).
+  This is strict because of how `modules/process_profiles.py::
+  normaliser_prosessprofil()` already behaves today, not a new
+  restriction invented by the importer.
+  **Owner decision, corrected (PR #3 Chief re-review, 2026-09-02):**
+  App's `.kbhrecipe` process-profile import is **deliberately
+  safe-subset-only** for now — a known `process_id` whose structural
+  fields *diverge* from App's canonical profile is **rejected**, not
+  silently normalized and not converted to a custom representation. An
+  earlier round of this same PR briefly implemented the alternative
+  (losslessly converting a divergent known process to `"egendefinert"`,
+  commit `ce4ab4c`) against a misread of the owner's actual choice; it
+  was reverted. That attempt also surfaced a real technical reason not
+  to take that path casually: the conversion was not wire-lossless on
+  App re-export (`modules/kbh_contract.py` has no passthrough slot for
+  the original `process_id`/payload, so an import → re-export roundtrip
+  could not reproduce the original process representation) — a correct
+  lossless implementation would need a separately designed raw/opaque
+  preservation mechanism, intentionally left as a follow-up rather than
+  built under review pressure. **This document does not describe PRI 2
+  as full bidirectional/backwards-compatible `.kbhrecipe` interchange
+  for process data while this gap remains open** — see the KBHR-020
+  paragraph below.
 - **Non-calculation-affecting metadata is preserved opaquely via
   passthrough**, not dropped (KBHR-011/KBHR-014): `brygger`, `bryggeri`,
   `notater`, `valgtStil`, and any currently-unknown top-level payload
@@ -425,21 +433,34 @@ historically genuine V1 payload if importing it would make the reader's
 own native model silently diverge from what the file says — this is the
 same principle §9/KBHR-018 already states for `recipeSchemaVersion` and
 process-profile normalization, just spelled out explicitly for fixture
-handling. The general principle stands; **its original concrete example
-here has since been superseded (PR #3 Chief review, owner decision,
-2026-09-02).** `tests/fixtures/legacy/kbhrecipe/full.json`'s `prosess`
-block (one mash step) does not structurally match today's App canonical
-`enkel_infusjon` (two steps, `modules/process_profiles.py`) — App's
-reader no longer rejects that field; it now imports it losslessly as an
-App-safe `"egendefinert"` process instead (see the bullet above,
-`tests/test_kbh_import.py::test_2`), rather than either silently
-renormalizing it, rejecting it outright, or weakening the canonical
-equality check to accommodate it. The fixture itself is still not
-touched, and today's App process-profile shape is still not a universal
-Core rule (see above) — a reader remains entitled to reject old
-evidence it cannot represent safely; App's reader has simply widened
-what it can represent safely, without weakening the underlying
-semantic-preservation guarantee itself.
+handling: `tests/fixtures/legacy/kbhrecipe/full.json`'s `prosess` block
+(one mash step) does not structurally match today's App canonical
+`enkel_infusjon` (two steps, `modules/process_profiles.py`), so App's
+reader correctly rejects that one field with `unsupported_process`
+(`tests/test_kbh_import.py`, `test_2`) rather than either silently
+renormalizing it or weakening the equality check to accommodate it. The
+fixture itself is not touched, and today's App process-profile shape is
+still not a universal Core rule (see above) — this is a statement about
+how a strict reader must treat old evidence, not a redefinition of what
+V1 process data must look like.
+
+**Owner GO recorded: App `.kbhrecipe` process-profile import is
+intentionally safe-subset-only (PR #3 Chief re-review, 2026-09-02).**
+PRI 2's stated purpose is App↔Web `.kbhrecipe` interoperability, but
+that does not extend to representative frozen V1 evidence like
+`full.json` being importable losslessly *today* — App's reader
+currently covers a **subset** of historically valid V1 process data
+(exact canonical matches and `"egendefinert"`), not the full historical
+range. This is an explicit, recorded owner decision, not an oversight:
+a follow-up, separately scoped compatibility task may later import
+divergent-but-known process data losslessly (an earlier attempt at this
+in this same PR, commit `ce4ab4c`, was reverted — see git history and
+`modules/kbh_import.py::_valider_og_bygg_prosess()`'s docstring — partly
+because a correct implementation also needs a passthrough slot for the
+original `process_id`/payload on the App writer side, which does not
+exist yet). **This document does not describe today's PRI 2 as full
+bidirectional/backwards-compatible `.kbhrecipe` interchange for process
+data** — only for the fields and cases explicitly covered above.
 
 ## 14. What this document does not do
 
