@@ -52,6 +52,15 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  # REQUIRED for the default Claude GitHub App authentication path, which
+  # is what this workflow uses (it deliberately does not pass a custom
+  # `github_token` to the action). Anthropic's FAQ is explicit: "If you're
+  # using the default GitHub App authentication, you must add the
+  # `id-token: write` permission to your workflow ... The OIDC token is
+  # required in order for the Claude GitHub app to function." Without it,
+  # the first real run fails during GitHub App/OIDC auth even with a valid
+  # Anthropic credential (Chief review, PR #7, blocker 1).
+  id-token: write
 
 concurrency:
   group: claude-agent-bridge-${{ github.event.inputs.issue_number || github.event.issue.number }}
@@ -159,8 +168,10 @@ jobs:
       - name: Dry run — report and stop
         if: needs.guard.outputs.dry_run == 'true'
         run: |
-          echo "DRY RUN: would move #$ISSUE from '$TRIGGER_LABEL' to 'status:working', run Claude, then move to 'status:review' on success."
-          echo "No labels changed, Claude not invoked."
+          echo "DRY RUN for issue #$ISSUE (triggering label: '$TRIGGER_LABEL')."
+          echo "Would: set lifecycle label to exactly 'status:working' (dropping ALL other status:* labels, keeping agent:claude/area:*),"
+          echo "       run Claude, then set it to exactly 'status:review' on success."
+          echo "No labels changed, Claude not invoked, no API cost incurred."
 
       - name: Check required secret is configured
         if: needs.guard.outputs.dry_run != 'true'
@@ -175,19 +186,34 @@ jobs:
       - name: Report missing credentials and stop
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing == 'true'
         run: |
-          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: triggered, but neither \`ANTHROPIC_API_KEY\` nor \`CLAUDE_CODE_OAUTH_TOKEN\` is configured as a repository secret, and/or the official Claude GitHub App (https://github.com/apps/claude) is not installed. See \`docs/development/AGENT_WORKFLOW.md\` → \"Required secrets and apps\" for setup. No work was started; \`$TRIGGER_LABEL\` left in place so this can be retried once configured."
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: triggered, but neither \`ANTHROPIC_API_KEY\` nor \`CLAUDE_CODE_OAUTH_TOKEN\` is configured as a repository secret. (Note: this preflight can only check the *secret* — it cannot verify that the official Claude GitHub App at https://github.com/apps/claude is installed. If the secret is present but the App is missing, the run will instead fail later, inside the Claude step, and the generic failure path below handles it.) See \`docs/development/AGENT_WORKFLOW.md\` → \"Required secrets and apps\". No work was started; \`$TRIGGER_LABEL\` left in place so this can be retried once configured."
           exit 1
 
-      - name: Move to status:working
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
-        run: |
-          gh issue edit "$ISSUE" --repo "$REPO" --remove-label "$TRIGGER_LABEL" --add-label "status:working"
-
+      # Checkout must happen BEFORE the label transition, because the
+      # transition uses .github/scripts/lifecycle_labels.py from the repo.
       - name: Checkout
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # Chief review-fix (PR #7, blocker 2): lifecycle labels are
+      # EXCLUSIVE. Do not merely add the new one and remove the single
+      # triggering one -- that left e.g. `status:review` + `status:working`
+      # coexisting during the normal review loop. Compute the whole new
+      # label set (all lifecycle labels dropped, exactly one added,
+      # agent:claude/area:* preserved) and PUT it, so the issue can never
+      # carry two contradictory states. Logic + regression tests:
+      # .github/scripts/lifecycle_labels.py, tests/test_agent_bridge_labels.py
+      - name: Move to status:working (exclusive lifecycle transition)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        run: |
+          set -euo pipefail
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]' \
+            | python3 .github/scripts/lifecycle_labels.py status:working \
+            | gh api --method PUT "repos/$REPO/issues/$ISSUE/labels" --input -
+          echo "Labels now:"
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
 
       - name: Run Claude Code
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
@@ -242,10 +268,15 @@ jobs:
             itself will move the issue to `status:review` only if this
             step completes successfully.
 
-      - name: Move to status:review on success
+      - name: Move to status:review on success (exclusive lifecycle transition)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success()
         run: |
-          gh issue edit "$ISSUE" --repo "$REPO" --remove-label "status:working" --add-label "status:review"
+          set -euo pipefail
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]' \
+            | python3 .github/scripts/lifecycle_labels.py status:review \
+            | gh api --method PUT "repos/$REPO/issues/$ISSUE/labels" --input -
+          echo "Labels now:"
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
 
       - name: Report failure — leave at status:working for manual follow-up
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure()

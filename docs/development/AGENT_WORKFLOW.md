@@ -49,6 +49,34 @@ the automation, not a substitute for reading the PR itself.
 | `agent:claude` | Owner | Routing label: marks an issue as one Claude should react to at all. Required on **every** trigger, alongside a status label. |
 | `area:core` / `area:web` / `area:app` / `area:infra` | Owner (optional) | Informational scoping only — not read by the workflow. |
 
+### Lifecycle labels are exclusive; routing/area labels are additive
+
+The five `status:*` labels describe **one** state, so an issue must
+never carry two of them at once. Every transition therefore *replaces*
+the lifecycle label rather than adding to it:
+
+- **The workflow** computes the complete new label set via
+  [`.github/scripts/lifecycle_labels.py`](../../.github/scripts/lifecycle_labels.py)
+  — every `status:*` label is dropped, exactly one is added, and
+  `agent:claude`/`area:*`/anything else is preserved untouched — and
+  `PUT`s that whole set. So a run always leaves exactly
+  `status:working` while executing, and exactly `status:review` on
+  success, even if the issue arrived carrying stale/multiple status
+  labels.
+- **The owner** must follow the same rule manually for the two
+  owner-driven transitions: applying `status:changes-requested` should
+  *replace* `status:review`, and applying `status:approved` after a
+  Chief PASS should *replace* `status:review` — not simply be added
+  alongside it. (The workflow normalizes whatever it finds at the start
+  of its next run, but between runs the labels are only as clean as the
+  owner leaves them.)
+
+Regression coverage: `tests/test_agent_bridge_labels.py` runs the full
+`ready → working → review → changes-requested → working → review →
+approved` loop through the transition function and asserts there is
+exactly one lifecycle label after every single step, with
+`agent:claude`/`area:*` surviving each one.
+
 ### Design decision: state lives on the issue
 
 The issue text describing this state machine consistently frames it in
@@ -160,11 +188,7 @@ Several independent layers, deliberately redundant:
 
 **Not yet configured in this repository as of this PR** (verified: `gh
 api repos/:owner/:repo/actions/secrets` currently returns zero
-secrets). The workflow is a complete, reviewable scaffold; it will
-fail fast with a clear comment on the issue (rather than a cryptic
-Actions error) if triggered before these are set up, and will leave
-the triggering label in place so the run can simply be retried once
-configured.
+secrets). The workflow is a complete, reviewable scaffold.
 
 To make this live, the **owner** must, in the GitHub UI (none of this
 is something Claude or this workflow can do on its own — both require
@@ -173,15 +197,15 @@ interactive, owner-authenticated consent):
 1. **Install the official Claude GitHub App** — <https://github.com/apps/claude>
    — on this repository. This is what lets `anthropics/claude-code-action`
    comment, push, and open PRs as the `claude[bot]` identity.
-2. **Add exactly one** of the following as a repository secret
-   (Settings → Secrets and variables → Actions → New repository secret)
-   — **this is a cost/product decision for the owner, not something
-   this PR decides**:
-   - `ANTHROPIC_API_KEY` — an Anthropic API key (`sk-ant-...`),
-     billed per-token via the API. Simplest, most direct option.
-   - `CLAUDE_CODE_OAUTH_TOKEN` — a token from `claude setup-token`,
-     for owners with an existing Claude Pro/Max subscription (uses
-     subscription usage instead of separate API billing).
+2. **Add the credential secret** (Settings → Secrets and variables →
+   Actions → New repository secret). **Owner decision for V1 (made,
+   not open): `CLAUDE_CODE_OAUTH_TOKEN`** — generated locally with
+   `claude setup-token` — so the bridge draws on the existing Claude
+   subscription rather than separate per-token API billing.
+   `ANTHROPIC_API_KEY` (an `sk-ant-...` key, billed per-token via the
+   API) remains fully supported by the workflow as a fallback/alternative
+   if that ever becomes preferable; the workflow accepts either and
+   requires only one.
 
    (A third option, Workload Identity Federation — no static key at
    all, short-lived tokens exchanged via GitHub's OIDC — exists for
@@ -189,7 +213,34 @@ interactive, owner-authenticated consent):
    configuration; out of scope for V1's scaffold.)
 
 Nothing in this PR contains, invents, or requires committing an actual
-secret value.
+secret or token value — and no token value belongs in GitHub issue/PR
+text either.
+
+### Workflow permissions
+
+The workflow grants `contents: write`, `pull-requests: write`,
+`issues: write` **and `id-token: write`**. The last one is not
+optional here: this workflow uses the action's *default Claude GitHub
+App authentication* (it deliberately does not pass a custom
+`github_token`), and Anthropic's FAQ states that path requires
+`id-token: write` — "The OIDC token is required in order for the
+Claude GitHub app to function." Without it, a run fails during
+GitHub App/OIDC authentication even with a valid Anthropic
+credential.
+
+### What the preflight can and cannot check
+
+The workflow's preflight step checks **only** whether one of the two
+credential secrets is present, and if not, comments on the issue
+naming exactly that and stops — leaving the triggering label in place
+so the run can simply be retried once configured.
+
+It **cannot** verify that the Claude GitHub App is actually installed.
+If the secret exists but the App is missing, the run proceeds, the
+Claude step itself fails, and the generic failure path handles it: the
+issue stays at `status:working` and a failure comment points at the
+workflow-run logs. Read that failure as "check the App installation
+too", not just "check the secret".
 
 ## Manual / dry-run test path
 
