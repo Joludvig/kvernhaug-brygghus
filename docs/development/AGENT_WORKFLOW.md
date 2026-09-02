@@ -188,7 +188,7 @@ this bounded workflow's two run types (`status:ready` fresh
 implementation, `status:changes-requested` follow-up) actually need,
 each scoped as tightly as the official permission-rule syntax allows
 (`Bash(cmd *)` prefix rules where arguments genuinely vary per run;
-one exact, argument-free rule where they don't):
+exact, argument-free/argument-fixed rules where they don't):
 
 | Rule | Why |
 |---|---|
@@ -199,25 +199,67 @@ one exact, argument-free rule where they don't):
 | `Bash(git diff *)` | Review its own changes before committing. |
 | `Bash(git add *)` | Stage files. |
 | `Bash(git commit *)` | Commit staged changes. |
-| `Bash(git push *)` | Push the feature branch (never `master` — see "Owner merge gate"). |
+| `Bash(git push -u origin <branch>)` / `Bash(git push origin <branch>)` | Push the feature branch — **exact match, no wildcard**, `<branch>` filled in per-run from the "Compute deterministic bridge branch name" step. See "Branch naming is deterministic and enforced" below. |
 | `Bash(git log *)` | Inspect history/context. |
-| `Bash(gh issue view *)` | Read the task issue, and (for `changes-requested`) its timeline for the associated PR. |
+| `Bash(gh issue view *)` | Read the task issue. |
 | `Bash(gh issue comment *)` | Post the required `SCOPE CHANGE` / "cannot identify PR" / final-outcome comments. |
 | `Bash(gh pr create *)` | Actually open the PR — the step this bug was named for. |
 | `Bash(gh pr view *)` | Read an existing PR (state, latest Chief review) for `changes-requested`. |
 | `Bash(gh pr edit *)` | Update the PR description/report. |
 | `Bash(gh pr comment *)` | Post the PR-side report. |
-| `Bash(gh pr list *)` | Search for the PR associated with the issue when the timeline alone is ambiguous. |
+| `Bash(gh pr list *)` | Look up the PR associated with this run's fixed branch. |
 | `Bash(pip install -r requirements.txt)` | Install project dependencies before running tests — **exact match, no wildcard**: this and only this invocation, deliberately not `pip install <anything>`. |
 | `Bash(python3 -m unittest *)` | Run the project's test suite (full `discover -s tests -b` or a focused module). |
 
 **Deliberately NOT granted**, as a defense-in-depth backstop to the
 "never merge" rule the prompt also states in plain language:
-`git merge`, `gh pr merge`, `git push` to `master` (there is no
-`master`-scoped exception — the rule is `Bash(git push *)` full stop,
-and the prompt separately instructs never to target `master`), and any
-unscoped `gh api`/`git *`/arbitrary shell (no bare `Bash` or `Bash(*)`
-rule exists here).
+`git merge`, `gh pr merge`, any `git push` outside the two exact
+commands above (in particular: no wildcard on the destination, so no
+refspec trick like `<branch>:master` can match either rule — see
+"Branch naming is deterministic and enforced" below), and any unscoped
+`gh api`/`git *`/arbitrary shell (no bare `Bash` or `Bash(*)` rule
+exists here).
+
+## Branch naming is deterministic and enforced (Chief review, PR #13)
+
+**The bug this fixes:** the original V1.2 draft granted `Bash(git push
+*)` — a wildcard that, despite the prompt's plain-language "never push
+master" instruction, was **not actually enforced**. `git push origin
+master`, or a refspec trick like `git push origin <branch>:master`,
+textually matches that rule just as well as a legitimate feature-branch
+push. Relying on model behavior for the one operation this bridge must
+never allow is exactly the kind of gap issue #12 was written to close.
+
+**The fix:** every bridge run for an issue uses **one fixed,
+deterministic branch name for that issue's entire lifecycle** —
+`agent/issue-<N>`, computed once by
+[`.github/scripts/branch_policy.py`](../../.github/scripts/branch_policy.py)
+(`agent_branch_navn`) and exposed as a step output
+(`steps.branch.outputs.name`) that the "Run Claude Code" step, its
+prompt, and the evidence-gathering steps all reference — never
+recomputed or restated, so they cannot drift apart. `status:ready`
+creates this branch from `origin/master`; every later
+`status:changes-requested` round reuses the identical name.
+
+That fixed name is then used for two independent things:
+
+1. **Push permission** (`tillatte_push_kommandoer` in the same module)
+   becomes two **exact-match** `--allowedTools` rules —
+   `git push -u origin <branch>` and `git push origin <branch>` — for
+   that literal string only. Since `<branch>` can never equal
+   `"master"` (it is always `agent/issue-<N>` for an integer `N`), no
+   refspec, flag, or destination variant of a master-push can ever be
+   textually identical to either allowed command; an attempt is simply
+   a different string and gets denied by construction, not by model
+   obedience. Regression coverage:
+   [`tests/test_agent_bridge_branch_policy.py`](../../tests/test_agent_bridge_branch_policy.py)
+   `test_4_...`, which checks a battery of adversarial push strings
+   (`git push origin master`, `git push origin HEAD:master`,
+   `git push origin agent/issue-12:master`, `--force` variants, wrong
+   issue's branch, …) against the two allowed strings and asserts none
+   of them match.
+2. **Deliverable association** (see below) looks the PR up by exact
+   head-branch match instead of a text heuristic.
 
 ## Deliverable verification gate (V1.2, issue #12)
 
@@ -225,16 +267,29 @@ A successful "Run Claude Code" step is no longer sufficient by itself
 to reach `status:review`. Two new steps run after it, only on
 `success()`:
 
-1. **Gather evidence** — re-derive the PR(s) associated with the issue
-   from GitHub's own issue timeline (`cross-referenced` events —
-   exactly the *"mentioned this issue in PR #Y"* signal the prompt
-   already tells Claude to look for), then fetch each candidate PR's
-   `state`, `baseRefName`, `headRefOid`, `additions`, `deletions`,
-   `changedFiles` via `gh pr view --json`.
+1. **Gather evidence** — **(Chief review fix, PR #13, blocker 2)**:
+   the first version of this gate found candidate PRs via GitHub's
+   issue timeline (`cross-referenced` events — the *"mentioned this
+   issue in PR #Y"* signal), a text heuristic the `status:ready` prompt
+   never actually forced Claude to satisfy, so a fully correct PR could
+   still be rejected as "no deliverable" if its body happened not to
+   contain a reference GitHub's own parser recognized. Fixed:
+   `gh pr list --head <branch> --base master --state open --json …`
+   (exact argument shape: `gh_pr_list_args` in `branch_policy.py`,
+   tested in `test_agent_bridge_branch_policy.py` `test_6_...`) looks
+   the PR up by the same fixed branch name from "Branch naming is
+   deterministic and enforced" — exact string equality in GitHub's own
+   PR index, with zero dependency on PR body/title content. `gh pr
+   list --json` already returns the array in exactly the shape
+   `deliverable_guard.py` expects (`number`, `state`, `baseRefName`,
+   `headRefOid`, `additions`, `deletions`, `changedFiles`), so no
+   per-PR loop or JSON assembly is needed.
 2. **Decide** — [`.github/scripts/deliverable_guard.py`](../../.github/scripts/deliverable_guard.py),
    one pure function (`vurder_leveranse`), unit-tested in
    [`tests/test_agent_bridge_deliverable_guard.py`](../../tests/test_agent_bridge_deliverable_guard.py)
-   without touching GitHub. Rules:
+   without touching GitHub — unchanged by the PR #13 fix, since it only
+   evaluates whatever PR list it's given, independent of how that list
+   was gathered. Rules:
    - **`status:ready`**: exactly one **open** PR against `master`
      associated with the issue, with a **non-empty diff**
      (`additions + deletions > 0` and `changedFiles > 0`). Zero
@@ -258,6 +313,18 @@ pre-existing generic failure path.
 
 This is a fail-closed design: the default, on any ambiguity or missing
 evidence, is to **not** advance the issue.
+
+**Testability boundary, stated plainly:** the exact `gh pr list --head
+<branch> --base master --state open --json …` argument shape is
+unit-tested (`gh_pr_list_args` in `branch_policy.py`), and the decision
+function it feeds is unit-tested against synthetic PR data — but
+whether that live `gh` call actually returns Claude's real PR on a real
+run can only be proven by an actual E2E bridge run, the same honest
+limit noted for `workflow_dispatch` testing elsewhere in this document.
+What changed with the PR #13 fix is *what* that live call depends on:
+exact head-branch equality in GitHub's own PR index, not a natural-
+language heuristic — strictly more reliable by construction, not merely
+by assumption.
 
 ## Scope-change rule
 

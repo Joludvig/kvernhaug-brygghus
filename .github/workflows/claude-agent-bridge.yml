@@ -195,41 +195,51 @@ jobs:
           echo "Labels now:"
           gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
 
+      # V1.2 (issue #12), Chief review fix (PR #13, blockers 1+2): every
+      # bridge run for an issue uses ONE fixed, deterministic branch
+      # name for that issue's entire lifecycle -- status:ready creates
+      # it, every later status:changes-requested round reuses it
+      # UNCHANGED. This single name is then used for two independent
+      # things below: (1) scoping Claude's push permission to an EXACT,
+      # wildcard-free command instead of the unenforced `Bash(git push
+      # *)` blocker-1 flagged, and (2) associating the deliverable PR by
+      # exact head-branch match instead of the text-heuristic issue-
+      # timeline cross-reference blocker-2 flagged. Formula lives once
+      # in .github/scripts/branch_policy.py (tests:
+      # tests/test_agent_bridge_branch_policy.py) so this workflow, the
+      # prompt below, and the tests can never drift apart on it.
+      - name: Compute deterministic bridge branch name
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: branch
+        run: |
+          set -euo pipefail
+          echo "name=$(python3 .github/scripts/branch_policy.py "$ISSUE")" >> "$GITHUB_OUTPUT"
+
       # V1.2 (issue #12): for a status:changes-requested run, the
       # deliverable gate below must PROVE new commits were pushed, not
       # just that a PR exists (it already did, from a prior round). That
       # requires knowing the associated PR's HEAD SHA from BEFORE this
       # run starts -- captured here, once, prior to invoking Claude.
-      # Uses the same "PR cross-references this issue" signal
-      # (GitHub's own issue timeline) the prompt already tells Claude to
-      # look for. For a status:ready run there is normally no associated
-      # PR yet, so this simply yields an empty before_head_sha, which is
-      # correctly unused by deliverable_guard.py for that trigger label.
+      # Chief review fix (PR #13, blocker 2): looks the PR up by its
+      # EXACT head branch (the name computed above) via `gh pr list`,
+      # not the issue timeline's cross-reference heuristic -- a PR
+      # either has this exact head ref or it doesn't; no dependency on
+      # what Claude wrote in the PR body/title. For a status:ready run
+      # there is normally no associated PR yet, so this simply yields an
+      # empty before_head_sha, which is correctly unused by
+      # deliverable_guard.py for that trigger label.
       - name: Capture pre-run PR state (for changes-requested head-change check)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: before
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
         run: |
           set -euo pipefail
-          candidates=$(gh api "repos/$REPO/issues/$ISSUE/timeline" --paginate \
-            -q '[.[] | select(.event=="cross-referenced" and .source.issue.pull_request != null) | .source.issue.number] | unique | .[]')
-          before_sha=""
-          count=0
-          for n in $candidates; do
-            state=$(gh pr view "$n" --repo "$REPO" --json state -q .state)
-            base=$(gh pr view "$n" --repo "$REPO" --json baseRefName -q .baseRefName)
-            if [ "$state" = "OPEN" ] && [ "$base" = "master" ]; then
-              before_sha=$(gh pr view "$n" --repo "$REPO" --json headRefOid -q .headRefOid)
-              count=$((count + 1))
-            fi
-          done
-          # Ambiguous (>1 open PR against master already referencing the
-          # issue) is left to the post-run gate to reject explicitly --
-          # this step only needs a HEAD SHA when there is exactly one.
-          if [ "$count" = "1" ]; then
-            echo "before_head_sha=$before_sha" >> "$GITHUB_OUTPUT"
-          else
-            echo "before_head_sha=" >> "$GITHUB_OUTPUT"
-          fi
+          before_sha=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+            --json headRefOid -q '.[0].headRefOid // empty')
+          echo "before_head_sha=$before_sha" >> "$GITHUB_OUTPUT"
+
+      # V1.2 (issue #12): the first real E2E run (issue #11) finished
       # `conclusion: success` with `permission_denials_count: 14` and
       # produced NO branch, NO PR, NO comment -- because this step gave
       # Claude no `--allowedTools` at all. Per Anthropic's own docs,
@@ -238,8 +248,12 @@ jobs:
       # does not automatically create pull requests ... provides a link
       # to the GitHub PR creation page"). The list below is the minimum
       # set of exact git/gh/test commands this bounded workflow actually
-      # needs -- never `git merge` or `gh pr merge`, matching the
-      # "never merge" rule below and in AGENT_WORKFLOW.md. Rationale for
+      # needs -- never `git merge` or `gh pr merge`. Chief review fix
+      # (PR #13, blocker 1): `git push` is no longer a `*`-wildcard rule
+      # -- it is scoped to the two EXACT command strings
+      # `.github/scripts/branch_policy.py`'s `tillatte_push_kommandoer`
+      # defines for this run's fixed branch (see the step above), so no
+      # refspec/flag variant can ever target `master`. Rationale for
       # every entry: docs/development/AGENT_WORKFLOW.md → "Claude's
       # allowed tools (V1.2, issue #12)".
       - name: Run Claude Code
@@ -251,7 +265,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           base_branch: master
           claude_args: |
-            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push *),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *)"
+            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *)"
           prompt: |
             You are running as the automated Claude side of the Kvernhaug
             Agent Bridge (docs/development/AGENT_WORKFLOW.md — read it in
@@ -284,37 +298,49 @@ jobs:
             touched). `git merge` and `gh pr merge` are deliberately NOT
             in your allowed tools — never attempt either.
 
+            YOUR BRANCH NAME IS FIXED — use exactly
+            `${{ steps.branch.outputs.name }}` (not any name of your own
+            choosing, not any name the issue text might suggest). This
+            is not a style preference: your push permission is scoped to
+            the EXACT commands `git push -u origin ${{ steps.branch.outputs.name }}`
+            and `git push origin ${{ steps.branch.outputs.name }}` — any
+            other branch name, or any attempt to push to `master`
+            (directly or via a `<branch>:master` refspec), is simply a
+            different command string and will be denied outright.
+
             After this step finishes, the workflow independently
-            verifies a real deliverable exists (an open PR against
-            `master`, unambiguously associated with this issue, with a
-            non-empty diff — or, for a changes-requested run, proof the
-            PR's HEAD commit actually changed) before moving the issue
-            to `status:review`. A report/comment alone, or a "success"
-            exit with no PR, will leave the issue at `status:working`
-            for manual follow-up — so you must actually create/update
-            the PR, not just describe what you would do.
+            verifies a real deliverable exists — an open PR against
+            `master` whose **head branch is exactly**
+            `${{ steps.branch.outputs.name }}`, with a non-empty diff
+            (or, for a changes-requested run, proof that branch's HEAD
+            commit actually changed) — before moving the issue to
+            `status:review`. A report/comment alone, or a "success" exit
+            with no matching PR, will leave the issue at
+            `status:working` for manual follow-up — so you must actually
+            create/update the PR on that exact branch, not just describe
+            what you would do.
 
             - If `${{ env.TRIGGER_LABEL }}` is `status:ready`: this is a
-              fresh implementation pass. Fetch origin/master, work on a
-              new feature branch (use the issue's own suggested branch
-              name if it states one), implement exactly what the issue
-              specifies, run the tests it requests, commit, push, and
-              open a PR to `master` with `gh pr create`, with a report
-              following the issue's own "Deliverable" section. Do not
-              merge.
+              fresh implementation pass. Fetch origin/master, create
+              branch `${{ steps.branch.outputs.name }}` from it
+              (`git checkout -b ${{ steps.branch.outputs.name }} origin/master`),
+              implement exactly what the issue specifies, run the tests
+              it requests, commit, push, and open a PR to `master` with
+              `gh pr create`, with a report following the issue's own
+              "Deliverable" section. Do not merge.
             - If `${{ env.TRIGGER_LABEL }}` is `status:changes-requested`:
-              this is a follow-up pass. Find the open PR already
-              associated with issue #${{ env.ISSUE }} (check the issue's
-              GitHub timeline for "mentioned this issue in PR #Y", or
-              `gh pr list` for open PRs referencing #${{ env.ISSUE }}).
-              Read the latest Chief review on that PR and address ONLY
-              the CHANGES REQUESTED points from the most recent review —
-              do not re-address already-resolved points, do not expand
-              scope. Push to the SAME existing branch, update the PR
-              description/report accordingly. Do not merge. If you
-              cannot unambiguously identify the correct PR/branch, STOP
-              and post a comment on the issue explaining exactly why,
-              rather than guessing.
+              this is a follow-up pass against the SAME branch,
+              `${{ steps.branch.outputs.name }}` — fetch and check it
+              out (`git fetch origin ${{ steps.branch.outputs.name }} && git checkout ${{ steps.branch.outputs.name }}`),
+              then use `gh pr view` / `gh pr list --head ${{ steps.branch.outputs.name }}`
+              to find its PR. Read the latest Chief review on that PR
+              and address ONLY the CHANGES REQUESTED points from the
+              most recent review — do not re-address already-resolved
+              points, do not expand scope. Push to this same branch,
+              update the PR description/report accordingly. Do not
+              merge. If the branch or its PR is missing or in an
+              unexpected state, STOP and post a comment on the issue
+              explaining exactly why, rather than guessing.
 
             Do not touch `raw_data/unmatched_malt.json` or any other
             unrelated local/uncommitted state. Never push directly to
@@ -328,22 +354,24 @@ jobs:
       # V1.2 (issue #12): a `success()` Claude step is NOT proof of a
       # deliverable -- issue #11 proved that directly (conclusion:
       # success, permission_denials_count: 14, zero branch/PR/comment
-      # produced). Re-gather the same issue-timeline cross-reference
-      # evidence as the pre-run step, now with the full PR stats
-      # deliverable_guard.py needs to decide.
+      # produced). Chief review fix (PR #13, blocker 2): look the
+      # associated PR up by exact head-branch match (the same fixed name
+      # from the "Compute deterministic bridge branch name" step) rather
+      # than the issue timeline's cross-reference heuristic, which could
+      # miss a fully correct PR the prompt never forced to contain a
+      # specific "#N" reference string. `gh pr list --json` already
+      # returns a JSON array in exactly the shape deliverable_guard.py
+      # expects, so no per-PR loop or jq assembly is needed any more.
       - name: Gather post-run PR evidence
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success()
         id: evidence
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
         run: |
           set -euo pipefail
-          candidates=$(gh api "repos/$REPO/issues/$ISSUE/timeline" --paginate \
-            -q '[.[] | select(.event=="cross-referenced" and .source.issue.pull_request != null) | .source.issue.number] | unique | .[]')
-          prs_json="[]"
-          for n in $candidates; do
-            pr=$(gh pr view "$n" --repo "$REPO" --json number,state,baseRefName,headRefOid,additions,deletions,changedFiles)
-            prs_json=$(echo "$prs_json" | jq --argjson pr "$pr" '. + [$pr]')
-          done
-          echo "Candidate PRs (issue timeline cross-references): $prs_json"
+          prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+            --json number,state,baseRefName,headRefOid,additions,deletions,changedFiles)
+          echo "Associated PR (head=$BRANCH, base=master): $prs_json"
           echo "$prs_json" > "$RUNNER_TEMP/deliverable_prs.json"
 
       # The actual decision -- pure, unit-tested, see
