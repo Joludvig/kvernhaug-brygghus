@@ -19,14 +19,16 @@ Kjøres med:
     py -3 -m unittest discover -s tests
 """
 import io
+import os
 import re
 import unittest
 
-_APP_JS = r"D:\Development\Kvernhaug Brygghus\web\js\app.js"
-_I18N_JS = r"D:\Development\Kvernhaug Brygghus\web\js\i18n.js"
-_INDEX_NO = r"D:\Development\Kvernhaug Brygghus\web\index.html"
-_INDEX_EN = r"D:\Development\Kvernhaug Brygghus\web\en\index.html"
-_RECIPE_STORAGE_JS = r"D:\Development\Kvernhaug Brygghus\web\js\recipe_storage.js"
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_APP_JS = os.path.join(_REPO_ROOT, "web", "js", "app.js")
+_I18N_JS = os.path.join(_REPO_ROOT, "web", "js", "i18n.js")
+_INDEX_NO = os.path.join(_REPO_ROOT, "web", "index.html")
+_INDEX_EN = os.path.join(_REPO_ROOT, "web", "en", "index.html")
+_RECIPE_STORAGE_JS = os.path.join(_REPO_ROOT, "web", "js", "recipe_storage.js")
 
 
 def _les(sti):
@@ -60,9 +62,9 @@ class TestLegacyDataSafetyBevis(unittest.TestCase):
         # bekrefter at den er en isolert, redundant cache uten andre
         # avhengigheter noe annet sted i kodebasen.
         for sti in (
-            r"D:\Development\Kvernhaug Brygghus\web\js\recipe_storage.js",
-            r"D:\Development\Kvernhaug Brygghus\web\js\kbhrecipe.js",
-            r"D:\Development\Kvernhaug Brygghus\web\js\brew_storage.js",
+            os.path.join(_REPO_ROOT, "web", "js", "recipe_storage.js"),
+            os.path.join(_REPO_ROOT, "web", "js", "kbhrecipe.js"),
+            os.path.join(_REPO_ROOT, "web", "js", "brew_storage.js"),
         ):
             kilde = _les(sti)
             self.assertNotIn("IDENTITET_NOKKEL", kilde)

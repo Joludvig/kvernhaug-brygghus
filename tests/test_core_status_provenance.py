@@ -21,7 +21,7 @@ import json
 import os
 import unittest
 
-_ROOT = r"D:\Development\Kvernhaug Brygghus"
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _POLICY_PATH = os.path.join(_ROOT, "core", "status_provenance.json")
 _POLICY_DOC = os.path.join(_ROOT, "docs", "development", "CORE_STATUS_PROVENANCE.md")
 _MANIFEST_PATH = os.path.join(_ROOT, "core", "manifest.json")

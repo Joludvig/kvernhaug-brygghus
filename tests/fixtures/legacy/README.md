@@ -73,7 +73,7 @@ SHA-256-hasher av fixture-filene), ikke mot den levende
 ### `app/pantry_v1.json`
 - Source path: `data/pantry.example.json` (allerede eksplisitt sanert,
   git-tracket, ingen privat brukerdata — eksakt kopi tillatt)
-- SHA-256: `8457221a4e7c5b26304e7d864569b9d142b91ea177cb95ade9a140e566222f60`
+- SHA-256: `5030a9ff7b72848d9bf5515327f1d131512635751333dea13654d06aeb232588`
 - `data/pantry.example.json` selv forblir det **levende** eksempelet
   (kan endres av fremtidige runder); `app/pantry_v1.json` er den
   **frosne** Phase 0-fixturen og endres ikke i takt med den.

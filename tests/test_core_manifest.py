@@ -20,7 +20,7 @@ import os
 import re
 import unittest
 
-_ROOT = r"D:\Development\Kvernhaug Brygghus"
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _MANIFEST_PATH = os.path.join(_ROOT, "core", "manifest.json")
 _VERSIONING_DOC = os.path.join(_ROOT, "docs", "development", "CORE_VERSIONING.md")
 

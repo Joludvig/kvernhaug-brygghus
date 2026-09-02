@@ -17,11 +17,13 @@ Kjøres med:
     py -3 -m unittest discover -s tests
 """
 import io
+import os
 import unittest
 
-_PERSONVERN_NO = r"D:\Development\Kvernhaug Brygghus\web\personvern.html"
-_PERSONVERN_EN = r"D:\Development\Kvernhaug Brygghus\web\en\personvern.html"
-_I18N_JS = r"D:\Development\Kvernhaug Brygghus\web\js\i18n.js"
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_PERSONVERN_NO = os.path.join(_REPO_ROOT, "web", "personvern.html")
+_PERSONVERN_EN = os.path.join(_REPO_ROOT, "web", "en", "personvern.html")
+_I18N_JS = os.path.join(_REPO_ROOT, "web", "js", "i18n.js")
 
 
 def _les(sti):
