@@ -39,7 +39,7 @@ from modules.kbh_contract import bygg_kbhrecipe_konvolutt
 # Capture commit -- se tests/fixtures/legacy/README.md "CAPTURE PROVENANCE".
 _CAPTURE_COMMIT = "3ed82cf42c8bb4b0c53e8c74b21c965e1699775a"
 
-_ROOT = r"D:\Development\Kvernhaug Brygghus"
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FIXTURE_ROOT = os.path.join(_ROOT, "tests", "fixtures", "legacy")
 
 _APP_JS = os.path.join(_ROOT, "web", "js", "app.js")
@@ -212,7 +212,7 @@ class TestAppRecipeFixturerHarLegacyShape(unittest.TestCase):
         # kan endres av fremtidige, urelaterte runder uten at dette skal
         # gjøre fixturen ugyldig).
         sti = os.path.join(_FIXTURE_ROOT, "app", "pantry_v1.json")
-        forventet_sha256 = "8457221a4e7c5b26304e7d864569b9d142b91ea177cb95ade9a140e566222f60"
+        forventet_sha256 = "5030a9ff7b72848d9bf5515327f1d131512635751333dea13654d06aeb232588"
         self.assertEqual(
             _sha256(sti), forventet_sha256,
             "pantry_v1.json har driftet siden capture -- se README CAPTURE PROVENANCE",

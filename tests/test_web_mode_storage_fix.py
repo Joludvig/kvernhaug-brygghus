@@ -26,10 +26,12 @@ Kjøres med:
     py -3 -m unittest discover -s tests
 """
 import io
+import os
 import re
 import unittest
 
-_APP_JS = r"D:\Development\Kvernhaug Brygghus\web\js\app.js"
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_APP_JS = os.path.join(_REPO_ROOT, "web", "js", "app.js")
 
 
 def _kildekode():
@@ -205,9 +207,9 @@ class TestAndreLocalStorageNoklerUrort(unittest.TestCase):
         # skriving fortsatt er ubetinget, som et ekstra vern mot at noen
         # senere feilaktig antar persister-mønsteret gjelder der også.
         for sti, setitem_linje in (
-            (r"D:\Development\Kvernhaug Brygghus\web\js\i18n.js",
+            (os.path.join(_REPO_ROOT, "web", "js", "i18n.js"),
              "localStorage.setItem(SPRAK_NOKKEL, kode);"),
-            (r"D:\Development\Kvernhaug Brygghus\web\js\preferences.js",
+            (os.path.join(_REPO_ROOT, "web", "js", "preferences.js"),
              "localStorage.setItem(PREFERANSER_NOKKEL, JSON.stringify(pref));"),
         ):
             with io.open(sti, encoding="utf-8") as f:

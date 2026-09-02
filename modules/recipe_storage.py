@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+import re
 import shutil
 import uuid
 from datetime import datetime
@@ -348,10 +349,15 @@ def _valider_kildefilnavn(kilde_filnavn):
     UgyldigKildefilnavn ved ethvert brudd. Returnerer den fulle,
     validerte filstien.
 
-    `os.path.basename(kilde_filnavn) != kilde_filnavn` fanger i praksis
-    alle traversal-varianter i ett steg: en sti med "/" eller "\\" i seg
-    (uansett OS), en "../"-prefiks, eller en absolutt sti får ALLTID et
-    kortere resultat fra basename() enn originalen. Det andre steget
+    Separator-/stasjonssjekken under bruker eksplisitte tegnsjekker
+    ("/", "\\", stasjonsbokstav+":") i stedet for `os.path.basename()`
+    alene: `os.path.basename()` følger VERTSSYSTEMETS stisemantikk
+    (posixpath på Linux splitter kun på "/", ikke "\\"), så en Windows-
+    stil traversal som "..\\..\\pantry.json" eller en Windows-absolutt
+    sti som "C:\\Users\\noen\\pantry.json" ville IKKE blitt oppdaget når
+    denne koden kjører på Linux, selv om samme streng korrekt hadde blitt
+    blokkert på Windows. Sjekken må derfor være plattformuavhengig og gi
+    samme resultat uansett hvilket OS koden kjører på. Det andre steget
     (normalisert absoluttbane må ha oppskriftsmappen som DIREKTE
     foreldre) er et uavhengig sikkerhetsnett i tillegg, ikke en
     erstatning for det første."""
@@ -359,7 +365,7 @@ def _valider_kildefilnavn(kilde_filnavn):
         raise UgyldigKildefilnavn(f"Mangler eller ugyldig kildefilnavn: {kilde_filnavn!r}")
     if kilde_filnavn in (".", ".."):
         raise UgyldigKildefilnavn(f"Ugyldig kildefilnavn: {kilde_filnavn!r}")
-    if os.path.basename(kilde_filnavn) != kilde_filnavn:
+    if "/" in kilde_filnavn or "\\" in kilde_filnavn or re.match(r"^[A-Za-z]:", kilde_filnavn):
         raise UgyldigKildefilnavn(
             f"Kildefilnavnet må være et rent filnavn uten mappekomponenter: {kilde_filnavn!r}"
         )
