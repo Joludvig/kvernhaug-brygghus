@@ -103,14 +103,55 @@ the following hold:
    `status:changes-requested` (not any other label — including
    unrelated additions/removals, which do not fire `labeled` for a
    different label at all).
-2. The issue **currently** carries `agent:claude` (re-checked live via
-   `gh issue view`, not just trusted from the webhook payload).
-3. The label was applied by the repository owner
+2. **`agent:claude` was already present in the labels carried by that
+   triggering event** (`github.event.issue.labels` — the event-time
+   snapshot). See "Authorization is atomic with the trigger event"
+   below.
+3. The issue **still** carries `agent:claude` *and* that same trigger
+   label when the guard actually executes (re-checked live via
+   `gh issue view`).
+4. The label was applied by the repository owner
    (`github.event.sender.login == github.repository_owner`), not a
    bot or any other actor.
 
 If any of these fail, the workflow's `guard` job exits cleanly with no
 side effects (no label changes, no Claude invocation, no comment).
+
+The decision itself lives in
+[`.github/scripts/trigger_guard.py`](../../.github/scripts/trigger_guard.py)
+as one pure function, so every rule above is unit-tested without
+touching GitHub (`tests/test_agent_bridge_trigger_guard.py`).
+
+### Authorization is atomic with the trigger event (V1.1, issue #9)
+
+**The bug this fixes (found on the first real bridge test, issue #8):**
+V1 checked only the *live* labels at the moment the guard happened to
+run. The owner applied `status:ready` a few seconds *before*
+`agent:claude`; by the time the runner started, both labels existed, so
+the guard accepted a `status:ready` event that had **not** been
+authorized when it fired. (Execution then stopped safely at the
+missing-credential preflight — no Claude work ran — but the
+authorization itself was wrong.)
+
+**The rule now:** a trigger event is authorized only if `agent:claude`
+was present *in that event's own label snapshot*, **and** the live
+state still holds. Adding `agent:claude` afterwards never retroactively
+authorizes an older `status:*` event — that event stays permanently
+unauthorized, and the owner must re-apply the status label to arm a
+fresh, properly-ordered event.
+
+**Safe arming order — always:**
+
+1. Add (or keep) `agent:claude` on the issue.
+2. *Only then* apply/replace the lifecycle state with `status:ready` or
+   `status:changes-requested`.
+
+The live re-check from V1 is unchanged and still runs alongside this —
+it catches the *other* class of problem (an event that has since been
+superseded or disarmed). `workflow_dispatch` keeps its V1 semantics: it
+is already gated by GitHub to users with repo write access, so the
+event-snapshot requirement does not apply to manual runs — only the
+live state must be valid.
 
 ## Scope-change rule
 
