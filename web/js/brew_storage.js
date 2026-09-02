@@ -30,6 +30,37 @@ const BREW_STORE_VERSION = 1;
 const BREW_FIL_FORMAT = "kbhbrew";
 const BREW_FIL_VERSION = 1;
 
+// PRI 3A.2 (issue #22) -- Core V1 §5.13/§8#2 krever ukjent-felt-
+// passthrough for .kbhbrew, matchende .kbhrecipe sin garanti (se
+// KBHRECIPE_PASSTHROUGH_NOKKEL i kbhrecipe.js). Brygg har derimot FLERE
+// uavhengige normaliserte lag (actuals/sensing/learning i tillegg til
+// selve toppnivå-brew-objektet), så én container-nøkkel brukes PER LAG
+// den gjelder for, ikke én delt nøkkel for hele brygget -- samme prinsipp
+// som kbhrecipe.js, egen intern form siden formen her er lagdelt. Selve
+// snapshotet (lag 2) trengte ALDRI denne fiksen: byggBrewSnapshot()s
+// resultat lagres allerede som en ufiltrert dypkopi (se _normaliserBrew
+// under), så det er passthrough-sikkert av konstruksjon.
+const BREW_PASSTHROUGH_NOKKEL = "_kbhBrewUkjenteFelt";
+
+// Kjente felt per normalisert lag -- alt annet fanges til
+// BREW_PASSTHROUGH_NOKKEL i stedet for å slippes stille, se
+// _fangUkjenteFelt()/_normaliserActuals()/_normaliserSensing()/
+// _normaliserLearning()/_normaliserBrew() under.
+const BREW_KJENTE_TOPPFELT = new Set([
+  "brewId", "recipeId", "parentBrewId", "originBrewId", "status",
+  "createdAt", "brewedAt", "snapshot", "actuals", "sensing", "learning",
+]);
+const BREW_ACTUALS_KJENTE_FELT = new Set(["og", "fg", "volumeL", "notes"]);
+const BREW_SENSING_KJENTE_FELT = new Set(["judgment", "flavorProfile", "notes"]);
+const BREW_LEARNING_KJENTE_FELT = new Set(["whatWorked", "whatChanged", "nextTime"]);
+
+// brewId/recipeId er LOKAL identitet (se identitetspolicyen nederst i
+// filen) og skal ALDRI kunne lekke til en eksportert .kbhbrew-fil --
+// heller ikke via passthrough-containeren, selv om et håndredigert lokalt
+// objekt skulle inneholde dem der. Andre forsvarslinje, samme mønster som
+// KBHRECIPE_FORBUDTE_FELT i kbhrecipe.js.
+const BREW_FORBUDTE_EKSPORTFELT = new Set(["brewId", "recipeId"]);
+
 // Bumpes MANUELT når calc.js/flavor.js/style.js endrer seg på en måte som
 // gir andre tall for samme input. Da kan et gammelt brygg fortsatt leses
 // som "beregnet med motor v1" i stedet for å se ut som en uforklarlig
@@ -170,6 +201,42 @@ function _tekstEllerUndefined(v) {
   return t ? t : undefined;
 }
 
+// PRI 3A.2 (issue #22, Core V1 §5.13/§8#2) -- felles fangst av ukjente
+// felt for ETT normalisert lag. `kilde` er det RÅ input-objektet (kan
+// selv allerede bære en BREW_PASSTHROUGH_NOKKEL-container fra en
+// tidligere normalisering, f.eks. når oppdaterBrygg() sprer
+// {...forrige.actuals, ...endringer.actuals} og normaliserer på nytt) --
+// eksisterende containerinnhold flettes derfor inn FØRST, deretter vinner
+// ethvert felt som faktisk står som egen egenskap i `kilde` (et kjent
+// felt brukeren nettopp redigerte skal aldri tape mot en gammel
+// passthrough-verdi med samme navn, samme prinsipp som kbhrecipe.js).
+// Returnerer `null` (ikke et tomt objekt) når det ikke er noe å bevare,
+// slik at ingen tom container skrives ut.
+function _fangUkjenteFelt(kilde, kjenteFelt) {
+  if (!_erObjekt(kilde)) return null;
+  const ukjent = {};
+  const eksisterende = kilde[BREW_PASSTHROUGH_NOKKEL];
+  if (_erObjekt(eksisterende)) {
+    for (const [nokkel, verdi] of Object.entries(eksisterende)) {
+      if (nokkel === BREW_PASSTHROUGH_NOKKEL) continue;
+      // Et gammelt containerinnslag hvis navn NÅ er et kjent felt skal
+      // aldri gjenopplives -- ellers kan en avlegs passthrough-verdi
+      // (f.eks. fra en fil skrevet av en nyere/eldre klient) ligge og
+      // vente på å lekke tilbake den dagen det ekte kjente feltet en
+      // gang blir tomt/fjernet. Kjente felt leses ALLTID direkte fra
+      // `kilde` (se andre løkke under), aldri fra containeren.
+      if (kjenteFelt.has(nokkel)) continue;
+      ukjent[nokkel] = verdi;
+    }
+  }
+  for (const [nokkel, verdi] of Object.entries(kilde)) {
+    if (nokkel === BREW_PASSTHROUGH_NOKKEL) continue;
+    if (kjenteFelt.has(nokkel)) continue;
+    ukjent[nokkel] = verdi;
+  }
+  return Object.keys(ukjent).length ? ukjent : null;
+}
+
 // Alle actuals-felt er valgfrie og lagres canonical (SG-punkter som tall,
 // volum i liter). Faktisk ABV lagres ALDRI -- den regnes ut fra og/fg ved
 // visning, se filhodet.
@@ -184,6 +251,8 @@ function _normaliserActuals(a) {
   if (volumeL !== undefined) ut.volumeL = volumeL;
   const notes = _tekstEllerUndefined(a.notes);
   if (notes) ut.notes = notes;
+  const ukjent = _fangUkjenteFelt(a, BREW_ACTUALS_KJENTE_FELT);
+  if (ukjent) ut[BREW_PASSTHROUGH_NOKKEL] = ukjent;
   return ut;
 }
 
@@ -201,6 +270,8 @@ function _normaliserSensing(s) {
   }
   const notes = _tekstEllerUndefined(s.notes);
   if (notes) ut.notes = notes;
+  const ukjent = _fangUkjenteFelt(s, BREW_SENSING_KJENTE_FELT);
+  if (ukjent) ut[BREW_PASSTHROUGH_NOKKEL] = ukjent;
   return ut;
 }
 
@@ -215,6 +286,8 @@ function _normaliserLearning(l) {
   if (whatWorked) ut.whatWorked = whatWorked;
   if (whatChanged) ut.whatChanged = whatChanged;
   if (nextTime) ut.nextTime = nextTime;
+  const ukjent = _fangUkjenteFelt(l, BREW_LEARNING_KJENTE_FELT);
+  if (ukjent) ut[BREW_PASSTHROUGH_NOKKEL] = ukjent;
   return ut;
 }
 
@@ -241,6 +314,8 @@ function _normaliserBrew(b) {
   };
   const brewedAt = _tekstEllerUndefined(b.brewedAt);
   if (brewedAt) ut.brewedAt = brewedAt;
+  const ukjent = _fangUkjenteFelt(b, BREW_KJENTE_TOPPFELT);
+  if (ukjent) ut[BREW_PASSTHROUGH_NOKKEL] = ukjent;
   return ut;
 }
 
@@ -489,22 +564,55 @@ function bryggFase(brew) {
 // Ingen sammenslåing/overskriving skjer automatisk -- parseren rapporterer
 // duplikat, og et fremtidig UI-lag avgjør hva som skal skje.
 
+// PRI 3A.2 (issue #22) -- flater ut ETT normalisert lag til eksportform:
+// kjente felt uendret + bevart passthrough (BREW_PASSTHROUGH_NOKKEL)
+// flettet inn KUN for nøkler et kjent felt ikke allerede dekker (samme
+// presedens som kbhrecipe.js: et kjent, eksplisitt satt felt vinner alltid
+// over en gammel passthrough-verdi med samme navn). Containernøkkelen selv
+// skrives ALDRI ut som et bokstavelig felt. `forbudt` er andre forsvarslinje
+// (se BREW_FORBUDTE_EKSPORTFELT) -- filtrerer bort felt som aldri skal
+// lekke til en fil, selv om de skulle stå i passthrough-containeren.
+function _flatEksportfelt(lag, forbudt) {
+  const ut = {};
+  if (!_erObjekt(lag)) return ut;
+  for (const [nokkel, verdi] of Object.entries(lag)) {
+    if (nokkel === BREW_PASSTHROUGH_NOKKEL) continue;
+    if (forbudt && forbudt.has(nokkel)) continue;
+    ut[nokkel] = verdi;
+  }
+  const ukjent = lag[BREW_PASSTHROUGH_NOKKEL];
+  if (_erObjekt(ukjent)) {
+    for (const [nokkel, verdi] of Object.entries(ukjent)) {
+      if (forbudt && forbudt.has(nokkel)) continue;
+      if (!(nokkel in ut)) ut[nokkel] = verdi;
+    }
+  }
+  return ut;
+}
+
 function byggKbhBrewInnhold(brew) {
+  const toppfelt = _flatEksportfelt(
+    {
+      originBrewId: brew.originBrewId || brew.brewId,
+      parentBrewId: brew.parentBrewId || null,
+      status: brew.status,
+      createdAt: brew.createdAt,
+      brewedAt: brew.brewedAt,
+      [BREW_PASSTHROUGH_NOKKEL]: brew[BREW_PASSTHROUGH_NOKKEL],
+    },
+    BREW_FORBUDTE_EKSPORTFELT
+  );
   return {
     format: BREW_FIL_FORMAT,
     version: BREW_FIL_VERSION,
     exportedAt: new Date().toISOString(),
     generator: "Kvernhaug Brygghus",
     brew: {
-      originBrewId: brew.originBrewId || brew.brewId,
-      parentBrewId: brew.parentBrewId || null,
-      status: brew.status,
-      createdAt: brew.createdAt,
-      brewedAt: brew.brewedAt,
+      ...toppfelt,
       snapshot: brew.snapshot,
-      actuals: brew.actuals,
-      sensing: brew.sensing,
-      learning: brew.learning,
+      actuals: _flatEksportfelt(brew.actuals, BREW_FORBUDTE_EKSPORTFELT),
+      sensing: _flatEksportfelt(brew.sensing, BREW_FORBUDTE_EKSPORTFELT),
+      learning: _flatEksportfelt(brew.learning, BREW_FORBUDTE_EKSPORTFELT),
     },
   };
 }
@@ -541,7 +649,15 @@ function importerBrygg(filBrew) {
     return { ok: false, duplikat: true, melding: t("brygg.feilDuplikat") };
   }
   const state = lesBrewState();
+  // PRI 3A.2 (issue #22) -- sprer filBrew FØRST, slik at ethvert ukjent
+  // toppnivåfelt filen måtte inneholde (en fremtidig .kbhbrew-writer som
+  // ligger foran denne leseren) flyter med inn i _normaliserBrew(), som nå
+  // fanger det til passthrough i stedet for å miste det. De eksplisitt
+  // beregnede identitetsfeltene under står ETTER spredningen og vinner
+  // dermed alltid over samme navn i filen -- brewId/recipeId er uansett
+  // ALDRI noe en fil skal kunne diktere (identitetspolicyen over).
   const brew = _normaliserBrew({
+    ...filBrew,
     brewId: _genererBrewId(),
     // Den svake oppskriftsreferansen er LOKAL og følger derfor aldri med en
     // fil -- oppskrift-id-ene i mottakerens nettleser er andre enn i
@@ -550,12 +666,6 @@ function importerBrygg(filBrew) {
     parentBrewId: filBrew.parentBrewId || null,
     originBrewId: origin || _genererBrewId(),
     status: BREW_STATUSER.includes(filBrew.status) ? filBrew.status : "done",
-    createdAt: filBrew.createdAt,
-    brewedAt: filBrew.brewedAt,
-    snapshot: filBrew.snapshot,
-    actuals: filBrew.actuals,
-    sensing: filBrew.sensing,
-    learning: filBrew.learning,
   });
   state.items.push(brew);
   if (!_skrivBrewState(state)) return { ok: false, melding: t("brygg.feilLagring") };

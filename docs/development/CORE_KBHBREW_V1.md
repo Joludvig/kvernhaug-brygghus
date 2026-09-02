@@ -1,13 +1,14 @@
-# Core `.kbhbrew` V1 Contract — Proposal (PRI 3A)
+# Core `.kbhbrew` V1 Contract
 
-Version: 0.1 — **Proposal, not adopted**
-Status: **Draft for owner review.** This document does not become the
-governing Core contract until an explicit owner GO records it as
-`Status: Active` (the same pattern
+Version: 1.0
+Status: Active
+Ratified by: PRI 3A.2 (issue #22), from the owner's explicit PRI 3A
+review decisions recorded in Section 8. `.kbhbrew` V1 is now the
+governing Core contract — the same pattern
 [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) went through before it was
-marked Active). Until then, `.kbhbrew` remains governed only by what
-`web/js/brew_storage.js` actually does today — this document formalizes
-and questions that behavior, it does not yet replace it.
+marked Active. A machine-readable schema now exists:
+[core/kbhbrew_v1.schema.json](../../core/kbhbrew_v1.schema.json)
+(Section 7).
 
 Governed by: [KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md) (v2.0) —
 Core owns the shared wire contract; App/Web own their local storage,
@@ -18,13 +19,43 @@ in (Section 6). See also [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md)
 (the sibling `.kbhrecipe` contract, whose conventions this document
 follows where applicable) and [CORE_VERSIONING.md](CORE_VERSIONING.md) /
 [CORE_STATUS_PROVENANCE.md](CORE_STATUS_PROVENANCE.md) (the general
-Core version/provenance model this proposal reuses rather than
+Core version/provenance model this contract reuses rather than
 reinventing).
 
-**This is PRI 3A: contract discovery/formalization.** It does not
-implement `.kbhbrew` in App, does not change `web/js/brew_storage.js`,
-does not migrate any user data, and does not decide PRI 4 (custom
-ingredient identity). See Section 9, "What this document does not do."
+**This is PRI 3A.2: ratification + schema + required Web compatibility
+work.** It does not implement `.kbhbrew` in App (PRI 3B, separately
+authorized), does not migrate any user data, and does not decide PRI 4
+(custom ingredient identity). See Section 9, "What this document does
+not do."
+
+## PRI 3A.2 ratification summary (issue #22)
+
+The five PRI 3A "owner decisions required" (former Section 8) are now
+resolved and locked, per the owner's explicit review:
+
+1. **Ingredient/equipment snapshot** — Option A, full embed. No
+   historical masterdata archive invented; Core manifest provenance
+   (`schema_version`/`data_version`/`checksum`) is additionally captured
+   per referenced dataset at snapshot time where available (see
+   "Provenance implementation status" below for the one known Web
+   publication gap).
+2. **Unknown-field passthrough** — Option A, required in V1. Implemented
+   in `web/js/brew_storage.js` this round (Section 2/Section 6 updated
+   below); the schema's `additionalProperties: true` throughout is the
+   schema-level half of this guarantee.
+3. **Derived `actual_abv` on the wire** — Option A, omit entirely. The
+   schema does not define an actuals-layer ABV field; a canonical reader
+   always recomputes from `actuals.{og,fg}`.
+4. **Legacy App `note` mapping** — Option C, explicit split at
+   conversion/write time. Deferred to PRI 3B as an adapter/UI decision;
+   not implemented here. The wire shape (`actuals.notes` +
+   `sensing.notes`, distinct and independent) is unaffected either way.
+5. **"Actual process used"** — Option B, defer. No V1 field added; App's
+   `process_profile_navn` remains product-local/legacy evidence.
+
+These are locked for this contract unless implementation reveals a
+genuine contradiction that makes one of them impossible or unsafe — see
+the issue's own scope-change rule.
 
 ---
 
@@ -114,19 +145,23 @@ exported `.kbhbrew` file).
   `capturedAt`).
 - **Actuals/sensing/learning normalization**: each of
   `_normaliserActuals()`/`_normaliserSensing()`/`_normaliserLearning()`
-  reads a **fixed, named set of fields** off the input object and
-  writes nothing else — `actuals` accepts only `og`/`fg`/`volumeL`/
-  `notes`; `sensing` only `judgment`/`flavorProfile`/`notes`; `learning`
-  only `whatWorked`/`whatChanged`/`nextTime`. **There is no unknown-field
-  passthrough anywhere in this file** — contrast with `.kbhrecipe`'s
-  explicit `_kbhUkjenteFelt` passthrough container
-  (`web/js/kbhrecipe.js`, documented in
-  [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) §6). Any field outside
-  the named set, on any layer, top-level `brew` object included, is
-  silently dropped on read, on import, and on every subsequent
-  normalize-on-write. This is a real, load-bearing gap relative to the
-  sibling contract — see Section 6 and the OWNER DECISION REQUIRED list
-  (Section 8).
+  reads a **fixed, named set of fields** off the input object —
+  `actuals` recognizes `og`/`fg`/`volumeL`/`notes`; `sensing`
+  `judgment`/`flavorProfile`/`notes`; `learning`
+  `whatWorked`/`whatChanged`/`nextTime` — but, **as of PRI 3A.2 (issue
+  #22)**, no longer silently drops anything else. Every field outside
+  the named set, on any of these three layers *and* on the top-level
+  `brew` object, is now captured into a passthrough container
+  (`_kbhBrewUkjenteFelt`, one per layer where it applies) and carried
+  through read/normalize/import/export — the same general principle as
+  `.kbhrecipe`'s `_kbhUkjenteFelt` (`web/js/kbhrecipe.js`, documented in
+  [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) §6), under a distinct
+  internal name since brew passthrough is per-layer rather than a single
+  recipe-wide container. The frozen `snapshot` layer never needed this
+  fix: it is stored as an unfiltered deep copy already, so it was always
+  effectively passthrough-safe (see Section 5.13). This closes the gap
+  Section 6 previously documented as open — see Owner decision #2's
+  ratified outcome above.
 - **Derived values — never stored, always computed at display time**:
   `faktiskAbv()` ((actual OG − actual FG) × 131.25), `planVsFaktisk()`
   (plan-vs-actual deltas for OG/FG/ABV/volume), `faktiskEffektivitet()`
@@ -248,20 +283,20 @@ contract as-is.
 | Reserved shared-batch link | `parentBrewId` (unused in V1) | *(none)* | Reserved field, no V1 semantics yet | DEFER |
 | Recipe linkage | `recipeId` (weak, navigation-only) | Recipe **name** via filename (weaker — renameable, no id at all) | Core: a weak reference; the frozen snapshot is always authoritative for display | ADAPT |
 | Frozen recipe payload | `snapshot.recipe` (full deep copy) | *(none — no per-brew freeze exists)* | Core: immutable frozen recipe payload, written once | KEEP (concept), gap on App side |
-| Frozen ingredient master-data | `snapshot.ingredients.{malt,humle,gjaer}` — full referenced entries, not a hand-picked subset | *(none)* | Needs an explicit Core decision: embed full records vs. reference by id + pinned `data_version` | **OWNER DECISION REQUIRED** (Section 8 #1) |
+| Frozen ingredient master-data | `snapshot.ingredients.{malt,humle,gjaer}` — full referenced entries, not a hand-picked subset | *(none)* | Full embed (Section 8 #1, ratified) | KEEP (Web's current behavior is now the Core V1 contract) |
 | Frozen equipment profile | `snapshot.equipment` (or `null`) | *(none — App's `modules/equipment.py` profile is live/global, never frozen per brew)* | Core: optional frozen equipment snapshot | ADAPT |
 | Frozen predicted values | `snapshot.predicted.{og,fg,abv,ibu,ebc,buGu,flavorProfile,style}` | *(none per brew — App's `stats`/`flavor_profile` live on the mutable recipe object instead, see §3)* | Core: frozen prediction snapshot, per `KBH_CORE_CONTRACT.md` §2's explicit exception for historical reproducibility | KEEP (concept), shape depends on OWNER DECISION #1 |
 | Snapshot provenance | `snapshot.provenance.{engineVersion, recipeSchemaVersion, masterdata: {…count}, capturedAt}` | *(none)* | Core: needed for reproducibility. `core/manifest.json` already provides a stronger per-dataset foundation (`schema_version`, `data_version`, `checksum`) than Web's entry-count proxy; a Core-compliant writer should capture those manifest fields per referenced dataset. Web's entry-count proxy remains readable as legacy/de-facto provenance on brews already captured under it | ADAPT |
 | Status | `status ∈ {active, done, discarded}`, freely reassignable metadata | *(none)* | KEEP | KEEP |
 | Judgment | `sensing.judgment ∈ {yes, maybe, no}` | *(none)* | KEEP | KEEP |
 | Measured actuals: OG/FG/volume | `actuals.{og, fg, volumeL}` (canonical SG points, liters) | `actual_og`, `actual_fg`, `actual_volume_l` (same canonical units, snake_case) | KEEP concept; naming/casing convergence is a product decision, not a wire-contract blocker | ADAPT |
-| Actual ABV | **Never stored** — always `faktiskAbv()` from actuals | **Stored explicitly** (`actual_abv`, precomputed by the UI) | Wire contract only: never authoritative, always recomputable from `actuals.{og,fg}`, never required on write. Does not require App to change its local storage — App's cached copy is product-local and out of scope | **OWNER DECISION REQUIRED** (Section 8 #3) whether the wire schema omits the field entirely or allows it as optional/non-authoritative; App's local field is APP_ONLY either way |
+| Actual ABV | **Never stored** — always `faktiskAbv()` from actuals | **Stored explicitly** (`actual_abv`, precomputed by the UI) | Wire contract only: omitted entirely (Section 8 #3, ratified). Does not require App to change its local storage — App's cached copy is product-local and out of scope | **REJECT** on the wire (never authoritative, never emitted by a canonical writer); App's local field remains APP_ONLY |
 | Actual process used | *(absent — Web's actuals has no process-used field at all)* | `process_profile_navn` (name string only, no full profile) | A genuinely new candidate Core field ("what was actually done"), not yet present on either side in a complete form | DEFER (needs its own design, same caution `.kbhrecipe`'s `prosess` field already required) |
-| Measurement/observation notes | `actuals.notes` (measurement-adjacent) + `sensing.notes` (tasting-adjacent) — two distinct fields | `note` — a single merged field covering both | Core V1 wire shape: both `actuals.notes` and `sensing.notes`, optional and independent, matching Web (§5.8) — not an open wire question | KEEP (Web's two-field shape); App's single `note` → this shape is a deferred adapter/migration question, **OWNER DECISION REQUIRED** only for that mapping (Section 8 #4) |
+| Measurement/observation notes | `actuals.notes` (measurement-adjacent) + `sensing.notes` (tasting-adjacent) — two distinct fields | `note` — a single merged field covering both | Core V1 wire shape: both `actuals.notes` and `sensing.notes`, optional and independent, matching Web (§5.8) — not an open wire question | KEEP (Web's two-field shape); App's single `note` → this shape is a PRI 3B adapter/migration decision (Section 8 #4, ratified: explicit split at write time), not decided here |
 | Sensory flavor profile | `sensing.flavorProfile` (numeric map, same axes as predicted) | *(none)* | KEEP | KEEP |
 | Learning: whatWorked/whatChanged/nextTime | `learning.{whatWorked, whatChanged, nextTime}` | *(none)* | KEEP | KEEP |
 | Timestamps | `createdAt` + `brewedAt` (both ISO 8601, distinct meanings) | `date` only (a single date; ambiguous whether it means "brew day" or "log entry day" — in practice always brew day) | Core: needs at least a "when brewed" timestamp; `createdAt` (record creation) vs. `brewedAt` (the actual brew day) is a real, useful distinction Web already draws | ADAPT |
-| Unknown-field passthrough | **Absent.** All four normalizers whitelist fields and silently drop anything else | N/A (flat list; no schema-aware writer to lose data from) | `.kbhrecipe` already requires this ([CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) §6); `.kbhbrew` currently provides no equivalent guarantee | **OWNER DECISION REQUIRED** (Section 8 #2) |
+| Unknown-field passthrough | **Implemented as of PRI 3A.2** (issue #22) — the four normalizers now capture unrecognized fields into a per-layer passthrough container instead of dropping them | N/A (flat list; no schema-aware writer to lose data from) | `.kbhrecipe` already requires this ([CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) §6); `.kbhbrew` now provides the equivalent guarantee (Section 8 #2, ratified: Option A, required in V1) | KEEP (required) |
 | Import duplicate detection | `originBrewId`-keyed, explicit `{duplikat:true}` result, never silent | *(none — no import mechanism exists)* | KEEP as the Core V1 identity/dedup policy | KEEP |
 | `_kbh_passthrough` (recipe-level opaque fields) | N/A — this is a `.kbhrecipe` mechanism, not `.kbhbrew` | Recipe-scoped only (`modules/recipe.py`), not brew-scoped | Out of scope: this is `.kbhrecipe`'s mechanism, unrelated to a brew record | APP_ONLY / WEB_ONLY (recipe-scoped, not this contract's concern) |
 
@@ -524,34 +559,29 @@ compatibility gap, not a hypothetical one, and is part of why passthrough
 ## 6. Compatibility / migration analysis (no migration performed)
 
 **Is today's Web `.kbhbrew` wire-lossless on its own round-trip?**
-Yes, *in practice*, because Web today only ever writes fields already
-in its own whitelist — so export→import→export reproduces the same
-data. But this is a **coincidence of current behavior, not a structural
-guarantee**: there is no forward-compatibility margin (§5.15), and any
-field a future writer adds without also updating the four normalizer
-functions would be silently dropped on the very next read.
+As of PRI 3A.2 (issue #22), **yes, structurally**, not merely by
+coincidence: `web/js/brew_storage.js`'s four normalizer functions now
+capture any field outside their known set into a passthrough container
+per layer (Section 2), closing the forward-compatibility gap §5.15
+previously described. Before this round it was only true *in practice*
+(Web only ever wrote fields already in its own whitelist).
 
 **Can current Web `.kbhbrew` be treated as Core V1 as-is?**
-Recommended: **yes, as the de facto V1 baseline**, with two explicit,
-un-guessed caveats that keep this from being a blind rubber-stamp:
+**Yes — this is now the ratified Core V1 baseline.** The two caveats
+this section previously listed as open are resolved:
 
-1. It currently provides no unknown-field passthrough guarantee
-   (Section 8 #2) — calling it "Core V1, final" without deciding this
-   would silently lock in a weaker guarantee than `.kbhrecipe` already
-   has.
-2. Its ingredient-embedding approach (full master-data copies, not
-   id+version references) is a real architectural choice with
-   tradeoffs neither this document nor the existing code has settled
-   as a deliberate Core decision — it has simply never been questioned
-   until this task (Section 8 #1).
+1. Unknown-field passthrough (Section 8 #2, ratified: required) —
+   implemented this round, see Section 2.
+2. Ingredient embedding (Section 8 #1, ratified: full embed, Option A)
+   — Web's existing full master-data-copy behavior is the Core V1
+   contract as-is; no code change was needed for this half.
 
-Subject to those two being explicitly resolved by the owner, nothing
-else in Web's current model needs to change to serve as Core V1: no
-backwards-incompatible reader adaptation is required, and it should
-**not** be treated as a mere "product-local pre-Core format" — it is
-already the only implementation that satisfies the five-layer model,
-the identity policy, and the derived-value discipline this document
-recommends adopting.
+Nothing else in Web's model changed to serve as Core V1: no
+backwards-incompatible reader adaptation was required, and it should
+**not** be treated as a mere "product-local pre-Core format" — it was
+already, and remains, the only implementation that satisfies the
+five-layer model, the identity policy, and the derived-value discipline
+this contract requires.
 
 **App compatibility/gap summary.**
 App implements, at most, the **actuals** layer of the five-layer model,
@@ -594,33 +624,67 @@ cross-product migration this issue explicitly excludes.
 
 ---
 
-## 7. Machine-readable schema — deferred, not built this round
+## 7. Machine-readable schema
 
-The issue's own governing instruction is explicit: *"If, and only if,
-the evidence supports a stable V1 shape without making unresolved
-owner decisions, add a machine-readable schema... If a genuinely
-architectural owner decision blocks a safe schema, do not guess."*
+PRI 3A left this deferred pending the two decisions (#1 ingredient
+embedding vs. reference; #2 passthrough requirement) that directly
+determine the **shape** of `snapshot.ingredients`/`snapshot.equipment`
+and of every layer's tolerance for extra fields — a JSON Schema written
+before either was resolved would either (a) have hard-coded Web's shape
+as permanent Core law without an owner having actually chosen it, or
+(b) needed rewriting the moment either decision landed.
 
-Section 8 lists two decisions (#1: ingredient embedding vs. reference;
-#2: passthrough requirement) that directly determine the **shape** of
-`snapshot.ingredients`/`snapshot.equipment` and of every layer's
-tolerance for extra fields — a JSON Schema written before either is
-resolved would either (a) hard-code today's Web shape as permanent
-Core law without an owner having actually chosen it, or (b) need to be
-rewritten the moment either decision lands. Neither outcome is
-acceptable per the issue's own guardrail against silently making a new
-irreversible product/ownership decision.
+**Both are now resolved (Section 8, ratified by PRI 3A.2 / issue #22)**,
+so the schema is added this round:
+[core/kbhbrew_v1.schema.json](../../core/kbhbrew_v1.schema.json) (JSON
+Schema, draft 2020-12). It encodes: the envelope and its pinned
+`format`/`version`; the identity fields (`brewId`/`originBrewId`/
+`parentBrewId`/`recipeId`), all optional at the schema level since a
+canonical exported file omits the two local-only ones (`brewId`/
+`recipeId` — see the frozen legacy fixture,
+`tests/fixtures/legacy/web/kbhbrew_v1.json`); the frozen snapshot's
+required minimum shape (`recipe` + `predicted` objects); full embedded
+ingredient/equipment snapshot semantics (Section 8 #1); a provenance
+structure covering both the new normative Core-manifest-derived
+`provenance.datasets.{malt,humle,gjaer}.{schema_version,data_version,
+checksum}` shape and the legacy `provenance.masterdata` entry-count
+proxy, which remains readable but is not the V1 target (Section 5.12);
+the optional `actuals`/`sensing`/`learning` layers with distinct
+`actuals.notes`/`sensing.notes`; canonical `status`/timestamp fields;
+no canonical `actual_abv` or V1 actual-process field (Section 8 #3/#5);
+and `additionalProperties: true` throughout, the schema-level
+expression of the unknown-field passthrough requirement (Section 8 #2).
 
-**No `.kbhbrew` JSON Schema is added in this PR.** This document itself
-is the deliverable for PRI 3A's Section 3 (normative contract); a
-machine-readable schema is proposed as the concrete next step once
-Section 8's items are resolved (see Section 8's closing note).
+Contract fixtures and tests live in
+`tests/fixtures/core/kbhbrew/{minimal_v1,full_v1}.json` and
+`tests/test_kbhbrew_schema_contract.py` — covering a minimal valid
+brew, a representative full brew (including the new manifest-provenance
+shape), unknown fields surviving validation at every layer, rejection
+of an unsupported envelope format/version, enforcement of the required
+identity/snapshot rules, absence of a canonical `actual_abv`/process
+field, and that the frozen legacy Web `.kbhbrew` fixture still
+validates unchanged against this schema.
 
 ---
 
-## 8. Owner decisions required
+## 8. Owner decisions — ratified (PRI 3A.2, issue #22)
+
+The five decisions below were left open by PRI 3A's discovery round and
+are now resolved by explicit owner review. Each entry keeps the
+original options/rationale for context, with the ratified outcome
+stated first. These are **locked** for this contract unless
+implementation reveals a genuine contradiction that makes one
+impossible or unsafe.
 
 ### 1. Ingredient/equipment snapshot: embed full records, or reference by id + pinned version?
+
+**Ratified: Option A — full embed.** Core V1 keeps Web's current
+self-contained historical snapshot model; no historical masterdata
+archive is invented. Core manifest provenance
+(`schema_version`/`data_version`/`checksum`) is additionally captured
+per relevant dataset at snapshot time where the writer has trustworthy
+access to it (see Section 5.12 and "Provenance implementation status"
+below for the one documented Web gap).
 
 - **Option A — full embed (Web's current behavior).** Self-contained:
   a brew remains fully readable even if the referenced master-data
@@ -654,6 +718,14 @@ Section 8's items are resolved (see Section 8's closing note).
 
 ### 2. Is unknown-field passthrough required for `.kbhbrew` V1?
 
+**Ratified: Option A — required now.** `.kbhbrew` V1 must preserve
+unknown fields across read/normalize/write/import/export round trips,
+matching `.kbhrecipe`'s existing guarantee. Implemented this round in
+`web/js/brew_storage.js` (Section 2) — see
+`tests/js/test_kbhbrew_contract.js` for the Web round-trip proof and
+`core/kbhbrew_v1.schema.json` (`additionalProperties: true` throughout)
+for the schema-level half.
+
 - **Option A — require it now.** Matches `.kbhrecipe`'s existing
   guarantee; requires new Web implementation work (adding a passthrough
   container to all four normalizers) that is explicitly out of scope
@@ -668,6 +740,11 @@ Section 8's items are resolved (see Section 8's closing note).
   discard from any writer that gets ahead of the reader).
 
 ### 3. Should the `.kbhbrew` wire schema carry a derived value (e.g. `actual_abv`) at all?
+
+**Ratified: Option A — omit it from the wire entirely.** Canonical
+`.kbhbrew` carries OG/FG actuals only; ABV is always recomputed. A
+future App exporter may keep any local convenience/cache value
+internally — Core does not dictate App local persistence.
 
 This is scoped to the **wire contract only** — it does not decide, and
 must not be read as deciding, whether App keeps `actual_abv` in its own
@@ -689,6 +766,11 @@ option below is chosen.
   correctness.
 
 ### 4. How should App's single legacy `note` field map onto Core's two-field notes shape?
+
+**Ratified: Option C — explicit split at conversion/write time.** This
+is a PRI 3B adapter/UI decision, not work for this issue — not
+implemented here. Core's wire shape remains the distinct optional
+`actuals.notes`/`sensing.notes` pair regardless.
 
 This is **not** a wire-schema ambiguity — Section 5.8 already fixes the
 wire shape as two distinct, optional, independent fields
@@ -717,6 +799,10 @@ reopen or duplicate the wire shape itself.
 
 ### 5. Should "actual process used" become a real Core V1 field?
 
+**Ratified: Option B — defer.** No half-defined process field is added
+to V1. Existing App `process_profile_navn` remains product-local/legacy
+evidence until separately designed.
+
 - **Option A — add it now**, since both implementations already gesture
   at it (App has a name-only string; Web has none at all) and it fits
   naturally as a layer-3 actual.
@@ -726,34 +812,82 @@ reopen or duplicate the wire shape itself.
   a full process-profile-shaped actual is more design work than this
   discovery task should absorb.
 
-**Once these are resolved**, the concrete next implementation step
-(explicitly requested by the issue's acceptance criteria) is: (a) bump
-this document to `Version: 1.0`/`Status: Active` reflecting the actual
-decisions made, (b) write the machine-readable JSON Schema deferred in
-Section 7, with contract fixtures alongside it (mirroring
-`tests/fixtures/legacy/`'s pattern), and (c) only then scope PRI 3B
-(actual App `.kbhbrew` implementation) as its own, separately
-authorized issue.
+**With all five resolved**, PRI 3A.2 (this ratification) completed the
+concrete next implementation step: (a) this document is now
+`Version: 1.0`/`Status: Active`; (b) the machine-readable JSON Schema
+deferred in the old Section 7 is written, with contract fixtures
+alongside it (`tests/fixtures/core/kbhbrew/`, mirroring
+`tests/fixtures/legacy/`'s pattern); (c) PRI 3B (actual App `.kbhbrew`
+implementation) remains its own, separately authorized issue — not
+started here.
+
+### Provenance implementation status (issue #22, Section 5 scope)
+
+Core manifest provenance (`schema_version`/`data_version`/`checksum`
+per dataset, `core/manifest.json`) is the schema's normative
+`provenance.datasets` target (Section 5.12, Section 7). Whether Web can
+*populate* it today is a separate, narrower question from whether the
+contract/schema should *define* it — the contract does; **Web cannot
+yet populate it without a build-pipeline change, and this round does
+not add one.**
+
+Checked this round: `web/data/{malt,humle,gjaer}.json` (the files
+`scripts/generate_web_data.py` actually publishes and the only
+ingredient data the browser has access to at snapshot time) carry no
+`schema_version`/`data_version`/`checksum`/manifest-linked metadata of
+any kind — plain `{id: {...entry fields...}}` maps, verified by reading
+both the generator script and a live generated file. `core/manifest.json`
+itself is not copied into `web/` at all. So
+`byggBrewSnapshot()`/`_frysIngredienser()` in `web/js/brew_storage.js`
+have no trustworthy, already-published value to read at snapshot time
+— populating `provenance.datasets` from the browser today would mean
+**fabricating** manifest-shaped values (e.g. hardcoding today's
+`core/manifest.json` numbers into `brew_storage.js` by hand, which would
+silently go stale the moment either file changes), which Section 5.12
+and this document's own discipline explicitly forbid.
+
+**Decision (per the issue's explicit fallback path): do not fabricate.**
+`web/js/brew_storage.js`'s `byggBrewSnapshot()` is unchanged in this
+round — it continues to write only the legacy `provenance.masterdata`
+entry-count proxy, which remains valid, readable de-facto provenance on
+every brew captured under it (Section 5.12), just not the V1 normative
+target.
+
+**Smallest follow-up needed before a Core-compliant Web writer can claim
+full V1 provenance** (not built here, explicitly out of scope per the
+issue's "do not expand into crawler/masterdata-pipeline work" guardrail):
+`scripts/generate_web_data.py` would need to additionally publish the
+relevant `core/manifest.json` dataset fields somewhere the browser can
+fetch at snapshot time — e.g. a small generated `web/data/manifest.json`
+mirroring the three datasets' `schema_version`/`data_version`/`checksum`,
+or embedding the same fields as a sibling key inside each of
+`malt.json`/`humle.json`/`gjaer.json`. Either is a real, if small,
+publication/build change — the issue's own line for what this round
+must not invent.
 
 ---
 
-## 9. What this document does not do
+## 9. What this document (and PRI 3A.2) does not do
 
 - Does not implement `.kbhbrew` in App — no new reader/writer/UI code
-  is added anywhere.
-- Does not modify `web/js/brew_storage.js`, `web/README.md`, or any
-  other Web file.
+  is added anywhere (PRI 3B, separately authorized).
+- Does not modify `web/README.md` or any Web file other than
+  `web/js/brew_storage.js` (Section 2, the required unknown-field
+  passthrough fix — the one Web change this ratification round makes).
 - Does not migrate any existing App brew-log data or Web brew-history
   data.
 - Does not touch `tests/fixtures/legacy/app/brew_log.json` or
   `tests/fixtures/legacy/web/{brew_store_v1,kbhbrew_v1}.json` — all
-  three remain byte-identical, frozen compatibility evidence.
+  three remain byte-identical, frozen compatibility evidence (verified
+  by `tests/test_kbhbrew_schema_contract.py`'s legacy-fixture
+  validation test, which reads them unchanged).
 - Does not change `.kbhrecipe` in any way.
 - Does not resolve custom-ingredient identity (PRI 4).
 - Does not add a database/backend/cloud requirement — local-first is
   unchanged.
 - Does not fold Brew Lab's interpretation activity into `actuals`, and
   does not collapse `sensing`/`learning` into one field.
-- Does not add a machine-readable schema (Section 7) — deliberately
-  deferred pending Section 8's owner decisions.
+- Does not fabricate Core manifest provenance in Web — see "Provenance
+  implementation status" above for the exact, explicitly documented gap
+  and its smallest follow-up.
 - Does not touch `raw_data/unmatched_malt.json`.

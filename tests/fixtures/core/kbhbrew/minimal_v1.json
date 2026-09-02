@@ -1,0 +1,22 @@
+{
+  "format": "kbhbrew",
+  "version": 1,
+  "exportedAt": "2026-03-01T00:00:00.000Z",
+  "generator": "Kvernhaug Brygghus",
+  "brew": {
+    "originBrewId": "brew-11111111-1111-4111-8111-111111111111",
+    "status": "active",
+    "createdAt": "2026-03-01T00:00:00.000Z",
+    "snapshot": {
+      "recipe": {
+        "recipeSchemaVersion": 1,
+        "navn": "Core V1 minimal (syntetisk fixture)",
+        "volum": 20,
+        "effektivitet": 75,
+        "malt": [],
+        "humle": []
+      },
+      "predicted": {}
+    }
+  }
+}
