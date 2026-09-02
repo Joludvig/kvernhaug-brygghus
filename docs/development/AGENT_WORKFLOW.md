@@ -43,7 +43,7 @@ the automation, not a substitute for reading the PR itself.
 |---|---|---|
 | `status:ready` | Owner | Issue is a bounded, authorized task; start a fresh Claude run. |
 | `status:working` | Workflow (automatic) | A Claude run is currently executing for this issue. |
-| `status:review` | Workflow (automatic, only on success) | Claude's run finished; a PR exists and is ready for Chief review. |
+| `status:review` | Workflow (automatic, only on success **and** a passed deliverable check, V1.2) | Claude's run finished, and a real PR with a non-empty diff was independently verified to exist; ready for Chief review. |
 | `status:changes-requested` | Owner (after reading a Chief review) | Trigger Claude again to address *only* that review's CHANGES REQUESTED points. |
 | `status:approved` | Owner (after a Chief PASS) | Signals the PR is approved. **Never auto-merged** — merge is always a separate, manual owner action. |
 | `agent:claude` | Owner | Routing label: marks an issue as one Claude should react to at all. Required on **every** trigger, alongside a status label. |
@@ -152,6 +152,112 @@ superseded or disarmed). `workflow_dispatch` keeps its V1 semantics: it
 is already gated by GitHub to users with repo write access, so the
 event-snapshot requirement does not apply to manual runs — only the
 live state must be valid.
+
+## Claude's allowed tools (V1.2, issue #12)
+
+**The bug this fixes (found on the first real E2E bridge run, issue
+#11):** workflow run `33646938966` finished `conclusion: success` —
+guard OK, secret OK, OIDC OK, Claude GitHub App token OK, Claude Code
+2.1.258 ran and returned `subtype: success` — but the repo afterward
+showed **no new branch, no open PR, no issue/PR comment**, and the
+requested deliverable file was never written. The same run recorded
+`permission_denials_count: 14`. The root cause: the "Run Claude Code"
+step passed **no `--allowedTools` at all**. Anthropic's own docs are
+explicit on both halves of why that is fatal here:
+
+- *"Run Arbitrary Bash Commands: By default, Claude cannot execute Bash
+  commands unless explicitly allowed using the `allowed_tools`
+  configuration."* (capabilities-and-limitations.md) — so every `git`/
+  `gh` command the prompt asked for was denied.
+- *"Claude does not automatically create pull requests… it commits
+  code changes to a new branch and provides a link to the GitHub PR
+  creation page in its response."* (security.md) — so even a
+  successful Claude turn, on its own, was never going to produce an
+  **open** PR; that always requires an explicit `gh pr create` call,
+  which itself requires Bash access.
+
+V1 then treated `conclusion: success` from the Claude action as "the
+task is done" and moved the issue straight to `status:review`. That is
+wrong for this state machine: a green process is a **necessary, never
+sufficient**, condition. See "Deliverable verification gate" below for
+the other half of this fix.
+
+**The allowlist itself** (`claude_args: --allowedTools "..."` on the
+"Run Claude Code" step) is the minimum explicit git/gh/test command set
+this bounded workflow's two run types (`status:ready` fresh
+implementation, `status:changes-requested` follow-up) actually need,
+each scoped as tightly as the official permission-rule syntax allows
+(`Bash(cmd *)` prefix rules where arguments genuinely vary per run;
+one exact, argument-free rule where they don't):
+
+| Rule | Why |
+|---|---|
+| `Bash(git fetch *)` | Start from current `origin/master`. |
+| `Bash(git checkout *)` | Create/switch to the task's feature branch. |
+| `Bash(git branch *)` | Inspect/name branches. |
+| `Bash(git status *)` | Sanity-check working tree state (also matches bare `git status`). |
+| `Bash(git diff *)` | Review its own changes before committing. |
+| `Bash(git add *)` | Stage files. |
+| `Bash(git commit *)` | Commit staged changes. |
+| `Bash(git push *)` | Push the feature branch (never `master` — see "Owner merge gate"). |
+| `Bash(git log *)` | Inspect history/context. |
+| `Bash(gh issue view *)` | Read the task issue, and (for `changes-requested`) its timeline for the associated PR. |
+| `Bash(gh issue comment *)` | Post the required `SCOPE CHANGE` / "cannot identify PR" / final-outcome comments. |
+| `Bash(gh pr create *)` | Actually open the PR — the step this bug was named for. |
+| `Bash(gh pr view *)` | Read an existing PR (state, latest Chief review) for `changes-requested`. |
+| `Bash(gh pr edit *)` | Update the PR description/report. |
+| `Bash(gh pr comment *)` | Post the PR-side report. |
+| `Bash(gh pr list *)` | Search for the PR associated with the issue when the timeline alone is ambiguous. |
+| `Bash(pip install -r requirements.txt)` | Install project dependencies before running tests — **exact match, no wildcard**: this and only this invocation, deliberately not `pip install <anything>`. |
+| `Bash(python3 -m unittest *)` | Run the project's test suite (full `discover -s tests -b` or a focused module). |
+
+**Deliberately NOT granted**, as a defense-in-depth backstop to the
+"never merge" rule the prompt also states in plain language:
+`git merge`, `gh pr merge`, `git push` to `master` (there is no
+`master`-scoped exception — the rule is `Bash(git push *)` full stop,
+and the prompt separately instructs never to target `master`), and any
+unscoped `gh api`/`git *`/arbitrary shell (no bare `Bash` or `Bash(*)`
+rule exists here).
+
+## Deliverable verification gate (V1.2, issue #12)
+
+A successful "Run Claude Code" step is no longer sufficient by itself
+to reach `status:review`. Two new steps run after it, only on
+`success()`:
+
+1. **Gather evidence** — re-derive the PR(s) associated with the issue
+   from GitHub's own issue timeline (`cross-referenced` events —
+   exactly the *"mentioned this issue in PR #Y"* signal the prompt
+   already tells Claude to look for), then fetch each candidate PR's
+   `state`, `baseRefName`, `headRefOid`, `additions`, `deletions`,
+   `changedFiles` via `gh pr view --json`.
+2. **Decide** — [`.github/scripts/deliverable_guard.py`](../../.github/scripts/deliverable_guard.py),
+   one pure function (`vurder_leveranse`), unit-tested in
+   [`tests/test_agent_bridge_deliverable_guard.py`](../../tests/test_agent_bridge_deliverable_guard.py)
+   without touching GitHub. Rules:
+   - **`status:ready`**: exactly one **open** PR against `master`
+     associated with the issue, with a **non-empty diff**
+     (`additions + deletions > 0` and `changedFiles > 0`). Zero
+     candidates, more than one (ambiguous), a non-`master` base, or an
+     already-merged/closed PR all fail the gate.
+   - **`status:changes-requested`**: the same, single associated open
+     PR, **and** its `headRefOid` must differ from the value captured
+     by a new step (`Capture pre-run PR state`) that runs *before*
+     Claude, proving new commits were actually pushed this run — not
+     merely that an old PR still exists.
+
+If the gate passes, the existing "Move to status:review" step runs
+exactly as before. If Claude's step succeeded but the gate fails, a
+**new** step posts a comment explaining exactly why (the gate's
+`reason`, e.g. "no open PR found" or "HEAD SHA unchanged") and leaves
+the issue at `status:working` — deliberately not a new lifecycle label
+(per the issue's own instruction not to invent one unless necessary),
+but a distinguishable message from a hard failure. A genuine step
+failure (`failure()`) is unaffected and still goes through the
+pre-existing generic failure path.
+
+This is a fail-closed design: the default, on any ambiguity or missing
+evidence, is to **not** advance the issue.
 
 ## Scope-change rule
 
