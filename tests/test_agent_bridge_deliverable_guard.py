@@ -8,6 +8,15 @@ branch/PR/kommentar/fil ble faktisk levert. V1 flyttet issuen til
 `status:review` likevel. V1.2 skal nekte, fordi det ikke finnes noen
 åpen PR mot master å vise til.
 
+`test_3c`/`test_3d`/`test_11e` dekker Chief-reviewets tredje runde (PR
+#13): siden branch-navnet er BEVISST deterministisk og gjenbrukbart
+gjennom hele issuens levetid, kan en tidligere mislykket/avbrutt/manuell
+kjøring ha etterlatt en åpen PR med ikke-tomt diff på nøyaktig den
+branchen. En etterfølgende status:ready-kjøring skal ALDRI kunne bli
+godkjent på DEN PR-en, uansett diff-innhold eller om HEAD endret seg
+underveis -- en PR som lå der FØR kjøringen startet er per definisjon
+ikke bevis for hva DENNE kjøringen leverte.
+
 Ren stdlib-test, ingen GitHub-kall, ingen bash/YAML-avhengighet --
 kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
 """
@@ -85,6 +94,48 @@ class TestDeliverableGuard(unittest.TestCase):
             prs=[_pr(additions=50, deletions=5, changed_files=4)],
         )
         self.assertTrue(ok, begrunnelse)
+        self.assertEqual(nummer, 42)
+
+    def test_3b_ready_ingen_preeksisterende_pr_og_ny_ikke_tom_pr_godkjennes(self):
+        # Samme som test_3, men eksplisitt med forrige_head_sha="" slik
+        # CLI-en faktisk mottar den fra en tom BEFORE_HEAD_SHA -- den
+        # normale, tilsiktede happy-pathen etter Chief-reviewets runde 3.
+        ok, nummer, begrunnelse = _DG.vurder_leveranse(
+            trigger_label="status:ready",
+            prs=[_pr(additions=12, deletions=0, changed_files=2)],
+            forrige_head_sha="",
+        )
+        self.assertTrue(ok, begrunnelse)
+        self.assertEqual(nummer, 42)
+
+    # ─── 3c/3d: KJERNEN I RUNDE 3-FIKSEN -- pre-eksisterende PR avvises ──
+    # (Chief review, PR #13: en deterministisk, gjenbrukbar branch kan ha
+    # en PR liggende igjen fra en tidligere mislykket/manuell kjøring --
+    # en fersk status:ready-kjøring skal ALDRI kunne bli godkjent på den
+    # gamle PR-en, uansett diff-innhold eller om HEAD endret seg.)
+
+    def test_3c_ready_preeksisterende_pr_med_samme_head_etter_avvises(self):
+        ok, nummer, begrunnelse = _DG.vurder_leveranse(
+            trigger_label="status:ready",
+            prs=[_pr(head="uendret-sha", additions=50, deletions=5, changed_files=4)],
+            forrige_head_sha="uendret-sha",
+        )
+        self.assertFalse(ok, "En PR som lå der FØR kjøringen startet skal aldri godkjennes for status:ready.")
+        self.assertEqual(nummer, 42)
+        self.assertIn("FØR kjøringen startet", begrunnelse)
+
+    def test_3d_ready_preeksisterende_pr_selv_med_endret_head_avvises(self):
+        # Selv om HEAD FAKTISK endret seg underveis, er selve det at en
+        # PR lå der FØR kjøringen startet nok til å avvise -- policyen er
+        # "status:ready starter fra en ren branch", ikke "krev bevist
+        # HEAD-endring" (den semantikken er reservert for
+        # status:changes-requested).
+        ok, nummer, begrunnelse = _DG.vurder_leveranse(
+            trigger_label="status:ready",
+            prs=[_pr(head="ny-sha-etter-kjoring", additions=50, deletions=5, changed_files=4)],
+            forrige_head_sha="gammel-sha-for-kjoring",
+        )
+        self.assertFalse(ok, begrunnelse)
         self.assertEqual(nummer, 42)
 
     # ─── 4: status:ready -- feil base / ikke lenger åpen ────────────────
@@ -194,8 +245,10 @@ class TestDeliverableGuard(unittest.TestCase):
         )
 
     def test_11_cli_skriver_ok_true_og_pr_number_for_gyldig_leveranse(self):
+        # BEFORE_HEAD_SHA eksplisitt tom -- ingen PR lå der før kjøringen
+        # startet, den normale status:ready happy-pathen.
         res = self._kjor_cli(
-            {"TRIGGER_LABEL": "status:ready"},
+            {"TRIGGER_LABEL": "status:ready", "BEFORE_HEAD_SHA": ""},
             '[{"number": 7, "state": "OPEN", "baseRefName": "master", '
             '"headRefOid": "abc", "additions": 10, "deletions": 1, "changedFiles": 2}]',
         )
@@ -204,11 +257,26 @@ class TestDeliverableGuard(unittest.TestCase):
         self.assertIn("pr_number=7", res.stdout)
 
     def test_11b_cli_skriver_ok_false_for_issue_11_situasjonen(self):
-        res = self._kjor_cli({"TRIGGER_LABEL": "status:ready"}, "[]")
+        res = self._kjor_cli({"TRIGGER_LABEL": "status:ready", "BEFORE_HEAD_SHA": ""}, "[]")
         self.assertEqual(res.returncode, 0)
         self.assertIn("ok=false", res.stdout)
         self.assertNotIn("pr_number=", res.stdout)
         self.assertIn("Ingen åpen PR", res.stderr)
+
+    def test_11e_cli_avviser_ready_med_preeksisterende_pr_selv_om_prosessen_lyktes(self):
+        # Chief review, PR #13 runde 3: workflowen setter BEFORE_HEAD_SHA
+        # fra "Capture pre-run PR state" UANSETT trigger-etikett -- denne
+        # testen er den ende-til-ende CLI-kontrakten for selve
+        # rettelsen (en PR som lå der FØR en status:ready-kjøring skal
+        # aldri godkjennes, uansett diff).
+        res = self._kjor_cli(
+            {"TRIGGER_LABEL": "status:ready", "BEFORE_HEAD_SHA": "sha-fra-for-kjoringen"},
+            '[{"number": 9, "state": "OPEN", "baseRefName": "master", '
+            '"headRefOid": "sha-fra-for-kjoringen", "additions": 40, "deletions": 2, "changedFiles": 3}]',
+        )
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("ok=false", res.stdout)
+        self.assertIn("FØR kjøringen startet", res.stderr)
 
     def test_11c_cli_bruker_before_head_sha_for_changes_requested(self):
         res = self._kjor_cli(

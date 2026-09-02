@@ -290,16 +290,38 @@ to reach `status:review`. Two new steps run after it, only on
    without touching GitHub — unchanged by the PR #13 fix, since it only
    evaluates whatever PR list it's given, independent of how that list
    was gathered. Rules:
-   - **`status:ready`**: exactly one **open** PR against `master`
-     associated with the issue, with a **non-empty diff**
-     (`additions + deletions > 0` and `changedFiles > 0`). Zero
-     candidates, more than one (ambiguous), a non-`master` base, or an
-     already-merged/closed PR all fail the gate.
+   - **`status:ready`**: the pre-run `before_head_sha` (see "Branch
+     naming is deterministic and enforced" above and the "Capture
+     pre-run PR state" step) must be **empty** — proof no PR already
+     existed on this issue's fixed branch before this run started — and
+     exactly one **open** PR against `master` must exist afterward, with
+     a **non-empty diff** (`additions + deletions > 0` and
+     `changedFiles > 0`). Zero candidates, more than one (ambiguous), a
+     non-`master` base, an already-merged/closed PR, or (see below) a
+     **non-empty `before_head_sha`** all fail the gate.
    - **`status:changes-requested`**: the same, single associated open
-     PR, **and** its `headRefOid` must differ from the value captured
-     by a new step (`Capture pre-run PR state`) that runs *before*
-     Claude, proving new commits were actually pushed this run — not
-     merely that an old PR still exists.
+     PR, **and** its `headRefOid` must differ from the `before_head_sha`
+     value captured by that same step, proving new commits were
+     actually pushed this run — not merely that an old PR still exists.
+
+   **Chief review fix (PR #13, round 3):** because the branch name is
+   *deliberately* deterministic and reused across an issue's whole
+   lifecycle (previous fix, above), a `status:ready` run could otherwise
+   be fooled by a PR left over from an earlier failed/interrupted/manual
+   run on the *same* branch — Claude does nothing useful, returns
+   `success()`, and the post-run `gh pr list --head <branch>` finds the
+   **old** PR, which already has a non-empty diff, and the gate would
+   have approved it as if this run had produced it. `status:ready`
+   means *"start a fresh run"* (see the label table above); a PR that
+   existed *before* the run started can never be evidence of what *this*
+   run delivered, regardless of its diff size or whether its HEAD
+   happened to change during the run too. The fix is the single
+   `before_head_sha` check above, reusing the same pre-run capture that
+   already existed for `status:changes-requested` (`deliverable_guard.py`
+   `vurder_leveranse`) — no new workflow step was needed. Regression
+   coverage: `tests/test_agent_bridge_deliverable_guard.py`
+   `test_3c`/`test_3d` (rejects both the same-HEAD and the
+   HEAD-changed-anyway cases) and `test_11e` (the CLI contract).
 
 If the gate passes, the existing "Move to status:review" step runs
 exactly as before. If Claude's step succeeded but the gate fails, a

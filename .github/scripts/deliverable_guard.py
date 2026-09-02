@@ -31,14 +31,23 @@ RETTELSEN har to uavhengige deler:
    alene.
 
 Kriteriene (issue #12, "Goal"):
-  status:ready             -- krever nøyaktig ÉN åpen PR mot `master`,
-      assosiert med issuen (GitHub cross-reference -- samme
-      "mentioned this issue in PR #Y"-signal prompten allerede ber
-      Claude lete etter i issuens tidslinje), med et IKKE-TOMT diff.
+  status:ready             -- krever at DENNE kjøringen faktisk startet
+      fra en ren branch: INGEN åpen PR fikk lov til å ligge på den
+      deterministiske branchen (agent/issue-<N>, se branch_policy.py)
+      FØR kjøringen startet (`forrige_head_sha` skal være tom). Gitt
+      det: nøyaktig ÉN åpen PR mot `master` på den branchen, med et
+      IKKE-TOMT diff.
   status:changes-requested -- krever den samme, allerede eksisterende
-      assosierte PR-en, og at HEAD-SHA-en har endret seg siden FØR
-      denne kjøringen startet (fanget av workflowen som
-      `forrige_head_sha` rett før Claude-steget kjører).
+      PR-en på den deterministiske branchen, og at HEAD-SHA-en har
+      endret seg siden FØR denne kjøringen startet.
+
+Begge grenene bruker altså samme `forrige_head_sha` -- fanget av
+workflowen (steg "Capture pre-run PR state") rett FØR Claude-steget
+kjører, uavhengig av trigger-etikett -- men på motsatte måter: for
+changes-requested er en UENDRET head et avvisningsgrunnlag (ingenting
+nytt ble pushet); for ready er en IKKE-TOM verdi i det hele tatt et
+avvisningsgrunnlag alene (en PR fantes allerede -- se
+"Chief review-fiks (PR #13, runde 3)" under).
 
 Ren, avhengighetsfri stdlib-Python -- kalt fra
 .github/workflows/claude-agent-bridge.yml og enhetstestet i
@@ -46,14 +55,30 @@ tests/test_agent_bridge_deliverable_guard.py, slik at selve
 beslutningen er testbar uten å kjøre noe mot GitHub.
 
 CLI-bruk (det workflowen gjør):
-    echo "$PRS_JSON" | TRIGGER_LABEL=status:ready \
+    echo "$PRS_JSON" | TRIGGER_LABEL=status:ready BEFORE_HEAD_SHA="$before" \
         python3 .github/scripts/deliverable_guard.py
 `PRS_JSON` er et JSON-array bygget av workflowen fra
-`gh api repos/OWNER/REPO/issues/N/timeline` (kryssreferanser til
-issuen) pluss ett `gh pr view --json
+`gh pr list --head agent/issue-N --base master --state open --json
 number,state,baseRefName,headRefOid,additions,deletions,changedFiles`
-per kandidat-PR -- feltnavnene under er nøyaktig de `gh pr view`
-gir, ingen ekstra oversettelse skjer i workflowen.
+(branch_policy.py sin `gh_pr_list_args`) -- feltnavnene under er
+nøyaktig de `gh pr list --json` gir, ingen ekstra oversettelse skjer i
+workflowen.
+
+Chief review-fiks (PR #13, runde 3): `status:ready` ignorerte tidligere
+`forrige_head_sha` helt. Men branch-navnet er BEVISST deterministisk og
+gjenbrukbart gjennom hele issuens levetid (PR #13, runde 2-fiksen) --
+så en tidligere mislykket/avbrutt/manuell kjøring kan ha etterlatt en
+ÅPEN PR med et ikke-tomt diff på nøyaktig den branchen. En etterfølgende
+`status:ready`-kjøring der Claude ikke gjør noe nyttig, men returnerer
+process-success, ville da funnet DEN gamle PR-en via
+`gh pr list --head agent/issue-N` og feilaktig godkjent den som om den
+var DENNE kjøringens leveranse. `status:ready` betyr "start en FERSK
+kjøring" (se AGENT_WORKFLOW.md-tabellen) -- en PR som allerede lå der
+FØR kjøringen startet kan aldri være bevis for hva DENNE kjøringen
+leverte, uansett innhold. Rettelsen: for status:ready skal
+`forrige_head_sha` derfor være TOM -- enhver ikke-tom verdi betyr en
+pre-eksisterende PR og avviser porten, uavhengig av diff-størrelse eller
+om HEAD-en endret seg underveis.
 """
 import json
 import os
@@ -73,10 +98,14 @@ def vurder_leveranse(*, trigger_label, prs, forrige_head_sha=None):
     """
     Returnerer (ok: bool, pr_number: int|None, begrunnelse: str).
 
-    `prs`: liste av dicts for PR-er GitHub-tidslinjen viser som
-    kryssrefererende til issuen. `forrige_head_sha`: PR-ens HEAD-SHA
-    slik den var FØR denne kjøringen startet (kun relevant for
-    status:changes-requested -- ignorert for status:ready).
+    `prs`: liste av dicts for PR-er funnet på issuens deterministiske
+    branch (`gh pr list --head agent/issue-N`). `forrige_head_sha`:
+    PR-ens HEAD-SHA slik den var FØR denne kjøringen startet, fanget
+    uavhengig av trigger-etikett -- brukt av BEGGE grenene, på motsatte
+    måter: for `status:changes-requested` skal den finnes og ha endret
+    seg (bevis på nye commits); for `status:ready` skal den derimot
+    være TOM (bevis på at ingen PR lå der FØR denne kjøringen -- se
+    moduldocstringen, "Chief review-fiks (PR #13, runde 3)").
     """
     if trigger_label not in GYLDIGE_TRIGGER_ETIKETTER:
         return False, None, f"Ukjent trigger-etikett {trigger_label!r} -- kan ikke verifisere leveranse."
@@ -100,6 +129,13 @@ def vurder_leveranse(*, trigger_label, prs, forrige_head_sha=None):
     nummer = pr.get("number")
 
     if trigger_label == "status:ready":
+        if forrige_head_sha:
+            return False, nummer, (
+                f"PR #{nummer} fantes allerede på denne branchen FØR kjøringen startet "
+                f"(HEAD var {forrige_head_sha}) -- status:ready skal starte fra en ren "
+                "branch, så dette kan ikke være DENNE kjøringens leveranse. Ser ut som en "
+                "gjenværende PR fra en tidligere/mislykket/manuell kjøring."
+            )
         diff_storrelse = int(pr.get("additions") or 0) + int(pr.get("deletions") or 0)
         if diff_storrelse == 0 or int(pr.get("changedFiles") or 0) == 0:
             return False, nummer, f"PR #{nummer} finnes, men har et tomt diff -- ingen faktisk leveranse."

@@ -215,20 +215,24 @@ jobs:
           set -euo pipefail
           echo "name=$(python3 .github/scripts/branch_policy.py "$ISSUE")" >> "$GITHUB_OUTPUT"
 
-      # V1.2 (issue #12): for a status:changes-requested run, the
-      # deliverable gate below must PROVE new commits were pushed, not
-      # just that a PR exists (it already did, from a prior round). That
-      # requires knowing the associated PR's HEAD SHA from BEFORE this
-      # run starts -- captured here, once, prior to invoking Claude.
-      # Chief review fix (PR #13, blocker 2): looks the PR up by its
-      # EXACT head branch (the name computed above) via `gh pr list`,
-      # not the issue timeline's cross-reference heuristic -- a PR
-      # either has this exact head ref or it doesn't; no dependency on
-      # what Claude wrote in the PR body/title. For a status:ready run
-      # there is normally no associated PR yet, so this simply yields an
-      # empty before_head_sha, which is correctly unused by
-      # deliverable_guard.py for that trigger label.
-      - name: Capture pre-run PR state (for changes-requested head-change check)
+      # V1.2 (issue #12): the deliverable gate below needs to know
+      # whether a PR already existed on this issue's fixed branch BEFORE
+      # this run starts -- captured here, once, prior to invoking
+      # Claude. Chief review fix (PR #13, blocker 2): looks the PR up by
+      # its EXACT head branch (the name computed above) via `gh pr
+      # list`, not the issue timeline's cross-reference heuristic -- a
+      # PR either has this exact head ref or it doesn't; no dependency
+      # on what Claude wrote in the PR body/title.
+      #
+      # This value is used for BOTH trigger labels, on opposite sides of
+      # the same fact (Chief review, PR #13, round 3): for
+      # status:changes-requested it must be non-empty AND change (proof
+      # new commits were pushed); for status:ready it must be EMPTY
+      # (proof no PR already existed on this reused, deterministic
+      # branch before this run -- otherwise a stale PR from an earlier
+      # failed/manual run could be mistaken for this run's own
+      # deliverable, see deliverable_guard.py's module docstring).
+      - name: Capture pre-run PR state (used by both trigger labels — see deliverable_guard.py)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: before
         env:
