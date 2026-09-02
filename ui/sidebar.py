@@ -14,6 +14,8 @@ from modules.recipe_importer import (
     match_imported_ingredients,
     apply_import_to_session_state,
 )
+from modules.kbh_import import parse_kbhrecipe_json, UgyldigKbhrecipeForImport
+from modules.kbh_import_apply import apply_kbhrecipe_import_to_session_state
 
 def _last_master_db(filnavn):
     try:
@@ -199,3 +201,100 @@ def render_sidebar():
                     del st.session_state["import_preview"]
                     del st.session_state["import_parsed"]
                     st.rerun()
+
+    # PRI 2C3 -- .kbhrecipe V1-fil-import (KBH Core Contract). Bruker den
+    # eksisterende, strenge, urørte leseren (modules/kbh_import.py) og
+    # PRI 2C2 sin allerede etablerte passthrough-/state-flyt --
+    # importeres ALLTID som en helt ny, ulagret oppskrift (KBHR-010), se
+    # modules/kbh_import_apply.py sin docstring. Ingen ny UI-redesign,
+    # ingen ny parservalidering -- kun forhåndsvisning + eksplisitt
+    # bekreftelse rundt de allerede eksisterende byggeklossene.
+    with st.sidebar.expander("📦 Importer .kbhrecipe-fil"):
+        st.caption(
+            "Åpne en .kbhrecipe-fil (KBH Core Contract V1) — f.eks. eksportert fra "
+            "Kvernhaug Brygghus Web, eller en tidligere App-eksport. Importeres som "
+            "en HELT NY, ulagret oppskrift — ingen eksisterende lagret fil "
+            "overskrives før du selv trykker Lagre."
+        )
+        kbhrecipe_fil = st.file_uploader(
+            "Velg .kbhrecipe-fil", type=["kbhrecipe"], key="kbhrecipe_import_uploader",
+            label_visibility="collapsed",
+        )
+
+        # Chief review-fiks (PR #5): en forhåndsvisning/feil skal ALDRI
+        # kunne overleve at brukeren bytter til en ANNEN fil eller fjerner
+        # filen fra opplasteren -- Streamlit sitt file_uploader-widget
+        # trigger en rerun uansett ved slike endringer (uavhengig av om
+        # "Analyser"-knappen noensinne trykkes på nytt), men
+        # kbhrecipe_import_preview/-_feil lever videre i session_state fra
+        # forrige analyse med mindre vi eksplisitt sjekker dette HER, FØR
+        # forhåndsvisningen/bekreft-knappen under i det hele tatt vurderer
+        # å vise noe. `file_id` er en unik, per-opplasting-identitet
+        # Streamlit selv tildeler (endres selv ved re-opplasting av samme
+        # fil) -- et strengt, konservativt signaturvalg: enhver endring i
+        # opplasterens tilstand ugyldiggjør en gammel forhåndsvisning.
+        _kbhrecipe_fil_id = getattr(kbhrecipe_fil, "file_id", None) if kbhrecipe_fil is not None else None
+        if st.session_state.get("kbhrecipe_import_preview_file_id") != _kbhrecipe_fil_id:
+            st.session_state.pop("kbhrecipe_import_preview", None)
+            st.session_state.pop("kbhrecipe_import_feil", None)
+            st.session_state["kbhrecipe_import_preview_file_id"] = _kbhrecipe_fil_id
+
+        if st.button("🔍 Analyser .kbhrecipe-fil", key="kbhrecipe_analyser_btn", width="stretch"):
+            if kbhrecipe_fil is None:
+                st.warning("Velg en fil først.")
+            else:
+                try:
+                    kbhrecipe_tekst = kbhrecipe_fil.getvalue().decode("utf-8")
+                except UnicodeDecodeError:
+                    st.session_state["kbhrecipe_import_preview"] = None
+                    st.session_state["kbhrecipe_import_feil"] = "Filen er ikke gyldig UTF-8-tekst."
+                else:
+                    master_malt  = _last_master_db("master_malt.json")
+                    master_humle = _last_master_db("master_humle_v2.json")
+                    master_gjaer = _last_master_db("master_gjaer_v2.json")
+                    try:
+                        kbhrecipe_resultat = parse_kbhrecipe_json(
+                            kbhrecipe_tekst, master_malt, master_humle, master_gjaer,
+                        )
+                    except UgyldigKbhrecipeForImport as e:
+                        # Parserfeilen vises ordrett (allerede vennlig,
+                        # menneskelesbar norsk tekst, se
+                        # modules/kbh_import.py) -- den aktive
+                        # oppskriften/økten røres IKKE (ingen delvis
+                        # import, se OPPGAVE-kravet i issue #4).
+                        st.session_state["kbhrecipe_import_preview"] = None
+                        st.session_state["kbhrecipe_import_feil"] = e.melding
+                    else:
+                        st.session_state["kbhrecipe_import_preview"] = kbhrecipe_resultat
+                        st.session_state["kbhrecipe_import_feil"] = None
+
+        kbhrecipe_feil = st.session_state.get("kbhrecipe_import_feil")
+        if kbhrecipe_feil:
+            st.error(f"❌ {kbhrecipe_feil}")
+
+        kbhrecipe_preview = st.session_state.get("kbhrecipe_import_preview")
+        if kbhrecipe_preview:
+            _r = kbhrecipe_preview["recipe"]
+            _pt = kbhrecipe_preview.get("passthrough")
+            st.markdown("**Forhåndsvisning:**")
+            st.caption(f"📛 Navn: **{_r['name']}**")
+            st.caption(
+                f"🪣 Volum: **{_r['batch_size']:g} L** · "
+                f"Effektivitet: **{_r['efficiency']:.0%}**"
+            )
+            st.caption(f"🌾 Malt: **{len(_r['malts'])}** · 🍺 Humle: **{len(_r['hops'])}**")
+            if _r.get("yeast"):
+                st.caption(f"🧫 Gjær: `{_r['yeast']}`")
+            if _r.get("process_profile"):
+                _p = _r["process_profile"]
+                st.caption(f"🔥 Prosess: **{_p.get('navn') or _p.get('process_id')}**")
+            if _pt:
+                st.caption(f"📎 {len(_pt)} bevart metadata-felt følger med opakt (f.eks. notater/stil).")
+
+            if st.button("✅ Importer som ny oppskrift", key="kbhrecipe_bekreft_btn", width="stretch"):
+                apply_kbhrecipe_import_to_session_state(kbhrecipe_preview)
+                st.session_state.pop("kbhrecipe_import_preview", None)
+                st.session_state.pop("kbhrecipe_import_feil", None)
+                st.session_state.pop("kbhrecipe_import_preview_file_id", None)
+                st.sidebar.success(f"Importert: {_r['name']}")
+                st.rerun()
