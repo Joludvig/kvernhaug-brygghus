@@ -123,38 +123,53 @@ class TestFixtureParsing(unittest.TestCase):
         self.assertEqual(res["recipe"]["name"], "Testbrygg Minimal (syntetisk fixture)")
         self.assertEqual(res["recipe"]["process_profile"], None)
 
-    def test_2_full_fixture_er_gyldig_historisk_evidence_men_avvises_for_import(self):
-        # KBHR-020 -- QA-korreksjon: en frosset legacy-fixture er
-        # historisk compatibility-evidence (den beviser at Web/en
-        # tidligere writer faktisk produserte denne teksten), IKKE en
-        # automatisk garanti om at ENHVER fremtidig leser trygt kan
-        # importere den. "full"-fixturens prosess (process_id=
-        # "enkel_infusjon") har ETT meskesteg (66C/60min "Hovedmesk"),
-        # mens Appens kanoniske enkel_infusjon i dag har TO steg (også
-        # en mashout-fase, 78C/5min) -- en REELL, bevist strukturell
-        # avvikelse (se PRI 2C1-rapporten). Hadde denne filen blitt
-        # importert, ville Appens EGEN normaliser_prosessprofil() stille
-        # ha erstattet brukerens faktiske meskesteg med den kanoniske
-        # to-stegs-profilen -- nøyaktig den stille semantikkendringen
-        # KBHR-018 forbyr.
-        #
-        # Dette er derfor IKKE "fixturen er ugyldig" (den er syntaktisk
-        # og historisk helt gyldig .kbhrecipe V1 -- se test_2b under, som
-        # bekrefter at resten av fixturens innhold importeres korrekt).
-        # Det er "gyldig historisk evidence, utrygt for dagens App-
-        # import" -- fixturen røres IKKE, og process equality-checken i
-        # modules/kbh_import.py svekkes IKKE for å få denne ene, kjente
-        # gamle filen til å bestå.
-        e = _forvent_avvist(KATEGORI_UNSUPPORTED_PROCESS, tekst=_last_fixture("full"),
-                             malt_db=_EKTE_MALT_DB, humle_db=_EKTE_HUMLE_DB, gjaer_db=_EKTE_GJAER_DB)
-        self.assertEqual(e.kategori, KATEGORI_UNSUPPORTED_PROCESS)
-        self.assertIn("enkel_infusjon", e.melding)
+    def test_2_full_fixture_avvikende_prosess_importeres_naa_losslessly_som_egendefinert(self):
+        # PR #3 Chief review, owner decision (option A) -- SUPERSEDES
+        # KBHR-020's tidligere "gyldig historisk evidence, avvist for
+        # import"-funn for nøyaktig DENNE fixturen. "full"-fixturens
+        # prosess (process_id="enkel_infusjon") har ETT meskesteg
+        # (66C/60min "Hovedmesk"), mens Appens kanoniske enkel_infusjon i
+        # dag har TO steg (også en mashout-fase, 78C/5min) -- en REELL,
+        # bevist strukturell avvikelse (se PRI 2C1-rapporten). I stedet
+        # for enten å avvise importen (tidligere oppførsel) eller stille
+        # late som filens ETT-stegs meskeplan ER den kanoniske to-stegs-
+        # profilen (KBHR-018 forbyr fortsatt dette), representeres den nå
+        # losslessly som en App-safe "egendefinert" prosess -- den ENE
+        # grenen normaliser_prosessprofil() ALDRI overskriver.
+        res = parse_kbhrecipe_json(_last_fixture("full"), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+        r = res["recipe"]
+        p = r["process_profile"]
+        self.assertIsNotNone(p)
+        # ALDRI en påstand om å VÆRE den kanoniske enkel_infusjon-profilen.
+        self.assertEqual(p["process_id"], "egendefinert")
+        # Men de faktiske, historiske meskestegene er bevart BIT FOR BIT,
+        # ikke normalisert til kanonisk sine to steg.
+        self.assertEqual(p["mash_steps"], [
+            {"temperatur": 66.0, "varighet": 60, "stegtype": "infusjon", "kommentar": "Hovedmesk"},
+        ])
+        self.assertEqual(p["sparge_method"], "batch_sparge")
+        self.assertEqual(p["boil_minutes"], 60)
+        self.assertIsNone(p["decoction_steps"])
+        self.assertIsNone(p["reiterated_mash"])
+
+        # Resten av fixturens innhold importeres korrekt, uendret av
+        # denne fiksen (se også test_11/test_12).
+        self.assertEqual(r["name"], "Testbrygg Full (syntetisk fixture)")
+        self.assertEqual(r["brygger_stil"], "Testbryggerens egen stil (syntetisk)")
+        self.assertEqual(r["yeast"], "lalbrew_diamond_lager")
+        self.assertEqual([m["id"] for m in r["malts"]], ["bohemian_pilsner_floor", "vienna"])
+        self.assertEqual([h["id"] for h in r["hops"]], ["east_kent_goldings", "amarillo"])
+        self.assertIsNotNone(r["water_source_profile"])
+        self.assertIsNotNone(r["water_measurements"])
 
     def test_2b_full_fixture_uten_prosess_parses_ellers_korrekt(self):
-        # Isolerer resten av "full"-fixturens innhold fra prosess-avviket
-        # over: fjerner KUN `prosess` fra en kopi (fixturfilen på disk
-        # røres aldri) og bekrefter at malt/humle/gjaerId/bryggerStil/vann
-        # importeres korrekt -- se også test_11/test_12.
+        # Isolerer resten av "full"-fixturens innhold fra selve
+        # prosess-representasjonen over: fjerner KUN `prosess` fra en
+        # kopi (fixturfilen på disk røres aldri) og bekrefter at
+        # malt/humle/gjaerId/bryggerStil/vann importeres korrekt helt
+        # uavhengig av prosess-håndteringen -- fortsatt nyttig som en
+        # isolert regresjonsvakt selv etter at test_2 over ble en positiv
+        # test, ikke lenger kompenserende for en avvisning.
         raw = json.loads(_last_fixture("full"))
         del raw["recipe"]["prosess"]
         res = parse_kbhrecipe_json(json.dumps(raw), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
@@ -457,18 +472,104 @@ class TestCustomOgOverrideAvvisning(unittest.TestCase):
         self.assertIsNone(res["recipe"]["yeast"])
 
 
-# ─── 38-39: prosess-avvisning ─────────────────────────────────────────────
+# ─── 38-39: prosess-avvisning / lossless bevaring av avvikende standard ───
 
 class TestProsessAvvisning(unittest.TestCase):
     def test_38_ukjent_process_id_avvises(self):
+        # Uendret av PR #3 -- kun KJENTE standardprofiler med avvikende
+        # steg får den nye losslessly-grenen (se test_39 under). En
+        # UKJENT process_id har ingen kanonisk profil å bevares "i
+        # forhold til", og avvises fortsatt eksplisitt (KBHR-018: unngår
+        # stille fallback til enkel_infusjon).
         _forvent_avvist(KATEGORI_UNSUPPORTED_PROCESS, payload_overrides={
             "prosess": {"process_id": "helt-ukjent-fremtidig-prosess", "mash_steps": []},
         })
 
-    def test_39_kjent_process_id_med_avvikende_steg_avvises(self):
+    def test_39_kjent_process_id_med_avvikende_steg_importeres_losslessly_som_egendefinert(self):
+        # PR #3 Chief review, owner decision (option A) -- en kjent
+        # standardprofil med avvikende meskesteg avvises IKKE lenger; den
+        # importeres som en App-safe "egendefinert" prosess som bevarer
+        # de faktiske meskestegene bit for bit.
         avvikende = hent_standardprofil("enkel_infusjon")
         avvikende["mash_steps"] = [{"temperatur": 64.0, "varighet": 45, "stegtype": "infusjon", "kommentar": "avvikende"}]
-        _forvent_avvist(KATEGORI_UNSUPPORTED_PROCESS, payload_overrides={"prosess": avvikende})
+        res = _parse({"prosess": avvikende})
+        p = res["recipe"]["process_profile"]
+        self.assertEqual(p["process_id"], "egendefinert")
+        self.assertEqual(p["mash_steps"], avvikende["mash_steps"])
+        # sparge_method/boil_minutes var UENDRET fra kanonisk i denne
+        # kilden (kun mash_steps ble overskrevet over) -- skal likevel
+        # være til stede, hentet fra selve kilden (ikke fra kanonisk via
+        # default-grenen, siden de FAKTISK var satt i avvikende).
+        self.assertEqual(p["sparge_method"], avvikende["sparge_method"])
+        self.assertEqual(p["boil_minutes"], avvikende["boil_minutes"])
+
+    def test_39b_mash_steps_mangler_avvises(self):
+        avvikende = hent_standardprofil("enkel_infusjon")
+        del avvikende["mash_steps"]
+        avvikende["sparge_method"] = "no_sparge"  # trigger avviker=True
+        _forvent_avvist(KATEGORI_INVALID_PAYLOAD, payload_overrides={"prosess": avvikende})
+
+    def test_39c_mash_steps_tom_liste_avvises(self):
+        avvikende = hent_standardprofil("enkel_infusjon")
+        avvikende["mash_steps"] = []
+        _forvent_avvist(KATEGORI_INVALID_PAYLOAD, payload_overrides={"prosess": avvikende})
+
+    def test_39d_mash_steps_rad_ikke_objekt_avvises(self):
+        avvikende = hent_standardprofil("enkel_infusjon")
+        avvikende["mash_steps"] = ["ikke-et-objekt"]
+        _forvent_avvist(KATEGORI_INVALID_PAYLOAD, payload_overrides={"prosess": avvikende})
+
+    def test_39e_ugyldig_sparge_method_avvises(self):
+        avvikende = hent_standardprofil("enkel_infusjon")
+        avvikende["mash_steps"] = [{"temperatur": 64.0, "varighet": 45, "stegtype": "infusjon", "kommentar": "x"}]
+        avvikende["sparge_method"] = 42
+        _forvent_avvist(KATEGORI_INVALID_PAYLOAD, payload_overrides={"prosess": avvikende})
+
+    def test_39f_ugyldig_boil_minutes_avvises(self):
+        avvikende = hent_standardprofil("enkel_infusjon")
+        avvikende["mash_steps"] = [{"temperatur": 64.0, "varighet": 45, "stegtype": "infusjon", "kommentar": "x"}]
+        avvikende["boil_minutes"] = -5
+        _forvent_avvist(KATEGORI_INVALID_PAYLOAD, payload_overrides={"prosess": avvikende})
+
+    def test_39g_ugyldig_decoction_steps_avvises(self):
+        avvikende = hent_standardprofil("enkel_infusjon")
+        avvikende["mash_steps"] = [{"temperatur": 64.0, "varighet": 45, "stegtype": "infusjon", "kommentar": "x"}]
+        avvikende["decoction_steps"] = "ikke-en-liste"
+        _forvent_avvist(KATEGORI_INVALID_PAYLOAD, payload_overrides={"prosess": avvikende})
+
+    def test_39h_ugyldig_reiterated_mash_avvises(self):
+        avvikende = hent_standardprofil("enkel_infusjon")
+        avvikende["mash_steps"] = [{"temperatur": 64.0, "varighet": 45, "stegtype": "infusjon", "kommentar": "x"}]
+        avvikende["reiterated_mash"] = "ikke-en-dict"
+        _forvent_avvist(KATEGORI_INVALID_PAYLOAD, payload_overrides={"prosess": avvikende})
+
+    def test_39i_kun_sparge_method_avviker_trigger_ogsaa_losslessly_gren(self):
+        # avviker skal trigges av ETHVERT strukturelt felt, ikke bare
+        # mash_steps -- her er selve meskestegene identiske med kanonisk,
+        # men sparge_method er endret.
+        kanonisk = hent_standardprofil("enkel_infusjon")
+        avvikende = copy.deepcopy(kanonisk)
+        avvikende["sparge_method"] = "fly_sparge"
+        res = _parse({"prosess": avvikende})
+        p = res["recipe"]["process_profile"]
+        self.assertEqual(p["process_id"], "egendefinert")
+        self.assertEqual(p["sparge_method"], "fly_sparge")
+        self.assertEqual(p["mash_steps"], kanonisk["mash_steps"])
+
+    def test_39j_manglende_strukturelt_felt_faller_tilbake_til_kanonisk_verdi(self):
+        # boil_minutes er HELT FRAVÆRENDE i kilden (ikke satt til noe
+        # ugyldig, bare ikke oppgitt i det hele tatt) -- skal IKKE avvises,
+        # og skal falle tilbake til kanonisk sin verdi, siden det ikke
+        # finnes noen faktisk avvikende historisk verdi å bevare for DETTE
+        # ene feltet.
+        kanonisk = hent_standardprofil("enkel_infusjon")
+        avvikende = copy.deepcopy(kanonisk)
+        avvikende["mash_steps"] = [{"temperatur": 64.0, "varighet": 45, "stegtype": "infusjon", "kommentar": "x"}]
+        del avvikende["boil_minutes"]
+        res = _parse({"prosess": avvikende})
+        p = res["recipe"]["process_profile"]
+        self.assertEqual(p["process_id"], "egendefinert")
+        self.assertEqual(p["boil_minutes"], kanonisk["boil_minutes"])
 
 
 # ─── 40: bool/NaN-edge cases ──────────────────────────────────────────────

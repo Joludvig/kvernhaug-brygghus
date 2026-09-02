@@ -90,6 +90,26 @@ separates this into three distinct sets:
   `KBHRECIPE_FORBUDTE_FELT`, §7) — this is what `_byggKjentPayload()`
   iterates over, not the raw known-fields list.
 
+**PR #3 Chief review correction: `bryggerStil`, `prosess`, and `vann`
+are *not* in Web's `KBHRECIPE_KJENTE_FELT`, even though they are valid
+optional V1 fields (this section).** They previously were, which caused
+a real regression: Web has no dedicated UI/state for any of the three
+(no DOM field, no module variable — neither `samleOppskrift()` nor
+`_gjenopprettOppskrift()` in `app.js` handles them), so classifying
+them as "known" only meant `_normaliserOppskriftForImport()` did *not*
+capture them into passthrough — and since nothing else in Web retained
+them either, they were silently dropped somewhere between import and
+the next `samleOppskrift()` call, contradicting the passthrough/
+losslessness rule below (§6). **Fix:** Web now treats these three
+exactly like any genuinely unknown future field — captured into and
+carried opaquely via `_kbhUkjenteFelt` (§6) — which `app.js` already
+correctly carries through the full edit/save/export cycle for any such
+field. No change to `app.js` was needed. On the App side, the
+equivalent fields are natively modeled (`bryggerStil` → `brygger_stil`,
+`prosess` → `process_profile`, `vann.*` → `water_*`, see §13) — this is
+a Web-implementation-specific gap being closed, not a Core V1 rule
+change.
+
 ## 4. Units
 
 Always metric: **liter, kilogram, gram, minutes, Celsius**. Display
@@ -124,10 +144,13 @@ into the file.
   the payload key by key from `modules/recipe.py`'s internal Recipe
   Object.
 - Web: `web/js/kbhrecipe.js::_byggKjentPayload()` builds the payload
-  from `KBHRECIPE_KJENTE_FELT` (PRI 2A — previously
-  `byggKbhRecipeInnhold()` wrapped the whole in-memory recipe object
-  unchecked; this was closed in PRI 2A, see §9 below and the PRI 2A
-  report for the before/after).
+  from `KBHRECIPE_EKSPORTERBARE_FELT` — **not** `KBHRECIPE_KJENTE_FELT`
+  directly, since the latter also includes Web-internal fields
+  (`lagretDato`) that must never reach the file; see §3 above (PRI 2A —
+  previously `byggKbhRecipeInnhold()` wrapped the whole in-memory
+  recipe object unchecked; this was closed in PRI 2A, see §9 below and
+  the PRI 2A report for the before/after). *(PR #3 Chief review: this
+  section previously named the wrong constant — corrected.)*
 
 ## 6. Passthrough rule (V1 §8)
 
@@ -151,9 +174,11 @@ mechanism (PRI 2A, KBHR-002):
 - A field the user has actually edited (a known field) always wins
   over an old passthrough value with the same key.
 
-Web does not need to understand `prosess` or `vann` to preserve them.
-Any future, currently-unknown field is preserved the same way, with no
-code change required for that new field specifically.
+Web does not need to understand `bryggerStil`, `prosess`, or `vann` to
+preserve them — they are captured into and carried via this same
+passthrough mechanism (§3 correction above, PR #3). Any future,
+currently-unknown field is preserved the same way, with no code change
+required for that new field specifically.
 
 Passthrough exists for **data that arrived from outside** (an imported
 file) that Web does not itself model — it is not a channel for Web's own
@@ -319,7 +344,9 @@ It is a statement of current App capability, not a new normative rule
 for the `.kbhrecipe` V1 format itself** — a different reader (a future
 App version, or another system entirely) may legitimately accept more
 than this without violating V1. Where this section would conflict with
-§1–§13 above, §1–§13 (the actual Core V1 contract) governs.
+§1–§12 above, §1–§12 (the actual Core V1 contract) governs. *(PR #3
+Chief review: this previously referenced itself, §1–§13 including this
+section — corrected to point to the preceding normative sections.)*
 
 - **No wrapperless legacy fallback.** §12 documents Web's own,
   Web-specific, undocumented-in-V1-proper compatibility path
@@ -343,14 +370,25 @@ than this without violating V1. Where this section would conflict with
   equipment/brewhouse default profile is never read from or written to
   by the parser itself.
 - **`prosess` is only imported when App's own normalization would not
-  change its semantics** — a known `process_id` must match App's
-  canonical standard profile exactly (structurally), or be
+  silently change its semantics** — a known `process_id` must match
+  App's canonical standard profile exactly (structurally), or be
   `"egendefinert"` (custom steps are that mode's entire point, always
-  safe); an unknown `process_id` — which would otherwise silently fall
-  back to `enkel_infusjon` — rejects the import instead (KBHR-018).
-  This is strict because of how `modules/process_profiles.py::
-  normaliser_prosessprofil()` already behaves today, not a new
-  restriction invented by the importer.
+  safe). An unknown `process_id` — which would otherwise silently fall
+  back to `enkel_infusjon` — still rejects the import (KBHR-018), since
+  there is no canonical profile to preserve data against in the first
+  place. **A known `process_id` whose structural fields *diverge* from
+  App's canonical profile is no longer rejected (PR #3 Chief review,
+  owner decision, 2026-09-02): it is imported losslessly as an
+  App-safe `"egendefinert"` process instead** — `mash_steps` and any
+  other structural field actually present in the file are preserved
+  verbatim (never normalized to the canonical profile's own steps,
+  never claimed to *be* that canonical profile); a structural field
+  genuinely absent from the file falls back to the canonical profile's
+  value for that one field only. This uses `"egendefinert"` exactly as
+  designed — the one mode `normaliser_prosessprofil()` never
+  overwrites — so it required no new representation and no change to
+  `modules/process_profiles.py`. See
+  `modules/kbh_import.py::_bygg_egendefinert_fra_avvikende_standard()`.
 - **Non-calculation-affecting metadata is preserved opaquely via
   passthrough**, not dropped (KBHR-011/KBHR-014): `brygger`, `bryggeri`,
   `notater`, `valgtStil`, and any currently-unknown top-level payload
@@ -387,16 +425,21 @@ historically genuine V1 payload if importing it would make the reader's
 own native model silently diverge from what the file says — this is the
 same principle §9/KBHR-018 already states for `recipeSchemaVersion` and
 process-profile normalization, just spelled out explicitly for fixture
-handling: `tests/fixtures/legacy/kbhrecipe/full.json`'s `prosess` block
-(one mash step) does not structurally match today's App canonical
-`enkel_infusjon` (two steps, `modules/process_profiles.py`), so App's
-reader correctly rejects that one field with `unsupported_process`
-(`tests/test_kbh_import.py`, `test_2`) rather than either silently
-renormalizing it or weakening the equality check to accommodate it. The
-fixture itself is not touched, and today's App process-profile shape is
-still not a universal Core rule (see above) — this is a statement about
-how a strict reader must treat old evidence, not a redefinition of what
-V1 process data must look like.
+handling. The general principle stands; **its original concrete example
+here has since been superseded (PR #3 Chief review, owner decision,
+2026-09-02).** `tests/fixtures/legacy/kbhrecipe/full.json`'s `prosess`
+block (one mash step) does not structurally match today's App canonical
+`enkel_infusjon` (two steps, `modules/process_profiles.py`) — App's
+reader no longer rejects that field; it now imports it losslessly as an
+App-safe `"egendefinert"` process instead (see the bullet above,
+`tests/test_kbh_import.py::test_2`), rather than either silently
+renormalizing it, rejecting it outright, or weakening the canonical
+equality check to accommodate it. The fixture itself is still not
+touched, and today's App process-profile shape is still not a universal
+Core rule (see above) — a reader remains entitled to reject old
+evidence it cannot represent safely; App's reader has simply widened
+what it can represent safely, without weakening the underlying
+semantic-preservation guarantee itself.
 
 ## 14. What this document does not do
 

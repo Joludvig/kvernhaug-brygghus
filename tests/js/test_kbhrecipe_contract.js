@@ -441,6 +441,172 @@ kjor('PRI2B (10): legacy V1-fixtures (recipeSchemaVersion: 1) importeres fortsat
   }
 });
 
+// ─── PR #3 Chief review, blocker 1: bryggerStil/prosess/vann must survive
+// the REAL import -> restore -> collect -> export cycle, not just the
+// parser<->writer shortcut every test above uses ─────────────────────────
+//
+// Root cause (confirmed by reading app.js): `bryggerStil`/`prosess`/`vann`
+// were classified as "known" in KBHRECIPE_KJENTE_FELT, so
+// _normaliserOppskriftForImport() did NOT capture them into
+// _kbhUkjenteFelt. But app.js has NO dedicated UI/state for any of the
+// three (no DOM field, no module variable) -- neither
+// _gjenopprettOppskrift() nor samleOppskrift() ever reads/writes
+// oppskrift.bryggerStil/.prosess/.vann directly (verified: zero
+// references anywhere in web/js/app.js outside kbhrecipe.js's own known-
+// field list). They sat as ordinary, harmless properties on the transient
+// object parseKbhRecipeInnhold() returns -- which is exactly why
+// "full fixture parses i Web" above still passes -- but nothing else in
+// Web ever read them from there, so they vanished the moment
+// samleOppskrift() built its own, fresh, fixed-shape return object. The
+// existing tests above never caught this because none of them exercise
+// app.js's actual restore/collect functions, only kbhrecipe.js's parser
+// and writer directly.
+//
+// Fix (this PR): removed bryggerStil/prosess/vann from
+// KBHRECIPE_KJENTE_FELT, so they are now captured into _kbhUkjenteFelt on
+// import -- exactly like any genuinely unknown future field -- which
+// app.js's EXISTING, UNCHANGED carrier variable (_aktivKbhUkjenteFelt)
+// already correctly threads through restore -> collect -> export for any
+// such field (see samleOppskrift()'s `_kbhUkjenteFelt: _aktivKbhUkjenteFelt`
+// and _gjenopprettOppskrift()'s `_aktivKbhUkjenteFelt =
+// oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL] ...`, both in web/js/app.js).
+// No app.js code change was needed or made.
+//
+// Test approach: web/index.html loads 13 files before app.js (i18n,
+// preferences, chrome, combobox, calc, flavor, radar, style, veiledning,
+// help, recipe_engine, kbhrecipe, units, equipment, recipe_storage,
+// brew_storage) and app.js itself unconditionally calls the full
+// rendering pipeline (beregnOgVisResultat()) at the end of
+// _gjenopprettOppskrift(). Loading that whole dependency graph into a
+// Node vm context to execute the real DOM-bound functions verbatim would
+// require building a small browser-page test harness -- a much larger,
+// separately-scoped undertaking than this fix, and explicitly out of
+// scope here ("unrelated refactors"). Instead, these tests mirror app.js's
+// REAL, documented, UNCHANGED carrier contract line-for-line (the two
+// lines quoted above) using the same technique already established on the
+// App/Python side of this codebase (tests/test_recipe_efficiency_scope.py,
+// tests/test_kbh_passthrough.py mirror ui/sidebar.py's/ui/recipe_card.py's
+// exact hydration lines without loading Streamlit) -- proving the carrier
+// CONTRACT is correct end-to-end, using kbhrecipe.js's real, unmodified
+// parser/writer at both ends.
+
+function _mirrorGjenopprettOppskrift(oppskrift, KBHRECIPE_PASSTHROUGH_NOKKEL) {
+  // Mirrors web/js/app.js::_gjenopprettOppskrift()'s ONE relevant line
+  // for this bug -- the extraction of the passthrough carrier.
+  return (oppskrift && typeof oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL] === "object" && oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL] !== null)
+    ? oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL]
+    : null;
+}
+
+function _mirrorSamleOppskrift(felter, aktivKbhUkjenteFelt) {
+  // Mirrors web/js/app.js::samleOppskrift()'s exact known-field shape
+  // (KBHRECIPE_PASSTHROUGH_NOKKEL literal reproduced below is the same
+  // string as KBHRECIPE_PASSTHROUGH_NOKKEL in kbhrecipe.js: "_kbhUkjenteFelt")
+  // -- deliberately does NOT include bryggerStil/prosess/vann as direct
+  // properties, exactly like the real function, so this test can only
+  // pass if the passthrough carrier itself is what keeps them alive.
+  return {
+    recipeSchemaVersion: felter.recipeSchemaVersion,
+    navn: felter.navn,
+    brygger: felter.brygger || "",
+    bryggeri: felter.bryggeri || "",
+    notater: felter.notater || "",
+    volum: felter.volum,
+    effektivitet: felter.effektivitet,
+    malt: felter.malt || [],
+    humle: felter.humle || [],
+    gjaerId: felter.gjaerId || null,
+    gjaerCustom: felter.gjaerCustom || null,
+    attenuationOverride: felter.attenuationOverride ?? null,
+    valgtStil: felter.valgtStil || null,
+    lagretDato: new Date().toISOString(),
+    _kbhUkjenteFelt: aktivKbhUkjenteFelt,
+  };
+}
+
+kjor('PR#3 (1): bryggerStil/prosess/vann fanges nå til _kbhUkjenteFelt ved import', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('full'));
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  const passthrough = res.oppskrift['_kbhUkjenteFelt'];
+  assert.ok(passthrough, '_kbhUkjenteFelt skal nå inneholde bryggerStil/prosess/vann');
+  assert.strictEqual(passthrough.bryggerStil, raa.recipe.bryggerStil);
+  assert.strictEqual(JSON.stringify(passthrough.prosess), JSON.stringify(raa.recipe.prosess));
+  assert.strictEqual(JSON.stringify(passthrough.vann), JSON.stringify(raa.recipe.vann));
+});
+
+kjor('PR#3 (2): navn/brygger/bryggeri/notater/valgtStil forblir KJENTE felt, IKKE i _kbhUkjenteFelt', () => {
+  // Regresjonsvakt mot Set-endringen over -- bekrefter at KUN
+  // bryggerStil/prosess/vann ble flyttet, ingenting annet.
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.recipe.brygger = 'Ola Nordmann';
+  raa.recipe.bryggeri = 'Kvernhaug';
+  raa.recipe.notater = 'Et notat';
+  raa.recipe.valgtStil = '21A American IPA';
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.oppskrift.brygger, 'Ola Nordmann');
+  const passthrough = res.oppskrift['_kbhUkjenteFelt'];
+  if (passthrough) {
+    assert.strictEqual('brygger' in passthrough, false);
+    assert.strictEqual('bryggeri' in passthrough, false);
+    assert.strictEqual('notater' in passthrough, false);
+    assert.strictEqual('valgtStil' in passthrough, false);
+  }
+});
+
+kjor('PR#3 (3): mirrors app.js -- full parse/import -> restore -> collect -> export bevarer bryggerStil/prosess/vann', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('full'));
+  const importRes = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(importRes.ok, true);
+
+  // "restore" -- mirrors _gjenopprettOppskrift()'s ene relevante linje.
+  const aktivKbhUkjenteFelt = _mirrorGjenopprettOppskrift(importRes.oppskrift, '_kbhUkjenteFelt');
+  assert.ok(aktivKbhUkjenteFelt, 'restore-steget skal ha fanget en passthrough-container');
+
+  // "collect" -- mirrors samleOppskrift()'s eksakte, faste feltsett (som
+  // IKKE inkluderer bryggerStil/prosess/vann direkte -- se over).
+  const samlet = _mirrorSamleOppskrift(importRes.oppskrift, aktivKbhUkjenteFelt);
+  assert.strictEqual('bryggerStil' in samlet, false, 'samleOppskrift() sitt faste feltsett har aldri bryggerStil direkte');
+  assert.strictEqual('prosess' in samlet, false);
+  assert.strictEqual('vann' in samlet, false);
+
+  // "export" -- den ekte, uendrede skriveren.
+  const eksportert = ctx.byggKbhRecipeInnhold(samlet);
+  assert.strictEqual(eksportert.recipe.bryggerStil, raa.recipe.bryggerStil);
+  assert.strictEqual(JSON.stringify(eksportert.recipe.prosess), JSON.stringify(raa.recipe.prosess));
+  assert.strictEqual(JSON.stringify(eksportert.recipe.vann), JSON.stringify(raa.recipe.vann));
+  // Containeren selv skal aldri lekke.
+  assert.strictEqual('_kbhUkjenteFelt' in eksportert.recipe, false);
+
+  // Kjente felt (navn, malt/humle-antall) skal fortsatt være riktige --
+  // hele syklusen skal ikke ha mistet noe annet underveis.
+  assert.strictEqual(eksportert.recipe.navn, raa.recipe.navn);
+  assert.strictEqual(eksportert.recipe.malt.length, raa.recipe.malt.length);
+});
+
+kjor('PR#3 (4): mirrors app.js -- kjent, redigert navn vinner selv gjennom hele restore -> collect -> export-syklusen', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('full'));
+  const importRes = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(importRes.ok, true);
+
+  const aktivKbhUkjenteFelt = _mirrorGjenopprettOppskrift(importRes.oppskrift, '_kbhUkjenteFelt');
+  // Simuler at brukeren redigerer "navn" i skjemaet mellom restore og collect.
+  const redigertOppskrift = { ...importRes.oppskrift, navn: 'Redigert av bruker (PR#3)' };
+  const samlet = _mirrorSamleOppskrift(redigertOppskrift, aktivKbhUkjenteFelt);
+
+  const eksportert = ctx.byggKbhRecipeInnhold(samlet);
+  assert.strictEqual(eksportert.recipe.navn, 'Redigert av bruker (PR#3)');
+  // Og bryggerStil/prosess/vann er fortsatt der, uendret -- redigering av
+  // ETT kjent felt skal ikke forstyrre passthrough-bevarte felt.
+  assert.strictEqual(eksportert.recipe.bryggerStil, raa.recipe.bryggerStil);
+  assert.strictEqual(JSON.stringify(eksportert.recipe.prosess), JSON.stringify(raa.recipe.prosess));
+});
+
 // ─── Oppsummering ───────────────────────────────────────────────────────
 
 console.log(`Kbhrecipe contract-tester: ${bestatt}/${bestatt + feil.length} bestått.`);

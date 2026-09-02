@@ -335,29 +335,42 @@ def _valider_kanoniske_ider(malt_ider, humle_ider, gjaer_ider, malt_db, humle_db
 
 def _valider_og_bygg_prosess(prosess_raw):
     """
-    KBHR-018: `prosess` importeres KUN dersom App kan representere den
-    UTEN at normaliser_prosessprofil() endrer semantikken -- ALDRI en
+    KBHR-018/020 + PR #3 Chief review (owner decision, option A):
+    `prosess` importeres KUN dersom App kan representere den UTEN at
+    normaliser_prosessprofil() endrer semantikken STILLE -- ALDRI en
     stille fallback til enkel_infusjon for en ukjent process_id, og
     ALDRI en stille erstatning av avvikende meskesteg med en kanonisk
-    standardprofils egne steg.
+    standardprofils egne steg. Innenfor den rammen importeres avvikende
+    historisk prosessdata nå LOSSLESSLY i stedet for å avvises -- se
+    fjerde punkt under.
 
       - Mangler `prosess` -> None (helt lovlig, se modules/recipe.py).
       - process_id == "egendefinert" -> normaliser_prosessprofil()
         deep-copier UBETINGET (se modules/process_profiles.py) -- ALDRI
         tap av semantikk mulig for denne grenen, alltid trygt å
         importere.
-      - process_id er en KJENT standardprofil (i STANDARDPROFILER) ->
-        normaliser_prosessprofil() erstatter ALLE strukturelle felt
-        (mash_steps/sparge_method/boil_minutes/decoction_steps/
-        reiterated_mash) med sin egen kanoniske versjon, uansett hva
-        payloaden sa. Importen er derfor kun lovlig hvis payloadens
-        egne strukturelle felt er IDENTISKE med den kanoniske profilen
-        -- avviker de (custom meskesteg under et kjent process_id),
-        ville import stille kastet brukerens faktiske data.
+      - process_id er en KJENT standardprofil (i STANDARDPROFILER) OG
+        alle strukturelle felt (mash_steps/sparge_method/boil_minutes/
+        decoction_steps/reiterated_mash) er IDENTISKE med den kanoniske
+        profilen -> importeres som den kanoniske profilen, uendret
+        oppførsel.
+      - process_id er en KJENT standardprofil, men ETT ELLER FLERE
+        strukturelle felt AVVIKER fra kanonisk (custom meskesteg under
+        et kjent process_id -- f.eks. en historisk .kbhrecipe-fil skrevet
+        av en eldre/annen writer, se KBHR-020) -> importeres LOSSLESSLY
+        som en App-safe "egendefinert" prosess (se
+        _bygg_egendefinert_fra_avvikende_standard()) i stedet for å
+        enten avvises eller stille normaliseres til kanonisk. Dette er
+        TRYGT fordi "egendefinert" er den ENE grenen
+        normaliser_prosessprofil() ALDRI overskriver -- profilen
+        påstår aldri å VÆRE den kanoniske standardprofilen, den bevarer
+        bare de faktiske, mottatte meskestegene uendret.
       - Ukjent process_id (verken "egendefinert" eller i
         STANDARDPROFILER) -> normaliser_prosessprofil() ville falt
         tilbake til "enkel_infusjon" STILLE. Import avviser dette
-        eksplisitt i stedet.
+        eksplisitt i stedet -- IKKE dekket av losslessly-grenen over,
+        siden det ikke finnes noen kjent kanonisk profil å sammenligne
+        avviket mot i utgangspunktet.
     """
     if prosess_raw is None:
         return None
@@ -377,15 +390,86 @@ def _valider_og_bygg_prosess(prosess_raw):
         )
 
     kanonisk = normaliser_prosessprofil(prosess_raw)
-    for felt in _PROSESS_STRUKTURELLE_FELT:
-        if prosess_raw.get(felt) != kanonisk.get(felt):
-            _feil(
-                KATEGORI_UNSUPPORTED_PROCESS,
-                f"Oppskriftens prosessprofil ({process_id}) har avvikende {felt} som ikke "
-                "samsvarer med Appens kanoniske standardprofil, og ville blitt stille "
-                "erstattet -- dagens App-import støtter derfor ikke denne filen.",
-            )
-    return kanonisk
+    avviker = any(prosess_raw.get(felt) != kanonisk.get(felt) for felt in _PROSESS_STRUKTURELLE_FELT)
+    if not avviker:
+        return kanonisk
+    return _bygg_egendefinert_fra_avvikende_standard(prosess_raw, process_id, kanonisk)
+
+
+def _bygg_egendefinert_fra_avvikende_standard(prosess_raw, process_id, kanonisk):
+    """
+    PR #3 Chief review, owner decision (option A): bevarer en kjent
+    standardprofils FAKTISKE, avvikende strukturelle felt losslessly som
+    en App-safe "egendefinert" prosess -- ALDRI en påstand om at dette
+    er den kanoniske `process_id`-profilen (som ville vært stille
+    semantikkendring, se KBHR-018), og ALDRI et tap av brukerens/den
+    historiske filens faktiske data (som en avvisning ville vært, se
+    KBHR-020).
+
+    `mash_steps` er selve payloaden dette skal bevare -- KREVES å være
+    en ikke-tom liste (samme lette strukturelle sjekk som resten av
+    denne modulen bruker, ingen dyp per-steg-validering utover det:
+    "egendefinert" er allerede fritt UI-redigerbart App-data). De øvrige
+    strukturelle feltene (sparge_method/boil_minutes/decoction_steps/
+    reiterated_mash) valideres løst hvis SATT i kilden, og faller
+    tilbake til kanonisk sin verdi hvis de mangler helt -- kun feltene
+    som FAKTISK avviker skal representeres som avvikende; et felt som
+    rett og slett ikke ble oppgitt er ikke "historisk data å bevare".
+    """
+    mash_steps = prosess_raw.get("mash_steps")
+    if not isinstance(mash_steps, list) or len(mash_steps) == 0:
+        _feil(
+            KATEGORI_INVALID_PAYLOAD,
+            f"prosess.mash_steps må være en ikke-tom liste (process_id={process_id!r}, "
+            f"avviker fra kanonisk): {mash_steps!r}",
+        )
+    if not all(isinstance(steg, dict) for steg in mash_steps):
+        _feil(KATEGORI_INVALID_PAYLOAD, "prosess.mash_steps inneholder et steg som ikke er et objekt.")
+
+    sparge_raw = prosess_raw.get("sparge_method")
+    if sparge_raw is not None and not (isinstance(sparge_raw, str) and sparge_raw.strip()):
+        _feil(KATEGORI_INVALID_PAYLOAD, f"prosess.sparge_method har ugyldig verdi: {sparge_raw!r}")
+    sparge_method = sparge_raw if sparge_raw is not None else kanonisk.get("sparge_method")
+
+    boil_raw = prosess_raw.get("boil_minutes")
+    if boil_raw is not None and (not _er_reelt_tall(boil_raw) or boil_raw < 0):
+        _feil(KATEGORI_INVALID_PAYLOAD, f"prosess.boil_minutes har ugyldig verdi: {boil_raw!r}")
+    boil_minutes = boil_raw if boil_raw is not None else kanonisk.get("boil_minutes")
+
+    decoction_raw = prosess_raw.get("decoction_steps")
+    if decoction_raw is not None and not isinstance(decoction_raw, list):
+        _feil(KATEGORI_INVALID_PAYLOAD, f"prosess.decoction_steps har ugyldig verdi: {decoction_raw!r}")
+    decoction_steps = decoction_raw if decoction_raw is not None else kanonisk.get("decoction_steps")
+
+    reiterated_raw = prosess_raw.get("reiterated_mash")
+    if reiterated_raw is not None and not isinstance(reiterated_raw, dict):
+        _feil(KATEGORI_INVALID_PAYLOAD, f"prosess.reiterated_mash har ugyldig verdi: {reiterated_raw!r}")
+    reiterated_mash = reiterated_raw if reiterated_raw is not None else kanonisk.get("reiterated_mash")
+
+    kanonisk_navn = STANDARDPROFILER[process_id]["navn"]
+    egen_navn = prosess_raw.get("navn") or kanonisk_navn
+
+    return {
+        "process_id": "egendefinert",
+        "navn": egen_navn,
+        "beskrivelse": (
+            f"Importert fra en .kbhrecipe-fil under process_id={process_id!r}, men med "
+            f"meskesteg/prosessdata som avviker fra Appens kanoniske {kanonisk_navn}-profil "
+            "-- bevart uendret som en egendefinert prosess i stedet for å bli stille "
+            "normalisert til den kanoniske profilen, eller avvist."
+        ),
+        "vanskelighetsgrad": STANDARDPROFILER[process_id]["vanskelighetsgrad"],
+        "mash_steps": copy.deepcopy(mash_steps),
+        "sparge_method": sparge_method,
+        "boil_minutes": boil_minutes,
+        "decoction_steps": copy.deepcopy(decoction_steps),
+        "reiterated_mash": copy.deepcopy(reiterated_mash),
+        "anbefalte_stiler": [],
+        "utstyrsbegrensninger": "",
+        "forventet_paavirkning": "",
+        "ekstra_tid_min": 0,
+        "brukernotater": prosess_raw.get("brukernotater") or "",
+    }
 
 
 # ─── OPPGAVE H -- vann ────────────────────────────────────────────────

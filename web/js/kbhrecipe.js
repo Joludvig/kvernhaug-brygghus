@@ -39,10 +39,26 @@ const KBHRECIPE_STOTTET_RECIPE_SCHEMA_VERSION = 1;
 // felt Web bare bruker internt blir IKKE automatisk en del av
 // .kbhrecipe-formatet bare fordi det står i denne listen -- se
 // KBHRECIPE_WEB_INTERNE_FELT.
+//
+// PR #3 Chief review-korreksjon: `bryggerStil`, `prosess` og `vann` er
+// BEVISST IKKE med i denne listen, selv om de er gyldige, kjente Core
+// V1-felt (§3) -- Web har per i dag INGEN dedikert UI/state for dem
+// (ingen DOM-felt, ingen egen variabel; verken samleOppskrift() eller
+// _gjenopprettOppskrift() i app.js håndterer dem). Å regne dem som
+// "kjent" her betydde tidligere at _normaliserOppskriftForImport()
+// IKKE fanget dem til _kbhUkjenteFelt -- men siden ingenting ELLERS i
+// Web faktisk holdt fast på dem heller, ble de stille mistet et sted
+// mellom import og neste samleOppskrift()-kall (bekreftet: en reell,
+// funnet regresjon i en faktisk import -> rediger -> lagre/eksporter-
+// runde, se PR #3 Chief review). Retting: disse tre behandles nå
+// EKSAKT som et vilkårlig, genuint ukjent fremtidig felt -- fanget opp
+// og videreført opakt via KBHRECIPE_PASSTHROUGH_NOKKEL/_kbhUkjenteFelt
+// (§6), som app.js allerede korrekt bærer gjennom hele
+// redigerings-/lagringssyklusen for ALLE slike felt. Ingen endring i
+// app.js var nødvendig -- kun denne klassifiseringen.
 const KBHRECIPE_KJENTE_FELT = new Set([
   "recipeSchemaVersion", "navn", "volum", "effektivitet", "malt", "humle",
   "gjaerId", "gjaerCustom", "attenuationOverride", "valgtStil",
-  "bryggerStil", "prosess", "vann",
   "brygger", "bryggeri", "notater", "lagretDato",
 ]);
 
