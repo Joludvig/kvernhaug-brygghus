@@ -85,6 +85,27 @@ def beregn_fg_og_abv(og, attenuation):
     return fg, abv
 
 
+def _avrund_gram_half_up(verdi):
+    """Avrunder et ikke-negativt gramtall til 1 desimal med DECIMAL
+    HALF-UP -- IKKE Pythons innebygde round(), som bruker bankers-
+    rounding/half-even og derfor kan avvike fra web/js/calc.js sin
+    beregnGramFraIBU() (Math.round(x * 10) / 10, som runder .5 opp) på
+    eksakte 1-desimal-ties. Dette er Core-kontraktens vedtatte
+    avrundingssemantikk for beregn_gram_fra_ibu() (CALC-002, Core
+    Stabilization PRI 1 QA-korreksjon) -- se
+    docs/development/CORE_CALCULATION_CONTRACT.md.
+
+    math.floor(verdi * 10 + 0.5) / 10 opererer på nøyaktig samme
+    mellomliggende flyttall (verdi * 10) som JS sin Math.round(x * 10)
+    gjør, og gir derfor bit-identisk resultat til JS for samme input --
+    i motsetning til en Decimal(str(verdi))-basert tilnærming, som ville
+    tolket tallet via sin streng-repr i stedet for selve flyttallet.
+    Kun definert/brukt for ikke-negative verdier, som er alt denne
+    funksjonen noensinne produserer før avrunding (se clampene over).
+    """
+    return math.floor(verdi * 10 + 0.5) / 10
+
+
 def beregn_gram_fra_ibu(maal_ibu, alfa_prosent, tid, volum, beregnet_og):
     """Invers Tinseth: beregner gram humle for ønsket IBU-bidrag på én tilsetning."""
     if alfa_prosent <= 0 or volum <= 0 or beregnet_og <= 1.000 or maal_ibu <= 0 or tid <= 0:
@@ -94,7 +115,7 @@ def beregn_gram_fra_ibu(maal_ibu, alfa_prosent, tid, volum, beregnet_og):
     utnyttelse = bigness * times
     if utnyttelse <= 0:
         return 0.0
-    return round((maal_ibu * volum) / (1000 * (alfa_prosent / 100.0) * utnyttelse), 1)
+    return _avrund_gram_half_up((maal_ibu * volum) / (1000 * (alfa_prosent / 100.0) * utnyttelse))
 
 
 def _hent_alfa(entry):
