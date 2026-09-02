@@ -10,7 +10,20 @@ import streamlit as st
 
 def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db, humle_db, gjaer_db):
     volum = st.session_state.get("batch_volum_input", 20.0) if "batch_volum_input" in st.session_state else 20.0
-    effektivitet = last_equipment().get("efficiency", 0.75)
+    # PRI 2C0 (KBHR-019) -- en aktiv oppskrift med sin egen, gyldige
+    # efficiency (satt av ui/sidebar.py ved lasting, se
+    # _aktiv_recipe_efficiency) skal ALDRI bli stille overskrevet av
+    # gjeldende utstyrsprofil. Kun når ingen recipe-scoped override finnes
+    # (helt ny/blank oppskrift, eller en eldre oppskrift uten feltet)
+    # faller vi tilbake til utstyrsprofilen -- akkurat som en helt ny
+    # oppskrift ville gjort. Utstyrsprofilen selv leses ALDRI skrevet til
+    # her -- kun lest.
+    _recipe_efficiency_override = st.session_state.get("_aktiv_recipe_efficiency")
+    effektivitet = (
+        _recipe_efficiency_override
+        if _recipe_efficiency_override is not None
+        else last_equipment().get("efficiency", 0.75)
+    )
     brygger_stil = st.session_state.get("brygger_stil", "")
     # Bryggemåte (prosessprofil) er helt separat fra ingrediensvalget over —
     # samme mønster som brygger_stil: lest fra session_state, satt av

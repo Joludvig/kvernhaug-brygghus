@@ -1,3 +1,4 @@
+import copy
 import json
 import streamlit as st
 from config import DEMO_MODE
@@ -7,6 +8,7 @@ from modules.recipe_storage import (
     finn_duplikate_oppskrift_navn,
 )
 from modules.process_profiles import normaliser_prosessprofil
+from modules.recipe import resolve_recipe_efficiency
 from modules.recipe_importer import (
     parse_recipe_text,
     match_imported_ingredients,
@@ -55,6 +57,31 @@ def render_sidebar():
             st.session_state["_gjeldende_navn_preserved"] = r_data["name"]
             st.session_state.brygger_stil = r_data.get("brygger_stil", "")
             st.session_state.batch_volum_input = r_data.get("batch_size", 20.0)
+            # PRI 2C0 (KBHR-019) -- en gyldig, lagret recipe-efficiency er
+            # recipe-scoped og skal vinne over utstyrsprofilen resten av
+            # denne oppskriftens aktive økt (se modules/recipe_context.py).
+            # Mangler feltet, eller er det ugyldig (eldre oppskrift), er
+            # resultatet None -- da faller recipe_context.py tilbake til
+            # gjeldende utstyrsprofil, akkurat som OPPGAVE D krever. Selve
+            # utstyrsprofilen leses/endres ALDRI her.
+            st.session_state["_aktiv_recipe_efficiency"] = resolve_recipe_efficiency(r_data.get("efficiency"))
+            # PRI 2C2 (KBHR-011/KBHR-014) -- ikke-beregningspåvirkende
+            # metadata bevart opakt fra en tidligere .kbhrecipe-import
+            # (se modules/kbh_import.py sin "passthrough",
+            # modules/recipe.py sin `_kbh_passthrough`-nøkkel) må følge
+            # oppskriften videre gjennom load, akkurat som
+            # _aktiv_recipe_efficiency over. Nøkkelen settes UBETINGET på
+            # HVERT load -- enten til den nylastede oppskriftens egen
+            # (deep-copierte) passthrough, eller til None -- slik at en
+            # tidligere lastet oppskrifts passthrough ALDRI kan henge
+            # igjen etter et bytte til en oppskrift som mangler feltet
+            # (vanlig, ikke-importert oppskrift, eller en eldre lagring).
+            _lagret_passthrough = r_data.get("_kbh_passthrough")
+            st.session_state["_aktiv_kbh_passthrough"] = (
+                copy.deepcopy(_lagret_passthrough)
+                if isinstance(_lagret_passthrough, dict) and _lagret_passthrough
+                else None
+            )
             # Normaliser en EVENTUELT lagret prosessprofil FØR den blir
             # aktiv — en kjent standardprofil (Hochkurz osv.) kan da
             # ALDRI hydreres inn med en korrupt/hybrid meskeplan fra en

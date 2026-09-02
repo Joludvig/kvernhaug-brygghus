@@ -138,6 +138,14 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             water_target_profile=st.session_state.get("aktiv_vannmaal_snapshot"),
             water_treatment=st.session_state.get("aktiv_vannbehandling"),
             water_measurements=st.session_state.get("aktiv_vannmaalinger"),
+            # PRI 2C2 (KBHR-011/KBHR-014) -- ikke-beregningspåvirkende
+            # metadata bevart opakt fra en tidligere .kbhrecipe-import
+            # (hydrert av ui/sidebar.py ved load, se
+            # _aktiv_kbh_passthrough) må følge med gjennom HVER
+            # rebygging, akkurat som brygger_stil/prosessprofil/vann
+            # over -- ellers ville et vanlig "Lagre endringer"-klikk
+            # stille mistet metadataen.
+            kbh_passthrough=st.session_state.get("_aktiv_kbh_passthrough"),
         )
 
     if not DEMO_MODE:
@@ -209,6 +217,18 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                                 st.session_state.valgt_malt = [{"id": "weyermann_pilsner", "mengde": 5.0}]
                                 st.session_state.valgt_humle = [{"id": "magnum_de", "gram": 20, "tid": 60}]
                                 st.session_state.valgt_gjaer_id = "safale_us_05"
+                                # PRI 2C0 (KBHR-019) -- en ny, blank oppskrift skal
+                                # igjen følge utstyrsprofilen, ikke arve efficiency
+                                # fra oppskriften som nettopp ble arkivert. Ikke
+                                # widget-bundet -- kan settes direkte (se app.py).
+                                st.session_state["_aktiv_recipe_efficiency"] = None
+                                # PRI 2C2 (KBHR-011/KBHR-014) -- en ny,
+                                # blank oppskrift skal IKKE arve den
+                                # nettopp arkiverte oppskriftens bevarte
+                                # import-metadata. Ikke widget-bundet --
+                                # kan settes direkte, samme mønster som
+                                # _aktiv_recipe_efficiency over.
+                                st.session_state["_aktiv_kbh_passthrough"] = None
                                 # "gjeldende_navn" er bundet til Bryggnavn-widgeten
                                 # (instansiert lenger opp i DENNE samme renderingen)
                                 # -- kan derfor ikke settes direkte her (Streamlit

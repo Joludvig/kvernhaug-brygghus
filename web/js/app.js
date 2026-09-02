@@ -35,6 +35,15 @@ const AKTIV_KLADD_NOKKEL = "kvernhaug_web_aktiv_kladd";
 // eksportert .kbhrecipe-fil (se recipe_storage.js).
 let _aktivRecipeId = null;
 
+// PRI 2A (KBHR-002) -- ukjente V1-payloadfelt fanget ved import (se
+// KBHRECIPE_PASSTHROUGH_NOKKEL i kbhrecipe.js), holdt utenfor
+// samleOppskrift()s faste feltliste av samme grunn som _aktivRecipeId er
+// det: satt av _gjenopprettOppskrift() (det ene, felles gjenopprettings-
+// punktet for aktiv kladd/blank/import), lest tilbake inn i
+// samleOppskrift() sitt resultat slik at det overlever
+// redigering -> lagring/eksport. null = ingen bevart passthrough.
+let _aktivKbhUkjenteFelt = null;
+
 // ─── Enhetsbevisste felt-lesing/-skriving (Runde 22) ───────────────────────
 // Et unit-bærende input sitt SYNLIGE .value viser tallet i GJELDENDE
 // unitSystem (metric/us), mens dataset.canonical alltid holder full
@@ -1287,6 +1296,10 @@ function samleOppskrift() {
     attenuationOverride: gjaerCombobox.getValue() ? null : parseFloat(attenuationOverrideInput.value) || null,
     valgtStil: stilCombobox ? stilCombobox.getValue() : null,
     lagretDato: new Date().toISOString(),
+    // PRI 2A (KBHR-002) -- bevart passthrough fra siste import/gjenoppretting
+    // (se _aktivKbhUkjenteFelt over og _gjenopprettOppskrift() under). Ikke
+    // et V1-kontraktfelt selv -- kun en bærer for felt Web ikke forstår.
+    _kbhUkjenteFelt: _aktivKbhUkjenteFelt,
   };
 }
 
@@ -1312,6 +1325,15 @@ function lagreOppskrift() {
 // Gjenoppretter en oppskrift (fra aktiv kladd, en lagret oppskrift, eller en
 // importert JSON-fil) inn i skjemaet.
 function _gjenopprettOppskrift(oppskrift) {
+  // PRI 2A (KBHR-002) -- dette er det ENE, felles stedet alle tre kilder
+  // (aktiv kladd ved sideinnlasting, blank oppskrift, importert fil) går
+  // gjennom, så det er her _aktivKbhUkjenteFelt hentes ut/nullstilles --
+  // se _aktivKbhUkjenteFelt-deklarasjonen og samleOppskrift() over.
+  _aktivKbhUkjenteFelt =
+    (oppskrift && typeof oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL] === "object" && oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL] !== null)
+      ? oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL]
+      : null;
+
   // Runde 18A -- den interne sentinelen "Uten navn" (satt av samleOppskrift()
   // når feltet står tomt) skal ALDRI settes som selve input-verdien -- det
   // ville vist den norske sentinelteksten ordrett også i EN. Feltet skal i
