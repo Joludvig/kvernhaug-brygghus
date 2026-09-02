@@ -251,13 +251,13 @@ contract as-is.
 | Frozen ingredient master-data | `snapshot.ingredients.{malt,humle,gjaer}` — full referenced entries, not a hand-picked subset | *(none)* | Needs an explicit Core decision: embed full records vs. reference by id + pinned `data_version` | **OWNER DECISION REQUIRED** (Section 8 #1) |
 | Frozen equipment profile | `snapshot.equipment` (or `null`) | *(none — App's `modules/equipment.py` profile is live/global, never frozen per brew)* | Core: optional frozen equipment snapshot | ADAPT |
 | Frozen predicted values | `snapshot.predicted.{og,fg,abv,ibu,ebc,buGu,flavorProfile,style}` | *(none per brew — App's `stats`/`flavor_profile` live on the mutable recipe object instead, see §3)* | Core: frozen prediction snapshot, per `KBH_CORE_CONTRACT.md` §2's explicit exception for historical reproducibility | KEEP (concept), shape depends on OWNER DECISION #1 |
-| Snapshot provenance | `snapshot.provenance.{engineVersion, recipeSchemaVersion, masterdata: {…count}, capturedAt}` | *(none)* | Core: needed for reproducibility; today's `masterdata` entry-count is an honest but weak proxy (no per-entry `data_version` exists yet to pin against, per `CORE_VERSIONING.md`) | ADAPT, flagged weak |
+| Snapshot provenance | `snapshot.provenance.{engineVersion, recipeSchemaVersion, masterdata: {…count}, capturedAt}` | *(none)* | Core: needed for reproducibility. `core/manifest.json` already provides a stronger per-dataset foundation (`schema_version`, `data_version`, `checksum`) than Web's entry-count proxy; a Core-compliant writer should capture those manifest fields per referenced dataset. Web's entry-count proxy remains readable as legacy/de-facto provenance on brews already captured under it | ADAPT |
 | Status | `status ∈ {active, done, discarded}`, freely reassignable metadata | *(none)* | KEEP | KEEP |
 | Judgment | `sensing.judgment ∈ {yes, maybe, no}` | *(none)* | KEEP | KEEP |
 | Measured actuals: OG/FG/volume | `actuals.{og, fg, volumeL}` (canonical SG points, liters) | `actual_og`, `actual_fg`, `actual_volume_l` (same canonical units, snake_case) | KEEP concept; naming/casing convergence is a product decision, not a wire-contract blocker | ADAPT |
-| Actual ABV | **Never stored** — always `faktiskAbv()` from actuals | **Stored explicitly** (`actual_abv`, precomputed by the UI) | Core V1 must state: actual ABV is derived, never authoritative if stored, and never required on write | REJECT (App's current storage of a derived value contradicts the "store what cannot be regenerated" principle both docs already state) |
+| Actual ABV | **Never stored** — always `faktiskAbv()` from actuals | **Stored explicitly** (`actual_abv`, precomputed by the UI) | Wire contract only: never authoritative, always recomputable from `actuals.{og,fg}`, never required on write. Does not require App to change its local storage — App's cached copy is product-local and out of scope | **OWNER DECISION REQUIRED** (Section 8 #3) whether the wire schema omits the field entirely or allows it as optional/non-authoritative; App's local field is APP_ONLY either way |
 | Actual process used | *(absent — Web's actuals has no process-used field at all)* | `process_profile_navn` (name string only, no full profile) | A genuinely new candidate Core field ("what was actually done"), not yet present on either side in a complete form | DEFER (needs its own design, same caution `.kbhrecipe`'s `prosess` field already required) |
-| Measurement/observation notes | `actuals.notes` (measurement-adjacent) + `sensing.notes` (tasting-adjacent) — two distinct fields | `note` — a single merged field covering both | Core V1 must decide whether the two-field split is required or a single merged field is an acceptable App-tier subset | **OWNER DECISION REQUIRED** (Section 8 #4) |
+| Measurement/observation notes | `actuals.notes` (measurement-adjacent) + `sensing.notes` (tasting-adjacent) — two distinct fields | `note` — a single merged field covering both | Core V1 wire shape: both `actuals.notes` and `sensing.notes`, optional and independent, matching Web (§5.8) — not an open wire question | KEEP (Web's two-field shape); App's single `note` → this shape is a deferred adapter/migration question, **OWNER DECISION REQUIRED** only for that mapping (Section 8 #4) |
 | Sensory flavor profile | `sensing.flavorProfile` (numeric map, same axes as predicted) | *(none)* | KEEP | KEEP |
 | Learning: whatWorked/whatChanged/nextTime | `learning.{whatWorked, whatChanged, nextTime}` | *(none)* | KEEP | KEEP |
 | Timestamps | `createdAt` + `brewedAt` (both ISO 8601, distinct meanings) | `date` only (a single date; ambiguous whether it means "brew day" or "log entry day" — in practice always brew day) | Core: needs at least a "when brewed" timestamp; `createdAt` (record creation) vs. `brewedAt` (the actual brew day) is a real, useful distinction Web already draws | ADAPT |
@@ -354,20 +354,28 @@ nullable/omittable — there is no minimum "complete" brew beyond layer 1
 
 **Measured actuals** (layer 3: `og`, `fg`, `volumeL`) are raw instrument
 readings, stored as-entered. **Derived values** — actual ABV, plan-vs-
-actual deviation, actual efficiency, actual attenuation — are
-**always** computed at display/use time from stored actuals and the
-frozen snapshot, and **never** stored, per the "store what cannot be
-regenerated" principle already established for Core
-(`KBH_CORE_CONTRACT.md` §2) and already implemented this way in Web
-(`faktiskAbv()`, `planVsFaktisk()`, `faktiskEffektivitet()`,
-`faktiskUtgjaering()`).
+actual deviation, actual efficiency, actual attenuation — are, on the
+**wire**, **always** computed at read/use time from stored actuals and
+the frozen snapshot, and **never carried as an authoritative field**,
+per the "store what cannot be regenerated" principle already
+established for Core (`KBH_CORE_CONTRACT.md` §2) and already
+implemented this way in Web (`faktiskAbv()`, `planVsFaktisk()`,
+`faktiskEffektivitet()`, `faktiskUtgjaering()`).
 
-**This conflicts with today's App behavior**, which stores
-`actual_abv`. Section 8 #3 records this as an explicit owner decision:
-whether Core V1 forbids storing it outright (requiring a future,
-separately scoped App fix) or tolerates a stored, non-authoritative
-convenience copy that a reader must be willing to recompute and
-disregard on conflict.
+This is a statement about the **`.kbhbrew` wire contract only**, not
+about App's internal persistence. Core does not own, and this document
+does not decide, what App keeps in its own local storage/workflow
+(`KBH_CORE_CONTRACT.md` §1) — App's current `actual_abv` field is
+product-local convenience state, not a wire-contract violation by
+itself. What Core V1 does require: a canonical `.kbhbrew` reader always
+recomputes ABV from `actuals.{og,fg}` and never trusts a carried value
+as authoritative; a canonical `.kbhbrew` exporter must either omit
+`actual_abv` entirely or mark it explicitly non-authoritative, treating
+any App-side cached value it disregards on export as safely
+discardable, not as data loss. Section 8 #3 records the narrower,
+still-open question this leaves: whether the wire schema should
+tolerate an optional, explicitly non-authoritative `actual_abv` field
+at all, or omit the concept from the wire entirely.
 
 ### 5.8 Sensory/documented observations vs. instrument measurements
 
@@ -384,6 +392,20 @@ reader can display them), matching the same non-storage-ownership
 pattern `KBH_CORE_CONTRACT.md` §6 already draws for App's local batch
 data ("makes App the local authoritative store... does not make App an
 owner of Core's schema").
+
+Because measurement-adjacent notes and tasting-adjacent notes are two
+different categories under this same distinction, Core V1 defines two
+free-text fields, both optional and independently populated:
+`actuals.notes` (measurement-adjacent, e.g. "kettle boiled over
+slightly") and `sensing.notes` (tasting/experience-adjacent, e.g. "more
+bitter than predicted"). This matches Web's already-implemented shape
+(Section 2).
+`.kbhbrew` V1 has exactly one canonical shape for this concept — it
+does not also define a merged single-field alternative. How a product
+whose own local storage only has one merged field (App's `note`, see
+Section 3) would map onto these two fields if and when it implements a
+`.kbhbrew` writer is a separate, deferred adapter question — see
+Section 8 #4.
 
 ### 5.9 Learning/notes semantics
 
@@ -415,16 +437,31 @@ field, unlike App's current single `date`.
 
 ### 5.12 Provenance / calculation-engine and data-version references
 
-`snapshot.provenance` must record enough to know *which calculation
-engine and *which* library size produced the frozen `predicted` values
-— today, `engineVersion` (bumped manually when `calc.js`/`flavor.js`/
-`style.js` change output for the same input) and a `masterdata` entry
-count. The entry-count proxy is honest but weak: it cannot detect a
-same-count *content* change (a corrected malt potential, for instance).
-A stronger provenance record (referencing `data_version` per
-`CORE_VERSIONING.md`) is not adopted here because no per-dataset
-`data_version` is actually wired to `data/master_*.json` yet — see
-Section 8 #1's dependency on this same gap.
+`snapshot.provenance` must record enough to know *which* calculation
+engine and *which* masterdata revision produced the frozen `predicted`
+values — `engineVersion` (bumped manually when `calc.js`/`flavor.js`/
+`style.js` change output for the same input) plus, per referenced
+dataset (`malt`/`humle`/`gjaer`), the `schema_version`, `data_version`
+and `checksum` already recorded in `core/manifest.json`
+(`CORE_VERSIONING.md`). This is materially stronger than an entry-count
+proxy: `data_version` is bumped on any semantic content change
+(corrected malt potential, added/removed entries) independent of
+whether the count happens to stay the same, and the checksum lets a
+future tool detect even a byte-level change the count would miss.
+Capturing the manifest's *current* `data_version`/`checksum` per
+dataset at snapshot time is implementable today — it does not require,
+and this document does not invent, a historical archive of prior
+masterdata revisions. Without such an archive, a captured
+`data_version` proves *that* the referenced dataset has since drifted
+(current manifest value ≠ captured value) but not *what* changed; that
+limit is inherent to not having an archive, not to the manifest itself.
+
+Web's current `masterdata: {…count}` proxy is de-facto legacy
+provenance: it remains a valid, readable field on brews already
+captured under it, but it is **not** the normative Core V1 provenance
+target — a Core-compliant writer should populate the manifest-derived
+fields above instead. See Section 8 #1, whose embedding-vs-reference
+tradeoff also turns on what the manifest can and cannot reconstruct.
 
 ### 5.13 Unknown-field preservation policy
 
@@ -593,13 +630,18 @@ Section 8's items are resolved (see Section 8's closing note).
   examples in Section 2), and there is no way to tell, from the brew
   alone, whether the embedded copy still matches today's canonical
   entry.
-- **Option B — reference by id + pinned `data_version`.** Smaller,
-  and makes drift detectable (compare pinned vs. current
-  `data_version`). Cost: **not actually implementable today** —
-  `CORE_VERSIONING.md` establishes `data_version` as a per-dataset
-  concept with no historical archive of prior revisions, so a
-  reference alone could not reconstruct "what this ingredient looked
-  like when brewed" the way full embedding can right now.
+- **Option B — reference by id + pinned `data_version`/`checksum`.**
+  Smaller, and *recording* the pin is implementable today —
+  `core/manifest.json` already exposes per-dataset `schema_version`,
+  `data_version` and `checksum` (`CORE_VERSIONING.md`) to capture at
+  snapshot time. The real cost is narrower than "not implementable":
+  a pinned `data_version` only proves *whether* the referenced dataset
+  has drifted since (current manifest value vs. captured value) — it
+  cannot *reconstruct* what the specific ingredient entry looked like
+  at brew time, because no historical archive of prior masterdata
+  revisions exists yet. So Option B can tell a reader "this snapshot's
+  ingredient reference is now stale," but only full embedding (Option
+  A) can show the reader the actual historical values without one.
 - **Option C — hybrid (embed only calculation-relevant fields).**
   Already implicitly rejected by Web's own code comment (§ `web/js/
   brew_storage.js` lines 60–67): a hand-picked subset "would quietly
@@ -625,26 +667,53 @@ Section 8's items are resolved (see Section 8's closing note).
   used" and richer provenance, that a passthrough gap would silently
   discard from any writer that gets ahead of the reader).
 
-### 3. Should storing a derived value (e.g. `actual_abv`) be forbidden outright?
+### 3. Should the `.kbhbrew` wire schema carry a derived value (e.g. `actual_abv`) at all?
 
-- **Option A — hard rule, App must stop storing it.** Consistent with
-  both Core Contract documents' stated principle; requires a future,
-  separately scoped App fix (not this issue).
-- **Option B — tolerate a stored, non-authoritative convenience copy**,
-  with a rule that any reader must recompute and treat the stored value
-  as informational only, silently overridden on conflict.
+This is scoped to the **wire contract only** — it does not decide, and
+must not be read as deciding, whether App keeps `actual_abv` in its own
+local storage. App owns its local persistence/workflow
+(`KBH_CORE_CONTRACT.md` §1); that is unaffected regardless of which
+option below is chosen.
 
-### 4. Must actuals-notes and sensing-notes stay two separate fields?
+- **Option A — omit it from the wire entirely.** Canonical readers
+  always recompute ABV from `actuals.{og,fg}`; a `.kbhbrew` exporter
+  never writes `actual_abv`, even if the exporting product (e.g. a
+  future App writer) has a locally cached value. Simplest, no
+  authoritative/non-authoritative ambiguity on the wire.
+- **Option B — allow it as an optional, explicitly non-authoritative
+  field**, with a rule that any reader must recompute and treat a
+  present value as informational only, silently overridden on
+  conflict. Lets a future App exporter carry its local convenience
+  value through export without losing it, at the cost of a wire field
+  whose value a spec-compliant reader is required to ignore for
+  correctness.
 
-- **Option A — require the split**, matching Web; a future App
-  `.kbhbrew` writer would need to decide how to split its single `note`
-  field (likely: treat it as `sensing.notes`, since App's UI collects
-  it after OG/FG are entered, closer to a tasting/summary note than a
-  pure measurement annotation — but this is a product judgment call,
-  not made here).
-- **Option B — allow a single merged notes field** as an
-  App-tier-acceptable V1 subset, with Core defining both `actuals.notes`
-  and `sensing.notes` as optional and independent, neither required.
+### 4. How should App's single legacy `note` field map onto Core's two-field notes shape?
+
+This is **not** a wire-schema ambiguity — Section 5.8 already fixes the
+wire shape as two distinct, optional, independent fields
+(`actuals.notes` and `sensing.notes`), matching Web. `.kbhbrew` V1 does
+not define a second, merged-field wire representation of the same
+concept alongside it. What remains open is a narrower, product-side
+adapter/migration question, deferred to PRI 3B (not decided here, and
+not needed for this docs-only round): if and when App implements a
+`.kbhbrew` writer, how does its existing single `note` field populate
+the two-field wire shape?
+
+- **Option A — write it into `sensing.notes` only.** App's UI collects
+  `note` after OG/FG are entered, closer to a tasting/summary note than
+  a pure measurement annotation; `actuals.notes` is left absent.
+- **Option B — write it into both fields.** Simplest to implement,
+  but duplicates the same text under two semantically distinct
+  headings, which a reader may reasonably not expect.
+- **Option C — prompt for an explicit split at write time** (a product
+  UI decision, not a data-transformation one), so newly written App
+  `.kbhbrew` records carry the fields Web already draws a real
+  distinction between.
+
+Whichever option PRI 3B picks, it is an adapter decision about how one
+product's legacy local field feeds a fixed wire shape — it must not
+reopen or duplicate the wire shape itself.
 
 ### 5. Should "actual process used" become a real Core V1 field?
 
