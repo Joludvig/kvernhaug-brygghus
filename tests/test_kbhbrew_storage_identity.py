@@ -178,6 +178,87 @@ class TestUpdateLayerNeverTouchesFrozenSnapshot(_IsolertRecipeMappeTestCase):
         self.assertIsNone(kbhbrew_storage.oppdater_brew_lag("does-not-exist", actuals={"og": 1.05}))
 
 
+class TestUpdateLayerPreservesUnknownAndUntouchedKnownFields(_IsolertRecipeMappeTestCase):
+    """Chief review (issue #24 round 2): oppdater_brew_lag() used to
+    REPLACE a whole layer wholesale, so importing a brew that carries an
+    unknown (future-V1 or foreign) field in one layer and then updating
+    just one KNOWN field in that same layer silently destroyed the
+    unknown field -- and any other known field the caller didn't
+    re-supply. Reproduces exactly that "import -> update one known
+    field -> export" sequence and proves both survive, for all three
+    mutable layers (actuals/sensing/learning)."""
+
+    def _importer_brew_med_ukjent_felt(self):
+        malt_db, humle_db, gjaer_db = _dbs()
+        brew = bygg_ny_brew(
+            _recipe(), malt_db, humle_db, gjaer_db, None, {},
+            created_at="2026-03-01T00:00:00+00:00", brew_id="brew-merge-origin",
+        )
+        brew["actuals"] = {"og": 1.050, "fg": 1.012, "notes": "Opprinnelig notat"}
+        brew["sensing"] = {"judgment": "yes", "notes": "Opprinnelig smaksnotat"}
+        brew["learning"] = {"whatWorked": "Meskeprofil", "nextTime": "Samme igjen"}
+        envelope = bygg_kbhbrew_konvolutt(brew, "2026-03-01T00:00:00+00:00")
+        # Simulate a foreign/future-version file: the writer above only
+        # emits KNOWN fields, so an unknown field per layer is injected
+        # directly into the wire dict here -- exactly what
+        # parse_kbhbrew_json()'s passthrough capture must preserve (same
+        # "hand-edited file" pattern as
+        # TestForbiddenActualAbvNeverEmitted in
+        # tests/test_kbhbrew_engine_readerwriter.py).
+        envelope["brew"]["actuals"]["mashPh"] = 5.4
+        envelope["brew"]["sensing"]["aromaNotes"] = "Fruktig"
+        envelope["brew"]["learning"]["yeastPitchRateNotes"] = "Dobbel pakke"
+        resultat = kbhbrew_storage.importer_kbhbrew(json.dumps(envelope))
+        self.assertTrue(resultat["ok"])
+        return resultat["brewId"]
+
+    def test_updating_one_known_actuals_field_preserves_unknown_field_and_other_known_fields(self):
+        brew_id = self._importer_brew_med_ukjent_felt()
+
+        oppdatert = kbhbrew_storage.oppdater_brew_lag(brew_id, actuals={"fg": 1.010})
+
+        self.assertEqual(oppdatert["actuals"]["fg"], 1.010)
+        self.assertEqual(oppdatert["actuals"]["og"], 1.050)  # untouched known field survives
+        self.assertEqual(oppdatert["actuals"]["notes"], "Opprinnelig notat")
+        exported = kbhbrew_storage.eksporter_kbhbrew(brew_id)
+        self.assertEqual(exported["brew"]["actuals"]["mashPh"], 5.4)  # unknown field survives export
+
+    def test_updating_one_known_sensing_field_preserves_unknown_field_and_other_known_fields(self):
+        brew_id = self._importer_brew_med_ukjent_felt()
+
+        oppdatert = kbhbrew_storage.oppdater_brew_lag(brew_id, sensing={"judgment": "maybe"})
+
+        self.assertEqual(oppdatert["sensing"]["judgment"], "maybe")
+        self.assertEqual(oppdatert["sensing"]["notes"], "Opprinnelig smaksnotat")
+        exported = kbhbrew_storage.eksporter_kbhbrew(brew_id)
+        self.assertEqual(exported["brew"]["sensing"]["aromaNotes"], "Fruktig")
+
+    def test_updating_one_known_learning_field_preserves_unknown_field_and_other_known_fields(self):
+        brew_id = self._importer_brew_med_ukjent_felt()
+
+        oppdatert = kbhbrew_storage.oppdater_brew_lag(brew_id, learning={"nextTime": "Prøv lavere kokehastighet"})
+
+        self.assertEqual(oppdatert["learning"]["nextTime"], "Prøv lavere kokehastighet")
+        self.assertEqual(oppdatert["learning"]["whatWorked"], "Meskeprofil")
+        exported = kbhbrew_storage.eksporter_kbhbrew(brew_id)
+        self.assertEqual(exported["brew"]["learning"]["yeastPitchRateNotes"], "Dobbel pakke")
+
+    def test_two_sequential_updates_to_different_known_fields_both_survive(self):
+        # A single wholesale-replace bug would also show up as the FIRST
+        # update's known field getting lost on the SECOND update -- not
+        # only as unknown-field loss. Covers that failure mode too.
+        brew_id = self._importer_brew_med_ukjent_felt()
+
+        kbhbrew_storage.oppdater_brew_lag(brew_id, actuals={"fg": 1.010})
+        oppdatert = kbhbrew_storage.oppdater_brew_lag(brew_id, actuals={"volumeL": 21.0})
+
+        self.assertEqual(oppdatert["actuals"]["fg"], 1.010)
+        self.assertEqual(oppdatert["actuals"]["volumeL"], 21.0)
+        self.assertEqual(oppdatert["actuals"]["og"], 1.050)
+        exported = kbhbrew_storage.eksporter_kbhbrew(brew_id)
+        self.assertEqual(exported["brew"]["actuals"]["mashPh"], 5.4)
+
+
 class TestDemoModeGuardsWrites(_IsolertRecipeMappeTestCase):
     def test_opprett_og_lagre_ny_brew_is_a_noop_in_demo_mode(self):
         malt_db, humle_db, gjaer_db = _dbs()

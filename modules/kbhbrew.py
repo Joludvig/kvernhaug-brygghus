@@ -33,6 +33,7 @@ Owner-ratifiserte regler denne modulen håndhever (Section 8, issue #22):
   #5 Ingen V1 "actual process used"-felt.
 """
 import copy
+import re
 import uuid
 
 from modules.kbh_contract import recipe_to_kbhrecipe_payload
@@ -69,6 +70,16 @@ _KJENTE_LEARNING_FELT = frozenset({"whatWorked", "whatChanged", "nextTime"})
 
 _GYLDIGE_JUDGMENT_VERDIER = frozenset({"yes", "maybe", "no"})
 
+# Containernøkler for bevarte ukjente felt (Section 5.13/Section 8 #2) --
+# ÉN konstant per lag/nivå, brukt av BÅDE leseren (bygger containeren) og
+# skriveren (fletter den inn igjen), slik at navnet aldri kan drifte
+# mellom de to kodeveiene.
+_ACTUALS_PASSTHROUGH_NOKKEL = "_kbh_brew_actuals_passthrough"
+_SENSING_PASSTHROUGH_NOKKEL = "_kbh_brew_sensing_passthrough"
+_LEARNING_PASSTHROUGH_NOKKEL = "_kbh_brew_learning_passthrough"
+_BREW_PASSTHROUGH_NOKKEL = "_kbh_brew_passthrough"
+_ENVELOPE_PASSTHROUGH_NOKKEL = "_kbh_brew_envelope_passthrough"
+
 # Ratifisert Section 8 #3 -- disse skal ALDRI kunne nå .kbhbrew-wire,
 # uansett hva en (evt. hånd-redigert/fremmed) passthrough-dict inneholder
 # under et av disse navnene. Filtreres eksplisitt ved EKSPORT, uavhengig
@@ -94,8 +105,35 @@ def _ikke_tom_streng(v):
     return isinstance(v, str) and v.strip() != ""
 
 
+# Core V1 Section 5.16 -- actuals/sensing normalisering skal godta
+# "parseable numeric" verdier på SAMME måte som Web sin
+# _tallEllerUndefined() (`parseFloat`), ikke bare rene Python-tall.
+# Python sin egen float()/isdigit() godtar IKKE JS parseFloat sin
+# ledende-numerisk-prefiks-oppførsel ("1.05kg" -> 1.05), så dette
+# speiler JS-tallgrammatikken eksplisitt for reell kryss-app-paritet.
+_JS_PARSEFLOAT_PREFIKS_RE = re.compile(
+    r"^[+-]?(?:Infinity|\d+(?:\.\d*)?(?:[eE][+-]?\d+)?|\.\d+(?:[eE][+-]?\d+)?)"
+)
+
+
+def _js_parsefloat_prefiks(streng):
+    match = _JS_PARSEFLOAT_PREFIKS_RE.match(streng.strip())
+    if not match:
+        return None
+    try:
+        return float(match.group(0))
+    except ValueError:
+        return None
+
+
 def _tall_eller_none(v):
-    return v if _er_reelt_tall(v) else None
+    if _er_reelt_tall(v):
+        return v
+    if isinstance(v, str):
+        parsed = _js_parsefloat_prefiks(v)
+        if _er_reelt_tall(parsed):
+            return parsed
+    return None
 
 
 def _tekst_eller_none(v):
@@ -107,13 +145,41 @@ def _tekst_trimmet(v):
     return v.strip() if isinstance(v, str) else ""
 
 
-def _bygg_passthrough(kilde, kjente_felt):
+def _bygg_passthrough(kilde, kjente_felt, container_nokkel=None):
     """Fanger ethvert felt i `kilde` som IKKE er i `kjente_felt` inn i en
     ny, dyp-kopiert dict -- returnerer {} (aldri None) hvis ingenting er
-    ukjent, slik kalleren enkelt kan sjekke `if passthrough:`."""
+    ukjent, slik kalleren enkelt kan sjekke `if passthrough:`.
+
+    `container_nokkel`, hvis satt, gjør funksjonen trygg å kalle med et
+    `kilde` som SELV allerede bærer en tidligere bevart passthrough-
+    container under det navnet (Chief review-fiks, issue #24 runde 2):
+    dette skjer når modules/kbhbrew_storage.py::oppdater_brew_lag()
+    sprer {**forrige_lag, **endringer} FØR re-normalisering, samme
+    mønster som Web sin oppdaterBrygg()/_fangUkjenteFelt(). Uten dette
+    ville den gamle containeren blitt fanget som et bokstavelig,
+    dobbelt-nøstet felt i den NYE containeren i stedet for flatet ut --
+    og dermed mistet unknown-field-innholdet på første etterfølgende
+    lagoppdatering. Eksisterende containerinnhold flettes derfor inn
+    FØRST, deretter vinner ethvert felt som står direkte på `kilde`
+    (et kjent felt kalleren nettopp satte skal aldri tape mot en
+    utdatert passthrough-verdi med samme navn)."""
     if not isinstance(kilde, dict):
         return {}
-    return {k: copy.deepcopy(v) for k, v in kilde.items() if k not in kjente_felt}
+    ut = {}
+    if container_nokkel:
+        eksisterende = kilde.get(container_nokkel)
+        if isinstance(eksisterende, dict):
+            for k, v in eksisterende.items():
+                if k == container_nokkel or k in kjente_felt:
+                    continue
+                ut[k] = copy.deepcopy(v)
+    for k, v in kilde.items():
+        if container_nokkel and k == container_nokkel:
+            continue
+        if k in kjente_felt:
+            continue
+        ut[k] = copy.deepcopy(v)
+    return ut
 
 
 def _flett_inn_passthrough(payload, passthrough):
@@ -330,7 +396,7 @@ def _bygg_actuals_payload(actuals):
     notes = _tekst_eller_none(actuals.get("notes"))
     if notes is not None:
         ut["notes"] = notes
-    _flett_inn_passthrough(ut, actuals.get("_kbh_brew_actuals_passthrough"))
+    _flett_inn_passthrough(ut, actuals.get(_ACTUALS_PASSTHROUGH_NOKKEL))
     # Ratifisert forbud (Section 8 #3) -- håndheves UAVHENGIG av
     # ovenstående passthrough-fletting, som et eget, uavhengig vern
     # (samme "to uavhengige punkter"-prinsipp som Web sin
@@ -352,7 +418,7 @@ def _bygg_sensing_payload(sensing):
     notes = _tekst_eller_none(sensing.get("notes"))
     if notes is not None:
         ut["notes"] = notes
-    _flett_inn_passthrough(ut, sensing.get("_kbh_brew_sensing_passthrough"))
+    _flett_inn_passthrough(ut, sensing.get(_SENSING_PASSTHROUGH_NOKKEL))
     return ut
 
 
@@ -363,7 +429,7 @@ def _bygg_learning_payload(learning):
         v = _tekst_eller_none(learning.get(felt))
         if v is not None:
             ut[felt] = v
-    _flett_inn_passthrough(ut, learning.get("_kbh_brew_learning_passthrough"))
+    _flett_inn_passthrough(ut, learning.get(_LEARNING_PASSTHROUGH_NOKKEL))
     return ut
 
 
@@ -427,7 +493,7 @@ def brew_to_kbhbrew_payload(brew):
     if learning_payload:
         payload["learning"] = learning_payload
 
-    _flett_inn_passthrough(payload, brew.get("_kbh_brew_passthrough"))
+    _flett_inn_passthrough(payload, brew.get(_BREW_PASSTHROUGH_NOKKEL))
     return payload
 
 
@@ -447,7 +513,7 @@ def bygg_kbhbrew_konvolutt(brew, generert_tidspunkt):
         "generator": _GENERATOR,
         "brew": payload,
     }
-    _flett_inn_passthrough(envelope, brew.get("_kbh_brew_envelope_passthrough"))
+    _flett_inn_passthrough(envelope, brew.get(_ENVELOPE_PASSTHROUGH_NOKKEL))
     return envelope
 
 
@@ -467,7 +533,7 @@ def _parse_json(tekst):
         _feil(KATEGORI_INVALID_JSON, f"Filen kunne ikke leses som gyldig JSON: {e}")
 
 
-def _normaliser_actuals(raw):
+def normaliser_actuals_lag(raw):
     """Toleranse-normalisering (Section 5.16): kjente felt tallsjekkes/
     trimmes; alt annet havner i en per-lag passthrough-container.
     ALDRI en stille reject av hele brygget for et malformert enkeltfelt
@@ -475,7 +541,14 @@ def _normaliser_actuals(raw):
     _tallEllerUndefined()/_tekstEllerUndefined()). Et evt. `actual_abv`/
     `abv`/`actualAbv`-felt i filen fanges her SOM passthrough (bevart
     for lesing/rundtur), men kan ALDRI re-eksporteres -- se
-    FORBUDTE_ACTUALS_EKSPORTFELT i skriveren over."""
+    FORBUDTE_ACTUALS_EKSPORTFELT i skriveren over.
+
+    Offentlig (ikke `_`-prefikset): modules/kbhbrew_storage.py sin
+    oppdater_brew_lag() kaller denne på {**gjeldende_lag, **endringer}
+    for å flette en delvis oppdatering trygt inn i det eksisterende
+    lagrede laget FØR re-normalisering (samme "spre + re-normaliser"-
+    mønster som Web sin oppdaterBrygg()) -- se _bygg_passthrough()
+    sin `container_nokkel`-håndtering for hvorfor dette er trygt."""
     raw = raw if isinstance(raw, dict) else {}
     ut = {}
     for felt in ("og", "fg", "volumeL"):
@@ -485,40 +558,54 @@ def _normaliser_actuals(raw):
     notes = _tekst_eller_none(raw.get("notes"))
     if notes is not None:
         ut["notes"] = notes
-    passthrough = _bygg_passthrough(raw, _KJENTE_ACTUALS_FELT)
+    passthrough = _bygg_passthrough(raw, _KJENTE_ACTUALS_FELT, _ACTUALS_PASSTHROUGH_NOKKEL)
     if passthrough:
-        ut["_kbh_brew_actuals_passthrough"] = passthrough
+        ut[_ACTUALS_PASSTHROUGH_NOKKEL] = passthrough
     return ut
 
 
-def _normaliser_sensing(raw):
+def normaliser_sensing_lag(raw):
+    """Se normaliser_actuals_lag() -- samme toleranse-/passthrough-
+    prinsipp, offentlig av samme grunn (gjenbrukt av
+    modules/kbhbrew_storage.py::oppdater_brew_lag()).
+    `flavorProfile`-aksene tallnormaliseres per nøkkel (Section 5.16) --
+    en aksverdi som IKKE er et parseable tall droppes individuelt,
+    resten av profilen beholdes."""
     raw = raw if isinstance(raw, dict) else {}
     ut = {}
     judgment = raw.get("judgment")
     if judgment in _GYLDIGE_JUDGMENT_VERDIER:
         ut["judgment"] = judgment
     flavor_profile = raw.get("flavorProfile")
-    if isinstance(flavor_profile, dict) and flavor_profile:
-        ut["flavorProfile"] = copy.deepcopy(flavor_profile)
+    if isinstance(flavor_profile, dict):
+        fp = {}
+        for akse, v in flavor_profile.items():
+            n = _tall_eller_none(v)
+            if n is not None:
+                fp[akse] = n
+        if fp:
+            ut["flavorProfile"] = fp
     notes = _tekst_eller_none(raw.get("notes"))
     if notes is not None:
         ut["notes"] = notes
-    passthrough = _bygg_passthrough(raw, _KJENTE_SENSING_FELT)
+    passthrough = _bygg_passthrough(raw, _KJENTE_SENSING_FELT, _SENSING_PASSTHROUGH_NOKKEL)
     if passthrough:
-        ut["_kbh_brew_sensing_passthrough"] = passthrough
+        ut[_SENSING_PASSTHROUGH_NOKKEL] = passthrough
     return ut
 
 
-def _normaliser_learning(raw):
+def normaliser_learning_lag(raw):
+    """Se normaliser_actuals_lag() -- samme toleranse-/passthrough-
+    prinsipp, offentlig av samme grunn."""
     raw = raw if isinstance(raw, dict) else {}
     ut = {}
     for felt in ("whatWorked", "whatChanged", "nextTime"):
         v = _tekst_eller_none(raw.get(felt))
         if v is not None:
             ut[felt] = v
-    passthrough = _bygg_passthrough(raw, _KJENTE_LEARNING_FELT)
+    passthrough = _bygg_passthrough(raw, _KJENTE_LEARNING_FELT, _LEARNING_PASSTHROUGH_NOKKEL)
     if passthrough:
-        ut["_kbh_brew_learning_passthrough"] = passthrough
+        ut[_LEARNING_PASSTHROUGH_NOKKEL] = passthrough
     return ut
 
 
@@ -532,8 +619,8 @@ def parse_kbhbrew_json(tekst):
           "originBrewId", "parentBrewId", "status", "createdAt",
           "brewedAt", "snapshot",                  # uendret dyp kopi
           "actuals", "sensing", "learning",         # normalisert, se over
-          "_kbh_brew_passthrough": {...},           # kun hvis ikke-tom
-          "_kbh_brew_envelope_passthrough": {...},  # kun hvis ikke-tom
+          _BREW_PASSTHROUGH_NOKKEL: {...},           # kun hvis ikke-tom
+          _ENVELOPE_PASSTHROUGH_NOKKEL: {...},       # kun hvis ikke-tom
         }
 
     IKKE inkludert med vilje: `brewId`, `recipeId`. Import er "import
@@ -560,6 +647,16 @@ def parse_kbhbrew_json(tekst):
             KATEGORI_UNSUPPORTED_VERSION,
             f"Denne filen bruker .kbhbrew versjon {versjon!r}, som ikke støttes her (kun versjon 1).",
         )
+
+    # Core V1-skjemaet (core/kbhbrew_v1.schema.json "required") krever
+    # exportedAt/generator på konvoluttnivå, på linje med format/version/
+    # brew -- en fil som mangler dem er ikke en gyldig required V1-
+    # konvolutt, uavhengig av at selve brew-rekorden under kan se OK ut.
+    if not _ikke_tom_streng(parsed.get("exportedAt")):
+        _feil(KATEGORI_INVALID_ENVELOPE, "Filen mangler gyldig exportedAt i konvolutten.")
+
+    if not _ikke_tom_streng(parsed.get("generator")):
+        _feil(KATEGORI_INVALID_ENVELOPE, "Filen mangler gyldig generator i konvolutten.")
 
     brew_payload = parsed.get("brew")
     if not isinstance(brew_payload, dict):
@@ -595,17 +692,17 @@ def parse_kbhbrew_json(tekst):
         # samme "already effectively passthrough-safe" begrunnelse som
         # skriveren (Section 5.13).
         "snapshot": copy.deepcopy(snapshot),
-        "actuals": _normaliser_actuals(brew_payload.get("actuals")),
-        "sensing": _normaliser_sensing(brew_payload.get("sensing")),
-        "learning": _normaliser_learning(brew_payload.get("learning")),
+        "actuals": normaliser_actuals_lag(brew_payload.get("actuals")),
+        "sensing": normaliser_sensing_lag(brew_payload.get("sensing")),
+        "learning": normaliser_learning_lag(brew_payload.get("learning")),
     }
 
-    brew_passthrough = _bygg_passthrough(brew_payload, _KJENTE_BREW_FELT)
+    brew_passthrough = _bygg_passthrough(brew_payload, _KJENTE_BREW_FELT, _BREW_PASSTHROUGH_NOKKEL)
     if brew_passthrough:
-        native["_kbh_brew_passthrough"] = brew_passthrough
+        native[_BREW_PASSTHROUGH_NOKKEL] = brew_passthrough
 
-    envelope_passthrough = _bygg_passthrough(parsed, _KJENTE_ENVELOPE_FELT)
+    envelope_passthrough = _bygg_passthrough(parsed, _KJENTE_ENVELOPE_FELT, _ENVELOPE_PASSTHROUGH_NOKKEL)
     if envelope_passthrough:
-        native["_kbh_brew_envelope_passthrough"] = envelope_passthrough
+        native[_ENVELOPE_PASSTHROUGH_NOKKEL] = envelope_passthrough
 
     return native

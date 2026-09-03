@@ -35,6 +35,9 @@ from config import DEMO_MODE
 from modules.kbhbrew import (
     bygg_kbhbrew_konvolutt,
     bygg_ny_brew,
+    normaliser_actuals_lag,
+    normaliser_learning_lag,
+    normaliser_sensing_lag,
     parse_kbhbrew_json,
 )
 
@@ -208,19 +211,28 @@ def oppdater_brew_lag(brew_id, actuals=None, sensing=None, learning=None, status
     ingen kodevei som i det hele tatt kunne skrevet over det.
 
     Kun de lagene som faktisk sendes inn (ikke None) oppdateres; øvrige
-    lag beholder sin nåværende, lagrede verdi uendret. No-op (returnerer
-    None) i DEMO_MODE eller hvis `brew_id` ikke finnes lokalt fra før."""
+    lag beholder sin nåværende, lagrede verdi uendret. Et lag som
+    sendes inn FLETTES inn i -- ikke erstatter -- det eksisterende
+    lagrede laget (`{**gjeldende, **innsendt}`) FØR re-normalisering
+    (Chief review-fiks, issue #24 runde 2): et importert/tidligere
+    lagret brygg kan bære et ukjent Core V1-felt i sin passthrough-
+    container (Section 5.13/Section 8 #2), og et rått
+    `brew["actuals"] = actuals`-erstatt ville mistet BÅDE det ukjente
+    feltet og ethvert kjent felt kalleren ikke selv sendte inn denne
+    gangen -- samme "spre gammelt + nytt, normaliser på nytt"-prinsipp
+    som Web sin oppdaterBrygg(). No-op (returnerer None) i DEMO_MODE
+    eller hvis `brew_id` ikke finnes lokalt fra før."""
     if DEMO_MODE:
         return None
     brew = hent_brew(brew_id)
     if brew is None:
         return None
     if actuals is not None:
-        brew["actuals"] = copy.deepcopy(actuals)
+        brew["actuals"] = normaliser_actuals_lag({**(brew.get("actuals") or {}), **actuals})
     if sensing is not None:
-        brew["sensing"] = copy.deepcopy(sensing)
+        brew["sensing"] = normaliser_sensing_lag({**(brew.get("sensing") or {}), **sensing})
     if learning is not None:
-        brew["learning"] = copy.deepcopy(learning)
+        brew["learning"] = normaliser_learning_lag({**(brew.get("learning") or {}), **learning})
     if status is not None:
         brew["status"] = status
     if brewed_at is not None:

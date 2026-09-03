@@ -161,6 +161,37 @@ class TestInvalidFormatVersionRejected(unittest.TestCase):
             parse_kbhbrew_json(json.dumps(doc))
         self.assertEqual(ctx.exception.kategori, KATEGORI_INVALID_ENVELOPE)
 
+    def test_missing_exported_at_rejected(self):
+        # core/kbhbrew_v1.schema.json requires exportedAt on the envelope
+        # (Chief review, issue #24 round 2) -- a required V1 shape check,
+        # not just format/version/brew.
+        doc = copy.deepcopy(_load_fixture("minimal_v1"))
+        del doc["exportedAt"]
+        with self.assertRaises(UgyldigKbhbrewForImport) as ctx:
+            parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(ctx.exception.kategori, KATEGORI_INVALID_ENVELOPE)
+
+    def test_blank_exported_at_rejected(self):
+        doc = copy.deepcopy(_load_fixture("minimal_v1"))
+        doc["exportedAt"] = "   "
+        with self.assertRaises(UgyldigKbhbrewForImport) as ctx:
+            parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(ctx.exception.kategori, KATEGORI_INVALID_ENVELOPE)
+
+    def test_missing_generator_rejected(self):
+        doc = copy.deepcopy(_load_fixture("minimal_v1"))
+        del doc["generator"]
+        with self.assertRaises(UgyldigKbhbrewForImport) as ctx:
+            parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(ctx.exception.kategori, KATEGORI_INVALID_ENVELOPE)
+
+    def test_blank_generator_rejected(self):
+        doc = copy.deepcopy(_load_fixture("minimal_v1"))
+        doc["generator"] = ""
+        with self.assertRaises(UgyldigKbhbrewForImport) as ctx:
+            parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(ctx.exception.kategori, KATEGORI_INVALID_ENVELOPE)
+
 
 class TestRequiredIdentityAndSnapshotRulesEnforced(unittest.TestCase):
     def test_missing_origin_brew_id_rejected(self):
@@ -317,6 +348,51 @@ class TestForbiddenActualAbvNeverEmitted(unittest.TestCase):
         # appears on the wire -- only the ACTUALS layer must never carry
         # an abv-shaped key of any spelling.
         self.assertNotIn("abv", envelope["brew"]["actuals"])
+
+
+class TestNumericStringNormalizationMatchesWebContract(unittest.TestCase):
+    """Core V1 Section 5.16: actuals/sensing numeric-ish values are
+    coerced the way Web's `_tallEllerUndefined()` (`parseFloat`) does --
+    a parseable numeric string is accepted, not just a Python
+    int/float. Chief review, issue #24 round 2."""
+
+    def test_actuals_numeric_strings_are_coerced(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["actuals"]["og"] = "1.053"
+        doc["brew"]["actuals"]["fg"] = " 1.011 "
+        doc["brew"]["actuals"]["volumeL"] = "22.5"
+        native = parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(native["actuals"]["og"], 1.053)
+        self.assertEqual(native["actuals"]["fg"], 1.011)
+        self.assertEqual(native["actuals"]["volumeL"], 22.5)
+
+    def test_malformed_actuals_numeric_string_is_dropped_not_the_whole_brew(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["actuals"]["og"] = "ikke et tall"
+        native = parse_kbhbrew_json(json.dumps(doc))
+        self.assertNotIn("og", native["actuals"])
+        # Rest of the layer is unaffected by the one malformed field.
+        self.assertEqual(native["actuals"]["fg"], 1.01)
+
+    def test_sensing_flavor_profile_numeric_strings_are_coerced(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["sensing"]["flavorProfile"] = {"Maltfylde": "5.0", "Sitrus": "2"}
+        native = parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(native["sensing"]["flavorProfile"], {"Maltfylde": 5.0, "Sitrus": 2.0})
+
+    def test_sensing_flavor_profile_malformed_axis_is_dropped_not_the_whole_profile(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["sensing"]["flavorProfile"] = {"Maltfylde": 5.0, "Sitrus": "ikke et tall"}
+        native = parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(native["sensing"]["flavorProfile"], {"Maltfylde": 5.0})
+
+    def test_actuals_numeric_string_round_trips_through_writer_as_a_real_number(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["actuals"]["og"] = "1.053"
+        native = parse_kbhbrew_json(json.dumps(doc))
+        envelope = bygg_kbhbrew_konvolutt(native, "2026-03-09T00:00:00+00:00")
+        self.assertEqual(envelope["brew"]["actuals"]["og"], 1.053)
+        self.assertIsInstance(envelope["brew"]["actuals"]["og"], float)
 
 
 class TestNoV1ActualProcessFieldEmitted(unittest.TestCase):
