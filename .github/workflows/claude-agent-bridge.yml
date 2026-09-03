@@ -501,6 +501,100 @@ jobs:
           set -euo pipefail
           gh pr comment "${{ steps.signal.outputs.pr_number }}" --repo "$REPO" --body-file "$RUNNER_TEMP/chief_ready_comment.txt"
 
+      # Issue #40 -- deterministic retry wake-up. Root-cause evidence
+      # (PR #39, issue #38's E2E retry): the round-1 marker at 16:41:56Z
+      # correctly woke the Work task (Chief replied CHANGES_REQUESTED at
+      # 16:45:05Z), but the round-2 marker at 16:52:07Z -- posted only
+      # ~20s after Claude's own PR report comment, and only ~10.5
+      # minutes after the round-1 task invocation started -- produced no
+      # observed re-review. Whether the exact mechanism is Work-side
+      # event coalescing with the immediately preceding PR comment, or a
+      # per-PR cooldown after a recent task run, is NOT verifiable from
+      # this repo (Work's internal event/debounce behavior is an
+      # external SaaS configuration with no inspectable API here) -- see
+      # AGENT_WORKFLOW.md and .github/scripts/chief_retry_signal.py's
+      # module docstring. Both hypotheses are addressed the same way,
+      # without guessing which is correct: wait a fixed, generous window
+      # so a potential retry marker is temporally isolated from any
+      # other recent PR activity, then re-check live state.
+      #
+      # 900s (15 minutes) is chosen with a documented margin over the
+      # ~10.5-minute gap that failed in the PR #39 evidence above -- not
+      # a guess presented as verified fact. Acceptance criterion 4 (a
+      # real, controlled re-review E2E) is the actual confirmation this
+      # window is sufficient; that E2E happens live, outside this run's
+      # control, exactly like every other "cannot be proven except by a
+      # real Bridge run" limitation already noted elsewhere in
+      # AGENT_WORKFLOW.md.
+      #
+      # Only runs when THIS run's own signal step actually posted a
+      # fresh marker (steps.signal.outputs.post == 'true') -- a
+      # `duplicate=true` outcome means the marker predates this run, so
+      # any retry for it is that earlier run's own responsibility, not
+      # this one's.
+      - name: Wait for Chief reaction window (issue #40 deterministic retry)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true'
+        run: sleep 900
+
+      # Fresh live refetch after the wait -- never reuses anything
+      # cached from before the wait, same "Ordering / race safety"
+      # discipline as the original signal (AGENT_WORKFLOW.md). Also
+      # fetches PR reviews (not needed by the original signal), so
+      # chief_retry_signal.py can detect "Chief already reacted" and
+      # skip the retry as a no-op rather than posting redundant noise.
+      - name: Refetch live state for Chief-ready retry (issue #40)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true'
+        id: retry_state
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          set -euo pipefail
+          labels_json=$(gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]')
+          prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+            --json number,state,baseRefName,headRefOid,headRefName)
+          pr_number_for_lookup=$(echo "$prs_json" | jq -r '.[0].number // empty')
+          if [ -n "$pr_number_for_lookup" ]; then
+            comments_json=$(gh pr view "$pr_number_for_lookup" --repo "$REPO" --json comments -q '[.comments[].body]')
+            reviews_json=$(gh pr view "$pr_number_for_lookup" --repo "$REPO" --json reviews -q '.reviews')
+          else
+            comments_json='[]'
+            reviews_json='[]'
+          fi
+          jq -n --argjson issue_number "$ISSUE" \
+                --argjson issue_labels "$labels_json" \
+                --argjson prs "$prs_json" \
+                --argjson comments "$comments_json" \
+                --argjson reviews "$reviews_json" \
+                --arg branch "$BRANCH" \
+                --arg signaled_head_sha "${{ steps.signal.outputs.head_sha }}" \
+                '{issue_number:$issue_number, issue_labels:$issue_labels, prs:$prs, comments:$comments, reviews:$reviews, branch:$branch, signaled_head_sha:$signaled_head_sha}' \
+            > "$RUNNER_TEMP/chief_retry_state.json"
+
+      # Pure/testable decision -- see .github/scripts/chief_retry_signal.py
+      # and tests/test_agent_bridge_chief_retry_signal.py. Deliberately
+      # ALWAYS exits 0 (unlike chief_ready_signal.py's fail-closed exit
+      # 1) -- "no retry needed" is the expected, healthy outcome here
+      # (most commonly: Chief already reacted), not an anomaly worth a
+      # separate failure comment. See that module's docstring.
+      - name: Decide Chief-ready retry signal (issue #40)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true'
+        id: retry_signal
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/chief_retry_signal.py "$RUNNER_TEMP/chief_retry_comment.txt" \
+            < "$RUNNER_TEMP/chief_retry_state.json" >> "$GITHUB_OUTPUT"
+
+      # The one extra, isolated PR comment this retry mechanism exists
+      # to emit -- same reserved marker line as the original, posted as
+      # a NEW, temporally isolated comment so it registers as its own
+      # PR-activity event. At most once per (issue, head) -- see
+      # chief_retry_signal.py's idempotency reasoning.
+      - name: Post Chief-ready retry signal comment (issue #40)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true' && steps.retry_signal.outputs.post == 'true'
+        run: |
+          set -euo pipefail
+          gh pr comment "${{ steps.retry_signal.outputs.pr_number }}" --repo "$REPO" --body-file "$RUNNER_TEMP/chief_retry_comment.txt"
+
       # Failure semantics (issue #32, "Failure semantics"): if emission
       # fails AFTER status:review was already set (steps.promote.outcome
       # captures that independent of what fails later), do not roll the
