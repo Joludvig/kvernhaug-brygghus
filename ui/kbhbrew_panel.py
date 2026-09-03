@@ -8,7 +8,11 @@ merged/testede PRI 3B1-motoren (modules/kbhbrew.py) og lagringen
   1. render_kbhbrew_create_panel() -- kalles fra ui/brewday_panel.py.
      Fryser gjeldende oppskrift/utstyr/spådde verdier som et NYTT,
      historisk brygg -- KUN på eksplisitt knappeklikk, aldri bare fordi
-     Bryggdag-fanen rendres/rerendres.
+     Bryggdag-fanen rendres/rerendres. En input-sikkerhets-preflight
+     (Chief review, PR #30 blocker 3) nekter opprettelsen -- viser en
+     tydelig feil, skriver ingenting -- hvis utstyrsprofilen ikke er
+     bekreftet lagret, eller hvis oppskriften refererer en malt-/humle-/
+     gjær-ID som ikke finnes i gjeldende masterdata.
   2. render_kbhbrew_import_panel() -- kalles fra app.py under
      "🔧 Verktøy". Opplasting -> forhåndsvisning (parse_kbhbrew_json,
      skriver ingenting) -> eksplisitt "Importer brygg" (kbhbrew_storage.
@@ -28,7 +32,7 @@ import json
 import streamlit as st
 
 from config import DEMO_MODE
-from modules.equipment import last_equipment
+from modules.equipment import equipment_kilde_er_lagret, last_equipment
 from modules.kbh_contract import UgyldigOppskriftForEksport
 from modules.kbhbrew import UgyldigKbhbrewForImport, parse_kbhbrew_json
 from modules.kbhbrew_storage import (
@@ -41,6 +45,7 @@ from modules.kbhbrew_storage import (
 from modules.kbhbrew_ui import (
     bygg_brew_eksport_filnavn,
     bygg_predicted_fra_ctx,
+    manglende_ingrediens_ider,
     sorter_brews_for_eksport,
 )
 
@@ -76,17 +81,34 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
         "NYTT batch — flere reelle brygg fra samme oppskrift er normalt."
     )
     if st.button("▶️ Start nytt brygg", key="kbhbrew_start_ny_brew_btn"):
-        try:
-            brew = opprett_og_lagre_ny_brew(
-                ctx.get("recipe"), malt_database, humle_database, gjaer_database,
-                last_equipment(), bygg_predicted_fra_ctx(ctx),
-                recipe_id=st.session_state.get("_last_loaded_recipe_file"),
+        manglende = manglende_ingrediens_ider(
+            ctx.get("recipe"), malt_database, humle_database, gjaer_database,
+        )
+        if not equipment_kilde_er_lagret():
+            st.error(
+                "❌ Kunne ikke starte nytt brygg — fant ingen bekreftet utstyrsprofil "
+                "(mangler eller korrupt). En ubekreftet standardprofil skal aldri fryses "
+                "som om den var ditt faktiske utstyr. Gå til «🔧 Verktøy» → «⚙️ "
+                "Utstyrsprofil» og trykk «💾 Lagre utstyrsprofil» først."
             )
-        except UgyldigOppskriftForEksport as e:
-            st.error(f"❌ Kunne ikke starte nytt brygg — oppskriften er ikke gyldig for eksport: {e}")
+        elif manglende:
+            st.error(
+                "❌ Kunne ikke starte nytt brygg — følgende ingrediens-ID-er finnes ikke i "
+                "gjeldende masterdata og ville blitt hoppet stille over i snapshotet: "
+                f"{', '.join(manglende)}. Oppdater masterdata eller oppskriften og prøv igjen."
+            )
         else:
-            st.session_state[_AKTIV_BREW_ID_NOKKEL] = brew["brewId"]
-            st.toast(f"Nytt brygg startet: {brew['brewId']}", icon="🍺")
+            try:
+                brew = opprett_og_lagre_ny_brew(
+                    ctx.get("recipe"), malt_database, humle_database, gjaer_database,
+                    last_equipment(), bygg_predicted_fra_ctx(ctx),
+                    recipe_id=st.session_state.get("_last_loaded_recipe_file"),
+                )
+            except UgyldigOppskriftForEksport as e:
+                st.error(f"❌ Kunne ikke starte nytt brygg — oppskriften er ikke gyldig for eksport: {e}")
+            else:
+                st.session_state[_AKTIV_BREW_ID_NOKKEL] = brew["brewId"]
+                st.toast(f"Nytt brygg startet: {brew['brewId']}", icon="🍺")
 
     aktiv_brew_id = st.session_state.get(_AKTIV_BREW_ID_NOKKEL)
     if aktiv_brew_id:

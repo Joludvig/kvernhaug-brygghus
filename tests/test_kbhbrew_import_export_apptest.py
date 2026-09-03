@@ -217,7 +217,10 @@ class TestKbhbrewImportExportAppTest(unittest.TestCase):
         # modules/kbhbrew_ui.py sin egen testsuite
         # (tests/test_kbhbrew_ui_helpers.py). Her bekreftes kun at
         # panelet faktisk tilbyr akkurat det NYLIG importerte brygget.
-        self.assertEqual(selectorer[0].options, ["Eksporttest Ale — 2026-08-01 — active"])
+        self.assertEqual(
+            selectorer[0].options,
+            [f"Eksporttest Ale — 2026-08-01 — active · {lokal_brew_id[-8:]}"],
+        )
         self.assertEqual(selectorer[0].value, lokal_brew_id)
 
         # Trykk den EKTE eksportknappen -- bekreft at selve eksportkoden

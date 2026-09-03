@@ -9,6 +9,17 @@
 # bygger en recipe med efficiency=0 -- ugyldig for
 # modules/kbh_contract.py::recipe_to_kbhrecipe_payload() -- for å teste
 # feilstien uten å måtte konstruere en full ugyldig malt-/humle-liste.
+#
+# KVERNHAUG_TEST_KBHBREW_MISSING_MALT (satt til hva som helst ikke-tomt)
+# fjerner "weyermann_pilsner" fra den oppgitte malt-databasen -- for å
+# teste opprettelses-preflighten (Chief review, PR #30 blocker 3) uten
+# en egen full oppskrift.
+#
+# KVERNHAUG_EQUIPMENT_FILE styrer selve testisolasjonen for
+# modules/equipment.py (se _equipment_file() der) -- satt av
+# tests/test_kbhbrew_create_panel_apptest.py sin setUp() til enten en
+# gyldig midlertidig fil (happy path) eller en ikke-eksisterende/korrupt
+# sti (equipment-preflight-testene), ALDRI den ekte data/equipment.json.
 import os
 
 import streamlit as st
@@ -17,6 +28,8 @@ from modules.recipe import bygg_recipe_object
 from ui.kbhbrew_panel import render_kbhbrew_create_panel
 
 _MALT_DB = {"weyermann_pilsner": {"display_name": "Weyermann Pilsner", "ebc": 3.5, "potensiale": 1.037}}
+if os.environ.get("KVERNHAUG_TEST_KBHBREW_MISSING_MALT"):
+    _MALT_DB = {}
 _HUMLE_DB = {}
 _GJAER_DB = {"safale_us_05": {"display_name": "SafAle US-05", "attenuation": 0.75}}
 
