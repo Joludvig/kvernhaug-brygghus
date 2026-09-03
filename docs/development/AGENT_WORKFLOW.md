@@ -859,6 +859,26 @@ behavior. Regression coverage:
 checks for step ordering/gating, the `decide`/`verify` CLI-mode split,
 and the two failure-report steps' mutual exclusivity).
 
+**Round 2 (Chief review, PR #45): identity/Draft alone still don't
+prove it's the same head.** The fix above verified PR *identity*
+(number matches `before_pr_number`) and live `isDraft`, but never
+compared the fresh `headRefOid` against `before_head_sha` -- so a push
+(or any other head movement) between the "Capture pre-run PR state"
+step and "Refetch live state for Draft verification" could pass both
+checks while actually describing a **different** head than the one the
+prerequisite was supposed to cover. "Refetch live state for Draft
+verification" now also forwards `before_head_sha` (from the same
+pre-run capture) into the JSON `verifiser_draft` reads, and
+`verifiser_draft` requires the fresh `headRefOid` to equal it exactly
+for `status:changes-requested` -- rejecting fail-closed on either a
+mismatch or a missing head, on either side. `status:ready` behavior is
+unchanged (the check is skipped entirely, same as before). Regression
+coverage: `tests/test_agent_bridge_pr_draft_handoff.py` `test_7i`
+(missing `before_head_sha`), `test_7j` (changed head despite matching
+identity/Draft), `test_7k` (missing live `headRefOid`), the CLI-level
+`test_8g`/`test_8h`, and `test_6o` (workflow wiring: the refetch step
+actually forwards `before_head_sha`).
+
 **Fail-closed conditions (issue #44, acceptance criterion 3) --** the
 Draft -> Ready transition (step 5 above) is rejected, on a **fresh**
 refetch of live state, if **any** of the following hold (see
