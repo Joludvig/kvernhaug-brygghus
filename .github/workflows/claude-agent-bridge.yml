@@ -310,6 +310,13 @@ jobs:
       # re-fetches LIVE PR state (never the pre-run capture from "Capture
       # pre-run PR state") so the verification below is never fooled by a
       # stale/cached read.
+      #
+      # Chief review fix (PR #45, round 2): also forwards `before_head_sha`
+      # (from "Capture pre-run PR state") alongside the live `prs` fetch --
+      # identity/Draft alone don't prove the fresh refetch reflects the SAME
+      # head that was captured before this run started; a push between the
+      # pre-run capture and this refetch could otherwise pass the gate on a
+      # different head.
       - name: Refetch live state for Draft verification (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: draft_state
@@ -321,9 +328,10 @@ jobs:
             --json number,state,baseRefName,headRefOid,headRefName,isDraft)
           jq -n --arg trigger_label "$TRIGGER_LABEL" \
                 --arg before_pr_number "${{ steps.before.outputs.before_pr_number }}" \
+                --arg before_head_sha "${{ steps.before.outputs.before_head_sha }}" \
                 --argjson prs "$prs_json" \
                 --arg branch "$BRANCH" \
-                '{trigger_label:$trigger_label, before_pr_number:$before_pr_number, prs:$prs, branch:$branch}' \
+                '{trigger_label:$trigger_label, before_pr_number:$before_pr_number, before_head_sha:$before_head_sha, prs:$prs, branch:$branch}' \
             > "$RUNNER_TEMP/pr_draft_verify_state.json"
 
       # Chief review fix (PR #45): makes Draft a VERIFIED prerequisite for
@@ -337,7 +345,9 @@ jobs:
       # a proven already-Draft PR both remain non-alarming
       # "prerequisite satisfied" outcomes, exactly as before this fix --
       # only a genuinely unproven Draft state for a changes-requested round
-      # now blocks the run.
+      # now blocks the run. Round 2: also requires the fresh `headRefOid` to
+      # equal `before_head_sha` exactly -- a mismatched or missing head is
+      # rejected fail-closed the same way as a missing/ambiguous PR.
       - name: Verify PR Draft state before Claude run (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: draft_verify

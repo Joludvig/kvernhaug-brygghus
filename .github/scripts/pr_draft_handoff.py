@@ -67,9 +67,10 @@ Modusen `decide` er default og kan utelates (bakoverkompatibelt med
 eksisterende kall).
 
     echo '{"trigger_label": "status:changes-requested", "before_pr_number": "45",
-           "branch": "agent/issue-45",
+           "before_head_sha": "<40-char-sha>", "branch": "agent/issue-45",
            "prs": [{"number": 45, "state": "OPEN", "baseRefName": "master",
-                     "headRefName": "agent/issue-45", "isDraft": true}]}' \
+                     "headRefName": "agent/issue-45", "isDraft": true,
+                     "headRefOid": "<40-char-sha>"}]}' \
       | python3 .github/scripts/pr_draft_handoff.py verify
 Skriver GITHUB_OUTPUT-linjer (`draft_verified`, `pr_number` hvis kjent,
 `reason`) til stdout og begrunnelsen til stderr. Exit 0 hvis
@@ -131,18 +132,27 @@ def _apen_pr_pa_branch(prs, branch_navn):
     return kandidater[0]
 
 
-def verifiser_draft(*, trigger_label, before_pr_number, prs, branch_navn):
+def verifiser_draft(*, trigger_label, before_pr_number, before_head_sha, prs, branch_navn):
     """
     Returnerer (draft_verified: bool, pr_nummer: int|str|None, begrunnelse: str).
 
-    Chief-review-fiks (PR #45): FAIL-CLOSED motstykke til `vurder_draft`
-    over -- kjøres ETTER selve Draft-konverteringsforsøket, på et FERSKT
-    refetch av `prs` (ikke gjenbruk av pre-run-fangsten). Draft er kun en
-    verifisert forutsetning for `status:changes-requested`; for
+    Chief-review-fiks (PR #45, runde 1): FAIL-CLOSED motstykke til
+    `vurder_draft` over -- kjøres ETTER selve Draft-konverteringsforsøket, på
+    et FERSKT refetch av `prs` (ikke gjenbruk av pre-run-fangsten). Draft er
+    kun en verifisert forutsetning for `status:changes-requested`; for
     `status:ready` (som aldri går via Draft) er resultatet alltid et
     ikke-alarmerende "ikke påkrevd". `draft_verified=False` betyr en REELL
     avvisning -- se CLI-kontrakten i main() (exit 1, blokkerer "Run Claude
     Code" strukturelt, se moduldocstring).
+
+    Chief-review-fiks (PR #45, runde 2): identitets-/Draft-sjekkene alene
+    beviser fortsatt ikke at det er SAMME hode som ble fanget FØR denne
+    kjøringen startet -- en push (eller annen hode-bevegelse) mellom
+    pre-run-fangsten og dette ferske refetchet kunne bestå begge de
+    sjekkene på et ANNET hode. `before_head_sha` er derfor nå en likeverdig
+    forutsetning som `before_pr_number`: fersk `headRefOid` MÅ matche den
+    eksakt for `status:changes-requested`, ellers er verifiseringen
+    fail-closed (mismatch OG manglende hode begge avvises).
     """
     if trigger_label != "status:changes-requested":
         return True, None, (
@@ -150,11 +160,11 @@ def verifiser_draft(*, trigger_label, before_pr_number, prs, branch_navn):
             "Draft er ikke en forutsetning for denne runden."
         )
 
-    if not before_pr_number:
+    if not before_pr_number or not before_head_sha:
         return False, None, (
-            "Ingen PR-nummer fanget FØR denne kjøringen startet -- kan ikke "
-            "verifisere Draft-forutsetningen for changes-requested-runden "
-            "(fail-closed)."
+            "Manglende PR-nummer og/eller head-SHA fanget FØR denne kjøringen "
+            "startet -- kan ikke verifisere Draft-forutsetningen for "
+            "changes-requested-runden (fail-closed)."
         )
 
     pr = _apen_pr_pa_branch(prs, branch_navn)
@@ -171,6 +181,16 @@ def verifiser_draft(*, trigger_label, before_pr_number, prs, branch_navn):
             f"PR-identiteten endret seg (var #{before_pr_number}, er nå "
             f"#{pr_nummer}) ved fersk refetch -- kan ikke bekrefte at dette "
             "er samme PR som ble forsøkt satt i Draft (fail-closed)."
+        )
+
+    fersk_head = pr.get("headRefOid")
+    if fersk_head != before_head_sha:
+        return False, pr_nummer, (
+            f"PR #{pr_nummer} sitt hode har endret seg (var {before_head_sha!r}, "
+            f"er nå {fersk_head!r}) mellom pre-run-fangsten og dette ferske "
+            "refetchet -- kan ikke bekrefte at Draft-forutsetningen gjelder "
+            "nøyaktig det hodet som ble fanget FØR kjøringen startet "
+            "(fail-closed)."
         )
 
     if not pr.get("isDraft"):
@@ -217,6 +237,7 @@ def _kjor_verify():
     draft_verified, pr_nummer, begrunnelse = verifiser_draft(
         trigger_label=data.get("trigger_label") or "",
         before_pr_number=data.get("before_pr_number") or None,
+        before_head_sha=data.get("before_head_sha") or None,
         prs=data.get("prs"),
         branch_navn=data.get("branch"),
     )

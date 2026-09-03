@@ -29,8 +29,8 @@ Testene dekker:
      funksjonen som gjør Draft til en VERIFISERT forutsetning for
      `status:changes-requested`: status:ready og en bekreftet allerede-
      Draft PR er fortsatt ikke-alarmerende, men manglende/tvetydig PR,
-     feil PR-identitet, eller en PR som IKKE er Draft ved fersk refetch
-     gir en REELL avvisning,
+     feil PR-identitet, feil/manglende hode (runde 2), eller en PR som
+     IKKE er Draft ved fersk refetch gir en REELL avvisning,
   8. `verify`-CLI-modusen returnerer exit 1 på en reell avvisning og
      exit 0 ellers -- og workflowen kobler denne inn slik at "Run Claude
      Code" strukturelt ikke kan kjøre når verifiseringen feiler (fail-
@@ -140,15 +140,19 @@ class TestVerifiserDraft(unittest.TestCase):
     -- gjør Draft til en VERIFISERT forutsetning for
     status:changes-requested, på et FERSKT refetch (aldri pre-run-data)."""
 
+    _HEAD = "a" * 40
+    _ANNET_HEAD = "b" * 40
     _PR_DRAFT = {"number": 45, "state": "OPEN", "baseRefName": "master",
-                 "headRefName": "agent/issue-45", "isDraft": True}
+                 "headRefName": "agent/issue-45", "isDraft": True,
+                 "headRefOid": _HEAD}
     _PR_READY = {"number": 45, "state": "OPEN", "baseRefName": "master",
-                 "headRefName": "agent/issue-45", "isDraft": False}
+                 "headRefName": "agent/issue-45", "isDraft": False,
+                 "headRefOid": _HEAD}
 
     def test_7a_status_ready_er_alltid_verifisert_uten_pr(self):
         verified, pr_nummer, _ = _PDH.verifiser_draft(
             trigger_label="status:ready", before_pr_number=None,
-            prs=[], branch_navn="agent/issue-45",
+            before_head_sha=None, prs=[], branch_navn="agent/issue-45",
         )
         self.assertTrue(verified)
         self.assertIsNone(pr_nummer)
@@ -156,6 +160,7 @@ class TestVerifiserDraft(unittest.TestCase):
     def test_7b_manglende_before_pr_number_avvises(self):
         verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
             trigger_label="status:changes-requested", before_pr_number=None,
+            before_head_sha=self._HEAD,
             prs=[self._PR_DRAFT], branch_navn="agent/issue-45",
         )
         self.assertFalse(verified)
@@ -165,7 +170,7 @@ class TestVerifiserDraft(unittest.TestCase):
     def test_7c_ingen_apen_pr_pa_branch_avvises(self):
         verified, *_rest = _PDH.verifiser_draft(
             trigger_label="status:changes-requested", before_pr_number="45",
-            prs=[], branch_navn="agent/issue-45",
+            before_head_sha=self._HEAD, prs=[], branch_navn="agent/issue-45",
         )
         self.assertFalse(verified)
 
@@ -173,6 +178,7 @@ class TestVerifiserDraft(unittest.TestCase):
         annen_pr = dict(self._PR_DRAFT, number=99)
         verified, *_rest = _PDH.verifiser_draft(
             trigger_label="status:changes-requested", before_pr_number="45",
+            before_head_sha=self._HEAD,
             prs=[self._PR_DRAFT, annen_pr], branch_navn="agent/issue-45",
         )
         self.assertFalse(verified)
@@ -183,6 +189,7 @@ class TestVerifiserDraft(unittest.TestCase):
         # ikke bevist samme PR.
         verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
             trigger_label="status:changes-requested", before_pr_number="99",
+            before_head_sha=self._HEAD,
             prs=[self._PR_DRAFT], branch_navn="agent/issue-45",
         )
         self.assertFalse(verified)
@@ -194,6 +201,7 @@ class TestVerifiserDraft(unittest.TestCase):
         # kan aldri bestå verifiseringen for en changes-requested-runde.
         verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
             trigger_label="status:changes-requested", before_pr_number="45",
+            before_head_sha=self._HEAD,
             prs=[self._PR_READY], branch_navn="agent/issue-45",
         )
         self.assertFalse(verified)
@@ -203,6 +211,7 @@ class TestVerifiserDraft(unittest.TestCase):
     def test_7g_bekreftet_draft_godkjennes(self):
         verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
             trigger_label="status:changes-requested", before_pr_number="45",
+            before_head_sha=self._HEAD,
             prs=[self._PR_DRAFT], branch_navn="agent/issue-45",
         )
         self.assertTrue(verified)
@@ -212,9 +221,49 @@ class TestVerifiserDraft(unittest.TestCase):
     def test_7h_feil_branch_avvises(self):
         verified, *_rest = _PDH.verifiser_draft(
             trigger_label="status:changes-requested", before_pr_number="45",
+            before_head_sha=self._HEAD,
             prs=[self._PR_DRAFT], branch_navn="agent/issue-999",
         )
         self.assertFalse(verified)
+
+    # ─── (runde 2) fersk head MÅ matche before_head_sha eksakt ────────────
+
+    def test_7i_manglende_before_head_sha_avvises(self):
+        verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            before_head_sha=None,
+            prs=[self._PR_DRAFT], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+        self.assertIsNone(pr_nummer)
+        self.assertIn("kan ikke verifisere", begrunnelse.lower())
+
+    def test_7j_hode_endret_seg_avvises_selv_om_draft_og_identitet_stemmer(self):
+        # Selve blokkeren fra runde-2-reviewen: en PR som fortsatt er
+        # samme nummer OG Draft, men hvor headRefOid har beveget seg siden
+        # pre-run-fangsten, må IKKE bestå -- det er ikke bevist at
+        # forutsetningen gjelder DETTE hodet.
+        pr_med_nytt_hode = dict(self._PR_DRAFT, headRefOid=self._ANNET_HEAD)
+        verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            before_head_sha=self._HEAD,
+            prs=[pr_med_nytt_hode], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+        self.assertEqual(pr_nummer, 45)
+        self.assertIn("hode", begrunnelse.lower())
+
+    def test_7k_manglende_headrefoid_i_fersk_refetch_avvises(self):
+        pr_uten_head = dict(self._PR_DRAFT)
+        del pr_uten_head["headRefOid"]
+        verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            before_head_sha=self._HEAD,
+            prs=[pr_uten_head], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+        self.assertEqual(pr_nummer, 45)
+        self.assertIn("hode", begrunnelse.lower())
 
 
 class TestCliAlltidExitNull(unittest.TestCase):
@@ -288,9 +337,10 @@ class TestCliVerifyFailClosed(unittest.TestCase):
     def test_8b_bekreftet_draft_gir_exit_0(self):
         res = self._kjor_verify({
             "trigger_label": "status:changes-requested", "before_pr_number": "45",
-            "branch": "agent/issue-45",
+            "before_head_sha": "a" * 40, "branch": "agent/issue-45",
             "prs": [{"number": 45, "state": "OPEN", "baseRefName": "master",
-                      "headRefName": "agent/issue-45", "isDraft": True}],
+                      "headRefName": "agent/issue-45", "isDraft": True,
+                      "headRefOid": "a" * 40}],
         })
         self.assertEqual(res.returncode, 0)
         self.assertIn("draft_verified=true", res.stdout)
@@ -299,9 +349,10 @@ class TestCliVerifyFailClosed(unittest.TestCase):
     def test_8c_ikke_draft_gir_exit_1(self):
         res = self._kjor_verify({
             "trigger_label": "status:changes-requested", "before_pr_number": "45",
-            "branch": "agent/issue-45",
+            "before_head_sha": "a" * 40, "branch": "agent/issue-45",
             "prs": [{"number": 45, "state": "OPEN", "baseRefName": "master",
-                      "headRefName": "agent/issue-45", "isDraft": False}],
+                      "headRefName": "agent/issue-45", "isDraft": False,
+                      "headRefOid": "a" * 40}],
         })
         self.assertEqual(res.returncode, 1)
         self.assertIn("draft_verified=false", res.stdout)
@@ -309,7 +360,31 @@ class TestCliVerifyFailClosed(unittest.TestCase):
     def test_8d_manglende_pr_gir_exit_1(self):
         res = self._kjor_verify({
             "trigger_label": "status:changes-requested", "before_pr_number": "45",
-            "branch": "agent/issue-45", "prs": [],
+            "before_head_sha": "a" * 40, "branch": "agent/issue-45", "prs": [],
+        })
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("draft_verified=false", res.stdout)
+
+    def test_8g_hode_endret_seg_gir_exit_1(self):
+        # (runde 2) CLI-nivå-motstykke til test_7j: en push mellom pre-run-
+        # fangst og fersk refetch må feile lukket her også.
+        res = self._kjor_verify({
+            "trigger_label": "status:changes-requested", "before_pr_number": "45",
+            "before_head_sha": "a" * 40, "branch": "agent/issue-45",
+            "prs": [{"number": 45, "state": "OPEN", "baseRefName": "master",
+                      "headRefName": "agent/issue-45", "isDraft": True,
+                      "headRefOid": "b" * 40}],
+        })
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("draft_verified=false", res.stdout)
+
+    def test_8h_manglende_before_head_sha_gir_exit_1(self):
+        res = self._kjor_verify({
+            "trigger_label": "status:changes-requested", "before_pr_number": "45",
+            "branch": "agent/issue-45",
+            "prs": [{"number": 45, "state": "OPEN", "baseRefName": "master",
+                      "headRefName": "agent/issue-45", "isDraft": True,
+                      "headRefOid": "a" * 40}],
         })
         self.assertEqual(res.returncode, 1)
         self.assertIn("draft_verified=false", res.stdout)
@@ -373,6 +448,15 @@ class TestWorkflowKildetekst(unittest.TestCase):
         steg = self._finn_steg("Refetch live state for Draft verification (issue #44)")
         self.assertIn("isDraft", steg)
         self.assertIn("gh pr list", steg)
+
+    def test_6o_refetch_steget_videresender_before_head_sha(self):
+        # (Chief-review-fiks, PR #45, runde 2): verify-modus kan ikke
+        # håndheve hode-matchen uten at dette steget faktisk sender
+        # before_head_sha (fra "Capture pre-run PR state") inn i JSON-en
+        # verify-CLI-en leser fra stdin.
+        steg = self._finn_steg("Refetch live state for Draft verification (issue #44)")
+        self.assertIn("before_head_sha", steg)
+        self.assertIn("steps.before.outputs.before_head_sha", steg)
 
     def test_6l_run_claude_code_har_ingen_egen_success_override(self):
         # "Run Claude Code" sitt `if:` inneholder ingen success()/failure()/
