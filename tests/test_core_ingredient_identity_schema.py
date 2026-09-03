@@ -135,6 +135,48 @@ class TestGrandfatheredLegacyShapes(unittest.TestCase):
         self.assertTrue(_matches("legacyWebCustomIngredientId", example))
 
 
+class TestLegacyGrandfatheringIsBroadButBoundsTheBarePrefix(unittest.TestCase):
+    """Section 9's normative choice: broad prefix-family grandfathering
+    (any positive-length suffix), not an exact historical generator
+    shape -- but a bare prefix with no suffix at all is malformed, not a
+    wildcard match."""
+
+    def test_bare_custom_prefix_is_rejected(self):
+        self.assertFalse(_matches("legacyAppCustomIngredientId", "custom_"))
+        self.assertFalse(_matches("customIngredientId", "custom_"))
+
+    def test_bare_egen_prefix_is_rejected(self):
+        self.assertFalse(_matches("legacyWebCustomIngredientId", "egen_"))
+        self.assertFalse(_matches("customIngredientId", "egen_"))
+
+    def test_custom_suffix_shorter_than_todays_generator_is_still_accepted(self):
+        # Today's App generator always emits 12 hex chars
+        # (modules/pantry.py:296), but Section 9 grandfathers any
+        # positive hex length, not only that one length.
+        self.assertTrue(_matches("legacyAppCustomIngredientId", "custom_a"))
+
+    def test_custom_suffix_longer_than_todays_generator_is_still_accepted(self):
+        self.assertTrue(
+            _matches("legacyAppCustomIngredientId", "custom_" + "a1b2c3" * 10)
+        )
+
+    def test_custom_suffix_with_non_hex_characters_is_rejected(self):
+        # The App generator only ever emits lowercase hex
+        # (uuid.uuid4().hex); a non-hex suffix does not match the
+        # grandfathered App shape.
+        self.assertFalse(_matches("legacyAppCustomIngredientId", "custom_zzzz"))
+        self.assertFalse(_matches("legacyAppCustomIngredientId", "custom_ABCD"))
+
+    def test_egen_suffix_of_any_content_is_accepted(self):
+        # Web's egen_ family has produced more than one exact historical
+        # suffix shape (hyphenated UUID vs. underscore/timestamp) -- the
+        # contract grandfathers the family, not one exact shape.
+        self.assertTrue(_matches("legacyWebCustomIngredientId", "egen_x"))
+        self.assertTrue(
+            _matches("legacyWebCustomIngredientId", "egen_pantry_humle-anything")
+        )
+
+
 class TestCanonicalMasterIdsAgainstRealData(unittest.TestCase):
     def test_every_real_canonical_id_matches_canonical_pattern(self):
         for path in _MASTER_DATA_FILES:
