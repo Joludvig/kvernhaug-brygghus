@@ -518,25 +518,36 @@ code.
 
 - **Task name:** `Kvernhaug Chief Event Review` — a standalone Work
   task, separate from the existing hourly `Kvernhaug Approval Watch`.
-- **Trigger:** event-only, scoped to GitHub PR-comment activity in
-  `Joludvig/kvernhaug-brygghus` — it reacts to new PR comments in this
-  repository, not issue-label events (Work does not support those) and
-  not any other repository.
-- **What wakes it:** the exact, versioned marker posted by the
-  Chief-ready signal (issue #32, above):
+- **Trigger:** event-only, scoped to repository-scoped PR activity in
+  `Joludvig/kvernhaug-brygghus` as a candidate wake-up — not issue-label
+  events (Work does not support those) and not any other repository.
+  The triggering event itself supplies only the repository and a
+  candidate PR number; it does not need to be a PR comment, and
+  non-comment PR events (review, label, synchronize, etc.) are harmless
+  candidates, since the task never derives authorization from the event
+  payload — only from what it independently refetches, below.
+- **What wakes it:** the task refetches the candidate PR's **live**
+  top-level comments and derives authorization solely from that fetch —
+  exactly one applicable current-head marker must be discovered and
+  validated there:
   ```
   KBH_CHIEF_REVIEW_READY_V1 issue=<N> head=<40-char-lowercase-sha>
   ```
+  A candidate event with no such marker in the PR's live comments (e.g.
+  a non-comment PR event, or a comment that isn't this marker) is not an
+  error — it is simply not a review trigger, and the task takes no
+  action.
 - **The marker is wake-up only, never authoritative.** Exactly as
   stated above for the signal itself, the Work task must refetch
   **live** Issue/PR/base(`master`)/deterministic-branch
   (`agent/issue-<N>`)/current-head state **at least twice** before
-  taking any action: once on waking, to confirm the marker's `(issue,
-  head)` pair still reflects live reality, and again **immediately
-  before** any mutating action (posting the review, applying a
-  lifecycle label) — never acting on the marker's payload alone, and
-  never on a fetch that has gone stale between the wake-up and the
-  mutation.
+  taking any action: once on waking, to discover and validate the
+  exactly-one applicable marker from the PR's live top-level comments
+  and confirm its `(issue, head)` pair still reflects live reality, and
+  again **immediately before** any mutating action (posting the review,
+  applying a lifecycle label) — never acting on the triggering event's
+  payload alone, and never on a fetch that has gone stale between the
+  wake-up and the mutation.
 - **Idempotency:** a duplicate marker, or a review request for a head
   SHA the task has already reviewed, is a no-op — mirroring the
   idempotent handling of the marker itself on the repo side.
@@ -573,8 +584,10 @@ Claude-authored documentation PR this issue itself produces is the real
 end-to-end test: E2E success requires, in order, that the Bridge moves
 this issue to `status:review`; that it emits the real
 `KBH_CHIEF_REVIEW_READY_V1` marker for this PR's exact head SHA; that
-the Work task above refetches live state and submits a formal
-`APPROVE` review for that exact head; that this issue then moves to
+the Work task above wakes on that PR's activity, refetches live state,
+discovers and validates that exact marker from the PR's live top-level
+comments, and submits a formal `APPROVE` review for that exact head;
+that this issue then moves to
 `status:approved`; and that the owner receives a GO/NO-GO notification
 — with **no merge** at any point. Those outcomes are external
 GitHub/Work observations, not something this documentation itself can
