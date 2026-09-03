@@ -18,18 +18,30 @@ Testene dekker:
   3. en allerede-Draft PR er et idempotent no-op,
   4. en gyldig changes-requested-handoff mot en Ready (ikke-Draft) PR
      godkjennes,
-  5. CLI-en skriver alltid exit 0 (aldri fail-closed) -- Draft-
-     konvertering er et vekke-signal-hjelpemiddel, ikke en forutsetning
-     for at Claude skal få lov til å jobbe,
+  5. `decide`-CLI-en skriver alltid exit 0 (aldri fail-closed) -- selve
+     Draft-FORSØKET er et vekke-signal-hjelpemiddel, ikke i seg selv en
+     forutsetning for at Claude skal få lov til å jobbe,
   6. workflow-kildeteksten gater de nye stegene korrekt (kun etter
      "Capture pre-run PR state", før "Run Claude Code"; den faktiske
      mutasjonen skjer kun når `set_draft == 'true'`), og introduserer
-     ingen ny Claude-trigger-overflate eller merge/master-push.
+     ingen ny Claude-trigger-overflate eller merge/master-push,
+  7. (Chief-review-fiks, PR #45) `verifiser_draft` -- den nye FAIL-CLOSED
+     funksjonen som gjør Draft til en VERIFISERT forutsetning for
+     `status:changes-requested`: status:ready og en bekreftet allerede-
+     Draft PR er fortsatt ikke-alarmerende, men manglende/tvetydig PR,
+     feil PR-identitet, eller en PR som IKKE er Draft ved fersk refetch
+     gir en REELL avvisning,
+  8. `verify`-CLI-modusen returnerer exit 1 på en reell avvisning og
+     exit 0 ellers -- og workflowen kobler denne inn slik at "Run Claude
+     Code" strukturelt ikke kan kjøre når verifiseringen feiler (fail-
+     closed step-kjede, dedikert feil-rapport-steg, generisk feil-steg
+     ekskluderer denne saken eksplisitt).
 
 Ren stdlib-test, ingen GitHub-kall -- kjøres av den vanlige suiten
 (`py -3 -m unittest discover -s tests -b`).
 """
 import importlib.util
+import json
 import os
 import re
 import subprocess
@@ -123,15 +135,100 @@ class TestVurderDraft(unittest.TestCase):
         self.assertTrue(set_draft)
 
 
-class TestCliAlltidExitNull(unittest.TestCase):
-    """Samme filosofi som chief_retry_signal.py: et avvist/skippet
-    Draft-forsøk skal ALDRI feile prosessen -- kun exit 0."""
+class TestVerifiserDraft(unittest.TestCase):
+    """Chief-review-fiks (PR #45): FAIL-CLOSED motstykke til vurder_draft
+    -- gjør Draft til en VERIFISERT forutsetning for
+    status:changes-requested, på et FERSKT refetch (aldri pre-run-data)."""
 
-    def _kjor_cli(self, env_extra):
+    _PR_DRAFT = {"number": 45, "state": "OPEN", "baseRefName": "master",
+                 "headRefName": "agent/issue-45", "isDraft": True}
+    _PR_READY = {"number": 45, "state": "OPEN", "baseRefName": "master",
+                 "headRefName": "agent/issue-45", "isDraft": False}
+
+    def test_7a_status_ready_er_alltid_verifisert_uten_pr(self):
+        verified, pr_nummer, _ = _PDH.verifiser_draft(
+            trigger_label="status:ready", before_pr_number=None,
+            prs=[], branch_navn="agent/issue-45",
+        )
+        self.assertTrue(verified)
+        self.assertIsNone(pr_nummer)
+
+    def test_7b_manglende_before_pr_number_avvises(self):
+        verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number=None,
+            prs=[self._PR_DRAFT], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+        self.assertIsNone(pr_nummer)
+        self.assertIn("Kan ikke verifisere".lower(), begrunnelse.lower())
+
+    def test_7c_ingen_apen_pr_pa_branch_avvises(self):
+        verified, *_rest = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            prs=[], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+
+    def test_7d_tvetydig_flere_apne_prer_avvises(self):
+        annen_pr = dict(self._PR_DRAFT, number=99)
+        verified, *_rest = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            prs=[self._PR_DRAFT, annen_pr], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+
+    def test_7e_pr_nummer_endret_seg_avvises(self):
+        # Samme identitets-sjekk som pr_ready_handoff.py krever for AC#4:
+        # et HEAD/PR-nummer som ikke lenger matcher pre-run-fangsten er
+        # ikke bevist samme PR.
+        verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="99",
+            prs=[self._PR_DRAFT], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+        self.assertEqual(pr_nummer, 45)
+        self.assertIn("identitet", begrunnelse.lower())
+
+    def test_7f_pr_er_ikke_draft_ved_refetch_avvises(self):
+        # Nøyaktig blokkeren fra Chief-reviewen: en Ready (ikke-Draft) PR
+        # kan aldri bestå verifiseringen for en changes-requested-runde.
+        verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            prs=[self._PR_READY], branch_navn="agent/issue-45",
+        )
+        self.assertFalse(verified)
+        self.assertEqual(pr_nummer, 45)
+        self.assertIn("IKKE Draft", begrunnelse)
+
+    def test_7g_bekreftet_draft_godkjennes(self):
+        verified, pr_nummer, begrunnelse = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            prs=[self._PR_DRAFT], branch_navn="agent/issue-45",
+        )
+        self.assertTrue(verified)
+        self.assertEqual(pr_nummer, 45)
+        self.assertIn("Draft", begrunnelse)
+
+    def test_7h_feil_branch_avvises(self):
+        verified, *_rest = _PDH.verifiser_draft(
+            trigger_label="status:changes-requested", before_pr_number="45",
+            prs=[self._PR_DRAFT], branch_navn="agent/issue-999",
+        )
+        self.assertFalse(verified)
+
+
+class TestCliAlltidExitNull(unittest.TestCase):
+    """`decide`-modus (default): samme filosofi som chief_retry_signal.py
+    -- et avvist/skippet Draft-FORSØK skal ALDRI feile prosessen alene --
+    kun exit 0. (Chief-review-fiks, PR #45: den fail-closed forutsetnings-
+    HÅNDHEVINGEN skjer i `verify`-modus, se TestCliVerifyFailClosed under,
+    ikke her.)"""
+
+    def _kjor_cli(self, env_extra, argv_ekstra=()):
         env = dict(os.environ)
         env.update(env_extra)
         return subprocess.run(
-            [sys.executable, _SCRIPT], input="", capture_output=True, text=True, env=env,
+            [sys.executable, _SCRIPT, *argv_ekstra], input="", capture_output=True, text=True, env=env,
         )
 
     def test_5a_status_ready_gir_exit_0_og_set_draft_false(self):
@@ -157,6 +254,83 @@ class TestCliAlltidExitNull(unittest.TestCase):
         self.assertEqual(res.returncode, 0)
         self.assertIn("set_draft=false", res.stdout)
 
+    def test_5d_eksplisitt_decide_argument_gir_samme_resultat_som_default(self):
+        uten_arg = self._kjor_cli({
+            "TRIGGER_LABEL": "status:changes-requested", "BEFORE_PR_NUMBER": "45",
+            "BEFORE_HEAD_SHA": "a" * 40, "BEFORE_PR_IS_DRAFT": "false",
+        })
+        med_arg = self._kjor_cli({
+            "TRIGGER_LABEL": "status:changes-requested", "BEFORE_PR_NUMBER": "45",
+            "BEFORE_HEAD_SHA": "a" * 40, "BEFORE_PR_IS_DRAFT": "false",
+        }, argv_ekstra=("decide",))
+        self.assertEqual(uten_arg.returncode, med_arg.returncode)
+        self.assertEqual(uten_arg.stdout, med_arg.stdout)
+
+
+class TestCliVerifyFailClosed(unittest.TestCase):
+    """Chief-review-fiks (PR #45): `verify`-CLI-modusen -- fail-closed,
+    samme exit-kode-kontrakt som chief_ready_signal.py/pr_ready_handoff.py
+    (exit 1 på reell avvisning, exit 0 ellers), slik at det tilhørende
+    workflow-steget selv feiler og "Run Claude Code" strukturelt aldri
+    kjører (se TestWorkflowKildetekst under for kjedingen)."""
+
+    def _kjor_verify(self, data):
+        return subprocess.run(
+            [sys.executable, _SCRIPT, "verify"],
+            input=json.dumps(data), capture_output=True, text=True,
+        )
+
+    def test_8a_status_ready_gir_exit_0(self):
+        res = self._kjor_verify({"trigger_label": "status:ready"})
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("draft_verified=true", res.stdout)
+
+    def test_8b_bekreftet_draft_gir_exit_0(self):
+        res = self._kjor_verify({
+            "trigger_label": "status:changes-requested", "before_pr_number": "45",
+            "branch": "agent/issue-45",
+            "prs": [{"number": 45, "state": "OPEN", "baseRefName": "master",
+                      "headRefName": "agent/issue-45", "isDraft": True}],
+        })
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("draft_verified=true", res.stdout)
+        self.assertIn("pr_number=45", res.stdout)
+
+    def test_8c_ikke_draft_gir_exit_1(self):
+        res = self._kjor_verify({
+            "trigger_label": "status:changes-requested", "before_pr_number": "45",
+            "branch": "agent/issue-45",
+            "prs": [{"number": 45, "state": "OPEN", "baseRefName": "master",
+                      "headRefName": "agent/issue-45", "isDraft": False}],
+        })
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("draft_verified=false", res.stdout)
+
+    def test_8d_manglende_pr_gir_exit_1(self):
+        res = self._kjor_verify({
+            "trigger_label": "status:changes-requested", "before_pr_number": "45",
+            "branch": "agent/issue-45", "prs": [],
+        })
+        self.assertEqual(res.returncode, 1)
+        self.assertIn("draft_verified=false", res.stdout)
+
+    def test_8e_tom_stdin_gir_exit_0_status_ready_default(self):
+        # Manglende trigger_label i tom/ugyldig JSON tolkes som "" -- ikke
+        # status:changes-requested -- så ingen forutsetning gjelder.
+        res = subprocess.run(
+            [sys.executable, _SCRIPT, "verify"], input="", capture_output=True, text=True,
+        )
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("draft_verified=true", res.stdout)
+
+    def test_8f_ugyldig_json_gir_exit_0_uten_krasj(self):
+        res = subprocess.run(
+            [sys.executable, _SCRIPT, "verify"], input="{ikke gyldig json",
+            capture_output=True, text=True,
+        )
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("draft_verified=true", res.stdout)
+
 
 class TestWorkflowKildetekst(unittest.TestCase):
     """Inspiserer selve workflow-KILDETEKSTEN -- samme stdlib-only
@@ -178,10 +352,47 @@ class TestWorkflowKildetekst(unittest.TestCase):
         pos_before = self.tekst.index("Capture pre-run PR state")
         pos_decide = self.tekst.index("Decide PR Draft handoff (issue #44)")
         pos_convert = self.tekst.index("Convert PR to Draft for changes-requested handoff (issue #44)")
+        pos_state = self.tekst.index("Refetch live state for Draft verification (issue #44)")
+        pos_verify = self.tekst.index("Verify PR Draft state before Claude run (issue #44)")
         pos_claude = self.tekst.index("- name: Run Claude Code")
         self.assertLess(pos_before, pos_decide)
         self.assertLess(pos_decide, pos_convert)
-        self.assertLess(pos_convert, pos_claude)
+        self.assertLess(pos_convert, pos_state)
+        self.assertLess(pos_state, pos_verify)
+        self.assertLess(pos_verify, pos_claude)
+
+    def test_6i_decide_steget_bruker_decide_modus(self):
+        steg = self._finn_steg("Decide PR Draft handoff (issue #44)")
+        self.assertIn("pr_draft_handoff.py decide", steg)
+
+    def test_6j_verify_steget_bruker_verify_modus_og_ferskt_refetch(self):
+        steg = self._finn_steg("Verify PR Draft state before Claude run (issue #44)")
+        self.assertIn("pr_draft_handoff.py verify", steg)
+
+    def test_6k_refetch_steget_henter_isdraft_live_ikke_fra_capture(self):
+        steg = self._finn_steg("Refetch live state for Draft verification (issue #44)")
+        self.assertIn("isDraft", steg)
+        self.assertIn("gh pr list", steg)
+
+    def test_6l_run_claude_code_har_ingen_egen_success_override(self):
+        # "Run Claude Code" sitt `if:` inneholder ingen success()/failure()/
+        # always()-kall, så GitHub Actions prepender implisitt success() --
+        # et feilende "Verify PR Draft state"-steg stopper jobben FØR dette
+        # steget i det hele tatt evalueres. Denne testen dokumenterer/låser
+        # den forutsetningen i kildeteksten.
+        steg = self._finn_steg("Run Claude Code")
+        if_linje = next(linje for linje in steg.splitlines() if linje.strip().startswith("if:"))
+        for funksjon in ("success(", "failure(", "always(", "cancelled("):
+            self.assertNotIn(funksjon, if_linje)
+
+    def test_6m_dedikert_feilrapport_for_draft_verify(self):
+        steg = self._finn_steg("Report Draft-verification failure — Claude did not run this round (issue #44)")
+        self.assertIn("steps.draft_verify.outcome == 'failure'", steg)
+        self.assertIn("failure()", steg)
+
+    def test_6n_generisk_feilsteg_ekskluderer_draft_verify_avvisning(self):
+        steg = self._finn_steg("Report failure — leave at status:working for manual follow-up")
+        self.assertIn("steps.draft_verify.outcome != 'failure'", steg)
 
     def test_6b_convert_steget_krever_set_draft_true(self):
         steg = self._finn_steg("Convert PR to Draft for changes-requested handoff (issue #44)")

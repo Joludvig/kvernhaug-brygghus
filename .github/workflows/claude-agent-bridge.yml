@@ -269,11 +269,14 @@ jobs:
       # for the full design). Uses the SAME pre-run PR state the step
       # above just captured -- no extra GitHub call. Decision is
       # pure/testable: .github/scripts/pr_draft_handoff.py,
-      # tests/test_agent_bridge_pr_draft_handoff.py. Deliberately
-      # NON-alarming (always exit 0) -- a missed/skipped Draft transition
-      # never blocks Claude's run, it only affects the wake-signal's
-      # fidelity. `TRIGGER_LABEL` is already a job-level env var (see the
-      # `execute` job's `env:` block above).
+      # tests/test_agent_bridge_pr_draft_handoff.py. This decision alone
+      # is deliberately NON-alarming (always exit 0) -- a missed/skipped
+      # Draft *attempt* never blocks Claude's run by itself. `TRIGGER_LABEL`
+      # is already a job-level env var (see the `execute` job's `env:`
+      # block above). Chief review fix (PR #45): that non-alarming attempt
+      # is NOT the whole story any more -- see "Verify PR Draft state
+      # before Claude run" below, which turns Draft into a VERIFIED,
+      # fail-closed prerequisite for `status:changes-requested`.
       - name: Decide PR Draft handoff (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: draft_decide
@@ -283,7 +286,7 @@ jobs:
           BEFORE_PR_IS_DRAFT: ${{ steps.before.outputs.before_pr_is_draft }}
         run: |
           set -euo pipefail
-          python3 .github/scripts/pr_draft_handoff.py >> "$GITHUB_OUTPUT"
+          python3 .github/scripts/pr_draft_handoff.py decide >> "$GITHUB_OUTPUT"
 
       # The actual mutation -- only for a genuine status:changes-requested
       # handoff onto an existing, non-Draft PR (see pr_draft_handoff.py
@@ -296,6 +299,52 @@ jobs:
         run: |
           set -euo pipefail
           gh pr ready "${{ steps.draft_decide.outputs.pr_number }}" --repo "$REPO" --undo
+
+      # Chief review fix (PR #45, blocking finding): the attempt above was
+      # fail-OPEN -- if the pre-run PR lookup was empty, ambiguous, stale,
+      # or couldn't prove `isDraft`, the run continued anyway, Claude could
+      # produce a new head, and the round could finish with the PR still
+      # Ready; `pr_ready_handoff.py` then reads that as a harmless
+      # `already_ready` no-op and never emits a `ready_for_review` event --
+      # exactly the missed re-review issue #44 exists to prevent. This step
+      # re-fetches LIVE PR state (never the pre-run capture from "Capture
+      # pre-run PR state") so the verification below is never fooled by a
+      # stale/cached read.
+      - name: Refetch live state for Draft verification (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: draft_state
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          set -euo pipefail
+          prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+            --json number,state,baseRefName,headRefOid,headRefName,isDraft)
+          jq -n --arg trigger_label "$TRIGGER_LABEL" \
+                --arg before_pr_number "${{ steps.before.outputs.before_pr_number }}" \
+                --argjson prs "$prs_json" \
+                --arg branch "$BRANCH" \
+                '{trigger_label:$trigger_label, before_pr_number:$before_pr_number, prs:$prs, branch:$branch}' \
+            > "$RUNNER_TEMP/pr_draft_verify_state.json"
+
+      # Chief review fix (PR #45): makes Draft a VERIFIED prerequisite for
+      # `status:changes-requested` -- pure/testable decision in
+      # .github/scripts/pr_draft_handoff.py (`verifiser_draft`),
+      # tests/test_agent_bridge_pr_draft_handoff.py. Fail-closed exit 1 on
+      # a genuine rejection (same exit-code contract as
+      # chief_ready_signal.py/pr_ready_handoff.py) -- which, by GitHub
+      # Actions' default step-failure behavior, stops the job here and
+      # skips "Run Claude Code" entirely. `status:ready` (never Draft) and
+      # a proven already-Draft PR both remain non-alarming
+      # "prerequisite satisfied" outcomes, exactly as before this fix --
+      # only a genuinely unproven Draft state for a changes-requested round
+      # now blocks the run.
+      - name: Verify PR Draft state before Claude run (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: draft_verify
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/pr_draft_handoff.py verify \
+            < "$RUNNER_TEMP/pr_draft_verify_state.json" >> "$GITHUB_OUTPUT"
 
       # V1.2 (issue #12): the first real E2E run (issue #11) finished
       # `conclusion: success` with `permission_denials_count: 14` and
@@ -647,6 +696,19 @@ jobs:
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE reached \`status:review\` and the Chief-ready marker was posted, but transitioning the PR to Ready for review failed -- see this workflow run's logs. The Issue is left at \`status:review\` (not rolled back) and nothing was merged; the hourly Chief watch (and, for a first-round PR, the existing \`opened\`-event wake) remain the fallback paths if this transition was missed."
 
+      # Chief review fix (PR #45): dedicated failure report for the NEW
+      # pre-Claude Draft-verification gate, scoped specifically to
+      # `steps.draft_verify.outcome == 'failure'` so it is never
+      # misattributed to the generic failure step below (which would
+      # otherwise also match, since `steps.promote` never even runs when
+      # this gate fails before Claude does). Claude never ran this round --
+      # the Issue is simply left at `status:working`, same state it was
+      # already in, so there is nothing to roll back.
+      - name: Report Draft-verification failure — Claude did not run this round (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.draft_verify.outcome == 'failure'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: this \`status:changes-requested\` run could not verify the PR was actually in Draft state before starting Claude, so Claude was NOT run this round (issue #44: Draft is a verified, fail-closed prerequisite, not a best-effort attempt) -- see this workflow run's logs for the exact reason. Issue left at \`status:working\`; check the PR's live state, then either fix and re-trigger manually, or re-apply \`status:changes-requested\` once resolved."
+
       # V1.2 (issue #12): the case that was missing entirely before this
       # fix -- Claude's own step reported success, but the deliverable
       # gate above says otherwise. Deliberately does NOT invent a new
@@ -666,8 +728,10 @@ jobs:
       # more accurate failure step above ("... issue stays at
       # status:review"), since this generic message's claim that the
       # Issue is "left at status:working" would be WRONG once
-      # status:review has actually been reached.
+      # status:review has actually been reached. Issue #44 (PR #45):
+      # also excludes `steps.draft_verify.outcome == 'failure'`, which
+      # has its own dedicated, more accurate report step above.
       - name: Report failure — leave at status:working for manual follow-up
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success'
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success' && steps.draft_verify.outcome != 'failure'
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted. Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."

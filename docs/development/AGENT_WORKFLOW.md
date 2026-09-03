@@ -757,9 +757,12 @@ family instead of trying a third comment-based variant: the PR's own
    already captured (no extra GitHub call): only for a
    `status:changes-requested` trigger, only when an existing PR was
    found, and only when it isn't already Draft (idempotent no-op
-   otherwise). This decision is deliberately **never alarming** -- it
-   always exits 0, because a missed/skipped Draft conversion must never
-   block Claude's actual fix work.
+   otherwise). This *attempt* decision alone is deliberately never
+   alarming -- it always exits 0, because a missed/skipped Draft
+   conversion attempt must never all by itself block Claude's actual fix
+   work. **Immediately after the attempt, a second, FAIL-CLOSED step
+   verifies the outcome** -- see "Draft is a verified prerequisite, not
+   a best-effort attempt (Chief review, PR #45)" below.
 4. Claude fixes the same deterministic branch/PR exactly as before (no
    change to "Run Claude Code" or its `--allowedTools`) and the issue
    returns to `status:review` exactly as before (deliverable gate,
@@ -798,6 +801,63 @@ runs identically on **every** successful round, round 1 included, but
 finds `isDraft == false` already and treats that as a non-alarming
 `already_ready` no-op -- no special-casing is needed to keep round 1
 safe, and no accidental Ready->Ready mutation occurs.
+
+**Draft is a verified prerequisite, not a best-effort attempt (Chief
+review, PR #45):** the first version of step 3 above stopped at the
+attempt -- `pr_draft_handoff.py`'s `vurder_draft` deliberately exits 0
+on every rejection (empty pre-run PR state, ambiguous lookup, already
+Draft, …), and "Run Claude Code" was never gated on the outcome. Chief's
+review of PR #45 found this fail-**open**: if the pre-run PR lookup was
+empty, ambiguous, stale, or simply couldn't prove `isDraft`, the run
+still continued, Claude could still push a new head, and the round
+could still finish with the PR **still Ready** -- at which point
+`pr_ready_handoff.py` reads that as the harmless `already_ready`
+no-op it's designed to be for round 1, and never emits a
+`ready_for_review` event at all. That is exactly the missed re-review
+issue #44 exists to prevent, just relocated one step earlier.
+
+**The fix:** two new workflow steps run between "Convert PR to Draft
+for changes-requested handoff" and "Run Claude Code":
+
+1. **"Refetch live state for Draft verification"** re-fetches the PR's
+   live `number`/`state`/`baseRefName`/`headRefName`/`isDraft` for the
+   issue's deterministic branch -- never the pre-run capture from
+   "Capture pre-run PR state", which by this point may already be
+   stale (the conversion attempt itself just ran).
+2. **"Verify PR Draft state before Claude run"** calls the new pure
+   function `verifiser_draft` (same module, `pr_draft_handoff.py`,
+   unit-tested alongside `vurder_draft`) on that fresh refetch. Unlike
+   `vurder_draft`, this is **fail-closed**: it exits 0 only when Draft
+   is not required at all (`status:ready`) or is positively confirmed
+   -- exactly one open PR against `master` on the deterministic branch,
+   whose number matches `before_pr_number` (the same identity check
+   `pr_ready_handoff.py` already applies for AC#4, so a same-branch PR
+   swap can't be mistaken for the original), **and** whose live
+   `isDraft` is `true`. Any other outcome -- missing/ambiguous PR, an
+   identity mismatch, or `isDraft == false` -- exits 1.
+
+Because this step's `if:` condition contains no `success()`/`failure()`/
+`always()` call, GitHub Actions implicitly requires the job to still be
+successful for it to run at all, and its own non-zero exit in turn
+fails the job for every step after it that doesn't opt back in with one
+of those functions -- which includes "Run Claude Code". **A
+`status:changes-requested` round whose Draft state cannot be positively
+verified on a fresh refetch therefore never invokes Claude at all**,
+closing the fail-open gap structurally rather than relying on the
+decision function's caller to remember to check an output. A dedicated
+"Report Draft-verification failure -- Claude did not run this round"
+step (gated on `steps.draft_verify.outcome == 'failure'`) posts a clear
+comment and leaves the Issue at `status:working`, exactly as it already
+was; the existing generic "Report failure" step is scoped to exclude
+this case (`steps.draft_verify.outcome != 'failure'`) so the two never
+double-report the same failure. `status:ready` and an already-verified
+Draft PR remain exactly as non-alarming as before this fix -- only a
+genuinely unproven Draft state for a changes-requested round is new
+behavior. Regression coverage:
+`tests/test_agent_bridge_pr_draft_handoff.py` (`TestVerifiserDraft`,
+`TestCliVerifyFailClosed`, and the extended `TestWorkflowKildetekst`
+checks for step ordering/gating, the `decide`/`verify` CLI-mode split,
+and the two failure-report steps' mutual exclusivity).
 
 **Fail-closed conditions (issue #44, acceptance criterion 3) --** the
 Draft -> Ready transition (step 5 above) is rejected, on a **fresh**
