@@ -29,8 +29,12 @@ Ren stdlib-test, ingen GitHub-kall, ingen `jq`-avhengighet -- kjøres av
 den vanlige suiten (`py -3 -m unittest discover -s tests -b`).
 """
 import importlib.util
+import json
 import os
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -290,6 +294,91 @@ class TestVurderSignal(unittest.TestCase):
         self.assertFalse(duplicate)
         self.assertEqual(head_sha, _HEAD_B)
         self.assertIn(_CRS.bygg_marker(32, _HEAD_B), kommentar)
+
+
+class TestCliExitKode(unittest.TestCase):
+    """Chief review (PR #34): CLI-kontrakten for exit-koden -- se
+    moduldocstringens 'EXIT-KODE' og main()s kommentarer. Kjører selve
+    scriptet som subprocess (samme mønster som CLI-seksjonen i
+    test_agent_bridge_deliverable_guard.py), slik at det er selve
+    prosessens exit-status og fil-sideeffekt som testes -- ikke bare
+    vurder_signal()s returverdier, som resten av denne suiten allerede
+    dekker.
+
+    Dette er den konkrete rettelsen for Chief-blokkeren på PR #34: uten
+    denne, kunne 'Decide Chief-ready signal'-workflow-steget lykkes
+    (exit 0) selv når live-tilstanden ikke lenger tilfredsstilte
+    signal-kontrakten, slik at jobben ble grønn uten både markør og
+    feilrapport."""
+
+    def _kjor_cli(self, stdin_data, output_path):
+        return subprocess.run(
+            [sys.executable, _SCRIPT, output_path],
+            input=json.dumps(stdin_data),
+            capture_output=True, text=True,
+        )
+
+    def test_11_ugyldig_live_tilstand_gir_ikke_null_exit_og_ingen_markor(self):
+        # Ambiguøs/ugyldig live-tilstand (issuen har rukket å bevege seg
+        # bort fra eksklusivt status:review ved refetch) -- fail-closed
+        # AVVISNING, ikke et duplikat. Skal nå feile prosessen.
+        with tempfile.TemporaryDirectory() as d:
+            output_path = os.path.join(d, "comment.txt")
+            res = self._kjor_cli(
+                {
+                    "issue_number": 32,
+                    "issue_labels": ["agent:claude", "status:working"],
+                    "prs": [_pr()],
+                    "branch": "agent/issue-32",
+                    "comments": [],
+                },
+                output_path,
+            )
+            self.assertNotEqual(res.returncode, 0)
+            self.assertIn("post=false", res.stdout)
+            self.assertIn("duplicate=false", res.stdout)
+            self.assertFalse(os.path.exists(output_path))
+
+    def test_11b_eksakt_duplikat_gir_null_exit_og_ingen_markor(self):
+        # Idempotent no-op -- fortsatt suksess (exit 0), fortsatt ingen
+        # ny markør skrevet, men prosessen skal IKKE feile.
+        with tempfile.TemporaryDirectory() as d:
+            output_path = os.path.join(d, "comment.txt")
+            res = self._kjor_cli(
+                {
+                    "issue_number": 32,
+                    "issue_labels": ["status:review"],
+                    "prs": [_pr()],
+                    "branch": "agent/issue-32",
+                    "comments": [_CRS.bygg_marker(32, _HEAD_A)],
+                },
+                output_path,
+            )
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("post=false", res.stdout)
+            self.assertIn("duplicate=true", res.stdout)
+            self.assertFalse(os.path.exists(output_path))
+
+    def test_11c_gyldig_fersk_tilstand_gir_null_exit_og_markor_skrevet(self):
+        with tempfile.TemporaryDirectory() as d:
+            output_path = os.path.join(d, "comment.txt")
+            res = self._kjor_cli(
+                {
+                    "issue_number": 32,
+                    "issue_labels": ["agent:claude", "status:review"],
+                    "prs": [_pr()],
+                    "branch": "agent/issue-32",
+                    "comments": [],
+                },
+                output_path,
+            )
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("post=true", res.stdout)
+            self.assertIn("duplicate=false", res.stdout)
+            self.assertTrue(os.path.exists(output_path))
+            with open(output_path, encoding="utf-8") as f:
+                innhold = f.read()
+            self.assertIn(_CRS.bygg_marker(32, _HEAD_A), innhold)
 
 
 class TestWorkflowKildetekst(unittest.TestCase):

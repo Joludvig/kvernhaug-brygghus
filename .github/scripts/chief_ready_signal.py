@@ -54,6 +54,16 @@ kommentarteksten til filstien gitt som argv[1] KUN når `post=true` --
 selve `gh pr comment --body-file`-kallet gjøres av workflowen, ikke her
 (ingen `gh`-avhengighet i denne modulen).
 
+EXIT-KODE (Chief review, PR #34): `post=true` og `duplicate=true` gir
+begge exit 0 -- en postet markør og et idempotent no-op er begge
+suksess. En fail-closed AVVISNING (`post=false` OG `duplicate=false`
+-- live-tilstanden tilfredsstiller ikke lenger signal-kontrakten) gir
+derimot exit 1, slik at "Decide Chief-ready signal"-workflow-steget
+selv feiler og den eksisterende "Report Chief-ready signal emission
+failure"-oppfølgeren (gatet på failure() + at status:review allerede
+er nådd) faktisk kjører, i stedet for at jobben blir grønn uten både
+markør og rapport.
+
 Ingen hemmeligheter/token/miljøverdier eller vilkårlig Claude-output
 inngår noensinne i markøren eller kommentarteksten -- kun issue-nummer,
 PR-nummer og PR-head-SHA, alle strukturerte tall/hex-strenger fra
@@ -222,8 +232,23 @@ def main(argv):
     if post:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(kommentar)
+        return 0
 
-    return 0
+    if duplicate:
+        # Idempotent no-op, not a failure: the exact (issue, head) marker
+        # already exists on the PR, so there is nothing left to do.
+        return 0
+
+    # Fail-closed rejection (live state no longer satisfies the signal
+    # contract) is a genuine failure, not a silent no-op -- see
+    # AGENT_WORKFLOW.md and issue #32 "Failure semantics": a signal
+    # rejection after status:review must be observable. A non-zero exit
+    # here fails the "Decide Chief-ready signal" workflow step, which is
+    # what lets the existing "Report Chief-ready signal emission failure"
+    # step (gated on failure() + steps.promote.outcome == 'success')
+    # actually run instead of the job finishing green with no marker and
+    # no report.
+    return 1
 
 
 if __name__ == "__main__":

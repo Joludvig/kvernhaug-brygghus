@@ -477,7 +477,12 @@ jobs:
       # emits `post=false` (no marker written) on any ambiguity, and
       # `duplicate=true` (also no marker) if the exact (issue, head)
       # marker already exists on the PR -- idempotent no-op, not a
-      # retry/error.
+      # retry/error. Chief review (PR #34): a fail-closed rejection
+      # (`post=false` AND `duplicate=false`) now exits non-zero, so THIS
+      # step itself fails and the "Report Chief-ready signal emission
+      # failure" step below actually runs instead of the job finishing
+      # green with no marker and no report. `post=true`/`duplicate=true`
+      # both still exit 0.
       - name: Decide Chief-ready signal (issue #32)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true'
         id: signal

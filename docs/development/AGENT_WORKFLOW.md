@@ -482,7 +482,17 @@ has already been set, the Issue is **not** rolled back and nothing is
 merged — a dedicated step (distinct from the generic failure step,
 which is scoped away from this case via `steps.promote.outcome`) posts
 a clear failure comment and leaves the Issue at `status:review`, so the
-hourly Chief watch can still recover it.
+hourly Chief watch can still recover it. "Fails" here is not limited to
+a `gh pr comment` API error: a **fail-closed rejection** — the helper
+finding, on live refetch, that the signal contract no longer holds
+(Issue no longer exclusively `status:review`, no single open PR on the
+deterministic branch, or a missing head SHA) — exits the "Decide
+Chief-ready signal" step non-zero on purpose (Chief review, PR #34),
+so the same dedicated failure step runs instead of the job finishing
+green with neither a marker nor a report. An **exact duplicate**
+marker for the same `(issue, head)` pair is the one case that is
+*not* a failure — the helper exits zero and the run is a normal,
+idempotent no-op.
 
 ## Scope-change rule
 
