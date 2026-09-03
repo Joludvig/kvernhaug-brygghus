@@ -416,6 +416,74 @@ exact head-branch equality in GitHub's own PR index, not a natural-
 language heuristic — strictly more reliable by construction, not merely
 by assumption.
 
+## Chief-ready PR signal (V1, issue #32)
+
+**Why this exists:** official ChatGPT Work supports event-triggered/
+webhook GitHub tasks for supported **pull-request activity**, including
+PR comments — but not issue-label events, which is what this Bridge's
+authoritative state machine runs on. Issue #31 (parent) tracks wiring
+the native Work-side task to that PR signal; this section documents
+only the repo-side half: the smallest possible adapter, entirely inside
+this workflow, with no custom webhook server, no OpenAI API call from
+Actions, and no second Chief runtime.
+
+**What it does:** once, and only once, the "Move to status:review"
+step above has actually succeeded, the workflow refetches **live**
+GitHub state (not anything cached from before the Claude step ran) and
+verifies all of: the Issue still carries `status:review` and no other
+lifecycle label; exactly one PR is open against `master` on the
+issue's deterministic branch (`agent/issue-<N>`, see "Branch naming is
+deterministic and enforced"); and that PR's current head SHA. If, and
+only if, all of that still holds, it posts **one top-level comment** on
+that PR containing a reserved, versioned marker:
+
+```
+KBH_CHIEF_REVIEW_READY_V1 issue=<N> head=<40-char-sha>
+```
+
+The decision and marker construction live in one pure, dependency-free
+helper, [`.github/scripts/chief_ready_signal.py`](../../.github/scripts/chief_ready_signal.py)
+(unit-tested in
+[`tests/test_agent_bridge_chief_ready_signal.py`](../../tests/test_agent_bridge_chief_ready_signal.py)),
+called from three new workflow steps ("Refetch live state for
+Chief-ready signal", "Decide Chief-ready signal", "Post Chief-ready
+signal comment") that run entirely **after** the Claude step, with the
+workflow's own token — not through `anthropics/claude-code-action`, not
+in `--allowedTools`. No new Claude trigger surface is introduced by
+this feature at all.
+
+**Ordering:** `status:review` first, signal second — enforced by the
+new steps being gated on `steps.deliverable.outputs.ok == 'true'` (the
+same deliverable-PASS gate from above) and running after the "Move to
+status:review" step (`id: promote`) in step order, so the marker can
+never be posted before the Issue is actually live at `status:review`.
+
+**Idempotency / head semantics:** before posting, the workflow fetches
+the target PR's existing top-level comments and the helper checks them
+for an *exact*, line-anchored match of the reserved marker for the same
+`(issue, head)` pair — malformed or near-match text never counts (wrong
+version, wrong case, missing spacing, a short SHA, or the marker
+embedded mid-line all fail the match on purpose). If found, posting is
+skipped as a no-op, not an error. A later `status:changes-requested`
+round produces a **new** head SHA, which is deliberately *not* treated
+as a duplicate, so re-review wakes correctly.
+
+**What the signal is (and is not):** the comment exists **solely** to
+wake the native ChatGPT Work event task — it is never authoritative.
+The Work task, and Chief, must always refetch live Issue/PR/head state
+before reviewing anything; the comment is a nudge, not a source of
+truth. The existing **hourly Chief watch remains the fallback** path if
+this event signal is ever missed or fails to fire. **Merge remains an
+owner-only action** regardless — nothing about this signal changes the
+"Owner merge gate" below.
+
+**Failure semantics:** if signal emission fails *after* `status:review`
+has already been set, the Issue is **not** rolled back and nothing is
+merged — a dedicated step (distinct from the generic failure step,
+which is scoped away from this case via `steps.promote.outcome`) posts
+a clear failure comment and leaves the Issue at `status:review`, so the
+hourly Chief watch can still recover it.
+
 ## Scope-change rule
 
 Once a Claude run starts, the triggering issue's body is the run's

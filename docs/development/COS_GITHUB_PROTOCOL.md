@@ -58,6 +58,8 @@ For Chief review, the practical rule remains:
 
 A PR review action alone is not assumed to update the Issue lifecycle label. Verify both separately.
 
+When the Issue reaches `status:review`, the Bridge posts one reserved `KBH_CHIEF_REVIEW_READY_V1` marker comment on the associated PR (issue #32) solely to wake the event-triggered Work task — it is never authoritative. Always refetch live Issue/PR/head state before reviewing; never treat the comment itself as proof of current state. The hourly Chief watch remains the fallback if that signal is ever missed.
+
 ## 6. Critical Web rule
 
 **GitHub MERGED != Web DEPLOYED.**

@@ -426,6 +426,7 @@ jobs:
 
       - name: Move to status:review on success (exclusive lifecycle transition)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true'
+        id: promote
         run: |
           set -euo pipefail
           gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]' \
@@ -433,6 +434,79 @@ jobs:
             | gh api --method PUT "repos/$REPO/issues/$ISSUE/labels" --input -
           echo "Labels now:"
           gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
+
+      # Issue #32 -- repo-side adapter to the native ChatGPT Work
+      # event-triggered PR task, which supports PR activity (incl. PR
+      # comments) but not issue labels. Only reachable AFTER the Issue
+      # is already live as status:review (this step is gated on
+      # `success()`, which by GitHub Actions semantics covers every
+      # step so far in this job, including "Move to status:review"
+      # above). Refetches LIVE state -- not anything cached from before
+      # the Claude step ran -- so the decision in chief_ready_signal.py
+      # is made on current reality, per AGENT_WORKFLOW.md "Ordering /
+      # race safety". The PR used for the existing-comments lookup here
+      # is provisional (first match on the deterministic branch); the
+      # actual accept/reject decision, including re-verifying there is
+      # EXACTLY one such PR, happens in the pure Python helper, not here.
+      - name: Refetch live state for Chief-ready signal (issue #32)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true'
+        id: signal_state
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          set -euo pipefail
+          labels_json=$(gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]')
+          prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+            --json number,state,baseRefName,headRefOid,headRefName)
+          pr_number_for_comments=$(echo "$prs_json" | jq -r '.[0].number // empty')
+          if [ -n "$pr_number_for_comments" ]; then
+            comments_json=$(gh pr view "$pr_number_for_comments" --repo "$REPO" --json comments -q '[.comments[].body]')
+          else
+            comments_json='[]'
+          fi
+          jq -n --argjson issue_number "$ISSUE" \
+                --argjson issue_labels "$labels_json" \
+                --argjson prs "$prs_json" \
+                --argjson comments "$comments_json" \
+                --arg branch "$BRANCH" \
+                '{issue_number:$issue_number, issue_labels:$issue_labels, prs:$prs, comments:$comments, branch:$branch}' \
+            > "$RUNNER_TEMP/chief_ready_state.json"
+
+      # Pure/testable decision -- see .github/scripts/chief_ready_signal.py
+      # and tests/test_agent_bridge_chief_ready_signal.py. Fail-closed:
+      # emits `post=false` (no marker written) on any ambiguity, and
+      # `duplicate=true` (also no marker) if the exact (issue, head)
+      # marker already exists on the PR -- idempotent no-op, not a
+      # retry/error.
+      - name: Decide Chief-ready signal (issue #32)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true'
+        id: signal
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/chief_ready_signal.py "$RUNNER_TEMP/chief_ready_comment.txt" \
+            < "$RUNNER_TEMP/chief_ready_state.json" >> "$GITHUB_OUTPUT"
+
+      # The one top-level PR comment this whole feature exists to emit.
+      # Deliberately NOT part of Claude's run or --allowedTools -- this
+      # runs after Claude's step entirely, with the workflow's own
+      # token, so no new Claude trigger surface is introduced.
+      - name: Post Chief-ready signal comment (issue #32 adapter)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true'
+        run: |
+          set -euo pipefail
+          gh pr comment "${{ steps.signal.outputs.pr_number }}" --repo "$REPO" --body-file "$RUNNER_TEMP/chief_ready_comment.txt"
+
+      # Failure semantics (issue #32, "Failure semantics"): if emission
+      # fails AFTER status:review was already set (steps.promote.outcome
+      # captures that independent of what fails later), do not roll the
+      # Issue backwards and do not merge anything -- just report clearly.
+      # `steps.promote.outcome` (not `success()`) is used here because it
+      # reflects that ONE step's own result regardless of which later
+      # step is what actually failed.
+      - name: Report Chief-ready signal emission failure — issue stays at status:review
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome == 'success'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE reached \`status:review\`, but emitting the Chief-ready PR signal comment failed -- see this workflow run's logs. The Issue is left at \`status:review\` (not rolled back) and nothing was merged; the existing hourly Chief watch remains the fallback path if this signal was missed."
 
       # V1.2 (issue #12): the case that was missing entirely before this
       # fix -- Claude's own step reported success, but the deliverable
@@ -448,7 +522,13 @@ jobs:
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
 
+      # Issue #32: scoped to exclude the case where "Move to
+      # status:review" already succeeded -- that case has its own,
+      # more accurate failure step above ("... issue stays at
+      # status:review"), since this generic message's claim that the
+      # Issue is "left at status:working" would be WRONG once
+      # status:review has actually been reached.
       - name: Report failure — leave at status:working for manual follow-up
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure()
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success'
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted. Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
