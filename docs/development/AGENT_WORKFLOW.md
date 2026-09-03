@@ -522,10 +522,12 @@ code.
   `Joludvig/kvernhaug-brygghus` as a candidate wake-up — not issue-label
   events (Work does not support those) and not any other repository.
   The triggering event itself supplies only the repository and a
-  candidate PR number; it does not need to be a PR comment, and
-  non-comment PR events (review, label, synchronize, etc.) are harmless
-  candidates, since the task never derives authorization from the event
-  payload — only from what it independently refetches, below.
+  candidate PR number; it does not need to be a PR comment, and any
+  other event family delivered by the configured repository-scoped PR
+  trigger (`opened`, `ready_for_review`, `closed`, plus enabled PR
+  comments) is a harmless candidate, since the task never derives
+  authorization from the event payload — only from what it
+  independently refetches, below.
 - **What wakes it:** the task refetches the candidate PR's **live**
   top-level comments and derives authorization solely from that fetch —
   exactly one applicable current-head marker must be discovered and
