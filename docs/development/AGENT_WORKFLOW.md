@@ -44,8 +44,8 @@ the automation, not a substitute for reading the PR itself.
 | `status:ready` | Owner | Issue is a bounded, authorized task; start a fresh Claude run. |
 | `status:working` | Workflow (automatic) | A Claude run is currently executing for this issue. |
 | `status:review` | Workflow (automatic, only on success **and** a passed deliverable check, V1.2) | Claude's run finished, and a real PR with a non-empty diff was independently verified to exist; ready for Chief review. |
-| `status:changes-requested` | Owner (after reading a Chief review) | Trigger Claude again to address *only* that review's CHANGES REQUESTED points. |
-| `status:approved` | Owner (after a Chief PASS) | Signals the PR is approved. **Never auto-merged** — merge is always a separate, manual owner action. |
+| `status:changes-requested` | Owner, or the owner-authorized Chief Work task (V1, issue #31) acting through the connected owner GitHub identity, after reading a Chief review | Trigger Claude again to address *only* that review's CHANGES REQUESTED points. |
+| `status:approved` | Owner, or the owner-authorized Chief Work task (V1, issue #31) acting through the connected owner GitHub identity, after a Chief PASS | Signals the PR is approved. **Never auto-merged** — merge is always a separate, manual owner action. |
 | `agent:claude` | Owner | Routing label: marks an issue as one Claude should react to at all. Required on **every** trigger, alongside a status label. |
 | `area:core` / `area:web` / `area:app` / `area:infra` | Owner (optional) | Informational scoping only — not read by the workflow. |
 
@@ -63,13 +63,20 @@ the lifecycle label rather than adding to it:
   `status:working` while executing, and exactly `status:review` on
   success, even if the issue arrived carrying stale/multiple status
   labels.
-- **The owner** must follow the same rule manually for the two
+- **The owner** — or, as of the Chief Work task (V1, issue #31), the
+  owner-authorized Chief Work task acting through the connected owner
+  GitHub identity — must follow the same rule manually for the two
   owner-driven transitions: applying `status:changes-requested` should
   *replace* `status:review`, and applying `status:approved` after a
   Chief PASS should *replace* `status:review` — not simply be added
   alongside it. (The workflow normalizes whatever it finds at the start
-  of its next run, but between runs the labels are only as clean as the
-  owner leaves them.)
+  of its next run, but between runs the labels are only as clean as
+  whichever of the two leaves them.) This does not weaken the owner
+  gate: the Work task acts through the owner's own connected GitHub
+  identity, not a separate bot account, and the formal PR review itself
+  must still be performed by an identity other than the PR's author —
+  normal Bridge PRs are authored by `claude[bot]`, so a Chief review
+  from the owner identity satisfies that independently.
 
 Regression coverage: `tests/test_agent_bridge_labels.py` runs the full
 `ready → working → review → changes-requested → working → review →
@@ -493,6 +500,100 @@ green with neither a marker nor a report. An **exact duplicate**
 marker for the same `(issue, head)` pair is the one case that is
 *not* a failure — the helper exits zero and the run is a normal,
 idempotent no-op.
+
+## Work-side Chief task (V1, issue #31)
+
+**Why this exists:** the repo-side half above (issue #32) only gets a
+wake-up signal as far as a PR comment; something on the Chief/ChatGPT
+side still has to receive that event and actually act. Official ChatGPT
+Work supports event-triggered/webhook GitHub tasks for supported
+pull-request activity, including PR comments — so issue #31 wires a
+standalone Work task to that signal instead of building any custom
+webhook server, OpenAI API call from Actions, or second Chief runtime.
+This section records only the **live configuration** of that Work-side
+task; it does not change anything in this repository's own workflow
+code.
+
+**Live configuration:**
+
+- **Task name:** `Kvernhaug Chief Event Review` — a standalone Work
+  task, separate from the existing hourly `Kvernhaug Approval Watch`.
+- **Trigger:** event-only, scoped to repository-scoped PR activity in
+  `Joludvig/kvernhaug-brygghus` as a candidate wake-up — not issue-label
+  events (Work does not support those) and not any other repository.
+  The triggering event itself supplies only the repository and a
+  candidate PR number; it does not need to be a PR comment, and any
+  other event family delivered by the configured repository-scoped PR
+  trigger (`opened`, `ready_for_review`, `closed`, plus enabled PR
+  comments) is a harmless candidate, since the task never derives
+  authorization from the event payload — only from what it
+  independently refetches, below.
+- **What wakes it:** the task refetches the candidate PR's **live**
+  top-level comments and derives authorization solely from that fetch —
+  exactly one applicable current-head marker must be discovered and
+  validated there:
+  ```
+  KBH_CHIEF_REVIEW_READY_V1 issue=<N> head=<40-char-lowercase-sha>
+  ```
+  A candidate event with no such marker in the PR's live comments (e.g.
+  a non-comment PR event, or a comment that isn't this marker) is not an
+  error — it is simply not a review trigger, and the task takes no
+  action.
+- **The marker is wake-up only, never authoritative.** Exactly as
+  stated above for the signal itself, the Work task must refetch
+  **live** Issue/PR/base(`master`)/deterministic-branch
+  (`agent/issue-<N>`)/current-head state **at least twice** before
+  taking any action: once on waking, to discover and validate the
+  exactly-one applicable marker from the PR's live top-level comments
+  and confirm its `(issue, head)` pair still reflects live reality, and
+  again **immediately before** any mutating action (posting the review,
+  applying a lifecycle label) — never acting on the triggering event's
+  payload alone, and never on a fetch that has gone stale between the
+  wake-up and the mutation.
+- **Idempotency:** a duplicate marker, or a review request for a head
+  SHA the task has already reviewed, is a no-op — mirroring the
+  idempotent handling of the marker itself on the repo side.
+- **Blockers (CHANGES REQUESTED):** when a Chief review finds blocking
+  issues that need another Claude pass and no owner decision, the Work
+  task submits a formal GitHub `REQUEST_CHANGES` review on the PR
+  **and** applies `status:changes-requested` as the issue's sole,
+  exclusive lifecycle label (replacing `status:review`, per "Lifecycle
+  labels are exclusive" above) — acting through the connected owner
+  GitHub identity, as recorded in the label table and lifecycle
+  paragraph above.
+- **PASS:** the Work task submits a formal GitHub `APPROVE` review on
+  the PR **and** applies `status:approved` as the issue's sole,
+  exclusive lifecycle label, and separately notifies the owner with a
+  GO/NO-GO prompt — approval alone never authorizes a merge.
+- **Manual/owner-only gates:** anything requiring a PC-side action,
+  deploy, credential, permission change, or a `SCOPE CHANGE` comment
+  from Claude is never resolved by the Work task itself — it notifies
+  the owner instead and takes no mutating GitHub action beyond that
+  notification.
+- **What the Work task never does:** push to any branch, merge, edit an
+  issue body, or close an issue automatically — identical restrictions
+  to every other actor in this Bridge (see "Owner merge gate" below).
+- **Fallback unchanged:** the existing hourly `Kvernhaug Approval Watch`
+  task remains active and is the fallback path if this event-triggered
+  task is ever missed, delayed, or fails to fire — exactly as the
+  repo-side signal above already treats it.
+- **`MERGED != DEPLOYED` remains in force:** an `APPROVE` review and
+  `status:approved` label are review-stage signals only; they say
+  nothing about deploy state, and nothing in this task changes that.
+
+**This issue is the controlled E2E fixture for #31.** The
+Claude-authored documentation PR this issue itself produces is the real
+end-to-end test: E2E success requires, in order, that the Bridge moves
+this issue to `status:review`; that it emits the real
+`KBH_CHIEF_REVIEW_READY_V1` marker for this PR's exact head SHA; that
+the Work task above wakes on that PR's activity, refetches live state,
+discovers and validates that exact marker from the PR's live top-level
+comments, and submits a formal `APPROVE` review for that exact head;
+that this issue then moves to
+`status:approved`; and that the owner receives a GO/NO-GO notification
+— with **no merge** at any point. Those outcomes are external
+GitHub/Work observations, not something this documentation itself can
+assert; nothing in this PR claims E2E PASS.
 
 ## Scope-change rule
 
