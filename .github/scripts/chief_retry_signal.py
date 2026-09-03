@@ -104,8 +104,17 @@ LIVSSYKLUS_ETIKETTER = (
 )
 
 MARKER_VERSJON = "KBH_CHIEF_REVIEW_READY_V1"
+# MERK (Chief review, PR #41): `\d` matcher ALLE Unicode-desimalsifre
+# (ikke bare ASCII 0-9), og `\d+` alene tillater ledende nuller. Et
+# nesten-treff-linje med f.eks. `issue=040` eller et Unicode-siffer som
+# normaliserer til samme tall via `int(...)` i `_tell_markorer` ville
+# derfor telle som en EKSTRA gyldig markor for samme (issue, head) --
+# noe som kan lofte `antall_markorer` fra 1 til 2 og feilaktig avvise
+# det eneste retry-forsoket. `[1-9][0-9]*` bruker eksplisitte ASCII-
+# tegn-klasser (ikke `\d`), sa den matcher kun ekte ASCII-sifre og
+# forbyr bade "0" alene og ledende nuller.
 MARKER_LINJE_RE = re.compile(
-    r"(?m)^" + re.escape(MARKER_VERSJON) + r" issue=(?P<issue>\d+) head=(?P<head>[0-9a-f]{40})$"
+    r"(?m)^" + re.escape(MARKER_VERSJON) + r" issue=(?P<issue>[1-9][0-9]*) head=(?P<head>[0-9a-f]{40})$"
 )
 
 _REVIEW_TILSTANDER_SOM_TELLER = ("APPROVED", "CHANGES_REQUESTED")

@@ -101,6 +101,58 @@ class TestMarkorKonstruksjonIdentiskMedOriginalen(unittest.TestCase):
             self.assertNotIn(uventet.lower(), kommentar.lower())
 
 
+class TestMarkorLinjeRegexHardening(unittest.TestCase):
+    """Chief review (PR #41): `MARKER_LINJE_RE` matchet tidligere ethvert
+    Unicode-desimalsiffer (`\\d`) og tillot ledende nuller i issue-delen,
+    sa et nesten-treff kunne normalisere til samme tall via `int(...)` i
+    `_tell_markorer` og feilaktig lofte markor-antallet fra 1 til 2 --
+    noe som ville avvist det eneste retry-forsoket. Disse testene
+    beviser at slike nesten-treff aldri telles, verken direkte mot
+    regexen eller gjennom `vurder_retry` sin ende-til-ende-beslutning."""
+
+    def test_2a_regex_avviser_alenestaende_null(self):
+        linje = f"{_CRETRY.MARKER_VERSJON} issue=0 head={_HEAD_A}"
+        self.assertIsNone(_CRETRY.MARKER_LINJE_RE.match(linje))
+
+    def test_2b_regex_avviser_ledende_null(self):
+        linje = f"{_CRETRY.MARKER_VERSJON} issue=040 head={_HEAD_A}"
+        self.assertIsNone(_CRETRY.MARKER_LINJE_RE.match(linje))
+
+    def test_2c_regex_avviser_unicode_siffer(self):
+        # "٤٠" er Arabic-Indic-sifre for 40 -- \d matcher disse, men
+        # de er ikke gyldige ASCII-sifre i markor-grammatikken.
+        linje = f"{_CRETRY.MARKER_VERSJON} issue=٤٠ head={_HEAD_A}"
+        self.assertIsNone(_CRETRY.MARKER_LINJE_RE.match(linje))
+
+    def test_2d_regex_godtar_gyldig_ascii_tall(self):
+        linje = _CRETRY.bygg_marker(40, _HEAD_A)
+        m = _CRETRY.MARKER_LINJE_RE.match(linje)
+        self.assertIsNotNone(m)
+        self.assertEqual(m.group("issue"), "40")
+
+    def test_2e_naerttreff_teller_ikke_i_tell_markorer(self):
+        naerttreff = [
+            f"{_CRETRY.MARKER_VERSJON} issue=040 head={_HEAD_A}",
+            f"{_CRETRY.MARKER_VERSJON} issue=٤٠ head={_HEAD_A}",
+        ]
+        self.assertEqual(_CRETRY._tell_markorer(naerttreff, 40, _HEAD_A), 0)
+
+    def test_2f_naerttreff_ved_siden_av_ekte_markor_blokkerer_ikke_retry(self):
+        # Et nesten-treff til stede sammen med DEN ekte markoren skal
+        # fortsatt telle som noyaktig 1 -- og dermed godkjenne retryen,
+        # ikke avvise den slik det opprinnelige `\d+`-hullet ville gjort.
+        eksisterende = [
+            _CRETRY.bygg_marker(40, _HEAD_A),
+            f"{_CRETRY.MARKER_VERSJON} issue=040 head={_HEAD_A}",
+        ]
+        post, *_rest = _CRETRY.vurder_retry(
+            issue_nummer=40, issue_labels=["status:review"], prs=[_pr()],
+            branch_navn="agent/issue-40", signalert_head_sha=_HEAD_A,
+            eksisterende_kommentarer=eksisterende, pr_reviews=[],
+        )
+        self.assertTrue(post)
+
+
 class TestVurderRetry(unittest.TestCase):
     # ─── 4: godkjennes nar, og kun nar, ALT stemmer ──────────────────────
 
