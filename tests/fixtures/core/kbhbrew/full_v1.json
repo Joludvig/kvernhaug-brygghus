@@ -1,0 +1,116 @@
+{
+  "format": "kbhbrew",
+  "version": 1,
+  "exportedAt": "2026-03-01T09:00:00.000Z",
+  "generator": "Kvernhaug Brygghus",
+  "brew": {
+    "originBrewId": "brew-33333333-3333-4333-8333-333333333333",
+    "parentBrewId": null,
+    "status": "done",
+    "createdAt": "2026-02-28T09:00:00.000Z",
+    "brewedAt": "2026-02-28T09:30:00.000Z",
+    "snapshot": {
+      "recipe": {
+        "recipeSchemaVersion": 1,
+        "navn": "Core V1 full (syntetisk fixture)",
+        "brygger": "Testbrygger",
+        "bryggeri": "Testbryggeri",
+        "notater": "Syntetisk testnotat (fixture).",
+        "volum": 23,
+        "effektivitet": 75,
+        "malt": [
+          { "id": "bohemian_pilsner_floor", "mengde": 4.0 }
+        ],
+        "humle": [
+          { "id": "east_kent_goldings", "gram": 40.0, "tid": 60 }
+        ],
+        "gjaerId": "saflager_w3470",
+        "gjaerCustom": null,
+        "attenuationOverride": null,
+        "valgtStil": null
+      },
+      "ingredients": {
+        "malt": {
+          "bohemian_pilsner_floor": {
+            "display_name": "Bohemian Pilsner Floor",
+            "produsent": "Weyermann",
+            "kategori": "Basemalt",
+            "ebc": 4.0,
+            "potensiale": 1.037,
+            "maks_prosent": 100
+          }
+        },
+        "humle": {
+          "east_kent_goldings": {
+            "display_name": "East Kent Goldings",
+            "kategori": "humle",
+            "type": "T90 Pellets",
+            "alfa_typisk": 5.8
+          }
+        },
+        "gjaer": {
+          "saflager_w3470": {
+            "display_name": "SafLager W-34/70",
+            "gjaertype": "Lager",
+            "attenuation": 0.81
+          }
+        }
+      },
+      "equipment": {
+        "id": "brewzilla-35-gen4-1",
+        "name": "BrewZilla 35L Gen 4.1",
+        "type": "preset",
+        "manufacturer": "KegLand",
+        "kettleCapacityL": 35
+      },
+      "predicted": {
+        "og": 1.052,
+        "fg": 1.011,
+        "abv": 5.4,
+        "ibu": 24.0,
+        "ebc": 12.0,
+        "buGu": 0.9,
+        "flavorProfile": { "Maltfylde": 5.0, "Sitrus": 2.0, "Bitterhet": 3.0 },
+        "style": { "stil": "Testøl", "score": 0.8 }
+      },
+      "provenance": {
+        "engineVersion": 1,
+        "recipeSchemaVersion": 1,
+        "capturedAt": "2026-02-28T09:00:00.000Z",
+        "datasets": {
+          "malt": {
+            "schema_version": 1,
+            "data_version": 1,
+            "checksum": { "algorithm": "sha256", "value": "216f978a93116c51eaf988f47e2f39d2bacee7702cf6f89c8f10f4f302fcbc55" }
+          },
+          "humle": {
+            "schema_version": 1,
+            "data_version": 1,
+            "checksum": { "algorithm": "sha256", "value": "09aeac406db103b7fce4050d6e6842d4aa3a753d181ab9de1b6d34f7afc26f24" }
+          },
+          "gjaer": {
+            "schema_version": 1,
+            "data_version": 1,
+            "checksum": { "algorithm": "sha256", "value": "c9bad9e47ea65c408b20b13846fd82649f715c5d3104ccc3216d620846fce8d2" }
+          }
+        }
+      }
+    },
+    "actuals": {
+      "og": 1.053,
+      "fg": 1.01,
+      "volumeL": 22.5,
+      "notes": "Syntetisk testnotat (fixture)."
+    },
+    "sensing": {
+      "judgment": "yes",
+      "flavorProfile": { "Maltfylde": 5.0, "Sitrus": 2.0, "Bitterhet": 3.0 },
+      "notes": "Syntetisk smaksnotat (fixture)."
+    },
+    "learning": {
+      "whatWorked": "Syntetisk testtekst -- hva som fungerte.",
+      "whatChanged": "Syntetisk testtekst -- hva som ble endret.",
+      "nextTime": "Syntetisk testtekst -- neste gang."
+    }
+  }
+}

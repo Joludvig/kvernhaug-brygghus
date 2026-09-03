@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kvernhaugbrygghus.no/core/kbhbrew_v1.schema.json",
+  "title": "Kvernhaug Core .kbhbrew V1",
+  "description": "Machine-readable Core V1 schema for a Kvernhaug brew/batch record (.kbhbrew). Normative document: docs/development/CORE_KBHBREW_V1.md. Governs the wire contract only -- App/Web local storage/UI details are out of scope (KBH_CORE_CONTRACT.md Section 1). additionalProperties is deliberately true throughout: unknown-field passthrough is a required V1 guarantee (CORE_KBHBREW_V1.md Section 5.13), so a reader/writer implementing this schema must never reject a record purely for carrying an extra field it does not recognize.",
+  "type": "object",
+  "required": ["format", "version", "exportedAt", "generator", "brew"],
+  "properties": {
+    "format": {
+      "const": "kbhbrew",
+      "description": "Must equal exactly \"kbhbrew\" -- any other value is rejected, never guessed or coerced (Section 5.2)."
+    },
+    "version": {
+      "const": 1,
+      "description": "Envelope version. Only 1 is supported by this schema -- any other value (including a non-integer) is rejected explicitly (Section 5.2, 5.15)."
+    },
+    "exportedAt": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of export. Not the same as brew.createdAt/brewedAt."
+    },
+    "generator": {
+      "type": "string"
+    },
+    "brew": {
+      "$ref": "#/$defs/brew"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "brew": {
+      "type": "object",
+      "description": "The brew/batch record itself. brewId/recipeId are LOCAL identity (Section 5.3) -- a canonical exported .kbhbrew file never carries them (see the frozen legacy fixture tests/fixtures/legacy/web/kbhbrew_v1.json), but a full local-storage record (Web's kvernhaug_web_brygg item shape) may. Both are therefore optional here, not required.",
+      "required": ["originBrewId", "status", "createdAt", "snapshot"],
+      "properties": {
+        "brewId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "LOCAL storage identity only. Minted locally, never adopted from an imported file -- a reader must never treat an incoming brewId as authoritative (Section 5.3)."
+        },
+        "originBrewId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Portable/historical identity. Travels with an export and identifies the same real-world brewing event across machines. Defaults to brewId at creation (Section 5.3). Import dedup key (Section 5.14)."
+        },
+        "parentBrewId": {
+          "type": ["string", "null"],
+          "description": "Reserved for a future shared-batch concept. Always null in V1 -- no reader may assign meaning to a non-null value yet (Section 5.3)."
+        },
+        "recipeId": {
+          "type": ["string", "null"],
+          "description": "WEAK reference for navigation/grouping only. Display must never depend on it; the frozen snapshot is always authoritative (Section 4, 5.4). Local-machine-scoped -- never adopted from a file."
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO 8601. When the record was created -- always present (Section 5.11)."
+        },
+        "brewedAt": {
+          "type": "string",
+          "description": "ISO 8601. The actual brew day. Optional -- may be set later than createdAt, or never (Section 5.11)."
+        },
+        "snapshot": {
+          "$ref": "#/$defs/snapshot"
+        },
+        "actuals": {
+          "$ref": "#/$defs/actuals"
+        },
+        "sensing": {
+          "$ref": "#/$defs/sensing"
+        },
+        "learning": {
+          "$ref": "#/$defs/learning"
+        }
+      },
+      "additionalProperties": true
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "done", "discarded"],
+      "description": "Metadata, not a state machine -- freely reassignable in any direction (Section 5.10). A discarded brew is full, valid history."
+    },
+    "snapshot": {
+      "type": "object",
+      "description": "Layer 2: frozen plan. Written exactly once, at brew creation, and never modified afterward (Section 5.5) -- this schema cannot itself enforce write-time immutability, that is a reader/writer behavioral rule, not a shape rule.",
+      "required": ["recipe", "predicted"],
+      "properties": {
+        "recipe": {
+          "type": "object",
+          "description": "A frozen COPY of a .kbhrecipe-shaped payload (Section 5.4) -- not a live reference. Not re-validated against the .kbhrecipe schema here; that is a sibling contract's concern.",
+          "additionalProperties": true
+        },
+        "ingredients": {
+          "$ref": "#/$defs/ingredientsSnapshot"
+        },
+        "equipment": {
+          "type": ["object", "null"],
+          "description": "Frozen equipment profile, or null (Section 4).",
+          "additionalProperties": true
+        },
+        "predicted": {
+          "$ref": "#/$defs/predicted"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      },
+      "additionalProperties": true
+    },
+    "ingredientsSnapshot": {
+      "type": "object",
+      "description": "Owner decision #1 (Option A, ratified): FULL embedded ingredient master-data entries for every non-custom ingredient the recipe references -- not a hand-picked subset, not an id+version reference (Section 5.5, Section 8 #1). Custom ingredients live in snapshot.recipe already and are deliberately absent here.",
+      "properties": {
+        "malt": { "$ref": "#/$defs/ingredientMap" },
+        "humle": { "$ref": "#/$defs/ingredientMap" },
+        "gjaer": { "$ref": "#/$defs/ingredientMap" }
+      },
+      "additionalProperties": true
+    },
+    "ingredientMap": {
+      "type": "object",
+      "description": "Map of ingredient id -> the FULL master-data entry as it existed at snapshot time. Values are intentionally unconstrained (additionalProperties) -- the whole point of full embedding is that the snapshot does not have to know in advance which fields a future calculation might need (Section 8 #1's rejection of the hand-picked-subset Option C).",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "predicted": {
+      "type": "object",
+      "description": "Frozen prediction snapshot (og/fg/abv/ibu/ebc/buGu/flavorProfile/style). This abv is the PREDICTED value from the calculation engine, distinct from -- and not to be confused with -- the actual-ABV wire ban in #/$defs/actuals (Section 5.7, Owner decision #3).",
+      "properties": {
+        "og": { "type": ["number", "null"] },
+        "fg": { "type": ["number", "null"] },
+        "abv": { "type": ["number", "null"] },
+        "ibu": { "type": ["number", "null"] },
+        "ebc": { "type": ["number", "null"] },
+        "buGu": { "type": ["number", "null"] },
+        "flavorProfile": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        },
+        "style": {
+          "type": ["object", "null"],
+          "description": "Reduced to {stil, score} -- localized balanse/problemer/mangler text is deliberately NOT frozen (Section 2).",
+          "properties": {
+            "stil": { "type": ["string", "null"] },
+            "score": { "type": ["number", "null"] }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Section 5.12. engineVersion/recipeSchemaVersion/capturedAt are the stable core. `datasets` is the normative Core-manifest-derived target (schema_version/data_version/checksum per referenced dataset, matching core/manifest.json -- CORE_VERSIONING.md); `masterdata` (entry-count proxy) is the legacy/de-facto shape Web has produced historically and remains READABLE, not the V1 target (Section 5.12, Section 6). A writer is not required to populate `datasets` if it has no trustworthy way to obtain manifest values (see the documented Web publication gap, Section 5.12/Section 8 #1 closing note) -- but must never fabricate one.",
+      "properties": {
+        "engineVersion": { "type": ["integer", "null"] },
+        "recipeSchemaVersion": { "type": ["integer", "null"] },
+        "capturedAt": { "type": "string" },
+        "datasets": {
+          "type": "object",
+          "description": "Normative Core manifest provenance target, keyed by dataset name (malt/humle/gjaer).",
+          "additionalProperties": { "$ref": "#/$defs/datasetProvenance" }
+        },
+        "masterdata": {
+          "type": "object",
+          "description": "Legacy/de-facto Web provenance proxy (entry counts only). Remains valid, readable data on brews already captured under it -- not the V1 normative target (Section 5.12).",
+          "properties": {
+            "maltCount": { "type": "integer" },
+            "humleCount": { "type": "integer" },
+            "gjaerCount": { "type": "integer" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "datasetProvenance": {
+      "type": "object",
+      "description": "Per-dataset Core manifest reference, matching core/manifest.json's per-dataset shape (CORE_VERSIONING.md).",
+      "properties": {
+        "schema_version": { "type": "integer" },
+        "data_version": { "type": "integer" },
+        "checksum": {
+          "type": ["object", "null"],
+          "properties": {
+            "algorithm": { "type": "string" },
+            "value": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "actuals": {
+      "type": "object",
+      "description": "Layer 3: sparse instrument measurements. Every field optional and independently nullable/omittable (Section 5.6). Deliberately does NOT define a derived actual-ABV field (og/fg-derived) or an actual-process-used field as canonical V1 properties -- Owner decisions #3 (Option A: omit from wire entirely) and #5 (Option B: defer) (Section 5.7). additionalProperties stays true for genuine forward-compatible passthrough of a FUTURE field -- it does not retroactively make either of those two a canonical V1 field.",
+      "properties": {
+        "og": { "type": "number", "description": "Specific gravity as a plain decimal, e.g. 1.053 -- never SG points (Section 5.6)." },
+        "fg": { "type": "number" },
+        "volumeL": { "type": "number", "description": "Liters (Section 5.6)." },
+        "notes": { "type": "string", "description": "Measurement-adjacent notes. Distinct from sensing.notes (Section 5.8)." }
+      },
+      "additionalProperties": true
+    },
+    "sensing": {
+      "type": "object",
+      "description": "Layer 4: the brewer's subjective, documented experience -- distinct from actuals (Section 5.8).",
+      "properties": {
+        "judgment": {
+          "type": "string",
+          "enum": ["yes", "maybe", "no"]
+        },
+        "flavorProfile": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        },
+        "notes": { "type": "string", "description": "Tasting/experience-adjacent notes. Distinct from actuals.notes (Section 5.8)." }
+      },
+      "additionalProperties": true
+    },
+    "learning": {
+      "type": "object",
+      "description": "Layer 5: forward-looking payload for the next brew of the same recipe (Section 5.9).",
+      "properties": {
+        "whatWorked": { "type": "string" },
+        "whatChanged": { "type": "string" },
+        "nextTime": { "type": "string", "description": "The single most important value in the model -- surfaced before a new brew starts (Section 5.9)." }
+      },
+      "additionalProperties": true
+    }
+  }
+}
