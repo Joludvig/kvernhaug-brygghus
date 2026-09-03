@@ -304,9 +304,13 @@ with locally-generated IDs (`egen_malt_*`, `egen_humle_*`).
 custom-ingredient data (a `custom` sub-object carrying enough to
 display and calculate without a master-data lookup) may continue to be
 carried in a V1 `.kbhrecipe` file. **Global custom-ingredient identity
-is explicitly not standardized here** — that is owned by a future PRI 4
-(custom entity/pantry identity harmonization). PRI 2A does not change
-the shape of `custom` sub-objects, does not give custom ingredients a
+is not standardized here** — the namespace/format contract for it now
+lives in
+[CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md](CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md)
+(PRI 4A), which does not change the shape of `custom` sub-objects
+either — it defines only the identity (ID string) contract, contract-
+first, without implementing App/Web changes. PRI 2A does not change the
+shape of `custom` sub-objects, does not give custom ingredients a
 Core-wide ID scheme, and does not touch App's (currently absent)
 custom-ingredient representation.
 
@@ -474,5 +478,7 @@ data** — only for the fields and cases explicitly covered above.
 - Does not implement `recipeId`/`originRecipeId` end-to-end identity.
 - Does not build a `recipeSchemaVersion` migrator — an unsupported
   schema is rejected explicitly (§9), never interpreted or upgraded.
-- Does not standardize custom-ingredient identity — owned by PRI 4.
+- Does not standardize custom-ingredient identity — see
+  [CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md](CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md)
+  (PRI 4A).
 - Does not touch `.kbhbrew`.

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kvernhaugbrygghus.no/core/ingredient_identity_v1.schema.json",
+  "title": "Kvernhaug Core custom-ingredient identity V1",
+  "description": "Machine-readable Core V1 patterns for ingredient identity strings (canonical master IDs vs. user-defined custom IDs). Normative document: docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md. Validates identity STRINGS only, not any recipe/brew payload shape -- .kbhrecipe/.kbhbrew are unchanged by this contract (see that document's Section 15).",
+  "$defs": {
+    "kbhCustomIngredientId": {
+      "type": "string",
+      "description": "The canonical V1 custom-ingredient ID format (Section 3): a single reserved prefix followed by a lowercase RFC 4122 UUIDv4, opaque -- no ingredient-type semantics encoded (Section 4).",
+      "pattern": "^kbh-custom-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "legacyAppCustomIngredientId": {
+      "type": "string",
+      "description": "App's existing custom-ingredient ID shape (modules/pantry.py:291-296), grandfathered permanently (Section 9).",
+      "pattern": "^custom_[0-9a-f]+$"
+    },
+    "legacyWebCustomIngredientId": {
+      "type": "string",
+      "description": "Web's existing custom-ingredient ID shapes across all three of its historical namespaces (recipe-level egen_malt_*/egen_humle_*, web/js/app.js:149-152; pantry-level egen_pantry_<type>*, web/js/pantry.js:130-144), grandfathered permanently (Section 9).",
+      "pattern": "^egen_.+$"
+    },
+    "legacyCustomIngredientId": {
+      "description": "Union of every grandfathered legacy custom-ID shape (Section 9).",
+      "anyOf": [
+        { "$ref": "#/$defs/legacyAppCustomIngredientId" },
+        { "$ref": "#/$defs/legacyWebCustomIngredientId" }
+      ]
+    },
+    "customIngredientId": {
+      "description": "Any ID recognized as a custom (non-canonical) ingredient identity under this contract -- the new kbh-custom- format or a grandfathered legacy form (Sections 3 and 9).",
+      "anyOf": [
+        { "$ref": "#/$defs/kbhCustomIngredientId" },
+        { "$ref": "#/$defs/legacyCustomIngredientId" }
+      ]
+    },
+    "canonicalMasterIngredientId": {
+      "type": "string",
+      "description": "A canonical Core master-data ingredient ID (data/master_malt.json, master_humle_v2.json, master_gjaer_v2.json): an unprefixed lowercase snake_case slug that must never start with any reserved custom-ID prefix (Section 8's disjoint-alphabet invariant).",
+      "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$",
+      "not": {
+        "anyOf": [
+          { "pattern": "^kbh-custom-" },
+          { "pattern": "^custom_" },
+          { "pattern": "^egen_" }
+        ]
+      }
+    }
+  }
+}
