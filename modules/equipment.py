@@ -17,14 +17,43 @@ DEFAULTS = {
 }
 
 
+def _equipment_file():
+    """Aktiv equipment-fil -- lest FRISKT ved hvert kall, aldri frosset i
+    en modulnivå-konstant (samme begrunnelse som
+    modules/recipe_storage.py::_mappe(): en tidlig-frosset os.getenv()-
+    verdi kan bli lest FØR en test rekker å sette miljøvariabelen).
+
+    KVERNHAUG_EQUIPMENT_FILE finnes KUN for testisolasjon (PRI 3B2) --
+    lar en AppTest-harness peke last_equipment()/
+    equipment_kilde_er_lagret() mot en midlertidig fil i stedet for den
+    ekte data/equipment.json."""
+    return os.getenv("KVERNHAUG_EQUIPMENT_FILE", _EQUIPMENT_FILE)
+
+
 def last_equipment() -> dict:
     """Load equipment profile from disk. Falls back to BrewZilla 35L defaults on any error."""
     try:
-        with open(_EQUIPMENT_FILE, "r", encoding="utf-8") as f:
+        with open(_equipment_file(), "r", encoding="utf-8") as f:
             data = json.load(f)
         return {**DEFAULTS, **data}
     except (FileNotFoundError, json.JSONDecodeError, OSError):
         return dict(DEFAULTS)
+
+
+def equipment_kilde_er_lagret() -> bool:
+    """True KUN hvis en gyldig utstyrsprofil faktisk er lagret på disk --
+    False hvis filen mangler eller er korrupt, altså akkurat situasjonen
+    der last_equipment() stille faller tilbake til DEFAULTS uten at
+    kalleren kan se forskjellen (Chief review, PR #30 blocker 3: en
+    .kbhbrew-opprettelse skal aldri fryse en ubekreftet default-profil
+    som om den var brukerens faktiske utstyr). Leser IKKE `data`-
+    innholdet -- kun om filen finnes og er gyldig JSON."""
+    try:
+        with open(_equipment_file(), "r", encoding="utf-8") as f:
+            json.load(f)
+        return True
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return False
 
 
 def lagre_equipment(data: dict) -> None:
@@ -33,6 +62,9 @@ def lagre_equipment(data: dict) -> None:
     modules/humle_lager.py."""
     if DEMO_MODE:
         return
-    os.makedirs("data", exist_ok=True)
-    with open(_EQUIPMENT_FILE, "w", encoding="utf-8") as f:
+    filsti = _equipment_file()
+    mappe = os.path.dirname(filsti)
+    if mappe:
+        os.makedirs(mappe, exist_ok=True)
+    with open(filsti, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
