@@ -494,6 +494,46 @@ marker for the same `(issue, head)` pair is the one case that is
 *not* a failure — the helper exits zero and the run is a normal,
 idempotent no-op.
 
+## Work-side Chief task (V1, issue #31)
+
+The repo-side marker above is consumed by one standalone, event-only
+ChatGPT Work task named **Kvernhaug Chief Event Review**. It listens to
+pull-request comment activity in `Joludvig/kvernhaug-brygghus`; it has no
+time schedule and does not replace or modify the existing hourly
+**Kvernhaug Approval Watch** fallback.
+
+The saved condition accepts only a newly created, top-level PR comment
+whose body contains an exact standalone line matching the reserved V1
+marker (`issue` is a positive integer and `head` is exactly 40 lowercase
+hex characters). Inline review comments, quoted or embedded prose,
+near-matches, and every unrelated PR event are rejected before review.
+
+The marker remains a wake-up hint only. On every accepted event the Work
+task refetches the live Issue, labels, PR, base, deterministic branch,
+full current head, diff, checks, reviews, comments, current `master`, and
+relevant governing documents. It fails closed unless the Issue is open
+with `agent:claude` and exactly `status:review`, and unless the triggering
+PR is the single open PR from `agent/issue-<N>` to `master` at the exact
+marker head. The same invariants, including the exact head, are refetched
+again immediately before any mutation.
+
+For an unreviewed current head, blockers produce one `REQUEST_CHANGES`
+review plus an exclusive `status:changes-requested` transition. A clean
+review produces one `APPROVE` review plus an exclusive
+`status:approved` transition and an owner-facing GO/NO-GO notification.
+Existing unrelated labels are preserved. A prior Chief review of the
+same head is an idempotent no-op. The task never pushes, merges, closes
+the Issue, edits its body, quotes the reserved marker in its own output,
+or treats approval as merge authorization. Manual PC/deployment,
+credential, permission, or scope/owner gates are surfaced to the owner;
+otherwise an autonomous blocker/fix round does not notify the owner.
+
+The controlled V1 end-to-end check uses this documentation-only change
+on `agent/issue-31`. Success requires the real marker event to wake the
+task, a live-state refetch to approve the exact PR head, the Issue to end
+at `status:approved`, an explicit owner GO/NO-GO request, and no merge.
+Issue #31 stays open until those observations have been made.
+
 ## Scope-change rule
 
 Once a Claude run starts, the triggering issue's body is the run's
