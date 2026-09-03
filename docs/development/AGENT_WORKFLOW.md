@@ -595,7 +595,18 @@ that this issue then moves to
 GitHub/Work observations, not something this documentation itself can
 assert; nothing in this PR claims E2E PASS.
 
-## Deterministic Chief-ready retry signal (V1, issue #40)
+## Deterministic Chief-ready retry signal (V1, issue #40) — SUPERSEDED
+
+**Superseded by issue #44** ("PR Draft/Ready-for-review lifecycle wake
+mechanism", below): the 900-second sleep + retry-comment mechanism this
+section describes has been **removed** from
+`.github/workflows/claude-agent-bridge.yml` and
+`.github/scripts/chief_retry_signal.py` no longer exists. This section
+is kept verbatim as the historical incident record and evidence (per
+issue #44's own instruction not to rewrite the #42/#43 failure
+evidence) — it does **not** describe current workflow behavior. See "PR
+Draft/Ready-for-review lifecycle wake mechanism (V1, issue #44)" below
+for what replaced it and why.
 
 **The bug this addresses:** the real production retry for issue #38 /
 PR #39 exposed a gap the controlled E2E (issue #31/#32) had not
@@ -712,6 +723,159 @@ E2E on a live issue -- acceptance criterion 4 for this issue -- which
 happens outside this run's control, the same honest limit already
 noted for `workflow_dispatch` and the original Chief-ready signal
 above. Nothing in this change claims that E2E has already passed.
+
+## PR Draft/Ready-for-review lifecycle wake mechanism (V1, issue #44)
+
+**Why this replaces the section above:** issue #42/#43 proved, with
+concrete timestamp evidence, that the issue #40 retry mechanism
+(another top-level PR *comment*, temporally isolated from the first)
+still did not reliably wake the native ChatGPT Work event task for a
+round-2+ re-review -- see the preserved evidence in "Deterministic
+Chief-ready retry signal (V1, issue #40) — SUPERSEDED" above. Every
+wake attempt tried so far (the original marker, the 15-minute retry
+marker) used the *same* GitHub event family: a PR top-level comment.
+Issue #44's premise is that the unreliability may be inherent to that
+event family under Work's own (unobservable) event-coalescing/cooldown
+behavior, so the fix uses a **structurally different** GitHub event
+family instead of trying a third comment-based variant: the PR's own
+`ready_for_review` state transition.
+
+**Preferred lifecycle (issue #44, "Target design"):**
+
+1. Chief reviews an exact head and submits a formal `CHANGES_REQUESTED`
+   review.
+2. The owner (or the owner-authorized Work task) applies
+   `status:changes-requested` to the issue, exactly as the existing
+   state machine already requires (see "State machine" above) -- this
+   is the trigger that starts the next bridge run.
+3. **New in this run:** right after "Capture pre-run PR state" and
+   *before* "Run Claude Code", the bridge converts the issue's existing,
+   deterministic PR (`agent/issue-N`) to **Draft** --
+   `.github/scripts/pr_draft_handoff.py` (`vurder_draft`, unit-tested in
+   `tests/test_agent_bridge_pr_draft_handoff.py`) decides this using
+   only the pre-run PR state the "Capture pre-run PR state" step
+   already captured (no extra GitHub call): only for a
+   `status:changes-requested` trigger, only when an existing PR was
+   found, and only when it isn't already Draft (idempotent no-op
+   otherwise). This decision is deliberately **never alarming** -- it
+   always exits 0, because a missed/skipped Draft conversion must never
+   block Claude's actual fix work.
+4. Claude fixes the same deterministic branch/PR exactly as before (no
+   change to "Run Claude Code" or its `--allowedTools`) and the issue
+   returns to `status:review` exactly as before (deliverable gate,
+   `status:review` promotion, Chief-ready marker -- all **unchanged**).
+5. As the final successful handoff action -- *after* the existing
+   Chief-ready marker step (`chief_ready_signal.py`, issue #32) has
+   itself succeeded (posted a fresh marker, or found the exact same
+   marker already present) -- the bridge refetches **live** state again
+   and converts the PR from Draft back to **Ready for review**.
+   `.github/scripts/pr_ready_handoff.py` (`vurder_ready`, unit-tested in
+   `tests/test_agent_bridge_pr_ready_handoff.py`) makes this decision;
+   see "Fail-closed conditions" below.
+6. It is this `ready_for_review` **state-transition event** -- not
+   another PR comment -- that the native ChatGPT Work task wakes on for
+   round 2+, per its already-documented trigger configuration (see
+   "Work-side Chief task (V1, issue #31)" above: the Live configuration
+   already lists `ready_for_review` as one of the accepted event
+   families in the repository-scoped PR trigger). **No new Work-side
+   configuration change is asserted as required by this change** --
+   this is inferred from the already-documented live configuration, not
+   independently re-verified against Work's actual current settings
+   (an external SaaS surface with no inspectable API from this repo, the
+   same honest limit noted throughout this document); the owner should
+   confirm this still holds before relying on it for a live re-review
+   E2E (acceptance criterion 6, issue #44).
+
+**Round 1 / initial-review safety (issue #44 requirement):** a fresh
+`status:ready` run's `gh pr create` always opens the PR **Ready**
+(never Draft) -- so step 3 above never runs for `status:ready` at all
+(`pr_draft_handoff.py` rejects any trigger label other than
+`status:changes-requested`). Round 1's Chief wake keeps relying on
+GitHub's `opened` PR event (already an accepted event family per the
+issue #31 Work-side configuration) plus the unchanged Chief-ready
+marker -- completely undisturbed by this change. `pr_ready_handoff.py`
+runs identically on **every** successful round, round 1 included, but
+finds `isDraft == false` already and treats that as a non-alarming
+`already_ready` no-op -- no special-casing is needed to keep round 1
+safe, and no accidental Ready->Ready mutation occurs.
+
+**Fail-closed conditions (issue #44, acceptance criterion 3) --** the
+Draft -> Ready transition (step 5 above) is rejected, on a **fresh**
+refetch of live state, if **any** of the following hold (see
+`pr_ready_handoff.vurder_ready`):
+
+- The signaled head-SHA (from the Chief-ready marker step) or the issue
+  number is missing.
+- The issue is not (or no longer) exclusively `status:review`.
+- There is not exactly one open PR against `master` on the issue's
+  deterministic branch (wrong branch/base, or ambiguous).
+- The PR's **live** head-SHA no longer matches the signaled head
+  (stale -- a newer round has already superseded it).
+- The reserved `KBH_CHIEF_REVIEW_READY_V1` marker for this exact
+  `(issue, head)` does not appear **exactly once** among the PR's
+  top-level comments (0 = missing marker, ≥2 = a conflicting/duplicate
+  marker).
+- A formal GitHub review (`APPROVED`/`CHANGES_REQUESTED`) already
+  exists for this exact head -- Chief has already reacted; a transition
+  would only trigger a redundant/confusing re-review.
+
+A failed deliverable validation can never even reach this gate at all
+-- structurally impossible, since these workflow steps are gated on
+`steps.deliverable.outputs.ok == 'true'`, exactly like the existing
+Chief-ready marker steps.
+
+Any of the conditions above makes `vurder_ready` exit 1 (the same
+fail-closed exit-code contract as `chief_ready_signal.py`), which fails
+the "Decide PR ready-for-review transition" step and runs a dedicated
+"Report PR ready-for-review transition failure" step -- `status:review`
+is **never** rolled back and nothing is merged; the hourly Chief watch
+(and, for a first-round PR, the existing `opened`-event wake) remain
+the fallback paths, exactly as issue #32's own failure semantics
+already establish. This new failure-report step is deliberately
+distinct from the existing "Report Chief-ready signal emission
+failure" step (which is now scoped to `steps.signal.outcome ==
+'failure'` specifically), so a rejection is never misattributed to the
+wrong stage.
+
+**No duplicate review/lifecycle mutation for an exact head (issue #44,
+acceptance criterion 4):** a PR that is already Ready -- because this
+is round 1, or because a previous run already completed the
+transition for this exact head -- always falls into the non-alarming
+`already_ready` no-op branch; `gh pr ready` is never called a second
+time for the same head. Conversely, `pr_draft_handoff.py`'s "already
+Draft" check gives the same idempotency on the Draft side.
+
+**No loops (issue #44 requirement):** neither transition adds a new
+Claude-trigger surface -- both run entirely with the workflow's own
+token, outside `--allowedTools`/`Run Claude Code`, exactly like the
+existing Chief-ready marker steps (see "Anti-loop / idempotency
+behavior" below, unchanged). A `ready_for_review` event is PR activity,
+not an issue-label event, so it cannot itself satisfy this bridge's own
+`issues: labeled` trigger condition -- there is no path by which either
+transition could cause this workflow to re-invoke itself.
+
+**What was removed:** the issue #40 mechanism's four workflow steps
+("Wait for Chief reaction window", "Refetch live state for Chief-ready
+retry", "Decide Chief-ready retry signal", "Post Chief-ready retry
+signal comment") and `.github/scripts/chief_retry_signal.py` /
+`tests/test_agent_bridge_chief_retry_signal.py` no longer exist. This
+is a deliberate replacement, not a silent regression -- issue #44's own
+"Purpose" and "Do not add another comment retry loop as the primary
+solution" instruct exactly this. The 15-minute sleep this removes was
+also a fixed cost on every successful bridge run; it no longer applies.
+
+**Testability boundary, stated plainly, exactly as for every other
+mechanism in this document:** the fail-closed decision logic and the
+workflow's step wiring are unit- and source-tested without touching
+GitHub (`tests/test_agent_bridge_pr_draft_handoff.py`,
+`tests/test_agent_bridge_pr_ready_handoff.py`). Whether the native Work
+task, in practice, actually wakes reliably on a live `ready_for_review`
+event -- the entire premise of this change -- can only be confirmed by
+a real, controlled re-review E2E on a live issue (acceptance criterion
+7, issue #44), which happens outside this run's control, the same
+honest limit already noted for `workflow_dispatch` and every prior
+Chief-ready signal iteration above. Nothing in this change claims that
+E2E has already passed.
 
 ## Scope-change rule
 

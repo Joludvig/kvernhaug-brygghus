@@ -243,6 +243,10 @@ jobs:
       # approved as "the same PR, new commits". Captures the PR NUMBER
       # alongside its HEAD SHA from the exact same query, so the gate can
       # require both: unchanged identity AND changed HEAD.
+      # Issue #44 addendum: also captures `isDraft`, so the new Draft-
+      # handoff decision below (pr_draft_handoff.py) can tell an
+      # already-Draft PR (idempotent no-op) from one that still needs
+      # converting -- reuses this SAME query/output, no extra GitHub call.
       - name: Capture pre-run PR state (used by both trigger labels — see deliverable_guard.py)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: before
@@ -251,9 +255,47 @@ jobs:
         run: |
           set -euo pipefail
           before_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
-            --json number,headRefOid)
+            --json number,headRefOid,isDraft)
           echo "before_pr_number=$(echo "$before_json" | jq -r '.[0].number // empty')" >> "$GITHUB_OUTPUT"
           echo "before_head_sha=$(echo "$before_json" | jq -r '.[0].headRefOid // empty')" >> "$GITHUB_OUTPUT"
+          echo "before_pr_is_draft=$(echo "$before_json" | jq -r '.[0].isDraft // false')" >> "$GITHUB_OUTPUT"
+
+      # Issue #44 -- first half of the PR Draft/Ready-for-review
+      # lifecycle wake mechanism, replacing the unreliable comment-only
+      # retry (issue #40, REMOVED by this change -- see
+      # AGENT_WORKFLOW.md "Deterministic Chief-ready retry signal (V1,
+      # issue #40)" for the preserved incident evidence, and "PR
+      # Draft/Ready-for-review lifecycle wake mechanism (V1, issue #44)"
+      # for the full design). Uses the SAME pre-run PR state the step
+      # above just captured -- no extra GitHub call. Decision is
+      # pure/testable: .github/scripts/pr_draft_handoff.py,
+      # tests/test_agent_bridge_pr_draft_handoff.py. Deliberately
+      # NON-alarming (always exit 0) -- a missed/skipped Draft transition
+      # never blocks Claude's run, it only affects the wake-signal's
+      # fidelity. `TRIGGER_LABEL` is already a job-level env var (see the
+      # `execute` job's `env:` block above).
+      - name: Decide PR Draft handoff (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: draft_decide
+        env:
+          BEFORE_PR_NUMBER: ${{ steps.before.outputs.before_pr_number }}
+          BEFORE_HEAD_SHA: ${{ steps.before.outputs.before_head_sha }}
+          BEFORE_PR_IS_DRAFT: ${{ steps.before.outputs.before_pr_is_draft }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/pr_draft_handoff.py >> "$GITHUB_OUTPUT"
+
+      # The actual mutation -- only for a genuine status:changes-requested
+      # handoff onto an existing, non-Draft PR (see pr_draft_handoff.py
+      # for every fail-closed/no-op condition). Never runs for
+      # status:ready -- a freshly `gh pr create`d PR is already Ready,
+      # and round 1's Chief wake keeps relying on the existing `opened`
+      # PR event + Chief-ready marker, completely unchanged.
+      - name: Convert PR to Draft for changes-requested handoff (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && steps.draft_decide.outputs.set_draft == 'true'
+        run: |
+          set -euo pipefail
+          gh pr ready "${{ steps.draft_decide.outputs.pr_number }}" --repo "$REPO" --undo
 
       # V1.2 (issue #12): the first real E2E run (issue #11) finished
       # `conclusion: success` with `permission_denials_count: 14` and
@@ -501,57 +543,35 @@ jobs:
           set -euo pipefail
           gh pr comment "${{ steps.signal.outputs.pr_number }}" --repo "$REPO" --body-file "$RUNNER_TEMP/chief_ready_comment.txt"
 
-      # Issue #40 -- deterministic retry wake-up. Root-cause evidence
-      # (PR #39, issue #38's E2E retry): the round-1 marker at 16:41:56Z
-      # correctly woke the Work task (Chief replied CHANGES_REQUESTED at
-      # 16:45:05Z), but the round-2 marker at 16:52:07Z -- posted only
-      # ~20s after Claude's own PR report comment, and only ~10.5
-      # minutes after the round-1 task invocation started -- produced no
-      # observed re-review. Whether the exact mechanism is Work-side
-      # event coalescing with the immediately preceding PR comment, or a
-      # per-PR cooldown after a recent task run, is NOT verifiable from
-      # this repo (Work's internal event/debounce behavior is an
-      # external SaaS configuration with no inspectable API here) -- see
-      # AGENT_WORKFLOW.md and .github/scripts/chief_retry_signal.py's
-      # module docstring. Both hypotheses are addressed the same way,
-      # without guessing which is correct: wait a fixed, generous window
-      # so a potential retry marker is temporally isolated from any
-      # other recent PR activity, then re-check live state.
+      # Issue #44 -- second half of the PR Draft/Ready-for-review
+      # lifecycle wake mechanism, REPLACING the unreliable comment-only
+      # retry that used to sit here (issue #40's 900s-sleep-then-retry-
+      # comment steps -- see AGENT_WORKFLOW.md "Deterministic Chief-ready
+      # retry signal (V1, issue #40)" for the preserved incident evidence
+      # this replaces, and "PR Draft/Ready-for-review lifecycle wake
+      # mechanism (V1, issue #44)" for the full design). Fresh refetch
+      # AFTER the Chief-ready marker step -- never reuses anything cached
+      # from before that step, same "Ordering / race safety" discipline
+      # as the original signal. Fetches `isDraft` (new) and PR reviews
+      # (to detect an existing formal review for the exact head) on top
+      # of what the original signal refetch already gathers.
       #
-      # 900s (15 minutes) is chosen with a documented margin over the
-      # ~10.5-minute gap that failed in the PR #39 evidence above -- not
-      # a guess presented as verified fact. Acceptance criterion 4 (a
-      # real, controlled re-review E2E) is the actual confirmation this
-      # window is sufficient; that E2E happens live, outside this run's
-      # control, exactly like every other "cannot be proven except by a
-      # real Bridge run" limitation already noted elsewhere in
-      # AGENT_WORKFLOW.md.
-      #
-      # Only runs when THIS run's own signal step actually posted a
-      # fresh marker (steps.signal.outputs.post == 'true') -- a
-      # `duplicate=true` outcome means the marker predates this run, so
-      # any retry for it is that earlier run's own responsibility, not
-      # this one's.
-      - name: Wait for Chief reaction window (issue #40 deterministic retry)
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true'
-        run: sleep 900
-
-      # Fresh live refetch after the wait -- never reuses anything
-      # cached from before the wait, same "Ordering / race safety"
-      # discipline as the original signal (AGENT_WORKFLOW.md). Also
-      # fetches PR reviews (not needed by the original signal), so
-      # chief_retry_signal.py can detect "Chief already reacted" and
-      # skip the retry as a no-op rather than posting redundant noise.
-      - name: Refetch live state for Chief-ready retry (issue #40)
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true'
-        id: retry_state
+      # Runs whenever "Decide Chief-ready signal" itself SUCCEEDED
+      # (`steps.signal.outcome == 'success'` -- both post=true and
+      # duplicate=true exit 0) rather than `steps.signal.outputs.post ==
+      # 'true'` alone, so an idempotent duplicate-marker outcome can
+      # still complete a pending Draft -> Ready transition for that same
+      # head (e.g. a re-run of this workflow step).
+      - name: Refetch live state for PR ready-for-review transition (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success'
+        id: ready_state
         env:
           BRANCH: ${{ steps.branch.outputs.name }}
         run: |
           set -euo pipefail
           labels_json=$(gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]')
           prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
-            --json number,state,baseRefName,headRefOid,headRefName)
+            --json number,state,baseRefName,headRefOid,headRefName,isDraft)
           pr_number_for_lookup=$(echo "$prs_json" | jq -r '.[0].number // empty')
           if [ -n "$pr_number_for_lookup" ]; then
             comments_json=$(gh pr view "$pr_number_for_lookup" --repo "$REPO" --json comments -q '[.comments[].body]')
@@ -568,32 +588,35 @@ jobs:
                 --arg branch "$BRANCH" \
                 --arg signaled_head_sha "${{ steps.signal.outputs.head_sha }}" \
                 '{issue_number:$issue_number, issue_labels:$issue_labels, prs:$prs, comments:$comments, reviews:$reviews, branch:$branch, signaled_head_sha:$signaled_head_sha}' \
-            > "$RUNNER_TEMP/chief_retry_state.json"
+            > "$RUNNER_TEMP/pr_ready_state.json"
 
-      # Pure/testable decision -- see .github/scripts/chief_retry_signal.py
-      # and tests/test_agent_bridge_chief_retry_signal.py. Deliberately
-      # ALWAYS exits 0 (unlike chief_ready_signal.py's fail-closed exit
-      # 1) -- "no retry needed" is the expected, healthy outcome here
-      # (most commonly: Chief already reacted), not an anomaly worth a
-      # separate failure comment. See that module's docstring.
-      - name: Decide Chief-ready retry signal (issue #40)
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true'
-        id: retry_signal
+      # Pure/testable decision -- see .github/scripts/pr_ready_handoff.py
+      # and tests/test_agent_bridge_pr_ready_handoff.py. Fail-closed exit
+      # 1 on a genuine rejection (same exit-code contract as
+      # chief_ready_signal.py, so the failure-report step below actually
+      # runs) -- but `already_ready=true` (the PR was never Draft, e.g.
+      # round 1, or a previous run already completed the transition) is
+      # a NON-alarming no-op and still exits 0.
+      - name: Decide PR ready-for-review transition (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success'
+        id: ready_decide
         run: |
           set -euo pipefail
-          python3 .github/scripts/chief_retry_signal.py "$RUNNER_TEMP/chief_retry_comment.txt" \
-            < "$RUNNER_TEMP/chief_retry_state.json" >> "$GITHUB_OUTPUT"
+          python3 .github/scripts/pr_ready_handoff.py \
+            < "$RUNNER_TEMP/pr_ready_state.json" >> "$GITHUB_OUTPUT"
 
-      # The one extra, isolated PR comment this retry mechanism exists
-      # to emit -- same reserved marker line as the original, posted as
-      # a NEW, temporally isolated comment so it registers as its own
-      # PR-activity event. At most once per (issue, head) -- see
-      # chief_retry_signal.py's idempotency reasoning.
-      - name: Post Chief-ready retry signal comment (issue #40)
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outputs.post == 'true' && steps.retry_signal.outputs.post == 'true'
+      # The one state-transition mutation this whole feature exists to
+      # perform -- structurally a DIFFERENT GitHub event family
+      # (`ready_for_review`) than a PR comment, which is exactly what
+      # issue #44 replaces the unreliable comment-only retry (issue #40)
+      # with. Only fires when the PR is actually Draft (see
+      # pr_ready_handoff.py's `isDraft` check) -- a harmless no-op
+      # (nothing to transition) for round 1.
+      - name: Transition PR to Ready for review (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success' && steps.ready_decide.outputs.set_ready == 'true'
         run: |
           set -euo pipefail
-          gh pr comment "${{ steps.retry_signal.outputs.pr_number }}" --repo "$REPO" --body-file "$RUNNER_TEMP/chief_retry_comment.txt"
+          gh pr ready "${{ steps.ready_decide.outputs.pr_number }}" --repo "$REPO"
 
       # Failure semantics (issue #32, "Failure semantics"): if emission
       # fails AFTER status:review was already set (steps.promote.outcome
@@ -601,11 +624,28 @@ jobs:
       # Issue backwards and do not merge anything -- just report clearly.
       # `steps.promote.outcome` (not `success()`) is used here because it
       # reflects that ONE step's own result regardless of which later
-      # step is what actually failed.
+      # step is what actually failed. Chief review fix (issue #44):
+      # scoped to `steps.signal.outcome == 'failure'` specifically, so a
+      # failure in the LATER, separate "Decide PR ready-for-review
+      # transition" step (which has its own, more accurate report step
+      # below) is never misattributed to this one.
       - name: Report Chief-ready signal emission failure — issue stays at status:review
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome == 'success'
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome == 'success' && steps.signal.outcome == 'failure'
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE reached \`status:review\`, but emitting the Chief-ready PR signal comment failed -- see this workflow run's logs. The Issue is left at \`status:review\` (not rolled back) and nothing was merged; the existing hourly Chief watch remains the fallback path if this signal was missed."
+
+      # Issue #44: distinct failure-report step scoped to the NEW
+      # ready-for-review transition gate specifically, so a rejection
+      # here is never misattributed to the (separate, earlier,
+      # already-successful) Chief-ready marker step above. Same failure
+      # semantics as issue #32's own report: status:review is NOT rolled
+      # back and nothing is merged -- the hourly Chief watch, and (for a
+      # first-round PR) the existing `opened`-event wake, remain the
+      # fallback paths.
+      - name: Report PR ready-for-review transition failure — issue stays at status:review
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome == 'success' && steps.ready_decide.outcome == 'failure'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE reached \`status:review\` and the Chief-ready marker was posted, but transitioning the PR to Ready for review failed -- see this workflow run's logs. The Issue is left at \`status:review\` (not rolled back) and nothing was merged; the hourly Chief watch (and, for a first-round PR, the existing \`opened\`-event wake) remain the fallback paths if this transition was missed."
 
       # V1.2 (issue #12): the case that was missing entirely before this
       # fix -- Claude's own step reported success, but the deliverable
