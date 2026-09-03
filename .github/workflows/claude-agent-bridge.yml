@@ -646,7 +646,8 @@ jobs:
                 --argjson reviews "$reviews_json" \
                 --arg branch "$BRANCH" \
                 --arg signaled_head_sha "${{ steps.signal.outputs.head_sha }}" \
-                '{issue_number:$issue_number, issue_labels:$issue_labels, prs:$prs, comments:$comments, reviews:$reviews, branch:$branch, signaled_head_sha:$signaled_head_sha}' \
+                --arg trigger_label "$TRIGGER_LABEL" \
+                '{issue_number:$issue_number, issue_labels:$issue_labels, prs:$prs, comments:$comments, reviews:$reviews, branch:$branch, signaled_head_sha:$signaled_head_sha, trigger_label:$trigger_label}' \
             > "$RUNNER_TEMP/pr_ready_state.json"
 
       # Pure/testable decision -- see .github/scripts/pr_ready_handoff.py
@@ -654,14 +655,19 @@ jobs:
       # 1 on a genuine rejection (same exit-code contract as
       # chief_ready_signal.py, so the failure-report step below actually
       # runs) -- but `already_ready=true` (the PR was never Draft, e.g.
-      # round 1, or a previous run already completed the transition) is
-      # a NON-alarming no-op and still exits 0.
+      # round 1, or -- for a status:changes-requested round -- a proven
+      # prior run of THIS mechanism already completed the transition for
+      # this exact head, per the KBH_PR_READY_TRANSITION_DONE_V1 marker
+      # check, PR #45 round 3) is a NON-alarming no-op and still exits 0.
+      # Passes an output-file path so the script can write that same
+      # done-marker text (only when set_ready=true) for the posting step
+      # below to actually post -- same pattern as chief_ready_signal.py.
       - name: Decide PR ready-for-review transition (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success'
         id: ready_decide
         run: |
           set -euo pipefail
-          python3 .github/scripts/pr_ready_handoff.py \
+          python3 .github/scripts/pr_ready_handoff.py "$RUNNER_TEMP/pr_ready_done_marker.txt" \
             < "$RUNNER_TEMP/pr_ready_state.json" >> "$GITHUB_OUTPUT"
 
       # The one state-transition mutation this whole feature exists to
@@ -673,9 +679,23 @@ jobs:
       # (nothing to transition) for round 1.
       - name: Transition PR to Ready for review (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success' && steps.ready_decide.outputs.set_ready == 'true'
+        id: transition
         run: |
           set -euo pipefail
           gh pr ready "${{ steps.ready_decide.outputs.pr_number }}" --repo "$REPO"
+
+      # PR #45 round 3 fix: posts the KBH_PR_READY_TRANSITION_DONE_V1
+      # marker as proof, for a LATER re-run of this same workflow step
+      # (e.g. after a transient failure downstream), that THIS mechanism
+      # -- not something external -- already performed the Draft -> Ready
+      # transition for this exact head. Only runs immediately after the
+      # transition above actually succeeded, so the marker is never
+      # posted for a head that was not really transitioned by this run.
+      - name: Post PR ready-transition-done marker (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success' && steps.ready_decide.outputs.set_ready == 'true' && steps.transition.outcome == 'success'
+        run: |
+          set -euo pipefail
+          gh pr comment "${{ steps.ready_decide.outputs.pr_number }}" --repo "$REPO" --body-file "$RUNNER_TEMP/pr_ready_done_marker.txt"
 
       # Failure semantics (issue #32, "Failure semantics"): if emission
       # fails AFTER status:review was already set (steps.promote.outcome

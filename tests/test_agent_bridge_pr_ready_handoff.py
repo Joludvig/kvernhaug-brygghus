@@ -124,12 +124,136 @@ class TestRunde1Sikkerhet(unittest.TestCase):
             signalert_head_sha=_HEAD_A,
             eksisterende_kommentarer=eksisterende,
             pr_reviews=[],
+            trigger_label="status:ready",
         )
         self.assertFalse(set_ready)
         self.assertTrue(already_ready)
         self.assertEqual(pr_nummer, 45)
         self.assertEqual(head_sha, _HEAD_A)
         self.assertTrue(begrunnelse)
+
+    def test_pr_allerede_ready_uten_trigger_label_er_fortsatt_no_op(self):
+        # Bakoverkompatibelt default (ingen trigger_label oppgitt) er
+        # fortsatt den trygge grenen -- workflowen sender i praksis alltid
+        # en av de to eksakte verdiene, men et manglende argument skal
+        # ikke plutselig bli en fail-closed avvisning for eksisterende
+        # kallere.
+        eksisterende = [_CREADY.bygg_marker(44, _HEAD_A)]
+        set_ready, already_ready, *_rest = _PRH.vurder_ready(
+            issue_nummer=44,
+            issue_labels=["status:review"],
+            prs=[_pr(is_draft=False)],
+            branch_navn="agent/issue-44",
+            signalert_head_sha=_HEAD_A,
+            eksisterende_kommentarer=eksisterende,
+            pr_reviews=[],
+        )
+        self.assertFalse(set_ready)
+        self.assertTrue(already_ready)
+
+
+class TestChangesRequestedReadyFailOpen(unittest.TestCase):
+    """Chief-review-fiks (PR #45, runde 3): for status:changes-requested
+    er "allerede Ready" IKKE unntaksfritt trygt -- kun bevist av en
+    KBH_PR_READY_TRANSITION_DONE_V1-markør for nettopp dette hodet."""
+
+    def test_changes_requested_allerede_ready_uten_bevis_avvises(self):
+        # PR-en kan ha blitt eksternt/prematurt undraftet FØR dette
+        # steget fikk kjøre -- ingen ready-transition-done-markør finnes,
+        # så dette MÅ være en reell, fail-closed avvisning, ikke et
+        # stille already_ready-no-op (den uteblitte re-review-vekkingen
+        # issue #44 finnes for å forhindre).
+        set_ready, already_ready, pr_nummer, head_sha, begrunnelse = _PRH.vurder_ready(
+            issue_nummer=44,
+            issue_labels=["status:review"],
+            prs=[_pr(is_draft=False)],
+            branch_navn="agent/issue-44",
+            signalert_head_sha=_HEAD_A,
+            eksisterende_kommentarer=[_CREADY.bygg_marker(44, _HEAD_A)],
+            pr_reviews=[],
+            trigger_label="status:changes-requested",
+        )
+        self.assertFalse(set_ready)
+        self.assertFalse(already_ready)
+        self.assertEqual(pr_nummer, 45)
+        self.assertEqual(head_sha, _HEAD_A)
+        self.assertIn("TRANSITION_DONE", begrunnelse)
+
+    def test_changes_requested_allerede_ready_med_bevist_markor_er_no_op(self):
+        # Idempotent gjentatt kjøring: DENNE mekanismen har alt utført
+        # overgangen for nettopp dette hodet tidligere (t.d. en re-kjøring
+        # av "Decide PR ready-for-review transition"-steget) -- den
+        # tidligere kjøringen postet KBH_PR_READY_TRANSITION_DONE_V1, så
+        # dette er et bevist, trygt no-op.
+        eksisterende = [
+            _CREADY.bygg_marker(44, _HEAD_A),
+            _PRH.bygg_ready_done_marker(44, _HEAD_A),
+        ]
+        set_ready, already_ready, pr_nummer, head_sha, begrunnelse = _PRH.vurder_ready(
+            issue_nummer=44,
+            issue_labels=["status:review"],
+            prs=[_pr(is_draft=False)],
+            branch_navn="agent/issue-44",
+            signalert_head_sha=_HEAD_A,
+            eksisterende_kommentarer=eksisterende,
+            pr_reviews=[],
+            trigger_label="status:changes-requested",
+        )
+        self.assertFalse(set_ready)
+        self.assertTrue(already_ready)
+        self.assertEqual(pr_nummer, 45)
+        self.assertEqual(head_sha, _HEAD_A)
+        self.assertTrue(begrunnelse)
+
+    def test_changes_requested_ready_transition_done_markor_for_annet_hode_teller_ikke(self):
+        # En ready-transition-done-markør for et ANNET (eldre) hode skal
+        # ikke kunne bevise overgangen for DETTE hodet.
+        eksisterende = [
+            _CREADY.bygg_marker(44, _HEAD_A),
+            _PRH.bygg_ready_done_marker(44, _HEAD_B),
+        ]
+        set_ready, already_ready, *_rest = _PRH.vurder_ready(
+            issue_nummer=44,
+            issue_labels=["status:review"],
+            prs=[_pr(is_draft=False)],
+            branch_navn="agent/issue-44",
+            signalert_head_sha=_HEAD_A,
+            eksisterende_kommentarer=eksisterende,
+            pr_reviews=[],
+            trigger_label="status:changes-requested",
+        )
+        self.assertFalse(set_ready)
+        self.assertFalse(already_ready)
+
+    def test_changes_requested_draft_pr_gar_via_vanlig_overgang_uendret(self):
+        # Draft er fortsatt Draft ved dette ferske refetchet -- den
+        # ordinære transition-veien er uendret av runde 3-fiksen.
+        set_ready, already_ready, pr_nummer, head_sha, begrunnelse = _PRH.vurder_ready(
+            issue_nummer=44,
+            issue_labels=["status:review"],
+            prs=[_pr(is_draft=True)],
+            branch_navn="agent/issue-44",
+            signalert_head_sha=_HEAD_A,
+            eksisterende_kommentarer=[_CREADY.bygg_marker(44, _HEAD_A)],
+            pr_reviews=[],
+            trigger_label="status:changes-requested",
+        )
+        self.assertTrue(set_ready)
+        self.assertFalse(already_ready)
+        self.assertEqual(pr_nummer, 45)
+        self.assertEqual(head_sha, _HEAD_A)
+
+
+class TestByggReadyDoneMarker(unittest.TestCase):
+    def test_marker_matcher_egen_regex(self):
+        linje = _PRH.bygg_ready_done_marker(44, _HEAD_A)
+        self.assertIsNotNone(_PRH.MARKER_READY_DONE_LINJE_RE.match(linje))
+
+    def test_marker_skiller_seg_fra_chief_ready_markoren(self):
+        linje = _PRH.bygg_ready_done_marker(44, _HEAD_A)
+        self.assertIsNone(_PRH.MARKER_LINJE_RE.match(linje))
+        chief_linje = _CREADY.bygg_marker(44, _HEAD_A)
+        self.assertIsNone(_PRH.MARKER_READY_DONE_LINJE_RE.match(chief_linje))
 
 
 class TestVurderReadyFailClosed(unittest.TestCase):
@@ -322,6 +446,86 @@ class TestCliExitKode(unittest.TestCase):
         self.assertIn(f"pr_number={45}", res.stdout)
         self.assertIn(f"head_sha={_HEAD_A}", res.stdout)
 
+    def test_changes_requested_allerede_ready_uten_bevis_gir_ikke_null_exit(self):
+        # CLI-nivå-motstykke til TestChangesRequestedReadyFailOpen: en
+        # status:changes-requested-runde der PR-en allerede er Ready uten
+        # noen ready-transition-done-markør MÅ feile lukket.
+        res = self._kjor_cli({
+            "issue_number": 44,
+            "issue_labels": ["status:review"],
+            "prs": [_pr(is_draft=False)],
+            "branch": "agent/issue-44",
+            "signaled_head_sha": _HEAD_A,
+            "comments": [_CREADY.bygg_marker(44, _HEAD_A)],
+            "reviews": [],
+            "trigger_label": "status:changes-requested",
+        })
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn("set_ready=false", res.stdout)
+        self.assertIn("already_ready=false", res.stdout)
+
+    def test_changes_requested_allerede_ready_med_bevist_markor_gir_null_exit(self):
+        res = self._kjor_cli({
+            "issue_number": 44,
+            "issue_labels": ["status:review"],
+            "prs": [_pr(is_draft=False)],
+            "branch": "agent/issue-44",
+            "signaled_head_sha": _HEAD_A,
+            "comments": [_CREADY.bygg_marker(44, _HEAD_A), _PRH.bygg_ready_done_marker(44, _HEAD_A)],
+            "reviews": [],
+            "trigger_label": "status:changes-requested",
+        })
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("set_ready=false", res.stdout)
+        self.assertIn("already_ready=true", res.stdout)
+
+    def test_gyldig_overgang_skriver_ready_done_markor_til_output_fil(self):
+        # main() sitt valgfrie argv[1] -- samme mønster som
+        # chief_ready_signal.py -- skal skrive den ferdige
+        # ready-transition-done-markørteksten KUN når set_ready=true.
+        with tempfile.TemporaryDirectory() as tmp:
+            output_path = os.path.join(tmp, "ready_done_marker.txt")
+            res = subprocess.run(
+                [sys.executable, _SCRIPT, output_path],
+                input=json.dumps({
+                    "issue_number": 44,
+                    "issue_labels": ["status:review"],
+                    "prs": [_pr(is_draft=True)],
+                    "branch": "agent/issue-44",
+                    "signaled_head_sha": _HEAD_A,
+                    "comments": [_CREADY.bygg_marker(44, _HEAD_A)],
+                    "reviews": [],
+                    "trigger_label": "status:changes-requested",
+                }),
+                capture_output=True, text=True,
+            )
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("set_ready=true", res.stdout)
+            with open(output_path, encoding="utf-8") as f:
+                innhold = f.read()
+            self.assertEqual(innhold, _PRH.bygg_ready_done_marker(44, _HEAD_A))
+
+    def test_already_ready_skriver_ikke_output_fil(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output_path = os.path.join(tmp, "ready_done_marker.txt")
+            res = subprocess.run(
+                [sys.executable, _SCRIPT, output_path],
+                input=json.dumps({
+                    "issue_number": 44,
+                    "issue_labels": ["status:review"],
+                    "prs": [_pr(is_draft=False)],
+                    "branch": "agent/issue-44",
+                    "signaled_head_sha": _HEAD_A,
+                    "comments": [_CREADY.bygg_marker(44, _HEAD_A)],
+                    "reviews": [],
+                    "trigger_label": "status:ready",
+                }),
+                capture_output=True, text=True,
+            )
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("already_ready=true", res.stdout)
+            self.assertFalse(os.path.exists(output_path))
+
     def test_manglende_stdin_data_gir_ikke_null_exit_uten_krasj(self):
         res = subprocess.run([sys.executable, _SCRIPT], input="", capture_output=True, text=True)
         self.assertNotEqual(res.returncode, 0)
@@ -412,6 +616,39 @@ class TestWorkflowKildetekst(unittest.TestCase):
         self.assertIn("steps.promote.outcome == 'success'", steg)
         self.assertIn("steps.ready_decide.outcome == 'failure'", steg)
         self.assertIn("status:review", steg)
+
+    # ─── PR #45 runde 3: trigger_label-viring + ready-transition-done- ────
+    # ─── markør-postingen ──────────────────────────────────────────────────
+
+    def test_refetch_steget_sender_trigger_label_til_scriptet(self):
+        steg = self._finn_steg("Refetch live state for PR ready-for-review transition (issue #44)")
+        self.assertIn('--arg trigger_label "$TRIGGER_LABEL"', steg)
+        self.assertIn("trigger_label:$trigger_label", steg)
+
+    def test_decide_steget_sender_output_fil_argument(self):
+        steg = self._finn_steg("Decide PR ready-for-review transition (issue #44)")
+        self.assertIn("pr_ready_handoff.py \"$RUNNER_TEMP/pr_ready_done_marker.txt\"", steg)
+
+    def test_transition_steget_har_id(self):
+        steg = self._finn_steg("Transition PR to Ready for review (issue #44)")
+        self.assertIn("id: transition", steg)
+
+    def test_ready_done_markor_postes_kun_etter_vellykket_transition(self):
+        steg = self._finn_steg("Post PR ready-transition-done marker (issue #44)")
+        self.assertIn("steps.ready_decide.outputs.set_ready == 'true'", steg)
+        self.assertIn("steps.transition.outcome == 'success'", steg)
+        self.assertIn("steps.signal.outcome == 'success'", steg)
+        self.assertIn("steps.deliverable.outputs.ok == 'true'", steg)
+        self.assertIn("needs.guard.outputs.dry_run != 'true'", steg)
+        self.assertIn('gh pr comment "${{ steps.ready_decide.outputs.pr_number }}"', steg)
+        self.assertIn("pr_ready_done_marker.txt", steg)
+        for forbudt in ("gh pr merge", "git merge"):
+            self.assertNotIn(forbudt, steg)
+
+    def test_ready_done_markor_steget_kommer_etter_transition_steget(self):
+        pos_transition = self.tekst.index("Transition PR to Ready for review (issue #44)")
+        pos_marker_post = self.tekst.index("Post PR ready-transition-done marker (issue #44)")
+        self.assertLess(pos_transition, pos_marker_post)
 
 
 if __name__ == "__main__":

@@ -879,6 +879,50 @@ identity/Draft), `test_7k` (missing live `headRefOid`), the CLI-level
 `test_8g`/`test_8h`, and `test_6o` (workflow wiring: the refetch step
 actually forwards `before_head_sha`).
 
+**Round 3 (Chief review, PR #45): "already Ready" was fail-open for a
+changes-requested round.** Rounds 1-2 above made the **pre-Claude**
+Draft handoff fail-closed, but the **post-Claude** ready gate
+(`pr_ready_handoff.vurder_ready`) still treated *every* live
+`isDraft == false` as the same harmless `already_ready` no-op --
+correct for `status:ready` (which never goes through Draft at all, see
+"Round 1 / initial-review safety" above), but not for
+`status:changes-requested`: the PR could be correctly verified Draft
+before Claude ran and then be externally/prematurely undrafted before
+this final gate executed, and the gate would silently accept that as
+`already_ready`, emit no `ready_for_review` transition, and lose
+exactly the re-review wake issue #44 exists to guarantee -- with no
+observable failure at all. The fix makes the final gate
+**trigger-aware**: `vurder_ready` now also takes the run's
+`trigger_label`. For any trigger other than exactly
+`status:changes-requested` (i.e. `status:ready`), "already Ready"
+remains unconditionally safe, unchanged from before. For
+`status:changes-requested`, "already Ready" is safe **only** when a
+new, separate, reserved marker --
+`KBH_PR_READY_TRANSITION_DONE_V1 issue=<N> head=<sha>` (same
+line-anchored, exact-version/exact-40-hex-SHA grammar as the existing
+`KBH_CHIEF_REVIEW_READY_V1` marker, but a distinct version string so
+the two can never be confused with each other) -- already exists for
+this exact `(issue, head)` pair among the PR's comments, proving that
+**this mechanism itself**, not something external, already performed
+the transition for this exact head (the intended case: a re-run of
+this same workflow step after the transition already succeeded).
+Without that marker, "already Ready" in a `status:changes-requested`
+round is now a **genuine, fail-closed rejection** instead of a silent
+no-op. The marker is posted by a **new** workflow step, "Post PR
+ready-transition-done marker", which runs only immediately *after*
+`gh pr ready` itself has actually succeeded (`steps.transition.outcome
+== 'success'`) -- so it can never be posted for a head that this run
+did not really transition. `pr_ready_handoff.py`'s CLI now accepts an
+optional output-file argument (same pattern as
+`chief_ready_signal.py`'s comment-file argument) that it writes the
+built marker text to, only when `set_ready=true`, for that new step to
+post via `gh pr comment`. Regression coverage:
+`tests/test_agent_bridge_pr_ready_handoff.py`
+(`TestChangesRequestedReadyFailOpen`, `TestByggReadyDoneMarker`, the
+extended `TestCliExitKode` marker-file-writing tests, and the extended
+`TestWorkflowKildetekst` checks for the new step's gating/ordering and
+the refetch step's `trigger_label` wiring).
+
 **Fail-closed conditions (issue #44, acceptance criterion 3) --** the
 Draft -> Ready transition (step 5 above) is rejected, on a **fresh**
 refetch of live state, if **any** of the following hold (see
@@ -898,6 +942,9 @@ refetch of live state, if **any** of the following hold (see
 - A formal GitHub review (`APPROVED`/`CHANGES_REQUESTED`) already
   exists for this exact head -- Chief has already reacted; a transition
   would only trigger a redundant/confusing re-review.
+- (Round 3, `status:changes-requested` only) the PR is already Ready
+  but no `KBH_PR_READY_TRANSITION_DONE_V1` marker for this exact
+  `(issue, head)` proves this mechanism performed that transition.
 
 A failed deliverable validation can never even reach this gate at all
 -- structurally impossible, since these workflow steps are gated on
@@ -919,10 +966,16 @@ wrong stage.
 
 **No duplicate review/lifecycle mutation for an exact head (issue #44,
 acceptance criterion 4):** a PR that is already Ready -- because this
-is round 1, or because a previous run already completed the
-transition for this exact head -- always falls into the non-alarming
-`already_ready` no-op branch; `gh pr ready` is never called a second
-time for the same head. Conversely, `pr_draft_handoff.py`'s "already
+is round 1 (unconditionally safe), or because a previous run already
+completed the transition for this exact head and left the
+`KBH_PR_READY_TRANSITION_DONE_V1` proof marker behind (round 3, see
+above) -- falls into the non-alarming `already_ready` no-op branch;
+`gh pr ready` is never called a second time for the same head. An
+already-Ready `status:changes-requested` PR **without** that proof is,
+since round 3, no longer treated as idempotent at all -- it is a
+genuine rejection instead, precisely because there is no such
+duplicate-mutation risk to guard against (nothing was transitioned by
+this mechanism yet). Conversely, `pr_draft_handoff.py`'s "already
 Draft" check gives the same idempotency on the Draft side.
 
 **No loops (issue #44 requirement):** neither transition adds a new
