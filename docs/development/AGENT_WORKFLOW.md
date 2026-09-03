@@ -595,6 +595,124 @@ that this issue then moves to
 GitHub/Work observations, not something this documentation itself can
 assert; nothing in this PR claims E2E PASS.
 
+## Deterministic Chief-ready retry signal (V1, issue #40)
+
+**The bug this addresses:** the real production retry for issue #38 /
+PR #39 exposed a gap the controlled E2E (issue #31/#32) had not
+caught. Exact evidence, read directly from PR #39's own comment/review
+timestamps:
+
+| Time (UTC) | Event |
+|---|---|
+| 16:41:56 | Round-1 `KBH_CHIEF_REVIEW_READY_V1` marker posted (head `c6b9954a...`). |
+| 16:45:05 | Chief's formal `CHANGES_REQUESTED` review submitted -- the Work task woke correctly and reviewed within ~3 minutes. |
+| 16:51:47 | Claude's own PR follow-up report comment (round 2, new head `0bcfc583...`). |
+| 16:52:07 | Round-2 marker posted -- only **~20 seconds** after the report comment above, and only **~10.5 minutes** after the round-1 task invocation started. No automatic re-review was observed for this head. |
+
+**Root cause, stated honestly:** the round-2 marker is textually
+identical in structure to the round-1 marker that worked, and the
+repo-side emission logic (`chief_ready_signal.py`) behaved correctly
+in both rounds -- the marker was posted, for the right head, after
+`status:review` was confirmed live, exactly per contract. The gap is
+therefore on the Work/ChatGPT side: either (a) Work's event delivery
+coalesces/debounces PR-comment activity that arrives in a tight burst
+on the same PR (the round-2 marker landed 20s after Claude's own
+report comment), or (b) Work enforces some per-PR cooldown after a
+recent task invocation (the round-2 marker landed ~10.5 minutes after
+the round-1 invocation started). **Both remain hypotheses** -- Work's
+internal event/debounce configuration is an external SaaS surface with
+no API or log this repository/agent can inspect, so which one (or
+whether it's something else entirely) is the actual cause is not
+verifiable from here, only from Work's own side, which is owned and
+configured by the owner outside this repo. Per the issue's own
+instruction, this is documented as a hypothesis backed by the evidence
+above, not presented as a proven root cause.
+
+**The fix, chosen to be correct under either hypothesis without
+guessing which one is real:** a bounded, one-shot, deterministic retry
+wake-up, implemented entirely as new workflow steps plus one new pure
+helper -- no webhook server/broker, no polling loop, no change to the
+existing V1 signal's behavior:
+
+1. After the existing "Post Chief-ready signal comment" step (issue
+   #32, unchanged), a new **"Wait for Chief reaction window"** step
+   sleeps a fixed **900 seconds (15 minutes)** -- chosen with a
+   documented margin over the ~10.5-minute gap observed in the PR #39
+   evidence above, not asserted as a verified-sufficient number. Only
+   runs when this run's own signal step actually posted a *fresh*
+   marker (`steps.signal.outputs.post == 'true'`); a duplicate
+   (pre-existing marker) is that earlier run's own responsibility.
+2. **"Refetch live state for Chief-ready retry"** re-fetches the
+   issue's live labels, the PR's live state/comments, and (new) the
+   PR's live **reviews** -- never anything cached from before the
+   wait.
+3. **"Decide Chief-ready retry signal"** calls the new pure helper
+   [`.github/scripts/chief_retry_signal.py`](../../.github/scripts/chief_retry_signal.py)
+   (`vurder_retry`, unit-tested in
+   [`tests/test_agent_bridge_chief_retry_signal.py`](../../tests/test_agent_bridge_chief_retry_signal.py)),
+   which posts a retry **only if all of** hold on the fresh refetch:
+   the issue is still exclusively `status:review`; exactly one open PR
+   still exists on the deterministic branch; that PR's live head SHA
+   is still the exact head the original marker signaled (a newer round
+   hasn't already superseded it); the original marker appears
+   **exactly once** among the PR's comments (0 is an unexpected state,
+   >=2 means a retry already happened -- both reject, capping this at
+   **at most one retry per head**); and no formal GitHub review
+   (`APPROVED`/`CHANGES_REQUESTED`) already exists for that exact head
+   (if one does, Chief already reacted -- a retry would be redundant
+   noise, not a fix).
+4. **"Post Chief-ready retry signal comment"** posts, only if step 3
+   said so, a **second** comment carrying the exact same reserved
+   marker line (unchanged format, unchanged version string) as an
+   isolated, later PR-activity event -- temporally separated from
+   whatever burst may have caused the original miss, addressing both
+   the coalescing and cooldown hypotheses the same way.
+
+**Why this preserves every existing guardrail:**
+- **Marker format**: byte-identical `KBH_CHIEF_REVIEW_READY_V1
+  issue=<N> head=<sha>` line, reusing the same construction logic
+  (duplicated, not imported, matching every other `.github/scripts`
+  module's independence convention -- checked against
+  `chief_ready_signal.py`'s copy by
+  `tests/test_agent_bridge_chief_retry_signal.py`).
+- **Wake-up only, never authoritative**: the retry comment says so
+  explicitly, same as the original.
+- **Idempotency**: capped at exactly one retry attempt per `(issue,
+  head)` by the exact-count check in step 3 above; Work's own
+  idempotent handling of a review request for an already-reviewed head
+  (AGENT_WORKFLOW.md, "Work-side Chief task") covers the remaining
+  case where a retry marker somehow reaches Work *after* it already
+  reviewed via some other path.
+- **No polling replacement**: this is one bounded `sleep` plus a
+  single re-check, not a recurring loop -- the hourly `Kvernhaug
+  Approval Watch` is completely untouched and remains the ultimate
+  fallback if even the retry is missed.
+- **No new autonomy**: no auto-merge, no direct `master` push (the
+  new steps use the same workflow token as the existing signal steps,
+  never Claude's `--allowedTools`), no issue-body mutation, no owner
+  bypass -- the new steps only ever post one PR comment.
+- **No product behavior touched**: changes are confined to
+  `.github/workflows/claude-agent-bridge.yml` and the new
+  `.github/scripts/chief_retry_signal.py`.
+- **"no retry needed" is not alarm-worthy**: unlike the original
+  signal's fail-closed rejection (a real anomaly once `status:review`
+  is live), `chief_retry_signal.py` always exits 0 -- most rejection
+  reasons here (a review already exists, a newer round already
+  superseded this head) mean the system worked as intended, so no new
+  failure-comment path was added for this case; genuine step failures
+  (e.g. a `gh` API error) still fall through to the existing "Report
+  Chief-ready signal emission failure" step exactly as before.
+
+**Testability boundary, stated plainly, exactly as for the original
+signal:** the retry decision logic and the workflow's step wiring are
+unit- and source-tested without touching GitHub. Whether 900 seconds
+is actually long enough to clear whatever Work-side behavior caused
+the PR #39 miss can only be confirmed by a real, controlled re-review
+E2E on a live issue -- acceptance criterion 4 for this issue -- which
+happens outside this run's control, the same honest limit already
+noted for `workflow_dispatch` and the original Chief-ready signal
+above. Nothing in this change claims that E2E has already passed.
+
 ## Scope-change rule
 
 Once a Claude run starts, the triggering issue's body is the run's
