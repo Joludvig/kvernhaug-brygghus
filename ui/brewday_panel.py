@@ -6,6 +6,7 @@ from modules.brewday_calc import (
 from modules.process_profiles import normaliser_prosessprofil
 from modules.export_format import fmt_og, fmt_fg, fmt_abv, stats_linje
 from modules.brewday_template import render_brewday_html
+from ui.kbhbrew_panel import render_kbhbrew_create_panel
 
 _SJEKKLISTE = [
     "Utstyr rent", "Meskevann varmt", "Skylling ferdig", "Kok startet",
@@ -85,6 +86,8 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         st.date_input("Bryggedato", key="bd_dato")
     with bi3:
         st.text_input("Brygger", placeholder="Navn", key="bd_brygger")
+
+    render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_database)
 
     st.write("---")
 

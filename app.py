@@ -25,6 +25,7 @@ from ui.brewday_panel import render_brewday_panel
 from ui.equipment_panel import render_equipment_panel
 from ui.process_panel import render_process_panel
 from ui.water_panel import render_water_panel
+from ui.kbhbrew_panel import render_kbhbrew_export_panel, render_kbhbrew_import_panel
 
 # 1. Grunnleggende Streamlit-konfigurering
 st.set_page_config(page_title="Kvernhaug Brygghus", page_icon="🍺", layout="wide")
@@ -181,6 +182,8 @@ with tab_bryggdag:
 # ==================================================
 with tab_verktoy:
     render_import_panel()
+    render_kbhbrew_import_panel()
+    render_kbhbrew_export_panel()
     # Utstyrsprofil er ren konfigurasjon (aldri brukt under aktiv brygging)
     # -- flyttet hit fra Bryggdag-fanen i Brewday Tab UX Cleanup V1 for å
     # redusere planleggings-/konfigstøy i selve bryggedagsverktøyet. Ren
