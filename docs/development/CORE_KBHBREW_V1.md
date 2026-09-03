@@ -904,7 +904,9 @@ must not invent.
   by `tests/test_kbhbrew_schema_contract.py`'s legacy-fixture
   validation test, which reads them unchanged).
 - Does not change `.kbhrecipe` in any way.
-- Does not resolve custom-ingredient identity (PRI 4).
+- Does not resolve custom-ingredient identity — see
+  [CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md](CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md)
+  (PRI 4A), which does not change `.kbhbrew` either.
 - Does not add a database/backend/cloud requirement — local-first is
   unchanged.
 - Does not fold Brew Lab's interpretation activity into `actuals`, and
