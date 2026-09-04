@@ -813,3 +813,146 @@ jobs:
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success' && steps.draft_verify.outcome != 'failure'
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted. Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
+
+  # ── Owner GO/NO-GO notification (issue #66) ─────────────────────────────
+  # INDEPENDENT of guard/execute above: fires on a `status:approved` label
+  # event (owner-applied, after a Chief PASS review — see AGENT_WORKFLOW.md
+  # "Work-side Chief task"), never invokes Claude, and never touches
+  # --allowedTools/the Claude step. Purpose: a real, event-driven, repo-side
+  # owner notification, because issue #66 observed that the native ChatGPT
+  # Work-side "separately notifies the owner with a GO/NO-GO prompt" step
+  # is not reliable enough alone (exact-head Chief APPROVED reached on
+  # issue #59 / PR #64 with no clear owner-facing prompt) — the same class
+  # of gap issues #32/#40/#44 already fixed for the Chief-review wake path,
+  # fixed here the same way: a deterministic, unit-tested, fail-closed
+  # decision (.github/scripts/go_notify_signal.py) plus its own atomic
+  # trigger authorization (.github/scripts/approved_notify_guard.py — a
+  # deliberately separate, single-label sibling of trigger_guard.py, so
+  # `status:approved` is never added to the list that gates the
+  # Claude-invoking `execute` job above). Preserves every existing
+  # guardrail: no auto-merge, no new Claude trigger surface, the existing
+  # hourly `Kvernhaug Approval Watch` and event-Chief behavior are
+  # completely untouched.
+  notify_guard:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.check.outputs.proceed }}
+      issue_number: ${{ steps.context.outputs.issue_number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve issue number and read live labels
+        id: context
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          WEBHOOK_ISSUE: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          live_labels=$(gh issue view "$WEBHOOK_ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]')
+          echo "Issue #$WEBHOOK_ISSUE live labels: $live_labels"
+          echo "issue_number=$WEBHOOK_ISSUE" >> "$GITHUB_OUTPUT"
+          echo "live_labels=$live_labels" >> "$GITHUB_OUTPUT"
+
+      # Same event-time + live authorization discipline as the main
+      # guard job's trigger_guard.py (issue #9/V1.1), but via a
+      # deliberately separate module scoped to exactly one label — see
+      # approved_notify_guard.py's module docstring for why it is not a
+      # reuse of trigger_guard.py.
+      - name: Evaluate GO/NO-GO notification authorization (event-time + live)
+        id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          LABEL_NAME: ${{ github.event.label.name }}
+          EVENT_LABELS: ${{ toJSON(github.event.issue.labels.*.name) }}
+          LIVE_LABELS: ${{ steps.context.outputs.live_labels }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+          SENDER_TYPE: ${{ github.event.sender.type }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/approved_notify_guard.py >> "$GITHUB_OUTPUT"
+
+  notify:
+    needs: notify_guard
+    if: needs.notify_guard.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      ISSUE: ${{ needs.notify_guard.outputs.issue_number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute deterministic bridge branch name
+        id: branch
+        run: |
+          set -euo pipefail
+          echo "name=$(python3 .github/scripts/branch_policy.py "$ISSUE")" >> "$GITHUB_OUTPUT"
+
+      # Fresh refetch — never anything cached from before this job started
+      # (same "Ordering / race safety" discipline as chief_ready_signal.py
+      # / pr_ready_handoff.py). Idempotency dedup reads the ISSUE's own
+      # comments (not the PR's) because the GO/NO-GO notification is
+      # posted on the issue — the same place every other owner-facing
+      # Bridge notice in this workflow already goes.
+      - name: Refetch live state for GO/NO-GO notification (issue #66)
+        id: notify_state
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          set -euo pipefail
+          labels_json=$(gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]')
+          prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+            --json number,state,baseRefName,headRefOid,headRefName)
+          pr_number_for_lookup=$(echo "$prs_json" | jq -r '.[0].number // empty')
+          if [ -n "$pr_number_for_lookup" ]; then
+            reviews_json=$(gh pr view "$pr_number_for_lookup" --repo "$REPO" --json reviews -q '.reviews')
+          else
+            reviews_json='[]'
+          fi
+          comments_json=$(gh issue view "$ISSUE" --repo "$REPO" --json comments -q '[.comments[].body]')
+          jq -n --argjson issue_number "$ISSUE" \
+                --argjson issue_labels "$labels_json" \
+                --argjson prs "$prs_json" \
+                --argjson reviews "$reviews_json" \
+                --argjson comments "$comments_json" \
+                --arg branch "$BRANCH" \
+                '{issue_number:$issue_number, issue_labels:$issue_labels, prs:$prs, reviews:$reviews, comments:$comments, branch:$branch}' \
+            > "$RUNNER_TEMP/go_notify_state.json"
+
+      # Pure/testable decision — see .github/scripts/go_notify_signal.py
+      # and tests/test_agent_bridge_go_notify_signal.py. Fail-closed exit 1
+      # on a genuine rejection (same exit-code contract as
+      # chief_ready_signal.py) — `post=true`/`duplicate=true` both exit 0.
+      - name: Decide GO/NO-GO notification (issue #66)
+        id: go_notify
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/go_notify_signal.py "$RUNNER_TEMP/go_notify_comment.txt" \
+            < "$RUNNER_TEMP/go_notify_state.json" >> "$GITHUB_OUTPUT"
+
+      # The one owner-facing comment this whole feature exists to emit.
+      # Deliberately NOT part of Claude's run or --allowedTools — posted
+      # entirely with the workflow's own token, so no new Claude trigger
+      # surface is introduced.
+      - name: Post GO/NO-GO notification comment (issue #66)
+        if: steps.go_notify.outputs.post == 'true'
+        run: |
+          set -euo pipefail
+          gh issue comment "$ISSUE" --repo "$REPO" --body-file "$RUNNER_TEMP/go_notify_comment.txt"
+
+      # Fail-closed rejection (live state no longer satisfies the notify
+      # contract — e.g. no APPROVED review yet on the exact live head, or
+      # the issue no longer exclusively status:approved) is a genuine
+      # failure, not a silent no-op. Never rolls back any label and never
+      # merges anything — the existing hourly Chief watch remains the
+      # fallback path for owner visibility.
+      - name: Report GO/NO-GO notification rejection (issue #66)
+        if: failure() && steps.go_notify.outcome == 'failure'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE was labeled \`status:approved\`, but the owner GO/NO-GO notification could not be verified on a fresh refetch of live state — see this workflow run's logs for the exact reason. No merge action was taken and no label was changed; the existing hourly Chief watch remains the fallback path for owner visibility."
