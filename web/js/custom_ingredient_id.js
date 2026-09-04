@@ -53,16 +53,37 @@ function _customIngredientIderIOppskrift(recipe) {
   return ider;
 }
 
+// Chief-runde (PR #52 review): AKTIV_KLADD_NOKKEL -- den aktive, ulagrede
+// kladden i byggeren -- er et FJERDE lokalt lagringssted som kan holde en
+// custom-ingrediens-id, fordi app.js autolagrer den assemblerte oppskriften
+// dit ved HVER beregning (se app.js sin hentAktivKladd()/AKTIV_KLADD_NOKKEL-
+// kommentar), altså lenge før raden noensinne havner i alleOppskrifter(),
+// pantry eller et brygg-snapshot. Uten denne kilden ville et
+// generasjonstids-kollisjon-forsøk mot en id som KUN finnes i den aktive
+// kladden bli akseptert, i strid med kontraktens §6. AKTIV_KLADD_NOKKEL er
+// en konstant (ikke en funksjon som de tre andre kildene over), definert i
+// BÅDE app.js og pantry_page.js -- begge alltid lastet ETTER denne filen
+// (se <script>-rekkefølgen i index.html/pantry.html) -- så samme
+// feature-detection-prinsipp (typeof ... !== "undefined") brukes her også.
+function _aktivKladdCustomIngredientIder() {
+  if (typeof AKTIV_KLADD_NOKKEL === "undefined") return [];
+  try {
+    return _customIngredientIderIOppskrift(JSON.parse(localStorage.getItem(AKTIV_KLADD_NOKKEL)));
+  } catch {
+    return [];
+  }
+}
+
 // Kontraktens §6 -- kollisjonssjekken ved MINTING må dekke ETHVERT lokalt
 // lagringssted som kan holde en custom-ingrediens-id i dag: pantry, alle
-// lagrede oppskrifter, og alle frosne brygg-snapshots (ALDRI kun samlingen
-// man er i ferd med å skrive til). Hver kilde er bevisst feature-detected
-// (typeof ... === "function") i stedet for antatt lastet -- denne filen
-// lastes kun på de to sidene som faktisk MINTER nye id-er (index.html,
-// pantry.html). Begge sider laster nå alle tre lagrings-modulene
-// (pantry.js/recipe_storage.js/brew_storage.js) i tillegg til denne filen,
-// slik at feature-detecten alltid finner alle tre der -- se
-// <script>-rekkefølgen i index.html/pantry.html.
+// lagrede oppskrifter, alle frosne brygg-snapshots, og den aktive kladden
+// (ALDRI kun samlingen man er i ferd med å skrive til). Hver kilde er
+// bevisst feature-detected (typeof ... === "function"/"undefined") i stedet
+// for antatt lastet -- denne filen lastes kun på de to sidene som faktisk
+// MINTER nye id-er (index.html, pantry.html). Begge sider laster nå alle
+// tre lagrings-modulene (pantry.js/recipe_storage.js/brew_storage.js) i
+// tillegg til denne filen, slik at feature-detecten alltid finner alle tre
+// der -- se <script>-rekkefølgen i index.html/pantry.html.
 function alleLokaleCustomIngredientIder() {
   const ider = new Set();
   if (typeof allePantryItems === "function") {
@@ -81,6 +102,7 @@ function alleLokaleCustomIngredientIder() {
       for (const id of _customIngredientIderIOppskrift(recipe)) ider.add(id);
     }
   }
+  for (const id of _aktivKladdCustomIngredientIder()) ider.add(id);
   return ider;
 }
 
