@@ -269,8 +269,9 @@ class TestFullFlowLagerStatusSkaleringOgPersistens(_PantryAppTestCase):
 
 class TestEgendefinertIngrediensIUI(_PantryAppTestCase):
     """UI-flyt for «Egendefinert ingrediens»: valget vises i selectboxen,
-    krever navn, får en custom_-ID, markeres tydelig i lagerlisten, og
-    påvirker aldri oppskriftskontrollen (Krav: ingen automatisk match)."""
+    krever navn, får en kbh-custom-ID (Core custom-ingredient identity-
+    kontrakten §3), markeres tydelig i lagerlisten, og påvirker aldri
+    oppskriftskontrollen (Krav: ingen automatisk match)."""
 
     def test_egendefinert_valg_finnes_i_ingrediens_selectboxen(self):
         at = self._kjor()
@@ -294,7 +295,7 @@ class TestEgendefinertIngrediensIUI(_PantryAppTestCase):
         items = at.session_state["_debug_pantry"]["items"]
         self.assertEqual(len(items), 1)
         self.assertTrue(items[0]["is_custom"])
-        self.assertTrue(items[0]["ingredient_id"].startswith("custom_"))
+        self.assertTrue(items[0]["ingredient_id"].startswith("kbh-custom-"))
         self.assertEqual(items[0]["name_snapshot"], "Restmalt fra forrige brygg")
 
     def test_egendefinert_vises_merket_i_lagerlisten(self):
@@ -312,9 +313,9 @@ class TestEgendefinertIngrediensIUI(_PantryAppTestCase):
 
         rader = at.session_state["_debug_mangler_rader"]
         # Ingen av radene i oppskriftskontrollen (som alle stammer fra
-        # OPPSKRIFTENS ingredienser, ikke lagerets) skal ha en custom_-ID --
+        # OPPSKRIFTENS ingredienser, ikke lagerets) skal ha en kbh-custom--ID --
         # den egendefinerte posten skal ikke ha "smittet over" på noen måte.
-        self.assertFalse(any(str(r.get("ingredient_id", "")).startswith("custom_") for r in rader))
+        self.assertFalse(any(str(r.get("ingredient_id", "")).startswith("kbh-custom-") for r in rader))
 
     def test_egendefinert_navn_kan_endres_uten_at_id_endres(self):
         at = self._kjor()

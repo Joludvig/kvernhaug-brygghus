@@ -288,38 +288,66 @@ def opprett_pantry_item(ingredient_type, ingredient_id, name_snapshot, quantity,
     }
 
 
-def _generer_custom_ingredient_id():
-    """Stabil ID for en egendefinert (ikke-master-DB) ingrediens. Genereres
+# Core custom-ingredient identity-namespaceprefiks
+# (docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md §3). Enhver NY
+# egendefinert ingrediens App oppretter fra og med PRI 4B mintes i dette
+# formatet -- allerede lagrede legacy `custom_*`-ID-er (mintet av den
+# tidligere `custom_<uuid-hex12>`-formen) er permanent grandfatret av
+# kontraktens §9 og røres ALDRI av denne modulen.
+CUSTOM_INGREDIENT_ID_PREFIX = "kbh-custom-"
+
+
+def _generer_custom_ingredient_id(eksisterende_ider=None):
+    """Stabil ID for en egendefinert (ikke-master-DB) ingrediens, mintet i
+    Core-kontraktens kanoniske format `kbh-custom-<uuidv4>` (§3). Genereres
     ÉN gang ved opprettelse og endres ALDRI senere, heller ikke når
     brukeren redigerer visningsnavnet — «stabil» betyr her at ID-en
-    identifiserer ingrediensen for godt, uavhengig av senere redigering."""
-    return f"custom_{uuid.uuid4().hex[:12]}"
+    identifiserer ingrediensen for godt, uavhengig av senere redigering.
+
+    `eksisterende_ider` er mengden av ID-er som allerede er i bruk lokalt
+    (i praksis: alle ingredient_id-er i pantry, i dag App sin eneste
+    lagringsplass som kan holde en custom-ingrediens-ID — se kontraktens
+    §6). Ved en (statistisk sett forsvinnende usannsynlig) kollisjon
+    mintes en FRISK ID i stedet for å gjenbruke/overskrive den
+    eksisterende — aldri omvendt."""
+    eksisterende_ider = eksisterende_ider or set()
+    ny_id = f"{CUSTOM_INGREDIENT_ID_PREFIX}{uuid.uuid4()}"
+    while ny_id in eksisterende_ider:
+        ny_id = f"{CUSTOM_INGREDIENT_ID_PREFIX}{uuid.uuid4()}"
+    return ny_id
 
 
 def opprett_egendefinert_pantry_item(ingredient_type, navn, quantity, unit,
                                       opened=False, best_before=None, lot_number="",
-                                      storage_location="", notes=""):
+                                      storage_location="", notes="", pantry=None):
     """Oppretter en lagerpost for en EGENDEFINERT ingrediens — noe brukeren
     har hjemme som ikke finnes i master-databasen (f.eks. hjemmelaget
     honning, en gjenbrukt gjærkake, en spesialgjær kjøpt til noe annet enn
     øl). `ingredient_type` er fortsatt malt/humle/gjaer (styrer basisenhet
-    og sikkerhetsmargin), men får en fersk custom_-ingredient_id i stedet
-    for en ID fra masterdatabasen. Krever et ikke-tomt navn — kaster
-    ValueError ellers.
+    og sikkerhetsmargin), men får en fersk kbh-custom-ingredient_id (Core
+    custom-ingredient identity-kontrakten §3) i stedet for en ID fra
+    masterdatabasen. Krever et ikke-tomt navn — kaster ValueError ellers.
+
+    `pantry` (valgfri) er gjeldende pantry-struktur — sendes med for å la
+    kollisjonssjekken i _generer_custom_ingredient_id() se ID-er som
+    allerede er i bruk der. Ikke påkrevd (kollisjon er i praksis aldri
+    observerbar med UUIDv4), men lar kalleren følge kontraktens §6 uten at
+    denne funksjonen selv må lese pantry.json fra disk.
 
     Dette er nettopp DERFOR egendefinerte varer aldri matches automatisk
     mot en oppskrift: beregn_mangler() slår opp oppskriftens ingrediens-
     ID-er (som alltid kommer fra malt_db/humle_db/gjaer_db) mot lagerets
-    ingredient_id-er — en custom_-ID vil aldri finnes i en oppskrift med
+    ingredient_id-er — en custom-ID vil aldri finnes i en oppskrift med
     mindre brukeren en gang i fremtiden får en egen, eksplisitt
     koblingsfunksjon (ikke bygget i V1)."""
     navn = (navn or "").strip()
     if not navn:
         raise ValueError("Egendefinert ingrediens krever et navn.")
 
+    eksisterende_ider = {i.get("ingredient_id") for i in (pantry or {}).get("items", [])}
     item = opprett_pantry_item(
         ingredient_type=ingredient_type,
-        ingredient_id=_generer_custom_ingredient_id(),
+        ingredient_id=_generer_custom_ingredient_id(eksisterende_ider),
         name_snapshot=navn,
         quantity=quantity, unit=unit, opened=opened, best_before=best_before,
         lot_number=lot_number, storage_location=storage_location, notes=notes,
