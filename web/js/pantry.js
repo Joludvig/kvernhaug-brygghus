@@ -21,11 +21,19 @@
 // peker på en ingrediens med EKSAKT samme id-skjema som en oppskrifts
 // malt[]/humle[]-rader og gjaerId/gjaerCustom bruker -- enten en
 // masterdata-nøkkel (samme streng som web/data/malt.json/humle.json/
-// gjaer.json sine objekt-nøkler) eller en egen "egen_pantry_<type>_<unik>"-
-// id for custom-varer. ALDRI fuzzy/normalisert navnematching. Custom
-// pantry-ider er en EGEN navnerom fra oppskriftenes "egen_malt_<timestamp>_
-// <teller>"-ider -- de skal ALDRI antas å matche hverandre (se Runde 24
-// pkt. 6/8). Recipe-sammenligning bygges i Runde 24B, ikke her.
+// gjaer.json sine objekt-nøkler) eller en custom-ingrediens-id for
+// custom-varer. ALDRI fuzzy/normalisert navnematching. Recipe-sammenligning
+// bygges i Runde 24B, ikke her.
+//
+// PRI 4C (issue #50) -- fram til nå mintet pantry en EGEN
+// "egen_pantry_<type>_<unik>"-id per custom-vare, i et eget navnerom fra
+// oppskriftenes "egen_malt_<timestamp>_<teller>"-ider (Runde 24 pkt. 6/8).
+// Fra og med nå deler pantry, oppskriftenes malt/humle og custom-gjær ETT
+// felles, opakt `kbh-custom-<uuidv4>`-navnerom (Core-kontraktens §3, se
+// docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md) -- se
+// nyCustomIngredientId() i custom_ingredient_id.js. Allerede lagrede
+// `egen_pantry_*`-ider er permanent grandfatret (kontraktens §9) og røres
+// ALDRI av denne filen.
 
 const PANTRY_NOKKEL = "kvernhaug_web_pantry";
 const PANTRY_VERSION = 1;
@@ -136,13 +144,6 @@ function _genererPantryItemId() {
   return _genererId("pantryitem");
 }
 
-// Egen navnerom fra oppskriftenes "egen_malt_<timestamp>_<teller>" -- se
-// filhode-kommentaren. IKKE samme prefiks/form som app.js sin
-// nyEgendefinertId(), bevisst, slik at det aldri er mulig å forveksle de to.
-function nyPantryCustomId(ingredientType) {
-  return _genererId(`egen_pantry_${ingredientType}`);
-}
-
 function _erGyldigMengde(ingredientType, mengde) {
   if (typeof mengde !== "number" || !isFinite(mengde) || mengde < 0) return false;
   if (ingredientType === "gjaer" && !Number.isInteger(mengde)) return false;
@@ -175,7 +176,7 @@ function leggTilPantryItem({ ingredientType, id, custom, mengde, notat }) {
   const item = {
     pantryItemId: _genererPantryItemId(),
     ingredientType,
-    id: custom ? nyPantryCustomId(ingredientType) : id,
+    id: custom ? nyCustomIngredientId() : id,
     mengde,
   };
   if (custom) item.custom = { navn: custom.navn.trim(), produsent: (custom.produsent || "").toString().trim() || undefined };

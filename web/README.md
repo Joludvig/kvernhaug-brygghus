@@ -90,6 +90,10 @@ web/
   js/pantry.js            DOM-fri Pantry-state (Runde 24A) -- samme mønster som equipment.js. Egen
                           kvernhaug_web_pantry-nøkkel, aldri blandet med recipes/utstyr/.kbhrecipe. Eget
                           .kbhpantry backup-/importformat (Runde 24C), aldri .kbhrecipe
+  js/custom_ingredient_id.js   DOM-fri (PRI 4C/issue #50): minter Core sin kbh-custom-<uuidv4>-id for
+                          NYE egendefinerte ingredienser (malt/humle/gjær/pantry, ETT delt navnerom),
+                          med kollisjonssjekk på tvers av pantry/oppskrifter/brygg. Lastet av
+                          index.html OG pantry.html, se docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md
   js/pantry_compare.js    DOM-fri oppskrift <-> lager-sammenligning (Runde 24B) -- samme mønster som
                           recipe_engine.js. required/available/shortage per ingrediens, aldri persistert
   js/pantry_page.js       Lager-siden: CRUD-UI over pantry.js, enhetsbevisst mengde via units.js, samt
