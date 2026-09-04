@@ -111,11 +111,39 @@ class TestVurderReadyGodkjenner(unittest.TestCase):
         self.assertTrue(begrunnelse)
 
 
-class TestRunde1Sikkerhet(unittest.TestCase):
-    # ─── 3: PR allerede Ready er et IKKE-alarmerende no-op ────────────────
+class TestRunde1BrukerSammeOvergangSomChangesRequested(unittest.TestCase):
+    """Issue #62: en fersk `status:ready`-PR opprettes nå som Draft (Claudes
+    `gh pr create --draft`), så runde 1 går via NØYAKTIG samme
+    Draft -> Ready-overgang som en changes-requested-runde -- ikke lenger
+    en unntaksfri "allerede Ready"-sikkerhet (den gamle TestRunde1Sikkerhet-
+    antagelsen, som denne klassen erstatter)."""
+
+    def test_godkjenner_runde_1_transisjon_nar_pr_er_draft(self):
+        set_ready, already_ready, pr_nummer, head_sha, begrunnelse = _PRH.vurder_ready(
+            issue_nummer=44,
+            issue_labels=["status:review"],
+            prs=[_pr(is_draft=True)],
+            branch_navn="agent/issue-44",
+            signalert_head_sha=_HEAD_A,
+            eksisterende_kommentarer=[_CREADY.bygg_marker(44, _HEAD_A)],
+            pr_reviews=[],
+            trigger_label="status:ready",
+        )
+        self.assertTrue(set_ready)
+        self.assertFalse(already_ready)
+        self.assertEqual(pr_nummer, 45)
+        self.assertEqual(head_sha, _HEAD_A)
+        self.assertTrue(begrunnelse)
 
     def test_pr_allerede_ready_er_no_op_ikke_feil(self):
-        eksisterende = [_CREADY.bygg_marker(44, _HEAD_A)]
+        # Post-issue #62: "allerede Ready" er kun et no-op nar en
+        # ready-transition-done-markor BEVISER at DENNE mekanismen selv
+        # utforte overgangen -- se TestPrAlleredeReadyKreverBevisUansett
+        # under for den fail-closed motsatsen (ingen slik markor).
+        eksisterende = [
+            _CREADY.bygg_marker(44, _HEAD_A),
+            _PRH.bygg_ready_done_marker(44, _HEAD_A),
+        ]
         set_ready, already_ready, pr_nummer, head_sha, begrunnelse = _PRH.vurder_ready(
             issue_nummer=44,
             issue_labels=["status:review"],
@@ -132,12 +160,12 @@ class TestRunde1Sikkerhet(unittest.TestCase):
         self.assertEqual(head_sha, _HEAD_A)
         self.assertTrue(begrunnelse)
 
-    def test_pr_allerede_ready_uten_trigger_label_er_fortsatt_no_op(self):
-        # Bakoverkompatibelt default (ingen trigger_label oppgitt) er
-        # fortsatt den trygge grenen -- workflowen sender i praksis alltid
-        # en av de to eksakte verdiene, men et manglende argument skal
-        # ikke plutselig bli en fail-closed avvisning for eksisterende
-        # kallere.
+    def test_pr_allerede_ready_uten_trigger_label_krever_ogsa_bevis(self):
+        # Post-issue #62: `trigger_label` avgjor ikke lenger noe for denne
+        # grenen (se moduldocstring) -- et manglende argument er derfor
+        # IKKE lenger en automatisk trygg gren; uten ready-transition-
+        # done-markoren er dette en reell, fail-closed avvisning, akkurat
+        # som for en eksplisitt trigger_label.
         eksisterende = [_CREADY.bygg_marker(44, _HEAD_A)]
         set_ready, already_ready, *_rest = _PRH.vurder_ready(
             issue_nummer=44,
@@ -149,13 +177,15 @@ class TestRunde1Sikkerhet(unittest.TestCase):
             pr_reviews=[],
         )
         self.assertFalse(set_ready)
-        self.assertTrue(already_ready)
+        self.assertFalse(already_ready)
 
 
 class TestChangesRequestedReadyFailOpen(unittest.TestCase):
-    """Chief-review-fiks (PR #45, runde 3): for status:changes-requested
-    er "allerede Ready" IKKE unntaksfritt trygt -- kun bevist av en
-    KBH_PR_READY_TRANSITION_DONE_V1-markør for nettopp dette hodet."""
+    """Chief-review-fiks (PR #45, runde 3; issue #62 generaliserer den samme
+    regelen til status:ready, se TestRunde1BrukerSammeOvergangSomChangesRequested
+    over): for status:changes-requested er "allerede Ready" IKKE
+    unntaksfritt trygt -- kun bevist av en KBH_PR_READY_TRANSITION_DONE_V1-
+    markør for nettopp dette hodet."""
 
     def test_changes_requested_allerede_ready_uten_bevis_avvises(self):
         # PR-en kan ha blitt eksternt/prematurt undraftet FØR dette
@@ -418,6 +448,24 @@ class TestCliExitKode(unittest.TestCase):
         self.assertIn("already_ready=false", res.stdout)
 
     def test_allerede_ready_gir_null_exit(self):
+        # Post-issue #62: krever ready-transition-done-markoren uansett
+        # trigger_label for a vaere et gyldig already_ready-no-op.
+        res = self._kjor_cli({
+            "issue_number": 44,
+            "issue_labels": ["status:review"],
+            "prs": [_pr(is_draft=False)],
+            "branch": "agent/issue-44",
+            "signaled_head_sha": _HEAD_A,
+            "comments": [_CREADY.bygg_marker(44, _HEAD_A), _PRH.bygg_ready_done_marker(44, _HEAD_A)],
+            "reviews": [],
+        })
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("set_ready=false", res.stdout)
+        self.assertIn("already_ready=true", res.stdout)
+
+    def test_allerede_ready_uten_markor_gir_ikke_null_exit(self):
+        # Motsatsen: uten den markoren er dette IKKE lenger et no-op --
+        # samme fail-closed avvisning som en changes-requested-runde.
         res = self._kjor_cli({
             "issue_number": 44,
             "issue_labels": ["status:review"],
@@ -427,9 +475,9 @@ class TestCliExitKode(unittest.TestCase):
             "comments": [_CREADY.bygg_marker(44, _HEAD_A)],
             "reviews": [],
         })
-        self.assertEqual(res.returncode, 0)
+        self.assertNotEqual(res.returncode, 0)
         self.assertIn("set_ready=false", res.stdout)
-        self.assertIn("already_ready=true", res.stdout)
+        self.assertIn("already_ready=false", res.stdout)
 
     def test_gyldig_overgang_gir_null_exit_og_set_ready_true(self):
         res = self._kjor_cli({
@@ -516,7 +564,7 @@ class TestCliExitKode(unittest.TestCase):
                     "prs": [_pr(is_draft=False)],
                     "branch": "agent/issue-44",
                     "signaled_head_sha": _HEAD_A,
-                    "comments": [_CREADY.bygg_marker(44, _HEAD_A)],
+                    "comments": [_CREADY.bygg_marker(44, _HEAD_A), _PRH.bygg_ready_done_marker(44, _HEAD_A)],
                     "reviews": [],
                     "trigger_label": "status:ready",
                 }),
@@ -723,6 +771,62 @@ class TestWorkflowKildetekst(unittest.TestCase):
         # denne testen dokumenterer nettopp det premisset eksplisitt.
         steg = self._finn_steg("Report failure — leave at status:working for manual follow-up")
         self.assertIn("steps.promote.outcome != 'success'", steg)
+
+
+class TestRunde1DraftPromptIssue62(unittest.TestCase):
+    """Issue #62: en fersk status:ready-PR skal opprettes som Draft, slik at
+    runde 1 far en ekte ready_for_review-hendelse istedenfor a stole
+    utelukkende pa det upalitelige PR-kommentar-markorsignalet. Verifiserer
+    KUN workflow-KILDETEKSTEN (samme stdlib-only monster som de andre
+    workflow-testene her) -- ingen ekte GitHub-/Claude-kall."""
+
+    def setUp(self):
+        with open(_WORKFLOW, encoding="utf-8") as f:
+            self.tekst = f.read()
+
+    def _run_claude_steg(self):
+        match = re.search(
+            r"^([ \t]*)- name: Run Claude Code\n(.*?)(?=^\1- name:|\Z)",
+            self.tekst, re.MULTILINE | re.DOTALL,
+        )
+        self.assertIsNotNone(match)
+        return match.group(0)
+
+    def test_status_ready_prompten_bruker_gh_pr_create_draft(self):
+        steg = self._run_claude_steg()
+        self.assertIn("gh pr create --draft", steg)
+
+    def test_status_changes_requested_prompten_bruker_ikke_draft_flagget(self):
+        # Runde 2+ pusher til en ALLEREDE eksisterende PR (som
+        # pr_draft_handoff.py allerede har konvertert til Draft FOR Claude
+        # kjorer) -- den grenen av prompten skal ikke selv nevne
+        # `gh pr create`/`--draft` i det hele tatt.
+        steg = self._run_claude_steg()
+        changes_requested_del = steg[steg.index("status:changes-requested`:"):]
+        self.assertNotIn("gh pr create", changes_requested_del)
+
+    def test_allowedtools_utvides_ikke(self):
+        # Issue #62 skal ikke lose opp verktoy-/tillatelsesmodellen --
+        # `--draft` er bare et ekstra argument til den allerede tillatte
+        # `Bash(gh pr create *)`-regelen, ingen ny --allowedTools-oppforing.
+        steg = self._run_claude_steg()
+        match = re.search(r'--allowedTools "([^"]*)"', steg)
+        self.assertIsNotNone(match)
+        verktoy = [v.strip() for v in match.group(1).split(",")]
+        self.assertIn("Bash(gh pr create *)", verktoy)
+        for forbudt in ("gh pr merge", "git merge", "Bash(Write", "Bash(Edit"):
+            self.assertNotIn(forbudt, match.group(1))
+
+    def test_ingen_nye_workflow_steg_lagt_til_for_runde_1_draft_handoff(self):
+        # "Smallest conservative change" (issue #62 scope): runde 1 skal
+        # gjenbruke NOYAKTIG de samme post-Claude Draft -> Ready-stegene
+        # (issue #44) som changes-requested allerede bruker -- ingen egen
+        # runde-1-spesifikk konverteringssteg-familie.
+        for navn in (
+            "Convert PR to Draft for status:ready",
+            "Convert freshly created PR to Draft",
+        ):
+            self.assertNotIn(navn, self.tekst)
 
 
 if __name__ == "__main__":

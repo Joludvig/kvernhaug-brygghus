@@ -291,9 +291,13 @@ jobs:
       # The actual mutation -- only for a genuine status:changes-requested
       # handoff onto an existing, non-Draft PR (see pr_draft_handoff.py
       # for every fail-closed/no-op condition). Never runs for
-      # status:ready -- a freshly `gh pr create`d PR is already Ready,
-      # and round 1's Chief wake keeps relying on the existing `opened`
-      # PR event + Chief-ready marker, completely unchanged.
+      # status:ready -- there is no PR to convert yet at this point in
+      # the run (Claude hasn't created one). A fresh status:ready PR is
+      # instead opened directly as Draft by Claude's own `gh pr create
+      # --draft` (issue #62), so it goes through the SAME Draft -> Ready
+      # transition below (see "Transition PR to Ready for review") as a
+      # changes-requested round, instead of relying solely on the
+      # `opened` PR event + Chief-ready marker as before issue #62.
       - name: Convert PR to Draft for changes-requested handoff (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && steps.draft_decide.outputs.set_draft == 'true'
         run: |
@@ -464,8 +468,11 @@ jobs:
               (`git checkout -b ${{ steps.branch.outputs.name }} origin/master`),
               implement exactly what the issue specifies, run the tests
               it requests, commit, push, and open a PR to `master` with
-              `gh pr create`, with a report following the issue's own
-              "Deliverable" section. Do not merge.
+              `gh pr create --draft`, with a report following the
+              issue's own "Deliverable" section. Do not merge. Open it
+              as **Draft** — the workflow itself converts it to Ready
+              for review once the deliverable/Chief-ready checks pass
+              (issue #62); do not pass any other visibility flag.
             - If `${{ env.TRIGGER_LABEL }}` is `status:changes-requested`:
               this is a follow-up pass against the SAME branch,
               `${{ steps.branch.outputs.name }}` — fetch and check it
@@ -654,11 +661,11 @@ jobs:
       # and tests/test_agent_bridge_pr_ready_handoff.py. Fail-closed exit
       # 1 on a genuine rejection (same exit-code contract as
       # chief_ready_signal.py, so the failure-report step below actually
-      # runs) -- but `already_ready=true` (the PR was never Draft, e.g.
-      # round 1, or -- for a status:changes-requested round -- a proven
-      # prior run of THIS mechanism already completed the transition for
-      # this exact head, per the KBH_PR_READY_TRANSITION_DONE_V1 marker
-      # check, PR #45 round 3) is a NON-alarming no-op and still exits 0.
+      # runs) -- but `already_ready=true` (a proven prior run of THIS
+      # mechanism already completed the transition for this exact head,
+      # per the KBH_PR_READY_TRANSITION_DONE_V1 marker check, PR #45
+      # round 3, generalized to every trigger label by issue #62) is a
+      # NON-alarming no-op and still exits 0.
       # Passes an output-file path so the script can write that same
       # done-marker text (only when set_ready=true) for the posting step
       # below to actually post -- same pattern as chief_ready_signal.py.
@@ -675,8 +682,10 @@ jobs:
       # (`ready_for_review`) than a PR comment, which is exactly what
       # issue #44 replaces the unreliable comment-only retry (issue #40)
       # with. Only fires when the PR is actually Draft (see
-      # pr_ready_handoff.py's `isDraft` check) -- a harmless no-op
-      # (nothing to transition) for round 1.
+      # pr_ready_handoff.py's `isDraft` check) -- true for round 1 too
+      # since issue #62 (Claude's `gh pr create --draft`), so this now
+      # normally DOES fire on a fresh status:ready round as well, not
+      # only on status:changes-requested rounds.
       - name: Transition PR to Ready for review (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success' && steps.ready_decide.outputs.set_ready == 'true'
         id: transition
