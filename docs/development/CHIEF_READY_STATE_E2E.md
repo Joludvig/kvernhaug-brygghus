@@ -19,7 +19,7 @@ same branch/PR, per Chief's deliberate single-instruction review)
 changes it to `B` and nothing else in this file.
 
 ```
-E2E_STAGE=A
+E2E_STAGE=B
 ```
 
 ## Do not
