@@ -32,25 +32,29 @@ referanse pluss selve token-filen — det introduserer ingen nye verdier.
 
 ## 1. Fargeroller
 
-Seks **aksentfarger** er allerede delt, byte-identiske, på tvers av alle
-overflater i produksjon i dag — `design/tokens.json` sin `color.accent` er
-nå den ene sannhetskilden for dem:
+Seks **aksentfarger** utgjør `design/tokens.json` sin `color.accent` — den
+ene sannhetskilden for dem. Hver av de tre håndvedlikeholdte konsumentene
+brukte allerede sitt eget delsett av disse seks verdiene, byte-identisk der
+de faktisk overlapper, før dette dokumentet fantes; ingen av dem definerte
+alle seks:
 
-| Rolle | Token-nøkkel | Hex | Brukes til |
-|---|---|---|---|
-| Gull | `accent.gold` | `#c49a2a` | Primær merkevareaksent — rammer, lenker, aktive tilstander, fokusring |
-| Pergament | `accent.pergament` | `#dfd0a0` | Primær overskrifts-/emfasetekst på mørk/varm bakgrunn |
-| Mosegrønn | `accent.moss` | `#3d6b2a` | Sekundær merkevareaksent — stil-/undertekst, positiv-aktig tone |
-| Kobber | `accent.copper` | `#9e6030` | Varm aksent — besøkte lenker, rustikk detalj |
-| Elfenbein | `accent.elfenbein` | `#c8b882` | Dempet merkevaretekst — bildetekster, motto, footer |
-| Danger | `accent.danger` | `#c0605a` | Kun feil-/destruktiv tilstand — aldri dekorativ |
+| Rolle | Token-nøkkel | Hex | Brukes til | Brukes i |
+|---|---|---|---|---|
+| Gull | `accent.gold` | `#c49a2a` | Primær merkevareaksent — rammer, lenker, aktive tilstander, fokusring | `ui/branding.py`, `modules/card_template.py`, `web/css/style.css` |
+| Pergament | `accent.pergament` | `#dfd0a0` | Primær overskrifts-/emfasetekst på mørk/varm bakgrunn | `ui/branding.py`, `modules/card_template.py`, `web/css/style.css` |
+| Mosegrønn | `accent.moss` | `#3d6b2a` | Sekundær merkevareaksent — stil-/undertekst, positiv-aktig tone | `ui/branding.py`, `modules/card_template.py`, `web/css/style.css` |
+| Kobber | `accent.copper` | `#9e6030` | Varm aksent — besøkte lenker, rustikk detalj | `ui/branding.py`, `modules/card_template.py`, `web/css/style.css` |
+| Elfenbein | `accent.elfenbein` | `#c8b882` | Dempet merkevaretekst — bildetekster, motto, footer | `modules/card_template.py`, `web/css/style.css` (ikke `ui/branding.py`) |
+| Danger | `accent.danger` | `#c0605a` | Kun feil-/destruktiv tilstand — aldri dekorativ | `web/css/style.css` (ikke `ui/branding.py` eller `card_template.py`) |
 
 Dette er **ikke** nye ønskeverdier: det er de samme verdiene som allerede
-sto håndskrevet i `ui/branding.py`, `modules/card_template.py` og
-`web/css/style.css` sin `:root`-blokk før dette dokumentet fantes. Å
-formalisere dem som tokens gjør en tilfeldighet til en kontrakt —
-`tests/test_design_tokens.py` feiler dersom noen av disse fire stedene
-driver bort fra `design/tokens.json` uten at de andre oppdateres samtidig.
+sto håndskrevet i `ui/branding.py` (fire av de seks: gull, pergament,
+mosegrønn, kobber), `modules/card_template.py` (fem: de fire over pluss
+elfenbein) og `web/css/style.css` sin `:root`-blokk (alle seks) før dette
+dokumentet fantes. Å formalisere dem som tokens gjør en tilfeldighet til
+en kontrakt — `tests/test_design_tokens.py` feiler dersom noen av disse
+tre konsumentenes eksisterende delsett driver bort fra
+`design/tokens.json`, eller fra CSS, for de fargene den faktisk definerer.
 
 ### Overflatefarger (bakgrunn/tekst/dempet) er bevisst per kontekst
 

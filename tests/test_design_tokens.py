@@ -107,6 +107,88 @@ class TestValiderTokensAvviserOdelagteData(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_tokens(data)
 
+    def test_tom_radius_px_feiler(self):
+        data = self._gyldig_kopi()
+        data["radius_px"] = {}
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_manglende_radius_notekkel_feiler(self):
+        data = self._gyldig_kopi()
+        del data["radius_px"]["pill"]
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_tom_shadow_feiler(self):
+        data = self._gyldig_kopi()
+        data["shadow"] = {}
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_manglende_shadow_notekkel_feiler(self):
+        data = self._gyldig_kopi()
+        del data["shadow"]["lg"]
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_tom_shadow_verdi_feiler(self):
+        data = self._gyldig_kopi()
+        data["shadow"]["sm"] = ""
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_manglende_schema_version_feiler(self):
+        data = self._gyldig_kopi()
+        del data["schema_version"]
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_ugyldig_schema_version_format_feiler(self):
+        data = self._gyldig_kopi()
+        data["schema_version"] = "1.0"
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_ikke_streng_schema_version_feiler(self):
+        data = self._gyldig_kopi()
+        data["schema_version"] = 1.0
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_data_ikke_objekt_feiler_med_value_error(self):
+        with self.assertRaises(ValueError):
+            validate_tokens(["ikke", "et", "objekt"])
+
+    def test_color_ikke_objekt_feiler_med_value_error(self):
+        data = self._gyldig_kopi()
+        data["color"] = "ikke et objekt"
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_color_accent_ikke_objekt_feiler_med_value_error(self):
+        data = self._gyldig_kopi()
+        data["color"]["accent"] = "ikke et objekt"
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_typography_ikke_objekt_feiler_med_value_error(self):
+        data = self._gyldig_kopi()
+        data["typography"] = "ikke et objekt"
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_radius_px_ikke_objekt_feiler_med_value_error(self):
+        data = self._gyldig_kopi()
+        data["radius_px"] = ["ikke", "et", "objekt"]
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
+    def test_shadow_ikke_objekt_feiler_med_value_error(self):
+        data = self._gyldig_kopi()
+        data["shadow"] = ["ikke", "et", "objekt"]
+        with self.assertRaises(ValueError):
+            validate_tokens(data)
+
     def test_gyldig_kopi_validerer_uten_feil(self):
         # Sanity: selve kopien (uendret) skal fortsatt validere -- ellers
         # ville testene over kunne feile av feil grunn.
