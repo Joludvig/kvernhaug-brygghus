@@ -1167,6 +1167,138 @@ confirmed by a real, controlled round-1 E2E on a live issue, the same
 honest limit already noted for every prior Chief-ready signal iteration
 above. Nothing in this change claims that E2E has already passed.
 
+## Owner GO/NO-GO notification (V1, issue #66)
+
+**The problem this fixes:** the "Work-side Chief task" section above
+already documents that, on a Chief PASS, the native Work task
+"separately notifies the owner with a GO/NO-GO prompt" -- but issue #66
+recorded a concrete case where the lifecycle machinery worked exactly
+as designed (issue #59 / PR #64 reached exact-head Chief `APPROVED` on
+2026-09-04, `status:approved` applied correctly) and the owner still
+received no clear, user-facing "GO?" prompt. This is the same class of
+gap already fixed once before for the *Chief review* wake path (issues
+#32/#40/#44: a notification that exists only on an external, un-
+inspectable SaaS surface is not reliable enough alone) -- here it
+recurs one step later, for the *owner's own* merge decision.
+
+**The fix, deliberately reusing the same shape as the Chief-ready
+signal instead of inventing a new mechanism:** a second, independent
+repo-side notification, entirely additive to everything above --
+`guard`/`execute` (the Claude-invoking path) are completely untouched,
+and so is the existing hourly `Kvernhaug Approval Watch` and the
+event-Chief task itself (requirement 6). Two new jobs in
+`claude-agent-bridge.yml`, gated on the **same** `issues: labeled`
+trigger this workflow already listens to, but for a **different**
+label:
+
+1. **`notify_guard`** decides whether a `status:approved` labeling
+   event is authorized to wake the notify path at all --
+   [`.github/scripts/approved_notify_guard.py`](../../.github/scripts/approved_notify_guard.py)
+   (`vurder_notify_trigger`, unit-tested in
+   [`tests/test_agent_bridge_approved_notify_guard.py`](../../tests/test_agent_bridge_approved_notify_guard.py))
+   is a **deliberately duplicated**, single-label sibling of
+   `trigger_guard.py` -- same event-time-plus-live authorization
+   discipline (issue #9/V1.1: `agent:claude` must have been present in
+   the *triggering event's own* label snapshot, not just live), same
+   owner-only/non-Bot actor guard, same anti-loop reasoning (every
+   label mutation this workflow itself makes uses its own token/actor,
+   never the owner's login, so it can never satisfy this check and
+   re-trigger itself). It is **not** a reuse of `trigger_guard.py`
+   itself: that module's `TRIGGER_ETIKETTER` also gates the
+   Claude-invoking `execute` job, and adding `status:approved` to it
+   would have made an approval event start a Claude run -- exactly what
+   this feature must never do (requirement 8, "No product changes").
+2. **`notify`** (`needs: notify_guard`) runs only when the guard above
+   authorized it. It refetches **live** issue labels, the single open
+   PR on the issue's deterministic branch (`agent/issue-<N>`, same
+   `branch_policy.py` formula every other job already uses), that PR's
+   live reviews, and the issue's own existing comments -- never
+   anything cached from before this job started, the same "Ordering /
+   race safety" discipline as `chief_ready_signal.py`. The decision
+   itself is one pure, dependency-free function,
+   [`.github/scripts/go_notify_signal.py`](../../.github/scripts/go_notify_signal.py)
+   (`vurder_go_notify`, unit-tested in
+   [`tests/test_agent_bridge_go_notify_signal.py`](../../tests/test_agent_bridge_go_notify_signal.py)).
+
+**Before presenting GO readiness (issue #66, requirement 3), all of the
+following must hold on that fresh refetch -- fail-closed on any
+ambiguity, exactly like every other decision module in this document:**
+
+- The PR is open **and unmerged** -- GitHub's own `OPEN`/`CLOSED`/
+  `MERGED` PR states are mutually exclusive, so requiring `state ==
+  "OPEN"` on the exactly-one PR found on the deterministic branch
+  proves both halves of this requirement in one check.
+- The PR's **live** head SHA (`headRefOid`), not anything captured
+  earlier in any other job.
+- A formal GitHub review with state `APPROVED` exists for **that exact
+  head** -- the same `commit.oid`-anchored check `pr_ready_handoff.py`
+  already uses for its own CHANGES_REQUESTED/APPROVED detection, so an
+  approval left over from an older head (superseded by a later push)
+  never counts.
+- The issue carries `status:approved` as its **sole** lifecycle label
+  on refetch (the same `LIVSSYKLUS_ETIKETTER` exclusivity check every
+  other signal module in this document performs).
+- **No unresolved manual gate** -- this repository defines no manual
+  "blocking" label or mechanism beyond the lifecycle labels themselves,
+  so the exclusivity check above **is** the entirety of this
+  requirement; stated explicitly here (rather than left implicit) so a
+  future manual-gate mechanism cannot silently bypass this notification
+  without a documentation update catching it.
+
+**Idempotency / staleness (requirements 4 and 5):** the notification is
+a single **issue** comment (not a PR comment -- this is an owner-facing
+notice, and every other owner-facing Bridge message in this workflow
+already posts to the issue, which is also where the lifecycle state
+itself lives) containing a reserved, line-anchored marker:
+
+```
+KBH_GO_READY_V1 issue=<N> head=<40-char-sha>
+```
+
+`go_notify_signal.py` searches the issue's own existing comments for an
+*exact* match of this marker for the same `(issue, head)` pair before
+posting -- a duplicate is a no-op, not an error (mirroring
+`chief_ready_signal.py`'s idempotency exactly). A **new** head (the PR
+picked up a further round after the notification already fired -- e.g.
+a subsequent `status:changes-requested`/re-approval cycle) is
+deliberately **not** treated as a duplicate: the old GO readiness is
+implicitly stale (a different head can never match the old marker's
+`head=` value), so a fresh notification is posted for the new head
+without any separate "staleness" bookkeeping being required.
+
+**Failure semantics:** a fail-closed rejection (`post=false` and
+`duplicate=false` -- e.g. no `APPROVED` review yet exists for the exact
+live head) exits the "Decide GO/NO-GO notification" step non-zero, so a
+dedicated report step posts a clear comment on the issue explaining why
+no notification was sent, rather than the job finishing green with
+neither a notification nor a report -- the same exit-code contract as
+`chief_ready_signal.py`/`pr_ready_handoff.py`. No label is ever changed
+and nothing is ever merged by this path.
+
+**What this notification is (and is not):** exactly like the
+Chief-ready marker, it is a wake-up/prompt **only** -- never
+authoritative and never a merge action. `gh pr merge`/`git merge` do
+not appear anywhere in the `notify_guard`/`notify` jobs (regression
+coverage:
+[`tests/test_agent_bridge_go_notify_workflow.py`](../../tests/test_agent_bridge_go_notify_workflow.py)),
+and neither job invokes `anthropics/claude-code-action` or touches
+`--allowedTools` -- no new Claude trigger surface is introduced by this
+feature at all. The existing hourly `Kvernhaug Approval Watch` and the
+event-Chief task remain completely unchanged and are the fallback paths
+if this notification is ever missed.
+
+**Testability boundary, stated plainly, exactly as for every other
+mechanism in this document:** the fail-closed decision logic and the
+guard's authorization logic are unit-tested without touching GitHub,
+and the workflow's own source text is checked for the wiring
+guarantees above (new jobs present and correctly gated, independent of
+`guard`/`execute`, no new Claude trigger surface, no merge command).
+Whether a live `status:approved` labeling event actually produces a
+visible, timely issue comment in practice can only be confirmed by a
+real, controlled E2E on a live issue -- the same honest limit already
+noted for every prior signal/transition mechanism in this document.
+Nothing in this change claims that E2E has already passed.
+
 ## Scope-change rule
 
 Once a Claude run starts, the triggering issue's body is the run's
