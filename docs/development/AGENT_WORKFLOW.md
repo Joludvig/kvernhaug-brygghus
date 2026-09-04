@@ -964,6 +964,54 @@ failure" step (which is now scoped to `steps.signal.outcome ==
 'failure'` specifically), so a rejection is never misattributed to the
 wrong stage.
 
+**Round 5 fix (PR #45, Chief review):** the "Decide PR ready-for-review
+transition" step above only ever *decides* whether to transition --
+that decision succeeding (`ready_decide` step outcome `success`,
+`set_ready=true`) says nothing about whether the actual mutation
+afterward, `gh pr ready` in the "Transition PR to Ready for review"
+step, itself then succeeds. Before this fix, a failure there (e.g. a
+transient GitHub API error) fell through every existing report step
+unreported: the generic failure step is excluded because
+`steps.promote.outcome == 'success'`, and the dedicated "Report PR
+ready-for-review transition failure" step above requires
+`steps.ready_decide.outcome == 'failure'`, which is false here --
+`ready_decide` itself succeeded. Two new, distinctly-scoped failure
+reports close this:
+- "Report PR ready-for-review transition command failure", scoped to
+  `steps.transition.outcome == 'failure'` -- the actual `gh pr ready`
+  call itself failing, as distinct from the decision that preceded it.
+- "Report PR ready-transition-done marker post failure", scoped to
+  `steps.marker_post.outcome == 'failure'` (the "Post PR
+  ready-transition-done marker" step was given an explicit `id:
+  marker_post` for this) -- by the time this step runs, `gh pr ready`
+  has already succeeded, so the real `ready_for_review` wake this
+  feature exists to produce has already fired; a failure here only
+  means the `KBH_PR_READY_TRANSITION_DONE_V1` proof marker itself
+  never got posted, which could make a *later*
+  `status:changes-requested` round on this exact head unable to prove
+  via that marker that this mechanism already performed the
+  transition (see the "already Ready" fail-closed condition above) --
+  worth its own distinct report rather than silence, even though it is
+  lower severity than the transition command itself failing.
+
+Both new steps require `steps.promote.outcome == 'success'` (so the
+generic failure step, already excluded by that same condition, never
+double-reports) and are each scoped to the opposite step's outcome
+being *not* `'failure'` by construction (`steps.transition.outcome ==
+'failure'` can never be true at the same time as
+`steps.ready_decide.outcome == 'failure'`, since `ready_decide` must
+have succeeded -- i.e. output `set_ready=true` -- for the "Transition
+PR to Ready for review" step to run at all), so neither can be
+misattributed to an existing step. Regression coverage:
+`tests/test_agent_bridge_pr_ready_handoff.py`
+`TestWorkflowKildetekst.test_marker_post_steget_har_id`,
+`test_transition_kommando_failure_steg_finnes_og_er_scoped_riktig`,
+`test_transition_kommando_failure_steg_kan_ikke_forveksles_med_ready_decide_steget`,
+`test_marker_post_failure_steg_finnes_og_er_scoped_riktig`,
+`test_marker_post_failure_steg_kan_ikke_forveksles_med_transition_kommando_steget`,
+`test_nye_failure_stegene_kommer_etter_sine_respektive_kildesteg`, and
+`test_generisk_failure_steg_ekskluderer_ikke_pa_de_nye_stegene_direkte`.
+
 **No duplicate review/lifecycle mutation for an exact head (issue #44,
 acceptance criterion 4):** a PR that is already Ready -- because this
 is round 1 (unconditionally safe), or because a previous run already

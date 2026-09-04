@@ -554,6 +554,18 @@ class TestWorkflowKildetekst(unittest.TestCase):
         self.assertIsNotNone(match, f"Fant ikke steget {navn!r} i workflowen.")
         return match.group(0)
 
+    def _finn_if_linje(self, navn):
+        # `_finn_steg` sitt steg-blokk inkluderer bevisst ETTERFØLGENDE
+        # forklarende kommentarlinjer (frem til neste `- name:`), som gjør
+        # den uegnet for å teste at to steg sin FAKTISKE `if:`-betingelse
+        # er gjensidig utelukkende -- en nabo-kommentar kan nevne den andre
+        # betingelsen i prosa uten at selve YAML-betingelsen gjør det. Denne
+        # henter kun den ene `if:`-linjen selv.
+        steg = self._finn_steg(navn)
+        match = re.search(r"^\s*if: .*$", steg, re.MULTILINE)
+        self.assertIsNotNone(match, f"Fant ikke if-linjen for steget {navn!r}.")
+        return match.group(0)
+
     def test_stegene_er_gatet_pa_dry_run_og_leveranse_ok(self):
         for navn in self._NYE_STEG:
             steg = self._finn_steg(navn)
@@ -649,6 +661,68 @@ class TestWorkflowKildetekst(unittest.TestCase):
         pos_transition = self.tekst.index("Transition PR to Ready for review (issue #44)")
         pos_marker_post = self.tekst.index("Post PR ready-transition-done marker (issue #44)")
         self.assertLess(pos_transition, pos_marker_post)
+
+    # ─── PR #45 runde 5: dekker `gh pr ready`-kommando-feil OG ────────────
+    # ─── markør-post-feil, som tidligere gikk urapportert gjennom ─────────
+    # ─── ALLE eksisterende feilrapport-steg ────────────────────────────────
+
+    def test_marker_post_steget_har_id(self):
+        steg = self._finn_steg("Post PR ready-transition-done marker (issue #44)")
+        self.assertIn("id: marker_post", steg)
+
+    def test_transition_kommando_failure_steg_finnes_og_er_scoped_riktig(self):
+        steg = self._finn_steg(
+            "Report PR ready-for-review transition command failure — issue stays at status:review (issue #44)"
+        )
+        self.assertIn("steps.promote.outcome == 'success'", steg)
+        self.assertIn("steps.transition.outcome == 'failure'", steg)
+        self.assertIn("status:review", steg)
+
+    def test_transition_kommando_failure_steg_kan_ikke_forveksles_med_ready_decide_steget(self):
+        transition_failure_if = self._finn_if_linje(
+            "Report PR ready-for-review transition command failure — issue stays at status:review (issue #44)"
+        )
+        ready_decide_failure_if = self._finn_if_linje(
+            "Report PR ready-for-review transition failure — issue stays at status:review"
+        )
+        self.assertNotIn("steps.ready_decide.outcome == 'failure'", transition_failure_if)
+        self.assertNotIn("steps.transition.outcome == 'failure'", ready_decide_failure_if)
+
+    def test_marker_post_failure_steg_finnes_og_er_scoped_riktig(self):
+        steg = self._finn_steg(
+            "Report PR ready-transition-done marker post failure — issue stays at status:review (issue #44)"
+        )
+        self.assertIn("steps.promote.outcome == 'success'", steg)
+        self.assertIn("steps.marker_post.outcome == 'failure'", steg)
+        self.assertIn("status:review", steg)
+
+    def test_marker_post_failure_steg_kan_ikke_forveksles_med_transition_kommando_steget(self):
+        marker_post_failure_if = self._finn_if_linje(
+            "Report PR ready-transition-done marker post failure — issue stays at status:review (issue #44)"
+        )
+        self.assertNotIn("steps.transition.outcome == 'failure'", marker_post_failure_if)
+
+    def test_nye_failure_stegene_kommer_etter_sine_respektive_kildesteg(self):
+        pos_transition = self.tekst.index("Transition PR to Ready for review (issue #44)")
+        pos_transition_failure = self.tekst.index(
+            "Report PR ready-for-review transition command failure — issue stays at status:review (issue #44)"
+        )
+        self.assertLess(pos_transition, pos_transition_failure)
+
+        pos_marker_post = self.tekst.index("Post PR ready-transition-done marker (issue #44)")
+        pos_marker_post_failure = self.tekst.index(
+            "Report PR ready-transition-done marker post failure — issue stays at status:review (issue #44)"
+        )
+        self.assertLess(pos_marker_post, pos_marker_post_failure)
+
+    def test_generisk_failure_steg_ekskluderer_ikke_pa_de_nye_stegene_direkte(self):
+        # Det generiske failure-steget er allerede ekskludert av
+        # `steps.promote.outcome != 'success'` for ALLE post-promote-feil
+        # (inkludert de to nye), og trenger derfor ingen egen
+        # `steps.transition`/`steps.marker_post`-eksklusjon i tillegg --
+        # denne testen dokumenterer nettopp det premisset eksplisitt.
+        steg = self._finn_steg("Report failure — leave at status:working for manual follow-up")
+        self.assertIn("steps.promote.outcome != 'success'", steg)
 
 
 if __name__ == "__main__":

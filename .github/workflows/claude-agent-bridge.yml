@@ -693,6 +693,7 @@ jobs:
       # posted for a head that was not really transitioned by this run.
       - name: Post PR ready-transition-done marker (issue #44)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true' && steps.signal.outcome == 'success' && steps.ready_decide.outputs.set_ready == 'true' && steps.transition.outcome == 'success'
+        id: marker_post
         run: |
           set -euo pipefail
           gh pr comment "${{ steps.ready_decide.outputs.pr_number }}" --repo "$REPO" --body-file "$RUNNER_TEMP/pr_ready_done_marker.txt"
@@ -725,6 +726,44 @@ jobs:
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome == 'success' && steps.ready_decide.outcome == 'failure'
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE reached \`status:review\` and the Chief-ready marker was posted, but transitioning the PR to Ready for review failed -- see this workflow run's logs. The Issue is left at \`status:review\` (not rolled back) and nothing was merged; the hourly Chief watch (and, for a first-round PR, the existing \`opened\`-event wake) remain the fallback paths if this transition was missed."
+
+      # Chief review fix (PR #45, round 5): the two report steps above only
+      # cover a FAILING decision (`steps.ready_decide.outcome == 'failure'`)
+      # or a FAILING signal step -- neither matches the case where
+      # `pr_ready_handoff.py` correctly said `set_ready=true` (so
+      # `ready_decide` itself SUCCEEDED) and the actual mutation, `gh pr
+      # ready` in the "Transition PR to Ready for review" step, then fails
+      # (e.g. a transient GitHub API error). That failure previously fell
+      # through every existing report step -- the generic one is excluded
+      # because `steps.promote.outcome == 'success'`, and neither dedicated
+      # one above matches because `ready_decide`/`signal` both succeeded --
+      # leaving the run silently green-ish with no comment at all and no
+      # `ready_for_review` wake. Scoped specifically to
+      # `steps.transition.outcome == 'failure'` so it can never be
+      # misattributed to (or double-fire alongside) the `ready_decide`
+      # failure step above, which requires the opposite
+      # (`steps.ready_decide.outcome == 'failure'`) and therefore can never
+      # be true at the same time as this one.
+      - name: Report PR ready-for-review transition command failure — issue stays at status:review (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome == 'success' && steps.transition.outcome == 'failure'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE reached \`status:review\`, the Chief-ready marker was posted, and the ready-for-review transition was approved, but running \`gh pr ready\` itself failed -- see this workflow run's logs. The Issue is left at \`status:review\` (not rolled back) and nothing was merged; the hourly Chief watch (and, for a first-round PR, the existing \`opened\`-event wake) remain the fallback paths if this transition was missed."
+
+      # Chief review fix (PR #45, round 5): the done-marker post is the
+      # LAST step of the guaranteed handoff chain, so its own failure needs
+      # the same distinct treatment for the same reason as above -- by the
+      # time this step runs, `gh pr ready` (the step above) has already
+      # SUCCEEDED, so the real `ready_for_review` GitHub event this whole
+      # feature exists to produce has already fired; this failure only
+      # means the KBH_PR_READY_TRANSITION_DONE_V1 proof text
+      # (pr_ready_handoff.py's "already Ready" safety check for a LATER
+      # changes-requested round on this same head) never got posted.
+      # Reported distinctly, not silently, so that gap is visible rather
+      # than assumed away.
+      - name: Report PR ready-transition-done marker post failure — issue stays at status:review (issue #44)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome == 'success' && steps.marker_post.outcome == 'failure'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: issue #$ISSUE reached \`status:review\` and the PR was successfully transitioned to Ready for review, but posting the \`KBH_PR_READY_TRANSITION_DONE_V1\` proof marker afterward failed -- see this workflow run's logs. The Issue is left at \`status:review\` (not rolled back) and nothing was merged; the real \`ready_for_review\` wake already fired, so this alone should not cause a missed re-review, but a later \`status:changes-requested\` round on this exact head could be unable to prove this mechanism already performed the transition -- check the PR's live Draft state and comments before relying on that idempotency path."
 
       # Chief review fix (PR #45): dedicated failure report for the NEW
       # pre-Claude Draft-verification gate, scoped specifically to
