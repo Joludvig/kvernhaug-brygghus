@@ -18,9 +18,11 @@ Kjøres med:
 import copy
 import json
 import os
+import re
 import tempfile
 import unittest
 from datetime import date, timedelta
+from unittest import mock
 
 import modules.pantry as pantry
 
@@ -704,11 +706,18 @@ class Test23PantryDataCommittesIkke(unittest.TestCase):
         self.assertIn("data/pantry.json", innhold)
 
 
+_KBH_CUSTOM_ID_MONSTER = re.compile(
+    r"^kbh-custom-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+)
+
+
 class Test25EgendefinerteIngredienser(_PantryTestCase):
     """Egendefinerte ingredienser: brukeren velger malt/humle/gjær-bøtte,
     men ingrediensen er ikke i masterdatabasen. Krever navn, får en stabil
-    custom_-ID, redigeres/lagres normalt, og matches ALDRI automatisk mot en
-    oppskrift siden ingen oppskrift kan referere en generert custom_-ID."""
+    kbh-custom-<uuidv4>-ID (Core custom-ingredient identity-kontrakten §3,
+    docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md), redigeres/
+    lagres normalt, og matches ALDRI automatisk mot en oppskrift siden ingen
+    oppskrift kan referere en generert custom-ID."""
 
     def test_krever_ikke_tomt_navn(self):
         with self.assertRaises(ValueError):
@@ -720,7 +729,7 @@ class Test25EgendefinerteIngredienser(_PantryTestCase):
 
     def test_far_stabil_custom_id_og_is_custom_flagg(self):
         item = pantry.opprett_egendefinert_pantry_item("malt", "Hjemmelaget honning", 1.0, "kg")
-        self.assertTrue(item["ingredient_id"].startswith("custom_"))
+        self.assertRegex(item["ingredient_id"], _KBH_CUSTOM_ID_MONSTER)
         self.assertTrue(item["is_custom"])
         self.assertEqual(item["name_snapshot"], "Hjemmelaget honning")
 
@@ -747,6 +756,55 @@ class Test25EgendefinerteIngredienser(_PantryTestCase):
         a = pantry.opprett_egendefinert_pantry_item("malt", "Restmalt", 1.0, "kg")
         b = pantry.opprett_egendefinert_pantry_item("malt", "Restmalt", 1.0, "kg")
         self.assertNotEqual(a["ingredient_id"], b["ingredient_id"])
+
+    def test_tvunget_kollisjon_regenererer_i_stedet_for_a_gjenbruke(self):
+        """Core-kontraktens §6: en generation-time-kollisjon skal ALDRI
+        overskrive/gjenbruke en eksisterende ID -- generatoren skal mint en
+        FRISK en i stedet. Simuleres ved å mocke uuid.uuid4() til å returnere
+        samme (kolliderende) verdi to ganger før en unik tredje."""
+        kolliderende_uuid = pantry.uuid.UUID("11111111-1111-4111-8111-111111111111")
+        unik_uuid = pantry.uuid.UUID("22222222-2222-4222-8222-222222222222")
+        eksisterende = {f"kbh-custom-{kolliderende_uuid}"}
+        with mock.patch.object(pantry.uuid, "uuid4", side_effect=[kolliderende_uuid, kolliderende_uuid, unik_uuid]):
+            ny_id = pantry._generer_custom_ingredient_id(eksisterende)
+        self.assertEqual(ny_id, f"kbh-custom-{unik_uuid}")
+        self.assertNotIn(ny_id, eksisterende)
+
+    def test_kollisjonssjekk_dekker_eksisterende_ider_i_pantry(self):
+        """opprett_egendefinert_pantry_item() sender pantry sine eksisterende
+        ingredient_id-er videre til generatoren (Core-kontraktens §6:
+        kollisjonssjekken må dekke enhver lokal lagringsplass som kan holde
+        en custom-ID -- i dag kun pantry, se issue #48 sin AC 6)."""
+        p = pantry.last_pantry()
+        eksisterende_item = pantry.opprett_egendefinert_pantry_item("malt", "Restmalt", 1.0, "kg")
+        p["items"].append(eksisterende_item)
+        opptatt_id = eksisterende_item["ingredient_id"]
+
+        with mock.patch.object(pantry.uuid, "uuid4", side_effect=[
+            pantry.uuid.UUID(opptatt_id[len("kbh-custom-"):]),
+            pantry.uuid.UUID("33333333-3333-4333-8333-333333333333"),
+            pantry.uuid.UUID("44444444-4444-4444-8444-444444444444"),  # pantry_item_id
+        ]):
+            nytt_item = pantry.opprett_egendefinert_pantry_item("malt", "Restmalt 2", 1.0, "kg", pantry=p)
+
+        self.assertNotEqual(nytt_item["ingredient_id"], opptatt_id)
+
+    def test_legacy_custom_id_forblir_uendret_ved_vanlig_redigering(self):
+        """En allerede lagret legacy custom_<uuid>-post (mintet FØR denne
+        kontrakten) skal lastes og forbli uendret etter en normal redigering
+        -- ALDRI migreres/normaliseres til det nye kbh-custom--formatet
+        (Core-kontraktens §9 og §10: kun NYE ingredienser bruker det nye
+        formatet, ingen migrering av eksisterende data)."""
+        p = pantry.last_pantry()
+        legacy_item = pantry.opprett_pantry_item(
+            "malt", "custom_ab12cd34ef56", "Gammel egendefinert malt", 1.0, "kg", is_custom=True,
+        )
+        p["items"].append(legacy_item)
+
+        pantry.oppdater_pantry_item(p, legacy_item["pantry_item_id"], name_snapshot="Gammel egendefinert malt (endret)")
+
+        self.assertEqual(p["items"][0]["ingredient_id"], "custom_ab12cd34ef56")
+        self.assertEqual(p["items"][0]["name_snapshot"], "Gammel egendefinert malt (endret)")
 
     def test_egendefinert_ingrediens_matcher_ikke_automatisk_mot_oppskrift(self):
         p = pantry.last_pantry()

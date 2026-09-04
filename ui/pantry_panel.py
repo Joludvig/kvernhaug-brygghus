@@ -344,6 +344,7 @@ def _render_legg_til(data, malt_db, humle_db, gjaer_db):
                 ingredient_type=ingredient_type, navn=navn,
                 quantity=mengde, unit=enhet, opened=opened, best_before=best_before,
                 lot_number=lot_number, storage_location=storage_location, notes=notes,
+                pantry=data,
             )
         else:
             nytt_item = pantry.opprett_pantry_item(
