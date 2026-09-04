@@ -26,6 +26,7 @@ from ui.equipment_panel import render_equipment_panel
 from ui.process_panel import render_process_panel
 from ui.water_panel import render_water_panel
 from ui.kbhbrew_panel import render_kbhbrew_export_panel, render_kbhbrew_import_panel
+from ui.i18n import t
 
 # 1. Grunnleggende Streamlit-konfigurering
 st.set_page_config(page_title="Kvernhaug Brygghus", page_icon="🍺", layout="wide")
@@ -121,7 +122,7 @@ render_sidebar()
 
 # 5. TABS
 tab_oppskrift, tab_innkjop, tab_bryggdag, tab_verktoy = st.tabs([
-    "🍺 Oppskrift", "🛒 Innkjøp & Lager", "🧪 Bryggdag", "🔧 Verktøy"
+    t("tabs.oppskrift"), t("tabs.innkjop"), t("tabs.bryggdag"), t("tabs.verktoy")
 ])
 
 # ==================================================

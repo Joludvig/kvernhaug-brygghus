@@ -16,6 +16,19 @@ from modules.recipe_importer import (
 )
 from modules.kbh_import import parse_kbhrecipe_json, UgyldigKbhrecipeForImport
 from modules.kbh_import_apply import apply_kbhrecipe_import_to_session_state
+from ui.i18n import render_sprak_valger, t
+
+# Stabil, språknøytral sentinel for "ingen oppskrift valgt ennå" i
+# oppskrift-selectboksen — ALDRI den oversatte visningsteksten selv.
+# Før dette var selve sentinelen den norske label-strengen, som ville
+# knekt widget-/sammenligningslogikken under hvis brukeren byttet språk
+# mens plassholderen sto valgt (Streamlit sin `key`-bundne selectbox
+# ville da fått en verdi som ikke lenger fantes i den nye `options`-
+# listen). `format_func` viser den oversatte teksten uten at selve
+# valgt-verdien noensinne er språkavhengig — se
+# test_app_i18n_foundation.py sin
+# `test_sprak_bytte_med_plassholder_valgt_endrer_ikke_widgetverdi`.
+_INGEN_OPPSKRIFT_VALGT = "__ingen_oppskrift_valgt__"
 
 def _last_master_db(filnavn):
     try:
@@ -25,10 +38,12 @@ def _last_master_db(filnavn):
         return {}
 
 def render_sidebar():
-    if DEMO_MODE:
-        st.sidebar.warning("🍺 Demo-modus — oppskrifter lagres ikke")
+    render_sprak_valger()
 
-    st.sidebar.header("📁 Lagrede oppskrifter")
+    if DEMO_MODE:
+        st.sidebar.warning(t("sidebar.demo_advarsel"))
+
+    st.sidebar.header(t("sidebar.tittel"))
     _oppskrift_mappe_kwargs = {"mappe": "demo_recipes"} if DEMO_MODE else {}
     lagrede_brygg = hent_alle_oppskrifter(**_oppskrift_mappe_kwargs)
     filnavn_kart = hent_oppskrift_filnavn_kart(**_oppskrift_mappe_kwargs)
@@ -43,13 +58,14 @@ def render_sidebar():
                 )
 
     if lagrede_brygg:
-        oppskrift_valg = ["-- Velg oppskrift --"] + list(lagrede_brygg.keys())
+        oppskrift_valg = [_INGEN_OPPSKRIFT_VALGT] + list(lagrede_brygg.keys())
         valgt_lagret_navn = st.sidebar.selectbox(
-            "Velg et brygg fra harddisken:",
+            t("sidebar.velg_brygg_label"),
             oppskrift_valg,
+            format_func=lambda v: t("sidebar.velg_placeholder") if v == _INGEN_OPPSKRIFT_VALGT else v,
             key="sidebar_recipe_selector",
         )
-        if (valgt_lagret_navn != "-- Velg oppskrift --"
+        if (valgt_lagret_navn != _INGEN_OPPSKRIFT_VALGT
                 and valgt_lagret_navn != st.session_state.get("_last_loaded_recipe")):
             r_data = lagrede_brygg[valgt_lagret_navn]
             st.session_state.valgt_malt = r_data["malts"]
@@ -119,13 +135,13 @@ def render_sidebar():
             st.session_state["_original_batch_size"] = r_data.get("batch_size", 20.0)
             st.session_state["_malt_pct_pending_sync"] = False
             st.session_state.pop("skaler_maal_volum", None)
-            st.sidebar.success(f"Laddet: {valgt_lagret_navn}")
+            st.sidebar.success(t("sidebar.lastet_ok", navn=valgt_lagret_navn))
             st.rerun()
-        elif valgt_lagret_navn == "-- Velg oppskrift --":
+        elif valgt_lagret_navn == _INGEN_OPPSKRIFT_VALGT:
             st.session_state.pop("_last_loaded_recipe", None)
             st.session_state.pop("_last_loaded_recipe_file", None)
     else:
-        st.sidebar.info("Ingen oppskrifter lagret i mappen ennå.")
+        st.sidebar.info(t("sidebar.ingen_lagret"))
 
     st.sidebar.write("---")
     with st.sidebar.expander("📥 Importer oppskrift fra tekst"):
