@@ -51,6 +51,16 @@ each of the three mutation kinds the review named, that this structural
 comparison actually rejects them (mutating only an in-memory copy of the
 calc.js source text, never the file itself).
 
+Round 5 (Chief review, PR #53, head 98f3cae) found that the declared EBC
+structural-parity test still omitted three core precursor expressions --
+`volumGal`, `maltLovibond`, `mengdeLb` (the unit conversions feeding the
+MCU accumulator) -- so a mutation confined to one of them, e.g. changing
+`const volumGal = volum * LITER_TIL_US_GALLON;` to division, preserved
+every previously-checked tree/sequence and still passed. `_ebc_komponenter()`
+now also extracts and compares those three expressions structurally, with
+a representative in-memory mutation (`test_multiplikasjon_til_divisjon_i_ebc_volum_gal_feiler`)
+proving the added coverage actually rejects such a change.
+
 Kjøres med:
     py -3 -m unittest tests.test_web_calc_js_parity
 """
@@ -500,7 +510,30 @@ def _ebc_komponenter(js_kilde=None):
         _js_uttrykk_kanonisk(_uttrykk(r"return (srm [^;]+);", js_kropp, "EBC-returuttrykk, JS"), navnemap),
         _python_uttrykk_kanonisk(_uttrykk(r"return (srm .+)", python_kropp, "EBC-returuttrykk, Python")),
     )
-    return [akkumulator, srm, retur]
+    # Round 5 (Chief review, PR #53, head 98f3cae): akkumulator/srm/retur alone
+    # left the three EBC precursor conversion expressions -- volumGal,
+    # maltLovibond, mengdeLb -- outside the structural comparison, so an
+    # operator mutation confined to one of THEM (e.g. `volum * LITER_TIL_US_GALLON`
+    # -> division) preserved every previously-checked tree and still passed.
+    volum_gal = (
+        _js_uttrykk_kanonisk(_uttrykk(r"const volumGal = ([^;]+);", js_kropp, "volumGal, JS")),
+        _python_uttrykk_kanonisk(_uttrykk(r"volum_gal = (.+)", python_kropp, "volum_gal, Python")),
+    )
+    malt_lovibond = (
+        _js_uttrykk_kanonisk(
+            _uttrykk(r"const maltLovibond = ([^;]+);", js_kropp, "maltLovibond, JS"),
+            {"entry.ebc": "malt_ebc"},
+        ),
+        _python_uttrykk_kanonisk(_uttrykk(r"malt_lovibond = (.+)", python_kropp, "malt_lovibond, Python")),
+    )
+    mengde_lb = (
+        _js_uttrykk_kanonisk(
+            _uttrykk(r"const mengdeLb = ([^;]+);", js_kropp, "mengdeLb, JS"),
+            {"m.mengde": "mengde_kg"},
+        ),
+        _python_uttrykk_kanonisk(_uttrykk(r"mengde_lb = (.+)", python_kropp, "mengde_lb, Python")),
+    )
+    return [akkumulator, srm, retur, volum_gal, malt_lovibond, mengde_lb]
 
 
 def _gram_komponenter(js_kilde=None):
@@ -613,6 +646,17 @@ class TestMutasjonerFeiler(unittest.TestCase):
         )
         js_fg, python_fg = _fgabv_komponenter(js_kilde=mutert)[0]
         self.assertNotEqual(js_fg, python_fg)
+
+    def test_multiplikasjon_til_divisjon_i_ebc_volum_gal_feiler(self):
+        # Round 5 (Chief review, PR #53, head 98f3cae): proves the newly added
+        # volumGal component in _ebc_komponenter() actually catches a mutation
+        # confined to it -- not just that it exists.
+        mutert = self._mutert_kilde(
+            "const volumGal = volum * LITER_TIL_US_GALLON;",
+            "const volumGal = volum / LITER_TIL_US_GALLON;",
+        )
+        js_volum_gal, python_volum_gal = _ebc_komponenter(js_kilde=mutert)[3]
+        self.assertNotEqual(js_volum_gal, python_volum_gal)
 
 
 if __name__ == "__main__":
