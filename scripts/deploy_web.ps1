@@ -25,9 +25,26 @@
   serveren. Kun overskriving/opplasting av filene som faktisk finnes i
   web/ lokalt.
 
+  GUARD (checkout må matche origin/master): en tidligere deploy ble kjørt
+  fra en lokal checkout som var 52 commits bak origin/master og manglet
+  hele PR #23 -- scriptet lastet stille opp gammelt innhold, rapporterte
+  suksess, og den daværende HTTP-200-sjekken kunne ikke fange det (se
+  issue #28). Scriptet nekter derfor nå å gjøre noe som helst dersom denne
+  checkoutens HEAD ikke er nøyaktig identisk med origin/master (ahead,
+  behind eller divergert stopper alle likt) -- kjør fra en fersk
+  checkout/worktree av current origin/master i stedet.
+
+  INNHOLDSVERIFISERING (ikke bare HTTP 200): etter opplasting lastes HVER
+  ENESTE deployet fil ned igjen over HTTPS og sammenlignes byte-for-byte
+  (SHA-256) mot den lokale kilden -- ikke et kuratert utvalg. HTTP 200
+  beviser bare at siden svarer, ikke at innholdet er riktig.
+
 .PARAMETER DryRun
-  Viser source, target, filantall og full filliste. Gjør ingen tilkobling og
-  ingen endringer.
+  Viser source, target, filantall og full filliste. Gjør ingen FTP-/HTTPS-
+  tilkobling og ingen endringer. Guarden over kjøres likevel (ren lokal
+  git-sammenligning, ingen `git fetch`) -- sammenligningen bruker da sist
+  kjente origin/master; kjør uten -DryRun, eller `git fetch` manuelt her
+  først, for en garantert fersk sammenligning.
 
 .PARAMETER Force
   Hopper over ja/nei-bekreftelsen før opplasting. Bruk med varsomhet.
@@ -106,6 +123,70 @@ if (-not (Test-Path $WebRoot)) {
 if (-not (Test-Path (Join-Path $WebRoot "index.html"))) {
     Write-Error "web\index.html mangler under $WebRoot -- dette ser ikke ut som riktig web-runtime. Avbryter uten å gjøre noe."
     exit 1
+}
+
+# ─── 1b. Guard: nekt å deploye fra en checkout som ikke matcher origin/master ──
+# Se .DESCRIPTION for bakgrunnen (issue #28). Kjøres FØR filer i det hele
+# tatt listes -- fail fast, ingen grunn til å bygge en filliste fra en
+# checkout som uansett skal avvises.
+$gitCmd = Get-Command git.exe -ErrorAction SilentlyContinue
+if (-not $gitCmd) {
+    Write-Error "git.exe ble ikke funnet i PATH. Kan ikke bekrefte at denne checkouten matcher origin/master -- avbryter uten å gjøre noe."
+    exit 1
+}
+
+Push-Location $RepoRoot
+try {
+    if (-not $DryRun) {
+        # Fersk fetch KUN utenfor DryRun -- DryRun skal fortsatt gjøre 0
+        # nettverkstilkoblinger (dets egen dokumenterte kontrakt). Den
+        # faktiske FTP-deployen er der skaden faktisk kan skje, så DER skal
+        # sammenligningen være garantert fersk, ikke avhengig av at brukeren
+        # husket å `git fetch` manuelt på forhånd (nøyaktig det som gikk galt
+        # forrige gang).
+        Write-Host "--- Guard: henter fersk origin/master for å bekrefte checkouten ---"
+        & git fetch origin master --quiet
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "git fetch origin master feilet -- kan ikke bekrefte at denne checkouten er oppdatert. Avbryter uten å laste opp noe."
+            exit 1
+        }
+    }
+
+    $localHead = (& git rev-parse HEAD).Trim()
+    $originMasterRef = (& git rev-parse origin/master).Trim()
+
+    if ([string]::IsNullOrWhiteSpace($localHead) -or [string]::IsNullOrWhiteSpace($originMasterRef)) {
+        Write-Error "Kunne ikke lese HEAD og/eller origin/master fra git i $RepoRoot -- er dette faktisk en git-klone av kvernhaug-brygghus, med en 'origin'-remote? Avbryter uten å gjøre noe."
+        exit 1
+    }
+
+    if ($localHead -ne $originMasterRef) {
+        $counts = (& git rev-list --left-right --count "HEAD...origin/master").Trim()
+        Write-Host ""
+        Write-Host "STOPPER: denne checkouten matcher IKKE origin/master."
+        Write-Host "  HEAD:          $localHead"
+        Write-Host "  origin/master: $originMasterRef"
+        Write-Host "  ahead/behind (HEAD...origin/master): $counts"
+        Write-Host ""
+        Write-Host "web/ under denne checkouten kan avvike fra hva som faktisk er merget og"
+        Write-Host "godkjent -- en deploy herfra kan laste opp feil innhold til produksjon"
+        Write-Host "(nøyaktig det som skjedde med issue #28). Kjør scriptet fra en"
+        Write-Host "checkout/worktree hvis HEAD er identisk med origin/master."
+        if ($DryRun) {
+            Write-Host ""
+            Write-Host "(DryRun sammenlignet mot sist kjente origin/master uten å hente på nytt --"
+            Write-Host " kjør uten -DryRun, eller 'git fetch' manuelt her først, for en garantert"
+            Write-Host " fersk sammenligning.)"
+        }
+        Write-Host ""
+        Write-Error "Ingen filer ble lastet opp -- checkout matcher ikke origin/master."
+        exit 1
+    }
+    Write-Host "Guard OK -- HEAD matcher origin/master ($localHead)."
+    Write-Host ""
+}
+finally {
+    Pop-Location
 }
 
 # ─── 2. Runtime-filliste (full sync, eksplisitt exclude-liste) ────────────
@@ -254,18 +335,24 @@ if ($exitCode -ne 0) {
     exit $exitCode
 }
 
-# ─── 6. Read-only produksjonsverifisering over HTTPS ───────────────────────
+# ─── 6. Produksjonsverifisering: FAKTISK FILINNHOLD, ikke bare HTTP 200 ────
 # Kjøres KUN hvis alle filene faktisk ble lastet opp uten feil over.
+#
+# En tidligere deploy rapporterte "alle filer lastet opp" OG besto denne
+# stegets forgjenger (HTTP-200 på fire faste URL-er) -- men innholdet som
+# faktisk lå på produksjon var likevel FEIL, fordi HTTP 200 kun beviser at
+# SIDEN SVARER, ikke at BYTENE er riktige (se issue #28 / guarden over).
+# Denne versjonen laster derfor ned HVER ENESTE deployet fil på nytt og
+# sammenligner SHA-256 mot den lokale kilden -- bevisst IKKE et kuratert
+# utvalg "relevante" filer, siden nettopp et slikt utvalg-blindpunkt var
+# årsaken til at forrige feil ikke ble oppdaget.
 Write-Host ""
-Write-Host "--- Verifiserer produksjon (HTTPS, read-only) ---"
-$checks = @(
+Write-Host "--- Verifiserer produksjon: rask HTTP-svar-sjekk (root/en) ---"
+$smokeChecks = @(
     "https://kvernhaugbrygghus.no/",
-    "https://kvernhaugbrygghus.no/en/",
-    "https://kvernhaugbrygghus.no/js/app.js",
-    "https://kvernhaugbrygghus.no/js/preferences.js"
+    "https://kvernhaugbrygghus.no/en/"
 )
-$verifyFailed = $false
-foreach ($url in $checks) {
+foreach ($url in $smokeChecks) {
     try {
         $resp = Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -TimeoutSec 20
         $status = $resp.StatusCode
@@ -273,16 +360,63 @@ foreach ($url in $checks) {
     catch {
         $status = if ($_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { "FEIL" }
     }
-    $ok = ($status -eq 200)
-    if (-not $ok) { $verifyFailed = $true }
-    $marker = if ($ok) { "OK  " } else { "FEIL" }
+    $marker = if ($status -eq 200) { "OK  " } else { "FEIL" }
     Write-Host "  $marker $url ($status)"
+    if ($status -ne 200) {
+        Write-Error "Produksjon svarer ikke 200 på $url -- stopper før innholdsverifisering. IKKE anta at deploy var vellykket."
+        exit 1
+    }
 }
 
 Write-Host ""
-if ($verifyFailed) {
-    Write-Host "Verifisering fant minst én feil -- IKKE anta at deploy var vellykket før dette er rettet."
+Write-Host "--- Verifiserer produksjon: FAKTISK INNHOLD (SHA-256 per fil, $($DeployFiles.Count) filer) ---"
+$tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_verify_" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $tempDir | Out-Null
+$mismatches = @()
+$unverifiable = @()
+try {
+    $i = 0
+    foreach ($f in $DeployFiles) {
+        $i++
+        $rel = $f.FullName.Substring($WebRoot.Length + 1) -replace '\\', '/'
+        $url = "https://kvernhaugbrygghus.no/$rel"
+        $tempFile = Join-Path $tempDir "f$i"
+        try {
+            Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -TimeoutSec 20 -OutFile $tempFile
+            $localHash = (Get-FileHash -Path $f.FullName -Algorithm SHA256).Hash
+            $remoteHash = (Get-FileHash -Path $tempFile -Algorithm SHA256).Hash
+            if ($localHash -ne $remoteHash) {
+                Write-Host ("  [{0}/{1}] AVVIK                {2}" -f $i, $DeployFiles.Count, $rel)
+                $mismatches += $rel
+            }
+            else {
+                Write-Host ("  [{0}/{1}] OK                   {2}" -f $i, $DeployFiles.Count, $rel)
+            }
+        }
+        catch {
+            Write-Host ("  [{0}/{1}] KAN IKKE VERIFISERE  {2}  ({3})" -f $i, $DeployFiles.Count, $rel, $_.Exception.Message)
+            $unverifiable += $rel
+        }
+    }
+}
+finally {
+    Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+Write-Host ""
+if ($mismatches.Count -gt 0 -or $unverifiable.Count -gt 0) {
+    if ($mismatches.Count -gt 0) {
+        Write-Host "INNHOLDSAVVIK -- produksjon svarer, men bytes matcher IKKE lokal kilde for $($mismatches.Count) fil(er):"
+        foreach ($m in $mismatches) { Write-Host "  - $m" }
+    }
+    if ($unverifiable.Count -gt 0) {
+        Write-Host "KUNNE IKKE VERIFISERE $($unverifiable.Count) fil(er) (nettverksfeil/ikke tilgjengelig via HTTPS):"
+        foreach ($u in $unverifiable) { Write-Host "  - $u" }
+    }
+    Write-Host ""
+    Write-Error "Innholdsverifisering feilet -- IKKE anta at deploy var vellykket før dette er undersøkt."
     exit 1
 }
-Write-Host "Verifisering OK -- produksjon svarer 200 på alle sjekkede URL-er."
+
+Write-Host "Verifisering OK -- alle $($DeployFiles.Count) filer bekreftet byte-for-byte identiske mellom $WebRoot og produksjon."
 exit 0
