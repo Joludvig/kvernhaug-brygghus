@@ -16,29 +16,38 @@ Ready for review. Det er DENNE GitHub-hendelsen (`ready_for_review`),
 ikke enda en PR-kommentar, den native ChatGPT Work-oppgaven våkner på
 for runde 2+ (AGENT_WORKFLOW.md "Work-side Chief task (V1, issue #31)").
 
-RUNDE 1 / INITIAL-RUNDE-SIKKERHET: en fersk `status:ready`-PR opprettes
-alltid Ready (gh pr create sin default) -- den er ALDRI Draft når denne
-porten kjører for runde 1. For `status:ready` er "PR-en er allerede
-Ready" derfor UNNTAKSFRITT trygt: `already_ready=True`, ingen mutasjon,
-og runde 1s eksisterende oppvåkning via GitHubs `opened`-PR-hendelse +
-Chief-ready-markøren fortsetter helt uforstyrret.
+RUNDE 1 (issue #62): FØR issue #62 opprettet `gh pr create` alltid en
+Ready PR for `status:ready`, og runde 1s Chief-oppvåkning stolte
+utelukkende på GitHubs `opened`-PR-hendelse + Chief-ready-kommentar-
+markøren -- som issue #62s "Problem" dokumenterer som upålitelig for å
+vekke den native ChatGPT Work-oppgaven, fordi den aldri produserer en
+`ready_for_review`-hendelse. Fra og med issue #62 oppretter Claudes
+`gh pr create --draft` (se claude-agent-bridge.yml, status:ready-delen
+av prompten) derfor en FERSK `status:ready`-PR som Draft, akkurat som
+`pr_draft_handoff.py` allerede gjør for en EKSISTERENDE PR ved en
+changes-requested-runde -- runde 1 går dermed gjennom NØYAKTIG samme
+Draft -> Ready-overgang (DENNE modulen) som runde 2+, og produserer
+dermed den samme ekte `ready_for_review`-hendelsen for det native
+Work-oppgavetriggeret.
 
-Chief-review-fiks (PR #45, runde 3): for `status:changes-requested` er
-"allerede Ready" derimot IKKE unntaksfritt trygt -- `pr_draft_handoff.py`
-gjør Draft en VERIFISERT forutsetning FØR Claude kjører, men PR-en kan i
-prinsippet bli eksternt/prematurt undraftet ETTER den verifiseringen og
-FØR dette steget kjører, uten at DENNE mekanismen noensinne faktisk
-utførte en Draft -> Ready-overgang for det nye hodet -- nøyaktig den
-uteblitte re-review-vekkingen issue #44 skal forhindre. Derfor: for
-`status:changes-requested` teller "allerede Ready" kun som et trygt,
+Chief-review-fiks (PR #45, runde 3; GENERALISERT til begge
+trigger-etikettene av issue #62): "allerede Ready" er derfor IKKE
+unntaksfritt trygt for NOEN trigger-etikett -- `pr_draft_handoff.py`
+gjør Draft en VERIFISERT forutsetning FØR Claude kjører for
+changes-requested (og `gh pr create --draft` gjør det samme direkte for
+status:ready), men PR-en kan i prinsippet bli eksternt/prematurt
+undraftet ETTER det og FØR dette steget kjører, uten at DENNE
+mekanismen noensinne faktisk utførte en Draft -> Ready-overgang for det
+nye hodet -- nøyaktig den uteblitte re-review-vekkingen issue #44/#62
+skal forhindre. Derfor: "allerede Ready" teller KUN som et trygt,
 idempotent no-op når en EGEN, reservert
 `KBH_PR_READY_TRANSITION_DONE_V1`-markør for nettopp dette
 (issue, head)-paret allerede finnes blant PR-ens kommentarer -- BEVIS
 at DENNE mekanismen (og ikke noe eksternt) alt utførte overgangen for
 akkurat dette hodet (f.eks. en re-kjøring av selve dette workflow-
 steget etter at overgangen alt lyktes). Uten den markøren er "allerede
-Ready" i en changes-requested-runde en REELL, fail-closed avvisning --
-se `vurder_ready` og "FAIL-CLOSED" under.
+Ready" en REELL, fail-closed avvisning -- se `vurder_ready` og
+"FAIL-CLOSED" under.
 
 FAIL-CLOSED (issue #44, akseptansekriterium 3) -- enhver av følgende gir
 `set_ready=False, already_ready=False` (en REELL avvisning, se CLI-
@@ -55,10 +64,11 @@ kontrakten i main()):
   6. En formell GitHub-review (APPROVED/CHANGES_REQUESTED) finnes
      allerede for nettopp denne head-SHA-en -- en ny overgang ville
      trigget en overflødig/forvirrende re-review.
-  7. (Kun `status:changes-requested`, PR #45 runde 3): PR-en er allerede
-     Ready (ikke Draft), MEN ingen `KBH_PR_READY_TRANSITION_DONE_V1`-
-     markør for dette (issue, head)-paret beviser at DENNE mekanismen
-     utførte overgangen -- se "RUNDE 1 / INITIAL-RUNDE-SIKKERHET" over.
+  7. (PR #45 runde 3; generalisert til BEGGE trigger-etiketter av issue
+     #62): PR-en er allerede Ready (ikke Draft), MEN ingen
+     `KBH_PR_READY_TRANSITION_DONE_V1`-markør for dette (issue, head)-
+     paret beviser at DENNE mekanismen utførte overgangen -- se
+     "RUNDE 1" over.
 
 ("failed deliverable validation" fra samme akseptansekriterium er
 allerede strukturelt umulig å nå denne porten med -- workflowen gater
@@ -66,10 +76,12 @@ alle disse nye stegene på `steps.deliverable.outputs.ok == 'true'`, se
 claude-agent-bridge.yml.)
 
 IDEMPOTENS / "No duplicate review/lifecycle mutation for an exact
-head" (issue #44, akseptansekriterium 4): en PR som allerede ER Ready
-(fordi en tidligere kjøring av dette steget allerede lyktes, ELLER fordi
-det er runde 1) faller alltid i `already_ready`-grenen over -- `gh pr
-ready` kalles rett og slett ikke på nytt for samme hode.
+head" (issue #44, akseptansekriterium 4; generalisert til BEGGE
+trigger-etiketter av issue #62): en PR som allerede ER Ready OG har en
+`KBH_PR_READY_TRANSITION_DONE_V1`-markør som beviser at DENNE
+mekanismen selv utførte overgangen (typisk: en tidligere kjøring av
+dette steget allerede lyktes) faller i `already_ready`-grenen over --
+`gh pr ready` kalles rett og slett ikke på nytt for samme hode.
 
 Duplisert BEVISST (ikke importert) fra lifecycle_labels.py og
 chief_ready_signal.py/chief_retry_signal.py sine kopier av
@@ -196,15 +208,16 @@ def vurder_ready(*, issue_nummer, issue_labels, prs, branch_navn, signalert_head
     IKKE-alarmerende no-op; enhver annen `set_ready=False` er en
     fail-closed AVVISNING (se moduldocstring, akseptansekriterium 3).
 
-    `trigger_label` avgjør HVOR trygt "PR-en er allerede Ready" er (PR #45
-    runde 3, se moduldocstring "RUNDE 1 / INITIAL-RUNDE-SIKKERHET"): kun
-    for eksakt `status:changes-requested` kreves et bevist
-    `KBH_PR_READY_TRANSITION_DONE_V1`-funn for nettopp dette hodet --
-    samme "`!= status:changes-requested` er den trygge grenen"-konvensjon
-    som `pr_draft_handoff.py` allerede bruker. Enhver annen verdi
-    (`status:ready`, eller ikke oppgitt -- workflowen sender alltid en av
-    de to eksakte verdiene i praksis) er unntaksfritt trygt, uendret fra
-    før denne fiksen.
+    `trigger_label` beholdes i signaturen (workflowen sender den fortsatt,
+    se claude-agent-bridge.yml) og videreformidles i feilmeldinger, men
+    avgjør IKKE lenger hvor strengt "PR-en er allerede Ready" behandles
+    (issue #62 generaliserer PR #45 runde 3s fail-closed-fiks til BEGGE
+    trigger-etikettene): siden en fersk `status:ready`-PR nå OGSÅ
+    opprettes Draft (`gh pr create --draft`) og går via nøyaktig samme
+    Draft -> Ready-overgang som en changes-requested-runde, kreves et
+    bevist `KBH_PR_READY_TRANSITION_DONE_V1`-funn for nettopp dette
+    hodet uansett trigger-etikett -- se "FAIL-CLOSED" punkt 7 i
+    moduldocstringen.
     """
     if not signalert_head_sha:
         return False, False, None, None, (
@@ -256,13 +269,6 @@ def vurder_ready(*, issue_nummer, issue_labels, prs, branch_navn, signalert_head
         )
 
     if not pr.get("isDraft"):
-        if trigger_label != "status:changes-requested":
-            return False, True, pr_nummer, signalert_head_sha, (
-                f"PR #{pr_nummer} er allerede Ready (ikke Draft) -- trigger-etikett "
-                f"{trigger_label!r} går aldri via Draft (runde 1) -- unntaksfritt "
-                "idempotent no-op."
-            )
-
         antall_ferdig = _tell_ready_done_markorer(eksisterende_kommentarer, issue_nummer, signalert_head_sha)
         if antall_ferdig >= 1:
             return False, True, pr_nummer, signalert_head_sha, (
@@ -273,13 +279,14 @@ def vurder_ready(*, issue_nummer, issue_labels, prs, branch_navn, signalert_head
             )
 
         return False, False, pr_nummer, signalert_head_sha, (
-            f"status:changes-requested-runde: PR #{pr_nummer} er allerede Ready "
-            f"(ikke Draft), men INGEN {MARKER_READY_DONE_VERSJON}-markør finnes for "
-            f"issue #{issue_nummer}/head {signalert_head_sha} -- kan ikke bevise at "
-            "DENNE mekanismen utførte overgangen (PR-en kan ha blitt eksternt/"
-            "prematurt undraftet før dette steget fikk kjøre) -- avviser "
-            "ready-overgang (fail-closed); en stille godkjenning her ville tapt "
-            "nettopp den re-review-vekkingen issue #44 skal garantere."
+            f"PR #{pr_nummer} er allerede Ready (ikke Draft), men INGEN "
+            f"{MARKER_READY_DONE_VERSJON}-markør finnes for issue #{issue_nummer}/"
+            f"head {signalert_head_sha} -- kan ikke bevise at DENNE mekanismen "
+            "utførte overgangen (PR-en kan ha blitt eksternt/prematurt undraftet "
+            "før dette steget fikk kjøre, eller ble opprettet Ready av en eldre "
+            "workflow-versjon fra før issue #62) -- avviser ready-overgang "
+            "(fail-closed); en stille godkjenning her ville tapt nettopp den "
+            "re-review-vekkingen issue #44/#62 skal garantere."
         )
 
     return True, False, pr_nummer, signalert_head_sha, (

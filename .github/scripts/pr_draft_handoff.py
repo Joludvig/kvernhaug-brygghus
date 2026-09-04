@@ -24,10 +24,15 @@ Bruker BEVISST kun data "Capture pre-run PR state"-steget allerede har
 hentet (samme (nummer, head-SHA, isDraft)-fangst deliverable_guard.py
 bruker) -- ingen ekstra GitHub-kall.
 
-Kun `status:changes-requested`-runder konverterer til Draft. En fersk
-`status:ready`-PR opprettes alltid Ready (gh pr create sin default) og
-skal ALDRI settes i Draft av denne modulen -- det ville brutt runde 1s
-eksisterende oppvåkning via GitHubs `opened`-PR-hendelse (AGENT_WORKFLOW.md).
+Kun `status:changes-requested`-runder konverterer en EKSISTERENDE PR til
+Draft -- en fersk `status:ready`-runde har per definisjon ingen PR før
+Claude kjører, så det er ingenting for DENNE modulen å konvertere. Fra
+og med issue #62 oppretter Claudes `gh pr create --draft` (se
+claude-agent-bridge.yml) en fersk `status:ready`-PR direkte som Draft --
+runde 1 går dermed gjennom nøyaktig samme Draft -> Ready-overgang
+(pr_ready_handoff.py) som runde 2+, uten at denne modulen (som er
+scopet til en allerede eksisterende PR via `before_pr_number`/
+`before_head_sha`) trenger å endres.
 
 `vurder_draft` (den opprinnelige beslutningen om å FORSØKE
 Draft-konverteringen) er IKKE-ALARMERENDE (samme filosofi som

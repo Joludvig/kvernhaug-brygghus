@@ -789,18 +789,22 @@ family instead of trying a third comment-based variant: the PR's own
    confirm this still holds before relying on it for a live re-review
    E2E (acceptance criterion 6, issue #44).
 
-**Round 1 / initial-review safety (issue #44 requirement):** a fresh
-`status:ready` run's `gh pr create` always opens the PR **Ready**
-(never Draft) -- so step 3 above never runs for `status:ready` at all
-(`pr_draft_handoff.py` rejects any trigger label other than
-`status:changes-requested`). Round 1's Chief wake keeps relying on
+**Round 1 / initial-review safety (issue #44 requirement) -- SUPERSEDED
+by issue #62:** this paragraph is kept verbatim as the historical
+record of issue #44's original round-1 design; it no longer describes
+current behavior -- see "Round 1 also uses the Draft -> Ready lifecycle
+(V1, issue #62)" below for what replaced it and why. Originally: a
+fresh `status:ready` run's `gh pr create` always opened the PR
+**Ready** (never Draft) -- so step 3 above never ran for `status:ready`
+at all (`pr_draft_handoff.py` rejects any trigger label other than
+`status:changes-requested`). Round 1's Chief wake relied solely on
 GitHub's `opened` PR event (already an accepted event family per the
 issue #31 Work-side configuration) plus the unchanged Chief-ready
-marker -- completely undisturbed by this change. `pr_ready_handoff.py`
-runs identically on **every** successful round, round 1 included, but
-finds `isDraft == false` already and treats that as a non-alarming
-`already_ready` no-op -- no special-casing is needed to keep round 1
-safe, and no accidental Ready->Ready mutation occurs.
+marker. `pr_ready_handoff.py` ran identically on **every** successful
+round, round 1 included, but found `isDraft == false` already and
+treated that as a non-alarming `already_ready` no-op -- no
+special-casing was needed to keep round 1 safe, and no accidental
+Ready->Ready mutation occurred.
 
 **Draft is a verified prerequisite, not a best-effort attempt (Chief
 review, PR #45):** the first version of step 3 above stopped at the
@@ -1057,6 +1061,111 @@ a real, controlled re-review E2E on a live issue (acceptance criterion
 honest limit already noted for `workflow_dispatch` and every prior
 Chief-ready signal iteration above. Nothing in this change claims that
 E2E has already passed.
+
+## Round 1 also uses the Draft -> Ready lifecycle (V1, issue #62)
+
+**The problem this fixes:** issue #44 (above) gave `status:changes-requested`
+re-review a reliable wake-up via a real GitHub `ready_for_review` event.
+`status:ready` (round 1) never went through that mechanism at all --
+`gh pr create` opened the PR **Ready** immediately, so round 1's Chief
+wake depended entirely on GitHub's `opened` PR event and the
+Chief-ready comment marker (issue #32). Observed on issue #58 / PR #61:
+the PR was created Ready, the `KBH_CHIEF_REVIEW_READY_V1` marker was
+posted at 19:05, and no native Chief review appeared until the hourly
+`Kvernhaug Approval Watch` fallback picked it up later -- i.e. the same
+class of missed-wake risk issue #44 had already fixed for round 2+, just
+never closed for round 1.
+
+**The fix, chosen to be the smallest change that reuses issue #44's
+already-proven mechanism instead of building a second one:** a fresh
+`status:ready` PR is now opened as **Draft** --
+`gh pr create --draft`, a one-word change to the `status:ready` branch
+of the Claude prompt in `claude-agent-bridge.yml` (`Run Claude Code`
+step) -- instead of Ready. Every other step in the Draft/Ready-for-review
+pipeline (issue #44) is already trigger-label-agnostic about the
+**mutation** itself: `pr_ready_handoff.py`'s ordinary transition path
+only ever checks the PR's live `isDraft` flag, never the trigger label,
+so a Draft round-1 PR flows through the exact same
+deliverable-gate -> Chief-ready-marker -> refetch -> `gh pr ready`
+sequence a changes-requested round already uses, producing a real
+`ready_for_review` event for round 1 too. **No new workflow steps, no
+new script module, and no `--allowedTools`/permission-model change**
+were needed for this -- `gh pr create --draft` is just a different
+argument to the already-allowed `Bash(gh pr create *)` rule.
+
+`pr_draft_handoff.py` (the *pre-Claude* Draft conversion for an
+*existing* PR) is intentionally untouched: it still only ever fires for
+`status:changes-requested`, because a fresh `status:ready` run has no PR
+to convert yet when that step runs -- Claude creates one, directly as
+Draft, later in the same job. Its docstring is updated to explain the
+new reason `status:ready` is out of its scope (issue #62), not to change
+its behavior.
+
+**Preserving fail-closed behavior (scope requirement 5) required one
+substantive code change, not just a prompt tweak:** before this fix,
+`pr_ready_handoff.py`'s "PR is already Ready (not Draft)" branch treated
+*any* trigger label other than `status:changes-requested` as an
+unconditionally safe `already_ready` no-op -- correct when round 1 could
+never legitimately be Draft in the first place, but a **latent fail-open
+gap** once round 1 also creates a Draft PR: if a round-1 PR were
+externally/prematurely un-drafted before this gate ran, it would have
+been silently accepted as "the safe round-1 case" without ever having
+performed a real transition -- exactly the class of bug Chief's PR #45
+review already fixed for `status:changes-requested` (requiring a
+`KBH_PR_READY_TRANSITION_DONE_V1` proof marker), just left open for the
+other label. The fix generalizes that same requirement to **every**
+trigger label (`vurder_ready` in `pr_ready_handoff.py` no longer
+branches on `trigger_label` for this check at all): "already Ready" is
+now a safe idempotent no-op only when a `KBH_PR_READY_TRANSITION_DONE_V1`
+marker proves this mechanism itself performed the transition for that
+exact `(issue, head)` pair, regardless of which label triggered the run.
+`trigger_label` remains in the function signature and the workflow's
+JSON payload (unchanged wiring, no need to touch the "Refetch live state
+for PR ready-for-review transition" step) but no longer gates this
+decision.
+
+**What was verified, and how (issue #62 scope item 6):**
+- First-round PR: Draft -> Ready -> one review-ready signal/event path --
+  `tests/test_agent_bridge_pr_ready_handoff.py`
+  `TestRunde1BrukerSammeOvergangSomChangesRequested` (a Draft round-1 PR
+  transitions normally) plus the `TestRunde1DraftPromptIssue62`
+  workflow-source checks (`gh pr create --draft` present in the
+  `status:ready` prompt branch, absent from the `status:changes-requested`
+  branch, no new workflow steps, no `--allowedTools` expansion).
+- Re-review path still works: every existing `TestChangesRequestedReadyFailOpen`
+  / `TestVurderReadyFailClosed` / `TestVurderReadyGodkjenner` case is
+  unchanged and still passes -- the changes-requested branch's own logic
+  and its already-required proof marker were not touched.
+- No duplicate transition on retries: the generalized "already Ready"
+  check is exactly the existing `KBH_PR_READY_TRANSITION_DONE_V1`
+  idempotency mechanism (issue #44/PR #45), now applied uniformly --
+  `gh pr ready` is still never called twice for the same head, for
+  either trigger label.
+- No auto-merge or scope expansion: `TestRunde1DraftPromptIssue62.test_allowedtools_utvides_ikke`
+  asserts the `--allowedTools` string is unchanged apart from `gh pr
+  create`'s existing wildcard rule, and that no `gh pr merge`/`git
+  merge`/`Write`/`Edit` rule was introduced; the pre-existing
+  `TestWorkflowKildetekst` suite (unchanged) continues to assert no
+  merge command anywhere in the new-to-issue-#44 steps this change
+  reuses.
+
+**Files changed:** `.github/workflows/claude-agent-bridge.yml` (the
+`status:ready` prompt bullet, plus updated inline comments that had
+described the pre-#62 "round 1 is always Ready" behavior as fact),
+`.github/scripts/pr_ready_handoff.py` (`vurder_ready`'s "already Ready"
+branch generalized, docstrings updated), `.github/scripts/pr_draft_handoff.py`
+(docstring only), `tests/test_agent_bridge_pr_ready_handoff.py` (updated
++ new tests above), this document.
+
+**Testability boundary, stated plainly, exactly as for every other
+mechanism in this document:** the fail-closed decision logic and the
+workflow's step wiring are unit- and source-tested without touching
+GitHub. Whether a live round-1 PR created as Draft actually produces a
+`ready_for_review` event the native Work task reliably wakes on -- the
+entire premise of both this change and issue #44's -- can only be
+confirmed by a real, controlled round-1 E2E on a live issue, the same
+honest limit already noted for every prior Chief-ready signal iteration
+above. Nothing in this change claims that E2E has already passed.
 
 ## Scope-change rule
 
