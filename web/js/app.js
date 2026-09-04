@@ -131,7 +131,15 @@ let gjaerData = {};
 let bjcpStyles = {};
 let sisteBeregning = null;
 let sisteStilAnalyse = null;
-let _egendefinertTeller = 0;
+
+// PRI 4C (issue #50) -- stabil custom-ingrediens-id for AKTIV custom-gjær
+// (kontraktens §5 tredje dokumenterte hull: gjaerCustom hadde tidligere
+// INGEN id i det hele tatt). Mintet FØRSTE gang _lesGjaerEgendefinert()
+// faktisk trenger den (lazy), gjenbrukt uendret så lenge den samme
+// oppskriften redigeres. Satt eksplisitt fra oppskrift.gjaerCustom.id (eller
+// nullstilt) i _gjenopprettOppskrift() -- SAMME ene, felles
+// gjenopprettingspunkt som _aktivKbhUkjenteFelt bruker, se der.
+let _aktivGjaerCustomId = null;
 
 const maltRaderEl = document.getElementById("malt-rader");
 const humleRaderEl = document.getElementById("humle-rader");
@@ -145,11 +153,6 @@ const gjaerEgGjaertype = document.getElementById("gjaer-eg-gjaertype");
 let gjaerCombobox = null;
 let stilCombobox = null;
 let oppdaterSmakshjul = null;
-
-function nyEgendefinertId(prefiks) {
-  _egendefinertTeller += 1;
-  return `${prefiks}_${Date.now()}_${_egendefinertTeller}`;
-}
 
 // ─── Brukeridentitet (brygger/bryggeri) ──────────────────────────────────
 // Oppskriften er brukerens, ikke Kvernhaug sin: brygger/bryggeri lagres på
@@ -353,7 +356,7 @@ function _settMaltEgendefinert(rad, pa, eksplisittId) {
   rad.querySelector(".combobox").style.display = pa ? "none" : "";
   rad.querySelector(".egendefinert-knapp").style.display = pa ? "none" : "";
   if (pa) {
-    rad.dataset.egendefinertId = eksplisittId || rad.dataset.egendefinertId || nyEgendefinertId("egen_malt");
+    rad.dataset.egendefinertId = eksplisittId || rad.dataset.egendefinertId || nyCustomIngredientId();
   } else {
     rad._combobox.clear();
   }
@@ -610,7 +613,7 @@ function _settHumleEgendefinert(rad, pa, eksplisittId) {
   rad.querySelector(".combobox").style.display = pa ? "none" : "";
   rad.querySelector(".egendefinert-knapp").style.display = pa ? "none" : "";
   if (pa) {
-    rad.dataset.egendefinertId = eksplisittId || rad.dataset.egendefinertId || nyEgendefinertId("egen_humle");
+    rad.dataset.egendefinertId = eksplisittId || rad.dataset.egendefinertId || nyCustomIngredientId();
   } else {
     rad._combobox.clear();
   }
@@ -765,7 +768,13 @@ function lesHumleRader() {
 
 function _lesGjaerEgendefinert() {
   if (gjaerCombobox.getValue() || gjaerEgendefinertFelt.hidden) return null;
+  // PRI 4C (issue #50) -- mintes lazily, FØRSTE gang en aktiv custom-gjær
+  // faktisk samles inn, og gjenbrukes deretter uendret (se
+  // _aktivGjaerCustomId-deklarasjonen). En allerede satt id (gjenopprettet
+  // fra en lagret/importert oppskrift) overskrives ALDRI her.
+  if (!_aktivGjaerCustomId) _aktivGjaerCustomId = nyCustomIngredientId();
   return {
+    id: _aktivGjaerCustomId,
     navn: gjaerEgNavn.value.trim() || "Egendefinert gjær",
     produsent: gjaerEgProdusent.value.trim() || undefined,
     gjaertype: gjaerEgGjaertype.value.trim() || undefined,
@@ -1332,6 +1341,16 @@ function _gjenopprettOppskrift(oppskrift) {
   _aktivKbhUkjenteFelt =
     (oppskrift && typeof oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL] === "object" && oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL] !== null)
       ? oppskrift[KBHRECIPE_PASSTHROUGH_NOKKEL]
+      : null;
+
+  // PRI 4C (issue #50) -- samme gjenopprettingspunkt bærer også
+  // _aktivGjaerCustomId videre: en allerede mintet id (lagret/importert
+  // oppskrift) PRESERVERES uendret, en blank/id-løs oppskrift (inkl. en
+  // legacy gjaerCustom uten id) nullstilles til null -- en fersk id mintes
+  // først når/hvis _lesGjaerEgendefinert() faktisk trenger den igjen.
+  _aktivGjaerCustomId =
+    (oppskrift && oppskrift.gjaerCustom && typeof oppskrift.gjaerCustom.id === "string" && oppskrift.gjaerCustom.id)
+      ? oppskrift.gjaerCustom.id
       : null;
 
   // Runde 18A -- den interne sentinelen "Uten navn" (satt av samleOppskrift()

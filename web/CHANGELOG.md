@@ -4,6 +4,36 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## PRI 4C — Core custom-ingredient identity-kontrakt (2026-09-04)
+
+Web-siden adopsjon av `docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md`
+for NYE egendefinerte ingredienser, etter App P4A/P4B (issue #38/#48). Rent
+internt/datamodell — ingen synlig UI-endring.
+
+**Ett delt, opakt navnerom.** Web mintet tidligere TRE separate custom-id-
+navnerom: `egen_malt_<timestamp>_<teller>`, `egen_humle_<timestamp>_<teller>`
+(begge `app.js::nyEgendefinertId()`) og `egen_pantry_<type>_<unik>`
+(`pantry.js::nyPantryCustomId()`). Fra og med nå mintes ENHVER ny custom
+malt/humle/gjær/pantry-ingrediens i kontraktens kanoniske
+`kbh-custom-<uuidv4>`-format via ny, delt `js/custom_ingredient_id.js`
+(`nyCustomIngredientId()`), med generasjonstids-kollisjonssjekk på tvers av
+pantry (`allePantryItems()`), alle lagrede oppskrifter (`alleOppskrifter()`)
+og alle frosne brygg-snapshots (`alleBrygg()`) -- de tre eneste lokale
+lagringsstedene som kan holde en custom-id i dag. Allerede lagrede
+`egen_*`-ider er permanent grandfatret (kontraktens §9) og røres ikke.
+
+**Custom-gjær fikk endelig en stabil id.** `gjaerCustom` hadde tidligere
+INGEN id i det hele tatt (kontraktens §5, tredje dokumenterte Web-hull) --
+kun det selvbeskrivende navn/produsent/gjaertype/attenuation-innholdet.
+Mintes nå lazy (`app.js::_lesGjaerEgendefinert()`), stabilt gjennom
+redigering/lagring/eksport/import/reload av samme oppskrift.
+
+**Script-lasting.** `js/pantry.js` lastes nå også på `index.html` (for
+kollisjonssjekkens `allePantryItems()`), og `js/brew_storage.js` lastes nå
+også på `pantry.html` (for `alleBrygg()`) -- begge sider laster i tillegg
+den nye `js/custom_ingredient_id.js`. `web/en/index.html`/`web/en/pantry.html`
+regenerert tilsvarende.
+
 ## Bryggeskole P3B — Gjærvalg, Klaring og responsiv navigasjon (2026-08-23)
 
 Den andre og siste av de målrettede rundene Gap Audit V1 pekte ut. **P3B er
