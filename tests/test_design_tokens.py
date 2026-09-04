@@ -7,13 +7,14 @@ Dekker:
   validate_tokens) mot syntetiske, bevisst ødelagte kopier -- ikke bare
   at den ekte filen tilfeldigvis er gyldig.
 - Token-drift-vakt: de seks aksentfargene (gull/pergament/mose/kobber/
-  elfenbein/danger) skal være byte-identiske på tvers av design/tokens.json,
-  ui/branding.py (via faktisk import, ikke kildetekst-regex) og de to
-  fortsatt uavhengige, håndvedlikeholdte kopiene i
-  modules/card_template.py og web/css/style.css sin :root-blokk.
-  En fremtidig endring av én av disse fire uten å oppdatere de andre skal
-  feile denne testen -- det er selve poenget med "prevent obvious token
-  drift".
+  elfenbein/danger) i design/tokens.json skal stemme byte-for-byte med
+  hver konsuments faktiske delsett -- ui/branding.py (fire: gull, pergament,
+  mose, kobber, via faktisk import, ikke kildetekst-regex), de to fortsatt
+  uavhengige, håndvedlikeholdte kopiene i modules/card_template.py (fem: de
+  fire over pluss elfenbein) og web/css/style.css sin :root-blokk (alle
+  seks). En fremtidig endring av tokens.json eller ett av disse
+  konsumentenes eksisterende delsett uten å oppdatere de andre skal feile
+  denne testen -- det er selve poenget med "prevent obvious token drift".
 - docs/DESIGN.md finnes og dekker minimumskravene fra issue #59 sitt scope.
 
 Kjøres med: py -3 -m unittest tests.test_design_tokens

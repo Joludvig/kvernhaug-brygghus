@@ -123,8 +123,10 @@ def load_tokens(path: Path = TOKENS_PATH) -> dict:
 
 def get_accent_colors(path: Path = TOKENS_PATH) -> dict:
     """Bekvemmelighetsfunksjon: kun de produktuavhengige aksentfargene
-    (gull/pergament/mose/kobber/elfenbein/danger) — de samme seks verdiene
-    som allerede var byte-identiske på tvers av ui/branding.py,
-    modules/card_template.py og web/css/style.css før denne modulen
-    fantes (se docs/DESIGN.md "Produkttilpasning: Web vs. App")."""
+    (gull/pergament/mose/kobber/elfenbein/danger). Hver konsument bruker sitt
+    eget delsett av disse seks verdiene -- ui/branding.py fire (gull,
+    pergament, mose, kobber), modules/card_template.py fem (de fire pluss
+    elfenbein), web/css/style.css alle seks -- og var allerede byte-identisk
+    der delsettene faktisk overlapper før denne modulen fantes (se
+    docs/DESIGN.md §1)."""
     return load_tokens(path)["color"]["accent"]
