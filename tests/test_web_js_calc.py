@@ -1,14 +1,16 @@
 """
-WEB PRI 5 (issue #51) -- første runde med ekte, KJØRENDE test-dekning av
-web/js/calc.js sine beregningsformler (OG/EBC/invers-Tinseth/FG-ABV), via
-Node (tests/web_js_runtime.py -- se den filens docstring for hvorfor og
-hvordan). Dette er "calculation semantics/golden vectors" fra issue #51 sin
-scope-liste: golden-vektorene under er faktiske returverdier fra den ekte,
-kjørende kildefilen (fanget via harnesset, ikke regnet ut for hånd), så en
-fremtidig regresjon i selve formelen fanges -- i motsetning til de
-eksisterende regex-baserte "kilde-kontrakt"-testene (f.eks.
-test_web_custom_ingredient_id_active_draft.py), som kun kan bevise at visse
-tekstmønstre finnes i kildekoden, aldri hva koden faktisk RETURNERER.
+WEB PRI 5 (issue #51) -- intended real, EXECUTED test coverage of
+web/js/calc.js's calculation formulas (OG/EBC/inverse-Tinseth/FG-ABV), via
+Node (tests/web_js_runtime.py). This is the "calculation semantics/golden
+vectors" area from issue #51's scope list.
+
+BLOCKED (Chief review, PR #53, on head 56dcab8): tests/web_js_runtime.py's
+run_web_js() shelled out to `node` from an allowed `python3 -m unittest ...`
+process -- a Bridge Bash-allowlist circumvention (see that module's
+docstring). run_web_js() now refuses to run, so every test below is
+`@unittest.skip`-ped rather than deleted, preserving the golden vectors
+(captured from the real running source, not hand-computed) as ready-to-run
+once a separate, explicitly reviewed Bridge permission-model change lands.
 
 Kjøres med:
     py -3 -m unittest tests.test_web_js_calc
@@ -18,8 +20,13 @@ import unittest
 from tests.web_js_runtime import run_web_js
 
 _CALC = ["calc.js"]
+_SKIP_REASON = (
+    "Blocked pending a separate Bridge permission-model change -- see "
+    "tests/web_js_runtime.py docstring (Chief review, PR #53)."
+)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestBeregnOG(unittest.TestCase):
     def test_golden_vector_single_malt(self):
         og = run_web_js(
@@ -40,6 +47,7 @@ class TestBeregnOG(unittest.TestCase):
         self.assertEqual(og, 1.0)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestBeregnEBC(unittest.TestCase):
     def test_golden_vector_single_malt(self):
         ebc = run_web_js(
@@ -53,6 +61,7 @@ class TestBeregnEBC(unittest.TestCase):
         self.assertEqual(run_web_js(_CALC, "beregnEBC([], {}, -5)"), 0)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestBeregnGramFraIBU(unittest.TestCase):
     def test_golden_vector(self):
         gram = run_web_js(_CALC, "beregnGramFraIBU(30, 12.5, 60, 20, 1.055)")
@@ -74,6 +83,7 @@ class TestBeregnGramFraIBU(unittest.TestCase):
                 self.assertEqual(run_web_js(_CALC, "beregnGramFraIBU(%s)" % args), 0.0)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestBeregnFgOgAbv(unittest.TestCase):
     def test_golden_vector(self):
         result = run_web_js(_CALC, "beregnFgOgAbv(1.055, 0.75)")

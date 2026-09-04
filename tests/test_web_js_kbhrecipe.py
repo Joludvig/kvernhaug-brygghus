@@ -1,9 +1,15 @@
 """
-WEB PRI 5 (issue #51) -- ekte, KJØRENDE test-dekning av web/js/kbhrecipe.js
-(byggKbhRecipeInnhold/parseKbhRecipeInnhold), via Node (se
-tests/web_js_runtime.py). Dette dekker issue #51 sitt ".kbhrecipe"-
-scope-punkt med faktisk kjørt eksport/import-rundtur -- ikke bare regex mot
-kildeteksten. Kontrakten selv: docs/development/CORE_KBHRECIPE_V1.md.
+WEB PRI 5 (issue #51) -- intended real, EXECUTED test coverage of
+web/js/kbhrecipe.js (byggKbhRecipeInnhold/parseKbhRecipeInnhold), via Node
+(see tests/web_js_runtime.py). This is issue #51's ".kbhrecipe" scope
+point. Kontrakten selv: docs/development/CORE_KBHRECIPE_V1.md.
+
+BLOCKED (Chief review, PR #53, on head 56dcab8): tests/web_js_runtime.py's
+run_web_js() shelled out to `node` from an allowed `python3 -m unittest ...`
+process -- a Bridge Bash-allowlist circumvention (see that module's
+docstring). run_web_js() now refuses to run, so every test below is
+`@unittest.skip`-ped rather than deleted, pending a separate, explicitly
+reviewed Bridge permission-model change.
 
 `t` (i18n-oppslag) stubbes til identitetsfunksjon i alle tester her --
 kbhrecipe.js kaller kun t() for brukervendte feilmeldinger ved avvist
@@ -21,6 +27,10 @@ from tests.web_js_runtime import run_web_js
 
 _KBHRECIPE = ["kbhrecipe.js"]
 _T_STUB = "const t = (k) => k;"
+_SKIP_REASON = (
+    "Blocked pending a separate Bridge permission-model change -- see "
+    "tests/web_js_runtime.py docstring (Chief review, PR #53)."
+)
 
 
 def _bygg(oppskrift):
@@ -35,6 +45,7 @@ def _parse_obj(obj):
     return _parse("JSON.stringify(%s)" % json.dumps(obj))
 
 
+@unittest.skip(_SKIP_REASON)
 class TestByggKbhRecipeInnhold(unittest.TestCase):
     def test_kun_kjente_eksporterbare_felt_tas_med(self):
         # bryggerStil er et gyldig Core V1-felt, men Web har bevisst ingen
@@ -70,6 +81,7 @@ class TestByggKbhRecipeInnhold(unittest.TestCase):
         self.assertEqual(built["recipe"]["ok_field"], "keep")
 
 
+@unittest.skip(_SKIP_REASON)
 class TestRoundtrip(unittest.TestCase):
     def test_ukjente_felt_overlever_eksport_og_import(self):
         built = _bygg(
@@ -105,6 +117,7 @@ class TestRoundtrip(unittest.TestCase):
         self.assertEqual(built["recipe"]["navn"], "Nytt navn")
 
 
+@unittest.skip(_SKIP_REASON)
 class TestParseKbhRecipeInnhold(unittest.TestCase):
     def test_gammel_ra_json_uten_wrapper_gjenkjennes_som_legacy(self):
         parsed = _parse_obj({"navn": "Gammel oppskrift", "malt": [], "humle": [], "volum": 20})

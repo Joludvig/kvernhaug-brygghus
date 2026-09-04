@@ -1,7 +1,7 @@
 """
-WEB PRI 5 (issue #51) -- ekte, KJØRENDE test-dekning av
-web/js/brew_storage.js sitt CRUD- og .kbhbrew-eksport/import-lag, via Node
-(se tests/web_js_runtime.py). Dekker issue #51 sitt ".kbhbrew"-scope-punkt.
+WEB PRI 5 (issue #51) -- intended real, EXECUTED test coverage of
+web/js/brew_storage.js's CRUD and .kbhbrew export/import layer, via Node
+(see tests/web_js_runtime.py). This is issue #51's ".kbhbrew" scope point.
 
 Testene bruker et minimalt, håndbygget snapshot ({recipe, predicted}) i
 stedet for å kjøre hele byggBrewSnapshot()-pipelinen (som krever
@@ -15,6 +15,13 @@ passthrough-policyen).
 `t` stubbes til identitetsfunksjon -- se test_web_js_kbhrecipe.py sin
 docstring for samme begrunnelse.
 
+BLOCKED (Chief review, PR #53, on head 56dcab8): tests/web_js_runtime.py's
+run_web_js() shelled out to `node` from an allowed `python3 -m unittest ...`
+process -- a Bridge Bash-allowlist circumvention (see that module's
+docstring). run_web_js() now refuses to run, so every test below is
+`@unittest.skip`-ped rather than deleted, pending a separate, explicitly
+reviewed Bridge permission-model change.
+
 Kjøres med:
     py -3 -m unittest tests.test_web_js_brew_storage
 """
@@ -26,12 +33,17 @@ from tests.web_js_runtime import run_web_js
 _BREW_STORAGE = ["brew_storage.js"]
 _T_STUB = "const t = (k) => k;"
 _MINIMAL_SNAPSHOT = {"recipe": {"navn": "Test"}, "predicted": {"og": 1.055}}
+_SKIP_REASON = (
+    "Blocked pending a separate Bridge permission-model change -- see "
+    "tests/web_js_runtime.py docstring (Chief review, PR #53)."
+)
 
 
 def _kjor(expr):
     return run_web_js(_BREW_STORAGE, expr, prelude=_T_STUB)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestOpprettOgLesBrygg(unittest.TestCase):
     def test_opprett_deretter_finn_og_list(self):
         expr = (
@@ -55,6 +67,7 @@ class TestOpprettOgLesBrygg(unittest.TestCase):
         self.assertFalse(result["ok"])
 
 
+@unittest.skip(_SKIP_REASON)
 class TestKbhBrewRoundtrip(unittest.TestCase):
     def test_eksport_deretter_import_bevarer_snapshot_og_status(self):
         expr = (

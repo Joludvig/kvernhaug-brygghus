@@ -1,20 +1,22 @@
 """
-WEB PRI 5 (issue #51) -- ekte, KJØRENDE test-dekning av
-web/js/custom_ingredient_id.js (nyCustomIngredientId()), via Node (se
-tests/web_js_runtime.py). Dekker issue #51 sitt "custom ingredient
-identity/adapters"-scope-punkt med et FAKTISK, deterministisk mocket
-kollisjonsforsøk -- ved å skripte crypto.randomUUID() til å levere en kjent
-UUID-sekvens (harnessets `uuid_queue`), kan disse testene bevise at
-regenerer-løkka faktisk kjører til den finner en ledig id, i stedet for kun
-å bevise (som den eksisterende
-test_web_custom_ingredient_id_active_draft.py gjør, via regex mot
-kildeteksten) at koden SER ut som den burde gjøre det.
-
-De to testene er komplementære, ikke duplikater: regex-testen dokumenterer
-og vokter selve IMPLEMENTASJONEN (riktig kilde-mønster, riktig plassering i
-funksjonen); denne filen beviser den OBSERVERBARE OPPFØRSELEN (riktig
-returverdi for et gitt scenario) uavhengig av hvordan koden er skrevet.
+WEB PRI 5 (issue #51) -- intended real, EXECUTED test coverage of
+web/js/custom_ingredient_id.js (nyCustomIngredientId()), via Node (see
+tests/web_js_runtime.py). This is issue #51's "custom ingredient
+identity/adapters" scope point -- intended to prove, via a scripted
+crypto.randomUUID() collision (the harness's `uuid_queue`), that the
+regenerate loop actually runs until it finds a free id, complementary to
+the existing regex-based test_web_custom_ingredient_id_active_draft.py
+(which documents the implementation, not the observable behavior).
 Kontrakten selv: docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md.
+
+BLOCKED (Chief review, PR #53, on head 56dcab8): tests/web_js_runtime.py's
+run_web_js() shelled out to `node` from an allowed `python3 -m unittest ...`
+process -- a Bridge Bash-allowlist circumvention (see that module's
+docstring). run_web_js() now refuses to run, so every test below is
+`@unittest.skip`-ped rather than deleted, pending a separate, explicitly
+reviewed Bridge permission-model change. The existing regex-based test
+(test_web_custom_ingredient_id_active_draft.py) is unaffected and remains
+the current, valid guard for this contract.
 
 Kjøres med:
     py -3 -m unittest tests.test_web_js_custom_ingredient_id
@@ -28,8 +30,13 @@ _MODUL = ["custom_ingredient_id.js"]
 _UUID_V4_REGEX = re.compile(
     r"^kbh-custom-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
 )
+_SKIP_REASON = (
+    "Blocked pending a separate Bridge permission-model change -- see "
+    "tests/web_js_runtime.py docstring (Chief review, PR #53)."
+)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestNyCustomIngredientIdFormat(unittest.TestCase):
     def test_returnerer_kontraktens_format_uten_lokale_kilder_lastet(self):
         # Ingen av allePantryItems/alleOppskrifter/alleBrygg/AKTIV_KLADD_NOKKEL
@@ -39,6 +46,7 @@ class TestNyCustomIngredientIdFormat(unittest.TestCase):
         self.assertRegex(result, _UUID_V4_REGEX)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestKollisjonMotAktivKladd(unittest.TestCase):
     """AKTIV_KLADD_NOKKEL (Chief-runde, PR #52/issue #50) -- se
     test_web_custom_ingredient_id_active_draft.py for kilde-kontrakten
@@ -72,6 +80,7 @@ class TestKollisjonMotAktivKladd(unittest.TestCase):
         self.assertEqual(result, "kbh-custom-%s" % self._FRESH)
 
 
+@unittest.skip(_SKIP_REASON)
 class TestAlleFireKilderSjekkes(unittest.TestCase):
     """Kontraktens §6 -- kollisjonssjekken skal dekke pantry, lagrede
     oppskrifter, brygg-snapshots OG den aktive kladden samtidig, ikke bare

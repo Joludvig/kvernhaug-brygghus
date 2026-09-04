@@ -7,9 +7,16 @@
 //
 // Invoked as: node eval_web_js.js <manifest.json>, where the manifest is
 // { files: [absolute paths, loaded in order], prelude, presetLocalStorage,
-//   uuidQueue, expr }. Never invoked directly by Claude's own Bash tool --
-// only indirectly, as a subprocess spawned from inside an already-allowed
-// `python3 -m unittest ...` process (see tests/web_js_runtime.py).
+//   uuidQueue, expr }.
+//
+// BLOCKED (Chief review, PR #53, on head 56dcab8): the only caller,
+// tests/web_js_runtime.py's run_web_js(), invoked this file as a `node`
+// subprocess from inside an allowed `python3 -m unittest ...` process --
+// found to be a Bridge Bash-allowlist circumvention (`node` itself is not
+// on --allowedTools; see docs/development/AGENT_WORKFLOW.md). run_web_js()
+// now refuses to run, so this harness is currently unreferenced. Kept
+// as-is (not deleted) as reference for a future, separately reviewed
+// Bridge permission-model change; do not wire it back up without that.
 //
 // Prints exactly one line of JSON to stdout on success:
 //   {"ok":true,"value":<result of evaluating manifest.expr>}
