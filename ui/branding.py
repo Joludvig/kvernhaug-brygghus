@@ -2,6 +2,8 @@ import base64
 import os
 import streamlit as st
 
+from modules.design_tokens import get_accent_colors
+
 _LOGO_PATH = os.path.join("assets", "branding", "kbh_emblem_master.png")
 
 # Samme godkjente motiv/fil-prinsipp som web/assets/branding/kvernhaug_header_banner.jpg
@@ -10,11 +12,17 @@ _LOGO_PATH = os.path.join("assets", "branding", "kbh_emblem_master.png")
 # ingen ny beskjæring). Delt visuelt univers mellom web og desktop-appen.
 _BANNER_PATH = os.path.join("assets", "branding", "kvernhaug_header_banner.jpg")
 
+# Kilde: design/tokens.json (Kvernhaug Design System, docs/DESIGN.md) --
+# samme verdier som før (uendret utseende), nå hentet fra én delt
+# token-fil i stedet for en lokal kopi. skifer_sort er ikke en aksentfarge
+# (den er kun brukt her, ikke felles med web/kortet) og beholdes derfor
+# som en lokal literal.
+_accent = get_accent_colors()
 _COLORS = {
-    "antikk_gull":  "#c49a2a",
-    "pergament":    "#dfd0a0",
-    "mosegroen":    "#3d6b2a",
-    "kobber":       "#9e6030",
+    "antikk_gull":  _accent["gold"],
+    "pergament":    _accent["pergament"],
+    "mosegroen":    _accent["moss"],
+    "kobber":       _accent["copper"],
     "skifer_sort":  "#0a0a0a",
 }
 
