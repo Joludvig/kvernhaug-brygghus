@@ -26,6 +26,7 @@ from ui.equipment_panel import render_equipment_panel
 from ui.process_panel import render_process_panel
 from ui.water_panel import render_water_panel
 from ui.kbhbrew_panel import render_kbhbrew_export_panel, render_kbhbrew_import_panel
+from ui.abv_calculator_panel import render_abv_calculator_panel
 from ui.i18n import t
 
 # 1. Grunnleggende Streamlit-konfigurering
@@ -182,6 +183,7 @@ with tab_bryggdag:
 # === TAB 4: VERKTØY =============================
 # ==================================================
 with tab_verktoy:
+    render_abv_calculator_panel()
     render_import_panel()
     render_kbhbrew_import_panel()
     render_kbhbrew_export_panel()

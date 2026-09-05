@@ -4,6 +4,33 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## TOOLS — Standalone ABV-kalkulator (issue #77, 2026-09-05)
+
+Ny, syvende Verktøy-side (`verktoy.html`) med en frittstående ABV-kalkulator
+-- tar målt OG+FG direkte, uten å opprette/åpne/endre en oppskrift eller et
+brygg. Lagt til i sidemenyen på alle 19 eksisterende NO-sider (samt
+tilsvarende EN-speiling).
+
+**Core-kontrakt, delt med App:** `web/js/calc.js` fikk `beregnAbvFraOgFg()`
+(pluss `beregnAbvStandard()`/`beregnAbvHighGravity()`/`validerMaaltOgFg()`),
+en direkte port av `modules/calculations.py`s nye
+`beregn_abv_fra_og_fg()`-familie -- egen kontrakt fra `beregnFgOgAbv()`
+(som er en forventet-FG-planleggingsberegning, ikke en målt-verdi-
+kalkulator). Se `core/calculation_golden_vectors.json`s nye
+`measured_abv`-cases og docs/development/CORE_CALCULATION_CONTRACT.md.
+
+**To eksplisitte estimater, aldri stille byttet ut:** standardformelen
+`(OG-FG)*131.25` vises alltid; et separat high-gravity-estimat vises i
+tillegg når OG >= 1.070 (samme presentasjonsterskel som App sin
+`ui/abv_calculator_panel.py`) -- ren UI-logikk, ikke en del av
+Core-kontrakten.
+
+**Filer:** `verktoy.html` (ny), `web/en/verktoy.html` (generert), `js/calc.js`,
+`js/verktoy_page.js` (ny), `js/i18n.js` (nye `verktoy.*`/`nav.verktoy`/
+`meta.verktoy.*`-nøkler, NO+EN), `css/style.css` (`.verktoy-feil`),
+`scripts/generate_web_i18n_pages.py` (`PAGES`), `sitemap.xml` (regenerert),
+sidemeny-lenke lagt til på alle 19 øvrige NO-sider + EN-speilinger.
+
 ## PRI 4C — Core custom-ingredient identity-kontrakt (2026-09-04)
 
 Web-siden adopsjon av `docs/development/CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md`

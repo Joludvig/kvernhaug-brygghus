@@ -85,6 +85,86 @@ def beregn_fg_og_abv(og, attenuation):
     return fg, abv
 
 
+def _valider_malt_og_fg(og, fg):
+    """Delt inputvalidering for de MÅLTE OG+FG-ABV-funksjonene under (issue
+    #77, standalone ABV-kalkulator) -- IKKE brukt av beregn_fg_og_abv()
+    over, som er en forventet-FG-planleggingsberegning med sin egen,
+    bevisst stille (0.0-fallback) semantikk. Denne kalles fra en eksplisitt
+    brukerhandling (en frittstående kalkulator, ingen live per-tastetrykk-
+    beregning på ufullstendig input), så feil skal være synlige, ikke
+    stille dempet -- reiser ValueError med en tydelig, norsk feiltekst UI-
+    laget kan vise direkte eller oversette via i18n-nøkkel."""
+    if og <= 1.000:
+        raise ValueError("OG må være høyere enn 1.000")
+    if fg <= 0:
+        raise ValueError("FG må være et positivt tall")
+    if fg > og:
+        raise ValueError("FG kan ikke være høyere enn OG")
+    if og >= 1.775:
+        # High-gravity-formelens (1.775 - og)-nevner blir null/negativ her
+        # -- langt utenfor noe reelt målt øl (1.775 SG er ren sukkerlake),
+        # men matematisk udefinert/meningsløst dersom det skjer.
+        raise ValueError("OG er urealistisk høy for en ABV-beregning")
+
+
+def beregn_abv_standard(og, fg):
+    """Standard ABV-estimat fra MÅLT OG+FG: ABV = (OG - FG) * 131.25.
+
+    Dette er den samme formelen som beregn_fg_og_abv() sin ABV-halvdel,
+    men her anvendt direkte på to MÅLTE gravity-verdier -- ikke en
+    forventet-utgjæring-planlegging fra én kjent OG. Se
+    docs/development/CORE_CALCULATION_CONTRACT.md for hvorfor dette er en
+    egen, eksplisitt kontrakt (issue #77) i stedet for gjenbruk av
+    beregn_fg_og_abv().
+
+    Reiser ValueError for umulig/utrygg input (OG <= 1.000, FG <= 0,
+    FG > OG) -- se _valider_malt_og_fg().
+    """
+    _valider_malt_og_fg(og, fg)
+    return (og - fg) * 131.25
+
+
+def beregn_abv_high_gravity(og, fg):
+    """Alternativt, mer presist ABV-estimat for sterke øl (høy OG), fra
+    MÅLT OG+FG: ABV = [76.08 * (OG - FG) / (1.775 - OG)] * (FG / 0.794).
+
+    Standardformelen (beregn_abv_standard()) undervurderer alkoholinnholdet
+    systematisk jo sterkere ølet er, fordi den antar en lineær sammenheng
+    mellom gravity-tap og alkoholproduksjon -- en forenkling som holder
+    godt for normalstyrke øl, men avviker merkbart for high-gravity-brygg.
+    Denne etablerte alternative formelen korrigerer for det. Se
+    docs/development/CORE_CALCULATION_CONTRACT.md.
+
+    Reiser ValueError for samme umulig/utrygg input som
+    beregn_abv_standard() -- se _valider_malt_og_fg().
+    """
+    _valider_malt_og_fg(og, fg)
+    return (76.08 * (og - fg) / (1.775 - og)) * (fg / 0.794)
+
+
+def beregn_abv_fra_og_fg(og, fg):
+    """Core-eid, frittstående inngangspunkt (issue #77) for å beregne ABV
+    fra to MÅLTE gravity-verdier -- helt uavhengig av en oppskrift eller et
+    brygg (ingen malt/humle/gjær/batch-volum nødvendig). Brukt av den
+    frittstående ABV-kalkulatoren i App (Verktøy-fanen) og Web
+    (verktoy.html), samt av beregnFgOgAbv()s JS-søsterfunksjon
+    beregnAbvFraOgFg() i web/js/calc.js -- se golden-vector-dekningen i
+    core/calculation_golden_vectors.json ("measured_abv").
+
+    Returnerer BEGGE etablerte estimater eksplisitt navngitt i et dict, slik
+    at ingen av dem ved en feil kan erstatte den andre stille:
+    {"standard": <prosent>, "high_gravity": <prosent>}. UI-laget velger
+    selv en presentasjonsregel for når high_gravity-verdien vises i tillegg
+    til standard (ren presentasjonslogikk, ikke en del av denne kontrakten).
+
+    Reiser ValueError for umulig/utrygg input -- se _valider_malt_og_fg().
+    """
+    return {
+        "standard": beregn_abv_standard(og, fg),
+        "high_gravity": beregn_abv_high_gravity(og, fg),
+    }
+
+
 def _avrund_gram_half_up(verdi):
     """Avrunder et ikke-negativt gramtall til 1 desimal med DECIMAL
     HALF-UP -- IKKE Pythons innebygde round(), som bruker bankers-

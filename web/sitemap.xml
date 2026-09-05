@@ -62,6 +62,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/bryggelogg.html"/>
   </url>
   <url>
+    <loc>https://kvernhaugbrygghus.no/verktoy.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/verktoy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/verktoy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/verktoy.html"/>
+  </url>
+  <url>
+    <loc>https://kvernhaugbrygghus.no/en/verktoy.html</loc>
+    <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/verktoy.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/verktoy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kvernhaugbrygghus.no/verktoy.html"/>
+  </url>
+  <url>
     <loc>https://kvernhaugbrygghus.no/personvern.html</loc>
     <xhtml:link rel="alternate" hreflang="no" href="https://kvernhaugbrygghus.no/personvern.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://kvernhaugbrygghus.no/en/personvern.html"/>

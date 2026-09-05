@@ -57,6 +57,7 @@ PAGES = [
     "utskrift.html",
     "pantry.html",
     "bryggelogg.html",
+    "verktoy.html",
     "personvern.html",
     "hjelp/index.html",
     "hjelp/bryggedag.html",

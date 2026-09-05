@@ -1,9 +1,9 @@
 # Core Calculation Contract
 
-Version: 1.0
+Version: 1.1
 Status: Active
 Governed by: [KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md) (v2.0) — this
-document names six calculations as Core-owned shared semantic
+document names seven calculations as Core-owned shared semantic
 contracts, under the existing "shared semantic contracts" grant in
 Section 1. It does not redefine domain ownership.
 
@@ -22,7 +22,7 @@ document the underlying brewing math itself — see the docstrings in
 `modules/calculations.py` (source-of-truth comments, constants,
 citations) for that; this document is intentionally short.
 
-## The six calculations
+## The seven calculations
 
 1. **OG** (Original Gravity) — `beregn_og()` / `beregnOG()`
 2. **FG** (Final Gravity) and **ABV** — `beregn_fg_og_abv()` /
@@ -32,6 +32,16 @@ citations) for that; this document is intentionally short.
 4. **Tinseth IBU** — `beregn_total_ibu()` / `beregnTotalIBU()`
 5. **Inverse Tinseth IBU** — `beregn_gram_fra_ibu()` /
    `beregnGramFraIBU()`
+6. **Measured-gravity ABV** (issue #77, standalone ABV calculator) —
+   `beregn_abv_fra_og_fg()` / `beregnAbvFraOgFg()` (one shared entry
+   point, two explicitly named estimates — see "Measured-gravity ABV
+   (issue #77)" below and `core/calculation_golden_vectors.json`'s
+   `measured_abv` calculation type). Deliberately a **separate**
+   contract from #2 above: `beregn_fg_og_abv()` is an expected-FG
+   *planning* calculation from a single known OG plus an assumed
+   attenuation, while this is a *measured*-OG+FG calculation with no
+   attenuation input at all, and no dependency on any recipe/batch
+   state — see `_valider_malt_og_fg()` in `modules/calculations.py`.
 
 `web/js/calc.js` is a direct, deliberate line-for-line port of
 `modules/calculations.py` (see that file's own header comment). This
@@ -163,3 +173,68 @@ remains deliberately verified to sit away from a tie boundary, and all
 `inverse_tinseth` cases now use a near-exact tolerance (`1e-9`, not the
 previous `0.05`) so a vector can no longer pass against two different,
 equally-plausible 1-decimal contractual results.
+
+## Measured-gravity ABV (issue #77)
+
+Adds calculation #6 (see "The seven calculations" above): a
+frittstående ("standalone") ABV calculator that accepts a directly
+**measured** OG and FG — no recipe, no batch/brew record, no yeast
+attenuation input at all.
+
+**Two explicit, separately named estimates, never silently substituted
+for each other:**
+
+- **Standard** — `beregn_abv_standard()` / `beregnAbvStandard()`:
+  `ABV = (OG - FG) * 131.25`. Same arithmetic as `beregn_fg_og_abv()`'s
+  ABV half, applied here directly to two measured values instead of a
+  planned FG.
+- **High-gravity** — `beregn_abv_high_gravity()` /
+  `beregnAbvHighGravity()`: `ABV = [76.08 * (OG - FG) / (1.775 - OG)] *
+  (FG / 0.794)`. A separate, established empirical correction that
+  tracks real-world strong-beer ABV more closely than the standard
+  formula, which increasingly under-estimates alcohol content as OG
+  rises.
+- `beregn_abv_fra_og_fg()` / `beregnAbvFraOgFg()` is the single public
+  entry point both App and Web call: it always computes **both**
+  estimates and returns them in an explicitly named
+  `{"standard": ..., "high_gravity": ...}` result (Python dict /
+  JS `{standard, highGravity}` object) — never just one, so a caller
+  can never mistake one estimate for the other.
+
+**Shared validation, fail-visibly (not silently dampened):** both
+runtimes reject impossible/unsafe input via `_valider_malt_og_fg()` /
+`validerMaaltOgFg()` — `OG <= 1.000`, `FG <= 0`, `FG > OG` (not
+meaningfully supported by either formula), or `OG >= 1.775` (the
+high-gravity formula's `(1.775 - OG)` denominator becomes zero/negative
+there, far outside any realistic measured beer). Python raises
+`ValueError`; JS throws `Error` — deliberately **not** the same silent
+`0.0`-fallback pattern `beregn_fg_og_abv()`/`beregnFgOgAbv()` use,
+because those are live per-keystroke recipe-builder calculations where
+a transient incomplete/zero value is an expected intermediate state,
+while this calculator is always invoked from one explicit,
+user-initiated action on complete input — an invalid result here is a
+genuine input error the user should see, not a state to paper over.
+
+**UI presentation trigger (not part of this Core contract — see
+`tolerance_principle`'s "measured_abv" entry and
+`measured_abv_borderline_high_gravity_threshold` in
+`core/calculation_golden_vectors.json`):** both estimates are always
+computed by Core regardless of OG. The UI (App's ABV calculator panel,
+Web's `verktoy.html`) chooses to additionally *display* the
+high-gravity estimate only when `OG >= 1.070` — a conservative,
+commonly-used "high gravity beer" threshold at which the two estimates
+have already diverged by a third of a percentage point or more (see
+the golden vector's own worked example). Below that OG the two
+estimates are close enough that showing both would mostly add noise;
+the underlying Core functions never change behavior based on this
+threshold — a future UI could pick a different trigger without
+touching `modules/calculations.py`/`web/js/calc.js` at all.
+
+**Golden vectors:** `core/calculation_golden_vectors.json`'s
+`measured_abv` cases include a normal-strength example (OG 1.045/FG
+1.010, matching this issue's own worked ~4.59% example), a
+representative Vardeldr-like high-gravity example (OG 1.100/FG 1.022),
+a second independent high-gravity example (OG 1.090/FG 1.015), and a
+case sitting exactly at the UI's OG 1.070 threshold. All four use
+`1e-9` absolute tolerance (only `+,-,*,/`, no transcendental functions
+— same reasoning as `og`/`fg_abv`).

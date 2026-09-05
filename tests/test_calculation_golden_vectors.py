@@ -27,6 +27,7 @@ from modules.calculations import (
     beregn_fg_og_abv,
     beregn_total_ibu,
     beregn_gram_fra_ibu,
+    beregn_abv_fra_og_fg,
 )
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -78,12 +79,21 @@ def _kjor_invers_tinseth(inputs):
     return {"hop_amount_g": gram}
 
 
+def _kjor_malt_abv(inputs):
+    resultat = beregn_abv_fra_og_fg(inputs["og_sg"], inputs["fg_sg"])
+    return {
+        "abv_standard_percent": resultat["standard"],
+        "abv_high_gravity_percent": resultat["high_gravity"],
+    }
+
+
 _ADAPTERE = {
     "og": _kjor_og,
     "fg_abv": _kjor_fg_abv,
     "ebc_morey": _kjor_ebc,
     "tinseth_ibu": _kjor_tinseth_ibu,
     "inverse_tinseth": _kjor_invers_tinseth,
+    "measured_abv": _kjor_malt_abv,
 }
 
 
@@ -100,7 +110,12 @@ class TestGoldenVectorsFixtureParserOgStruktur(unittest.TestCase):
         dekket = {c["calculation"] for c in data["cases"]}
         # "fg" og "abv" er én delt Core-beregning (fg_abv) -- se
         # calculation_golden_vectors.json sin tolerance_principle.
-        self.assertEqual(dekket, {"og", "fg_abv", "ebc_morey", "tinseth_ibu", "inverse_tinseth"})
+        # "measured_abv" (issue #77) er den frittstående ABV-kalkulatorens
+        # egen kontrakt -- egen fra fg_abv, se CORE_CALCULATION_CONTRACT.md.
+        self.assertEqual(
+            dekket,
+            {"og", "fg_abv", "ebc_morey", "tinseth_ibu", "inverse_tinseth", "measured_abv"},
+        )
 
     def test_alle_cases_har_unik_id(self):
         data = _last_golden_vectors()

@@ -60,6 +60,38 @@ function beregnFgOgAbv(og, attenuation) {
   return { fg, abv };
 }
 
+// Frittstående ABV fra MÅLT OG+FG (issue #77 -- ABV-kalkulator, Verktøy).
+// IKKE samme kontrakt som beregnFgOgAbv() over, som er en forventet-FG-
+// planleggingsberegning med sin egen stille 0.0-fallback-semantikk.
+// Portert fra modules/calculations.py::_valider_malt_og_fg() /
+// beregn_abv_standard() / beregn_abv_high_gravity() / beregn_abv_fra_og_fg()
+// -- kaster Error for umulig/utrygg input i stedet for å dempe den stille,
+// siden dette alltid kalles fra en eksplisitt brukerhandling på en
+// frittstående kalkulator, aldri live på ufullstendig input.
+function validerMaaltOgFg(og, fg) {
+  if (og <= 1.0) throw new Error('OG må være høyere enn 1.000');
+  if (fg <= 0) throw new Error('FG må være et positivt tall');
+  if (fg > og) throw new Error('FG kan ikke være høyere enn OG');
+  if (og >= 1.775) throw new Error('OG er urealistisk høy for en ABV-beregning');
+}
+
+function beregnAbvStandard(og, fg) {
+  validerMaaltOgFg(og, fg);
+  return (og - fg) * 131.25;
+}
+
+function beregnAbvHighGravity(og, fg) {
+  validerMaaltOgFg(og, fg);
+  return (76.08 * (og - fg) / (1.775 - og)) * (fg / 0.794);
+}
+
+function beregnAbvFraOgFg(og, fg) {
+  return {
+    standard: beregnAbvStandard(og, fg),
+    highGravity: beregnAbvHighGravity(og, fg),
+  };
+}
+
 // valgtHumleListe: [{ id, gram, tid }] -- tid i minutter. humleData: { id: { alfa } }
 function beregnTotalIBU(valgtHumleListe, humleData, volum, beregnetOG) {
   if (volum === 0 || beregnetOG <= 1.0) return 0;

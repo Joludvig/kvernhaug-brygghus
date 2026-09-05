@@ -510,6 +510,16 @@ main {
   max-width: 20rem;
 }
 
+/* Verktøy/ABV-kalkulator (issue #77) -- synlig valideringsfeil, samme
+   --danger-farge som .fjern-knapp:hover bruker, IKKE den dempede
+   --utstyr-advarsel-tonen (dette er en reell, blokkerende feil, ikke en
+   vennlig heads-up). */
+.verktoy-feil {
+  color: var(--danger);
+  font-weight: 600;
+  margin: 0.4rem 0 0.9rem;
+}
+
 /* Web Identity Remember Opt-in V1 -- egen rad, IKKE .felt-rad (som setter
    width:9rem på alle input/select inni seg -- ville gjort avkrysnings-
    boksen unaturlig bred). Checkbox og tekst ligger i SAMME <label> (klikk
