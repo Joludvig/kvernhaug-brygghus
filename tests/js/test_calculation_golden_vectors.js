@@ -40,6 +40,7 @@ function lastProduksjonsfunksjoner() {
   new vm.Script(kilde, { filename: CALC_JS_PATH }).runInContext(context);
   const paakrevde = [
     'beregnOG', 'beregnEBC', 'beregnFgOgAbv', 'beregnTotalIBU', 'beregnGramFraIBU',
+    'beregnAbvFraOgFg',
   ];
   for (const navn of paakrevde) {
     if (typeof context[navn] !== 'function') {
@@ -83,6 +84,10 @@ function lagAdaptere(fns) {
         inputs.batch_volume_l, inputs.wort_gravity_sg,
       );
       return { hop_amount_g: gram };
+    },
+    measured_abv(inputs) {
+      const { standard, highGravity } = fns.beregnAbvFraOgFg(inputs.og_sg, inputs.fg_sg);
+      return { abv_standard_percent: standard, abv_high_gravity_percent: highGravity };
     },
   };
 }

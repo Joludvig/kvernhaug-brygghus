@@ -1,6 +1,6 @@
 <!--
   GENERERT AV scripts/generate_web_i18n_pages.py — IKKE REDIGER MANUELT.
-  Kilde: web/utskrift.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
+  Kilde: web/verktoy.html (struktur/mal) + web/js/i18n.js sin TEKSTER.en (innhold).
   Kjør generatoren på nytt for å oppdatere denne filen — håndredigering blir
   overskrevet ved neste kjøring. Se web/README.md "Engelsk pre-render (web/en/)".
 -->
@@ -10,21 +10,20 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Kvernhaug Brygghus — Print</title>
-<meta content="Print a recipe sheet, shopping list, brew day worksheet and brew log for your active or saved beer recipe — four A4-friendly documents." data-i18n-content="meta.utskrift.beskrivelse" name="description"/>
-<meta content="noindex, follow" name="robots"/>
-<link href="https://kvernhaugbrygghus.no/en/utskrift.html" rel="canonical"/>
-<link href="https://kvernhaugbrygghus.no/utskrift.html" hreflang="no" rel="alternate"/>
-<link href="https://kvernhaugbrygghus.no/en/utskrift.html" hreflang="en" rel="alternate"/>
-<link href="https://kvernhaugbrygghus.no/utskrift.html" hreflang="x-default" rel="alternate"/>
+<title>Tools — Kvernhaug Brygghus</title>
+<meta content="Standalone brewing tools that don't require a recipe or a brew — starting with the ABV calculator." data-i18n-content="meta.verktoy.beskrivelse" name="description"/>
+<link href="https://kvernhaugbrygghus.no/en/verktoy.html" rel="canonical"/>
+<link href="https://kvernhaugbrygghus.no/verktoy.html" hreflang="no" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/en/verktoy.html" hreflang="en" rel="alternate"/>
+<link href="https://kvernhaugbrygghus.no/verktoy.html" hreflang="x-default" rel="alternate"/>
 <link href="../assets/favicon/favicon.ico" rel="icon" sizes="any"/>
 <link href="../assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
 <link href="../assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
 <link href="../assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="../css/style.css" rel="stylesheet"/>
 </head>
-<body data-i18n-tittel-nokkel="meta.utskrift.tittel">
-<header class="hero no-print">
+<body data-i18n-tittel-nokkel="meta.verktoy.tittel">
+<header class="hero">
 <img alt="Kvernhaug Brygghus — a crow by the mill house in a golden mountain valley" class="hero-img" data-i18n-alt="brand.heroAlt" src="../assets/branding/kvernhaug_header_banner.jpg"/>
 <div class="hero-scrim"></div>
 <div class="hero-topprad">
@@ -32,13 +31,13 @@
 <span></span><span></span><span></span>
 </button>
 <div aria-label="Switch language" class="sprakvelger" data-i18n-aria-label="sprak.ariaLabel" role="group">
-<a class="sprak-knapp" data-sprak="no" href="../utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
-<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+<a class="sprak-knapp" data-sprak="no" href="../verktoy.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="verktoy.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
 </div>
 </div>
 <div class="hero-tekst">
 <div class="hero-navn">Kvernhaug Brygghus</div>
-<h1 class="hero-sidetittel" data-i18n="meta.utskrift.sidetittel">🖨️ Print</h1>
+<h1 class="hero-sidetittel" data-i18n="meta.verktoy.sidetittel">🔧 Tools</h1>
 </div>
 </header>
 <nav aria-label="Main navigation (compact)" class="kompaktnav no-print" data-i18n-aria-label="chrome.navKompaktAriaLabel">
@@ -49,8 +48,8 @@
 <img alt="" class="kompaktnav-logo" src="../assets/branding/kbh_icon_v1.png"/>
 <span class="kompaktnav-navn">Kvernhaug Brygghus</span>
 <div aria-label="Switch language" class="sprakvelger sprakvelger-kompakt" data-i18n-aria-label="sprak.ariaLabel" role="group">
-<a class="sprak-knapp" data-sprak="no" href="../utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
-<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+<a class="sprak-knapp" data-sprak="no" href="../verktoy.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="verktoy.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
 </div>
 </div>
 </nav>
@@ -62,8 +61,8 @@
 <button aria-label="Close menu" class="sidemeny-lukk" data-i18n-aria-label="chrome.lukkMeny" type="button">✕</button>
 </div>
 <div aria-label="Switch language" class="sprakvelger sprakvelger-drawer" data-i18n-aria-label="sprak.ariaLabel" role="group">
-<a class="sprak-knapp" data-sprak="no" href="../utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
-<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="utskrift.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
+<a class="sprak-knapp" data-sprak="no" href="../verktoy.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-no.webp"/>NO</a>
+<a aria-current="page" class="sprak-knapp aktiv" data-sprak="en" href="verktoy.html"><img alt="" aria-hidden="true" class="sprak-flagg" src="../assets/ui/flag-gb.webp"/>EN</a>
 </div>
 <div class="enhetsvelger-blokk">
 <span class="enhetsvelger-label" data-i18n="enhet.label">Units</span>
@@ -75,66 +74,44 @@
 <a class="sidemeny-lenke" href="index.html"><span data-i18n="nav.bygger">🍺 Recipe Builder</span></a>
 <a class="sidemeny-lenke" href="mine-oppskrifter.html"><span data-i18n="nav.mineOppskrifter">📂 My Recipes</span></a>
 <a class="sidemeny-lenke" href="importer.html"><span data-i18n="nav.importer">📥 Import Recipe</span></a>
-<a class="sidemeny-lenke aktiv" href="utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
+<a class="sidemeny-lenke" href="utskrift.html"><span data-i18n="nav.utskrift">🖨️ Print</span></a>
 <a class="sidemeny-lenke" href="pantry.html"><span data-i18n="nav.pantry">📦 Pantry</span></a>
 <a class="sidemeny-lenke" href="bryggelogg.html"><span data-i18n="nav.bryggelogg">🪓 Brew log</span></a>
-<a class="sidemeny-lenke" href="verktoy.html"><span data-i18n="nav.verktoy">🔧 Tools</span></a>
+<a class="sidemeny-lenke aktiv" href="verktoy.html"><span data-i18n="nav.verktoy">🔧 Tools</span></a>
 <hr class="sidemeny-skille"/>
 <a class="sidemeny-lenke" href="hjelp/index.html"><span data-i18n="nav.hjelp">📖 Help / Brewing Handbook</span></a>
 </nav>
-<main class="no-print">
-<section class="panel" hidden="" id="utskrift-tom-tilstand">
-<h2 data-i18n="utskrift.tomTittel">Print</h2>
-<div class="utskrift-tom-tilstand">
-<p data-i18n="utskrift.tomTekst1">You don't have a recipe to print yet.</p>
-<p class="hjelpetekst" data-i18n-html="utskrift.tomTekst2">Go to the <a href="index.html">Recipe Builder</a> and make one, or open a saved recipe under <a href="mine-oppskrifter.html">My Recipes</a>.</p>
-</div>
-</section>
-<div id="utskrift-innhold">
+<main>
 <section class="panel">
-<h2 data-i18n="utskrift.velgOppskriftTittel">Choose recipe</h2>
+<h2 data-i18n="verktoy.abv.tittel">🧮 ABV calculator</h2>
+<p class="hjelpetekst" data-i18n="verktoy.abv.intro">Calculate alcohol by volume directly from a measured Original Gravity (OG) and Final Gravity (FG) — completely independent of any recipe or brew. Useful for extract kits, partial-mash brews, or old brewing notes.</p>
 <div class="felt-rad">
-<label data-i18n="utskrift.oppskriftLabel" for="utskrift-oppskrift-velger">Recipe</label>
-<select id="utskrift-oppskrift-velger"></select>
+<label data-i18n="verktoy.abv.ogLabel" for="verktoy-abv-og">Measured OG</label>
+<input id="verktoy-abv-og" inputmode="decimal" max="1.300" min="0.980" step="0.001" type="number" value="1.050"/>
 </div>
-<div class="utskrift-info">
-<div class="utskrift-info-navn" id="utskrift-info-navn"></div>
-<div class="utskrift-info-tall" id="utskrift-info-tall"></div>
+<div class="felt-rad">
+<label data-i18n="verktoy.abv.fgLabel" for="verktoy-abv-fg">Measured FG</label>
+<input id="verktoy-abv-fg" inputmode="decimal" max="1.300" min="0.980" step="0.001" type="number" value="1.010"/>
 </div>
+<p class="verktoy-feil" hidden="" id="verktoy-abv-feil" role="alert"></p>
+<div class="resultat-grid" id="verktoy-abv-resultat-normal">
+<div class="resultat-boks"><span class="resultat-tall" id="verktoy-abv-normal-tall">0,0 %</span><span class="resultat-label" data-i18n="verktoy.abv.resultatLabel">ABV</span></div>
+</div>
+<div class="resultat-grid" hidden="" id="verktoy-abv-resultat-hoygrav">
+<div class="resultat-boks"><span class="resultat-tall" id="verktoy-abv-standard-tall">0,0 %</span><span class="resultat-label" data-i18n="verktoy.abv.standardLabel">Standard estimate</span></div>
+<div class="resultat-boks"><span class="resultat-tall" id="verktoy-abv-hoygrav-tall">0,0 %</span><span class="resultat-label" data-i18n="verktoy.abv.highGravityLabel">High-gravity estimate</span></div>
+</div>
+<p class="hjelpetekst" data-i18n="verktoy.abv.highGravityForklaring" hidden="" id="verktoy-abv-hoygrav-forklaring">At high alcohol strength, the two established ABV formulas can diverge noticeably — both are shown here.</p>
 </section>
-<section class="panel">
-<h2 data-i18n="utskrift.skrivUtTittel">Print</h2>
-<p class="hjelpetekst" data-i18n="utskrift.skrivUtHjelpetekst">Each sheet is its own print-friendly page — not just a printout of this screen.</p>
-<div class="knapperad">
-<button data-i18n="utskrift.knappOppskriftsark" id="print-oppskriftsark-knapp" type="button">🖨️ Recipe Sheet</button>
-<button data-i18n="utskrift.knappHandleliste" id="print-handleliste-knapp" type="button">🖨️ Shopping List</button>
-<button data-i18n="utskrift.knappBryggedagsark" id="print-bryggedagsark-knapp" type="button">🖨️ Brew Day Sheet</button>
-<button data-i18n="utskrift.knappBryggelogg" id="print-bryggelogg-knapp" type="button">🖨️ Brew Log</button>
-</div>
-</section>
-</div>
 </main>
-<div hidden="" id="smakshjul-container"></div>
 <footer class="no-print">
 <p data-i18n="footer.enkel">Your recipes are stored locally in this browser (localStorage).</p>
 <p class="footer-kontakt">Kvernhaug Brygghus · <a href="mailto:post@kvernhaugbrygghus.no">post@kvernhaugbrygghus.no</a> · <a data-i18n="footer.kontaktLenke" href="personvern.html">Contact &amp; Privacy</a></p>
 </footer>
-<div class="utskrift-dokument" id="utskrift-oppskriftsark"></div>
-<div class="utskrift-dokument" id="utskrift-handleliste"></div>
-<div class="utskrift-dokument" id="utskrift-bryggedagsark"></div>
-<div class="utskrift-dokument" id="utskrift-bryggelogg"></div>
 <script src="../js/i18n.js"></script>
 <script src="../js/preferences.js"></script>
-<script src="../js/units.js"></script>
 <script src="../js/chrome.js"></script>
 <script src="../js/calc.js"></script>
-<script src="../js/flavor.js"></script>
-<script src="../js/radar.js"></script>
-<script src="../js/style.js"></script>
-<script src="../js/veiledning.js"></script>
-<script src="../js/recipe_engine.js"></script>
-<script src="../js/print.js"></script>
-<script src="../js/recipe_storage.js"></script>
-<script src="../js/utskrift_page.js"></script>
+<script src="../js/verktoy_page.js"></script>
 </body>
 </html>

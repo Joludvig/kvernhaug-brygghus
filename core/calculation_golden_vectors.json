@@ -2,8 +2,8 @@
   "vectors_schema_version": 1,
   "description": "Core-owned, technology-independent golden vectors proving that today's Python (modules/calculations.py) and JavaScript (web/js/calc.js) implementations of six shared calculations produce the same result on the same valid input. Tests raw calculation semantics, not UI/display formatting -- except for inverse Tinseth, whose production functions round to 1 decimal internally (see tolerance_principle below).",
   "governed_by": "docs/development/CORE_CALCULATION_CONTRACT.md",
-  "calculations_covered": ["og", "fg_abv", "ebc_morey", "tinseth_ibu", "inverse_tinseth"],
-  "tolerance_principle": "Absolute tolerance per calculation type, chosen as the smallest value robust across Python (CPython math/pow) and JavaScript (V8 Math.exp/Math.pow) double-precision floating point -- not a large tolerance chosen to hide a real deviation. og/fg_abv use only +,-,*,/ (no transcendental functions), so both runtimes are expected to agree to full double precision: tolerance 1e-9. ebc_morey and tinseth_ibu involve a fractional-exponent power (Math.pow/** 0.6859) and/or exp (Math.exp/math.exp), which can differ by a few ULPs between runtimes' underlying libm/JS-engine implementations: tolerance 1e-6 absolute, still ~7-8 significant digits of agreement at these calculations' typical magnitude (10-70). inverse_tinseth's production functions (beregn_gram_fra_ibu / beregnGramFraIBU) round their own output to 1 decimal as part of the existing, unchanged calculation contract (not a UI-layer concern) -- as of the PRI 1 QA correction (CALC-002), BOTH implementations round with decimal half-up, so golden vectors now require near-exact agreement against that already-rounded contractual output: tolerance 1e-9, deliberately NOT 0.05 (half the 0.1 rounding grain), since a tolerance that wide could let two adjacent, equally-plausible-looking 1-decimal contractual results both pass the same vector -- see inverse_tinseth_tie_case_half_up, which is deliberately constructed to land exactly on a .x5 tie boundary and would have caught the old Python round-half-to-even vs JS Math.round-half-up divergence this correction fixed.",
+  "calculations_covered": ["og", "fg_abv", "ebc_morey", "tinseth_ibu", "inverse_tinseth", "measured_abv"],
+  "tolerance_principle": "Absolute tolerance per calculation type, chosen as the smallest value robust across Python (CPython math/pow) and JavaScript (V8 Math.exp/Math.pow) double-precision floating point -- not a large tolerance chosen to hide a real deviation. og/fg_abv use only +,-,*,/ (no transcendental functions), so both runtimes are expected to agree to full double precision: tolerance 1e-9. ebc_morey and tinseth_ibu involve a fractional-exponent power (Math.pow/** 0.6859) and/or exp (Math.exp/math.exp), which can differ by a few ULPs between runtimes' underlying libm/JS-engine implementations: tolerance 1e-6 absolute, still ~7-8 significant digits of agreement at these calculations' typical magnitude (10-70). inverse_tinseth's production functions (beregn_gram_fra_ibu / beregnGramFraIBU) round their own output to 1 decimal as part of the existing, unchanged calculation contract (not a UI-layer concern) -- as of the PRI 1 QA correction (CALC-002), BOTH implementations round with decimal half-up, so golden vectors now require near-exact agreement against that already-rounded contractual output: tolerance 1e-9, deliberately NOT 0.05 (half the 0.1 rounding grain), since a tolerance that wide could let two adjacent, equally-plausible-looking 1-decimal contractual results both pass the same vector -- see inverse_tinseth_tie_case_half_up, which is deliberately constructed to land exactly on a .x5 tie boundary and would have caught the old Python round-half-to-even vs JS Math.round-half-up divergence this correction fixed. measured_abv (issue #77, standalone ABV calculator) uses only +,-,*,/ for both the standard and high-gravity estimates -- no transcendental functions -- so both runtimes are expected to agree to full double precision, same as og/fg_abv: tolerance 1e-9.",
   "canonical_units": {
     "amount_kg": "kilograms of grain",
     "amount_g": "grams of hops",
@@ -19,7 +19,9 @@
     "og_sg": "Original Gravity as specific gravity",
     "fg_sg": "Final Gravity as specific gravity",
     "abv_percent": "alcohol by volume as a percent number",
-    "hop_amount_g": "grams of hops, rounded to 1 decimal by the production functions themselves"
+    "hop_amount_g": "grams of hops, rounded to 1 decimal by the production functions themselves",
+    "abv_standard_percent": "standard ABV estimate ((OG-FG)*131.25) from measured OG+FG, as a percent number",
+    "abv_high_gravity_percent": "alternate high-gravity ABV estimate from measured OG+FG, as a percent number"
   },
   "cases": [
     {
@@ -371,6 +373,42 @@
       "tolerance": 1e-9,
       "tolerance_type": "absolute",
       "note": "Deliberately ON a .x5 rounding tie boundary (raw value 10.25 exactly) -- the opposite of every other inverse_tinseth case, which are deliberately verified to sit AWAY from one. This is the case that actually exercises the half-up vs half-even distinction."
+    },
+    {
+      "id": "measured_abv_normal_beer",
+      "calculation": "measured_abv",
+      "description": "Normal-strength beer, measured OG/FG directly (no recipe) -- acceptance criterion 5, issue #77. Standard estimate matches the issue's own worked example (~4.59% before display rounding).",
+      "inputs": {"og_sg": 1.045, "fg_sg": 1.010},
+      "expected": {"abv_standard_percent": 4.593749999999989, "abv_high_gravity_percent": 4.6399848176391325},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "measured_abv_high_gravity_vaardeldr",
+      "calculation": "measured_abv",
+      "description": "High-gravity/imperial-strength case, deliberately chosen around OG 1.100 / FG 1.022 (a representative Vardeldr-like strong beer, issue #77 acceptance criterion 6) -- demonstrates the material (~1.08 percentage point) difference between the standard and high-gravity estimates that motivates surfacing both explicitly instead of silently switching formulas.",
+      "inputs": {"og_sg": 1.100, "fg_sg": 1.022},
+      "expected": {"abv_standard_percent": 10.23750000000001, "abv_high_gravity_percent": 11.31596842989086},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "measured_abv_high_gravity_second_case",
+      "calculation": "measured_abv",
+      "description": "Second, independent high-gravity example (OG 1.090 / FG 1.015) isolating a different OG/FG pair from measured_abv_high_gravity_vaardeldr -- both estimates still meaningfully diverge (~0.8 percentage points).",
+      "inputs": {"og_sg": 1.090, "fg_sg": 1.015},
+      "expected": {"abv_standard_percent": 9.843750000000023, "abv_high_gravity_percent": 10.648458327970754},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
+    },
+    {
+      "id": "measured_abv_borderline_high_gravity_threshold",
+      "calculation": "measured_abv",
+      "description": "OG 1.070 -- the UI presentation threshold this issue's implementation chose for surfacing the high-gravity estimate alongside the standard one (see web/verktoy.html / ui/abv_calculator_panel.py). Both Core estimates are always computed regardless of this UI trigger; this vector only proves they remain correct exactly at the boundary value.",
+      "inputs": {"og_sg": 1.070, "fg_sg": 1.015},
+      "expected": {"abv_standard_percent": 7.218750000000021, "abv_high_gravity_percent": 7.587341229433538},
+      "tolerance": 1e-9,
+      "tolerance_type": "absolute"
     }
   ]
 }
