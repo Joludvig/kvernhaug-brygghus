@@ -8,11 +8,20 @@ ukommittert/staget/untracked innhold under web/ -- scriptet laster opp
 CURRENT WORKING-TREE-bytes og verifiserer produksjon mot akkurat de samme
 lokale bytene, så post-upload SHA-verifiseringen kan strukturelt aldri
 oppdage en ukommittert web/-endring den selv lastet opp. Fiksen legger til
-en ny guard (steg 1c) FØR filer enumereres: `git status --porcelain -- web/`,
-fail-closed på modifisert/staget/slettet/untracked innhold under web/,
-README.md/CHANGELOG.md unntatt (samme eksklusjonsliste som selve
-opplastingen bruker), urelaterte urene filer utenfor web/ upåvirket, kjører
-også under -DryRun.
+en ny guard (steg 1c) FØR filer enumereres:
+`git status --porcelain --ignored=matching -- web/`, fail-closed på
+modifisert/staget/slettet/untracked innhold under web/, README.md/
+CHANGELOG.md unntatt (samme eksklusjonsliste som selve opplastingen
+bruker), urelaterte urene filer utenfor web/ upåvirket, kjører også under
+-DryRun.
+
+CHIEF REVIEW-FIKS (PR #73, runde 2): `git status --porcelain` (uten
+--ignored) viser aldri gitignorerte filer i det hele tatt, mens
+fillistingen i steg 2 (`Get-ChildItem -Recurse -File`) enumererer
+filsystemet direkte og laster opp ALT under web/ uansett .gitignore. En
+lokal, gitignorert (*.log/*.tmp) men deployable fil under web/ var derfor
+usynlig for guarden mens den likevel ville blitt lastet opp. Fikset ved å
+legge til `--ignored=matching` på det samme git-kallet.
 
 TESTSTRATEGI (eksplisitt begrunnet, per issue #72s egen instruks om ikke å
 late som Linux-dekning erstatter Windows-dekning): hele scriptet er
@@ -31,20 +40,23 @@ mocket):
    Get-CurlConfigEscaped/Get-CurlFeilmelding-hjelperne) -- kjøres med en
    ekte `pwsh`-prosess, dot-sourcet direkte ut av den FAKTISKE
    scriptfilen (ikke en kopi/re-implementasjon), matet med syntetiske
-   `git status --porcelain`-linjer som dekker alle påkrevde tilfeller.
-2. Selve git-kallet guarden bruker, `git status --porcelain -- web/`,
-   kjøres med ekte `git` mot et ekte fixture-repo med urent innhold både
-   i og utenfor web/ -- beviser at pathspec-avgrensningen faktisk holder
-   urelaterte urene filer (f.eks. eierens egen raw_data/unmatched_malt.json)
-   utenfor treffmengden.
+   `git status --porcelain`-linjer som dekker alle påkrevde tilfeller,
+   inkludert `!!`-linjer (gitignorert innhold).
+2. Selve git-kallet guarden bruker,
+   `git status --porcelain --ignored=matching -- web/`, kjøres med ekte
+   `git` mot et ekte fixture-repo med urent innhold både i og utenfor
+   web/ -- beviser at pathspec-avgrensningen faktisk holder urelaterte
+   urene filer (f.eks. eierens egen raw_data/unmatched_malt.json) utenfor
+   treffmengden, OG at en gitignorert (*.log/*.tmp) fil under web/ likevel
+   dukker opp mens en tilsvarende ignorert fil utenfor web/ ikke gjør det.
 3. Statiske kildetekst-/kontrakt-sjekker (samme stil som
    tests/test_agent_bridge_permission_config.py) beviser at guarden er
    riktig koblet inn: plassert etter den eksisterende HEAD-guarden og før
    fillisting, kjører ubetinget av -DryRun, bruker nøyaktig ett
-   `git status --porcelain -- web/`-kall (ingen overflødig `git diff`/
-   `git ls-files`), gjenbruker $ExcludeRelative i stedet for å duplisere
-   den, og at den eksisterende HEAD/origin-guardens egen logikk/meldinger
-   er urørt.
+   `git status --porcelain --ignored=matching -- web/`-kall (ingen
+   overflødig `git diff`/`git ls-files`), gjenbruker $ExcludeRelative i
+   stedet for å duplisere den, og at den eksisterende HEAD/origin-guardens
+   egen logikk/meldinger er urørt.
 
 Kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests -b`).
 Krever `pwsh` og `git` i PATH (begge bekreftet tilgjengelige i dette
@@ -95,6 +107,8 @@ _CASES = [
         ["web/index.html", "web/x.html"],
     ),
     ("staged_rename", ["R  web/old.html -> web/new.html"], ["web/new.html", "web/old.html"]),
+    ("ignored_tmp", ["!! web/foo.tmp"], ["web/foo.tmp"]),
+    ("ignored_log", ["!! web/sub/foo.log"], ["web/sub/foo.log"]),
 ]
 
 
@@ -151,12 +165,14 @@ $results | ConvertTo-Json -Depth 5 -Compress
                 self.assertEqual(results_by_name[name], sorted(expect))
 
 
-# ─── 2: ekte `git status --porcelain -- web/` pathspec-avgrensning ─────────
+# ─── 2: ekte `git status --porcelain --ignored=matching -- web/` ──────────
 
 class TestGitPorcelainScoping(unittest.TestCase):
     """Bygger et ekte fixture-repo og kjører det EKSAKTE git-kallet guarden
     bruker, for å bevise at pathspec-avgrensningen til web/ faktisk holder
-    urelaterte urene filer utenfor treffmengden -- uavhengig av pwsh."""
+    urelaterte urene filer utenfor treffmengden -- uavhengig av pwsh -- og
+    at --ignored=matching faktisk fanger en gitignorert (*.log/*.tmp) men
+    deployable fil under web/ (Chief review, PR #73)."""
 
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
@@ -166,6 +182,7 @@ class TestGitPorcelainScoping(unittest.TestCase):
         _run_git(["config", "user.name", "T"], self.repo)
         os.makedirs(os.path.join(self.repo, "web"))
         for rel, content in (
+            (".gitignore", "*.log\n*.tmp\n"),
             ("web/index.html", "hello\n"),
             ("web/README.md", "docs\n"),
             ("other.txt", "outside\n"),
@@ -180,7 +197,7 @@ class TestGitPorcelainScoping(unittest.TestCase):
         self._tmp.cleanup()
 
     def _porcelain(self):
-        out = _run_git(["status", "--porcelain", "--", "web/"], self.repo)
+        out = _run_git(["status", "--porcelain", "--ignored=matching", "--", "web/"], self.repo)
         return [l for l in out.splitlines() if l.strip()]
 
     def test_clean_repo_yields_no_porcelain_lines(self):
@@ -210,6 +227,29 @@ class TestGitPorcelainScoping(unittest.TestCase):
         lines = self._porcelain()
         self.assertTrue(any("index.html" in l for l in lines))
 
+    def test_ignored_tmp_file_under_web_appears(self):
+        """Chief review, PR #73: a gitignored (*.tmp) file under web/ is
+        deployable (the upload enumeration in step 2 walks the filesystem
+        directly, ignoring .gitignore entirely) but was invisible to plain
+        `git status --porcelain` -- --ignored=matching must surface it."""
+        with open(os.path.join(self.repo, "web", "foo.tmp"), "w") as f:
+            f.write("scratch\n")
+        lines = self._porcelain()
+        self.assertTrue(any(l.startswith("!!") and "foo.tmp" in l for l in lines))
+
+    def test_ignored_log_file_under_web_appears(self):
+        os.makedirs(os.path.join(self.repo, "web", "sub"))
+        with open(os.path.join(self.repo, "web", "sub", "foo.log"), "w") as f:
+            f.write("scratch\n")
+        lines = self._porcelain()
+        self.assertTrue(any(l.startswith("!!") and "foo.log" in l for l in lines))
+
+    def test_ignored_file_outside_web_is_excluded(self):
+        with open(os.path.join(self.repo, "outside.log"), "w") as f:
+            f.write("scratch\n")
+        lines = self._porcelain()
+        self.assertFalse(any("outside.log" in l for l in lines))
+
     def test_unrelated_dirty_file_outside_web_is_excluded(self):
         with open(os.path.join(self.repo, "other.txt"), "a") as f:
             f.write("more outside\n")
@@ -228,9 +268,17 @@ class TestSourceWiring(unittest.TestCase):
 
     def test_new_guard_git_call_present_exactly_once(self):
         self.assertEqual(
-            self.text.count("git status --porcelain -- web/"), 1,
-            "Forventer nøyaktig ett git status --porcelain -- web/-kall.",
+            self.text.count("git status --porcelain --ignored=matching -- web/"), 1,
+            "Forventer nøyaktig ett git status --porcelain --ignored=matching -- web/-kall.",
         )
+
+    def test_guard_git_call_includes_ignored_matching(self):
+        """Chief review, PR #73: uten --ignored=matching er en gitignorert
+        (*.log/*.tmp) men deployable fil under web/ usynlig for
+        `git status --porcelain` (ignorerte filer vises kun via output når
+        --ignored er eksplisitt satt), selv om fillistingen i steg 2 laster
+        den opp uansett."""
+        self.assertIn("--ignored=matching", self.text)
 
     def test_no_redundant_git_diff_or_ls_files_introduced(self):
         self.assertNotIn("git diff", self.text)
@@ -238,7 +286,7 @@ class TestSourceWiring(unittest.TestCase):
 
     def test_guard_placed_after_head_guard_and_before_file_listing(self):
         idx_head_guard_ok = self.text.index('Write-Host "Guard OK -- HEAD matcher origin/master')
-        idx_new_guard = self.text.index("git status --porcelain -- web/")
+        idx_new_guard = self.text.index("git status --porcelain --ignored=matching -- web/")
         idx_file_listing = self.text.index("$AllFiles = Get-ChildItem -Path $WebRoot -Recurse -File")
         self.assertLess(idx_head_guard_ok, idx_new_guard, "Ny guard skal komme etter HEAD-guarden.")
         self.assertLess(idx_new_guard, idx_file_listing, "Ny guard skal komme før fillisting/enumerering.")

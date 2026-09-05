@@ -44,8 +44,11 @@
   produksjon mot akkurat de samme lokale bytene den selv nettopp lastet
   opp -- den kan derfor aldri på egen hånd oppdage en ukommittert
   web/-endring (se issue #72). Scriptet nekter derfor å gjøre noe som
-  helst dersom modifisert, staget, slettet eller untracked innhold finnes
-  under web/ (README.md/CHANGELOG.md unntatt -- de deployes aldri).
+  helst dersom modifisert, staget, slettet, untracked ELLER gitignorert
+  (f.eks. *.log/*.tmp) innhold finnes under web/ (README.md/CHANGELOG.md
+  unntatt -- de deployes aldri). Gitignorerte filer under web/ må også
+  fanges, siden fillistingen i steg 2 enumererer filsystemet direkte og
+  laster opp ALT under web/ uansett .gitignore (Chief review, PR #73).
   Urelaterte urene filer utenfor web/ (f.eks. eierens egne lokale
   endringer andre steder i repoet) påvirkes ikke.
 
@@ -247,6 +250,19 @@ finally {
 # -DryRun (ren lokal git-sjekk, ingen tilkobling) slik at DryRun faktisk
 # reflekterer om en ekte deploy ville blitt avvist.
 #
+# --ignored=matching (Chief review, PR #73): reposet ignorerer *.log/*.tmp
+# globalt (.gitignore), men fillistingen i steg 2 under (Get-ChildItem
+# -Recurse -File) enumererer og laster opp ALT under web/ uansett
+# .gitignore -- den kjenner ingen git-tilstand i det hele tatt. Uten dette
+# flagget er en ignorert-men-deployable fil (f.eks. en lokal web/foo.log
+# eller web/foo.tmp) usynlig for `git status --porcelain` (ignorerte filer
+# vises kun via OUTPUT når --ignored eksplisitt er satt), så guarden ville
+# sluppet den gjennom mens opplastingen likevel tar den med. --ignored=matching
+# (fremfor default "traditional"-modus) sikrer at hver enkelt ignorert sti
+# rapporteres eksplisitt i stedet for kollapset til et katalognavn der det
+# er mulig, uten å endre hvordan modifisert/staget/slettet/untracked
+# innhold allerede rapporteres.
+#
 # Samme deployable-fil-semantikk som eksklusjonslisten i steg 2 under
 # ($ExcludeRelative, definert her og gjenbrukt der) -- web/README.md og
 # web/CHANGELOG.md er utviklerdokumentasjon, aldri deployet, og skal derfor
@@ -257,7 +273,7 @@ $ExcludeRelative = @("README.md", "CHANGELOG.md")
 
 Push-Location $RepoRoot
 try {
-    $porcelain = & git status --porcelain -- web/
+    $porcelain = & git status --porcelain --ignored=matching -- web/
     if ($LASTEXITCODE -ne 0) {
         Write-Error "git status --porcelain feilet for web/ -- kan ikke bekrefte at working tree/index er rent. Avbryter uten å gjøre noe."
         exit 1
