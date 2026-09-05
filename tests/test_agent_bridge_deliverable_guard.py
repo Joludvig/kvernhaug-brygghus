@@ -295,11 +295,18 @@ class TestDeliverableGuard(unittest.TestCase):
     # ─── 11: CLI-kontrakten workflowen faktisk bruker ───────────────────
 
     def _kjor_cli(self, env, stdin_json):
+        # PYTHONIOENCODING tvinger barneprosessens stdout/stderr til UTF-8
+        # uansett plattformens lokale konsoll-kodeside (f.eks. cp1252 på
+        # Windows) -- uten den ville "Ingen åpen PR"/"FØR kjøringen
+        # startet" over kunne skrives som mojibake av barnet FØR vi i det
+        # hele tatt når `encoding="utf-8"` under, som bare styrer HVORDAN
+        # subprocess.run() dekoder de bytene den mottar (issue #55).
         fullt_env = dict(os.environ)
+        fullt_env["PYTHONIOENCODING"] = "utf-8"
         fullt_env.update(env)
         return subprocess.run(
             [sys.executable, _SCRIPT], input=stdin_json,
-            capture_output=True, text=True, env=fullt_env,
+            capture_output=True, text=True, encoding="utf-8", env=fullt_env,
         )
 
     def test_11_cli_skriver_ok_true_og_pr_number_for_gyldig_leveranse(self):
