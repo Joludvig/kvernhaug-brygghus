@@ -520,6 +520,20 @@ main {
   margin: 0.4rem 0 0.9rem;
 }
 
+/* Verktøy/ABV-kalkulator (issue #82) -- .resultat-grid/.resultat-boks (se
+   over) er designet for det faste 4-5-felts dashbordet i .bygger-hoyre
+   sitt oppskriftskort, der 1fr sørger for at mange fliser deler bredden
+   jevnt (~100-140px hver på desktop). Her vises kun 1-2 resultater i en
+   .panel UTEN sideveis padding, så uendret 1fr strakk boksen/boksene til
+   å fylle hele panelbredden (opptil ~730px) -- én diger, ballongaktig
+   flate rundt ett lite tall, i stedet for den kompakte resultat-flisen
+   som brukes ellers i appen. Cap på maks-bredde (i stedet for 1fr)
+   holder boksene på samme kompakte størrelsesorden. */
+#verktoy-abv-resultat-normal,
+#verktoy-abv-resultat-hoygrav {
+  grid-template-columns: repeat(auto-fit, minmax(95px, 12rem));
+}
+
 /* Web Identity Remember Opt-in V1 -- egen rad, IKKE .felt-rad (som setter
    width:9rem på alle input/select inni seg -- ville gjort avkrysnings-
    boksen unaturlig bred). Checkbox og tekst ligger i SAMME <label> (klikk
