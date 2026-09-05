@@ -156,6 +156,79 @@ function Get-CurlFeilmelding {
     }
 }
 
+# Ren beslutningsfunksjon (issue #81) -- tar resultatene fra ETT
+# verifiseringspass (allerede beregnet av kalleren -- ingen nettverk/fil-IO
+# her) og returnerer hvilke relative stier som trenger et retry-forsøk: alt
+# som ikke fikk status "ok" i det passet. Trukket ut til egen funksjon
+# (samme mønster som Get-UrentWebInnhold over) slik at selve
+# retry-utvelgelsen er testbar uavhengig av det faktiske HTTP-kallet.
+function Get-VerifiseringsStierForRetry {
+    param([Parameter(Mandatory)][object[]]$Resultater)
+    return @($Resultater | Where-Object { -not $_.ok } | ForEach-Object { $_.rel })
+}
+
+# Ren beslutningsfunksjon (issue #81) -- slår sammen første passets
+# resultater med retry-passets resultater til ett endelig resultatsett per
+# fil. En sti som faktisk ble retried får sitt ENDELIGE utfall fra
+# retry-resultatet (uansett retning); en sti som ikke trengte retry (var ok
+# i pass 1) beholder sitt opprinnelige utfall uendret. Siden $Retry per
+# konstruksjon kun inneholder stier Get-VerifiseringsStierForRetry plukket
+# ut over (dvs. stier som IKKE var ok i pass 1), kan denne sammenslåingen
+# aldri konvertere et uløst avvik til suksess med mindre retry-passets egne
+# ferske bytes faktisk matcher -- den STILLER aldri om en fil pass 1 aldri
+# rørte.
+function Merge-VerifiseringsResultat {
+    param(
+        [Parameter(Mandatory)][object[]]$Forste,
+        [object[]]$Retry = @()
+    )
+    $retryByRel = @{}
+    foreach ($r in $Retry) { $retryByRel[$r.rel] = $r }
+    $endelig = @()
+    foreach ($f in $Forste) {
+        if ($retryByRel.ContainsKey($f.rel)) {
+            $endelig += $retryByRel[$f.rel]
+        }
+        else {
+            $endelig += $f
+        }
+    }
+    return @($endelig)
+}
+
+# Utfører ETT faktisk verifiseringsforsøk (fersk nedlasting + SHA-256-
+# sammenligning) for én fil -- brukt av både første pass og retry-passet
+# lenger ned, slik at et retry-forsøk garantert er en FERSK HTTP-hentning
+# og aldri gjenbruk av forrige nedlastede fil (issue #81, krav 3). Dette er
+# IKKE en ren funksjon (den gjør fil-IO og nettverkskall) -- selve
+# beslutningslogikken som ER testbar uten nettverk/fil ligger i
+# Get-VerifiseringsStierForRetry/Merge-VerifiseringsResultat over.
+function Invoke-DeployFileVerifisering {
+    param(
+        [Parameter(Mandatory)][string]$Rel,
+        [Parameter(Mandatory)][string]$LocalPath,
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$TempDir
+    )
+    $url = "$BaseUrl/$Rel"
+    $tempFile = Join-Path $TempDir ("f" + [guid]::NewGuid().ToString("N"))
+    try {
+        Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -TimeoutSec 20 -OutFile $tempFile
+        $localHash = (Get-FileHash -Path $LocalPath -Algorithm SHA256).Hash
+        $remoteHash = (Get-FileHash -Path $tempFile -Algorithm SHA256).Hash
+        if ($localHash -eq $remoteHash) {
+            return [PSCustomObject]@{ rel = $Rel; ok = $true; reason = "ok"; localHash = $localHash; remoteHash = $remoteHash; error = $null }
+        }
+        return [PSCustomObject]@{ rel = $Rel; ok = $false; reason = "mismatch"; localHash = $localHash; remoteHash = $remoteHash; error = $null }
+    }
+    catch {
+        return [PSCustomObject]@{ rel = $Rel; ok = $false; reason = "unverifiable"; localHash = $null; remoteHash = $null; error = $_.Exception.Message }
+    }
+    finally {
+        if (Test-Path $tempFile) { Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue }
+    }
+}
+
 # ─── 1. Finn repo-root/web robust ──────────────────────────────────────────
 # Scriptet ligger alltid i <repo>\scripts\deploy_web.ps1 -- repo-roten er
 # derfor alltid dens foreldre-mappe, uansett hvor brukeren selv står når
@@ -482,46 +555,80 @@ Write-Host ""
 Write-Host "--- Verifiserer produksjon: FAKTISK INNHOLD (SHA-256 per fil, $($DeployFiles.Count) filer) ---"
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_verify_" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $tempDir | Out-Null
-$mismatches = @()
-$unverifiable = @()
+$BaseUrl = "https://kvernhaugbrygghus.no"
+# Kort, avgrenset pause (issue #81) -- ETT retry-forsøk, ikke en løkke --
+# for at en forbigående nettverksglipp ikke skal rapporteres som et
+# permanent avvik før den faktisk er bekreftet reproduserbar.
+$RetryPauseSekunder = 5
+
+function Write-VerifiseringsResultatLinje {
+    param([string]$Prefiks, [object]$Resultat)
+    $label = switch ($Resultat.reason) {
+        "ok" { "OK" }
+        "mismatch" { "AVVIK" }
+        default { "KAN IKKE VERIFISERE" }
+    }
+    Write-Host ("  [{0}] {1,-20} {2}" -f $Prefiks, $label, $Resultat.rel)
+    if ($Resultat.reason -eq "mismatch") {
+        Write-Host ("        forventet sjekksum (lokal kilde):  {0}" -f $Resultat.localHash)
+        Write-Host ("        mottatt sjekksum (produksjon):     {0}" -f $Resultat.remoteHash)
+    }
+    elseif ($Resultat.reason -eq "unverifiable") {
+        Write-Host ("        feil: {0}" -f $Resultat.error)
+    }
+}
+
 try {
+    $relByPath = @{}
     $i = 0
+    $forstePass = @()
     foreach ($f in $DeployFiles) {
         $i++
         $rel = $f.FullName.Substring($WebRoot.Length + 1) -replace '\\', '/'
-        $url = "https://kvernhaugbrygghus.no/$rel"
-        $tempFile = Join-Path $tempDir "f$i"
-        try {
-            Invoke-WebRequest -Uri $url -Method Get -UseBasicParsing -TimeoutSec 20 -OutFile $tempFile
-            $localHash = (Get-FileHash -Path $f.FullName -Algorithm SHA256).Hash
-            $remoteHash = (Get-FileHash -Path $tempFile -Algorithm SHA256).Hash
-            if ($localHash -ne $remoteHash) {
-                Write-Host ("  [{0}/{1}] AVVIK                {2}" -f $i, $DeployFiles.Count, $rel)
-                $mismatches += $rel
-            }
-            else {
-                Write-Host ("  [{0}/{1}] OK                   {2}" -f $i, $DeployFiles.Count, $rel)
-            }
-        }
-        catch {
-            Write-Host ("  [{0}/{1}] KAN IKKE VERIFISERE  {2}  ({3})" -f $i, $DeployFiles.Count, $rel, $_.Exception.Message)
-            $unverifiable += $rel
+        $relByPath[$rel] = $f
+        $resultat = Invoke-DeployFileVerifisering -Rel $rel -LocalPath $f.FullName -BaseUrl $BaseUrl -TempDir $tempDir
+        Write-VerifiseringsResultatLinje -Prefiks ("{0}/{1}" -f $i, $DeployFiles.Count) -Resultat $resultat
+        $forstePass += $resultat
+    }
+
+    $retryRels = @(Get-VerifiseringsStierForRetry -Resultater $forstePass)
+    $retryPass = @()
+    if ($retryRels.Count -gt 0) {
+        Write-Host ""
+        Write-Host ("--- {0} fil(er) feilet forste pass -- venter {1}s og prover PA NYTT med fersk HTTP-hentning per fil ---" -f $retryRels.Count, $RetryPauseSekunder)
+        Start-Sleep -Seconds $RetryPauseSekunder
+        $j = 0
+        foreach ($rel in $retryRels) {
+            $j++
+            $f = $relByPath[$rel]
+            $resultat = Invoke-DeployFileVerifisering -Rel $rel -LocalPath $f.FullName -BaseUrl $BaseUrl -TempDir $tempDir
+            Write-VerifiseringsResultatLinje -Prefiks ("retry {0}/{1}" -f $j, $retryRels.Count) -Resultat $resultat
+            $retryPass += $resultat
         }
     }
+
+    $sluttResultat = @(Merge-VerifiseringsResultat -Forste $forstePass -Retry $retryPass)
 }
 finally {
     Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 
+$mismatches = @($sluttResultat | Where-Object { $_.reason -eq "mismatch" })
+$unverifiable = @($sluttResultat | Where-Object { $_.reason -eq "unverifiable" })
+
 Write-Host ""
 if ($mismatches.Count -gt 0 -or $unverifiable.Count -gt 0) {
     if ($mismatches.Count -gt 0) {
-        Write-Host "INNHOLDSAVVIK -- produksjon svarer, men bytes matcher IKKE lokal kilde for $($mismatches.Count) fil(er):"
-        foreach ($m in $mismatches) { Write-Host "  - $m" }
+        Write-Host "INNHOLDSAVVIK -- produksjon svarer, men bytes matcher IKKE lokal kilde for $($mismatches.Count) fil(er) (uendret etter eventuelt retry):"
+        foreach ($m in $mismatches) {
+            Write-Host ("  - {0}" -f $m.rel)
+            Write-Host ("      forventet sjekksum (lokal kilde):  {0}" -f $m.localHash)
+            Write-Host ("      mottatt sjekksum (produksjon):     {0}" -f $m.remoteHash)
+        }
     }
     if ($unverifiable.Count -gt 0) {
-        Write-Host "KUNNE IKKE VERIFISERE $($unverifiable.Count) fil(er) (nettverksfeil/ikke tilgjengelig via HTTPS):"
-        foreach ($u in $unverifiable) { Write-Host "  - $u" }
+        Write-Host "KUNNE IKKE VERIFISERE $($unverifiable.Count) fil(er) (nettverksfeil/ikke tilgjengelig via HTTPS, uendret etter eventuelt retry):"
+        foreach ($u in $unverifiable) { Write-Host ("  - {0} ({1})" -f $u.rel, $u.error) }
     }
     Write-Host ""
     Write-Error "Innholdsverifisering feilet -- IKKE anta at deploy var vellykket før dette er undersøkt."
