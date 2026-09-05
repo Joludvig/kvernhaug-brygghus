@@ -1,0 +1,60 @@
+name: CI Test Gate
+
+# INFRA -- minimal CI test gate (Chief-assigned: "IMPLEMENT CI TEST GATE").
+#
+# Purpose: automatically run the existing Kvernhaug test baseline on every
+# pull request and on master, so a regression is caught before/at merge
+# instead of relying on a human remembering to run tests locally.
+#
+# This workflow does not change, generate, or fix anything -- it only
+# invokes suites that already exist in the repository:
+#   - the full Python unittest suite under tests/ (extensive existing
+#     coverage, including ~30 intentionally-skipped Web execution tests
+#     that stay skipped -- see tests/web_js_runtime.py)
+#   - the three Node "contract" test files under tests/js/, each run as
+#     its own explicit `node <file>` command (NOT a shell glob --
+#     `node tests/js/*.js` does not execute every expanded filename as a
+#     separate program)
+#
+# Deliberately NOT covered here: Agent Bridge behavior (see
+# claude-agent-bridge.yml, untouched by this workflow) and web deployment
+# (merged web/ code is not deployed web code until the owner deploys it).
+
+"on":
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Python test suite
+        run: python -m unittest discover -s tests -b
+
+      - name: Run Node contract tests -- calculation golden vectors
+        run: node tests/js/test_calculation_golden_vectors.js
+
+      - name: Run Node contract tests -- .kbhrecipe
+        run: node tests/js/test_kbhrecipe_contract.js
+
+      - name: Run Node contract tests -- .kbhbrew
+        run: node tests/js/test_kbhbrew_contract.js
