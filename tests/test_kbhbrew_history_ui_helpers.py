@@ -8,7 +8,11 @@ Kjøres med:
 """
 import unittest
 
-from modules.kbhbrew_history_ui import bygg_planlagt_sammendrag, bygg_planlagt_vs_faktisk
+from modules.kbhbrew_history_ui import (
+    bygg_planlagt_sammendrag,
+    bygg_planlagt_vs_faktisk,
+    parse_actual_tallfelt,
+)
 
 
 def _brew(**overrides):
@@ -118,6 +122,55 @@ class TestByggPlanlagtVsFaktisk(unittest.TestCase):
     def test_7_tom_manglende_brew_gir_tomt_resultat_uten_feil(self):
         self.assertEqual(bygg_planlagt_vs_faktisk({}), {})
         self.assertEqual(bygg_planlagt_vs_faktisk(None), {})
+
+
+class TestParseActualTallfelt(unittest.TestCase):
+    """Chief review-fiks (PR #84 runde 2, issue #83) -- se
+    modules/kbhbrew_history_ui.py::parse_actual_tallfelt() sin egen
+    docstring for hvorfor denne strenge forhåndsvalideringen finnes."""
+
+    def test_1_blankt_felt_er_gyldig_og_betyr_toem(self):
+        self.assertEqual(parse_actual_tallfelt(""), (True, None))
+        self.assertEqual(parse_actual_tallfelt("   "), (True, None))
+        self.assertEqual(parse_actual_tallfelt(None), (True, None))
+
+    def test_2_eksakt_punktum_desimal_er_gyldig(self):
+        self.assertEqual(parse_actual_tallfelt("1.055"), (True, 1.055))
+        self.assertEqual(parse_actual_tallfelt(" 1.055 "), (True, 1.055))
+        self.assertEqual(parse_actual_tallfelt("-2.5"), (True, -2.5))
+        self.assertEqual(parse_actual_tallfelt("20"), (True, 20.0))
+
+    def test_3_norsk_komma_desimal_normaliseres_trygt(self):
+        self.assertEqual(parse_actual_tallfelt("1,055"), (True, 1.055))
+        self.assertEqual(parse_actual_tallfelt("19,5"), (True, 19.5))
+
+    def test_4_komma_prefiks_ble_tidligere_stille_kuttet_til_1_0_naa_avvist_med_full_verdi(self):
+        # Regresjon for selve Chief-blockeren: "1,055" skal aldri bli
+        # tolket som det trunkerte tallet "1" -- se test 3 for at det nå
+        # normaliseres til den FULLE, korrekte verdien 1.055 i stedet.
+        ok, verdi = parse_actual_tallfelt("1,055")
+        self.assertTrue(ok)
+        self.assertNotEqual(verdi, 1.0)
+        self.assertEqual(verdi, 1.055)
+
+    def test_5_etterslep_avvises_helt_ikke_stille_kuttet(self):
+        ok, verdi = parse_actual_tallfelt("1.055abc")
+        self.assertFalse(ok)
+        self.assertIsNone(verdi)
+
+    def test_6_soeppeltekst_avvises_ikke_tolket_som_toem(self):
+        ok, verdi = parse_actual_tallfelt("abc")
+        self.assertFalse(ok)
+        self.assertIsNone(verdi)
+
+    def test_7_flere_komma_eller_komma_og_punktum_avvises(self):
+        self.assertEqual(parse_actual_tallfelt("1,05,5")[0], False)
+        self.assertEqual(parse_actual_tallfelt("1,055.2")[0], False)
+
+    def test_8_uendelig_og_nan_avvises(self):
+        self.assertEqual(parse_actual_tallfelt("Infinity")[0], False)
+        self.assertEqual(parse_actual_tallfelt("-Infinity")[0], False)
+        self.assertEqual(parse_actual_tallfelt("nan")[0], False)
 
 
 if __name__ == "__main__":

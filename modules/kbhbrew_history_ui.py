@@ -17,6 +17,9 @@ lagringen (eksplisitt "Lagre"-klikk) skjer i UI-laget, som kaller
 modules/kbhbrew_storage.py::oppdater_brew_lag() direkte -- ingen ny
 skrivevei bygges her.
 """
+import math
+import re
+
 from modules.calculations import beregn_abv_fra_og_fg
 
 _TALLTYPER = (int, float)
@@ -24,6 +27,57 @@ _TALLTYPER = (int, float)
 
 def _er_reelt_tall(v):
     return isinstance(v, _TALLTYPER) and not isinstance(v, bool)
+
+
+# Chief review-fiks (PR #84 runde 2, issue #83): modules/kbhbrew.py sin
+# normaliser_actuals_lag() er BEVISST tolerant (Core V1 Section 5.16,
+# JS parseFloat-prefiks-parity for import/kryss-app-data) -- "1,055"
+# tolkes som "1" (komma stopper prefikset), "1.055abc" tolkes som
+# "1.055" (etterslep forkastes stille), og ren søppel-tekst gir None,
+# som ved lagring TØMMER et allerede lagret mål uten synlig varsel.
+# Riktig oppførsel for Core-normaliseringen (import/legacy-toleranse) er
+# FEIL for direkte manuell tasting i denne UI-en -- en skrivefeil skal
+# ALDRI stille lagres som et annet tall, og ugyldig tekst skal ALDRI
+# oppføre seg som en implisitt "tøm feltet"-handling (som er reservert
+# for et BEVISST blankt felt). Denne funksjonen validerer derfor
+# rå-teksten STRENGT her, FØR den når oppdater_brew_lag() i det hele
+# tatt -- selve Core-normaliseringen i modules/kbhbrew.py endres IKKE
+# (utenfor scope, se issue #83 "Do not redesign .kbhbrew V1").
+_TALLFELT_KOMMA_RE = re.compile(r"^[+-]?\d+,\d+$")
+
+
+def parse_actual_tallfelt(raw_tekst):
+    """Strengt validerer ETT actuals-tallfelt (og/fg/volumeL) fra
+    Brew History-skjemaet, FØR kalleren i det hele tatt bygger
+    `actuals`-argumentet til oppdater_brew_lag().
+
+    Returnerer (True, None) for et blankt/tomt felt -- det BEVISST
+    reserverte "tøm dette feltet"-signalet, uendret oppførsel fra før
+    denne fiksen.
+
+    Returnerer (True, <float>) for eksakt gyldig tallgrammatikk (Python
+    sin egen `float()`, INGEN prefiks-/etterslep-toleranse) eller for
+    norsk komma-som-desimaltegn ("1,055" -> 1.055, KUN når teksten er
+    ett heltall, komma, ett heltall -- aldri en gjetning på et
+    tusenskille).
+
+    Returnerer (False, None) for ALT annet (søppeltekst, flere komma,
+    komma OG punktum, uendelig/NaN, tallEtterfulgtAvSøppel) -- kalleren
+    MÅ da vise en synlig feil og utføre INGEN skriving i det hele
+    tatt, for NOEN av de redigerte tallfeltene i samme lagre-klikk."""
+    tekst = raw_tekst.strip() if isinstance(raw_tekst, str) else ""
+    if not tekst:
+        return True, None
+    kandidat = tekst
+    if _TALLFELT_KOMMA_RE.match(kandidat):
+        kandidat = kandidat.replace(",", ".")
+    try:
+        verdi = float(kandidat)
+    except ValueError:
+        return False, None
+    if not math.isfinite(verdi):
+        return False, None
+    return True, verdi
 
 
 def bygg_planlagt_sammendrag(brew):

@@ -175,6 +175,64 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         metrikker = {m.label: m.value for m in at.metric}
         self.assertIn("ABV — Standardestimat", metrikker)
 
+    # ─── Chief review-fiks (PR #84 runde 2): strengt validerte tallfelt ─
+
+    def test_10_ugyldig_tall_blokkerer_hele_lagringen_uten_mutasjon(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_input(key="kbhbrew_hist_og::brew-seed-0001").set_value("1.055abc").run()
+        at.text_input(key="kbhbrew_hist_fg::brew-seed-0001").set_value("1.011").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew.get("actuals"), {})
+        feilmeldinger = [e.value for e in at.error]
+        self.assertTrue(feilmeldinger, "Forventet en synlig feilmelding")
+        self.assertFalse(list(at.success), "Skal IKKE vise en lagre-bekreftelse ved ugyldig input")
+
+    def test_11_soeppeltekst_toemmer_aldri_et_eksisterende_lagret_maal(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_input(key="kbhbrew_hist_og::brew-seed-0001").set_value("1.055").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001")["actuals"]["og"], 1.055)
+
+        at.text_input(key="kbhbrew_hist_fg::brew-seed-0001").set_value("abc").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew["actuals"]["og"], 1.055, "Det tidligere lagrede OG-målet må overleve uendret")
+        self.assertNotIn("fg", brew["actuals"])
+
+    def test_12_norsk_komma_desimal_lagres_som_full_korrekt_verdi(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_input(key="kbhbrew_hist_og::brew-seed-0001").set_value("1,055").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew["actuals"]["og"], 1.055)
+        self.assertTrue(list(at.success))
+
+    def test_13_blankt_felt_toemmer_fortsatt_et_tidligere_lagret_maal(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_input(key="kbhbrew_hist_og::brew-seed-0001").set_value("1.055").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001")["actuals"]["og"], 1.055)
+
+        at.text_input(key="kbhbrew_hist_og::brew-seed-0001").set_value("").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertNotIn("og", brew["actuals"])
+
 
 if __name__ == "__main__":
     unittest.main()

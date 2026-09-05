@@ -27,10 +27,22 @@ Tekstfeltene for OG/FG/volum starter TOMME hvis ingen tidligere målt
 verdi finnes, og forhåndsutfylles ellers med den EKSAKTE, allerede
 lagrede verdien (aldri en gjettet default som 1.050) -- nøyaktig samme
 "fabriker aldri en måling"-prinsipp som modules/kbhbrew_ui.py sin
-predicted-bygging. Selve tallparsingen/toleransen ved lagring skjer i
-modules/kbhbrew.py::normaliser_actuals_lag() (kalt via
-oppdater_brew_lag()) -- denne modulen sender kun de rå tekststrengene
-videre, ingen egen validering/parsing dupliseres her.
+predicted-bygging.
+
+Chief review-fiks (PR #84 runde 2, issue #83): OG/FG/volum-teksten
+valideres nå STRENGT her (modules/kbhbrew_history_ui.py::
+parse_actual_tallfelt()) FØR oppdater_brew_lag() i det hele tatt
+kalles. modules/kbhbrew.py::normaliser_actuals_lag() sin
+JS-parseFloat-prefiks-toleranse (Core V1 Section 5.16) er riktig for
+import/legacy-data, men FEIL for direkte manuell tasting her: uten
+denne forhåndsvalideringen ville "1,055" stille blitt lagret som 1.0,
+"1.055abc" ville blitt lagret som 1.055 med etterslepet stille
+forkastet, og ren søppeltekst ville TØMT et allerede lagret mål mens
+UI-en likevel viser "Lagret ok". Ett eneste ugyldig (ikke-blankt)
+tallfelt blokkerer nå HELE lagre-klikket -- ingen skriving utføres for
+NOEN av feltene -- og viser en synlig feilmelding i stedet. Et
+BEVISST blankt felt beholder sin eksisterende "tøm dette feltet"-
+oppførsel uendret.
 
 Rene formaterings-/uttrekkshjelpere (planlagt sammendrag,
 planlagt-vs-faktisk) er i modules/kbhbrew_history_ui.py, slik at de kan
@@ -41,7 +53,11 @@ import streamlit as st
 
 from config import DEMO_MODE
 from modules.export_format import fmt_abv, fmt_fg, fmt_og, fmt_vol
-from modules.kbhbrew_history_ui import bygg_planlagt_sammendrag, bygg_planlagt_vs_faktisk
+from modules.kbhbrew_history_ui import (
+    bygg_planlagt_sammendrag,
+    bygg_planlagt_vs_faktisk,
+    parse_actual_tallfelt,
+)
 from modules.kbhbrew_storage import hent_alle_brews, oppdater_brew_lag
 from modules.kbhbrew_ui import sorter_brews_for_eksport
 from ui.i18n import t
@@ -133,15 +149,35 @@ def _render_actuals_skjema(brew_id, brew):
     )
 
     if st.button(t("brew_history.lagre_btn"), key=f"kbhbrew_hist_lagre_btn::{brew_id}"):
-        oppdatert_brew = oppdater_brew_lag(
-            brew_id,
-            actuals={"og": og_tekst, "fg": fg_tekst, "volumeL": volum_tekst, "notes": notat_tekst},
-            status=status_valgt,
-            brewed_at=brygget_tekst.strip(),
-        )
-        st.success(t("brew_history.lagret_ok"))
-        if oppdatert_brew is not None:
-            return oppdatert_brew
+        og_ok, og_verdi = parse_actual_tallfelt(og_tekst)
+        fg_ok, fg_verdi = parse_actual_tallfelt(fg_tekst)
+        volum_ok, volum_verdi = parse_actual_tallfelt(volum_tekst)
+
+        ugyldige_felt = []
+        if not og_ok:
+            ugyldige_felt.append(t("brew_history.actual_og_label"))
+        if not fg_ok:
+            ugyldige_felt.append(t("brew_history.actual_fg_label"))
+        if not volum_ok:
+            ugyldige_felt.append(t("brew_history.actual_volum_label"))
+
+        if ugyldige_felt:
+            st.error(t("brew_history.ugyldig_tall_feil", felt=", ".join(ugyldige_felt)))
+        else:
+            oppdatert_brew = oppdater_brew_lag(
+                brew_id,
+                actuals={
+                    "og": "" if og_verdi is None else og_verdi,
+                    "fg": "" if fg_verdi is None else fg_verdi,
+                    "volumeL": "" if volum_verdi is None else volum_verdi,
+                    "notes": notat_tekst,
+                },
+                status=status_valgt,
+                brewed_at=brygget_tekst.strip(),
+            )
+            st.success(t("brew_history.lagret_ok"))
+            if oppdatert_brew is not None:
+                return oppdatert_brew
     return brew
 
 
