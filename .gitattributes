@@ -1,0 +1,12 @@
+# Windows checkouts historically used core.autocrlf=true with no
+# governing .gitattributes, so committed LF bytes could materialise as
+# CRLF on checkout and break checksum-governed fixtures/generated data
+# (issue #55). `eol=lf` forces LF in the working tree regardless of the
+# platform or local core.autocrlf setting; the actual bytes stored in
+# the repository are unaffected.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.webp binary
+*.ico binary
