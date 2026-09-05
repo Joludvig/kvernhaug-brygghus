@@ -149,6 +149,41 @@ class TestKorruptBryggloggOverskrivesAldriStille(unittest.TestCase):
         result = _kjor("bryggStateErKorrupt()", preset_local_storage={})
         self.assertFalse(result)
 
+    def test_tom_streng_er_korrupt_ikke_manglende_nokkel(self):
+        # Chief review, PR #75: `localStorage.getItem` returnerer "" for en
+        # nøkkel som FAKTISK inneholder en tom streng -- det skiller seg fra
+        # `null` (nøkkelen mangler) og må derfor behandles som uleselig
+        # rådata, ikke en ekte tom brygglogg.
+        result = _kjor("bryggStateErKorrupt()", preset_local_storage={_BREW_NOKKEL: ""})
+        self.assertTrue(result)
+
+    def test_ett_ugyldig_brygg_gjor_hele_loggen_korrupt(self):
+        # Chief review, PR #75: en logg med ÉTT strukturelt ugyldig brygg
+        # skal IKKE stille normaliseres til en redusert, men "gyldig", liste
+        # -- det ville la en påfølgende normal lagring persistere den
+        # reduserte listen og dermed ødelegge det ugyldige brygget for godt.
+        lagret = {"format": "kbh-brews", "version": 1, "items": [
+            {"brewId": "brew-1", "status": "active", "snapshot": _MINIMAL_SNAPSHOT},
+            {"brewId": "brew-2", "status": "ikke-en-gyldig-status", "snapshot": _MINIMAL_SNAPSHOT},
+        ]}
+        result = _kjor("bryggStateErKorrupt()", preset_local_storage={_BREW_NOKKEL: json.dumps(lagret)})
+        self.assertTrue(result)
+
+    def test_blandet_gyldig_ugyldig_liste_overskrives_ikke_av_normal_lagring(self):
+        raa = json.dumps({"format": "kbh-brews", "version": 1, "items": [
+            {"brewId": "brew-1", "status": "active", "snapshot": _MINIMAL_SNAPSHOT},
+            {"brewId": "brew-2", "status": "ikke-en-gyldig-status", "snapshot": _MINIMAL_SNAPSHOT},
+        ]})
+        expr = (
+            "(function(){"
+            "const res = opprettBrygg({snapshot: %s, recipeId: null, parentBrewId: null});"
+            "return {res, raaEtterpa: localStorage.getItem('%s')};"
+            "})()"
+        ) % (json.dumps(_MINIMAL_SNAPSHOT), _BREW_NOKKEL)
+        result = _kjor(expr, preset_local_storage={_BREW_NOKKEL: raa})
+        self.assertFalse(result["res"]["ok"])
+        self.assertEqual(result["raaEtterpa"], raa, "Det gyldige brygget med den ugyldige naboen skal ALDRI reduseres bort av et normalt lagringsforsøk")
+
     def test_opprett_brygg_avvises_pa_korrupt_logg_og_rorer_ikke_radataen(self):
         raa = "{ ikke gyldig json ]"
         expr = (

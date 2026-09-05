@@ -81,6 +81,43 @@ class TestKorruptLagerOverskrivesAldriStille(unittest.TestCase):
         result = _kjor("pantryStateErKorrupt()", preset_local_storage={})
         self.assertFalse(result)
 
+    def test_tom_streng_er_korrupt_ikke_manglende_nokkel(self):
+        # Chief review, PR #75: `localStorage.getItem` returnerer "" for en
+        # nøkkel som FAKTISK inneholder en tom streng -- det skiller seg fra
+        # `null` (nøkkelen mangler) og må derfor behandles som uleselig
+        # rådata, ikke en ekte tom pantry.
+        result = _kjor("pantryStateErKorrupt()", preset_local_storage={_PANTRY_NOKKEL: ""})
+        self.assertTrue(result)
+
+    def test_en_ugyldig_rad_gjor_hele_lageret_korrupt(self):
+        # Chief review, PR #75: et lager med ÉN strukturelt ugyldig rad skal
+        # IKKE stille normaliseres til en redusert, men "gyldig", liste --
+        # det ville la en påfølgende normal lagring persistere den reduserte
+        # listen og dermed ødelegge den ugyldige raden for godt.
+        lagret = {"format": "kbh-pantry", "version": 1, "items": [
+            {"pantryItemId": "pantryitem-1", "ingredientType": "malt", "id": "weyermann_pilsner", "mengde": 1},
+            {"pantryItemId": "pantryitem-2", "ingredientType": "ugyldig-type", "id": "x", "mengde": 1},
+        ]}
+        preset = {_PANTRY_NOKKEL: json.dumps(lagret)}
+        result = _kjor("pantryStateErKorrupt()", preset_local_storage=preset)
+        self.assertTrue(result)
+
+    def test_blandet_gyldig_ugyldig_liste_overskrives_ikke_av_normal_lagring(self):
+        raa = json.dumps({"format": "kbh-pantry", "version": 1, "items": [
+            {"pantryItemId": "pantryitem-1", "ingredientType": "malt", "id": "weyermann_pilsner", "mengde": 1},
+            {"pantryItemId": "pantryitem-2", "ingredientType": "ugyldig-type", "id": "x", "mengde": 1},
+        ]})
+        preset = {_PANTRY_NOKKEL: raa}
+        expr = (
+            "(function(){"
+            "const res = leggTilPantryItem(%s);"
+            "return {res, raaEtterpa: localStorage.getItem('%s')};"
+            "})()"
+        ) % (json.dumps(_GYLDIG_TILLEGG), _PANTRY_NOKKEL)
+        result = _kjor(expr, preset_local_storage=preset)
+        self.assertFalse(result["res"]["ok"])
+        self.assertEqual(result["raaEtterpa"], raa, "Den opprinnelige raden med den ugyldige naboen skal ALDRI reduseres bort av et normalt lagringsforsøk")
+
     def test_legg_til_avvises_pa_korrupt_lager_og_rorer_ikke_radataen(self):
         raa = "{ dette er ikke gyldig json ]"
         preset = {_PANTRY_NOKKEL: raa}

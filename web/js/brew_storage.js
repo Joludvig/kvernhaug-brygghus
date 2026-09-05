@@ -380,7 +380,11 @@ function lesBrewState() {
   } catch {
     return _tomBrewState(true);
   }
-  if (!raa) return _tomBrewState(false);
+  // KUN localStorage.getItem === null betyr at nøkkelen faktisk mangler.
+  // En tom streng ER eksisterende, uleselig rådata (Chief review, PR #75)
+  // -- den skal falle gjennom til JSON.parse under, som kaster på "" og
+  // dermed korrekt gir korrupt: true, ikke behandles som en ekte tom state.
+  if (raa === null) return _tomBrewState(false);
 
   let parsed;
   try {
@@ -396,10 +400,17 @@ function lesBrewState() {
   ) {
     return _tomBrewState(true);
   }
+  // Chief review (PR #75): ETT ugyldig brygg i den lagrede listen må gjøre
+  // HELE loggen korrupt, ikke stille filtreres bort -- ellers kan en
+  // etterfølgende normal lagring persistere den reduserte listen og
+  // dermed ødelegge det ugyldige brygget for godt.
+  if (!parsed.items.every(_gyldigBrew)) {
+    return _tomBrewState(true);
+  }
   return {
     format: BREW_STORE_FORMAT,
     version: BREW_STORE_VERSION,
-    items: parsed.items.filter(_gyldigBrew).map(_normaliserBrew),
+    items: parsed.items.map(_normaliserBrew),
     korrupt: false,
   };
 }

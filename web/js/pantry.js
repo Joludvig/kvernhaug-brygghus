@@ -49,10 +49,13 @@ function _tomPantryState(korrupt = false) {
   return { format: "kbh-pantry", version: PANTRY_VERSION, items: [], korrupt };
 }
 
-// Konservativ item-validering: en enkelt korrupt/ugyldig rad filtreres
-// bort stille i stedet for å forkaste HELE pantryet (samme prinsipp som
-// equipment.js sin profiles-filtrering). custom, hvis til stede, må minst
-// ha et ikke-tomt navn -- ellers kan ikke raden vises forståelig.
+// Per-item-validering delt av to ulike kontrakter: lesPantryState() (under)
+// krever at ALLE rader er gyldige -- én ugyldig rad gjør hele lageret
+// korrupt, se Chief review PR #75 -- mens parsePantryBackupInnhold()
+// (backup-import) bevisst filtrerer ugyldige rader bort stille, siden en
+// import allerede er en eksplisitt, brukerbekreftet handling. custom, hvis
+// til stede, må minst ha et ikke-tomt navn -- ellers kan ikke raden vises
+// forståelig.
 function _gyldigPantryItem(item) {
   if (!item || typeof item !== "object") return false;
   if (typeof item.pantryItemId !== "string" || !item.pantryItemId) return false;
@@ -104,7 +107,11 @@ function lesPantryState() {
   } catch {
     return _tomPantryState(true);
   }
-  if (!raw) return _tomPantryState(false);
+  // KUN localStorage.getItem === null betyr at nøkkelen faktisk mangler.
+  // En tom streng ER eksisterende, uleselig rådata (Chief review, PR #75)
+  // -- den skal falle gjennom til JSON.parse under, som kaster på "" og
+  // dermed korrekt gir korrupt: true, ikke behandles som en ekte tom state.
+  if (raw === null) return _tomPantryState(false);
 
   let parsed;
   try {
@@ -120,10 +127,17 @@ function lesPantryState() {
   ) {
     return _tomPantryState(true);
   }
+  // Chief review (PR #75): EN ugyldig rad i den lagrede listen må gjøre
+  // HELE lageret korrupt, ikke stille filtreres bort -- ellers kan en
+  // etterfølgende normal lagring persistere den reduserte listen og
+  // dermed ødelegge den ugyldige raden for godt.
+  if (!parsed.items.every(_gyldigPantryItem)) {
+    return _tomPantryState(true);
+  }
   return {
     format: "kbh-pantry",
     version: PANTRY_VERSION,
-    items: parsed.items.filter(_gyldigPantryItem).map(_normalisertPantryItem),
+    items: parsed.items.map(_normalisertPantryItem),
     korrupt: false,
   };
 }
