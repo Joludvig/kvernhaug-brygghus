@@ -110,8 +110,14 @@ const BREW_STATUSER = ["active", "done", "discarded"];
 // brygget denne igjen?", ikke "hvor mange poeng av 100".
 const BREW_DOMMER = ["yes", "maybe", "no"];
 
-function _tomBrewState() {
-  return { format: BREW_STORE_FORMAT, version: BREW_STORE_VERSION, items: [] };
+// `korrupt: true` markerer at nøkkelen INNEHOLDT noe (i motsetning til å
+// rett og slett mangle) som ikke kunne tolkes -- se lesBrewState() og
+// PRI-oppgaven "localStorage safety" (issue #74). CRUD-funksjonene under
+// sjekker ALLTID dette flagget før de skriver, slik at en uleselig rådata
+// aldri overskrives stille bare fordi leseren falt tilbake til en tom
+// struktur.
+function _tomBrewState(korrupt = false) {
+  return { format: BREW_STORE_FORMAT, version: BREW_STORE_VERSION, items: [], korrupt };
 }
 
 function _genererBrewId() {
@@ -360,20 +366,27 @@ function _normaliserBrew(b) {
 
 // ─── Lesing/skriving ──────────────────────────────────────────────────────
 
+// Kaster aldri. Manglende nøkkel er en EKTE tom state (korrupt: false).
+// Ugyldig JSON, feil format/version eller et items-felt som ikke er en
+// liste betyr derimot at RÅDATAEN finnes men ikke kan tolkes -- da settes
+// korrupt: true i stedet for å late som bryggeloggen er tom (issue #74:
+// en tidligere leser falt tilbake til tom state ved BEGGE tilfellene, som
+// lot en etterfølgende vanlig lagring (opprettBrygg/oppdaterBrygg/
+// slettBrygg/importerBrygg) stille overskrive den uleselige rådataen).
 function lesBrewState() {
   let raa;
   try {
     raa = localStorage.getItem(BREW_NOKKEL);
   } catch {
-    return _tomBrewState();
+    return _tomBrewState(true);
   }
-  if (!raa) return _tomBrewState();
+  if (!raa) return _tomBrewState(false);
 
   let parsed;
   try {
     parsed = JSON.parse(raa);
   } catch {
-    return _tomBrewState();
+    return _tomBrewState(true);
   }
   if (
     !_erObjekt(parsed) ||
@@ -381,22 +394,34 @@ function lesBrewState() {
     parsed.version !== BREW_STORE_VERSION ||
     !Array.isArray(parsed.items)
   ) {
-    return _tomBrewState();
+    return _tomBrewState(true);
   }
   return {
     format: BREW_STORE_FORMAT,
     version: BREW_STORE_VERSION,
     items: parsed.items.filter(_gyldigBrew).map(_normaliserBrew),
+    korrupt: false,
   };
+}
+
+// Sant kun når nøkkelen INNEHOLDER noe som ikke kunne tolkes -- se
+// lesBrewState(). UI-laget bruker dette til å vise et vedvarende varsel
+// ved sidelasting, i stedet for å late som bryggeloggen bare er tom.
+function bryggStateErKorrupt() {
+  return lesBrewState().korrupt === true;
 }
 
 // Skriver og VERIFISERER ved tilbakelesing. Returnerer boolean -- lagring
 // skal aldri feile stille og aldri late som den lyktes (Runde 25A pkt. 13,
-// samme kontrakt som recipe_storage.js).
+// samme kontrakt som recipe_storage.js). `state` kommer typisk fra
+// lesBrewState() og bærer derfor et internt korrupt-flagg (issue #74) --
+// KUN de tre ekte skjemafeltene skrives faktisk til nøkkelen, slik at det
+// interne flagget aldri lekker inn i den lagrede JSON-en.
 function _skrivBrewState(state) {
+  const persistert = { format: BREW_STORE_FORMAT, version: BREW_STORE_VERSION, items: state.items };
   let serialisert;
   try {
-    serialisert = JSON.stringify(state);
+    serialisert = JSON.stringify(persistert);
   } catch {
     return false;
   }
@@ -430,6 +455,7 @@ function bryggForOppskrift(recipeId) {
 function opprettBrygg({ snapshot, recipeId, parentBrewId }) {
   if (!_gyldigSnapshot(snapshot)) return { ok: false, melding: t("brygg.feilUgyldigSnapshot") };
   const state = lesBrewState();
+  if (state.korrupt) return { ok: false, melding: t("brygg.feilKorrupt") };
   const brewId = _genererBrewId();
   const brew = _normaliserBrew({
     brewId,
@@ -452,6 +478,7 @@ function opprettBrygg({ snapshot, recipeId, parentBrewId }) {
 // rekkefølge, og endres i ettertid.
 function oppdaterBrygg(brewId, endringer) {
   const state = lesBrewState();
+  if (state.korrupt) return { ok: false, melding: t("brygg.feilKorrupt") };
   const idx = state.items.findIndex((b) => b.brewId === brewId);
   if (idx === -1) return { ok: false, melding: t("brygg.feilFinnesIkke") };
   const forrige = state.items[idx];
@@ -478,6 +505,7 @@ function oppdaterBrygg(brewId, endringer) {
 
 function slettBrygg(brewId) {
   const state = lesBrewState();
+  if (state.korrupt) return false;
   const forrige = state.items.length;
   state.items = state.items.filter((b) => b.brewId !== brewId);
   if (state.items.length === forrige) return false;
@@ -715,6 +743,7 @@ function importerBrygg(filBrew) {
     return { ok: false, duplikat: true, melding: t("brygg.feilDuplikat") };
   }
   const state = lesBrewState();
+  if (state.korrupt) return { ok: false, melding: t("brygg.feilKorrupt") };
   // PRI 3A.2 (issue #22) -- sprer filBrew FØRST, slik at ethvert ukjent
   // toppnivåfelt filen måtte inneholde (en fremtidig .kbhbrew-writer som
   // ligger foran denne leseren) flyter med inn i _normaliserBrew(), som nå

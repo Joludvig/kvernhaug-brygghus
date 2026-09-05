@@ -39,8 +39,11 @@ _SKIP_REASON = (
 )
 
 
-def _kjor(expr):
-    return run_web_js(_BREW_STORAGE, expr, prelude=_T_STUB)
+_BREW_NOKKEL = "kvernhaug_web_brygg"
+
+
+def _kjor(expr, preset_local_storage=None):
+    return run_web_js(_BREW_STORAGE, expr, prelude=_T_STUB, preset_local_storage=preset_local_storage)
 
 
 @unittest.skip(_SKIP_REASON)
@@ -121,6 +124,67 @@ class TestKbhBrewRoundtrip(unittest.TestCase):
     def test_feil_fil_format_avvises(self):
         result = _kjor("parseKbhBrewInnhold(JSON.stringify({format: 'kbhrecipe', version: 1}))")
         self.assertFalse(result["ok"])
+
+
+# WEB -- localStorage safety: pantry + brew fail closed without silent
+# data loss (issue #74). Se tests/test_web_js_pantry.py for samme
+# kontrakt anvendt på pantry.js -- brew_storage.js sin lesBrewState()
+# hadde allerede en verifiserende _skrivBrewState() (Runde 25B), men falt
+# tilbake til en tom, GYLDIG state ved ugyldig JSON/feil versjon akkurat
+# som pantry.js gjorde -- noe som lot en etterfølgende opprettBrygg/
+# oppdaterBrygg/slettBrygg/importerBrygg stille overskrive uleselig
+# rådata. Disse testene dekker den fiksen.
+@unittest.skip(_SKIP_REASON)
+class TestKorruptBryggloggOverskrivesAldriStille(unittest.TestCase):
+    def test_ugyldig_json_gir_korrupt_flagg(self):
+        result = _kjor("bryggStateErKorrupt()", preset_local_storage={_BREW_NOKKEL: "{ ikke gyldig json ]"})
+        self.assertTrue(result)
+
+    def test_ustottet_versjon_er_korrupt(self):
+        lagret = {"format": "kbh-brews", "version": 99, "items": []}
+        result = _kjor("bryggStateErKorrupt()", preset_local_storage={_BREW_NOKKEL: json.dumps(lagret)})
+        self.assertTrue(result)
+
+    def test_manglende_nokkel_er_ikke_korrupt(self):
+        result = _kjor("bryggStateErKorrupt()", preset_local_storage={})
+        self.assertFalse(result)
+
+    def test_opprett_brygg_avvises_pa_korrupt_logg_og_rorer_ikke_radataen(self):
+        raa = "{ ikke gyldig json ]"
+        expr = (
+            "(function(){"
+            "const res = opprettBrygg({snapshot: %s, recipeId: null, parentBrewId: null});"
+            "return {res, raaEtterpa: localStorage.getItem('%s')};"
+            "})()"
+        ) % (json.dumps(_MINIMAL_SNAPSHOT), _BREW_NOKKEL)
+        result = _kjor(expr, preset_local_storage={_BREW_NOKKEL: raa})
+        self.assertFalse(result["res"]["ok"])
+        self.assertEqual(result["raaEtterpa"], raa, "Korrupt rådata skal ALDRI overskrives av et påfølgende normalt forsøk på å lagre")
+
+
+@unittest.skip(_SKIP_REASON)
+class TestBryggSkrivefeilOverflatesAldriSomSuksess(unittest.TestCase):
+    _SETITEM_KASTER = "localStorage.setItem = () => { throw new Error('QuotaExceededError'); };"
+
+    def test_opprett_brygg_gir_ok_false_ved_skrivefeil(self):
+        expr = "opprettBrygg({snapshot: %s, recipeId: null, parentBrewId: null})" % json.dumps(_MINIMAL_SNAPSHOT)
+        result = run_web_js(_BREW_STORAGE, expr, prelude=_T_STUB + self._SETITEM_KASTER)
+        self.assertFalse(result["ok"])
+
+    def test_slett_brygg_gir_false_ved_skrivefeil(self):
+        lagret = {
+            "format": "kbh-brews", "version": 1,
+            "items": [{
+                "brewId": "brew-1", "status": "active", "createdAt": "2026-01-01T00:00:00.000Z",
+                "snapshot": _MINIMAL_SNAPSHOT, "actuals": {}, "sensing": {}, "learning": {},
+            }],
+        }
+        result = run_web_js(
+            _BREW_STORAGE, "slettBrygg('brew-1')",
+            prelude=_T_STUB + self._SETITEM_KASTER,
+            preset_local_storage={_BREW_NOKKEL: json.dumps(lagret)},
+        )
+        self.assertFalse(result)
 
 
 if __name__ == "__main__":

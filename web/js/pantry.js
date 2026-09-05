@@ -39,8 +39,14 @@ const PANTRY_NOKKEL = "kvernhaug_web_pantry";
 const PANTRY_VERSION = 1;
 const PANTRY_TYPER = ["malt", "humle", "gjaer"];
 
-function _tomPantryState() {
-  return { format: "kbh-pantry", version: PANTRY_VERSION, items: [] };
+// `korrupt: true` markerer at nøkkelen INNEHOLDT noe (i motsetning til å
+// rett og slett mangle) som ikke kunne tolkes -- se lesPantryState() og
+// PRI-oppgaven "localStorage safety" (issue #74). Skrivefunksjonene under
+// sjekker ALLTID dette flagget før de lagrer, slik at en uleselig rådata
+// aldri overskrives stille bare fordi leseren falt tilbake til en tom
+// struktur.
+function _tomPantryState(korrupt = false) {
+  return { format: "kbh-pantry", version: PANTRY_VERSION, items: [], korrupt };
 }
 
 // Konservativ item-validering: en enkelt korrupt/ugyldig rad filtreres
@@ -79,38 +85,77 @@ function _normalisertPantryItem(item) {
   return ut;
 }
 
-// Trygg lesing -- manglende nøkkel, ugyldig JSON, feil format/version eller
-// et items-felt som ikke er en liste faller ALLE tilbake til tom state.
-// Kaster aldri -- skal ALDRI stoppe Pantry-siden.
+// Trygg lesing -- kaster aldri, skal ALDRI stoppe Pantry-siden. Manglende
+// nøkkel er en EKTE tom state (korrupt: false). Ugyldig JSON, feil format/
+// version eller et items-felt som ikke er en liste betyr derimot at
+// RÅDATAEN finnes men ikke kan tolkes -- da settes korrupt: true i stedet
+// for å late som lageret er tomt (issue #74: en tidligere leser falt
+// tilbake til tom state ved BEGGE tilfellene, som lot en etterfølgende
+// vanlig lagring stille overskrive den uleselige rådataen med en
+// tilsynelatende gyldig, men i realiteten redusert/tom, state).
+// Skrivefunksjonene under (leggTilPantryItem/oppdaterPantryItem/
+// slettPantryItem) nekter å lagre når korrupt er true; erstattPantryItems
+// er unntaket med hensikt -- den er allerede en eksplisitt,
+// brukerbekreftet destruktiv gjenopprettingshandling (backup-import).
 function lesPantryState() {
+  let raw;
   try {
-    const raw = localStorage.getItem(PANTRY_NOKKEL);
-    if (!raw) return _tomPantryState();
-    const parsed = JSON.parse(raw);
-    if (
-      !parsed || typeof parsed !== "object" ||
-      parsed.format !== "kbh-pantry" ||
-      parsed.version !== PANTRY_VERSION ||
-      !Array.isArray(parsed.items)
-    ) {
-      return _tomPantryState();
-    }
-    return {
-      format: "kbh-pantry",
-      version: PANTRY_VERSION,
-      items: parsed.items.filter(_gyldigPantryItem).map(_normalisertPantryItem),
-    };
+    raw = localStorage.getItem(PANTRY_NOKKEL);
   } catch {
-    return _tomPantryState();
+    return _tomPantryState(true);
   }
+  if (!raw) return _tomPantryState(false);
+
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return _tomPantryState(true);
+  }
+  if (
+    !parsed || typeof parsed !== "object" ||
+    parsed.format !== "kbh-pantry" ||
+    parsed.version !== PANTRY_VERSION ||
+    !Array.isArray(parsed.items)
+  ) {
+    return _tomPantryState(true);
+  }
+  return {
+    format: "kbh-pantry",
+    version: PANTRY_VERSION,
+    items: parsed.items.filter(_gyldigPantryItem).map(_normalisertPantryItem),
+    korrupt: false,
+  };
 }
 
+// Sant kun når nøkkelen INNEHOLDER noe som ikke kunne tolkes -- se
+// lesPantryState(). UI-laget bruker dette til å vise et vedvarende varsel
+// ved sidelasting, i stedet for å late som lageret bare er tomt.
+function pantryStateErKorrupt() {
+  return lesPantryState().korrupt === true;
+}
+
+// Skriver og VERIFISERER ved tilbakelesing -- samme kontrakt som
+// recipe_storage.js/brew_storage.js (Runde 25A/25B pkt. 13, utvidet hit i
+// issue #74): lagring skal aldri feile stille og aldri late som den
+// lyktes. Returnerer boolean. `state` kommer typisk fra lesPantryState()
+// og bærer derfor et internt korrupt-flagg (se over) -- KUN de tre ekte
+// skjemafeltene skrives faktisk til nøkkelen, slik at det interne flagget
+// aldri lekker inn i den lagrede JSON-en.
 function _lagrePantryState(state) {
+  const persistert = { format: "kbh-pantry", version: PANTRY_VERSION, items: state.items };
+  let serialisert;
   try {
-    localStorage.setItem(PANTRY_NOKKEL, JSON.stringify(state));
+    serialisert = JSON.stringify(persistert);
   } catch {
-    // F.eks. privat nettlesing / full lagringskvote -- trygg no-op, samme
-    // prinsipp som resten av appens localStorage-skriving.
+    return false;
+  }
+  try {
+    localStorage.setItem(PANTRY_NOKKEL, serialisert);
+    return localStorage.getItem(PANTRY_NOKKEL) === serialisert;
+  } catch {
+    // F.eks. privat nettlesing / full lagringskvote.
+    return false;
   }
 }
 
@@ -173,6 +218,7 @@ function leggTilPantryItem({ ingredientType, id, custom, mengde, notat }) {
   }
 
   const state = lesPantryState();
+  if (state.korrupt) return { ok: false, melding: t("pantry.feilKorrupt") };
   const item = {
     pantryItemId: _genererPantryItemId(),
     ingredientType,
@@ -183,7 +229,7 @@ function leggTilPantryItem({ ingredientType, id, custom, mengde, notat }) {
   if (notat && String(notat).trim()) item.notat = String(notat).trim();
 
   state.items.push(item);
-  _lagrePantryState(state);
+  if (!_lagrePantryState(state)) return { ok: false, melding: t("pantry.feilLagring") };
   return { ok: true, item };
 }
 
@@ -192,6 +238,7 @@ function leggTilPantryItem({ ingredientType, id, custom, mengde, notat }) {
 // ny er akseptabel V1-vei for å "bytte vare").
 function oppdaterPantryItem(pantryItemId, endringer) {
   const state = lesPantryState();
+  if (state.korrupt) return { ok: false, melding: t("pantry.feilKorrupt") };
   const idx = state.items.findIndex((i) => i.pantryItemId === pantryItemId);
   if (idx === -1) return { ok: false, melding: t("pantry.feilFinnesIkke") };
   const eksisterende = state.items[idx];
@@ -219,17 +266,20 @@ function oppdaterPantryItem(pantryItemId, endringer) {
   }
 
   state.items[idx] = oppdatert;
-  _lagrePantryState(state);
+  if (!_lagrePantryState(state)) return { ok: false, melding: t("pantry.feilLagring") };
   return { ok: true, item: oppdatert };
 }
 
+// Returnerer boolean -- samme kontrakt som før (issue #74 gjorde den kun
+// STRENGERE: aldri true med mindre raden faktisk ble borte OG lagringen
+// faktisk lyktes).
 function slettPantryItem(pantryItemId) {
   const state = lesPantryState();
+  if (state.korrupt) return false;
   const forrigeLengde = state.items.length;
   state.items = state.items.filter((i) => i.pantryItemId !== pantryItemId);
-  const slettet = state.items.length !== forrigeLengde;
-  if (slettet) _lagrePantryState(state);
-  return slettet;
+  if (state.items.length === forrigeLengde) return false;
+  return _lagrePantryState(state);
 }
 
 // ─── Runde 24C -- Backup/eksport/import ────────────────────────────────────
@@ -304,9 +354,15 @@ function parsePantryBackupInnhold(tekst) {
 // slik at denne funksjonen aldri kan lagre noe ugyldig uansett hvem som
 // kaller den. RESTORE/REPLACE, ikke merge (Runde 24C pkt. 5) -- UI-laget
 // (pantry_page.js) er ansvarlig for å bekrefte med brukeren FØR dette
-// kalles.
+// kalles. Dette er bevisst den ENE skrivefunksjonen som IKKE nekter på et
+// korrupt lager -- det ER den eksplisitte, brukerbekreftede
+// destruktive gjenopprettingshandlingen issue #74 sin Scope C forbeholder
+// unntak for. Returnerer { ok, items } -- issue #74 utvidet den tidligere
+// rene item-listen med en ok-flagg slik at et mislykket skriveforsøk
+// (privat nettlesing/full kvote) kan skilles fra et vellykket, samme
+// kontrakt som resten av modulen.
 function erstattPantryItems(items) {
   const gyldige = (Array.isArray(items) ? items : []).filter(_gyldigPantryItem).map(_normalisertPantryItem);
-  _lagrePantryState({ format: "kbh-pantry", version: PANTRY_VERSION, items: gyldige });
-  return gyldige;
+  const lagret = _lagrePantryState({ format: "kbh-pantry", version: PANTRY_VERSION, items: gyldige });
+  return { ok: lagret, items: gyldige };
 }
