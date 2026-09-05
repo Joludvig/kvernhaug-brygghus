@@ -39,12 +39,26 @@
   (SHA-256) mot den lokale kilden -- ikke et kuratert utvalg. HTTP 200
   beviser bare at siden svarer, ikke at innholdet er riktig.
 
+  GUARD (rent web/-innhold i working tree/index): scriptet laster opp
+  CURRENT WORKING-TREE-bytes, og INNHOLDSVERIFISERINGEN over sammenligner
+  produksjon mot akkurat de samme lokale bytene den selv nettopp lastet
+  opp -- den kan derfor aldri på egen hånd oppdage en ukommittert
+  web/-endring (se issue #72). Scriptet nekter derfor å gjøre noe som
+  helst dersom modifisert, staget, slettet, untracked ELLER gitignorert
+  (f.eks. *.log/*.tmp) innhold finnes under web/ (README.md/CHANGELOG.md
+  unntatt -- de deployes aldri). Gitignorerte filer under web/ må også
+  fanges, siden fillistingen i steg 2 enumererer filsystemet direkte og
+  laster opp ALT under web/ uansett .gitignore (Chief review, PR #73).
+  Urelaterte urene filer utenfor web/ (f.eks. eierens egne lokale
+  endringer andre steder i repoet) påvirkes ikke.
+
 .PARAMETER DryRun
   Viser source, target, filantall og full filliste. Gjør ingen FTP-/HTTPS-
-  tilkobling og ingen endringer. Guarden over kjøres likevel (ren lokal
-  git-sammenligning, ingen `git fetch`) -- sammenligningen bruker da sist
-  kjente origin/master; kjør uten -DryRun, eller `git fetch` manuelt her
-  først, for en garantert fersk sammenligning.
+  tilkobling og ingen endringer. Guardene over kjøres likevel (ren lokal
+  git-sjekk, ingen `git fetch`) -- HEAD/origin-sammenligningen bruker da
+  sist kjente origin/master; kjør uten -DryRun, eller `git fetch` manuelt
+  her først, for en garantert fersk sammenligning. Den urene-web/-guarden
+  gjør uansett aldri noen `git fetch` og er derfor alltid fersk.
 
 .PARAMETER Force
   Hopper over ja/nei-bekreftelsen før opplasting. Bruk med varsomhet.
@@ -92,6 +106,40 @@ $ErrorActionPreference = "Stop"
 function Get-CurlConfigEscaped {
     param([string]$Value)
     return $Value.Replace('\', '\\').Replace('"', '\"')
+}
+
+# Ren beslutningsfunksjon (issue #72) -- tar `git status --porcelain`-linjer
+# (allerede pathspec-avgrenset til web/ av kalleren) pluss den samme
+# repo-rot-relative eksklusjonslisten (README.md/CHANGELOG.md via
+# $ExcludeRelative) og returnerer hvilke DEPLOYABLE stier under web/ som er
+# urene -- modifisert/staget/slettet/untracked. Utpakket til egen funksjon
+# (samme mønster som Get-CurlConfigEscaped/Get-CurlFeilmelding over) slik at
+# selve avgjørelseslogikken er testbar uavhengig av git.exe/curl.exe-sjekken
+# lenger ned, som gjør resten av scriptet Windows-only.
+function Get-UrentWebInnhold {
+    param(
+        [string[]]$PorcelainLinjer,
+        [string[]]$EkskluderteWebRelativeStier
+    )
+    $ekskludertAbsolutt = @($EkskluderteWebRelativeStier | ForEach-Object { "web/$_" })
+    $urent = @()
+    foreach ($line in $PorcelainLinjer) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        # Porcelain-linje: "XY <sti>", eller "XY <gammel sti> -> <ny sti>"
+        # for en oppdaget staget rename. Kolonne 1-2 er statuskoder,
+        # kolonne 4- er selve stien(e) -- Substring(3) er derfor en enklere
+        # og mer robust utpakking enn å splitte på mellomrom (stier kan
+        # selv inneholde mellomrom).
+        $pathsPart = $line.Substring(3)
+        if ($pathsPart -match '^"(.*)"$') { $pathsPart = $matches[1] }
+        foreach ($p in ($pathsPart -split ' -> ')) {
+            $p = $p.Trim().Trim('"')
+            if ($ekskludertAbsolutt -notcontains $p) {
+                $urent += $p
+            }
+        }
+    }
+    return @($urent | Sort-Object -Unique)
 }
 
 # curl exit code 67 = CURLE_LOGIN_DENIED -- serveren svarte FTP 530 på
@@ -189,10 +237,72 @@ finally {
     Pop-Location
 }
 
-# ─── 2. Runtime-filliste (full sync, eksplisitt exclude-liste) ────────────
-# Alt under web/ ER runtime bortsett fra disse to -- se web/README.md.
+# ─── 1c. Guard: nekt å deploye urent/ukommittert innhold under web/ ────────
+# Se .DESCRIPTION for bakgrunnen (issue #72). Guarden over (1b) beviser kun
+# at COMMITTED historikk (HEAD) matcher origin/master -- den sier ingenting
+# om working tree/index. Scriptet laster likevel opp CURRENT WORKING-TREE-
+# bytes, og INNHOLDSVERIFISERINGEN lenger ned sammenligner produksjon mot
+# akkurat de samme lokale bytene den selv nettopp lastet opp -- den kan
+# derfor aldri oppdage en ukommittert web/-endring på egen hånd. Denne
+# guarden kjører derfor FØR filene i det hele tatt listes, dekker
+# modifisert/staget/slettet/untracked i ett `git status --porcelain`-kall
+# (dirtighet vises via OUTPUT, ikke exit code), og kjører også under
+# -DryRun (ren lokal git-sjekk, ingen tilkobling) slik at DryRun faktisk
+# reflekterer om en ekte deploy ville blitt avvist.
+#
+# --ignored=matching (Chief review, PR #73): reposet ignorerer *.log/*.tmp
+# globalt (.gitignore), men fillistingen i steg 2 under (Get-ChildItem
+# -Recurse -File) enumererer og laster opp ALT under web/ uansett
+# .gitignore -- den kjenner ingen git-tilstand i det hele tatt. Uten dette
+# flagget er en ignorert-men-deployable fil (f.eks. en lokal web/foo.log
+# eller web/foo.tmp) usynlig for `git status --porcelain` (ignorerte filer
+# vises kun via OUTPUT når --ignored eksplisitt er satt), så guarden ville
+# sluppet den gjennom mens opplastingen likevel tar den med. --ignored=matching
+# (fremfor default "traditional"-modus) sikrer at hver enkelt ignorert sti
+# rapporteres eksplisitt i stedet for kollapset til et katalognavn der det
+# er mulig, uten å endre hvordan modifisert/staget/slettet/untracked
+# innhold allerede rapporteres.
+#
+# Samme deployable-fil-semantikk som eksklusjonslisten i steg 2 under
+# ($ExcludeRelative, definert her og gjenbrukt der) -- web/README.md og
+# web/CHANGELOG.md er utviklerdokumentasjon, aldri deployet, og skal derfor
+# aldri i seg selv blokkere en deploy. Filer utenfor web/ (f.eks. eierens
+# tiltenkte lokale endring i raw_data/unmatched_malt.json) berøres ikke i
+# det hele tatt, siden git-kallet er pathspec-avgrenset til web/.
 $ExcludeRelative = @("README.md", "CHANGELOG.md")
 
+Push-Location $RepoRoot
+try {
+    $porcelain = & git status --porcelain --ignored=matching -- web/
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "git status --porcelain feilet for web/ -- kan ikke bekrefte at working tree/index er rent. Avbryter uten å gjøre noe."
+        exit 1
+    }
+}
+finally {
+    Pop-Location
+}
+
+$dirtyDeployPaths = Get-UrentWebInnhold -PorcelainLinjer $porcelain -EkskluderteWebRelativeStier $ExcludeRelative
+
+if ($dirtyDeployPaths.Count -gt 0) {
+    Write-Host ""
+    Write-Host "STOPPER: urent/ukommittert innhold funnet under web/ (deployable filer)."
+    foreach ($p in $dirtyDeployPaths) { Write-Host "  $p" }
+    Write-Host ""
+    Write-Host "Scriptet laster opp CURRENT WORKING-TREE-bytes, og produksjonsverifiseringen"
+    Write-Host "lenger ned sammenligner kun mot de samme lokale bytene -- den kan derfor IKKE"
+    Write-Host "oppdage en ukommittert web/-endring den selv nettopp lastet opp."
+    Write-Host "Commit, fjern fra staging (git restore --staged), eller rydd opp disse"
+    Write-Host "filene, og prøv igjen."
+    Write-Error "Ingen filer ble lastet opp -- urent web/-innhold (deployable filer)."
+    exit 1
+}
+Write-Host "Guard OK -- web/ (deployable innhold) er rent i working tree/index."
+Write-Host ""
+
+# ─── 2. Runtime-filliste (full sync, eksplisitt exclude-liste) ────────────
+# Alt under web/ ER runtime bortsett fra disse to -- se web/README.md.
 $AllFiles = Get-ChildItem -Path $WebRoot -Recurse -File
 $DeployFiles = @($AllFiles | Where-Object {
     $rel = $_.FullName.Substring($WebRoot.Length + 1) -replace '\\', '/'
