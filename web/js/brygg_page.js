@@ -297,7 +297,8 @@ function _byggKort(brew) {
     });
     primar.textContent = t("brygg.gjenopptaKnapp");
     primar.addEventListener("click", () => {
-      oppdaterBrygg(brew.brewId, { status: "active" });
+      const res = oppdaterBrygg(brew.brewId, { status: "active" });
+      if (!res.ok) return _visTilbakemelding(kort, res.melding);
       visLogg(null, brew.brewId);
     });
     forkastKnapp.hidden = true;
@@ -305,12 +306,13 @@ function _byggKort(brew) {
 
   forkastKnapp.addEventListener("click", () => {
     if (!confirm(t("brygg.forkastConfirm"))) return;
-    oppdaterBrygg(brew.brewId, { status: "discarded" });
+    const res = oppdaterBrygg(brew.brewId, { status: "discarded" });
+    if (!res.ok) return _visTilbakemelding(kort, res.melding);
     visLogg(t("brygg.tilbakeForkastet"), brew.brewId);
   });
   kort.querySelector(".brygg-slett").addEventListener("click", () => {
     if (!confirm(t("brygg.slettConfirm"))) return;
-    slettBrygg(brew.brewId);
+    if (!slettBrygg(brew.brewId)) return _visTilbakemelding(kort, t("brygg.feilLagring"));
     visLogg(null, null);
   });
 
@@ -343,14 +345,15 @@ function _byggFerdigRad(brew) {
   const gjenapne = li.querySelector(".brygg-gjenapne");
   gjenapne.textContent = t("brygg.gjenapneKnapp");
   gjenapne.addEventListener("click", () => {
-    oppdaterBrygg(brew.brewId, { status: "active" });
+    const res = oppdaterBrygg(brew.brewId, { status: "active" });
+    if (!res.ok) return _visBryggVarsel(res.melding);
     visLogg(null, brew.brewId);
   });
   const slett = li.querySelector(".brygg-slett");
   slett.textContent = t("utstyr.slett");
   slett.addEventListener("click", () => {
     if (!confirm(t("brygg.slettConfirm"))) return;
-    slettBrygg(brew.brewId);
+    if (!slettBrygg(brew.brewId)) return _visBryggVarsel(t("brygg.feilLagring"));
     visLogg(null, null);
   });
   return li;
@@ -358,7 +361,41 @@ function _byggFerdigRad(brew) {
 
 // ─── Hovedvisning ─────────────────────────────────────────────────────────
 
+// Issue #74 -- vedvarende varsel når lesBrewState() ikke klarte å tolke
+// den lagrede rådataen (i stedet for å late som bryggeloggen bare er tom),
+// og et engangsvarsel for et mislykket skriveforsøk fra den "ferdige"
+// listens handlinger (som ikke har et per-kort .brygg-tilbakemelding-
+// element, se #brygg-ferdig-mal). Elementet finnes ikke i HTML-kildene
+// (unngår enhver web/en/-generatorsynk) -- opprettes lat ved første behov,
+// samme "hjelpetekst utstyr-advarsel"-stil som utstyr-batch-advarsel
+// (app.js/index.html) allerede bruker for tilsvarende ikke-blokkerende
+// varsler.
+function _bryggVarselEl() {
+  let el = document.getElementById("brygg-varsel");
+  if (el) return el;
+  el = document.createElement("p");
+  el.id = "brygg-varsel";
+  el.className = "hjelpetekst utstyr-advarsel";
+  el.setAttribute("aria-live", "polite");
+  el.hidden = true;
+  document.getElementById("brygg-tom-melding").insertAdjacentElement("afterend", el);
+  return el;
+}
+
+function _visBryggVarsel(tekst) {
+  const el = _bryggVarselEl();
+  el.textContent = tekst;
+  el.hidden = false;
+}
+
 function visLogg(tilbakemelding, fremhevBrewId) {
+  if (bryggStateErKorrupt()) {
+    _visBryggVarsel(t("brygg.feilKorrupt"));
+  } else {
+    const varselEl = document.getElementById("brygg-varsel");
+    if (varselEl) varselEl.hidden = true;
+  }
+
   const alle = alleBrygg();
   // Nyeste først -- det brukeren jobber med nå står øverst.
   alle.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));

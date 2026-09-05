@@ -405,7 +405,7 @@ class TestWebWrapperFixturerBrukerDagensKonstanter(unittest.TestCase):
 
     def test_pantry_store_v1_matcher_pantry_js_konstanter(self):
         kilde = _les(_PANTRY_JS)
-        self.assertIn('return { format: "kbh-pantry", version: PANTRY_VERSION, items: [] };', kilde)
+        self.assertIn('return { format: "kbh-pantry", version: PANTRY_VERSION, items: [], korrupt };', kilde)
         self.assertIn("const PANTRY_VERSION = 1;", kilde)
         fixture = _last_json(os.path.join(_FIXTURE_ROOT, "web", "pantry_store_v1.json"))
         self.assertEqual(fixture["format"], "kbh-pantry")

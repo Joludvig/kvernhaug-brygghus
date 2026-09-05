@@ -117,7 +117,43 @@ function _radDetalj(item) {
   return tekst;
 }
 
+// Issue #74 -- vedvarende varsel når lesPantryState() ikke klarte å tolke
+// den lagrede rådataen (i stedet for å late som lageret bare er tomt).
+// Elementet finnes ikke i HTML-kildene (unngår enhver web/en/-
+// generatorsynk for dette varselet) -- opprettes lat ved første behov,
+// samme "hjelpetekst utstyr-advarsel"-stil som utstyr-batch-advarsel
+// (app.js/index.html) allerede bruker for tilsvarende ikke-blokkerende
+// varsler.
+function _pantryVarselEl() {
+  let el = document.getElementById("pantry-varsel");
+  if (el) return el;
+  el = document.createElement("p");
+  el.id = "pantry-varsel";
+  el.className = "hjelpetekst utstyr-advarsel";
+  el.setAttribute("aria-live", "polite");
+  el.hidden = true;
+  document.getElementById("pantry-liste").insertAdjacentElement("beforebegin", el);
+  return el;
+}
+
+function _visPantryVarsel(tekst) {
+  const el = _pantryVarselEl();
+  el.textContent = tekst;
+  el.hidden = false;
+}
+
+function _skjulPantryVarsel() {
+  const el = document.getElementById("pantry-varsel");
+  if (el) el.hidden = true;
+}
+
 function visPantryListe() {
+  if (pantryStateErKorrupt()) {
+    _visPantryVarsel(t("pantry.feilKorrupt"));
+  } else {
+    _skjulPantryVarsel();
+  }
+
   const items = allePantryItems();
   const listeEl = document.getElementById("pantry-liste");
   const tomEl = document.getElementById("pantry-tom-melding");
@@ -136,7 +172,10 @@ function visPantryListe() {
     rad.querySelector(".utstyr-rad-rediger").addEventListener("click", () => _apnePantrySkjemaRediger(item));
     rad.querySelector(".utstyr-rad-slett").addEventListener("click", () => {
       if (confirm(t("pantry.slettConfirm", { navn: _hentVisningsnavn(item) }))) {
-        slettPantryItem(item.pantryItemId);
+        if (!slettPantryItem(item.pantryItemId)) {
+          _visPantryVarsel(t("pantry.feilLagring"));
+          return;
+        }
         visPantryListe();
       }
     });
@@ -375,9 +414,13 @@ function _handleImporterPantryFil(fil) {
       return;
     }
     if (!confirm(t("pantry.backup.erstattConfirm"))) return;
-    const importerte = erstattPantryItems(resultat.items);
+    const erstattet = erstattPantryItems(resultat.items);
     visPantryListe();
-    _visBackupStatus(t("pantry.backup.importertStatus", { antall: importerte.length }));
+    if (!erstattet.ok) {
+      _visBackupStatus(t("pantry.backup.feilLagring"));
+      return;
+    }
+    _visBackupStatus(t("pantry.backup.importertStatus", { antall: erstattet.items.length }));
   };
   reader.onerror = () => _visBackupStatus(t("pantry.backup.lesefeil"));
   reader.readAsText(fil);
