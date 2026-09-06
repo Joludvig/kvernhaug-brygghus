@@ -23,7 +23,10 @@ from bryggeskole.course_fact_registry import (
     SOURCE_TIERS,
     STATUSES,
     CourseFactRegistryError,
+    find_verified_records,
+    get_verified_record,
     read_registry_file,
+    read_verified_records,
     validate_registry,
 )
 
@@ -239,6 +242,120 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         self.assertEqual(verified, [])
 
 
+class TestReadVerifiedRecordsReturnsOnlyVerified(unittest.TestCase):
+    _PATH = _fixture_path("verified_consumer_mixed.json")
+
+    def test_returns_only_verified_status(self):
+        records = read_verified_records(self._PATH)
+        self.assertEqual({r["status"] for r in records}, {"verified"})
+
+    def test_draft_reviewed_deprecated_are_excluded(self):
+        ids = {r["id"] for r in read_verified_records(self._PATH)}
+        self.assertNotIn("FACT-TEST-0023", ids)  # draft
+        self.assertNotIn("FACT-TEST-0025", ids)  # deprecated
+        self.assertNotIn("FACT-TEST-0026", ids)  # reviewed
+
+    def test_ordering_is_canonical_id_order_independent_of_source_array_order(self):
+        ids = [r["id"] for r in read_verified_records(self._PATH)]
+        self.assertEqual(ids, sorted(ids))
+        self.assertEqual(
+            ids,
+            ["FACT-TEST-0020", "FACT-TEST-0021", "FACT-TEST-0022", "FACT-TEST-0024"],
+        )
+
+    def test_full_source_provenance_is_preserved(self):
+        records = read_verified_records(self._PATH)
+        record = next(r for r in records if r["id"] == "FACT-TEST-0020")
+        self.assertEqual(record["sources"][0]["ref"], "https://example.invalid/consumer-0020")
+        self.assertEqual(record["sources"][0]["tier"], "A")
+
+    def test_empty_production_registry_returns_zero_verified_records(self):
+        self.assertEqual(read_verified_records(_PRODUCTION_REGISTRY), [])
+
+    def test_malformed_registry_fails_closed_before_filtering(self):
+        with self.assertRaises(CourseFactRegistryError):
+            read_verified_records(_fixture_path("duplicate_id.json"))
+
+
+class TestGetVerifiedRecordLookup(unittest.TestCase):
+    _PATH = _fixture_path("verified_consumer_mixed.json")
+
+    def test_verified_id_is_returned(self):
+        record = get_verified_record(self._PATH, "FACT-TEST-0020")
+        self.assertIsNotNone(record)
+        self.assertEqual(record["status"], "verified")
+
+    def test_missing_id_returns_none(self):
+        self.assertIsNone(get_verified_record(self._PATH, "FACT-TEST-9999"))
+
+    def test_draft_id_returns_none_not_the_raw_record(self):
+        # FACT-TEST-0023 exists in the registry as a draft record -- the
+        # trusted lookup must never distinguish this from "id does not
+        # exist" and must never leak it as if it were safe/verified.
+        self.assertIsNone(get_verified_record(self._PATH, "FACT-TEST-0023"))
+
+    def test_deprecated_id_returns_none(self):
+        self.assertIsNone(get_verified_record(self._PATH, "FACT-TEST-0025"))
+
+    def test_reviewed_id_returns_none(self):
+        self.assertIsNone(get_verified_record(self._PATH, "FACT-TEST-0026"))
+
+    def test_malformed_registry_fails_closed(self):
+        with self.assertRaises(CourseFactRegistryError):
+            get_verified_record(_fixture_path("invalid_document_shape.json"), "FACT-TEST-0001")
+
+
+class TestFindVerifiedRecordsFiltering(unittest.TestCase):
+    _PATH = _fixture_path("verified_consumer_mixed.json")
+
+    def test_no_filter_returns_all_verified_in_canonical_order(self):
+        ids = [r["id"] for r in find_verified_records(self._PATH)]
+        self.assertEqual(
+            ids,
+            ["FACT-TEST-0020", "FACT-TEST-0021", "FACT-TEST-0022", "FACT-TEST-0024"],
+        )
+
+    def test_concept_filter_excludes_non_matching_and_unverified(self):
+        ids = {r["id"] for r in find_verified_records(self._PATH, concept="c.a")}
+        self.assertEqual(ids, {"FACT-TEST-0020", "FACT-TEST-0021"})
+
+    def test_module_filter_excludes_non_matching_and_unverified(self):
+        ids = {r["id"] for r in find_verified_records(self._PATH, module="m.a")}
+        self.assertEqual(ids, {"FACT-TEST-0020", "FACT-TEST-0022"})
+
+    def test_combined_concept_and_module_is_and_semantics(self):
+        ids = [r["id"] for r in find_verified_records(self._PATH, concept="c.a", module="m.a")]
+        self.assertEqual(ids, ["FACT-TEST-0020"])
+
+    def test_concept_with_zero_verified_matches_returns_empty_list(self):
+        self.assertEqual(find_verified_records(self._PATH, concept="no-such-concept"), [])
+
+    def test_module_with_zero_verified_matches_returns_empty_list(self):
+        self.assertEqual(find_verified_records(self._PATH, module="no-such-module"), [])
+
+    def test_malformed_registry_fails_closed_before_filtering(self):
+        with self.assertRaises(CourseFactRegistryError):
+            find_verified_records(_fixture_path("duplicate_id.json"), concept="anything")
+
+
+class TestTrustedApiNeverLeaksSharedMutableState(unittest.TestCase):
+    _PATH = _fixture_path("verified_consumer_mixed.json")
+
+    def test_mutating_a_looked_up_record_does_not_affect_the_next_lookup(self):
+        record = get_verified_record(self._PATH, "FACT-TEST-0020")
+        record["claim"] = "MUTATED BY CALLER"
+        record["sources"][0]["ref"] = "MUTATED"
+        fresh = get_verified_record(self._PATH, "FACT-TEST-0020")
+        self.assertNotEqual(fresh["claim"], "MUTATED BY CALLER")
+        self.assertNotEqual(fresh["sources"][0]["ref"], "MUTATED")
+
+    def test_mutating_one_result_does_not_affect_a_later_read(self):
+        records = read_verified_records(self._PATH)
+        records[0]["concepts"] = ["mutated"]
+        fresh = read_verified_records(self._PATH)
+        self.assertNotEqual(fresh[0].get("concepts"), ["mutated"])
+
+
 class TestContractDocExistsAndIsInternallyConsistent(unittest.TestCase):
     def test_contract_doc_exists(self):
         self.assertTrue(os.path.exists(_CONTRACT_DOC))
@@ -266,6 +383,12 @@ class TestContractDocExistsAndIsInternallyConsistent(unittest.TestCase):
             text = fh.read()
         for value in SOURCE_TIERS:
             self.assertIn(f"**{value}**", text)
+
+    def test_contract_doc_documents_the_verified_only_consumer_api(self):
+        with io.open(_CONTRACT_DOC, encoding="utf-8") as fh:
+            text = fh.read()
+        for name in ("read_verified_records", "get_verified_record", "find_verified_records"):
+            self.assertIn(name, text)
 
 
 if __name__ == "__main__":

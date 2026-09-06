@@ -1,12 +1,13 @@
 # Bryggeskole Course Fact Registry V1
 
-Version: 1.0
+Version: 1.1
 Status: Active
 Governed by: GitHub issue #65 (locked Bryggeskole product direction —
 "AI may research, compare, explain and write pedagogically — AI is
 never the source") and GitHub issue #78 (`ROADMAP V2`, item **V2-2 —
 Verified Knowledge Foundation / Course Fact Registry**). Implemented by
-issue #89 (**V2-2A — registry contract + validation foundation only**).
+issue #89 (**V2-2A — registry contract + validation foundation only**)
+and issue #91 (**V2-2B — verified-only consumer API**, §18 below).
 
 This is not a locked text. It is a versioned document. Changes require
 explicit review and a version increment.
@@ -486,3 +487,116 @@ claim can never itself be an AI/model name.
 - Does not attempt automatic fact-checking, source-tier inference, or
   AI-authorship detection beyond the narrow declared-source-name check
   in §16.
+
+---
+
+## 18. Verified-only consumer API (V2-2B, issue #91)
+
+V1 (§0–§17 above) is the registry **contract**: the record shape and
+the raw, fail-closed validator/reader (`validate_registry()`,
+`read_registry_file()`). It intentionally has no opinion on *how*
+future code should consume the registry — it will happily hand back a
+`draft` or `deprecated` record if asked to. That is fine for editorial
+or tooling use, but it is exactly the wrong default for future
+Bryggeskole course content: casually reading `records` and displaying
+whatever comes back would risk presenting an unreviewed or superseded
+claim as trusted teaching content.
+
+This section adds a small, separate, **read-only, verified-only**
+consumption boundary on top of the same registry file — still no real
+factual corpus, still no course UI, still no network/database/RAG/model
+dependency (§0's non-goals are unchanged).
+
+### 18.1 Two access surfaces, clearly distinguished
+
+| Surface | Functions | Who uses it | What it can return |
+|---|---|---|---|
+| Raw, validated access | `validate_registry()`, `read_registry_file()` | Editorial/review tooling that genuinely needs to see every status | Any record, any status, including `draft`/`reviewed`/`deprecated` |
+| **Trusted, verified-only access** | `read_verified_records()`, `get_verified_record()`, `find_verified_records()` | **All future course-facing Bryggeskole code that displays factual claims to a learner** | Only `status == "verified"` records — never `draft`, `reviewed`, or `deprecated` |
+
+**Future course code consuming factual teaching content must use the
+verified-only surface, never the raw reader.** The raw reader remaining
+available for editorial tooling is not an escape hatch for course
+content — it is a deliberately separate audience.
+
+### 18.2 API shape
+
+All three functions live in `bryggeskole/course_fact_registry.py`
+(re-exported from `bryggeskole/__init__.py`) and take the registry file
+path as their first argument, exactly like `read_registry_file()`:
+
+- **`read_verified_records(path)`** — validates the complete registry
+  fail-closed, then returns every `verified` record as a new list,
+  ordered by canonical `id` (independent of the record's position in
+  the source JSON array).
+- **`get_verified_record(path, fact_id)`** — returns the single verified
+  record matching the stable `id`, or `None`.
+- **`find_verified_records(path, concept=None, module=None)`** —
+  returns the verified records whose `concepts` list contains `concept`
+  (if given) **and** whose `modules` list contains `module` (if given);
+  omitting both returns every verified record. There is no general
+  query language — exactly these two optional filters, combined with
+  AND semantics.
+
+### 18.3 Fail-closed lookup semantics (explicit, tested)
+
+- **Malformed registry:** all three functions validate the *whole*
+  registry document before returning or filtering anything, and raise
+  `CourseFactRegistryError` (the same exception `read_registry_file()`
+  raises) if it is invalid — a broken registry never produces a
+  partial or best-effort result.
+- **Missing ID:** `get_verified_record()` returns `None`.
+- **ID exists but is not verified:** `get_verified_record()` also
+  returns `None` — deliberately identical to the missing-ID case. This
+  is intentional, not an oversight: the trusted surface must never leak
+  a distinguishing signal (a raw record, a different exception, a
+  different return shape) that would let a caller infer the existence
+  or content of an unverified record through the "safe" API. Code that
+  genuinely needs that distinction (e.g. a future editorial review UI)
+  is exactly the audience the raw reader (§18.1) exists for instead.
+- **Concept/module with zero verified matches:** `find_verified_records()`
+  returns an empty list — never `None`, never an error.
+- **Deprecated records:** never returned by any of the three functions,
+  under any argument combination — the same as `draft`/`reviewed`.
+
+### 18.4 Ordering and provenance
+
+Result order from all three functions is canonical `id` order (a plain
+ascending string sort of the `FACT-<DOMAIN>-<NNNN>` id), independent of
+the order records happen to appear in the source JSON `records` array —
+so a caller (or a future test) can rely on stable output without the
+registry file's own array order being a hidden dependency. Every
+returned record carries its full shape, including `sources`/
+provenance, `concepts`, `modules`, `notes`, and `verified_at` unchanged
+— the verified-only API narrows *which* records are visible, never
+*what fields* a visible record carries.
+
+### 18.5 No accidental mutation
+
+None of the three functions cache anything at module or process scope:
+every call re-reads and re-validates the file from disk, so there is no
+shared cached object for one caller's mutation to corrupt for another.
+Returned records are additionally deep-copied before being handed back,
+so a caller mutating a returned record (or a nested `sources` entry)
+can never affect the result of a later call or another record in the
+same result list — a guarantee that holds by construction, not merely
+as an accident of "no cache exists yet". If a future round introduces
+caching for performance, that guarantee must be preserved deliberately,
+not assumed to still hold.
+
+### 18.6 What this section does not change
+
+- `verified` still means exactly what §9 says: Kvernhaug's best current
+  verified representation of a claim, backed by at least one explicitly
+  tiered source with a concrete reference, as of `verified_at` — **not**
+  eternal or universal truth, and not automatically fact-checked (§9's
+  full list of what `verified` does *not* mean is unchanged).
+- AI/model output remains non-authoritative and is never an acceptable
+  declared source (§16, unchanged) — this section only narrows *which
+  status* is exposed to course code, it does not touch source-integrity
+  rules at all.
+- No status is promoted or demoted by anything in this section — these
+  are read-only query functions, exactly like the §13 validator they
+  build on.
+- No real factual corpus, course UI, question engine, or mastery model
+  is introduced here (§0's non-goals remain fully in force).

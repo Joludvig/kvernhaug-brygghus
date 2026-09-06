@@ -23,6 +23,7 @@ human-readable error strings describing everything that is wrong
 convenience wrapper: it raises CourseFactRegistryError, carrying that
 same full error list, on anything invalid.
 """
+import copy
 import json
 import re
 import unicodedata
@@ -316,3 +317,83 @@ def read_registry_file(path):
     if errors:
         raise CourseFactRegistryError(errors)
     return data
+
+
+# ---------------------------------------------------------------------------
+# Trusted, verified-only consumer API (V2-2B, issue #91).
+#
+# `read_registry_file()`/`validate_registry()` above are the low-level,
+# raw-but-validated reader: editorial/tooling code that genuinely needs to
+# see draft/reviewed/deprecated records (e.g. a future review UI) may keep
+# using them directly. The three functions below are the separate, narrower
+# surface future Bryggeskole course code must use for any teaching-facing
+# consumption of factual content -- they never return a draft, reviewed, or
+# deprecated record, under any argument combination.
+#
+# Fail-closed lookup semantics, stated explicitly:
+# - a malformed registry document (any error `validate_registry()` would
+#   report) always raises CourseFactRegistryError from all three functions
+#   below, before any filtering happens -- there is no partial/best-effort
+#   result for a broken registry;
+# - a missing fact ID and an ID that exists but is not `verified` are
+#   deliberately indistinguishable through this API: both `get_verified_
+#   record()` and `find_verified_records()` simply omit/return None for
+#   them. This is intentional, not an oversight -- the trusted surface must
+#   never leak a signal (a raw record, a distinct error, a different
+#   returned shape) that could be used to infer the existence or content of
+#   an unverified record. Code that genuinely needs to know "does a
+#   draft/reviewed/deprecated record with this id exist" is editorial
+#   tooling and belongs on the raw `read_registry_file()` path instead;
+# - a concept/module (or combination) that matches zero verified records
+#   returns an empty list -- never None, never an error.
+#
+# No caching or shared/global state is introduced here: every call re-reads
+# and re-validates the file from disk, so there is no cached object for a
+# caller's mutation to corrupt across calls. Returned records are still
+# deep-copied before being handed back, so that guarantee holds by
+# construction rather than merely as an accident of "no cache exists yet".
+
+
+def read_verified_records(path):
+    """Reads and fail-closed validates the complete registry at `path`,
+    then returns only its `verified` records as a new list, ordered by
+    canonical `id` (independent of their order in the source JSON array).
+    Raises CourseFactRegistryError for a malformed registry, exactly like
+    read_registry_file(). Draft/reviewed/deprecated records are never
+    included. Each returned record is a deep copy, so mutating it can never
+    affect a later call or another entry in the same list."""
+    data = read_registry_file(path)
+    verified = [record for record in data["records"] if record.get("status") == "verified"]
+    verified.sort(key=lambda record: record["id"])
+    return copy.deepcopy(verified)
+
+
+def get_verified_record(path, fact_id):
+    """Returns the verified record with the given stable `fact_id` from the
+    registry at `path`, or None if no such verified record exists -- this
+    covers both "no record with this id exists at all" and "a record with
+    this id exists but is draft/reviewed/deprecated", deliberately treated
+    identically (see the fail-closed semantics note above). Raises
+    CourseFactRegistryError for a malformed registry, before any lookup is
+    attempted."""
+    for record in read_verified_records(path):
+        if record["id"] == fact_id:
+            return record
+    return None
+
+
+def find_verified_records(path, concept=None, module=None):
+    """Returns the verified records from the registry at `path` whose
+    `concepts` list contains `concept` (if given) AND whose `modules` list
+    contains `module` (if given) -- both filters are optional and combine
+    with AND semantics when both are supplied. With neither argument, returns
+    every verified record. Result order is the same canonical id order as
+    read_verified_records(). A filter that matches nothing returns an empty
+    list, never None. Raises CourseFactRegistryError for a malformed
+    registry, before any filtering is attempted."""
+    records = read_verified_records(path)
+    if concept is not None:
+        records = [record for record in records if concept in (record.get("concepts") or [])]
+    if module is not None:
+        records = [record for record in records if module in (record.get("modules") or [])]
+    return records
