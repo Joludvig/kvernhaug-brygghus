@@ -2,6 +2,8 @@
 
 *Sist oppdatert: 2026-08-14 (Web Runde 14B — engelsk hjelp/bryggehåndbok, full NO/EN-dekning). Se `docs/PROJECT_STATUS_AUGUST_2026.md` for full status, nøkkeltall og kjent teknisk gjeld (`docs/PROJECT_STATUS_JULI_2026.md` beholdes som historikk).*
 
+> **Superseded som prioriteringskilde (2026-09-06):** GitHub issue #78 («ROADMAP V2 — Product Phase») erklærer denne filen «materially stale compared with current master» som planleggingsgrunnlag og etablerer prioritert rekkefølge for neste produktfase der i stedet, fra master-baseline `57cde82871e65f1a8414a5e474c4003cb5d2e308`. Denne filen rørt ikke — «Ferdig»-listen under er fortsatt en gyldig historisk oversikt over hva som faktisk er bygget, den er bare ikke lenger fasit for *hva som prioriteres videre*. Se issue #78 for gjeldende neste-fase-rekkefølge.
+
 Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkefølge — features flyttes mellom kategoriene etter hvert som virkelig bruk avgjør hva som trengs.
 
 ---
