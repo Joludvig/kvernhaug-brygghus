@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Synthetic record with a concepts field that is not a list.",
+      "classification": "hypothesis",
+      "status": "draft",
+      "concepts": "fixture.example_concept"
+    },
+    {
+      "id": "FACT-TEST-0002",
+      "claim": "Synthetic record with a duplicate entry inside modules.",
+      "classification": "hypothesis",
+      "status": "draft",
+      "modules": ["fixture-module-example", "fixture-module-example"]
+    }
+  ]
+}

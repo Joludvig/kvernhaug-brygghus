@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Synthetic record carrying an unrecognized top-level field.",
+      "classification": "hypothesis",
+      "status": "draft",
+      "confidence": 0.9
+    }
+  ]
+}

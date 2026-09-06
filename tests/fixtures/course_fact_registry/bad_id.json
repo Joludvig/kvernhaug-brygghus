@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "fact-test-0001",
+      "claim": "Synthetic record with a lowercase id that must not validate.",
+      "classification": "hypothesis",
+      "status": "draft"
+    }
+  ]
+}

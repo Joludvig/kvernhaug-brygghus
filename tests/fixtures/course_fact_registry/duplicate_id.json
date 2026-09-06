@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "First synthetic record using a duplicated id.",
+      "classification": "hypothesis",
+      "status": "draft"
+    },
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Second synthetic record reusing the same id -- must fail closed.",
+      "classification": "hypothesis",
+      "status": "draft"
+    }
+  ]
+}
