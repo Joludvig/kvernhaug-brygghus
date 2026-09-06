@@ -228,18 +228,35 @@ class TestReaderNeverCallsNetwork(unittest.TestCase):
             self.assertNotIn(forbidden, source)
 
 
+_PRODUCTION_VERIFIED_IDS = ["FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003"]
+
+
 class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestCase):
     def test_production_registry_parses_and_validates(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
         self.assertEqual(data["schema_version"], REGISTRY_SCHEMA_VERSION)
         self.assertIsInstance(data["records"], list)
 
-    def test_production_registry_has_zero_verified_records(self):
-        # V2-2A deliverable preference: zero real verified claims
-        # introduced by this foundation round.
+    def test_production_registry_has_exactly_the_v2_2c_verified_records(self):
+        # V2-2C (issue #93): the first source-backed fermentation fact
+        # pack -- exactly these three verified records, no more.
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
-        self.assertEqual(verified, [])
+        self.assertEqual({r["id"] for r in verified}, set(_PRODUCTION_VERIFIED_IDS))
+        self.assertEqual(len(verified), len(_PRODUCTION_VERIFIED_IDS))
+
+    def test_production_registry_classification_mix_is_exactly_2_documented_1_interpretation(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        verified = [r for r in data["records"] if r.get("status") == "verified"]
+        classifications = [r["classification"] for r in verified]
+        self.assertEqual(classifications.count("documented_fact"), 2)
+        self.assertEqual(classifications.count("professional_interpretation"), 1)
+
+    def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        record = next(r for r in data["records"] if r["id"] == "FACT-BREW-0003")
+        self.assertEqual(record["classification"], "professional_interpretation")
+        self.assertEqual(record["status"], "verified")
 
 
 class TestReadVerifiedRecordsReturnsOnlyVerified(unittest.TestCase):
@@ -269,12 +286,60 @@ class TestReadVerifiedRecordsReturnsOnlyVerified(unittest.TestCase):
         self.assertEqual(record["sources"][0]["ref"], "https://example.invalid/consumer-0020")
         self.assertEqual(record["sources"][0]["tier"], "A")
 
-    def test_empty_production_registry_returns_zero_verified_records(self):
-        self.assertEqual(read_verified_records(_PRODUCTION_REGISTRY), [])
-
     def test_malformed_registry_fails_closed_before_filtering(self):
         with self.assertRaises(CourseFactRegistryError):
             read_verified_records(_fixture_path("duplicate_id.json"))
+
+
+class TestProductionRegistryVerifiedOnlyApi(unittest.TestCase):
+    """V2-2C (issue #93): the trusted, verified-only consumer API against
+    the real production registry, now that it carries its first
+    source-backed fermentation fact pack (FACT-BREW-0001..0003)."""
+
+    def test_returns_exactly_the_three_v2_2c_ids_in_canonical_order(self):
+        ids = [r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)]
+        self.assertEqual(ids, sorted(_PRODUCTION_VERIFIED_IDS))
+        self.assertEqual(ids, _PRODUCTION_VERIFIED_IDS)
+
+    def test_ordering_is_deterministic_across_repeated_reads(self):
+        first = [r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)]
+        second = [r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)]
+        self.assertEqual(first, second)
+
+    def test_concept_filter_fermentation_temperature_returns_all_three(self):
+        ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept="fermentation.temperature")}
+        self.assertEqual(ids, set(_PRODUCTION_VERIFIED_IDS))
+
+    def test_module_filter_fermentation_fundamentals_returns_all_three(self):
+        ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, module="fermentation.fundamentals")}
+        self.assertEqual(ids, set(_PRODUCTION_VERIFIED_IDS))
+
+    def test_provenance_and_source_refs_survive_trusted_reads(self):
+        expected_refs = {
+            "FACT-BREW-0001": {
+                "https://blog.whitelabs.com/fermentation-controls-temperature",
+                "https://fermentis.com/en/news/fermentation/what-are-the-best-5-ways-to-improve-fermentation/",
+            },
+            "FACT-BREW-0002": {
+                "https://blog.whitelabs.com/fermentation-controls-temperature",
+                "https://fermentis.com/en/news/fermentation/rediscover-saflager-w-34-70/",
+            },
+            "FACT-BREW-0003": {
+                "https://blog.whitelabs.com/fermentation-controls-temperature",
+                "https://fermentis.com/en/news/fermentation/what-are-the-best-5-ways-to-improve-fermentation/",
+                "https://fermentis.com/en/news/fermentation/rediscover-saflager-w-34-70/",
+            },
+        }
+        for record in read_verified_records(_PRODUCTION_REGISTRY):
+            refs = {s["ref"] for s in record["sources"]}
+            self.assertEqual(refs, expected_refs[record["id"]])
+            self.assertTrue(all(s["tier"] == "A" for s in record["sources"]))
+
+    def test_get_verified_record_returns_each_of_the_three(self):
+        for fact_id in _PRODUCTION_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            self.assertIsNotNone(record)
+            self.assertEqual(record["status"], "verified")
 
 
 class TestGetVerifiedRecordLookup(unittest.TestCase):
