@@ -1,4 +1,76 @@
 {
   "schema_version": 1,
-  "records": []
+  "records": [
+    {
+      "id": "FACT-BREW-0001",
+      "claim": "Fermentation temperature influences yeast activity and fermentation speed; within a strain's workable range, warmer conditions generally increase yeast activity and can shorten fermentation time.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-06T07:42:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical article",
+          "ref": "https://blog.whitelabs.com/fermentation-controls-temperature"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical article",
+          "ref": "https://fermentis.com/en/news/fermentation/what-are-the-best-5-ways-to-improve-fermentation/"
+        }
+      ],
+      "concepts": ["fermentation.temperature", "fermentation.yeast_activity"],
+      "modules": ["fermentation.fundamentals"],
+      "notes": "General direction only; exact fermentation behavior remains strain- and process-dependent."
+    },
+    {
+      "id": "FACT-BREW-0002",
+      "claim": "Fermentation temperature can change yeast-derived flavor and aroma, but the size and direction of that change are strain-dependent; a warmer fermentation does not produce the same flavor response in every yeast strain.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-06T07:42:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical article",
+          "ref": "https://blog.whitelabs.com/fermentation-controls-temperature"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical characterization",
+          "ref": "https://fermentis.com/en/news/fermentation/rediscover-saflager-w-34-70/"
+        }
+      ],
+      "concepts": ["fermentation.temperature", "fermentation.flavor", "fermentation.yeast_strain"],
+      "modules": ["fermentation.fundamentals"],
+      "notes": "Avoid teaching temperature-to-flavor effects as universal absolutes; source material documents strain-specific exceptions."
+    },
+    {
+      "id": "FACT-BREW-0003",
+      "claim": "Fermentation temperature targets should be chosen with strain-specific guidance rather than treated as one universal ale or lager temperature rule.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-06T07:42:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical article",
+          "ref": "https://blog.whitelabs.com/fermentation-controls-temperature"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical article",
+          "ref": "https://fermentis.com/en/news/fermentation/what-are-the-best-5-ways-to-improve-fermentation/"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical characterization",
+          "ref": "https://fermentis.com/en/news/fermentation/rediscover-saflager-w-34-70/"
+        }
+      ],
+      "concepts": ["fermentation.temperature", "fermentation.yeast_strain"],
+      "modules": ["fermentation.fundamentals"],
+      "notes": "Practical course guidance derived from multiple manufacturer technical sources; the registry classification remains professional_interpretation, separate from verification status."
+    }
+  ]
 }
