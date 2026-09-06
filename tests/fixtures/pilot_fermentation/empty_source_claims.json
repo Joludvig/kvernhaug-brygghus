@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-TEST-TOPIC",
+  "chunks": [
+    {
+      "id": "CHUNK-TEST-A",
+      "source_claims": [],
+      "text": {
+        "no": "Norsk tekst.",
+        "en": "English text."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-TEST-001",
+      "type": "concept_check",
+      "concepts": [
+        "test.concept"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [
+        "FACT-TEST-0020"
+      ],
+      "prompt": {
+        "no": "Spørsmål?",
+        "en": "Question?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Riktig",
+            "en": "Correct"
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Feil",
+            "en": "Wrong"
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Bra jobbet.",
+        "en": "Well done."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke riktig, fordi X.",
+        "en": "Not correct, because X."
+      }
+    },
+    {
+      "id": "Q-TEST-002",
+      "type": "scenario",
+      "concepts": [
+        "test.concept"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [
+        "FACT-TEST-0020"
+      ],
+      "prompt": {
+        "no": "Scenario?",
+        "en": "Scenario?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Riktig",
+            "en": "Correct"
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Feil",
+            "en": "Wrong"
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Bra jobbet.",
+        "en": "Well done."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke riktig, fordi Y.",
+        "en": "Not correct, because Y."
+      }
+    }
+  ]
+}
