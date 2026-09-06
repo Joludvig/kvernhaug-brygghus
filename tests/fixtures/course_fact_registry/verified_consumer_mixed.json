@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0024",
+      "claim": "Synthetic verified record with no concept/module references, used only to prove find_verified_records() includes it when no filter is given and excludes it when any concept/module filter is given.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "sources": [
+        { "tier": "A", "type": "example standards body technical document", "ref": "https://example.invalid/consumer-0024" }
+      ],
+      "verified_at": "2026-09-01T00:00:00Z"
+    },
+    {
+      "id": "FACT-TEST-0022",
+      "claim": "Synthetic verified record matching module m.a but not concept c.a, used only to prove module-only filtering.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "sources": [
+        { "tier": "A", "type": "example standards body technical document", "ref": "https://example.invalid/consumer-0022" }
+      ],
+      "verified_at": "2026-09-01T00:00:00Z",
+      "concepts": ["c.b"],
+      "modules": ["m.a"]
+    },
+    {
+      "id": "FACT-TEST-0020",
+      "claim": "Synthetic verified record matching both concept c.a and module m.a, used only to prove combined concept+module AND semantics.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "sources": [
+        { "tier": "A", "type": "example standards body technical document", "ref": "https://example.invalid/consumer-0020" }
+      ],
+      "verified_at": "2026-09-01T00:00:00Z",
+      "concepts": ["c.a"],
+      "modules": ["m.a"]
+    },
+    {
+      "id": "FACT-TEST-0023",
+      "claim": "Synthetic draft record sharing concept c.a and module m.a with a verified record, used only to prove a draft record never leaks through the trusted verified-only API even when it would otherwise match a filter.",
+      "classification": "documented_fact",
+      "status": "draft",
+      "concepts": ["c.a"],
+      "modules": ["m.a"]
+    },
+    {
+      "id": "FACT-TEST-0021",
+      "claim": "Synthetic verified record matching concept c.a but not module m.a, used only to prove concept-only filtering.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "sources": [
+        { "tier": "A", "type": "example standards body technical document", "ref": "https://example.invalid/consumer-0021" }
+      ],
+      "verified_at": "2026-09-01T00:00:00Z",
+      "concepts": ["c.a"],
+      "modules": ["m.b"]
+    },
+    {
+      "id": "FACT-TEST-0025",
+      "claim": "Synthetic deprecated record, used only to prove a deprecated record never leaks through the trusted verified-only API.",
+      "classification": "documented_fact",
+      "status": "deprecated",
+      "notes": "Synthetic fixture -- not a real brewing claim, and not a real deprecation of anything."
+    },
+    {
+      "id": "FACT-TEST-0026",
+      "claim": "Synthetic reviewed-but-not-verified record, used only to prove a reviewed record never leaks through the trusted verified-only API.",
+      "classification": "documented_fact",
+      "status": "reviewed"
+    }
+  ]
+}
