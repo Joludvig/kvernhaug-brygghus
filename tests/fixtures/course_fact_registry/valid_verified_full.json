@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0002",
+      "claim": "Synthetic example claim used only to prove the validator accepts a fully populated, verified record shape. Not a real brewing claim.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "example standards body technical document",
+          "ref": "https://example.invalid/synthetic-source-0002",
+          "note": "Synthetic fixture source, not a real citation."
+        }
+      ],
+      "verified_at": "2026-09-01T12:00:00Z",
+      "notes": "Synthetic fixture -- deliberately not a real verified brewing claim.",
+      "concepts": ["fixture.example_concept"],
+      "modules": ["fixture-module-example"]
+    }
+  ]
+}

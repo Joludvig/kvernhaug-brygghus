@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Synthetic record claiming verified status without a verified_at timestamp.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "example standards body technical document"
+        }
+      ]
+    }
+  ]
+}

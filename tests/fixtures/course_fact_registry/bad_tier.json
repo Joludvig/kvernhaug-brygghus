@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Synthetic record with a source declaring an invalid tier value.",
+      "classification": "documented_fact",
+      "status": "reviewed",
+      "sources": [
+        {
+          "tier": "E",
+          "type": "example secondary source"
+        }
+      ]
+    }
+  ]
+}

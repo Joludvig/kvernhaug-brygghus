@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Synthetic record whose sources field is not a list at all.",
+      "classification": "documented_fact",
+      "status": "reviewed",
+      "sources": "example secondary source"
+    },
+    {
+      "id": "FACT-TEST-0002",
+      "claim": "Synthetic record with a source object missing both required fields.",
+      "classification": "documented_fact",
+      "status": "reviewed",
+      "sources": [
+        {
+          "note": "no tier and no type here"
+        }
+      ]
+    }
+  ]
+}

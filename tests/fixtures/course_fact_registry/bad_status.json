@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Synthetic record with an invalid verification status value.",
+      "classification": "hypothesis",
+      "status": "approved"
+    }
+  ]
+}

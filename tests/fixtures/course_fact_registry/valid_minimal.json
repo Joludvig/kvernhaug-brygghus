@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0001",
+      "claim": "Synthetic example claim used only to prove the validator accepts a minimal valid draft record.",
+      "classification": "hypothesis",
+      "status": "draft"
+    }
+  ]
+}
