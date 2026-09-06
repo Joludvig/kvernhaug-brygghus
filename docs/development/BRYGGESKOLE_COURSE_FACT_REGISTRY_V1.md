@@ -228,8 +228,15 @@ Each entry in a record's `sources` list:
 |---|---|---|
 | `tier` | **Required** | One of the four §8 values `A`/`B`/`C`/`D`. |
 | `type` | **Required** | Non-empty free-text description of the kind of source (e.g. `"manufacturer technical datasheet"`, `"peer-reviewed study"`). Not an enumerated vocabulary in V1. Must not be an AI/model name (§16). |
-| `ref` | Optional | A pointer to the actual source (URL, document name, citation) — not the source content itself. Must not be an AI/model name (§16). |
+| `ref` | Optional in general, **required in substance on at least one source when `status == "verified"`** (§9) | A pointer to the actual source (URL, document name, citation) — not the source content itself. Must not be an AI/model name (§16). |
 | `note` | Optional | Free-text context about this specific source. |
+
+A source with `tier`/`type` but no `ref` is a legitimate provenance
+entry for `draft`/`reviewed`/`hypothesis` records — it says "this is
+the kind of source we expect to cite" without yet pointing at a
+specific one. It is **not**, by itself, sufficient to reach `verified`
+(§9): `type` only classifies what *kind* of source is claimed; `ref`
+is what actually identifies *which* source it is.
 
 No other field is accepted on a source object (§13). The registry
 **never infers a tier automatically** — every source must declare its
@@ -267,14 +274,21 @@ a claim that is supposed to be independently checkable needs an
 unambiguous verification instant.
 
 **Required exactly when `status == "verified"`:** a record cannot be
-`verified` without both at least one entry in `sources` and a valid
-`verified_at` — the validator rejects either gap independently (a
-record can fail both checks at once and gets both error messages, not
-just the first).
+`verified` without *all three* of: at least one entry in `sources`;
+that at least one of those sources carries a concrete, non-empty `ref`
+(§7) — a real pointer to the source, not merely its `tier`/`type`
+metadata; and a valid `verified_at`. The validator rejects each gap
+independently (a record missing more than one of these fails all of
+the relevant checks at once and gets every applicable error message,
+not just the first). A source with `tier`/`type` but no `ref` counts
+toward "at least one entry in `sources`" but **not** toward the `ref`
+requirement — `{"tier": "A", "type": "manufacturer technical
+datasheet"}` alone is not enough to verify a claim; something has to
+actually identify *which* datasheet.
 
 **What `verified` means:** this is Kvernhaug's best current verified
 representation of the claim, backed by at least one explicitly tiered
-source, as of `verified_at`.
+source with a concrete reference, as of `verified_at`.
 
 **What `verified` does *not* mean:**
 
@@ -373,6 +387,8 @@ At minimum, the validator rejects, all covered by synthetic fixtures in
   or an entry missing `tier`/`type` (§7);
 - an invalid source `tier` (§8);
 - a `verified` record with no source at all (§9);
+- a `verified` record whose source(s) carry `tier`/`type` metadata but
+  no source has a concrete, non-empty `ref` (§7, §9);
 - a `verified` record with a missing or invalid `verified_at` (§9);
 - a malformed `concepts`/`modules` collection — not a list, an
   empty/non-string entry, or a duplicate entry (§10);

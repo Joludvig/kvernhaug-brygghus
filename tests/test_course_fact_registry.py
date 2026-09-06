@@ -128,6 +128,18 @@ class TestVerifiedRequiresSourceAndTimestamp(unittest.TestCase):
         errors = validate_registry(raw)
         self.assertTrue(any("requires a valid 'verified_at' timestamp" in e for e in errors))
 
+    def test_verified_with_source_metadata_but_no_ref_rejected(self):
+        # tier/type alone describe what KIND of source is claimed, not
+        # WHICH source it is -- this must not pass as provenance.
+        raw = _load_json(_fixture_path("verified_without_ref.json"))
+        errors = validate_registry(raw)
+        self.assertTrue(any("concrete, non-empty 'ref'" in e for e in errors))
+
+    def test_verified_with_real_ref_passes(self):
+        data = read_registry_file(_fixture_path("valid_verified_full.json"))
+        record = data["records"][0]
+        self.assertTrue(record["sources"][0]["ref"])
+
 
 class TestMalformedReferenceCollectionsFailClosed(unittest.TestCase):
     def test_non_list_concepts_rejected(self):

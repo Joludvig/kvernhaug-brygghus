@@ -141,6 +141,14 @@ def _is_valid_timestamp(value):
     return isinstance(value, str) and bool(_TIMESTAMP_PATTERN.match(value))
 
 
+def _source_has_concrete_reference(source):
+    """A source is a real provenance pointer only if it carries a
+    concrete, non-empty `ref` (URL, document name, citation) -- tier and
+    type alone describe *what kind* of source it claims to be, not
+    *which* source it actually is."""
+    return isinstance(source, dict) and _is_non_empty_string(source.get("ref"))
+
+
 def _validate_source(source, path, errors):
     if not isinstance(source, dict):
         errors.append(f"{path}: source must be an object, got {type(source).__name__}.")
@@ -246,6 +254,12 @@ def _validate_record(record, index, errors, seen_ids):
     if status == "verified":
         if not sources:
             errors.append(f"{path}: status 'verified' requires at least one source.")
+        elif not any(_source_has_concrete_reference(s) for s in sources):
+            errors.append(
+                f"{path}: status 'verified' requires at least one source with a concrete, "
+                f"non-empty 'ref' (a real pointer to the source -- URL, document name, "
+                f"citation); tier/type metadata alone is not a source reference."
+            )
         if not _is_valid_timestamp(verified_at):
             errors.append(f"{path}: status 'verified' requires a valid 'verified_at' timestamp.")
 
