@@ -233,6 +233,121 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         brew = kbhbrew_storage.hent_brew("brew-seed-0001")
         self.assertNotIn("og", brew["actuals"])
 
+    # ─── V2-1B (issue #87): sensorikk-/lærings-skjema ──────────────────
+
+    def test_14_redigering_av_sensing_learning_uten_lagre_klikk_skriver_ingenting(self):
+        at = self._ny_apptest(seed_count=1)
+        at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001").select("yes").run()
+        at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("Fruktig aroma").run()
+        at.text_area(key="kbhbrew_hist_learning_worked::brew-seed-0001").set_value("God temperaturkontroll").run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved typing: {at.exception}")
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew.get("sensing"), {})
+        self.assertEqual(brew.get("learning"), {})
+
+    def test_15_sensing_default_er_ikke_satt_uten_autofyll(self):
+        at = self._ny_apptest(seed_count=1)
+        selectboks = at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001")
+        self.assertEqual(selectboks.value, "")
+
+    def test_16_lagre_klikk_lagrer_sensing_og_learning_og_ikke_actuals(self):
+        at = self._ny_apptest(seed_count=1)
+        at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001").select("yes").run()
+        at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("Fruktig aroma").run()
+        at.text_area(key="kbhbrew_hist_learning_worked::brew-seed-0001").set_value("God temperaturkontroll").run()
+        at.text_area(key="kbhbrew_hist_learning_changed::brew-seed-0001").set_value("Byttet gjærstamme").run()
+        at.text_area(key="kbhbrew_hist_learning_next::brew-seed-0001").set_value("Senk mesketemperatur").run()
+
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        self.assertEqual(len(knapper), 1)
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved lagring: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew["sensing"]["judgment"], "yes")
+        self.assertEqual(brew["sensing"]["notes"], "Fruktig aroma")
+        self.assertEqual(brew["learning"]["whatWorked"], "God temperaturkontroll")
+        self.assertEqual(brew["learning"]["whatChanged"], "Byttet gjærstamme")
+        self.assertEqual(brew["learning"]["nextTime"], "Senk mesketemperatur")
+        # Denne lagre-knappen rører ALDRI actuals/status/brewedAt.
+        self.assertEqual(brew.get("actuals"), {})
+        self.assertEqual(brew.get("status"), "active")
+        self.assertIsNone(brew.get("brewedAt"))
+
+        suksessmeldinger = [e.value for e in at.success]
+        self.assertTrue(suksessmeldinger, "Forventet en synlig lagre-bekreftelse")
+
+    def test_17_sensing_learning_lagring_bevarer_identitet_og_frosset_snapshot(self):
+        at = self._ny_apptest(seed_count=1)
+        brew_for = kbhbrew_storage.hent_brew("brew-seed-0001")
+
+        at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("Fruktig aroma").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+
+        brew_etter = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew_etter["brewId"], brew_for["brewId"])
+        self.assertEqual(brew_etter["originBrewId"], brew_for["originBrewId"])
+        self.assertEqual(brew_etter["recipeId"], brew_for["recipeId"])
+        self.assertEqual(brew_etter["snapshot"], brew_for["snapshot"])
+
+    def test_18_actuals_lagring_roerer_aldri_sensing_learning_og_omvendt(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("Fruktig aroma").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001")["sensing"]["notes"], "Fruktig aroma")
+
+        at.text_input(key="kbhbrew_hist_og::brew-seed-0001").set_value("1.055").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew["actuals"]["og"], 1.055)
+        # Sensing-notatet fra forrige, separate lagre-klikk må overleve
+        # uendret -- actuals-lagringen skriver bare til actuals-laget.
+        self.assertEqual(brew["sensing"]["notes"], "Fruktig aroma")
+
+    def test_19_blank_sensing_learning_er_gyldig_ingen_fabrikert_innhold(self):
+        at = self._ny_apptest(seed_count=1)
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew.get("sensing"), {})
+        self.assertEqual(brew.get("learning"), {})
+
+    def test_20_blankt_sensing_notat_toemmer_et_tidligere_lagret_notat(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("Fruktig aroma").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001")["sensing"]["notes"], "Fruktig aroma")
+
+        at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertNotIn("notes", brew.get("sensing", {}))
+
+    def test_21_valg_av_ikke_satt_toemmer_en_tidligere_lagret_judgment(self):
+        at = self._ny_apptest(seed_count=1)
+        at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001").select("yes").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001")["sensing"]["judgment"], "yes")
+
+        at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001").select("").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertNotIn("judgment", brew.get("sensing", {}))
+
 
 if __name__ == "__main__":
     unittest.main()
