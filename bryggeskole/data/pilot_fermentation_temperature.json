@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-FERMENTATION-TEMPERATURE",
+  "chunks": [
+    {
+      "id": "CHUNK-FERM-A",
+      "source_claims": ["FACT-BREW-0001"],
+      "text": {
+        "no": "Gjæringstemperatur påvirker hvor aktiv gjæren er, og dermed hvor raskt gjæringen går. Innenfor det temperaturområdet en gjærstamme trives i, vil varmere forhold som regel gjøre gjæren mer aktiv og kunne korte ned gjæringstiden. Dette er en generell retning, ikke en fasit-regel som gjelder likt for enhver stamme og situasjon.",
+        "en": "Fermentation temperature affects how active the yeast is, and therefore how fast fermentation goes. Within the temperature range a given yeast strain tolerates well, warmer conditions generally make the yeast more active and can shorten fermentation time. This is a general direction, not a fixed rule that applies identically to every strain and situation."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-B",
+      "source_claims": ["FACT-BREW-0002"],
+      "text": {
+        "no": "Temperatur kan også påvirke smaken og aromaen gjæren selv skaper under gjæringen. Men hvor mye - og i hvilken retning - dette skjer, avhenger av hvilken gjærstamme du bruker. En varmere gjæring gir ikke automatisk den samme smaksendringen for alle stammer; noen stammer reagerer mye sterkere på temperatur enn andre.",
+        "en": "Temperature can also affect the flavor and aroma the yeast itself produces during fermentation. But how much - and in which direction - this happens depends on which yeast strain you use. A warmer fermentation does not automatically produce the same flavor change for every strain; some strains respond far more strongly to temperature than others."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-C",
+      "source_claims": ["FACT-BREW-0003"],
+      "text": {
+        "no": "Fordi virkningen av temperatur varierer fra stamme til stamme, bør du velge gjæringstemperatur ut fra anbefalingen for akkurat den gjærstammen du bruker - ikke ut fra en generell tommelfingerregel om at 'ale skal gjæres varmt' eller 'lager skal gjæres kaldt'. Stammespesifikk veiledning gir et mer pålitelig utgangspunkt enn én universell regel.",
+        "en": "Because the effect of temperature varies from strain to strain, you should choose your fermentation temperature based on the guidance for the specific yeast strain you are using - not a general rule of thumb like 'ales are fermented warm' or 'lagers are fermented cold'. Strain-specific guidance gives a more reliable starting point than one universal rule."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-FERM-001",
+      "type": "concept_check",
+      "concepts": ["fermentation.temperature", "fermentation.yeast_activity"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-BREW-0001"],
+      "prompt": {
+        "no": "Du gjærer en øl med en gjærstamme som trives mellom 18 og 22 °C. Hva skjer normalt med gjæraktiviteten hvis du gjærer nærmere den varme enden av dette området, sammenlignet med den kalde enden?",
+        "en": "You're fermenting a beer with a yeast strain that works well between 18 and 22 °C (64-72 °F). What normally happens to yeast activity if you ferment closer to the warm end of that range compared to the cold end?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Gjæren er som regel mer aktiv, og gjæringen går gjerne raskere.",
+            "en": "The yeast is generally more active, and fermentation tends to go faster."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Gjæren er alltid like aktiv, uansett hvor i området du gjærer.",
+            "en": "The yeast is always equally active, no matter where in the range you ferment."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Gjæren blir automatisk mindre aktiv jo varmere det er.",
+            "en": "The yeast automatically becomes less active the warmer it gets."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Innenfor stammens arbeidsområde gjør varmere forhold som regel gjæren mer aktiv, og gjæringen kan gå raskere - men dette er en generell tendens, ikke en fast regel for enhver situasjon.",
+        "en": "Correct. Within the strain's workable range, warmer conditions generally make the yeast more active, and fermentation can go faster - but this is a general tendency, not a fixed rule for every situation."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Misforståelsen her er å tro at temperatur ikke påvirker aktiviteten i det hele tatt, eller at varmere alltid betyr mindre aktiv gjær. Innenfor stammens arbeidsområde er sammenhengen motsatt: varmere forhold gjør som regel gjæren mer aktiv, ikke mindre.",
+        "en": "Not quite. The misconception here is thinking temperature doesn't affect activity at all, or that warmer always means less active yeast. Within the strain's workable range, the relationship is the opposite: warmer conditions generally make the yeast more active, not less."
+      }
+    },
+    {
+      "id": "Q-FERM-002",
+      "type": "scenario",
+      "concepts": ["fermentation.flavor", "fermentation.yeast_strain"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-BREW-0002", "FACT-BREW-0003"],
+      "prompt": {
+        "no": "En bryggevenn sier: 'Det spiller ingen rolle hvilken gjærstamme du bruker - gjærer du varmere, får du alltid akkurat samme smaksendring.' Er dette riktig?",
+        "en": "A brewing friend says: 'It doesn't matter which yeast strain you use - if you ferment warmer, you always get exactly the same flavor change.' Is this correct?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ja, temperaturens effekt på smak er lik for alle gjærstammer.",
+            "en": "Yes, temperature's effect on flavor is the same for every yeast strain."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Nei, effekten er stammeavhengig - ulike gjærstammer reagerer forskjellig på temperatur, så du bør følge stammespesifikk veiledning.",
+            "en": "No, the effect is strain-dependent - different yeast strains respond differently to temperature, so you should follow strain-specific guidance."
+          },
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei, temperatur påvirker aldri smak, bare gjæringshastighet.",
+            "en": "No, temperature never affects flavor, only fermentation speed."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Temperatur kan påvirke smak og aroma, men hvor mye og i hvilken retning avhenger av gjærstammen. Derfor bør du bruke stammespesifikk veiledning i stedet for én universell regel for 'ale' eller 'lager'.",
+        "en": "Correct. Temperature can affect flavor and aroma, but how much and in which direction depends on the yeast strain. That's why you should use strain-specific guidance instead of one universal rule for 'ale' or 'lager'."
+      },
+      "feedback_incorrect": {
+        "no": "Begge disse svarene bommer på samme kjernepunkt: smakseffekten av temperatur er ikke lik for alle gjærstammer, og temperatur er heller ikke uten betydning for smak. Effekten er stammeavhengig, så bruk stammespesifikk veiledning i stedet for én universell regel.",
+        "en": "Both of these answers miss the same core point: the flavor effect of temperature is not the same for every yeast strain, and temperature isn't irrelevant to flavor either. The effect is strain-dependent, so use strain-specific guidance instead of one universal rule."
+      }
+    }
+  ]
+}
