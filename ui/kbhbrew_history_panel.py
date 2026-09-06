@@ -48,6 +48,20 @@ Rene formaterings-/uttrekkshjelpere (planlagt sammendrag,
 planlagt-vs-faktisk) er i modules/kbhbrew_history_ui.py, slik at de kan
 enhetstestes uten en Streamlit-kontekst (se
 tests/test_kbhbrew_history_ui_helpers.py).
+
+V2-1B (issue #87) legger til et EGET, atskilt sensorikk-/lærings-skjema
+(_render_sensing_learning_skjema()) under actuals-skjemaet, med sitt
+EGET eksplisitte "💾 Lagre sensorikk og læring"-lagre-klikk -- samme
+"rendring/utvalg/typing skriver ingenting"-garanti som actuals-skjemaet,
+men en helt separat skrivehandling (ett Lagre-klikk her rører ALDRI
+actuals/status/brewedAt, og omvendt). Bruker KUN de eksisterende Core V1
+sensing.judgment/sensing.notes/learning.whatWorked/whatChanged/nextTime
+-- ingen ny .kbhbrew-semantikk, ingen AI-tolkning, ingen automatisk
+utledet konklusjon (se issue #87 "Ownership boundary": dette er
+fangst-UI, ikke Brew Lab-tolkning). `sensing.judgment` har en BEVISST
+tredje "ikke satt"-tilstand (tomstreng) utover de tre ekte
+yes/maybe/no-verdiene, slik at et ubesvart brygg aldri fremstår som om
+brukeren aktivt har valgt et av de tre svarene.
 """
 import streamlit as st
 
@@ -63,6 +77,14 @@ from modules.kbhbrew_ui import sorter_brews_for_eksport
 from ui.i18n import t
 
 _STATUS_VALG = ("active", "done", "discarded")
+
+# Tomstreng er det BEVISST reserverte "ikke satt"-valget (issue #87: "Do
+# not infer or auto-fill a judgment") -- ALDRI et gjettet/forhåndsvalgt
+# yes/maybe/no. normaliser_sensing_lag() (modules/kbhbrew.py) godtar kun
+# de tre ekte verdiene i _GYLDIGE_JUDGMENT_VERDIER, så en lagret tomstreng
+# faller automatisk bort igjen fra det lagrede laget (samme "blankt felt
+# tømmer feltet"-prinsipp som actuals.notes over).
+_SENSING_JUDGMENT_VALG = ("", "yes", "maybe", "no")
 
 # UI-presentasjonsterskel for når high-gravity-ABV-estimatet vises i
 # tillegg til standardestimatet -- SAMME verdi/begrunnelse som
@@ -181,6 +203,70 @@ def _render_actuals_skjema(brew_id, brew):
     return brew
 
 
+def _judgment_etikett(verdi):
+    return t("brew_history.sensing_judgment.unset") if verdi == "" else t(f"brew_history.sensing_judgment.{verdi}")
+
+
+def _render_sensing_learning_skjema(brew_id, brew):
+    """Renderer det editerbare sensorikk-/lærings-skjemaet (issue #87,
+    V2-1B) -- ATSKILT fra actuals-skjemaet over, med sitt EGET eksplisitte
+    lagre-klikk (samme "ingen skriving uten knappetrykk"-garanti som
+    _render_actuals_skjema()). Bruker KUN de eksisterende Core V1-feltene
+    sensing.judgment/sensing.notes/learning.whatWorked/whatChanged/
+    nextTime, via modules/kbhbrew_storage.py::oppdater_brew_lag() -- ALDRI
+    en ny skrivevei, ALDRI actuals/snapshot/status/brewedAt.
+
+    Returnerer det FERSKESTE kjente brew-objektet, samme mønster som
+    _render_actuals_skjema()."""
+    sensing = brew.get("sensing") or {}
+    learning = brew.get("learning") or {}
+
+    st.markdown(f"**{t('brew_history.sensing_tittel')}**")
+    judgment_naa = sensing.get("judgment")
+    if judgment_naa not in _SENSING_JUDGMENT_VALG:
+        judgment_naa = ""
+    judgment_valgt = st.selectbox(
+        t("brew_history.sensing_judgment_label"),
+        options=list(_SENSING_JUDGMENT_VALG),
+        index=_SENSING_JUDGMENT_VALG.index(judgment_naa),
+        format_func=_judgment_etikett,
+        key=f"kbhbrew_hist_sensing_judgment::{brew_id}",
+    )
+    sensing_notat_tekst = st.text_area(
+        t("brew_history.sensing_notes_label"),
+        value=sensing.get("notes") or "",
+        key=f"kbhbrew_hist_sensing_notes::{brew_id}",
+    )
+
+    st.markdown(f"**{t('brew_history.learning_tittel')}**")
+    worked_tekst = st.text_area(
+        t("brew_history.learning_what_worked_label"),
+        value=learning.get("whatWorked") or "",
+        key=f"kbhbrew_hist_learning_worked::{brew_id}",
+    )
+    changed_tekst = st.text_area(
+        t("brew_history.learning_what_changed_label"),
+        value=learning.get("whatChanged") or "",
+        key=f"kbhbrew_hist_learning_changed::{brew_id}",
+    )
+    next_tekst = st.text_area(
+        t("brew_history.learning_next_time_label"),
+        value=learning.get("nextTime") or "",
+        key=f"kbhbrew_hist_learning_next::{brew_id}",
+    )
+
+    if st.button(t("brew_history.sensing_learning_lagre_btn"), key=f"kbhbrew_hist_sensing_learning_lagre_btn::{brew_id}"):
+        oppdatert_brew = oppdater_brew_lag(
+            brew_id,
+            sensing={"judgment": judgment_valgt, "notes": sensing_notat_tekst},
+            learning={"whatWorked": worked_tekst, "whatChanged": changed_tekst, "nextTime": next_tekst},
+        )
+        st.success(t("brew_history.sensing_learning_lagret_ok"))
+        if oppdatert_brew is not None:
+            return oppdatert_brew
+    return brew
+
+
 def _render_sammenligning(brew):
     sammenligning = bygg_planlagt_vs_faktisk(brew)
     if not sammenligning:
@@ -259,5 +345,7 @@ def render_kbhbrew_history_panel():
     _render_planlagt_sammendrag(brew)
     st.write("")
     brew = _render_actuals_skjema(brew_id, brew)
+    st.write("")
+    brew = _render_sensing_learning_skjema(brew_id, brew)
     st.write("")
     _render_sammenligning(brew)
