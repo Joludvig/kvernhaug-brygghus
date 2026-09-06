@@ -35,6 +35,11 @@ data/equipment.json
 data/pantry.json
 data/pantry.json.tmp
 data/pantry.json.backup_*
+# Bryggeskole hidden per-concept mastery state (V2-3B, issue #97) --
+# private, per-installation learner state, same category as pantry.json
+# above -- see bryggeskole/mastery_store.py.
+data/bryggeskole_mastery_state.json
+data/bryggeskole_mastery_state.json.tmp_*
 
 # Backup-artefakter
 data/*.bak
