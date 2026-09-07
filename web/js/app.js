@@ -664,7 +664,12 @@ function leggTilHumleRad(forhandsutfylt) {
     ariaLabel: t("builder.humle.comboboxAriaLabel"),
     onSelect: (id) => {
       const info = humleData[id];
-      if (info && alfaInput.value === "") alfaInput.value = info.alfa;
+      if (info && alfaInput.value === "") {
+        // Bibliotekets default-alfa vises kun til brukeren -- dette er IKKE
+        // et eksplisitt valg, så alfaOverride skal forbli null (issue #112).
+        alfaInput.value = info.alfa;
+        rad.dataset.alfaEksplisitt = "0";
+      }
       beregnOgVisResultat();
     },
   });
@@ -690,8 +695,17 @@ function leggTilHumleRad(forhandsutfylt) {
     cb.setValue(forhandsutfylt.id);
     _settHumleGram(gramFelt, forhandsutfylt.gram);
     rad.querySelector(".humle-tid").value = forhandsutfylt.tid;
-    if (forhandsutfylt.alfaOverride != null) alfaInput.value = forhandsutfylt.alfaOverride;
-    else if (humleData[forhandsutfylt.id]) alfaInput.value = humleData[forhandsutfylt.id].alfa;
+    // issue #112: et gjenopprettet biblioteks-fallback-alfa (alfaOverride:
+    // null) er kun visning -- må IKKE merkes eksplisitt, ellers leser
+    // lesHumleRader() den tilbake som en fabrikkert override og recipe
+    // fremstår som "endret siden lagring" uten at brukeren har gjort noe.
+    if (forhandsutfylt.alfaOverride != null) {
+      alfaInput.value = forhandsutfylt.alfaOverride;
+      rad.dataset.alfaEksplisitt = "1";
+    } else {
+      if (humleData[forhandsutfylt.id]) alfaInput.value = humleData[forhandsutfylt.id].alfa;
+      rad.dataset.alfaEksplisitt = "0";
+    }
   } else {
     // Malens egen default-verdi (value="10") er alltid 10 gram canonical --
     // rerendres til gjeldende unitSystem akkurat som en forhåndsutfylt rad.
@@ -711,7 +725,14 @@ function leggTilHumleRad(forhandsutfylt) {
     oppdaterHumleMaalIbuSynlighet(rad);
     beregnOgVisResultat();
   });
-  alfaInput.addEventListener("input", beregnOgVisResultat);
+  alfaInput.addEventListener("input", () => {
+    // Enhver reell brukerinntasting i alfa-feltet er per definisjon et
+    // eksplisitt valg (issue #112) -- i motsetning til bibliotekets
+    // fallback-verdi som kun settes programmatisk andre steder i denne
+    // funksjonen og aldri trigger et "input"-event.
+    rad.dataset.alfaEksplisitt = "1";
+    beregnOgVisResultat();
+  });
   rad.querySelector(".humle-beregn-knapp").addEventListener("click", () => beregnHumleGramFraMaalIbu(rad));
   oppdaterHumleMaalIbuSynlighet(rad);
   humleRaderEl.appendChild(rad);
@@ -793,7 +814,12 @@ function lesHumleRader() {
         };
       }
       const id = rad._combobox.getValue();
-      return { id, gram, tid, alfaOverride: isFinite(alfa) ? alfa : null };
+      // issue #112: kun en verdi brukeren faktisk har tastet inn (markert av
+      // "input"-lytteren i leggTilHumleRad()) skal telle som eksplisitt
+      // override -- en bibliotek-fallback som bare er vist i feltet skal
+      // fortsatt persisteres som alfaOverride: null.
+      const alfaEksplisitt = rad.dataset.alfaEksplisitt === "1";
+      return { id, gram, tid, alfaOverride: alfaEksplisitt && isFinite(alfa) ? alfa : null };
     })
     .filter((h) => h && h.id);
 }
