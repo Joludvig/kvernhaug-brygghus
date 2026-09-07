@@ -1450,6 +1450,27 @@ function lagreOppskrift() {
   status.textContent = t("oppskrift.lagretStatus", { navn: visningsnavn(oppskrift.navn) });
 }
 
+// Chief-review-fiks (PR #107) -- det faste forslaget "{navn} (kopi)" er
+// bare unikt for DEN FØRSTE varianten. En andre variant fra samme original
+// (fortsatt under originalens navn) ville generert nøyaktig samme forslag
+// igjen, og lagreOppskriftIStore() sin navneunikhet ville da stille
+// slettet den FØRSTE varianten i stedet for originalen -- identitetstap på
+// en annen rad enn AC12 i det hele tatt handler om. Finner derfor det
+// første ledige navnet i rekken "(kopi)", "(kopi 2)", "(kopi 3)", ... mot
+// det faktiske lageret, aldri bare det statiske malforslaget.
+function _forslaVariantNavn(originalNavn) {
+  const visning = visningsnavn(originalNavn);
+  const forslag = t("oppskrift.variantNavnForslag", { navn: visning });
+  if (!finnOppskriftVedNavn(forslag)) return forslag;
+  let n = 2;
+  let nummerertForslag;
+  do {
+    nummerertForslag = t("oppskrift.variantNavnForslagNummerert", { navn: visning, n: n });
+    n++;
+  } while (finnOppskriftVedNavn(nummerertForslag));
+  return nummerertForslag;
+}
+
 // Acceptance criteria C (issue #106) -- den ENE, eksplisitte handlingen som
 // oppretter en NY lagret identitet fra en allerede lagret oppskrift, uten å
 // røre originalen. lagreOppskriftIStore() fjerner enhver ANNEN rad med
@@ -1462,7 +1483,7 @@ function lagreSomVariant() {
   const navnFelt = document.getElementById("oppskrift-navn");
   let oppskrift = samleOppskrift();
   if (original && oppskrift.navn === original.navn) {
-    navnFelt.value = t("oppskrift.variantNavnForslag", { navn: visningsnavn(original.navn) });
+    navnFelt.value = _forslaVariantNavn(original.navn);
     oppskrift = samleOppskrift();
   }
   const status = document.getElementById("lagre-status");

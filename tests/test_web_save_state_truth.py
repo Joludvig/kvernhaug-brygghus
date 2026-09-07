@@ -154,7 +154,7 @@ class TestLagreSomVariant(unittest.TestCase):
         # navneunikhet.
         kropp = _funksjonskropp(_app_js(), r"function lagreSomVariant\(\)\s*\{")
         self.assertRegex(kropp, r"if\s*\(original\s*&&\s*oppskrift\.navn\s*===\s*original\.navn\)")
-        self.assertIn('t("oppskrift.variantNavnForslag"', kropp)
+        self.assertIn("_forslaVariantNavn(original.navn)", kropp)
 
     def test_recipe_storage_har_fortsatt_navneunikhet_variantguarden_forutsetter(self):
         # FREEZE: hvis recipe_storage.js sin navne-dedup noensinne fjernes,
@@ -170,6 +170,55 @@ class TestLagreSomVariant(unittest.TestCase):
         id_idx = kropp.index("_aktivRecipeId = res.recipeId;")
         rerender_idx = kropp.index("beregnOgVisResultat();")
         self.assertLess(id_idx, rerender_idx)
+
+
+class TestForslaVariantNavnUnikhet(unittest.TestCase):
+    """Chief-review-fiks (PR #107): en andre variant fra samme original
+    (fortsatt under originalens navn) må IKKE generere samme forslag som
+    den første varianten allerede lagret under -- det ville stille slettet
+    den første varianten via recipe_storage.js sin navneunikhet. Se
+    1) original lagret, 2) første variant opprettet, 3) andre variant fra
+    samme original sletter ikke den første, 4) hver variant får en distinkt
+    recipeId (lagreOppskriftIStore(oppskrift, null) tvinger alltid en fersk
+    id, uendret av denne fiksen), 5) originalen er urørt (samme null-id-vei
+    som før), 6) NO/EN-forslagene er deterministisk avledet fra samme
+    i18n-nøkler for begge språk."""
+
+    def test_funksjon_finnes(self):
+        self.assertRegex(_app_js(), r"function _forslaVariantNavn\(originalNavn\)\s*\{")
+
+    def test_returnerer_basisforslag_nar_det_er_ledig(self):
+        kropp = _funksjonskropp(_app_js(), r"function _forslaVariantNavn\(originalNavn\)\s*\{")
+        self.assertIn('t("oppskrift.variantNavnForslag"', kropp)
+        self.assertRegex(kropp, r"if\s*\(!finnOppskriftVedNavn\(forslag\)\)\s*return\s*forslag")
+
+    def test_soker_neste_ledige_nummererte_navn_ved_kollisjon(self):
+        # Andre variant fra samme original: basisforslaget ("(kopi)") er nå
+        # opptatt av den FØRSTE varianten, så denne løkken må lete videre
+        # ("(kopi 2)", "(kopi 3)", ...) i stedet for å gjenbruke det samme
+        # navnet og dermed slette den første varianten.
+        kropp = _funksjonskropp(_app_js(), r"function _forslaVariantNavn\(originalNavn\)\s*\{")
+        self.assertIn('t("oppskrift.variantNavnForslagNummerert"', kropp)
+        self.assertRegex(kropp, r"while\s*\(finnOppskriftVedNavn\(nummerertForslag\)\)")
+        self.assertIn("n++", kropp)
+        self.assertIn("let n = 2;", kropp)
+
+    def test_lagreSomVariant_bruker_alltid_fersk_id_uansett_navneforslag(self):
+        # 3/4/5: uansett hvilket navn _forslaVariantNavn() lander på, skal
+        # lagreSomVariant() fortsatt aldri sende inn _aktivRecipeId -- det er
+        # ALENE det som garanterer en distinkt recipeId per variant og at
+        # originalen (identifisert av _aktivRecipeId) forblir urørt.
+        kropp = _funksjonskropp(_app_js(), r"function lagreSomVariant\(\)\s*\{")
+        self.assertIn("lagreOppskriftIStore(oppskrift, null)", kropp)
+
+    def test_no_og_en_navnekollisjon_bruker_samme_nokkelnavn(self):
+        # 6: samme nøkkel ("oppskrift.variantNavnForslagNummerert") brukes
+        # for begge språk -- selve oversettelsen (t()) er det eneste som
+        # varierer, ikke hvilken logikk som avgjør NÅR den brukes.
+        i18n = _les(_I18N_JS)
+        self.assertEqual(i18n.count('"oppskrift.variantNavnForslagNummerert"'), 2)
+        self.assertIn('"oppskrift.variantNavnForslagNummerert": "{navn} (kopi {n})"', i18n)
+        self.assertIn('"oppskrift.variantNavnForslagNummerert": "{navn} (copy {n})"', i18n)
 
 
 class TestModusBytteRorerIkkeOppskriftsinnhold(unittest.TestCase):
@@ -215,6 +264,7 @@ class TestMarkupOgI18n(unittest.TestCase):
             "builder.handling.lagreVariant",
             "builder.handling.variantHjelpetekst",
             "oppskrift.variantNavnForslag",
+            "oppskrift.variantNavnForslagNummerert",
             "oppskrift.lagretVariantStatus",
         ):
             self.assertEqual(
