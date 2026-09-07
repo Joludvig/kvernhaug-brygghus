@@ -648,6 +648,14 @@ function _settHumleEgendefinert(rad, pa, eksplisittId) {
     rad.dataset.egendefinertId = eksplisittId || rad.dataset.egendefinertId || nyCustomIngredientId();
   } else {
     rad._combobox.clear();
+    // issue #116: en tidligere biblioteks-id hørte til en identitet radet nå
+    // har forlatt (egendefinert var aktiv i mellomtiden) -- et senere
+    // biblioteksvalg skal derfor ALLTID behandles som identitetsbytte
+    // (samme regel som #114), selv om brukeren tilfeldigvis velger samme
+    // humle som før den egendefinerte perioden, slik at den egendefinerte
+    // alfaen aldri kan fremstå som gjeldende biblioteksverdi.
+    rad.dataset.humleId = "__egendefinert__";
+    rad.dataset.alfaEksplisitt = "0";
   }
   beregnOgVisResultat();
 }
