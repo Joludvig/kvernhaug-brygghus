@@ -86,9 +86,34 @@ class TestLeggTilHumleRadSkillerFallbackFraEksplisitt(unittest.TestCase):
         kropp = self._kropp()
         self.assertRegex(
             kropp,
-            r'if\s*\(info\s*&&\s*alfaInput\.value\s*===\s*""\)\s*\{[\s\S]*?'
+            r'if\s*\(info\s*&&\s*\(alfaInput\.value\s*===\s*""\s*\|\|\s*erIdentitetsbytte\)\)\s*\{[\s\S]*?'
             r'alfaInput\.value\s*=\s*info\.alfa;[\s\S]*?'
             r'rad\.dataset\.alfaEksplisitt\s*=\s*"0";',
+        )
+
+    def test_combobox_onselect_identitetsbytte_beregnes_mot_forrige_id(self):
+        # issue #114: et bytte til en ANNEN biblioteks-humle i samme rad må
+        # gjenkjennes som en identitetsendring -- sammenlignet mot forrige
+        # id lagret på selve raden (combobox.selectedId er allerede
+        # overskrevet med den NYE iden når onSelect kjører, så den kan ikke
+        # brukes til denne sammenligningen).
+        kropp = self._kropp()
+        self.assertRegex(
+            kropp,
+            r'const\s+forrigeId\s*=\s*rad\.dataset\.humleId;\s*'
+            r'const\s+erIdentitetsbytte\s*=\s*forrigeId\s*!==\s*undefined\s*&&\s*forrigeId\s*!==\s*id;',
+        )
+        self.assertRegex(kropp, r'if\s*\(info\)\s*rad\.dataset\.humleId\s*=\s*id;')
+
+    def test_gjenoppretting_setter_humleid_for_senere_identitetssammenligning(self):
+        # rad.dataset.humleId må også initialiseres ved gjenoppretting av en
+        # eksisterende biblioteks-humle-rad, ellers vil FØRSTE live-bytte
+        # etter en gjenoppretting ikke bli gjenkjent som en identitetsendring.
+        kropp = self._kropp()
+        self.assertRegex(
+            kropp,
+            r'cb\.setValue\(forhandsutfylt\.id\);\s*'
+            r'rad\.dataset\.humleId\s*=\s*forhandsutfylt\.id;',
         )
 
     def test_ekte_brukerinntasting_merker_eksplisitt(self):
