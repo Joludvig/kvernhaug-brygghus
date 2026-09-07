@@ -96,6 +96,38 @@ const ENHET_FORKORTELSE = {
   us: { volum: "US gal", malt: "lb", humle: "oz" },
 };
 
+// WEB STAB W1 (issue #102) -- oppdaterer BÅDE placeholder OG den synlige
+// enhets-spannen (<span class="enhet">kg/g</span>) rett ved siden av
+// mengdefeltet i malt-/humle-rad-malen (index.html), slik at det synlige
+// enhets-suffikset (kg/lb, g/oz) alltid stemmer med gjeldende unitSystem --
+// tidligere ble KUN tallverdien konvertert, mens denne spannen aldri ble
+// rørt (root cause for issue #102: "6.25 kg" -> "13.78" men fortsatt
+// merket "kg"). Bruker .nextElementSibling (malen sin faste rekkefølge:
+// mengdefelt -> enhet-span) fremfor et nytt data-attributt i markupet, for
+// å unngå å røre web/index.html sin struktur -- en slik endring ville
+// krevd å kjøre scripts/generate_web_i18n_pages.py på nytt for å holde
+// web/en/index.html i sync (se web/README.md), noe som ikke er en av
+// kommandoene denne kjøringen har tilgang til (se AGENT_WORKFLOW.md sin
+// --allowedTools-liste). Kalles ved radopprettelse, ved enhetsbytte
+// (_rerenderAlleEnhetsfelt) og ved språkbytte (sprakendret-lytteren),
+// siden "Beregn mengde"-knappeteksten under er språkavhengig.
+function _oppdaterMaltRadEnhet(rad) {
+  const enhet = ENHET_FORKORTELSE[hentUnitSystem()];
+  const felt = rad.querySelector(".malt-mengde");
+  felt.placeholder = enhet.malt;
+  const enhetSpan = felt.nextElementSibling;
+  if (enhetSpan && enhetSpan.classList.contains("enhet")) enhetSpan.textContent = enhet.malt;
+}
+function _oppdaterHumleRadEnhet(rad) {
+  const enhet = ENHET_FORKORTELSE[hentUnitSystem()];
+  const felt = rad.querySelector(".humle-gram");
+  felt.placeholder = enhet.humle;
+  const enhetSpan = felt.nextElementSibling;
+  if (enhetSpan && enhetSpan.classList.contains("enhet")) enhetSpan.textContent = enhet.humle;
+  const knapp = rad.querySelector(".humle-beregn-knapp");
+  if (knapp) knapp.textContent = `${t("builder.humle.beregnGramKnapp")} (${enhet.humle})`;
+}
+
 // Malt-gruppering i søkefeltet -- speiler ui/malt_panel.py sin
 // FORETRUKKET_GRUPPE_REKKEFØLGE/KATEGORI_TIL_GRUPPE nøyaktig, slik at web og
 // desktop viser malt organisert på samme måte. Ingen ny taksonomi oppfunnet.
@@ -399,7 +431,7 @@ function leggTilMaltRad(forhandsutfylt) {
     // rerendres til gjeldende unitSystem akkurat som en forhåndsutfylt rad.
     _settMaltKg(mengdeFelt, parseFloat(mengdeFelt.value) || 1);
   }
-  mengdeFelt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].malt;
+  _oppdaterMaltRadEnhet(rad);
 
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
     _redigerteMaltProsentRader.delete(rad);
@@ -665,7 +697,7 @@ function leggTilHumleRad(forhandsutfylt) {
     // rerendres til gjeldende unitSystem akkurat som en forhåndsutfylt rad.
     _settHumleGram(gramFelt, parseFloat(gramFelt.value) || 10);
   }
-  gramFelt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].humle;
+  _oppdaterHumleRadEnhet(rad);
 
   rad.querySelector(".fjern-knapp").addEventListener("click", () => {
     rad.remove();
@@ -1103,6 +1135,16 @@ function _oppdaterEnhetsLabels() {
   settLabel('label[for="skaler-maal-volum"]', "builder.skaler.maalLabel");
   settLabel('label[for="utstyr-felt-kapasitet"]', "utstyr.felt.kjelekapasitet");
   settLabel('label[for="utstyr-felt-maks"]', "utstyr.felt.anbefaltMaks");
+  // WEB STAB W1 (issue #102) -- skaler-hjelpeteksten nevner malt-/humle-
+  // enheten inne i selve setningen (ikke som et etterstilt "(enhet)"-
+  // suffiks som labelsene over), så den trenger egen parameterisert t().
+  // Selektert via det EKSISTERENDE data-i18n-attributtet (ikke en ny id) --
+  // se kommentaren over _oppdaterMaltRadEnhet() for hvorfor web/index.html
+  // sin markup ikke røres i denne endringen.
+  const skalerHjelpetekst = document.querySelector('[data-i18n="builder.skaler.hjelpetekst"]');
+  if (skalerHjelpetekst) {
+    skalerHjelpetekst.textContent = t("builder.skaler.hjelpetekst", { malt: enhet.malt, humle: enhet.humle });
+  }
 }
 
 // Rerendrer ALLE synlige/monterte unit-bærende felt FRA sin egen
@@ -1124,13 +1166,13 @@ function _rerenderAlleEnhetsfelt() {
     const felt = rad.querySelector(".malt-mengde");
     const kanonisk = _kanoniskVerdi(felt);
     if (kanonisk !== null) _settMaltKg(felt, kanonisk);
-    felt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].malt;
+    _oppdaterMaltRadEnhet(rad);
   }
   for (const rad of humleRaderEl.querySelectorAll(".ingrediens-rad")) {
     const felt = rad.querySelector(".humle-gram");
     const kanonisk = _kanoniskVerdi(felt);
     if (kanonisk !== null) _settHumleGram(felt, kanonisk);
-    felt.placeholder = ENHET_FORKORTELSE[hentUnitSystem()].humle;
+    _oppdaterHumleRadEnhet(rad);
   }
 
   // Utstyrsskjemaet, hvis åpent, rerendres på samme måte -- ellers er det
@@ -1696,7 +1738,17 @@ window.addEventListener("kvernhaug:sprakendret", () => {
   }
   oppdaterSmakshjul = initSmakshjul(document.getElementById("smakshjul-container"), SMAKS_KATEGORIER);
   oppdaterMaltProsentSum();
-  beregnOgVisResultat();
+  // WEB STAB W1 (issue #102) -- applyI18n() (kjørt før denne lytteren, se
+  // i18n.js) skriver om ALLE data-i18n-elementer til baseTeksten uten
+  // enhets-suffiks/parameter, inkl. felt som _oppdaterEnhetsLabels() og
+  // radenes egne enhets-spenn/"Beregn mengde"-knapp normalt eier. Uten en
+  // full rerender her ville et språkbytte midlertidig -- eller ved f.eks.
+  // "Beregn mengde ({humle})" faktisk PERMANENT -- mistet enhets-suffikset,
+  // uavhengig av om unitSystem er metric eller us.
+  // _rerenderAlleEnhetsfelt() leser kun fra dataset.canonical (aldri
+  // allerede avrundet displaytekst), så dette er trygt å kalle uten å endre
+  // tallverdier, og avslutter selv med en beregnOgVisResultat().
+  _rerenderAlleEnhetsfelt();
 });
 
 init();
