@@ -397,6 +397,8 @@ const TEKSTER = {
     "builder.handling.avansertSummary": "Avansert: rå JSON",
     "builder.handling.eksporterKnapp": "⬇️ Eksporter rå JSON",
     "builder.handling.avansertHjelpetekst": "Kun til debugging/videre bearbeiding — bruk «Lagre oppskriftsfil» over til vanlig lagring og backup.",
+    "builder.handling.lagreVariant": "🧬 Lagre som variant",
+    "builder.handling.variantHjelpetekst": "«Lagre som variant» oppretter en ny, uavhengig oppskrift fra den nåværende — uten å endre originalen du bygget videre på.",
 
     "builder.skaler.naavaerende": "Nåværende batch: {vol}",
     "builder.skaler.maalLabel": "Skaler til",
@@ -408,6 +410,9 @@ const TEKSTER = {
     "builder.skaler.statusFerdig": "Skalert fra {fra} til {til}.",
 
     "identitet.utenNavn": "Uten navn",
+    "identitet.lagretilstand.kladd": "Kladd — ikke lagret",
+    "identitet.lagretilstand.lagret": "Lagret",
+    "identitet.lagretilstand.endret": "Endret siden lagring",
 
     "builder.smaksprofil.tittel": "Smaksprofil",
     "builder.stilanalyse.tittel": "Stilanalyse",
@@ -429,6 +434,8 @@ const TEKSTER = {
     "malt.prosent.overstiger100": "De valgte prosentene blir {sum} %, som er mer enn 100 %. Juster en av de redigerte radene.",
 
     "oppskrift.lagretStatus": "Lagret \"{navn}\" i nettleseren. Se \"📂 Mine oppskrifter\" for å åpne den igjen senere.",
+    "oppskrift.lagretVariantStatus": "Lagret \"{navn}\" som en ny, uavhengig variant i nettleseren. Den opprinnelige oppskriften er ikke endret.",
+    "oppskrift.variantNavnForslag": "{navn} (kopi)",
     "oppskrift.lagreFilStatus": "Lastet ned \"{filnavn}.kbhrecipe\". Bruk denne filen som backup eller for å flytte oppskriften til en annen enhet.",
     "oppskrift.nyConfirm": "Vil du starte en ny oppskrift? Endringer i den aktive oppskriften som ikke er lagret eller eksportert vil forsvinne.",
     "oppskrift.nyStatus": "Ny, tom oppskrift.",
@@ -2132,6 +2139,8 @@ const TEKSTER = {
     "builder.handling.avansertSummary": "Advanced: raw JSON",
     "builder.handling.eksporterKnapp": "⬇️ Export raw JSON",
     "builder.handling.avansertHjelpetekst": "For debugging/further processing only — use «Save recipe file» above for regular saving and backup.",
+    "builder.handling.lagreVariant": "🧬 Save as variant",
+    "builder.handling.variantHjelpetekst": "“Save as variant” creates a new, independent recipe from the current one — without changing the original you built it from.",
 
     "builder.skaler.naavaerende": "Current batch: {vol}",
     "builder.skaler.maalLabel": "Scale to",
@@ -2143,6 +2152,9 @@ const TEKSTER = {
     "builder.skaler.statusFerdig": "Scaled from {fra} to {til}.",
 
     "identitet.utenNavn": "Untitled",
+    "identitet.lagretilstand.kladd": "Draft — not saved",
+    "identitet.lagretilstand.lagret": "Saved",
+    "identitet.lagretilstand.endret": "Changed since saved",
 
     "builder.smaksprofil.tittel": "Flavor Profile",
     "builder.stilanalyse.tittel": "Style Analysis",
@@ -2164,6 +2176,8 @@ const TEKSTER = {
     "malt.prosent.overstiger100": "The selected percentages total {sum}%, which is more than 100%. Adjust one of the edited rows.",
 
     "oppskrift.lagretStatus": "Saved \"{navn}\" in the browser. See \"📂 My Recipes\" to open it again later.",
+    "oppskrift.lagretVariantStatus": "Saved \"{navn}\" as a new, independent variant in the browser. The original recipe was not changed.",
+    "oppskrift.variantNavnForslag": "{navn} (copy)",
     "oppskrift.lagreFilStatus": "Downloaded \"{filnavn}.kbhrecipe\". Use this file as a backup or to move the recipe to another device.",
     "oppskrift.nyConfirm": "Start a new recipe? Changes to the active recipe that haven't been saved or exported will be lost.",
     "oppskrift.nyStatus": "New, empty recipe.",

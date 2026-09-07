@@ -4,6 +4,58 @@ Historisk, runde-for-runde narrativ for web-versjonens utvikling: hvorfor ting e
 
 Nyeste runde øverst.
 
+## WEB STAB W3 — Truthful draft/saved/variant state (issue #106, 2026-09-07)
+
+B03: UI-et kunne fortsette å si "Lagret"/"Saved" etter at den aktive kladden
+var redigert videre, uten noen måte å se om den eksakte nåværende versjonen
+var (a) en fersk, aldri lagret kladd, (b) nøyaktig lik siste eksplisitte
+lagring, eller (c) en redigert versjon av en lagret oppskrift.
+
+**Ingen ny lagringsmodell** -- løst som en sammenligning mot det som
+faktisk ligger i `recipe_storage.js`, via samme `recipeId`-arkitektur Runde
+25A allerede innførte (`finnOppskrift(_aktivRecipeId)`), ikke en egen,
+potensielt utdatert cache. `lagreTilstandForOppskrift()` (`app.js`) slår
+avgjørelsen opp live ved hver beregning (samme krok som allerede
+autolagrer aktiv kladd) og returnerer `"kladd"` (aldri lagret), `"lagret"`
+(nøyaktig lik siste eksplisitte lagring) eller `"endret"` (stammer fra en
+lagret oppskrift, men avviker nå -- inkl. hvis den lagrede raden er
+fjernet et annet sted). Sammenligningen (`_erOppskriftLikLagret()`, kanonisk
+nøkkel-sortert JSON) ignorerer bevisst `lagretDato` (ren "nå"-bokføring satt
+på hvert `samleOppskrift()`-kall), men sammenligner alt faktisk
+oppskriftsinnhold.
+
+**Ny, alltid synlig badge** i identitetskortet (`#identitet-lagretilstand`,
+`.identitet-lagretilstand-{kladd,lagret,endret}` i `style.css`) -- plassert
+der fordi kortet er det ene stedet som forblir synlig uansett hvor langt
+ned i skjemaet brukeren har scrollet, i stedet for kun i den eksisterende
+one-shot `#lagre-status`-meldingen under Lagre-knappen.
+
+**Ny handling: "Lagre som variant"** (`#lagre-variant-knapp`, kun synlig når
+kladden stammer fra en lagret oppskrift) -- oppretter en ny, uavhengig
+lagret identitet (`lagreOppskriftIStore(oppskrift, null)`) uten å røre
+originalen. Foreslår automatisk et "(kopi)"/"(copy)"-navnetillegg når
+navnefeltet fortsatt er identisk med originalens, siden
+`lagreOppskriftIStore()`s eksisterende navneunikhet ellers ville fjernet
+originalen i stedet for å opprette en variant ved siden av den.
+
+**Uendret:** rename-i-lagret-oppskrift oppdaterer fortsatt SAMME rad (ingen
+endring i `lagreOppskrift()`s upsert-på-recipeId), Learner/Master-bytte
+rører aldri skjemafeltene `samleOppskrift()` leser fra, og `.kbhrecipe`-
+kontrakten/beregningene er urørt.
+
+**Filer:** `js/app.js` (lagre-tilstand + `lagreSomVariant()`), `index.html` +
+`en/index.html` (generert) (badge + variant-knapp/hjelpetekst), `css/style.css`,
+`js/i18n.js` (nye `identitet.lagretilstand.*`/`builder.handling.lagreVariant`/
+`builder.handling.variantHjelpetekst`/`oppskrift.variantNavnForslag`/
+`oppskrift.lagretVariantStatus`-nøkler, NO+EN), ny
+`tests/test_web_save_state_truth.py` (kilde-kontrakt-tester, samme metode
+som `test_web_mode_storage_fix.py` -- ingen JS-kjøretid i dette miljøet).
+
+**Kjent gap:** ekte browser-verifisering av selve tilstandsovergangene
+(acceptance criterion E, issue #106) er ikke utført i denne runden -- ingen
+Node/Playwright tilgjengelig i Bridge-kjøringens sandkasse. Gjenstår som en
+manuell Playwright-sweep før `status:approved`.
+
 ## TOOLS — Standalone ABV-kalkulator (issue #77, 2026-09-05)
 
 Ny, syvende Verktøy-side (`verktoy.html`) med en frittstående ABV-kalkulator

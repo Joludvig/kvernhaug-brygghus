@@ -261,12 +261,14 @@
       <div class="knapperad">
         <button type="button" id="ny-oppskrift-knapp" data-i18n="builder.handling.nyOppskrift">🆕 Ny oppskrift</button>
         <button type="button" id="lagre-knapp" data-i18n="builder.handling.lagreOppskrift">💾 Lagre oppskrift</button>
+        <button type="button" id="lagre-variant-knapp" data-i18n="builder.handling.lagreVariant" hidden>🧬 Lagre som variant</button>
         <button type="button" id="lagre-fil-knapp" data-i18n="builder.handling.lagreFil">📄 Lagre oppskriftsfil (.kbhrecipe)</button>
         <button type="button" id="apne-fil-knapp" data-i18n="builder.handling.apneFil">📂 Åpne oppskriftsfil</button>
         <input type="file" id="apne-fil-input" accept=".kbhrecipe,.json,application/json" hidden>
       </div>
       <p class="hjelpetekst" id="lagre-status" aria-live="polite"></p>
       <p class="hjelpetekst" data-i18n="builder.handling.hjelpetekst">Lagrede oppskrifter ligger lokalt i denne nettleseren. Vil du ta backup eller flytte en oppskrift til en annen enhet, kan du lagre den som en <code>.kbhrecipe</code>-fil og åpne den igjen her eller under «📥 Importer oppskrift».</p>
+      <p class="hjelpetekst" id="lagre-variant-hjelpetekst" data-i18n="builder.handling.variantHjelpetekst" hidden>«Lagre som variant» oppretter en ny, uavhengig oppskrift fra den nåværende — uten å endre originalen du bygget videre på.</p>
 
       <details class="avansert-eksport">
         <summary data-i18n="builder.handling.avansertSummary">Avansert: rå JSON</summary>
@@ -298,6 +300,7 @@
       </div>
       <div class="kbh-ornament" aria-hidden="true"><span>&#9670;</span></div>
       <div class="identitet-navn" id="identitet-navn" data-i18n="identitet.utenNavn">Uten navn</div>
+      <div class="identitet-lagretilstand" id="identitet-lagretilstand" aria-live="polite"></div>
       <div class="identitet-stil" id="identitet-stil" hidden></div>
       <div class="identitet-brygger" id="identitet-brygger" hidden></div>
       <div class="kbh-ornament" aria-hidden="true"><span>&#9670;</span></div>
