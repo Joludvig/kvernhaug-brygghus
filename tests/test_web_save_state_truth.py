@@ -97,7 +97,46 @@ class TestSammenligningIgnorererTransientLagretDato(unittest.TestCase):
 
     def test_kanonisk_json_sorterer_nokler_uavhengig_av_rekkefolge(self):
         kropp = _funksjonskropp(_app_js(), r"function _kanoniskJson\(verdi\)\s*\{")
-        self.assertIn("Object.keys(verdi).sort()", kropp)
+        self.assertRegex(kropp, r"Object\.keys\(verdi\)\s*\.filter\(\(k\)[^\n]*\)\s*\.sort\(\)")
+
+
+class TestKanoniskJsonHandtererUndefined(unittest.TestCase):
+    """Issue #110 -- egendefinerte malt/humle/gjær-lesere produserer valgfrie
+    felt som `felt.value.trim() || undefined` (se app.js sine
+    .eg-produsent/.eg-opprinnelse/.eg-type-lesere og
+    gjaerEgProdusent/gjaerEgGjaertype). Den aktive kladden får dermed nøkler
+    med JS-verdien undefined, mens faktisk persistering (vanlig
+    JSON.stringify(), se recipe_storage.js) utelater slike nøkler helt.
+    _kanoniskJson() må speile NØYAKTIG den JSON.stringify()-oppførselen,
+    ellers rapporterer W3 falskt "Endret siden lagring" rett etter en
+    eksplisitt vellykket lagring (B03-tillit, se #106)."""
+
+    def _kropp(self):
+        return _funksjonskropp(_app_js(), r"function _kanoniskJson\(verdi\)\s*\{")
+
+    def test_objektnokler_med_undefined_verdi_utelates(self):
+        # JSON.stringify({a: undefined, b: 1}) === '{"b":1}' -- nøyaktig
+        # samme utelatelse må skje her, FØR sortering/serialisering, ellers
+        # dukker "produsent":undefined opp i kladden mens den lagrede raden
+        # (som gikk via ekte JSON.stringify) aldri hadde nøkkelen i det hele
+        # tatt.
+        kropp = self._kropp()
+        self.assertRegex(kropp, r"\.filter\(\(k\)\s*=>\s*verdi\[k\]\s*!==\s*undefined\)")
+
+    def test_array_elementer_med_undefined_blir_null_ikke_utelatt(self):
+        # JSON.stringify([undefined, 1]) === '[null,1]' -- et utelatt
+        # element ville forskjøvet array-lengden/indeksene og dermed brutt
+        # sammenligning av f.eks. malt-/humle-/gjærlister.
+        kropp = self._kropp()
+        self.assertRegex(kropp, r'v\s*===\s*undefined\s*\?\s*"null"\s*:\s*_kanoniskJson\(v\)')
+
+    def test_null_false_null_og_tom_streng_er_ikke_undefined_og_overlever(self):
+        # AC7: disse er REELLE, meningsbærende verdier -- filteret over
+        # sjekker eksplisitt `!== undefined`, ikke en løsere falsy-sjekk som
+        # ville slukt null/false/0/"" ved en feil.
+        kropp = self._kropp()
+        self.assertNotRegex(kropp, r"!verdi\[k\]")
+        self.assertNotRegex(kropp, r"if\s*\(!v\)")
 
 
 class TestBeregnOgVisResultatOppdatererBadge(unittest.TestCase):
