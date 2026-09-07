@@ -1473,17 +1473,18 @@ function _forslaVariantNavn(originalNavn) {
 
 // Acceptance criteria C (issue #106) -- den ENE, eksplisitte handlingen som
 // oppretter en NY lagret identitet fra en allerede lagret oppskrift, uten å
-// røre originalen. lagreOppskriftIStore() fjerner enhver ANNEN rad med
-// samme navn (bevisst navneunikhet, se recipe_storage.js) -- uten
-// navneforslaget under ville en variant lagret under SAMME navn som
-// originalen derfor stille slettet originalen i stedet for å opprette en
-// variant ved siden av den, altså nøyaktig mutasjonen AC12 forbyr.
+// røre originalen ELLER noen annen lagret oppskrift. lagreOppskriftIStore()
+// fjerner enhver ANNEN rad med samme navn (bevisst navneunikhet, se
+// recipe_storage.js) -- kollisjonssjekken under må derfor dekke ETHVERT
+// eksisterende navn, ikke bare originalens: en bruker kan også ha endret
+// navnefeltet manuelt til navnet på en helt annen lagret oppskrift B før
+// klikk, og uten denne generelle sjekken ville lagringen da stille slettet
+// B i stedet for originalen (Chief-review-fiks, PR #107, runde 3).
 function lagreSomVariant() {
-  const original = _hentSisteLagredeOppskrift();
   const navnFelt = document.getElementById("oppskrift-navn");
   let oppskrift = samleOppskrift();
-  if (original && oppskrift.navn === original.navn) {
-    navnFelt.value = _forslaVariantNavn(original.navn);
+  if (finnOppskriftVedNavn(oppskrift.navn)) {
+    navnFelt.value = _forslaVariantNavn(oppskrift.navn);
     oppskrift = samleOppskrift();
   }
   const status = document.getElementById("lagre-status");

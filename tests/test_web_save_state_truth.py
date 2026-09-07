@@ -146,15 +146,18 @@ class TestLagreSomVariant(unittest.TestCase):
         self.assertIn("lagreOppskriftIStore(oppskrift, null)", kropp)
         self.assertNotIn("lagreOppskriftIStore(oppskrift, _aktivRecipeId)", kropp)
 
-    def test_unngar_navnekollisjon_med_originalen(self):
-        # lagreOppskriftIStore() fjerner enhver ANNEN rad med samme navn
-        # (se recipe_storage.js) -- uten dette navnesjekk-/forslag-steget
-        # ville en variant lagret under SAMME navn som originalen derfor
-        # STILLE SLETTET originalen. Se recipe_storage.js sin dokumenterte
-        # navneunikhet.
+    def test_unngar_navnekollisjon_med_enhver_eksisterende_oppskrift(self):
+        # Chief-review-fiks (PR #107, runde 3): kollisjonssjekken må dekke
+        # ETHVERT eksisterende navn (finnOppskriftVedNavn), ikke bare
+        # originalens -- ellers ville en bruker som manuelt endrer
+        # navnefeltet til navnet på en HELT ANNEN lagret oppskrift B, og så
+        # trykker "Lagre som variant", stille slette B via
+        # lagreOppskriftIStore() sin navneunikhet (se
+        # recipe_storage.js). Se TestLagreSomVariantUnngarKollisjonMedAlleNavn
+        # for de fulle scenario-testene review'en ba om.
         kropp = _funksjonskropp(_app_js(), r"function lagreSomVariant\(\)\s*\{")
-        self.assertRegex(kropp, r"if\s*\(original\s*&&\s*oppskrift\.navn\s*===\s*original\.navn\)")
-        self.assertIn("_forslaVariantNavn(original.navn)", kropp)
+        self.assertRegex(kropp, r"if\s*\(finnOppskriftVedNavn\(oppskrift\.navn\)\)")
+        self.assertIn("_forslaVariantNavn(oppskrift.navn)", kropp)
 
     def test_recipe_storage_har_fortsatt_navneunikhet_variantguarden_forutsetter(self):
         # FREEZE: hvis recipe_storage.js sin navne-dedup noensinne fjernes,
@@ -219,6 +222,68 @@ class TestForslaVariantNavnUnikhet(unittest.TestCase):
         self.assertEqual(i18n.count('"oppskrift.variantNavnForslagNummerert"'), 2)
         self.assertIn('"oppskrift.variantNavnForslagNummerert": "{navn} (kopi {n})"', i18n)
         self.assertIn('"oppskrift.variantNavnForslagNummerert": "{navn} (copy {n})"', i18n)
+
+
+class TestLagreSomVariantUnngarKollisjonMedAlleNavn(unittest.TestCase):
+    """Chief-review-fiks (PR #107, runde 3) -- runde 2 sin variant-vern
+    dekket bare kollisjon med ORIGINALENS navn
+    (`oppskrift.navn === original.navn`). Reviewens flaggede scenario:
+    1) original A lagret;
+    2) en urelatert oppskrift B lagret;
+    3) A sin aktive kladd navngis manuelt om til B sitt eksakte navn;
+    4) "Lagre som variant" skal IKKE slette/erstatte B;
+    5) original A skal forbli urørt;
+    6) den nye varianten får en distinkt recipeId og et ikke-kolliderende
+       navn;
+    7) NO/EN-oppførselen er deterministisk (samme i18n-nøkler begge veier).
+
+    Uten JS-kjøretid (se filens toppkommentar) bevises dette som en
+    kilde-kontrakt: kollisjonsvakten må være uttrykt over
+    finnOppskriftVedNavn() -- et GLOBALT navnesøk i HELE lageret (se
+    recipe_storage.js), ikke en sammenligning kun mot original.navn --
+    og lagreSomVariant() skal ikke lenger hente/bruke "original" i det
+    hele tatt, siden nøyaktig DEN antagelsen (at bare originalens navn
+    kan kollidere) var rotårsaken reviewen flagget."""
+
+    def test_kollisjonsvakten_bruker_ikke_lenger_original(self):
+        kropp = _funksjonskropp(_app_js(), r"function lagreSomVariant\(\)\s*\{")
+        self.assertNotIn("original", kropp)
+        self.assertNotIn("_hentSisteLagredeOppskrift()", kropp)
+
+    def test_finnOppskriftVedNavn_soker_alle_rader_uavhengig_av_identitet(self):
+        # 1/2: dekker BÅDE original A og en urelatert B, siden søket ikke
+        # filtrerer bort noen rad basert på recipeId -- bare navn.
+        kilde = _les(_RECIPE_STORAGE_JS)
+        kropp = _funksjonskropp(kilde, r"function finnOppskriftVedNavn\(navn\)\s*\{")
+        self.assertIn("alleOppskrifter().find((i) => i.recipe.navn === navn)", kropp)
+        self.assertNotIn("recipeId", kropp)
+
+    def test_forslag_beregnes_fra_kladdens_faktiske_gjeldende_navn(self):
+        # 3: navnet som sjekkes/foreslås-fra er oppskrift.navn -- kladdens
+        # eget, gjeldende navn (her: B sitt navn, etter manuell omdøping),
+        # ikke et navn hentet fra et separat "original"-oppslag.
+        kropp = _funksjonskropp(_app_js(), r"function lagreSomVariant\(\)\s*\{")
+        self.assertIn("if (finnOppskriftVedNavn(oppskrift.navn)) {", kropp)
+        self.assertIn("navnFelt.value = _forslaVariantNavn(oppskrift.navn);", kropp)
+
+    def test_ny_variant_far_fersk_id_original_og_b_forblir_urort(self):
+        # 4/5/6: lagreOppskriftIStore(oppskrift, null) tvinger alltid en ny
+        # recipeId (distinkt fra både A og B). Siden navnekollisjonen
+        # allerede er løst FØR dette kallet, fjerner lagreOppskriftIStore()
+        # sin navneunikhet ikke lenger noen eksisterende rad -- verken B
+        # eller originalen A (identifisert av den urørte _aktivRecipeId).
+        kropp = _funksjonskropp(_app_js(), r"function lagreSomVariant\(\)\s*\{")
+        self.assertIn("lagreOppskriftIStore(oppskrift, null)", kropp)
+        self.assertNotIn("lagreOppskriftIStore(oppskrift, _aktivRecipeId)", kropp)
+
+    def test_no_og_en_bruker_samme_forslagsnokler_uavhengig_av_kollisjonskilde(self):
+        # 7: samme i18n-nøkler (oppskrift.variantNavnForslag/
+        # -Nummerert) brukes uansett HVEM sitt navn som kolliderte -- ingen
+        # egen gren/nøkkel for "kolliderte med original" vs. "kolliderte
+        # med en annen lagret oppskrift".
+        i18n = _les(_I18N_JS)
+        self.assertEqual(i18n.count('"oppskrift.variantNavnForslag"'), 2)
+        self.assertEqual(i18n.count('"oppskrift.variantNavnForslagNummerert"'), 2)
 
 
 class TestModusBytteRorerIkkeOppskriftsinnhold(unittest.TestCase):
