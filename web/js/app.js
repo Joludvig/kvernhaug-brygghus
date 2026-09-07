@@ -798,8 +798,36 @@ function lesHumleRader() {
     .filter((h) => h && h.id);
 }
 
+// WEB STAB W4 (issue #108) -- gjær har akkurat ÉN aktiv identitet:
+// biblioteksgjæren i gjaerCombobox, ELLER egendefinert gjær (de synlige
+// feltene under gjaerEgendefinertFelt) -- aldri begge. gjaerEgendefinertFelt
+// sin hidden-status ER selve det eksplisitte tilstandsflagget (samme rolle
+// som rad.dataset.egendefinert har for malt/humle, se
+// _settMaltEgendefinert()) -- IKKE en avledning av gjaerCombobox sin verdi.
+// _gjaerCustomAktiv()/_aktiverGjaerCustom()/_deaktiverGjaerCustom() er de
+// ENESTE stedene (utenom _gjenopprettOppskrift(), som setter begge feltene
+// eksplisitt og samtidig) som skal endre den flagget, slik at biblioteks-
+// valg og egendefinerte felt aldri kan fremstå som aktive samtidig.
+function _gjaerCustomAktiv() {
+  return !gjaerEgendefinertFelt.hidden;
+}
+
+function _aktiverGjaerCustom() {
+  // Aktivering av egendefinert gjær skal alltid oppheve en eksisterende
+  // biblioteksvalg -- ellers ville gjaerCombobox.getValue() fortsatt vært
+  // sann samtidig som de egendefinerte feltene vises (B05).
+  gjaerCombobox.clear();
+  gjaerEgendefinertFelt.hidden = false;
+  attenuationOverrideRad.style.display = "";
+}
+
+function _deaktiverGjaerCustom() {
+  gjaerEgendefinertFelt.hidden = true;
+  attenuationOverrideRad.style.display = gjaerCombobox.getValue() ? "none" : "";
+}
+
 function _lesGjaerEgendefinert() {
-  if (gjaerCombobox.getValue() || gjaerEgendefinertFelt.hidden) return null;
+  if (!_gjaerCustomAktiv()) return null;
   // PRI 4C (issue #50) -- mintes lazily, FØRSTE gang en aktiv custom-gjær
   // faktisk samles inn, og gjenbrukes deretter uendret (se
   // _aktivGjaerCustomId-deklarasjonen). En allerede satt id (gjenopprettet
@@ -1344,7 +1372,12 @@ function samleOppskrift() {
     effektivitet: parseFloat(document.getElementById("effektivitet").value) || 0,
     malt: lesMaltRader(),
     humle: lesHumleRader(),
-    gjaerId: gjaerCombobox.getValue() || null,
+    // WEB STAB W4 (issue #108) -- gjaerId sjekker eksplisitt _gjaerCustomAktiv()
+    // FØRST (samme mønster som lesMaltRader()/lesHumleRader() sjekker
+    // rad.dataset.egendefinert FØRST): en eventuell gjenværende verdi i
+    // gjaerCombobox kan aldri lekke inn som gjaerId mens egendefinert gjær
+    // er den aktive identiteten.
+    gjaerId: _gjaerCustomAktiv() ? null : (gjaerCombobox.getValue() || null),
     gjaerCustom: _lesGjaerEgendefinert(),
     attenuationOverride: gjaerCombobox.getValue() ? null : parseFloat(attenuationOverrideInput.value) || null,
     valgtStil: stilCombobox ? stilCombobox.getValue() : null,
@@ -1722,16 +1755,19 @@ async function init() {
     placeholder: t("builder.gjaer.comboboxPlaceholder"),
     ariaLabel: t("builder.gjaer.comboboxAriaLabel"),
     onSelect: () => {
-      attenuationOverrideRad.style.display = gjaerCombobox.getValue() ? "none" : "";
-      if (gjaerCombobox.getValue()) gjaerEgendefinertFelt.hidden = true;
+      // Velger et biblioteksgjær er en eksplisitt overgang bort fra
+      // egendefinert gjær -- se _deaktiverGjaerCustom(). En tømt combobox
+      // (ingen valg) rører ikke egendefinert-tilstanden i det hele tatt.
+      if (gjaerCombobox.getValue()) _deaktiverGjaerCustom();
+      else attenuationOverrideRad.style.display = "";
       beregnOgVisResultat();
     },
   });
   gjaerMount.replaceWith(gjaerCombobox.el);
 
   document.getElementById("gjaer-egendefinert-knapp").addEventListener("click", () => {
-    gjaerEgendefinertFelt.hidden = !gjaerEgendefinertFelt.hidden;
-    attenuationOverrideRad.style.display = gjaerCombobox.getValue() ? "none" : "";
+    if (_gjaerCustomAktiv()) _deaktiverGjaerCustom();
+    else _aktiverGjaerCustom();
     beregnOgVisResultat();
   });
   for (const felt of [gjaerEgNavn, gjaerEgProdusent, gjaerEgGjaertype]) {
