@@ -256,12 +256,14 @@
 <div class="knapperad">
 <button data-i18n="builder.handling.nyOppskrift" id="ny-oppskrift-knapp" type="button">🆕 New recipe</button>
 <button data-i18n="builder.handling.lagreOppskrift" id="lagre-knapp" type="button">💾 Save recipe</button>
+<button data-i18n="builder.handling.lagreVariant" hidden="" id="lagre-variant-knapp" type="button">🧬 Save as variant</button>
 <button data-i18n="builder.handling.lagreFil" id="lagre-fil-knapp" type="button">📄 Save recipe file (.kbhrecipe)</button>
 <button data-i18n="builder.handling.apneFil" id="apne-fil-knapp" type="button">📂 Open recipe file</button>
 <input accept=".kbhrecipe,.json,application/json" hidden="" id="apne-fil-input" type="file"/>
 </div>
 <p aria-live="polite" class="hjelpetekst" id="lagre-status"></p>
 <p class="hjelpetekst" data-i18n="builder.handling.hjelpetekst">Saved recipes live locally in this browser. To back up or move a recipe to another device, save it as a .kbhrecipe file and open it again here or under «📥 Import Recipe».</p>
+<p class="hjelpetekst" data-i18n="builder.handling.variantHjelpetekst" hidden="" id="lagre-variant-hjelpetekst">“Save as variant” creates a new, independent recipe from the current one — without changing the original you built it from.</p>
 <details class="avansert-eksport">
 <summary data-i18n="builder.handling.avansertSummary">Advanced: raw JSON</summary>
 <div class="knapperad">
@@ -290,6 +292,7 @@
 </div>
 <div aria-hidden="true" class="kbh-ornament"><span>◆</span></div>
 <div class="identitet-navn" data-i18n="identitet.utenNavn" id="identitet-navn">Untitled</div>
+<div aria-live="polite" class="identitet-lagretilstand" id="identitet-lagretilstand"></div>
 <div class="identitet-stil" hidden="" id="identitet-stil"></div>
 <div class="identitet-brygger" hidden="" id="identitet-brygger"></div>
 <div aria-hidden="true" class="kbh-ornament"><span>◆</span></div>

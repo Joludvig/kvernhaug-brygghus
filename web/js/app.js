@@ -904,6 +904,8 @@ function beregnOgVisResultat() {
   document.getElementById("identitet-stil").textContent = stilVisningsnavn(oppskrift.valgtStil) || "";
   document.getElementById("identitet-stil").hidden = !oppskrift.valgtStil;
 
+  _oppdaterLagreTilstandUI(oppskrift);
+
   if (oppdaterSmakshjul) oppdaterSmakshjul(sisteBeregning.flavorProfile);
   renderStilPanel();
 
@@ -1354,6 +1356,81 @@ function samleOppskrift() {
   };
 }
 
+// ─── Lagre-tilstand (WEB STAB W3, issue #106) ──────────────────────────────
+// B03: UI-et kunne fortsette å si "Lagret" etter at oppskriften var endret
+// videre, uten noen måte å se om den aktive kladden er (a) aldri lagret,
+// (b) nøyaktig lik siste eksplisitte lagring, eller (c) en redigert versjon
+// av en lagret oppskrift. Ingen ny lagringsmodell -- kun en sammenligning
+// mot det som faktisk ligger i recipe_storage.js via samme recipeId-
+// arkitektur Runde 25A allerede innførte.
+
+// Kanonisk, nøkkel-sortert JSON-serialisering, KUN til likhetssammenligning
+// (aldri til lagring/eksport) -- to objekter med identisk innhold, men ulik
+// nøkkelrekkefølge (f.eks. fordi _normalisertRecipe() i recipe_storage.js
+// kan legge recipeSchemaVersion til på slutten), skal regnes som like.
+function _kanoniskJson(verdi) {
+  if (Array.isArray(verdi)) return "[" + verdi.map(_kanoniskJson).join(",") + "]";
+  if (verdi && typeof verdi === "object") {
+    const nokler = Object.keys(verdi).sort();
+    return "{" + nokler.map((k) => JSON.stringify(k) + ":" + _kanoniskJson(verdi[k])).join(",") + "}";
+  }
+  return JSON.stringify(verdi);
+}
+
+// lagretDato er ren bokføringsmetadata -- samleOppskrift() setter den til
+// "nå" på HVER kall (se der), aldri en del av selve oppskriftsinnholdet --
+// og skal derfor aldri kunne gjøre en ellers uendret kladd "endret".
+function _oppskriftInnholdForSammenligning(oppskrift) {
+  const { lagretDato, ...resten } = oppskrift || {};
+  return resten;
+}
+
+function _erOppskriftLikLagret(oppskrift, lagretOppskrift) {
+  if (!lagretOppskrift) return false;
+  return (
+    _kanoniskJson(_oppskriftInnholdForSammenligning(oppskrift)) ===
+    _kanoniskJson(_oppskriftInnholdForSammenligning(lagretOppskrift))
+  );
+}
+
+// Den eksplisitt lagrede raden den aktive kladden stammer fra, slått opp
+// direkte i lageret -- aldri en egen, potensielt utdatert kopi. null når
+// kladden aldri er lagret (_aktivRecipeId selv er null) ELLER den lagrede
+// raden ikke lenger finnes (f.eks. slettet fra Mine oppskrifter i en annen
+// fane siden denne siden sist lastet).
+function _hentSisteLagredeOppskrift() {
+  if (!_aktivRecipeId) return null;
+  const funnet = finnOppskrift(_aktivRecipeId);
+  return funnet ? funnet.recipe : null;
+}
+
+// "kladd" = aldri eksplisitt lagret. "lagret" = nøyaktig lik siste
+// eksplisitte lagring. "endret" = stammer fra en lagret oppskrift, men
+// avviker nå -- inkludert når den lagrede raden er borte, slik at "lagret"
+// aldri kan påstås uten at det faktisk er bevist mot lageret.
+function lagreTilstandForOppskrift(oppskrift) {
+  if (!_aktivRecipeId) return "kladd";
+  const lagret = _hentSisteLagredeOppskrift();
+  if (!lagret) return "endret";
+  return _erOppskriftLikLagret(oppskrift, lagret) ? "lagret" : "endret";
+}
+
+function _oppdaterLagreTilstandUI(oppskrift) {
+  const tilstand = lagreTilstandForOppskrift(oppskrift);
+  const badge = document.getElementById("identitet-lagretilstand");
+  if (badge) {
+    badge.textContent = t("identitet.lagretilstand." + tilstand);
+    badge.className = "identitet-lagretilstand identitet-lagretilstand-" + tilstand;
+  }
+  // "Lagre som variant" gir bare mening når det finnes en original lagret
+  // identitet å avgrene fra -- en fersk kladd har ingenting å lage en
+  // variant AV (vanlig "Lagre oppskrift" er da allerede riktig handling).
+  const variantKnapp = document.getElementById("lagre-variant-knapp");
+  if (variantKnapp) variantKnapp.hidden = !_aktivRecipeId;
+  const variantHjelp = document.getElementById("lagre-variant-hjelpetekst");
+  if (variantHjelp) variantHjelp.hidden = !_aktivRecipeId;
+}
+
 // Runde 25A -- upsert på recipeId i stedet for på navn. Redigerer kladden en
 // allerede lagret oppskrift, oppdateres NØYAKTIG den raden, også når navnet
 // er endret; tidligere opprettet et navnebytte en ny rad og lot den gamle
@@ -1371,6 +1448,55 @@ function lagreOppskrift() {
   beregnOgVisResultat(); // skriver kladden på nytt, nå med recipeId
   visForrigeErfaring();
   status.textContent = t("oppskrift.lagretStatus", { navn: visningsnavn(oppskrift.navn) });
+}
+
+// Chief-review-fiks (PR #107) -- det faste forslaget "{navn} (kopi)" er
+// bare unikt for DEN FØRSTE varianten. En andre variant fra samme original
+// (fortsatt under originalens navn) ville generert nøyaktig samme forslag
+// igjen, og lagreOppskriftIStore() sin navneunikhet ville da stille
+// slettet den FØRSTE varianten i stedet for originalen -- identitetstap på
+// en annen rad enn AC12 i det hele tatt handler om. Finner derfor det
+// første ledige navnet i rekken "(kopi)", "(kopi 2)", "(kopi 3)", ... mot
+// det faktiske lageret, aldri bare det statiske malforslaget.
+function _forslaVariantNavn(originalNavn) {
+  const visning = visningsnavn(originalNavn);
+  const forslag = t("oppskrift.variantNavnForslag", { navn: visning });
+  if (!finnOppskriftVedNavn(forslag)) return forslag;
+  let n = 2;
+  let nummerertForslag;
+  do {
+    nummerertForslag = t("oppskrift.variantNavnForslagNummerert", { navn: visning, n: n });
+    n++;
+  } while (finnOppskriftVedNavn(nummerertForslag));
+  return nummerertForslag;
+}
+
+// Acceptance criteria C (issue #106) -- den ENE, eksplisitte handlingen som
+// oppretter en NY lagret identitet fra en allerede lagret oppskrift, uten å
+// røre originalen ELLER noen annen lagret oppskrift. lagreOppskriftIStore()
+// fjerner enhver ANNEN rad med samme navn (bevisst navneunikhet, se
+// recipe_storage.js) -- kollisjonssjekken under må derfor dekke ETHVERT
+// eksisterende navn, ikke bare originalens: en bruker kan også ha endret
+// navnefeltet manuelt til navnet på en helt annen lagret oppskrift B før
+// klikk, og uten denne generelle sjekken ville lagringen da stille slettet
+// B i stedet for originalen (Chief-review-fiks, PR #107, runde 3).
+function lagreSomVariant() {
+  const navnFelt = document.getElementById("oppskrift-navn");
+  let oppskrift = samleOppskrift();
+  if (finnOppskriftVedNavn(oppskrift.navn)) {
+    navnFelt.value = _forslaVariantNavn(oppskrift.navn);
+    oppskrift = samleOppskrift();
+  }
+  const status = document.getElementById("lagre-status");
+  const res = lagreOppskriftIStore(oppskrift, null); // null tvinger frem en FERSK recipeId
+  if (!res.ok) {
+    status.textContent = res.melding;
+    return;
+  }
+  _aktivRecipeId = res.recipeId;
+  beregnOgVisResultat();
+  visForrigeErfaring();
+  status.textContent = t("oppskrift.lagretVariantStatus", { navn: visningsnavn(oppskrift.navn) });
 }
 
 // Gjenoppretter en oppskrift (fra aktiv kladd, en lagret oppskrift, eller en
@@ -1656,6 +1782,7 @@ async function init() {
 
   document.getElementById("ny-oppskrift-knapp").addEventListener("click", nyOppskrift);
   document.getElementById("lagre-knapp").addEventListener("click", lagreOppskrift);
+  document.getElementById("lagre-variant-knapp").addEventListener("click", lagreSomVariant);
   document.getElementById("eksporter-knapp").addEventListener("click", eksporterJson);
   document.getElementById("lagre-fil-knapp").addEventListener("click", lagreOppskriftsfil);
   const apneFilInput = document.getElementById("apne-fil-input");

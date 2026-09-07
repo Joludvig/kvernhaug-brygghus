@@ -2653,6 +2653,31 @@ footer {
   margin-top: 0.35rem;
 }
 
+/* WEB STAB W3 (issue #106) -- alltid-synlig lagre-tilstand (kladd/lagret/
+   endret siden lagring), se lagreTilstandForOppskrift() i app.js. Plassert
+   i identitetskortet fordi det er det ene stedet som forblir synlig
+   uansett hvor langt ned i skjemaet brukeren har scrollet. */
+.identitet-lagretilstand {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+.identitet-lagretilstand-kladd {
+  color: var(--muted);
+}
+
+.identitet-lagretilstand-lagret {
+  color: var(--moss);
+}
+
+.identitet-lagretilstand-endret {
+  color: var(--copper);
+}
+
 /* Runde 10C: brygger/bryggeri er ordinær metadata (som _MUTED-footeren på
    desktop-kortet), ikke identitet -- demotet fra gull til dempet farge. */
 .identitet-brygger {
