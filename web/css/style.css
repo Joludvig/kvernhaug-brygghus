@@ -534,6 +534,20 @@ main {
   grid-template-columns: repeat(auto-fit, minmax(95px, 12rem));
 }
 
+/* B02 (issue #104) -- samme kjente spesifisitets-fallgruve som Runde 21B.2
+   løste for .utstyr-rad-handlinger[hidden] og #pantry-type-bryter[hidden]:
+   .resultat-grid sin egen "display: grid" (author-stylesheet) vinner over
+   nettleserens innebygde "[hidden] { display: none }" (UA-stylesheet)
+   uansett spesifisitet, siden author alltid slår UA i cascade-origin.
+   verktoy_page.js sin _oppdaterAbvKalkulator() setter .hidden på disse to
+   boksene for å bytte mellom/skjule ABV-resultatet -- uten eksplisitt
+   override her ble de stående synlige samtidig, eller etter at input ble
+   ugyldig. */
+#verktoy-abv-resultat-normal[hidden],
+#verktoy-abv-resultat-hoygrav[hidden] {
+  display: none;
+}
+
 /* Web Identity Remember Opt-in V1 -- egen rad, IKKE .felt-rad (som setter
    width:9rem på alle input/select inni seg -- ville gjort avkrysnings-
    boksen unaturlig bred). Checkbox og tekst ligger i SAMME <label> (klikk
