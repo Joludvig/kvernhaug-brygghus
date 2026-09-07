@@ -97,6 +97,54 @@ class TestMarkupDefaultHidden(unittest.TestCase):
         self._hoygrav_boks_fortsatt_hidden(_VERKTOY_EN)
 
 
+class TestIngenAutomatiskResultatVedInit(unittest.TestCase):
+    """AC1 (Chief round-2 CHANGES REQUESTED, issue #104): OG/FG-feltene har
+    gyldige forhåndsutfylte default-verdier i markup, så et
+    _oppdaterAbvKalkulator()-kall inne i _initAbvKalkulator() ville regnet
+    ut og vist et ekte resultat på førstelast -- markup-default-hidden
+    alene stopper ikke det, siden JS selv fjerner `hidden` igjen. Resultatet
+    skal først vises etter faktisk input-interaksjon (event listener), ikke
+    ved side-last."""
+
+    def setUp(self):
+        self.js = _VERKTOY_JS.read_text(encoding="utf-8")
+
+    def test_init_funksjonen_kaller_ikke_oppdater_direkte(self):
+        match = re.search(
+            r"function _initAbvKalkulator\(\)\s*\{(.*?)\n\}",
+            self.js,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, "Fant ikke _initAbvKalkulator() i verktoy_page.js")
+        body = match.group(1)
+        bare_kall = re.findall(r"(?<!\.addEventListener\()_oppdaterAbvKalkulator\(\)", body)
+        # Kall som argument til addEventListener (uten parenteser, dvs.
+        # `_oppdaterAbvKalkulator` som referanse) er greit -- det er et
+        # direkte, umiddelbart `_oppdaterAbvKalkulator()`-kall i kroppen
+        # (utenfor en event-callback) som ville trigget resultatvisning
+        # før brukerinteraksjon.
+        direkte_kall = re.findall(r"^\s*_oppdaterAbvKalkulator\(\)\s*;", body, re.MULTILINE)
+        self.assertEqual(
+            direkte_kall,
+            [],
+            "_initAbvKalkulator() kaller _oppdaterAbvKalkulator() direkte -- "
+            "med gyldige default OG/FG-verdier i markup viser dette et "
+            "resultat på førstelast, før brukeren har gjort noe (AC1).",
+        )
+
+    def test_event_listeners_fortsatt_registrert(self):
+        # Sanity -- beviser at fiksen ikke fjernet selve
+        # interaktiviteten, kun det umiddelbare kallet ved init.
+        self.assertRegex(
+            self.js,
+            r'getElementById\("verktoy-abv-og"\)\.addEventListener\("input",\s*_oppdaterAbvKalkulator\)',
+        )
+        self.assertRegex(
+            self.js,
+            r'getElementById\("verktoy-abv-fg"\)\.addEventListener\("input",\s*_oppdaterAbvKalkulator\)',
+        )
+
+
 class TestCssHiddenOverridePresent(unittest.TestCase):
     """The actual B02 root cause: .resultat-grid's "display: grid" beats
     the UA stylesheet's "[hidden] { display: none }" by cascade origin.

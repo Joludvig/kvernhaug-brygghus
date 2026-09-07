@@ -63,9 +63,12 @@ function _oppdaterAbvKalkulator() {
 }
 
 function _initAbvKalkulator() {
+  // Ikke kjør _oppdaterAbvKalkulator() her: OG/FG-feltene har gyldige
+  // forhåndsutfylte default-verdier, så et umiddelbart kall ville vist
+  // et resultat før brukeren har gjort noe (AC1, issue #104) -- resultatet
+  // skal først vises etter faktisk input-interaksjon.
   document.getElementById("verktoy-abv-og").addEventListener("input", _oppdaterAbvKalkulator);
   document.getElementById("verktoy-abv-fg").addEventListener("input", _oppdaterAbvKalkulator);
-  _oppdaterAbvKalkulator();
 }
 
 _initAbvKalkulator();
