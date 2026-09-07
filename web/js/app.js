@@ -1401,10 +1401,23 @@ function samleOppskrift() {
 // (aldri til lagring/eksport) -- to objekter med identisk innhold, men ulik
 // nøkkelrekkefølge (f.eks. fordi _normalisertRecipe() i recipe_storage.js
 // kan legge recipeSchemaVersion til på slutten), skal regnes som like.
+// Egendefinerte malt/humle/gjær-lesere returnerer valgfrie felt som
+// `felt.value.trim() || undefined` -- den aktive kladden får dermed nøkler
+// med JS-verdien undefined, mens faktisk lagring (vanlig JSON.stringify())
+// utelater slike nøkler helt. Uten normalisering under ser kanoniseringen
+// disse to formene som ulike, selv om de er nøyaktig samme lagrede
+// oppskrift (issue #110). Fiksen speiler JSON.stringify() sin egen,
+// dokumenterte oppførsel eksakt: undefined-verdier på objektnøkler
+// utelates, undefined-elementer i array blir null (aldri utelatt, siden det
+// ville endre array-lengden) -- null/false/0/tom streng er upåvirket.
 function _kanoniskJson(verdi) {
-  if (Array.isArray(verdi)) return "[" + verdi.map(_kanoniskJson).join(",") + "]";
+  if (Array.isArray(verdi)) {
+    return "[" + verdi.map((v) => (v === undefined ? "null" : _kanoniskJson(v))).join(",") + "]";
+  }
   if (verdi && typeof verdi === "object") {
-    const nokler = Object.keys(verdi).sort();
+    const nokler = Object.keys(verdi)
+      .filter((k) => verdi[k] !== undefined)
+      .sort();
     return "{" + nokler.map((k) => JSON.stringify(k) + ":" + _kanoniskJson(verdi[k])).join(",") + "}";
   }
   return JSON.stringify(verdi);
