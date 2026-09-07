@@ -664,12 +664,20 @@ function leggTilHumleRad(forhandsutfylt) {
     ariaLabel: t("builder.humle.comboboxAriaLabel"),
     onSelect: (id) => {
       const info = humleData[id];
-      if (info && alfaInput.value === "") {
+      const forrigeId = rad.dataset.humleId;
+      const erIdentitetsbytte = forrigeId !== undefined && forrigeId !== id;
+      if (info && (alfaInput.value === "" || erIdentitetsbytte)) {
         // Bibliotekets default-alfa vises kun til brukeren -- dette er IKKE
         // et eksplisitt valg, så alfaOverride skal forbli null (issue #112).
+        // Et bytte til en ANNEN biblioteks-humle i samme rad (issue #114) er
+        // en identitetsendring, ikke bare en tekstendring -- en evt.
+        // eksplisitt overstyring hørte til forrige humle og skal derfor
+        // IKKE arves av den nye, og visningen skal alltid friskes opp til
+        // den nye humlens biblioteksverdi, selv om feltet ikke var tomt.
         alfaInput.value = info.alfa;
         rad.dataset.alfaEksplisitt = "0";
       }
+      if (info) rad.dataset.humleId = id;
       beregnOgVisResultat();
     },
   });
@@ -693,6 +701,7 @@ function leggTilHumleRad(forhandsutfylt) {
     rad.querySelector(".eg-type").value = forhandsutfylt.custom.type || "";
   } else if (forhandsutfylt) {
     cb.setValue(forhandsutfylt.id);
+    rad.dataset.humleId = forhandsutfylt.id;
     _settHumleGram(gramFelt, forhandsutfylt.gram);
     rad.querySelector(".humle-tid").value = forhandsutfylt.tid;
     // issue #112: et gjenopprettet biblioteks-fallback-alfa (alfaOverride:
