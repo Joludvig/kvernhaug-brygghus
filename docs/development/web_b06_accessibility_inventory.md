@@ -22,7 +22,7 @@
 | 3 | Hop row alpha-acid input | `web/index.html:392` | Same — placeholder `alfa` only | MUST FIX |
 | 4 | Hop row grams input | `web/index.html:394` | Same — placeholder `gram` only | MUST FIX |
 | 5 | Hop row time (min) input | `web/index.html:396` | Same — placeholder `"60"`; also the only sibling numeric field with **no `data-i18n-placeholder`** at all (alpha/gram both have one), so its placeholder text is hardcoded and never localized | MUST FIX |
-| 6 | Hop target-IBU input | `web/index.html:408` | Same — placeholder `"0"` only | MUST FIX |
+| 6 | Hop target-IBU input | `web/index.html:408` | **Correction (Chief review, #142 prep):** already wrapped in a `<label>` (`web/index.html:407-409`), so it already has a correct programmatic accessible name via the wrapping-label mechanism. Not a gap. | — (reference-quality, already correct) |
 | 7 | Brew-log OG / volume / FG inputs | `web/bryggelogg.html:121-130` | Sibling `<label>` with **no `for`**, input has **no `id`** — zero programmatic association | MUST FIX |
 | 8 | Brew-log tasting sliders (18 flavor categories, `input[type=range]`) | `web/js/brygg_page.js:90-113` | `<label>` built with `textContent` but never linked (`for`/`id`) to its slider; same orphaned-label bug repeated per category, per brew | MUST FIX |
 | 9 | Brew-log "next time" / "what worked" / "what changed" textareas | `web/bryggelogg.html:151,155,157` | Same orphaned-label bug | MUST FIX |
@@ -43,7 +43,9 @@
 
 ## MUST FIX
 
-### 1–6. Malt/hop numeric inputs have no accessible name
+### 1–5. Malt/hop numeric inputs have no accessible name
+
+**Correction (Chief review, #142 prep):** the original draft of this section grouped six inputs (#1–6) as missing an accessible name. That is not correct for the sixth: `.humle-maal-ibu` (`web/index.html:407-409`) is already wrapped in a `<label>` and therefore already has a correct programmatic accessible name. It is not part of this MUST FIX group — see its own row in the prioritized table above. The real gap covers exactly five inputs, #1–5.
 
 `web/index.html:370-413` (the `<template id="malt-rad-mal">` / `<template id="humle-rad-mal">` used by `leggTilMaltRad()`/`leggTilHumleRad()` in `web/js/app.js`):
 
@@ -57,11 +59,11 @@
 <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram" data-i18n-placeholder="builder.humle.gramPlaceholder">
 ...
 <input type="number" class="humle-tid" min="0" step="1" value="60" placeholder="min">
-...
-<input type="number" class="humle-maal-ibu" min="0" step="1" placeholder="0">
 ```
 
-None of these six inputs have a `<label>`, `aria-label`, or `aria-labelledby` — no programmatic label / accessible-name mechanism was found for any of them in source. Each is followed by a `<span class="enhet">` (unit text, e.g. `kg`/`%α`/`g`/`min`) that is visually adjacent but **not** programmatically associated (no `id`/`aria-labelledby` link). The source defect is that missing name/association; placeholder text does not supply one — it is not linked via any accessible-name attribute and disappears once a value is typed — which relates to WCAG 3.3.2 (Labels or Instructions) among the applicable success criteria, cited here as context rather than as the complete accessible-name requirement. The exact screen-reader announcement for these fields (e.g. whether a generic role/state is spoken instead, and whether the placeholder is read at all) is **VERIFY IN BROWSER**, not asserted here. For repeated rows (multiple malt/hop lines), the missing accessible name is expected to make it hard to tell which row/field is focused — exact behavior needs live confirmation.
+(`.humle-maal-ibu` is intentionally omitted from this list — see the correction above.)
+
+None of these five inputs have a `<label>`, `aria-label`, or `aria-labelledby` — no programmatic label / accessible-name mechanism was found for any of them in source. Each is followed by a `<span class="enhet">` (unit text, e.g. `kg`/`%α`/`g`/`min`) that is visually adjacent but **not** programmatically associated (no `id`/`aria-labelledby` link). The source defect is that missing name/association; placeholder text does not supply one — it is not linked via any accessible-name attribute and disappears once a value is typed — which relates to WCAG 3.3.2 (Labels or Instructions) among the applicable success criteria, cited here as context rather than as the complete accessible-name requirement. The exact screen-reader announcement for these fields (e.g. whether a generic role/state is spoken instead, and whether the placeholder is read at all) is **VERIFY IN BROWSER**, not asserted here. For repeated rows (multiple malt/hop lines), the missing accessible name is expected to make it hard to tell which row/field is focused — exact behavior needs live confirmation.
 
 The searchable ingredient picker in the *same* row (`.combobox-mount`) **does** get a correct `aria-label` via `Combobox({ ariaLabel: t(...) })` (`web/js/app.js:406,672,1811-1837`) — so the picker is fine, only the raw numeric fields next to it are not.
 

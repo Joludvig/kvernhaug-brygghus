@@ -351,9 +351,9 @@
 <template id="malt-rad-mal">
 <div class="ingrediens-rad" data-type="malt">
 <div class="combobox-mount malt-velger-mount"></div>
-<input class="malt-mengde" min="0" placeholder="kg" step="0.05" type="number" value="1"/>
+<input aria-label="Malt amount (kg)" class="malt-mengde" data-i18n-aria-label="builder.malt.mengdeAriaLabel" min="0" placeholder="kg" step="0.05" type="number" value="1"/>
 <span class="enhet">kg</span>
-<input class="malt-pct mester-only" max="100" min="0" placeholder="%" step="0.1" type="number"/>
+<input aria-label="Malt share (%)" class="malt-pct mester-only" data-i18n-aria-label="builder.malt.pctAriaLabel" max="100" min="0" placeholder="%" step="0.1" type="number"/>
 <span class="enhet mester-only">%</span>
 <button class="egendefinert-knapp" data-i18n="builder.egendefinertKnapp" data-i18n-title="builder.malt.egendefinertTitle" title="Add a malt not found in the library" type="button">+ Custom</button>
 <button aria-label="Remove malt" class="fjern-knapp no-print" data-i18n-aria-label="builder.malt.fjernAriaLabel" data-i18n-title="builder.malt.fjernTitle" title="Remove" type="button">✕</button>
@@ -369,11 +369,11 @@
 <template id="humle-rad-mal">
 <div class="ingrediens-rad" data-type="humle">
 <div class="combobox-mount humle-velger-mount"></div>
-<input class="humle-alfa" data-i18n-placeholder="builder.humle.alfaPlaceholder" min="0" placeholder="alpha" step="0.1" type="number"/>
+<input aria-label="Alpha acid (%)" class="humle-alfa" data-i18n-aria-label="builder.humle.alfaAriaLabel" data-i18n-placeholder="builder.humle.alfaPlaceholder" min="0" placeholder="alpha" step="0.1" type="number"/>
 <span class="enhet">%α <button aria-label="What is alpha acid?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="alfasyre" data-i18n-aria-label="help.alfasyreAriaLabel" type="button">?</button></span>
-<input class="humle-gram" data-i18n-placeholder="builder.humle.gramPlaceholder" min="0" placeholder="grams" step="1" type="number" value="10"/>
+<input aria-label="Hop amount (g)" class="humle-gram" data-i18n-aria-label="builder.humle.gramAriaLabel" data-i18n-placeholder="builder.humle.gramPlaceholder" min="0" placeholder="grams" step="1" type="number" value="10"/>
 <span class="enhet">g</span>
-<input class="humle-tid" min="0" placeholder="min" step="1" type="number" value="60"/>
+<input aria-label="Time (min)" class="humle-tid" data-i18n-aria-label="builder.humle.tidAriaLabel" data-i18n-placeholder="builder.humle.tidPlaceholder" min="0" placeholder="min" step="1" type="number" value="60"/>
 <span class="enhet">min</span>
 <button class="egendefinert-knapp" data-i18n="builder.egendefinertKnapp" data-i18n-title="builder.humle.egendefinertTitle" title="Add a hop not found in the library" type="button">+ Custom</button>
 <button aria-label="Remove hops" class="fjern-knapp no-print" data-i18n-aria-label="builder.humle.fjernAriaLabel" data-i18n-title="builder.humle.fjernTitle" title="Remove" type="button">✕</button>

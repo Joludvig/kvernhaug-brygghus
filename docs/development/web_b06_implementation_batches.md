@@ -31,7 +31,7 @@ the inventory it builds on does.*
 
 | Order | Batch | Findings | Severity | Regression risk |
 |---|---|---|---|---|
-| 1 | Malt/hop numeric input accessible names | #1–6 | MUST FIX | Low |
+| 1 | Malt/hop numeric input accessible names | #1–5 | MUST FIX | Low |
 | 2 | Brew-log OG/FG/Volume/textareas + judgment-group label | #7, #9, #13 | MUST FIX (+1 SHOULD FIX) | Low–Medium |
 | 3 | Brew-log tasting sliders | #8 | MUST FIX | Medium–High |
 | 4 | Shared combobox ARIA + dead `aria-labelledby` cleanup | #10, #21 | MUST FIX (+1 SHOULD FIX) | High |
@@ -72,16 +72,19 @@ the inventory it builds on does.*
 
 ## Batch 1 — Malt/hop numeric input accessible names
 
-**Findings:** #1–6 (malt kg, malt %, hop alpha-acid, hop grams, hop time,
-hop target-IBU — all MUST FIX, no accessible name).
+**Findings:** #1–5 (malt kg, malt %, hop alpha-acid, hop grams, hop time —
+all MUST FIX, no accessible name). **Correction (Chief review, #142 prep):**
+finding #6 (hop target-IBU, `web/index.html:408`) is not part of this batch
+— `.humle-maal-ibu` is already wrapped in a `<label>` and already has a
+correct accessible name; it must not be touched.
 
 - **Files/functions/selectors:** `web/index.html` — `<template
   id="malt-rad-mal">` (`:373,375`) and `<template id="humle-rad-mal">`
-  (`:392,394,396,408`); populated per-row by `leggTilMaltRad()` /
+  (`:392,394,396`); populated per-row by `leggTilMaltRad()` /
   `leggTilHumleRad()` in `web/js/app.js`. New/changed i18n keys land in
   `web/js/i18n.js` (NO block ~486–518, EN block ~2229–2261, per the
   inventory's own citation).
-- **Acceptance criteria:** each of the six inputs gets a real accessible
+- **Acceptance criteria:** each of the five inputs gets a real accessible
   name (`aria-label` is the minimal-diff choice here, since these are
   templated rows with no natural static `id` to hang a `<label for>` on
   without also solving cross-row `id` uniqueness for no reason — `aria-label`
@@ -111,7 +114,7 @@ hop target-IBU — all MUST FIX, no accessible name).
   cross-reference check across `web/index.html`/`bryggelogg.html`/
   `pantry.html`/`verktoy.html`. Since this batch uses `aria-label` rather
   than `id`/`for`, a simpler static check for this batch specifically
-  would be: grep the six selectors in `web/index.html` and assert each
+  would be: grep the five selectors in `web/index.html` and assert each
   carries an `aria-label` attribute — cheap, no browser needed, but only
   covers "an attribute exists," not "the announced name is correct."
 - **Regression risk:** Low — pure attribute addition on template markup
@@ -121,7 +124,7 @@ hop target-IBU — all MUST FIX, no accessible name).
   (`web/index.html` malt/hop builder templates vs. brew-log/handbook
   files those touch).
 
-**Future issue title:** *"WEB FIX — B06 batch 1: accessible names for malt/hop numeric inputs (#1–6)"*
+**Future issue title:** *"WEB FIX — B06 batch 1: accessible names for malt/hop numeric inputs (#1–5)"*
 
 ---
 
