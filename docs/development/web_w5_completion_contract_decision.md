@@ -187,10 +187,24 @@ observable effect until then.
 5. "Gjenåpne" on a brew completed via this new path returns it to "Under
    arbeid" exactly as any other reopened brew, re-deriving `fase` from
    `actuals`/`sensing` as before.
-6. `bryggFase()`'s "forkastet" precedence is unaffected: a discarded brew
-   never appears in "Ferdige brygg" regardless of `status` history
-   (`forkastet` is checked first in `bryggFase()`, unrelated to the
-   `ferdige` filter's `status` clause).
+6. A discarded brew never appears in "Ferdige brygg" under Option A. This is
+   **not** because of `bryggFase()`'s "forkastet" precedence — under Option
+   A the `ferdige` filter is `b.status === "done"` only (§5) and no longer
+   calls `bryggFase()` at all, so that precedence does not participate in
+   this decision. The actual mechanism: the discard handler
+   (`brygg_page.js:309`) calls `oppdaterBrygg(brew.brewId, { status:
+   "discarded" })`, which overwrites the brew's `status` field in place
+   (`brew_storage.js:503`) — a brew holds exactly one *current* `status`
+   value, never a history of prior values — so a discarded brew's `status`
+   is `"discarded"`, which fails the `=== "done"` check directly. (`
+   bryggFase()` still independently returns `"forkastet"` for such a brew,
+   used elsewhere — e.g. the "Under arbeid" card label — but that return
+   value is not consulted by the `ferdige` filter under Option A.) Where
+   this criterion says "regardless of status history", it means: regardless
+   of what the brew's status was *before* being discarded — a brew never
+   holds a stale `"done"` value alongside a current `"discarded"` one, since
+   `oppdaterBrygg()` always overwrites the single current field — not that
+   any historical marker is tracked or consulted.
 7. Frozen `snapshot` is provably unchanged before/after (still not
    mutable by any code path touched).
 8. "Next time" visibility in the builder is unaffected — a brew's
@@ -213,7 +227,8 @@ Option A specifically needs verified, not the full W5 surface:
 | B2 | Give judgment, then click "Avslutt" (normal order) | Unchanged from current behavior — appears in "Ferdige brygg" with judgment badge |
 | B3 | Complete without judgment (B1), then "Gjenåpne", then give judgment, then "Avslutt" again | Ends in "Ferdige brygg" with judgment badge now shown; no duplicate row |
 | B4 | Complete without judgment (B1); inspect the "Ferdige brygg" row visually | No badge shown, no layout break, OG/FG/ABV shown normally (both were already required to reach `fase:"smaking"`) |
-| B5 | Discard a brew that already has `status:"done"` (if reachable via UI at all — confirm reachability first, per preflight §9 A4) | Still shown as `forkastet` in "Under arbeid", never in "Ferdige brygg" |
+| B5 | Discard a brew that already has `status:"done"` (if reachable via UI at all — confirm reachability first, per preflight §9 A4) | Still shown as `forkastet` in "Under arbeid", never in "Ferdige brygg" — because the discard action overwrites `status` to `"discarded"` (`brygg_page.js:309`), which fails the `ferdige` filter's `b.status === "done"` check directly (see acceptance criterion 6); confirms the brew's prior `"done"` value is not still readable anywhere the filter checks |
+| B5b | Complete a brew via "Avslutt" (B1) so it appears in "Ferdige brygg", then discard it from "Ferdige brygg"/"Under arbeid" (whichever the UI allows once `status:"done"`) | Brew disappears from "Ferdige brygg" immediately and shows as `forkastet`; regression proof that a `"done"` → `"discarded"` transition removes the brew from the finished list under Option A, not just that a never-completed brew stays out of it |
 | B6 | Run B1-B4 in both NO and EN | Identical behavior and text both languages; 0 raw keys |
 | B7 | Repeat B1-B6 at 390×844 and 768×1024 viewports | No layout break, no horizontal overflow |
 | B8 | Full scenario set B1-B7 | 0 console/network errors, both Chromium and Firefox |
