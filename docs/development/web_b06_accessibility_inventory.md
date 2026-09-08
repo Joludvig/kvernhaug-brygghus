@@ -61,7 +61,7 @@
 <input type="number" class="humle-maal-ibu" min="0" step="1" placeholder="0">
 ```
 
-None of these six inputs have a `<label>`, `aria-label`, or `aria-labelledby`. Each is followed by a `<span class="enhet">` (unit text, e.g. `kg`/`%α`/`g`/`min`) that is visually adjacent but **not** programmatically associated (no `id`/`aria-labelledby` link). A screen reader landing on any of these fields announces only `"number, edit"` with the placeholder as unreliable, non-guaranteed supplementary text (placeholders are explicitly not an adequate name substitute — WCAG 3.3.2, and disappear once a value is typed). For repeated rows (multiple malt/hop lines), this makes it impossible to tell which row/field a screen-reader user is in.
+None of these six inputs have a `<label>`, `aria-label`, or `aria-labelledby` — no programmatic label / accessible-name mechanism was found for any of them in source. Each is followed by a `<span class="enhet">` (unit text, e.g. `kg`/`%α`/`g`/`min`) that is visually adjacent but **not** programmatically associated (no `id`/`aria-labelledby` link). The source defect is that missing name/association; placeholder text does not supply one — it is not linked via any accessible-name attribute and disappears once a value is typed — which relates to WCAG 3.3.2 (Labels or Instructions) among the applicable success criteria, cited here as context rather than as the complete accessible-name requirement. The exact screen-reader announcement for these fields (e.g. whether a generic role/state is spoken instead, and whether the placeholder is read at all) is **VERIFY IN BROWSER**, not asserted here. For repeated rows (multiple malt/hop lines), the missing accessible name is expected to make it hard to tell which row/field is focused — exact behavior needs live confirmation.
 
 The searchable ingredient picker in the *same* row (`.combobox-mount`) **does** get a correct `aria-label` via `Combobox({ ariaLabel: t(...) })` (`web/js/app.js:406,672,1811-1837`) — so the picker is fine, only the raw numeric fields next to it are not.
 
@@ -114,7 +114,7 @@ function _byggSmakSliders(container, brew) {
 }
 ```
 
-This runs once per flavor category (up to all 18 in `SMAKS_KATEGORIER`, `web/js/flavor.js:5-9`) every time a brew reaches the "smaking" (tasting) phase. Neither `label` nor `input` ever gets an `id`/`for` — this is the single highest-severity finding in this inventory: up to 18 unnamed `<input type="range">` controls per brew, with no way for a screen-reader user to tell which flavor axis (Maltfylde, Karamell, Sitrus, …) any given slider adjusts. Minimal fix: assign `input.id = \`brygg-smak-${kategori}\`` and `label.htmlFor = input.id` in the same loop — no markup/template change needed since both elements are already created in JS.
+This runs once per flavor category (up to all 18 in `SMAKS_KATEGORIER`, `web/js/flavor.js:5-9`) every time a brew reaches the "smaking" (tasting) phase. Neither `label` nor `input` ever gets an `id`/`for` — this is the single highest-severity finding in this inventory: up to 18 unnamed `<input type="range">` controls per brew — no programmatic label / accessible-name mechanism was found for any of them in source, so a screen reader has no per-slider name to announce for which flavor axis (Maltfylde, Karamell, Sitrus, …) it adjusts; the exact resulting announcement is **VERIFY IN BROWSER**, not asserted here. Minimal fix: assign `input.id = \`brygg-smak-${kategori}\`` and `label.htmlFor = input.id` in the same loop — no markup/template change needed since both elements are already created in JS.
 
 ### 9. Brew-log "next time" / "what worked" / "what changed" notes — orphaned labels
 
@@ -143,7 +143,7 @@ Same orphaned-label pattern as #7, text populated the same way in `web/js/brygg_
 - Line 82: `li.setAttribute("role", "option")` — correct.
 - Line 113-118 (`_move`, arrow-key navigation): highlight is applied/removed via `classList.add/remove("is-active")` only. **No `id` is ever assigned to the `<li>` options**, **no `aria-controls` on the input pointing at the listbox `<ul>`**, and **no `aria-activedescendant` set on the input** as the highlight moves.
 
-Net effect: sighted mouse/keyboard users see the highlighted option move; screen-reader users navigating the same list with arrow keys hear nothing change until they commit with Enter. This is the standard WAI-ARIA Combobox pattern's two most load-bearing attributes, and both are currently missing. This affects all four comboboxes built from this shared class (malt, hop, yeast, style — `web/js/app.js:403-409,663-673,1808-1813,1833-1838`) identically in both NO and EN.
+Net effect: sighted mouse/keyboard users see the highlighted option move; the source facts are that no option `<li>` has an `id`, and neither `aria-controls` nor `aria-activedescendant` is ever set on the input — the two most load-bearing attributes of the standard WAI-ARIA Combobox pattern, both currently missing. Whether/what a screen reader announces (or fails to announce) as the highlight moves is not asserted here — **VERIFY IN BROWSER** (NVDA/VoiceOver) is required to confirm actual behavior. This affects all four comboboxes built from this shared class (malt, hop, yeast, style — `web/js/app.js:403-409,663-673,1808-1813,1833-1838`) identically in both NO and EN.
 
 Two smaller, related notes on the same widget:
 - Optgroup headers (`.combobox-gruppe-header`) are deliberately marked `aria-hidden="true"` per the file's own comment ("grouping is purely visual"). Defensible as-is — it means screen-reader users get a flat, ungrouped list while sighted users see grouped sections, which is a reasonable simplification rather than a defect — but worth recording since it's a real, intentional divergence in experience between input modalities.
@@ -197,12 +197,13 @@ Both sizes are below the WCAG 2.2 §2.5.8 (AA) 24×24 CSS-pixel minimum target s
 
 ## VERIFY IN BROWSER
 
-1. **Combobox aria-activedescendant fix (#10)** and **help popover focus (#11)** — once implemented, needs a real screen reader pass (NVDA/VoiceOver) to confirm announcements are correct, not just "attributes present."
-2. **Side-drawer focus trap (#14)** — needs an actual Tab-key walk-through with the drawer open to confirm whether focus really does leak to background content, and whether that's perceptible/harmful in practice (the backdrop is only a visual overlay, not `inert`/`aria-hidden` on the rest of the page — worth confirming background content doesn't get `Tab`-focused invisibly under the backdrop).
-3. **Modal dialog inert background (#12)** — confirm with a screen reader whether background content (page body) is actually reachable via swipe/virtual cursor while `#modus-forstegang` is open, despite `aria-modal="true"`.
-4. **Touch target sizing (#11, `.hjelp-knapp`)** — confirm real fat-finger tap success rate on a phone; CSS size alone doesn't account for padding/hit-area tricks that might not be present here.
-5. **Radar chart per-axis values (#15)** — confirm with a screen reader exactly what, if anything, is announced when focus reaches or a user inspects the flavor-wheel SVG.
-6. **Color-only state cues** — `.modus-knapp`/`.enhet-knapp`/pantry-type-knapp active states: confirmed these all also set `aria-pressed` (not color-only, see finding #19), but the exact focus-visible/active visual contrast in both light states should still get a quick manual contrast check — out of grep-able scope for this static pass.
+1. **Current (pre-fix) announcement behavior for the unlabeled numeric/range controls (#1–6, #8) and the combobox arrow-key highlight (#10)** — this inventory deliberately does not assert an exact screen-reader utterance for any of these; a real NVDA/VoiceOver pass is needed to confirm what, if anything, is currently announced.
+2. **Combobox aria-activedescendant fix (#10)** and **help popover focus (#11)** — once implemented, needs a real screen reader pass (NVDA/VoiceOver) to confirm announcements are correct, not just "attributes present."
+3. **Side-drawer focus trap (#14)** — needs an actual Tab-key walk-through with the drawer open to confirm whether focus really does leak to background content, and whether that's perceptible/harmful in practice (the backdrop is only a visual overlay, not `inert`/`aria-hidden` on the rest of the page — worth confirming background content doesn't get `Tab`-focused invisibly under the backdrop).
+4. **Modal dialog inert background (#12)** — confirm with a screen reader whether background content (page body) is actually reachable via swipe/virtual cursor while `#modus-forstegang` is open, despite `aria-modal="true"`.
+5. **Touch target sizing (#11, `.hjelp-knapp`)** — confirm real fat-finger tap success rate on a phone; CSS size alone doesn't account for padding/hit-area tricks that might not be present here.
+6. **Radar chart per-axis values (#15)** — confirm with a screen reader exactly what, if anything, is announced when focus reaches or a user inspects the flavor-wheel SVG.
+7. **Color-only state cues** — `.modus-knapp`/`.enhet-knapp`/pantry-type-knapp active states: confirmed these all also set `aria-pressed` (not color-only, see finding #19), but the exact focus-visible/active visual contrast in both light states should still get a quick manual contrast check — out of grep-able scope for this static pass.
 
 ---
 
