@@ -96,7 +96,7 @@ function _byggSmakSliders(container, brew) {
     rad.className = "brygg-smak-rad";
     const label = document.createElement("label");
     label.textContent = t("brygg.smakKategori", {
-      kategori,
+      kategori: smaksKategoriVisning(kategori),
       forventet: (predikert[kategori] || 0).toFixed(1).replace(".", ","),
     });
     const input = document.createElement("input");
