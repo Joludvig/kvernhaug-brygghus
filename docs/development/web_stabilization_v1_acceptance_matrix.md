@@ -102,23 +102,31 @@ of the sweep does a future fix for this actually owe":
 
 ## 4. Finding-by-finding matrix
 
-### 4.1 W1–W4 (B01/B02/B03/B05) — Roadmap "NOW" items with **no completed triage yet**
+### 4.1 W1–W4 (B01/B02/B03/B05) — completed baseline, no dedicated triage document in this synthesis's source set
 
-Only W5/B04 has a merged preflight analysis among the five source documents
-this issue was asked to reconcile. **B01 (units), B02 (ABV visible-state),
-B03 (draft/saved/variant clarity), and B05 (custom yeast transition) have no
-equivalent static-source triage document in this repository as of this
-synthesis** — confirmed by `ls docs/development/web_*` finding only the five
-documents listed in this file's header. This synthesis cannot fabricate
-acceptance rows for them without inventing findings no source backs, which
-would violate the same "source-proven, not asserted" discipline every input
-document already follows. **Recorded here as a gap, not silently
-skipped**: a future round should produce `web_w1_units_contract_preflight.md`
-/ `web_w2_abv_visible_state_preflight.md` / `web_w3_draft_saved_variant_preflight.md`
-/ `web_w4_custom_yeast_preflight.md` (or a combined document) mirroring
-W5's format before implementation starts on any of them, so DoD items 2–4
-have the same evidentiary footing DoD item 5 (W5/B04) already has via §4.2
-below.
+**W1 (B01, units), W2 (B02, ABV visible-state), W3 (B03, draft/saved/variant
+clarity), and W4 (B05, custom yeast transition) are already implemented,
+merged, deployed, and live** from previously completed stabilization rounds
+— confirmed by Chief's exact-head review of this document (PR #135,
+2026-09-08). This section records a **source-set / documentation gap in this
+synthesis**, not an implementation gap: only W5/B04 has a merged preflight
+analysis among the five source documents this issue was asked to reconcile
+— confirmed by `ls docs/development/web_*` finding only the five documents
+listed in this file's header. This synthesis cannot fabricate acceptance
+rows for W1–W4 without inventing findings no source backs, which would
+violate the same "source-proven, not asserted" discipline every input
+document already follows.
+
+**Recorded here as a documentation gap, not a pending-implementation gap**:
+if useful for audit consistency later, a retrospective evidence-summary
+document (e.g. `web_w1_units_contract_preflight.md` /
+`web_w2_abv_visible_state_preflight.md` /
+`web_w3_draft_saved_variant_preflight.md` /
+`web_w4_custom_yeast_preflight.md`, or a combined document) could be produced
+mirroring W5's format, so DoD items 2–4 have the same documented evidentiary
+trail DoD item 5 (W5/B04) already has via §4.2 below. This would be
+retrospective record-keeping only — **not** a prerequisite or gate for any
+further implementation, since W1–W4's product behavior already shipped.
 
 ### 4.2 W5 / B04 — brew completion state (source: `web_w5_brew_completion_preflight.md`)
 
@@ -213,11 +221,14 @@ inaccessible content" and B09/B10's "content renders visibly broken" cases.
 Per "say so instead of guessing" — carried forward from the source triages,
 not new claims:
 
-1. **W1–W4 (B01/B02/B03/B05) have no triage document** (§4.1) — the single
-   largest gap in mapping the full roadmap DoD to concrete acceptance rows.
-   DoD items 2, 3, 4, and part of 6 currently rest on the roadmap's own
-   one-line descriptions only, not on a source-proven finding list the way
-   W5/B04, B06, B07, B08, and B09–B11 already do.
+1. **W1–W4 (B01/B02/B03/B05) have no dedicated triage document in this
+   synthesis's source set** (§4.1) — a documentation/audit-trail gap, not an
+   implementation gap: these items are already implemented, merged, and
+   deployed (Chief review confirmation, PR #135). DoD items 2, 3, 4, and
+   part of 6 therefore rest on the roadmap's own one-line descriptions plus
+   their already-shipped status, rather than on a source-proven finding
+   list the way W5/B04, B06, B07, B08, and B09–B11 already have — a gap in
+   this synthesis's documentation coverage, not in DoD completion.
 2. **Viewport number mismatch** (§2.2) between the DoD's 390×844/768×1024
    and the `web-full-regression` skill's 375/768 (no pinned height) —
    needs an explicit reconciliation decision (update the skill, or confirm
@@ -261,9 +272,11 @@ not new claims:
   mechanism but live in otherwise-independent code paths (per B09_B11
   triage's own "Coupling / dependencies" section) — fixing one does not
   fix the other.
-- W1–W4's absence of a triage document (§4.1, §5.1) means this synthesis
-  cannot assert or rule out coupling between them and W5/B06/B07 — a real
-  gap, not an assumed "no coupling."
+- W1–W4 already shipped as completed prerequisites; their absence of a
+  dedicated triage document (§4.1, §5.1) means this synthesis cannot assert
+  or rule out **documented** coupling between them and W5/B06/B07 — a
+  documentation gap, not an implementation-status question and not an
+  assumed "no coupling."
 
 ---
 
