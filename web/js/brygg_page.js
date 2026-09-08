@@ -124,6 +124,35 @@ function _lesSmakSliders(container) {
 
 // ─── Kortrendering ────────────────────────────────────────────────────────
 
+// Runde B06 batch 2 (#144, findings #7/#9) -- statiske id-er som "brygg-og"
+// er FORBUDT: bryggeloggen kan vise flere .brygg-kort samtidig (én per
+// aktivt brygg, alle klonet fra samme <template>), så en bar streng-id
+// ville kollidert på tvers av kort. brew.brewId er allerede en stabil,
+// url-/id-sikker per-brew streng mynta av _genererBrewId() (brew_storage.js)
+// -- gjenbrukes rett som DOM-id-namespace her, ingen ny persistent identitet
+// innføres.
+const BRYGG_FELT_ID_PAR = [
+  [".brygg-og", ".brygg-og-label", "og"],
+  [".brygg-volum", ".brygg-volum-label", "volum"],
+  [".brygg-fg", ".brygg-fg-label", "fg"],
+  [".brygg-nestegang", ".brygg-nesteganglabel", "nestegang"],
+  [".brygg-fungerte", ".brygg-fungerte-label", "fungerte"],
+  [".brygg-endret", ".brygg-endret-label", "endret"],
+];
+
+// Kjøres uavhengig av hvilken fase som er synlig -- feltene finnes alltid i
+// det klonede kortet (bare skjult via en ancestor sin `hidden`), så også
+// skjulte kontroller får en unik id fra første render.
+function _kobleBryggFeltIder(kort, brewId) {
+  for (const [feltSel, labelSel, suffiks] of BRYGG_FELT_ID_PAR) {
+    const felt = kort.querySelector(feltSel);
+    const label = kort.querySelector(labelSel);
+    if (!felt || !label) continue;
+    felt.id = `${brewId}-${suffiks}`;
+    label.htmlFor = felt.id;
+  }
+}
+
 function _visTilbakemelding(kort, tekst) {
   const el = kort.querySelector(".brygg-tilbakemelding");
   if (!tekst) {
@@ -138,6 +167,7 @@ function _byggKort(brew) {
   const fase = bryggFase(brew);
   const kort = document.getElementById("brygg-kort-mal").content.firstElementChild.cloneNode(true);
   kort.dataset.brewId = brew.brewId;
+  _kobleBryggFeltIder(kort, brew.brewId);
 
   kort.querySelector(".brygg-kort-navn").textContent =
     visningsnavn(brew.snapshot.recipe.navn) || t("identitet.utenNavn");
@@ -200,6 +230,13 @@ function _byggKort(brew) {
     sporsmal.textContent = t("brygg.sporsmalSmaking");
     const domBlokk = kort.querySelector(".brygg-felt-smaking");
     domBlokk.hidden = false;
+    // Finding #13 -- judgment-gruppen (samme spørsmål som `sporsmal`
+    // ovenfor: "Ville du brygget dette igjen?") hadde ingen programmatisk
+    // navn. Gjenbruker den EKSISTERENDE brygg.sporsmalSmaking-nøkkelen --
+    // IKKE brygg.smakSporsmal, som er det SEPARATE flavor-match-spørsmålet
+    // ("Ble ølet omtrent som du forventet?") satt lenger ned. Ingen ny
+    // i18n-nøkkel, ingen synlig tekstendring.
+    kort.querySelector(".brygg-dom-bryter").setAttribute("aria-label", t("brygg.sporsmalSmaking"));
     for (const knapp of kort.querySelectorAll(".brygg-dom-knapp")) {
       knapp.textContent = t(`brygg.dom.${knapp.dataset.dom}`);
       const valgt = brew.sensing && brew.sensing.judgment === knapp.dataset.dom;
