@@ -21,6 +21,16 @@ rad.dataset.alfaEksplisitt-flagg, satt KUN av ekte brukerinntasting
 (input-lytteren) eller ved gjenoppretting av en allerede eksplisitt
 alfaOverride -- aldri av en biblioteks-fallback-fylling.
 
+Utvidet for issue #116 -- "custom hop -> library hop leaves stale alpha
+display": å forlate egendefinert-modus (uten fiksen) lot rad.dataset.humleId
+stå på hvilken biblioteks-id raden hadde FØR egendefinert ble aktivert. Valgte
+brukeren samme humle igjen etter å ha gått tilbake til biblioteket, ble ikke
+det etterfølgende valget gjenkjent som et identitetsbytte (#114), og den
+egendefinerte alfaen ble stående synlig selv om alfaOverride korrekt ble
+null. Fiksen setter rad.dataset.humleId til en sentinel-verdi
+("__egendefinert__") som aldri kan matche en ekte biblioteks-id, slik at
+ETHVERT påfølgende biblioteksvalg alltid trigger identitetsbytte-grenen.
+
 Kjøres med:
     py -3 -m unittest discover -s tests
 """
@@ -126,6 +136,35 @@ class TestLeggTilHumleRadSkillerFallbackFraEksplisitt(unittest.TestCase):
             r'rad\.dataset\.alfaEksplisitt\s*=\s*"1";[\s\S]*?'
             r'beregnOgVisResultat\(\);[\s\S]*?\}\);',
         )
+
+
+class TestSettHumleEgendefinertTilbakestillerBibliotekIdentitet(unittest.TestCase):
+    """issue #116 -- å forlate egendefinert-modus (tilbake til biblioteket)
+    må selv tilbakestille rad.dataset.humleId til en verdi som ALDRI kan
+    matche en ekte biblioteks-id, slik at det påfølgende biblioteksvalget
+    (uansett hvilken humle brukeren velger, inkludert den samme som var
+    aktiv FØR egendefinert ble slått på) alltid blir gjenkjent som et
+    identitetsbytte av onSelect's erIdentitetsbytte-sjekk (#114) -- og
+    dermed alltid frisker opp det synlige alfa-feltet i stedet for å la den
+    egendefinerte alfaen henge igjen."""
+
+    def _kropp(self):
+        return _funksjonskropp(
+            _app_js(), r"function _settHumleEgendefinert\(rad, pa, eksplisittId\)\s*\{"
+        )
+
+    def test_tilbake_til_bibliotek_setter_sentinel_humleid(self):
+        kropp = self._kropp()
+        self.assertRegex(
+            kropp,
+            r"\}\s*else\s*\{\s*"
+            r"rad\._combobox\.clear\(\);[\s\S]*?"
+            r'rad\.dataset\.humleId\s*=\s*"__egendefinert__";',
+        )
+
+    def test_tilbake_til_bibliotek_nullstiller_alfaeksplisitt(self):
+        kropp = self._kropp()
+        self.assertRegex(kropp, r'rad\.dataset\.alfaEksplisitt\s*=\s*"0";')
 
 
 class TestLesHumleRaderBrukerEksplisittFlagg(unittest.TestCase):
