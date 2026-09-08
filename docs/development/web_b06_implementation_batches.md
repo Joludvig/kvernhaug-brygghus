@@ -32,8 +32,8 @@ the inventory it builds on does.*
 | Order | Batch | Findings | Severity | Regression risk |
 |---|---|---|---|---|
 | 1 | Malt/hop numeric input accessible names | #1–5 | **COMPLETED — implemented in #142 / PR #143** | Low |
-| 2 | Brew-log OG/FG/Volume/textareas + judgment-group label | #7, #9, #13 | MUST FIX (+1 SHOULD FIX) — **next pending implementation batch** | Low–Medium |
-| 3 | Brew-log tasting sliders | #8 | MUST FIX | Medium–High |
+| 2 | Brew-log OG/FG/Volume/textareas + judgment-group label | #7, #9, #13 | **COMPLETED IN IMPLEMENTATION — implemented by #144** | Low–Medium |
+| 3 | Brew-log tasting sliders | #8 | MUST FIX — **next pending implementation batch** | Medium–High |
 | 4 | Shared combobox ARIA + dead `aria-labelledby` cleanup | #10, #21 | MUST FIX (+1 SHOULD FIX) | High |
 | 5 | Help popover focus handling + initial `aria-expanded` | #11 (focus half) | MUST FIX | Medium |
 | 6 | Touch-target sizing | #11 (size half), #20 | SHOULD FIX | Low |
@@ -135,12 +135,24 @@ correct accessible name; it was not touched.
 
 ## Batch 2 — Brew-log OG/FG/Volume + textareas + judgment-group label
 
-**Status: next pending implementation batch** (Batch 1 is completed — see
-above).
+**Status: COMPLETED IN IMPLEMENTATION — implemented by #144.** Deployment/
+live status is tracked separately on issue #144 under the Kvernhaug Web
+lifecycle rule `MERGED ≠ DEPLOYED/LIVE`. Everything below this line is
+retained as the original planning record for reference; it is no longer a
+future/pending batch. **One correction to the plan below, caught during
+#144 implementation:** the judgment-group `aria-label` acceptance criterion
+originally named the wrong i18n key (`brygg.smakSporsmal`) — see the two
+corrected bullets below for the fix (the actual implementation uses
+`brygg.sporsmalSmaking`). The actual per-field `id` scheme implemented is
+also slightly simpler than sketched below: `` `${brew.brewId}-og` `` etc.
+(no extra `"brygg-"` prefix — `brew.brewId` already reads as `brew-<uuid>`,
+so the prefix was redundant) — see the accessibility inventory's #7/#9
+entries for the exact scheme and verification evidence.
 
-**Findings:** #7 (OG/FG/Volume, MUST FIX), #9 (nextTime/whatWorked/whatChanged
-textareas, MUST FIX), #13 (tasting judgment-group label, SHOULD FIX — see
-"why #13 is here, not with #14/#15" below).
+**Findings:** #7 (OG/FG/Volume, MUST FIX — now fixed), #9
+(nextTime/whatWorked/whatChanged textareas, MUST FIX — now fixed), #13
+(tasting judgment-group label, SHOULD FIX — now fixed; see "why #13 is here,
+not with #14/#15" below).
 
 - **Files/functions/selectors:** `web/bryggelogg.html` template (`:121-130`
   OG/FG/Volume labels+inputs, `:133-137` judgment `role="group"`, `:150-159`
@@ -163,8 +175,16 @@ textareas, MUST FIX), #13 (tasting judgment-group label, SHOULD FIX — see
     `.brygg-endret` additionally lose their "zero accessible name and zero
     placeholder" gap the inventory flags as the weakest case in this group.
   - Judgment group (#13): add `aria-label` (not `aria-labelledby`, see
-    next bullet) matching `t("brygg.smakSporsmal")`'s content, on the
-    `role="group"` div at `bryggelogg.html:133-137`.
+    next bullet) matching `t("brygg.sporsmalSmaking")`'s content
+    ("Ville du brygget dette igjen?" / "Would you brew this again?"), on
+    the `role="group"` div at `bryggelogg.html:133-137`. **Correction
+    (caught during #144 implementation):** this bullet originally named
+    `t("brygg.smakSporsmal")` — that key is the *separate* flavor-match
+    question ("Ble ølet omtrent som du forventet?") shown further down the
+    same card, not the question the judgment buttons answer. The judgment
+    buttons answer the card's general `.brygg-sporsmal` question, which is
+    populated with `brygg.sporsmalSmaking` — that is the correct key to
+    reuse here.
   - **Cross-cutting acceptance criterion this batch must not skip:** the
     brew log can render **multiple brew cards on the same page
     simultaneously** (one `.brygg-kort` per active brew, from the same
@@ -179,8 +199,9 @@ textareas, MUST FIX), #13 (tasting judgment-group label, SHOULD FIX — see
 - **NO/EN implications:** none beyond existing `t()` keys already used for
   these labels — no new i18n key needed for #7/#9 (the `id`/`for`
   attributes carry no visible/translatable text). #13's `aria-label` reuses
-  the existing `brygg.smakSporsmal` key already rendered visually — no new
-  key.
+  the existing `brygg.sporsmalSmaking` key (see the correction above — not
+  `brygg.smakSporsmal`) already rendered visually elsewhere on the same
+  card — no new key.
 - **Keyboard/focus cases:** none — no new focus management, just
   programmatic name/association wiring on already-focusable controls.
 - **Mobile implications:** none.
@@ -225,11 +246,14 @@ textareas, MUST FIX), #13 (tasting judgment-group label, SHOULD FIX — see
   ready-to-ship one-liner into an issue that cannot start until someone
   makes two unrelated UX calls would delay it for no technical reason.
 
-**Future issue title:** *"WEB FIX — B06 batch 2: brew-log OG/FG/Volume, tasting-phase textareas, judgment-group label (#7, #9, #13)"*
+**Issue (actual):** #144 — *"WEB FIX — B06 batch 2: brew-log field labels + judgment group"*
 
 ---
 
 ## Batch 3 — Brew-log tasting sliders
+
+**Status: next pending implementation batch** (Batch 2 is completed — see
+above).
 
 **Findings:** #8 (MUST FIX — up to 18 unlabeled `<input type="range">` per
 brew, the inventory's own highest-severity single finding).
