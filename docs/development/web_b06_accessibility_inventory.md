@@ -45,7 +45,7 @@
 
 ### 1–5. Malt/hop numeric inputs — FIXED in #142 / PR #143
 
-**Status: FIXED.** Implemented in #142 / PR #143 (exact head `cfd4e81e0eded8b339d8d09360636c2dffac5bc4`); PR #143 has not yet been merged, and deployment/live verification is pending (merged ≠ deployed/live). These are no longer active MUST FIX findings — the section below is retained as historical evidence of the original defect and how it was fixed, not as a description of the current state.
+**Status: FIXED in implementation.** Implemented in #142 / PR #143 (product head `cfd4e81e0eded8b339d8d09360636c2dffac5bc4`). Deployment/live status is tracked separately on issue #142 under the Kvernhaug Web lifecycle rule `MERGED ≠ DEPLOYED/LIVE`. These are no longer active MUST FIX implementation findings — the section below is retained as historical evidence of the original defect and how it was fixed, not as a description of the current deployment state.
 
 **Correction (Chief review, #142 prep):** the original draft of this section grouped six inputs (#1–6) as missing an accessible name. That is not correct for the sixth: `.humle-maal-ibu` (`web/index.html:407-409`) is already wrapped in a `<label>` and therefore already has a correct programmatic accessible name. It was never part of this MUST FIX group — see its own row in the prioritized table above. The real gap covered exactly five inputs, #1–5, all now fixed.
 
