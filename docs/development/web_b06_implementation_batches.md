@@ -422,18 +422,37 @@ judgment call), #20 (folded into #11 per the inventory itself — no
 additional touch/swipe-only affordances found elsewhere).
 
 - **Files/functions/selectors:** `web/css/style.css` — `.hjelp-knapp`
-  (`:1777-...`, ~20.8px), `.hjelp-knapp-liten` (~16.8px).
+  (`:1777-1792`, fixed `width:1.3rem; height:1.3rem; padding:0`, ~20.8px),
+  `.hjelp-knapp-liten` (`:1800-1804`, overrides to `width:1.05rem;
+  height:1.05rem`, ~16.8px).
 - **Acceptance criteria:** both classes reach a minimum 24×24 CSS-pixel hit
-  target via padding (hit-area only), without changing the visible glyph
-  size — the inventory's own suggested acceptance criterion #6.
+  target, without changing the visible glyph size — the inventory's own
+  suggested acceptance criterion #6.
+  **Corrected mechanism (Chief review, PR #136 round 1):** `web/css/style.css`
+  sets `* { box-sizing: border-box; }` globally (`:56`), and both classes
+  currently fix `width`/`height` directly with `padding:0`. Under
+  `border-box`, adding padding *inside* an unchanged fixed width/height does
+  **not** enlarge the outer box — the padding eats into the existing box
+  instead of growing it, so "padding alone" is not a workable mechanism here
+  and must not be recommended. The fix must instead increase the outer box
+  itself, e.g. raising `.hjelp-knapp`'s `width`/`height` to `24px`
+  (`1.3rem` ≈ 20.8px at the default 16px root, so this is a real increase,
+  not a rounding no-op) and `.hjelp-knapp-liten`'s override to at least
+  `24px` as well (its current `1.05rem` override is *smaller* than the
+  base class, not larger), or applying `min-width:24px; min-height:24px`
+  as an addition alongside the existing fixed values — either way, the
+  glyph itself (`font-size`) stays unchanged; only the clickable box grows.
+  Which of these two mechanisms (raise `width`/`height` directly vs. add
+  `min-width`/`min-height`) is preferable is an implementation-time choice,
+  not decided by this plan.
   **Recommendation on the open judgment call:** the inventory flags that
   WCAG 2.5.8's "inline" exception may technically apply here since every
   `.hjelp-knapp` sits inline within label text — rather than spending
   further analysis effort proving or disproving that exception, this plan
-  recommends simply applying the padding-based fix regardless, since it
-  costs essentially nothing (no visual change, no layout risk) and removes
-  the ambiguity outright rather than leaving a WCAG citation that depends
-  on a case-by-case rendered-layout judgment.
+  recommends simply applying the hit-area fix regardless, since fixing it
+  is cheap and removes the ambiguity outright rather than leaving a WCAG
+  citation that depends on a case-by-case rendered-layout judgment; that
+  recommendation itself is unaffected by the mechanism correction above.
 - **NO/EN implications:** none — pure CSS, no text change.
 - **Keyboard/focus cases:** none.
 - **Mobile implications:** this batch **is** the mobile-relevant fix — real
@@ -441,19 +460,27 @@ additional touch/swipe-only affordances found elsewhere).
   the inventory's own "VERIFY IN BROWSER" item 5 (real-device tap success)
   still applies since CSS box size alone doesn't guarantee effective hit
   area on every device/browser combination.
-- **Screen-reader verification needed vs. source-testable:** fully
-  source-testable — the CSS values themselves can be checked without a
-  browser; a live check is about tap ergonomics, not screen-reader
-  behavior, and could reasonably be folded into the existing
-  `web-full-regression` mobile-viewport pass rather than needing a
-  dedicated round.
-- **Static test opportunities:** a static test could assert the computed
-  padding+box values meet 24px, but this is CSS-in-a-stylesheet, not
-  markup — a plain value-presence grep is possible but low-value versus
-  just eyeballing the two rules in review; not recommended as a dedicated
-  new test given how small and stable this surface is.
-- **Regression risk:** Low — visual-only, two CSS rules, easy
-  before/after screenshot comparison.
+- **Screen-reader verification needed vs. source-testable:** the *rule
+  values* are source-testable (checking the CSS declares ≥24px one way or
+  another needs no browser), but — unlike this plan's earlier draft —
+  **do not claim "no layout risk" or "no visual change" categorically**:
+  enlarging the outer box of an inline-flex button can shift inline
+  spacing/alignment against adjacent label text, so a rendered
+  desktop-and-mobile visual check is required before this batch can be
+  considered done, not merely optional polish. That check can reasonably be
+  folded into the existing `web-full-regression` sweep rather than needing
+  a dedicated round, but it is not skippable.
+- **Static test opportunities:** a static test could assert the CSS
+  declares a ≥24px box (via `width`/`height` or `min-width`/`min-height`)
+  for both classes, but this is CSS-in-a-stylesheet, not markup — a plain
+  value-presence grep is possible but low-value versus just eyeballing the
+  two rules in review; not recommended as a dedicated new test given how
+  small and stable this surface is.
+- **Regression risk:** Low, but not zero as previously stated — two CSS
+  rules, with a real (if small) risk of inline-alignment shift now that the
+  outer box genuinely grows; needs a before/after screenshot comparison on
+  both desktop and mobile viewports rather than being assumed purely
+  cosmetic-safe.
 - **Dependencies on W5/B07/B08/B09-B11:** none.
 
 **Future issue title:** *"WEB FIX — B06 batch 6: 24×24px minimum touch target for help buttons (#11 size half, #20)"*
@@ -612,9 +639,9 @@ whole-chart `aria-label`, no per-axis values to assistive tech).
   (#11) in the same general subsystem, because they have fundamentally
   different risk profiles and verification methods: Batch 5 is JS
   behavioral change needing a live focus/keyboard walkthrough; Batch 6 is
-  pure CSS, verifiable by measurement alone. Merging them would force a
-  trivial, zero-risk CSS fix to wait on a behavioral fix's full
-  verification cycle.
+  pure CSS, verified by a rendered screenshot check rather than a
+  keyboard/focus walkthrough. Merging them would force a small,
+  low-risk CSS fix to wait on a behavioral fix's full verification cycle.
 - **Batches 8 and 9 must not be combined with each other or with anything
   else**, and must not be opened as *implementation* issues at all yet —
   both are explicitly blocked on a product/UX decision the inventory
