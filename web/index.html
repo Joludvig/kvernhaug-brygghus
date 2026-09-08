@@ -370,9 +370,9 @@
 <template id="malt-rad-mal">
   <div class="ingrediens-rad" data-type="malt">
     <div class="combobox-mount malt-velger-mount"></div>
-    <input type="number" class="malt-mengde" min="0" step="0.05" value="1" placeholder="kg">
+    <input type="number" class="malt-mengde" min="0" step="0.05" value="1" placeholder="kg" aria-label="Maltmengde (kg)" data-i18n-aria-label="builder.malt.mengdeAriaLabel">
     <span class="enhet">kg</span>
-    <input type="number" class="malt-pct mester-only" min="0" max="100" step="0.1" placeholder="%">
+    <input type="number" class="malt-pct mester-only" min="0" max="100" step="0.1" placeholder="%" aria-label="Maltandel (%)" data-i18n-aria-label="builder.malt.pctAriaLabel">
     <span class="enhet mester-only">%</span>
     <button type="button" class="egendefinert-knapp" title="Legg til en malt som ikke finnes i biblioteket" data-i18n-title="builder.malt.egendefinertTitle" data-i18n="builder.egendefinertKnapp">+ Egendefinert</button>
     <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern malt" data-i18n-title="builder.malt.fjernTitle" data-i18n-aria-label="builder.malt.fjernAriaLabel">✕</button>
@@ -389,11 +389,11 @@
 <template id="humle-rad-mal">
   <div class="ingrediens-rad" data-type="humle">
     <div class="combobox-mount humle-velger-mount"></div>
-    <input type="number" class="humle-alfa" min="0" step="0.1" placeholder="alfa" data-i18n-placeholder="builder.humle.alfaPlaceholder">
+    <input type="number" class="humle-alfa" min="0" step="0.1" placeholder="alfa" data-i18n-placeholder="builder.humle.alfaPlaceholder" aria-label="Alfasyre (%)" data-i18n-aria-label="builder.humle.alfaAriaLabel">
     <span class="enhet">%α <button type="button" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="alfasyre" aria-label="Hva er alfasyre?" data-i18n-aria-label="help.alfasyreAriaLabel">?</button></span>
-    <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram" data-i18n-placeholder="builder.humle.gramPlaceholder">
+    <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram" data-i18n-placeholder="builder.humle.gramPlaceholder" aria-label="Humlemengde (g)" data-i18n-aria-label="builder.humle.gramAriaLabel">
     <span class="enhet">g</span>
-    <input type="number" class="humle-tid" min="0" step="1" value="60" placeholder="min">
+    <input type="number" class="humle-tid" min="0" step="1" value="60" placeholder="min" data-i18n-placeholder="builder.humle.tidPlaceholder" aria-label="Tid (min)" data-i18n-aria-label="builder.humle.tidAriaLabel">
     <span class="enhet">min</span>
     <button type="button" class="egendefinert-knapp" title="Legg til en humle som ikke finnes i biblioteket" data-i18n-title="builder.humle.egendefinertTitle" data-i18n="builder.egendefinertKnapp">+ Egendefinert</button>
     <button type="button" class="fjern-knapp no-print" title="Fjern" aria-label="Fjern humle" data-i18n-title="builder.humle.fjernTitle" data-i18n-aria-label="builder.humle.fjernAriaLabel">✕</button>

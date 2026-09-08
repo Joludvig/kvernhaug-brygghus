@@ -17,12 +17,12 @@
 
 | # | Control | File:line | Gap | Severity |
 |---|---|---|---|---|
-| 1 | Malt row quantity (`kg`) input | `web/index.html:373` | No `<label>`/`aria-label`; placeholder `"kg"` only | MUST FIX |
-| 2 | Malt row percent (`%`) input | `web/index.html:375` | Same — placeholder `"%"` only | MUST FIX |
-| 3 | Hop row alpha-acid input | `web/index.html:392` | Same — placeholder `alfa` only | MUST FIX |
-| 4 | Hop row grams input | `web/index.html:394` | Same — placeholder `gram` only | MUST FIX |
-| 5 | Hop row time (min) input | `web/index.html:396` | Same — placeholder `"60"`; also the only sibling numeric field with **no `data-i18n-placeholder`** at all (alpha/gram both have one), so its placeholder text is hardcoded and never localized | MUST FIX |
-| 6 | Hop target-IBU input | `web/index.html:408` | Same — placeholder `"0"` only | MUST FIX |
+| 1 | Malt row quantity (`kg`) input | `web/index.html:373` | Historical evidence: no `<label>`/`aria-label`; placeholder `"kg"` only. **FIXED in #142 / PR #143** — `aria-label`+`data-i18n-aria-label="builder.malt.mengdeAriaLabel"` added. | FIXED (#142 / PR #143) |
+| 2 | Malt row percent (`%`) input | `web/index.html:375` | Historical evidence: same — placeholder `"%"` only. **FIXED in #142 / PR #143** — `aria-label`+`data-i18n-aria-label="builder.malt.pctAriaLabel"` added. | FIXED (#142 / PR #143) |
+| 3 | Hop row alpha-acid input | `web/index.html:392` | Historical evidence: same — placeholder `alfa` only. **FIXED in #142 / PR #143** — `aria-label`+`data-i18n-aria-label="builder.humle.alfaAriaLabel"` added. | FIXED (#142 / PR #143) |
+| 4 | Hop row grams input | `web/index.html:394` | Historical evidence: same — placeholder `gram` only. **FIXED in #142 / PR #143** — `aria-label`+`data-i18n-aria-label="builder.humle.gramAriaLabel"` added. | FIXED (#142 / PR #143) |
+| 5 | Hop row time (min) input | `web/index.html:396` | Historical evidence: same — placeholder `"60"`; also the only sibling numeric field with **no `data-i18n-placeholder`** at all (alpha/gram both have one), so its placeholder text was hardcoded and never localized. **FIXED in #142 / PR #143** — `aria-label`+`data-i18n-aria-label="builder.humle.tidAriaLabel"` and `data-i18n-placeholder="builder.humle.tidPlaceholder"` added. | FIXED (#142 / PR #143) |
+| 6 | Hop target-IBU input | `web/index.html:408` | **Correction (Chief review, #142 prep):** already wrapped in a `<label>` (`web/index.html:407-409`), so it already has a correct programmatic accessible name via the wrapping-label mechanism. Not a gap. | — (reference-quality, already correct) |
 | 7 | Brew-log OG / volume / FG inputs | `web/bryggelogg.html:121-130` | Sibling `<label>` with **no `for`**, input has **no `id`** — zero programmatic association | MUST FIX |
 | 8 | Brew-log tasting sliders (18 flavor categories, `input[type=range]`) | `web/js/brygg_page.js:90-113` | `<label>` built with `textContent` but never linked (`for`/`id`) to its slider; same orphaned-label bug repeated per category, per brew | MUST FIX |
 | 9 | Brew-log "next time" / "what worked" / "what changed" textareas | `web/bryggelogg.html:151,155,157` | Same orphaned-label bug | MUST FIX |
@@ -43,9 +43,13 @@
 
 ## MUST FIX
 
-### 1–6. Malt/hop numeric inputs have no accessible name
+### 1–5. Malt/hop numeric inputs — FIXED in #142 / PR #143
 
-`web/index.html:370-413` (the `<template id="malt-rad-mal">` / `<template id="humle-rad-mal">` used by `leggTilMaltRad()`/`leggTilHumleRad()` in `web/js/app.js`):
+**Status: FIXED in implementation.** Implemented in #142 / PR #143 (product head `cfd4e81e0eded8b339d8d09360636c2dffac5bc4`). Deployment/live status is tracked separately on issue #142 under the Kvernhaug Web lifecycle rule `MERGED ≠ DEPLOYED/LIVE`. These are no longer active MUST FIX implementation findings — the section below is retained as historical evidence of the original defect and how it was fixed, not as a description of the current deployment state.
+
+**Correction (Chief review, #142 prep):** the original draft of this section grouped six inputs (#1–6) as missing an accessible name. That is not correct for the sixth: `.humle-maal-ibu` (`web/index.html:407-409`) is already wrapped in a `<label>` and therefore already has a correct programmatic accessible name. It was never part of this MUST FIX group — see its own row in the prioritized table above. The real gap covered exactly five inputs, #1–5, all now fixed.
+
+**Historical evidence (pre-fix state)** — `web/index.html:370-413` (the `<template id="malt-rad-mal">` / `<template id="humle-rad-mal">` used by `leggTilMaltRad()`/`leggTilHumleRad()` in `web/js/app.js`), as it read before #142:
 
 ```html
 <input type="number" class="malt-mengde" min="0" step="0.05" value="1" placeholder="kg">
@@ -57,11 +61,13 @@
 <input type="number" class="humle-gram" min="0" step="1" value="10" placeholder="gram" data-i18n-placeholder="builder.humle.gramPlaceholder">
 ...
 <input type="number" class="humle-tid" min="0" step="1" value="60" placeholder="min">
-...
-<input type="number" class="humle-maal-ibu" min="0" step="1" placeholder="0">
 ```
 
-None of these six inputs have a `<label>`, `aria-label`, or `aria-labelledby` — no programmatic label / accessible-name mechanism was found for any of them in source. Each is followed by a `<span class="enhet">` (unit text, e.g. `kg`/`%α`/`g`/`min`) that is visually adjacent but **not** programmatically associated (no `id`/`aria-labelledby` link). The source defect is that missing name/association; placeholder text does not supply one — it is not linked via any accessible-name attribute and disappears once a value is typed — which relates to WCAG 3.3.2 (Labels or Instructions) among the applicable success criteria, cited here as context rather than as the complete accessible-name requirement. The exact screen-reader announcement for these fields (e.g. whether a generic role/state is spoken instead, and whether the placeholder is read at all) is **VERIFY IN BROWSER**, not asserted here. For repeated rows (multiple malt/hop lines), the missing accessible name is expected to make it hard to tell which row/field is focused — exact behavior needs live confirmation.
+(`.humle-maal-ibu` is intentionally omitted from this list — see the correction above.)
+
+None of these five inputs had a `<label>`, `aria-label`, or `aria-labelledby` — no programmatic label / accessible-name mechanism was found for any of them in source. Each is followed by a `<span class="enhet">` (unit text, e.g. `kg`/`%α`/`g`/`min`) that was visually adjacent but **not** programmatically associated (no `id`/`aria-labelledby` link). The source defect was that missing name/association; placeholder text does not supply one — it is not linked via any accessible-name attribute and disappears once a value is typed — which relates to WCAG 3.3.2 (Labels or Instructions) among the applicable success criteria, cited here as context rather than as the complete accessible-name requirement.
+
+**How it was fixed (#142 / PR #143):** each of the five inputs gained a hand-authored Norwegian `aria-label` plus a matching `data-i18n-aria-label` attribute (`builder.malt.mengdeAriaLabel`, `builder.malt.pctAriaLabel`, `builder.humle.alfaAriaLabel`, `builder.humle.gramAriaLabel`, `builder.humle.tidAriaLabel`), using the pre-existing `applyI18n()` mechanism in `web/js/i18n.js` — the same mechanism already used elsewhere in this codebase (see finding #18/#19), not a new one. `.humle-tid` additionally gained `data-i18n-placeholder="builder.humle.tidPlaceholder"` to localize what had been a hardcoded placeholder. Both NO and EN string entries were added to `TEKSTER` in `web/js/i18n.js`, and `web/en/index.html` was regenerated via `scripts/generate_web_i18n_pages.py`. Verified locally in Chromium (NO+EN, multiple malt/hop rows): each field now exposes the intended field-specific accessible name (e.g. "Maltmengde (kg)" / "Malt amount (kg)"), with no `id` collisions across repeated rows.
 
 The searchable ingredient picker in the *same* row (`.combobox-mount`) **does** get a correct `aria-label` via `Combobox({ ariaLabel: t(...) })` (`web/js/app.js:406,672,1811-1837`) — so the picker is fine, only the raw numeric fields next to it are not.
 
@@ -197,7 +203,7 @@ Both sizes are below the WCAG 2.2 §2.5.8 (AA) 24×24 CSS-pixel minimum target s
 
 ## VERIFY IN BROWSER
 
-1. **Current (pre-fix) announcement behavior for the unlabeled numeric/range controls (#1–6, #8) and the combobox arrow-key highlight (#10)** — this inventory deliberately does not assert an exact screen-reader utterance for any of these; a real NVDA/VoiceOver pass is needed to confirm what, if anything, is currently announced.
+1. **Current (pre-fix) announcement behavior for the unlabeled range controls (#8) and the combobox arrow-key highlight (#10)** — this inventory deliberately does not assert an exact screen-reader utterance for any of these; a real NVDA/VoiceOver pass is needed to confirm what, if anything, is currently announced. (#1–5 are now FIXED and browser-verified per #142/PR #143 above; #6 was never a gap.)
 2. **Combobox aria-activedescendant fix (#10)** and **help popover focus (#11)** — once implemented, needs a real screen reader pass (NVDA/VoiceOver) to confirm announcements are correct, not just "attributes present."
 3. **Side-drawer focus trap (#14)** — needs an actual Tab-key walk-through with the drawer open to confirm whether focus really does leak to background content, and whether that's perceptible/harmful in practice (the backdrop is only a visual overlay, not `inert`/`aria-hidden` on the rest of the page — worth confirming background content doesn't get `Tab`-focused invisibly under the backdrop).
 4. **Modal dialog inert background (#12)** — confirm with a screen reader whether background content (page body) is actually reachable via swipe/virtual cursor while `#modus-forstegang` is open, despite `aria-modal="true"`.
@@ -211,7 +217,7 @@ Both sizes are below the WCAG 2.2 §2.5.8 (AA) 24×24 CSS-pixel minimum target s
 
 Not a fix spec — a sketch of "done" for a future implementation issue, so scope is bounded when this moves past analysis:
 
-1. Every form control in `web/index.html`'s malt/hop row templates has a real accessible name (`aria-label` or `aria-labelledby`, matching the localized unit/field concept) in both NO and EN.
+1. Every form control in `web/index.html`'s malt/hop row templates has a real accessible name (`aria-label` or `aria-labelledby`, matching the localized unit/field concept) in both NO and EN. **FIXED in #142 / PR #143.**
 2. Every `<label>`/`<input>`/`<textarea>` pair currently built in `web/js/brygg_page.js` and `web/bryggelogg.html` gets a matching `id`/`for`, including the per-category tasting sliders.
 3. `web/js/combobox.js` sets `aria-controls` (input → listbox `id`) and `aria-activedescendant` (input → highlighted option `id`) on every keyboard highlight move, and clears `aria-activedescendant` when the list closes.
 4. `web/js/help.js` popovers move focus to themselves (or their first focusable element) on open and restore focus to the triggering button on close; trigger buttons carry `aria-expanded="false"` in their initial markup.

@@ -31,8 +31,8 @@ the inventory it builds on does.*
 
 | Order | Batch | Findings | Severity | Regression risk |
 |---|---|---|---|---|
-| 1 | Malt/hop numeric input accessible names | #1–6 | MUST FIX | Low |
-| 2 | Brew-log OG/FG/Volume/textareas + judgment-group label | #7, #9, #13 | MUST FIX (+1 SHOULD FIX) | Low–Medium |
+| 1 | Malt/hop numeric input accessible names | #1–5 | **COMPLETED — implemented in #142 / PR #143** | Low |
+| 2 | Brew-log OG/FG/Volume/textareas + judgment-group label | #7, #9, #13 | MUST FIX (+1 SHOULD FIX) — **next pending implementation batch** | Low–Medium |
 | 3 | Brew-log tasting sliders | #8 | MUST FIX | Medium–High |
 | 4 | Shared combobox ARIA + dead `aria-labelledby` cleanup | #10, #21 | MUST FIX (+1 SHOULD FIX) | High |
 | 5 | Help popover focus handling + initial `aria-expanded` | #11 (focus half) | MUST FIX | Medium |
@@ -72,16 +72,24 @@ the inventory it builds on does.*
 
 ## Batch 1 — Malt/hop numeric input accessible names
 
-**Findings:** #1–6 (malt kg, malt %, hop alpha-acid, hop grams, hop time,
-hop target-IBU — all MUST FIX, no accessible name).
+**Status: COMPLETED — implemented in #142 / PR #143** (exact head
+`cfd4e81e0eded8b339d8d09360636c2dffac5bc4`). Everything below this line is
+retained as the original planning record for reference; it is no longer a
+future/pending batch.
+
+**Findings:** #1–5 (malt kg, malt %, hop alpha-acid, hop grams, hop time —
+all MUST FIX, no accessible name — now fixed). **Correction (Chief review, #142 prep):**
+finding #6 (hop target-IBU, `web/index.html:408`) is not part of this batch
+— `.humle-maal-ibu` is already wrapped in a `<label>` and already has a
+correct accessible name; it was not touched.
 
 - **Files/functions/selectors:** `web/index.html` — `<template
   id="malt-rad-mal">` (`:373,375`) and `<template id="humle-rad-mal">`
-  (`:392,394,396,408`); populated per-row by `leggTilMaltRad()` /
+  (`:392,394,396`); populated per-row by `leggTilMaltRad()` /
   `leggTilHumleRad()` in `web/js/app.js`. New/changed i18n keys land in
   `web/js/i18n.js` (NO block ~486–518, EN block ~2229–2261, per the
   inventory's own citation).
-- **Acceptance criteria:** each of the six inputs gets a real accessible
+- **Acceptance criteria:** each of the five inputs gets a real accessible
   name (`aria-label` is the minimal-diff choice here, since these are
   templated rows with no natural static `id` to hang a `<label for>` on
   without also solving cross-row `id` uniqueness for no reason — `aria-label`
@@ -111,7 +119,7 @@ hop target-IBU — all MUST FIX, no accessible name).
   cross-reference check across `web/index.html`/`bryggelogg.html`/
   `pantry.html`/`verktoy.html`. Since this batch uses `aria-label` rather
   than `id`/`for`, a simpler static check for this batch specifically
-  would be: grep the six selectors in `web/index.html` and assert each
+  would be: grep the five selectors in `web/index.html` and assert each
   carries an `aria-label` attribute — cheap, no browser needed, but only
   covers "an attribute exists," not "the announced name is correct."
 - **Regression risk:** Low — pure attribute addition on template markup
@@ -121,11 +129,14 @@ hop target-IBU — all MUST FIX, no accessible name).
   (`web/index.html` malt/hop builder templates vs. brew-log/handbook
   files those touch).
 
-**Future issue title:** *"WEB FIX — B06 batch 1: accessible names for malt/hop numeric inputs (#1–6)"*
+**Issue/PR (actual):** #142 / PR #143 — *"WEB FIX — B06 batch 1: accessible names for malt/hop numeric inputs"*.
 
 ---
 
 ## Batch 2 — Brew-log OG/FG/Volume + textareas + judgment-group label
+
+**Status: next pending implementation batch** (Batch 1 is completed — see
+above).
 
 **Findings:** #7 (OG/FG/Volume, MUST FIX), #9 (nextTime/whatWorked/whatChanged
 textareas, MUST FIX), #13 (tasting judgment-group label, SHOULD FIX — see
