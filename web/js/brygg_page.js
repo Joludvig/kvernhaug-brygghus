@@ -400,7 +400,7 @@ function visLogg(tilbakemelding, fremhevBrewId) {
   // Nyeste først -- det brukeren jobber med nå står øverst.
   alle.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
 
-  const ferdige = alle.filter((b) => bryggFase(b) === "ferdig" && b.status === "done");
+  const ferdige = alle.filter((b) => b.status === "done");
   const aktive = alle.filter((b) => !ferdige.includes(b));
 
   document.getElementById("brygg-tom-melding").hidden = alle.length !== 0;
