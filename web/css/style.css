@@ -2347,6 +2347,7 @@ footer {
 
 .hjelp-seksjon {
   margin-top: 2.4rem;
+  scroll-margin-top: calc(var(--kompaktnav-h, 0px) + 1rem);
 }
 
 .hjelp-seksjon > h2 {
