@@ -1,4 +1,5 @@
 import math
+from modules.calculations import beregn_total_ibu
 from modules.equipment import last_equipment
 from modules.process_profiles import (
     NO_SPARGE, beregn_dekoksjon_uttak, beregn_reiterated_mash,
@@ -106,17 +107,23 @@ def _gjær_type_key(gjaer_info):
     return gjaer_info.get("gjaertype", "Ale").lower()
 
 
-def _bygg_humle_entry(h, humle_database, bigness, volum, total_koketid_min):
+def _bygg_humle_entry(h, humle_database, og, volum, total_koketid_min):
     h_info = humle_database.get(h["id"]) or {}
     navn   = h_info.get("display_name", h["id"])
-    alfa   = h_info.get("alfa") or h_info.get("alfa_typisk") or 5.0
     tid, gram = h["tid"], h["gram"]
 
+    # Delegerer selve Tinseth-/alfa-aritmetikken til den autoritative
+    # modules.calculations.beregn_total_ibu() (samme funksjon recipe-/
+    # planleggingsstien bruker for ctx["ibu"]) i stedet for å regne den ut
+    # på nytt lokalt her -- én tilsetning om gangen, med prosess-justert
+    # tid, slik at bl.a. None-basert alfa-fallback (eksplisitt alfa=0.0
+    # respekteres) alltid er identisk med recipe-stien.
     def _ibu_for_tid(effektiv_tid):
-        if effektiv_tid > 0 and bigness > 0 and volum > 0:
-            times = (1 - math.exp(-0.04 * effektiv_tid)) / 4.15
-            return round((gram * 1000 * (alfa / 100.0) / volum) * bigness * times, 1)
-        return 0.0
+        return round(beregn_total_ibu(
+            [{"navn": h["id"], "gram": gram, "tid": effektiv_tid}],
+            {h["id"]: h_info},
+            volum, og,
+        ), 1)
 
     # En humle kan IKKE fysisk ha lengre egen koketid enn selve kokens
     # totale lengde -- ei heller "tilsettes ved kokestart" (0 min etter
@@ -268,9 +275,8 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
         for m in sorted(malt_valg, key=lambda x: x["mengde"], reverse=True)
     ]
 
-    bigness   = 1.65 * (0.000125 ** (og - 1)) if og > 1.000 and batch_volum_l > 0 else 0.0
     humleplan = sorted(
-        [_bygg_humle_entry(h, humle_database, bigness, batch_volum_l, koketid) for h in humle_valg],
+        [_bygg_humle_entry(h, humle_database, og, batch_volum_l, koketid) for h in humle_valg],
         key=lambda x: x["tid"],
         reverse=True,
     )
@@ -281,8 +287,18 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
     # (ui/process_panel.py og ui/brewday_panel.py) kan varsle uten selv å
     # regne ut noe.
     humle_over_koketid  = [h for h in humleplan if h["tid_over_koketid"]]
-    ibu_planlagt         = round(sum(h["ibu_bidrag"] for h in humleplan), 1)
-    ibu_faktisk_prosess  = round(sum(h["ibu_bidrag_faktisk"] for h in humleplan), 1)
+    # Summeres via beregn_total_ibu() på RÅ (u-avrundede) bidrag for hele
+    # humlelisten samtidig, i stedet for å summere de allerede avrundede
+    # per-tilsetning-verdiene i humleplan over -- samme rekkefølge
+    # (summer først, avrund til slutt) som den autoritative recipe-/
+    # planleggingsstien (modules/recipe_context.py), slik at planlagt
+    # Brewday-IBU er tallidentisk med oppskriftens ctx["ibu"] når det ikke
+    # foreligger noen prosessbegrensning.
+    _humle_data_by_id = {h["id"]: (humle_database.get(h["id"]) or {}) for h in humle_valg}
+    _humle_calc_planlagt = [{"navn": h["id"], "gram": h["gram"], "tid": h["tid"]} for h in humle_valg]
+    _humle_calc_faktisk  = [{"navn": h["id"], "gram": h["gram"], "tid": min(h["tid"], koketid)} for h in humle_valg]
+    ibu_planlagt         = round(beregn_total_ibu(_humle_calc_planlagt, _humle_data_by_id, batch_volum_l, og), 1)
+    ibu_faktisk_prosess  = round(beregn_total_ibu(_humle_calc_faktisk, _humle_data_by_id, batch_volum_l, og), 1)
 
     pakker         = beregn_pakker(og, batch_volum_l, gjaer_key)
     temp_min, temp_maks = _TEMP.get(gjaer_key, (18, 22))

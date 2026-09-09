@@ -26,7 +26,7 @@ class TestByggHumleEntry(unittest.TestCase):
     def test_tid_innenfor_koketid_flagges_ikke(self):
         entry = _bygg_humle_entry(
             {"id": "test_humle", "gram": 20, "tid": 60},
-            _HUMLE_DB, bigness=0.1, volum=20.0, total_koketid_min=60,
+            _HUMLE_DB, og=1.050, volum=20.0, total_koketid_min=60,
         )
         self.assertFalse(entry["tid_over_koketid"])
         self.assertEqual(entry["ibu_bidrag"], entry["ibu_bidrag_faktisk"])
@@ -35,7 +35,7 @@ class TestByggHumleEntry(unittest.TestCase):
     def test_tid_over_koketid_flagges_og_reduserer_faktisk_ibu(self):
         entry = _bygg_humle_entry(
             {"id": "test_humle", "gram": 20, "tid": 90},
-            _HUMLE_DB, bigness=0.1, volum=20.0, total_koketid_min=60,
+            _HUMLE_DB, og=1.050, volum=20.0, total_koketid_min=60,
         )
         self.assertTrue(entry["tid_over_koketid"])
         # Oppgitt tid beholdes uendret i "planlagt"-bidraget.
@@ -52,14 +52,14 @@ class TestByggHumleEntry(unittest.TestCase):
     def test_tid_lik_koketid_er_ikke_over(self):
         entry = _bygg_humle_entry(
             {"id": "test_humle", "gram": 20, "tid": 60},
-            _HUMLE_DB, bigness=0.1, volum=20.0, total_koketid_min=60,
+            _HUMLE_DB, og=1.050, volum=20.0, total_koketid_min=60,
         )
         self.assertFalse(entry["tid_over_koketid"], "tid == total_koketid_min er akkurat oppnåelig, ikke et avvik")
 
     def test_torrhumle_0_min_er_aldri_over_koketid(self):
         entry = _bygg_humle_entry(
             {"id": "test_humle", "gram": 20, "tid": 0},
-            _HUMLE_DB, bigness=0.1, volum=20.0, total_koketid_min=60,
+            _HUMLE_DB, og=1.050, volum=20.0, total_koketid_min=60,
         )
         self.assertFalse(entry["tid_over_koketid"])
         self.assertEqual(entry["ibu_bidrag"], 0.0)
