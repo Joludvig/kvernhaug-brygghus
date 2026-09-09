@@ -147,6 +147,20 @@ def bygg_brew_eksport_filnavn(brew, brew_id):
     return f"{navn}_{kort_id}.kbhbrew"
 
 
+def aktiv_brew_matcher_recipe(brew, recipe_id):
+    """App A1 (issue #170) sin identitetsvakt: True kun hvis `brew`s EGEN
+    frosne `recipeId` er nøyaktig `recipe_id`. Et oppskriftsbytte/import
+    (`ui/sidebar.py` sin `_last_loaded_recipe_file`) skal ALDRI la et
+    allerede aktivt Bryggdag-mål (`_aktiv_kbhbrew_brew_id`) stille
+    fortsette å peke på et brygg fryst fra en ANNEN oppskrift.
+
+    `recipe_id=None` matcher KUN et brygg som selv har `recipeId=None`
+    (opprettet uten en lastet/lagret oppskrift) -- ALDRI et jokertreff
+    mot et brygg med en FAKTISK satt `recipeId`, og omvendt."""
+    brew = brew if isinstance(brew, dict) else {}
+    return brew.get("recipeId") == recipe_id
+
+
 def manglende_ingrediens_ider(recipe, malt_db, humle_db, gjaer_db):
     """Chief review-fiks (PR #30 blocker 3) -- opprettelses-preflight:
     forutsier NØYAKTIG hvilke malt-/humle-/gjær-ID-er

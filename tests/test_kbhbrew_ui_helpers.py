@@ -10,6 +10,7 @@ Kjøres med:
 import unittest
 
 from modules.kbhbrew_ui import (
+    aktiv_brew_matcher_recipe,
     bygg_brew_eksport_filnavn,
     bygg_brew_eksport_label,
     bygg_predicted_fra_ctx,
@@ -208,6 +209,32 @@ class TestManglendeIngrediensIder(unittest.TestCase):
     def test_6_tom_manglende_recipe_gir_tom_liste_uten_feil(self):
         self.assertEqual(manglende_ingrediens_ider({}, {}, {}, {}), [])
         self.assertEqual(manglende_ingrediens_ider(None, None, None, None), [])
+
+
+class TestAktivBrewMatcherRecipe(unittest.TestCase):
+    """App A1 (issue #170) "Identity safety": aktiv_brew_matcher_recipe()
+    er den ENE, pure sannhetskilden `ui/kbhbrew_panel.py::_sinkroniser_
+    aktiv_brew_mot_oppskrift()` bruker for å avgjøre om et oppskriftsbytte
+    må ugyldiggjøre et allerede aktivt Bryggdag-mål."""
+
+    def test_1_samme_recipe_id_matcher(self):
+        self.assertTrue(aktiv_brew_matcher_recipe({"recipeId": "oppskrift-a.json"}, "oppskrift-a.json"))
+
+    def test_2_ulik_recipe_id_matcher_ikke(self):
+        self.assertFalse(aktiv_brew_matcher_recipe({"recipeId": "oppskrift-a.json"}, "oppskrift-b.json"))
+
+    def test_3_begge_none_matcher(self):
+        self.assertTrue(aktiv_brew_matcher_recipe({"recipeId": None}, None))
+
+    def test_4_brew_recipe_id_none_mot_faktisk_id_matcher_ikke(self):
+        self.assertFalse(aktiv_brew_matcher_recipe({"recipeId": None}, "oppskrift-a.json"))
+
+    def test_5_brew_faktisk_id_mot_none_matcher_ikke(self):
+        self.assertFalse(aktiv_brew_matcher_recipe({"recipeId": "oppskrift-a.json"}, None))
+
+    def test_6_ugyldig_brew_behandles_som_tomt_dict(self):
+        self.assertFalse(aktiv_brew_matcher_recipe(None, "oppskrift-a.json"))
+        self.assertTrue(aktiv_brew_matcher_recipe(None, None))
 
 
 if __name__ == "__main__":

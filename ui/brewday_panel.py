@@ -1,14 +1,24 @@
 import streamlit as st
+from config import DEMO_MODE
 from modules.brewday_calc import (
     lag_brewday_plan, TILSETNINGER,
     beregn_effektivitet, beregn_post_boil_og,
 )
 from modules.calculations import beregn_abv_standard
+from modules.kbhbrew_history_ui import parse_actual_tallfelt
+from modules.kbhbrew_storage import hent_brew, oppdater_brew_lag
 from modules.process_profiles import normaliser_prosessprofil
 from modules.export_format import fmt_og, fmt_fg, fmt_abv, stats_linje
 from modules.brewday_template import render_brewday_html
-from ui.kbhbrew_panel import render_kbhbrew_create_panel
+from ui.kbhbrew_panel import aktiv_brew_id, render_kbhbrew_create_panel
 from ui.kbhbrew_history_panel import render_kbhbrew_history_panel
+
+# App A1 (issue #170): et privat sentinel-objekt for å skille "Steg
+# 4/5 sine målefelt er ALDRI synket mot et aktivt brygg før" fra "de er
+# synket, og målet er (fortsatt) None" -- samme "unngå en falsk
+# None==None-treff ved aller første rendring"-forsiktighet som
+# ui/kbhbrew_history_panel.py sin _UKJENT_SENTINEL.
+_BD_MAALINGER_INGEN_SENTINEL = object()
 
 _SJEKKLISTE = [
     "Utstyr rent", "Meskevann varmt", "Skylling ferdig", "Kok startet",
@@ -91,6 +101,44 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
 
     render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_database)
     render_kbhbrew_history_panel()
+
+    # ── SYNKRONISER STEG 4/5-MÅLEFELT MOT AKTIVT BRYGG (App A1, issue #170) ──
+    # Når det aktive brygg-målet (ui/kbhbrew_panel.py::aktiv_brew_id() --
+    # samme peker "Start nytt brygg"/Brygghistorikk-utvalget over nettopp
+    # kan ha endret) er ANNERLEDES enn ved forrige kjente synk, må
+    # bd_og/bd_fg/bd_post_boil_vol re-synkes FØR widgetene under
+    # instansieres i DENNE kjøringen -- enten forhåndsutfylt fra det NYE
+    # målets EGNE lagrede actuals (aldri en gjettet verdi, samme prefill-
+    # prinsipp som ui/kbhbrew_history_panel.py::_render_actuals_skjema()),
+    # eller tømt hvis intet aktivt brygg finnes. Dette hindrer at et
+    # utypet, ulagret tall fra FORRIGE mål (eller fra FØR noe brygg i det
+    # hele tatt var aktivt) stille kan bli tilskrevet et nytt brygg, eller
+    # fortsette å vises som om det fortsatt gjaldt et brygg som nettopp
+    # ble ugyldiggjort av et oppskriftsbytte (issue #170 "Identity
+    # safety"). Må kjøres FØR Steg 3/4/5 sine widgets under -- ETTER at
+    # session_state for en widget-bundet nøkkel er satt her, kan den
+    # fortsatt brukes som widgetens verdi FOR DENNE kjøringen, men KUN
+    # fordi ingen av disse tre widgetene er instansiert ennå på dette
+    # punktet i skriptet.
+    _bd_maalinger_brew_id = aktiv_brew_id() or _BD_MAALINGER_INGEN_SENTINEL
+    if st.session_state.get("_bd_maalinger_synket_brew_id", object()) != _bd_maalinger_brew_id:
+        _bd_brew_for_prefill = (
+            hent_brew(_bd_maalinger_brew_id) if _bd_maalinger_brew_id is not _BD_MAALINGER_INGEN_SENTINEL else None
+        )
+        _bd_actuals_for_prefill = (_bd_brew_for_prefill or {}).get("actuals") or {}
+        st.session_state["bd_og"] = (
+            "" if _bd_actuals_for_prefill.get("og") is None else str(_bd_actuals_for_prefill["og"])
+        )
+        st.session_state["bd_fg"] = (
+            "" if _bd_actuals_for_prefill.get("fg") is None else str(_bd_actuals_for_prefill["fg"])
+        )
+        _bd_volum_for_prefill = _bd_actuals_for_prefill.get("volumeL")
+        st.session_state["bd_post_boil_vol"] = (
+            float(_bd_volum_for_prefill)
+            if isinstance(_bd_volum_for_prefill, (int, float)) and not isinstance(_bd_volum_for_prefill, bool)
+            else 0.0
+        )
+        st.session_state["_bd_maalinger_synket_brew_id"] = _bd_maalinger_brew_id
 
     st.write("---")
 
@@ -348,6 +396,58 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
                 # (f.eks. FG > OG) -- ingen metric vises da, i stedet
                 # for en stille negativ ABV.
                 pass
+
+    # ── LAGRE MÅLINGER TIL AKTIVT BRYGG (App A1, issue #170) ─────────────────
+    # Ett eksplisitt lagre-klikk skriver Steg 4/5 sine A1-kjernemålinger
+    # (OG/FG/post-boil-volum) + bryggedato til DET AKTIVE brygget
+    # (ui/kbhbrew_panel.py::aktiv_brew_id()) via SAMME
+    # oppdater_brew_lag()-skrivevei og SAMME strenge tallvalidering
+    # (parse_actual_tallfelt()) som Brygghistorikk-skjemaet bruker --
+    # ALDRI en ny skrivevei. Rendring/typing/rerun alene skriver ALDRI
+    # noe -- kun tilgjengelig inne i `if st.button(...)`-blokken, samme
+    # garanti som ui/kbhbrew_history_panel.py::_render_actuals_skjema().
+    # Skjules helt i DEMO_MODE, samme mønster som render_kbhbrew_
+    # create_panel()/render_kbhbrew_history_panel().
+    if not DEMO_MODE:
+        st.write("---")
+        st.markdown("**💾 Lagre målinger til aktivt brygg**")
+        _lagre_mal_brew_id = aktiv_brew_id()
+        _lagre_mal_brew = hent_brew(_lagre_mal_brew_id) if _lagre_mal_brew_id else None
+        if _lagre_mal_brew is None:
+            st.caption(
+                "Ingen aktivt brygg å lagre til. Start et brygg med «▶️ Start nytt "
+                "brygg» øverst, eller velg et brygg i Brygghistorikk over."
+            )
+        else:
+            _lagre_mal_navn = ((_lagre_mal_brew.get("snapshot") or {}).get("recipe") or {}).get("navn") or "(uten navn)"
+            st.caption(f"Målbrygg: **{_lagre_mal_navn}** · `{_lagre_mal_brew_id}`")
+        if st.button(
+            "💾 Lagre OG/FG/post-boil-volum + bryggedato",
+            key="bd_lagre_maalinger_btn",
+            disabled=_lagre_mal_brew is None,
+        ):
+            _og_ok, _og_verdi = parse_actual_tallfelt(st.session_state.get("bd_og", ""))
+            _fg_ok, _fg_verdi = parse_actual_tallfelt(st.session_state.get("bd_fg", ""))
+            _ugyldige_felt = []
+            if not _og_ok:
+                _ugyldige_felt.append("OG")
+            if not _fg_ok:
+                _ugyldige_felt.append("FG")
+            if _ugyldige_felt:
+                st.error(f"❌ Ugyldig tall i felt: {', '.join(_ugyldige_felt)}. Ingenting ble lagret.")
+            else:
+                _post_boil_verdi = st.session_state.get("bd_post_boil_vol", 0.0)
+                _bd_dato_verdi = st.session_state.get("bd_dato")
+                oppdater_brew_lag(
+                    _lagre_mal_brew_id,
+                    actuals={
+                        "og": "" if _og_verdi is None else _og_verdi,
+                        "fg": "" if _fg_verdi is None else _fg_verdi,
+                        "volumeL": _post_boil_verdi if _post_boil_verdi and _post_boil_verdi > 0 else "",
+                    },
+                    brewed_at=_bd_dato_verdi.isoformat() if hasattr(_bd_dato_verdi, "isoformat") else "",
+                )
+                st.success(f"✅ Lagret til `{_lagre_mal_brew_id}`")
 
     # ── STEG 6: EFFEKTIVITET ────────────────────────────────────────────────
     with st.expander("📊 6. Effektivitet"):
