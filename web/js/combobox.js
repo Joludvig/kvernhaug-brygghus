@@ -2,6 +2,11 @@
 // Starter blank, filtrerer på delvis tekst, navigerbar med tastatur, og store
 // nok trykkflater til å fungere godt på touch. Ingen ekstern autocomplete-lib.
 
+// Modulnivå-teller (ikke per instans) -- garanterer unike listbox-/option-id-er
+// på tvers av ALLE samtidig monterte Combobox-instanser (f.eks. flere
+// malt-/humle-rader), ikke bare unike innad i én instans.
+let comboboxInstansTeller = 0;
+
 class Combobox {
   constructor({ items, placeholder = "", ariaLabel = "", onSelect = () => {} }) {
     this.items = items; // [{ id, label, search?, group? }] -- "search" (lowercase) er
@@ -13,6 +18,7 @@ class Combobox {
     this.selectedId = null;
     this.highlightIndex = -1;
     this.filtered = [];
+    this.instansId = `combobox-${++comboboxInstansTeller}`;
 
     const wrap = document.createElement("div");
     wrap.className = "combobox";
@@ -30,8 +36,10 @@ class Combobox {
 
     const list = document.createElement("ul");
     list.className = "combobox-list";
+    list.id = `${this.instansId}-listbox`;
     list.hidden = true;
     list.setAttribute("role", "listbox");
+    input.setAttribute("aria-controls", list.id);
 
     wrap.appendChild(input);
     wrap.appendChild(list);
@@ -61,12 +69,14 @@ class Combobox {
   _renderList() {
     this.listEl.innerHTML = "";
     this.highlightIndex = -1;
+    this.inputEl.removeAttribute("aria-activedescendant");
     if (this.filtered.length === 0) {
       this.listEl.hidden = true;
       this.inputEl.setAttribute("aria-expanded", "false");
       return;
     }
     let forrigeGruppe = undefined;
+    let optionIndex = 0;
     for (const item of this.filtered) {
       if (item.group !== undefined && item.group !== forrigeGruppe) {
         const header = document.createElement("li");
@@ -78,6 +88,7 @@ class Combobox {
       }
       const li = document.createElement("li");
       li.className = "combobox-option";
+      li.id = `${this.instansId}-option-${optionIndex}`;
       li.textContent = item.label;
       li.setAttribute("role", "option");
       li.addEventListener("mousedown", (e) => {
@@ -85,6 +96,7 @@ class Combobox {
         this._select(item);
       });
       this.listEl.appendChild(li);
+      optionIndex++;
     }
     this.listEl.hidden = false;
     this.inputEl.setAttribute("aria-expanded", "true");
@@ -114,8 +126,10 @@ class Combobox {
     if (opts.length === 0) return;
     if (this.highlightIndex >= 0) opts[this.highlightIndex].classList.remove("is-active");
     this.highlightIndex = (this.highlightIndex + delta + opts.length) % opts.length;
-    opts[this.highlightIndex].classList.add("is-active");
-    opts[this.highlightIndex].scrollIntoView({ block: "nearest" });
+    const aktiv = opts[this.highlightIndex];
+    aktiv.classList.add("is-active");
+    aktiv.scrollIntoView({ block: "nearest" });
+    this.inputEl.setAttribute("aria-activedescendant", aktiv.id);
   }
 
   _select(item) {
@@ -128,6 +142,8 @@ class Combobox {
   _close() {
     this.listEl.hidden = true;
     this.inputEl.setAttribute("aria-expanded", "false");
+    this.inputEl.removeAttribute("aria-activedescendant");
+    this.highlightIndex = -1;
     const current = this.items.find((it) => it.id === this.selectedId);
     this.inputEl.value = current ? current.label : "";
     if (!current) this.selectedId = null;
