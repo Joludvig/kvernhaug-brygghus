@@ -395,6 +395,16 @@ jobs:
       # touch the Bash allowlist, the branch-scoped push rules, or any
       # other V1.2 control -- see AGENT_WORKFLOW.md → "Permission model:
       # Bash allowlist + acceptEdits (V1.3, issue #15)".
+      #
+      # V1.4 (issue #154): `python3 -m unittest *` (V1.2) never covered
+      # the repo's canonical Web i18n generator entry point, so a Bridge
+      # round needing bounded Web NO/EN work (issue #146) had no way to
+      # regenerate `web/en/**` other than hand-editing it -- exactly what
+      # `.claude/rules/web.md` forbids. Fixed by one additional EXACT
+      # (argument-free) rule, `Bash(python3 scripts/generate_web_i18n_pages.py)`
+      # -- no wildcard after the script path, so it grants nothing beyond
+      # that one literal invocation. See AGENT_WORKFLOW.md → "Canonical
+      # Web i18n generator permission (V1.4, issue #154)".
       - name: Run Claude Code
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: claude
@@ -406,7 +416,7 @@ jobs:
             workflows: write
           base_branch: master
           claude_args: |
-            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *)"
+            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *),Bash(python3 scripts/generate_web_i18n_pages.py)"
             --permission-mode acceptEdits
           prompt: |
             You are running as the automated Claude side of the Kvernhaug
@@ -437,8 +447,13 @@ jobs:
             tests with `python3 -m unittest ...` (the project convention
             is `python3 -m unittest discover -s tests -b`, or a focused
             `python3 -m unittest tests.test_x` for just the module you
-            touched). `git merge` and `gh pr merge` are deliberately NOT
-            in your allowed tools — never attempt either.
+            touched). For bounded Web NO/EN work you may also run the
+            canonical i18n generator exactly as
+            `python3 scripts/generate_web_i18n_pages.py` (no arguments —
+            that exact command is the only additional Bash permission
+            granted; never hand-edit generated `web/en/**` instead).
+            `git merge` and `gh pr merge` are deliberately NOT in your
+            allowed tools — never attempt either.
 
             YOUR BRANCH NAME IS FIXED — use exactly
             `${{ steps.branch.outputs.name }}` (not any name of your own

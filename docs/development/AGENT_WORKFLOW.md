@@ -217,6 +217,7 @@ exact, argument-free/argument-fixed rules where they don't):
 | `Bash(gh pr list *)` | Look up the PR associated with this run's fixed branch. |
 | `Bash(pip install -r requirements.txt)` | Install project dependencies before running tests — **exact match, no wildcard**: this and only this invocation, deliberately not `pip install <anything>`. |
 | `Bash(python3 -m unittest *)` | Run the project's test suite (full `discover -s tests -b` or a focused module). |
+| `Bash(python3 scripts/generate_web_i18n_pages.py)` | Run the repository's canonical Web NO/EN generator entry point for bounded Web work (issue #154) — **exact match, no wildcard**: this and only this invocation, deliberately not `Bash(python3 *)` or `Bash(python3 scripts/*)`. See "Canonical Web i18n generator permission (V1.4, issue #154)" below for why. |
 
 **Deliberately NOT granted**, as a defense-in-depth backstop to the
 "never merge" rule the prompt also states in plain language:
@@ -270,6 +271,63 @@ none of this suite's other tests require one either) and proves:
 two branch-scoped exact push rules from V1.2 are unchanged and are the
 *only* `git push` rules present; and no `git merge`, `gh pr merge`, bare
 `Bash`, or `Bash(*)` rule has been introduced.
+
+## Canonical Web i18n generator permission (V1.4, issue #154)
+
+**The bug this fixes:** #146's two Bridge rounds (PR #149) needed to
+regenerate the Web NO/EN pages as part of a bounded Web task, and
+correctly *refused* to hand-edit `web/en/**` or smuggle a write through
+`python3 -m unittest` — because `.claude/rules/web.md` requires
+generated EN pages to come only from the repository's canonical
+generator, `python3 scripts/generate_web_i18n_pages.py`, never a manual
+edit. But that exact command was never in `--allowedTools` at all (the
+only Python grant was `Bash(python3 -m unittest *)`, issue #12), so
+there was structurally no compliant way for a Bridge round to produce
+that regeneration — a correct refusal, but a dead end for any future
+Web round that legitimately needs it.
+
+**The fix:** exactly one additional `--allowedTools` entry —
+`Bash(python3 scripts/generate_web_i18n_pages.py)` — an **exact-match,
+argument-free** rule, the same pattern already used for
+`Bash(pip install -r requirements.txt)` (V1.2). No wildcard is
+introduced anywhere: not `Bash(python3 *)` (which would grant arbitrary
+Python execution), not `Bash(python3 scripts/*)` (which would grant
+every other script under `scripts/`, several of which write outside
+`web/**` or touch data files this Bridge must never touch), and not a
+bare `Bash` rule. This is strictly additive to the V1.2/V1.3 model
+above — it does not change `--permission-mode acceptEdits`, the
+branch-scoped push rules, the absence of `git merge`/`gh pr merge`, or
+any other existing control.
+
+**Why this is safe to add:** the generator is read-only with respect to
+task/recipe/pantry data (it only ever reads `web/no/**` and writes
+`web/en/**` plus `sitemap.xml`/`robots.txt`, per
+[web/README.md](../../web/README.md)) and is already the codebase's own
+required mechanism for producing those files — the rule grants Claude
+exactly the same generator invocation a human web round would run
+locally, nothing more. `--permission-mode acceptEdits` still governs
+*where* any resulting file writes may land (inside
+`$GITHUB_WORKSPACE` only), so this rule only ever widens *which command*
+may run, not *where* it may write.
+
+Regression coverage:
+[`tests/test_agent_bridge_permission_config.py`](../../tests/test_agent_bridge_permission_config.py)
+additionally proves: the exact generator rule is present; there is
+exactly one such rule (no near-duplicate variants); no broader
+`python3 *`, `python3 scripts/*`, bare `Bash`, or `Bash(*)` permission
+has been introduced alongside it; the two branch-scoped push rules,
+the absence of `git merge`/`gh pr merge`, `--permission-mode
+acceptEdits`, and the absence of `Write`/`Edit`/`MultiEdit` from
+`--allowedTools` are all unchanged by this addition.
+
+**Non-goals (explicitly out of scope for issue #154):** this change
+grants *permission* only — it does not itself regenerate any Web
+pages, change generator behavior, or touch any Web/App/Core product
+file. Whether/when a Bridge round actually invokes the generator for a
+real Web task remains a separate, task-scoped decision for that round's
+own issue (e.g. a future round of #146), governed by the same
+`.claude/rules/web.md` requirement that generated pages must come from
+this exact command.
 
 ## Branch naming is deterministic and enforced (Chief review, PR #13)
 
