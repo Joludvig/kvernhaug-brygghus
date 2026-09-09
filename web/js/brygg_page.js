@@ -91,15 +91,21 @@ function _byggSmakSliders(container, brew) {
   container.innerHTML = "";
   const predikert = (brew.snapshot.predicted && brew.snapshot.predicted.flavorProfile) || {};
   const faktisk = (brew.sensing && brew.sensing.flavorProfile) || {};
-  for (const kategori of Object.keys(predikert)) {
+  Object.keys(predikert).forEach((kategori, indeks) => {
     const rad = document.createElement("div");
     rad.className = "brygg-smak-rad";
+    // B06 Batch 3 (#150, finding #8) -- deterministisk per-render id fra
+    // brew.brewId (DOM-namespace, ingen ny persistent identitet) + indeks,
+    // aldri fra oversatt kategori-visningstekst.
+    const feltId = `${brew.brewId}-smak-${indeks}`;
     const label = document.createElement("label");
+    label.htmlFor = feltId;
     label.textContent = t("brygg.smakKategori", {
       kategori: smaksKategoriVisning(kategori),
       forventet: (predikert[kategori] || 0).toFixed(1).replace(".", ","),
     });
     const input = document.createElement("input");
+    input.id = feltId;
     input.type = "range";
     input.min = "0";
     input.max = String(SMAKS_SKALA_MAKS);
@@ -110,7 +116,7 @@ function _byggSmakSliders(container, brew) {
     rad.appendChild(label);
     rad.appendChild(input);
     container.appendChild(rad);
-  }
+  });
 }
 
 function _lesSmakSliders(container) {
