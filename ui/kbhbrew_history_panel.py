@@ -75,6 +75,15 @@ from modules.kbhbrew_history_ui import (
 from modules.kbhbrew_storage import hent_alle_brews, oppdater_brew_lag
 from modules.kbhbrew_ui import sorter_brews_for_eksport
 from ui.i18n import t
+from ui.kbhbrew_panel import aktiv_brew_id, sett_aktiv_brew_id
+
+# App A1 (issue #170) "Identity safety": et privat, per-modul sentinel-
+# objekt (ALDRI en streng/None som i teorien kunne vært en ekte,
+# lagret verdi) brukt til å skille "denne nøkkelen er ALDRI satt før"
+# fra "nøkkelen er satt, men til None/en tidligere kjent verdi" i de to
+# små synk-sjekkene under -- samme "unngå en falsk None==None-treff ved
+# aller første rendring"-forsiktighet issue #170 krever.
+_UKJENT_SENTINEL = object()
 
 _STATUS_VALG = ("active", "done", "discarded")
 
@@ -314,7 +323,26 @@ def _render_sammenligning(brew):
 def render_kbhbrew_history_panel():
     """Toppnivå-inngangspunkt kalt fra ui/brewday_panel.py. Skjules helt i
     DEMO_MODE (persistent skriving), samme mønster som
-    render_kbhbrew_create_panel()/render_kbhbrew_import_panel()."""
+    render_kbhbrew_create_panel()/render_kbhbrew_import_panel().
+
+    App A1 (issue #170) "Identity safety": denne selectboksen og
+    Bryggdag Steg 4/5 sitt målefelt-mål (ui/kbhbrew_panel.py sin
+    `_AKTIV_BREW_ID_NOKKEL`) skal ALDRI stille være uenige om hvilket
+    brygg som er målet. To små, retningsbestemte synk-sjekker (under)
+    håndhever dette begge veier, uten å innføre noe nytt state-mønster
+    utover de allerede etablerte shadow-/pending-nøkkel-idiomene
+    (docs/development/PROJECT_MAP.md):
+
+      1. Endres det aktive målet et ANNET sted (nytt brygg opprettet,
+         eller ugyldiggjort av et oppskriftsbytte) -- FØR selectboksen
+         under instansieres denne kjøringen -- forvelges/låses den til
+         det nye aktive målet (kun hvis det faktisk finnes i den
+         nåværende brygg-listen).
+      2. Ellers, hvis brukeren selv nettopp endret DENNE selectboksens
+         egen verdi (sammenlignet mot forrige kjente verdi -- ALDRI mot
+         hva forvalget over nettopp kan ha tvunget den til, som ville
+         gitt en falsk "brukervalg"-deteksjon), oppdateres det delte
+         aktive målet til å matche."""
     if DEMO_MODE:
         st.write("---")
         st.subheader(t("brew_history.tittel"))
@@ -331,12 +359,28 @@ def render_kbhbrew_history_panel():
 
     valg = sorter_brews_for_eksport(brews)
     etiketter = dict(valg)
+
+    _aktiv = aktiv_brew_id()
+    _sist_kjent_aktiv = st.session_state.get("_kbhbrew_hist_sist_kjente_aktiv", _UKJENT_SENTINEL)
+    _tvang_forvalg = False
+    if _aktiv != _sist_kjent_aktiv:
+        if _aktiv in brews:
+            st.session_state["kbhbrew_historikk_valgt_id"] = _aktiv
+            _tvang_forvalg = True
+        st.session_state["_kbhbrew_hist_sist_kjente_aktiv"] = _aktiv
+
     brew_id = st.selectbox(
         t("brew_history.velg_label"),
         options=[bid for bid, _ in valg],
         format_func=lambda bid: etiketter[bid],
         key="kbhbrew_historikk_valgt_id",
     )
+
+    _sist_valgt = st.session_state.get("_kbhbrew_hist_sist_valgt_id", _UKJENT_SENTINEL)
+    if not _tvang_forvalg and _sist_valgt is not _UKJENT_SENTINEL and brew_id != _sist_valgt:
+        sett_aktiv_brew_id(brew_id)
+    st.session_state["_kbhbrew_hist_sist_valgt_id"] = brew_id
+
     brew = brews.get(brew_id)
     if brew is None:
         return

@@ -26,6 +26,15 @@ eksisterende, testede motoren/lagringslaget. Rene formaterings-/
 utvalgshjelpere (predicted-bygging, eksport-label/-filnavn) er flyttet
 til modules/kbhbrew_ui.py, slik at de kan enhetstestes uten en
 Streamlit-kontekst (se tests/test_kbhbrew_ui_helpers.py).
+
+App A1 (issue #170) -- `_AKTIV_BREW_ID_NOKKEL` er PROMOTERT fra en
+ren visnings-bekreftelse til det eneste in-session målet Bryggdag Steg
+4/5 sine målefelt (ui/brewday_panel.py) og Brygghistorikk-forvalget
+(ui/kbhbrew_history_panel.py) leser/skriver via aktiv_brew_id()/
+sett_aktiv_brew_id() under. _sinkroniser_aktiv_brew_mot_oppskrift()
+ugyldiggjør pekeren FØR noen av de to leser den i en gitt kjøring, hvis
+gjeldende oppskrifts identitet ikke lenger matcher det aktive bryggets
+egen `recipeId` -- se modules/kbhbrew_ui.py::aktiv_brew_matcher_recipe().
 """
 import json
 
@@ -43,6 +52,7 @@ from modules.kbhbrew_storage import (
     opprett_og_lagre_ny_brew,
 )
 from modules.kbhbrew_ui import (
+    aktiv_brew_matcher_recipe,
     bygg_brew_eksport_filnavn,
     bygg_predicted_fra_ctx,
     manglende_ingrediens_ider,
@@ -51,6 +61,54 @@ from modules.kbhbrew_ui import (
 
 _AKTIV_BREW_ID_NOKKEL = "_aktiv_kbhbrew_brew_id"
 _IMPORT_FIL_ID_NOKKEL = "kbhbrew_import_preview_file_id"
+
+
+def aktiv_brew_id():
+    """Nøytral, delt leser for `_AKTIV_BREW_ID_NOKKEL` -- App A1 (issue
+    #170) sitt "eneste in-session mål for Bryggdag-målinger". Andre
+    moduler (ui/brewday_panel.py, ui/kbhbrew_history_panel.py) leser/
+    skriver denne UTELUKKENDE via denne og sett_aktiv_brew_id() i stedet
+    for å kjenne til selve nøkkelstrengen, slik at identitetskontrakten
+    forblir definert ETT sted."""
+    return st.session_state.get(_AKTIV_BREW_ID_NOKKEL)
+
+
+def sett_aktiv_brew_id(brew_id):
+    """Skriver (eller, med `brew_id` som en falsy verdi, fjerner) det
+    aktive brygg-målet. Samme peker som "▶️ Start nytt brygg" allerede
+    setter -- kalt herfra også når Brygghistorikk-panelet eksplisitt
+    velger et ANNET brygg (issue #170 "Identity safety": Steg 4/5 og
+    Historikk skal aldri stille være uenige om målet)."""
+    if brew_id:
+        st.session_state[_AKTIV_BREW_ID_NOKKEL] = brew_id
+    else:
+        st.session_state.pop(_AKTIV_BREW_ID_NOKKEL, None)
+
+
+def _sinkroniser_aktiv_brew_mot_oppskrift():
+    """Selvhelbreder/ugyldiggjør `_AKTIV_BREW_ID_NOKKEL` FØR noe annet i
+    Bryggdag-fanen (Steg 4/5-målefeltene, Brygghistorikk-forvalget) leser
+    den i DENNE kjøringen (App A1, issue #170 "Identity safety"):
+
+      - brygget finnes ikke lenger lokalt (slettet utenfor økten) --
+        selvhelbreder (eksisterende oppførsel, uendret);
+      - gjeldende oppskrifts identitet (`_last_loaded_recipe_file`,
+        samme peker som `ui/kbhbrew_panel.py:105` allerede bruker som
+        `recipe_id` ved opprettelse) matcher IKKE lenger det aktive
+        bryggets EGEN `recipeId` -- et oppskriftsbytte/import skal ALDRI
+        la påfølgende Steg 4/5-målinger stille feste seg til et brygg
+        fra en ANNEN oppskrift.
+
+    Returnerer det (fortsatt gyldige) aktive brygg-objektet, eller None
+    -- ALDRI en exception, samme "ren self-heal"-prinsipp som før."""
+    brew_id = aktiv_brew_id()
+    if not brew_id:
+        return None
+    brew = hent_brew(brew_id)
+    if brew is None or not aktiv_brew_matcher_recipe(brew, st.session_state.get("_last_loaded_recipe_file")):
+        sett_aktiv_brew_id(None)
+        return None
+    return brew
 
 
 def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_database):
@@ -63,13 +121,17 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
     endringer"-seksjonen i ui/recipe_card.py.
 
     `brewId`-en til sist opprettede brygg beholdes i session_state
-    (`_AKTIV_BREW_ID_NOKKEL`) KUN for å vise en vedvarende bekreftelse på
-    tvers av senere reruns -- IKKE for å hindre et NYTT, eksplisitt klikk
-    fra å opprette et NYTT batch (flere reelle brygg fra samme oppskrift
-    er gyldig historikk, se issue). Selve dedupliseringen mot en
-    utilsiktet Streamlit-rerun følger av at opprettelsen kun kan nås
-    inne i `if st.button(...)`-blokken -- `st.button()` returnerer kun
-    True i akkurat den kjøringen knappen faktisk ble trykket i."""
+    (`_AKTIV_BREW_ID_NOKKEL`). Opprinnelig (PRI 3B2) KUN for en
+    vedvarende bekreftelse på tvers av senere reruns -- App A1 (issue
+    #170) PROMOTERER den samme nøkkelen til det eneste in-session målet
+    Steg 4/5 sine målefelt og Brygghistorikk-forvalget skriver til/leser
+    fra (se aktiv_brew_id()/sett_aktiv_brew_id() over). Den hindrer
+    fortsatt ALDRI et NYTT, eksplisitt klikk fra å opprette et NYTT
+    batch (flere reelle brygg fra samme oppskrift er gyldig historikk,
+    se issue). Selve dedupliseringen mot en utilsiktet Streamlit-rerun
+    følger av at opprettelsen kun kan nås inne i `if st.button(...)`-
+    blokken -- `st.button()` returnerer kun True i akkurat den kjøringen
+    knappen faktisk ble trykket i."""
     if DEMO_MODE:
         return
 
@@ -107,19 +169,15 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
             except UgyldigOppskriftForEksport as e:
                 st.error(f"❌ Kunne ikke starte nytt brygg — oppskriften er ikke gyldig for eksport: {e}")
             else:
-                st.session_state[_AKTIV_BREW_ID_NOKKEL] = brew["brewId"]
+                sett_aktiv_brew_id(brew["brewId"])
                 st.toast(f"Nytt brygg startet: {brew['brewId']}", icon="🍺")
 
-    aktiv_brew_id = st.session_state.get(_AKTIV_BREW_ID_NOKKEL)
-    if aktiv_brew_id:
-        aktiv_brew = hent_brew(aktiv_brew_id)
-        if aktiv_brew is None:
-            st.session_state.pop(_AKTIV_BREW_ID_NOKKEL, None)
-        else:
-            st.success(
-                f"✅ Aktivt brygg denne økten: `{aktiv_brew_id}` · "
-                f"opprettet {aktiv_brew.get('createdAt', '-')} · status **{aktiv_brew.get('status')}**"
-            )
+    aktiv_brew = _sinkroniser_aktiv_brew_mot_oppskrift()
+    if aktiv_brew is not None:
+        st.success(
+            f"✅ Aktivt brygg denne økten: `{aktiv_brew['brewId']}` · "
+            f"opprettet {aktiv_brew.get('createdAt', '-')} · status **{aktiv_brew.get('status')}**"
+        )
 
 
 def render_kbhbrew_import_panel():
