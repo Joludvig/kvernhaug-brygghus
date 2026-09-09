@@ -8,13 +8,29 @@ that inventory's evidence, it extends it with the source verification issue
 #147 explicitly required, evaluates options A/B/C, and recommends one product
 contract. No `web/**` product file, i18n string, CSS rule, or JS logic is
 touched by this document. Authoritative master when opened:
-`d522a21de711a288220abe281f6f0cfa8808d816`.*
+`d522a21de711a288220abe281f6f0cfa8808d816`; revalidated against current
+master `b722811a7e04def9ae98baa95acaa78e6d0cbac4` per Chief's
+changes-requested follow-up (see "Revalidation" note in §1) — no premise
+below changed.*
 
 ## 1. Current source truth
 
 Confirms the triage doc's three findings still hold verbatim against current
 `master`, and adds the source verification issue #147 required beyond the
 triage's own scope:
+
+- **Revalidation (Chief changes-requested follow-up, this round)** —
+  `git diff d522a21..b722811 -- web/js/app.js web/js/veiledning.js
+  web/js/i18n.js web/css/style.css web/index.html` is empty: none of the
+  five source files this brief cites (or their line numbers below) changed
+  between the master this brief was originally opened against and current
+  master. The only `web/**` change in that range
+  (`web/js/brygg_page.js`, brew-log tasting-slider label IDs, #150) touches
+  an unrelated page/feature (`brygg_page.js` renders the post-brew tasting
+  log, not the style-analysis/guidance panel this brief covers) and shares
+  no function, container, or i18n key with anything cited below. Every
+  source claim, line citation, and the Option A recommendation in this
+  document therefore stand unchanged; no premise was disproven.
 
 - **`.mester-only` visibility mechanism** — unchanged from the triage doc:
   `body.modus-laerling .mester-only { display: none !important; }`
