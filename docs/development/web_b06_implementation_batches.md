@@ -33,8 +33,8 @@ the inventory it builds on does.*
 |---|---|---|---|---|
 | 1 | Malt/hop numeric input accessible names | #1–5 | **COMPLETED — implemented in #142 / PR #143** | Low |
 | 2 | Brew-log OG/FG/Volume/textareas + judgment-group label | #7, #9, #13 | **COMPLETED IN IMPLEMENTATION — implemented by #144** | Low–Medium |
-| 3 | Brew-log tasting sliders | #8 | MUST FIX — **next pending implementation batch** | Medium–High |
-| 4 | Shared combobox ARIA + dead `aria-labelledby` cleanup | #10, #21 | MUST FIX (+1 SHOULD FIX) | High |
+| 3 | Brew-log tasting sliders | #8 | **COMPLETED IN IMPLEMENTATION — implemented by #150** | Medium–High |
+| 4 | Shared combobox ARIA + dead `aria-labelledby` cleanup | #10, #21 | MUST FIX — **next pending implementation batch** | High |
 | 5 | Help popover focus handling + initial `aria-expanded` | #11 (focus half) | MUST FIX | Medium |
 | 6 | Touch-target sizing | #11 (size half), #20 | SHOULD FIX | Low |
 | 7 | First-visit Learner/Master dialog focus handling | #12 | MUST FIX | Low |
@@ -53,8 +53,10 @@ the inventory it builds on does.*
    Batch 1 touches a template with no shared-state hazards. Batch 2 is
    mechanically identical (add `id`/`for`) but must additionally get
    per-brew-card `id` uniqueness right (see Batch 2 below). Batch 3 is the
-   only MUST FIX batch that generates `id`s in a loop and has two live
-   cross-issue coordination points (B09, W5 — see below). Batch 4 (the
+   only MUST FIX batch that generates `id`s in a loop and, when this order
+   was originally proposed, had two cross-issue coordination points (B09,
+   W5 — see below); both are now already DEPLOYED/LIVE and required no
+   coordination by the time Batch 3 was actually implemented (#150). Batch 4 (the
    combobox) is placed **last** among MUST FIX batches deliberately: it is
    a single shared component instantiated by four different pickers on the
    same page simultaneously (malt/hop rows repeat it per row), so it is
@@ -252,28 +254,40 @@ not with #14/#15" below).
 
 ## Batch 3 — Brew-log tasting sliders
 
-**Status: next pending implementation batch** (Batch 2 is completed — see
-above).
+**Status: COMPLETED IN IMPLEMENTATION — implemented by #150.** Deployment/
+live status is tracked separately on issue #150 under the Kvernhaug Web
+lifecycle rule `MERGED ≠ DEPLOYED/LIVE`. Everything below this line is
+retained as the original planning record for reference; it is no longer a
+future/pending batch. **Corrections to the two dependency notes below,
+made when #150 was implemented:** both B09 and W5 are already
+DEPLOYED/LIVE — B09's current source already contains the display
+translation fix (`smaksKategoriVisning()`), and W5's finish/reopen
+behavior was preserved exactly, unmodified by this batch. Neither was an
+in-flight/future dependency by the time this batch was implemented; see
+the corrected bullets below.
 
 **Findings:** #8 (MUST FIX — up to 18 unlabeled `<input type="range">` per
-brew, the inventory's own highest-severity single finding).
+brew, the inventory's own highest-severity single finding — now fixed).
 
 - **Files/functions/selectors:** `web/js/brygg_page.js`, `_byggSmakSliders()`
-  (`:90-113`), called from the `fase === "smaking" || "ferdig"` branch
+  (`:90-113`, pre-fix), called from the `fase === "smaking" || "ferdig"` branch
   (`:224`).
-- **Acceptance criteria:** inside the existing `for (const kategori of
-  Object.keys(predikert))` loop, assign `input.id` and `label.htmlFor =
-  input.id` for every slider, using a **brew-scoped** id, e.g.
-  `` `brygg-${brew.brewId}-smak-${kategori}` `` — reusing the same
-  per-card-uniqueness convention Batch 2 should already have established
-  (see that batch's cross-cutting criterion), so both batches agree on one
-  naming scheme rather than inventing two. `container.innerHTML = ""` at
-  the top of the function already clears prior nodes on every rebuild, so
-  there is no stale-`id` leak risk across re-renders of the same card.
+- **Acceptance criteria:** inside the existing loop over
+  `Object.keys(predikert)`, assign `input.id` and `label.htmlFor =
+  input.id` for every slider, using a **brew-scoped, index-derived** id
+  (implemented as `` `${brew.brewId}-smak-${indeks}` ``, never derived from
+  translated category display text) — reusing the same per-card-uniqueness
+  convention Batch 2 already established (see that batch's cross-cutting
+  criterion), so both batches agree on one naming family rather than
+  inventing two. `container.innerHTML = ""` at the top of the function
+  already clears prior nodes on every rebuild, so there is no stale-`id`
+  leak risk across re-renders of the same card.
 - **NO/EN implications:** none directly from the `id`/`for` fix itself.
-  **However**, see the B09 dependency below — the *label text* this exact
-  loop builds (`label.textContent = t("brygg.smakKategori", { kategori,
-  ... })`, line 98) is the literal site of a separate, already-triaged bug.
+  The *label text* this exact loop builds (`label.textContent =
+  t("brygg.smakKategori", { kategori: smaksKategoriVisning(kategori), ...
+  })`, line ~98) already routes the category name through
+  `smaksKategoriVisning()` — the B09 display-translation fix — unmodified
+  by this batch; see the B09 note below.
 - **Keyboard/focus cases:** none new — sliders are already focusable/
   operable; this only adds the missing name.
 - **Mobile implications:** none.
@@ -296,46 +310,34 @@ brew, the inventory's own highest-severity single finding).
   fixed template edit) and the batch with by far the largest number of
   individual controls affected per brew card (up to 18) and per page
   (× number of concurrently rendered cards).
-- **Dependencies on W5/B07/B08/B09-B11 — two concrete, source-proven
-  points, not a general "same area" caveat:**
-  - **B09 (same line):** `web/js/brygg_page.js:98-101` — the exact
-    `label.textContent = t("brygg.smakKategori", { kategori, ... })` call
-    this batch must touch to add `label.htmlFor` — is also the exact
+- **Dependencies on W5/B07/B08/B09-B11 (corrected — both already
+  DEPLOYED/LIVE by the time this batch was implemented, #150):**
+  - **B09 — already DEPLOYED/LIVE; current source already contains
+    display translation fix.** `web/js/brygg_page.js:98-101` — the exact
+    `label.textContent = t("brygg.smakKategori", { kategori:
+    smaksKategoriVisning(kategori), ... })` call this batch touched to add
+    `label.htmlFor` — was, at the time this plan was originally drafted, the
     reported defect site for B09 ("English brew log shows Norwegian taste
-    labels," `docs/development/web_b09_b11_triage.md`): `kategori` is
-    passed to `t()` raw instead of through `smaksKategoriVisning(kategori)`
-    (`web/js/i18n.js:3773-3776`), so the interpolated category name stays
-    Norwegian in the EN UI. Whoever implements this batch will produce a
-    diff on the same three lines B09's own future fix would touch. This
-    plan does **not** ask this batch to fix B09 (out of this issue's hard
-    scope, and B09 has its own separate triage doc) — it flags the
-    unavoidable **same-line collision** so the batch's implementer/reviewer
-    picks one of two safe paths: (a) implement both fixes together in one
-    PR once both are authorized, since they touch the same three lines
-    anyway, or (b) implement this batch alone and expect B09's future PR
-    to need a small rebase on top, not the reverse. Silently landing both
-    independently, unaware of each other, is the one path likely to
-    produce an avoidable merge conflict on identical lines.
-  - **W5 (same render branch):** the whole `fase === "smaking" ||
-    "ferdig"` branch this function is called from (`brygg_page.js:198-280`)
-    is the exact region `docs/development/web_w5_brew_completion_preflight.md`
-    discusses for its brew-completion state-machine gap (the "Avslutt"
-    button at `:262-269` settable before `sensing.judgment` exists). W5's
-    own scope is the completion state machine, not this function's
-    internals, so there is no functional coupling — but if a W5
-    implementation round restructures *when or whether* this branch
-    renders (e.g. gating the tasting UI behind an explicit "not yet judged"
-    state), this batch's diff inside that same branch will need a rebase.
-    Sequencing recommendation: if both are active in the same period,
-    land W5 first to avoid this batch rebasing on top of a
-    restructured branch; there is no correctness reason to block this
-    batch on W5, only a rebase-avoidance one.
+    labels," `docs/development/web_b09_b11_triage.md`). B09 shipped
+    independently before #150 and already routes `kategori` through
+    `smaksKategoriVisning()`; #150 did not reopen or alter this display
+    semantics, only added `id`/`htmlFor`.
+  - **W5 — already DEPLOYED/LIVE; preserve current behavior.** The
+    `fase === "smaking" || "ferdig"` branch this function is called from
+    (`brygg_page.js:198-280`) is the region
+    `docs/development/web_w5_brew_completion_preflight.md` originally
+    discussed for the brew-completion state-machine gap. W5 shipped
+    independently before #150; its finish/reopen behavior was preserved
+    exactly by this batch, unmodified.
 
-**Future issue title:** *"WEB FIX — B06 batch 3: accessible names for brew-log tasting sliders (#8) — note same-line B09 collision, see triage doc"*
+**Issue/PR (actual):** #150 — *"WEB FIX — B06 batch 3: accessible names for brew-log tasting sliders"*.
 
 ---
 
 ## Batch 4 — Shared combobox ARIA + dead `aria-labelledby` cleanup
+
+**Status: next pending implementation batch** (Batch 3 is completed — see
+above).
 
 **Findings:** #10 (MUST FIX — incomplete ARIA combobox pattern), #21
 (SHOULD FIX — dead `aria-labelledby` markup on the yeast/style mount divs).
@@ -629,10 +631,9 @@ whole-chart `aria-label`, no per-axis values to assistive tech).
   pairs, or (b) an adjacent accessible data table mirroring the chart —
   the inventory does not commit to either, and neither should this plan.
 - **NO/EN implications:** if implemented, any new summary text needs both
-  NO and EN i18n keys, following the same category-naming mechanism this
-  document's Batch 3 already flags as being mid-fix via B09
-  (`smaksKategoriVisning`) — worth checking B09's resolution before writing
-  new category-name strings here, so the two don't diverge on how a
+  NO and EN i18n keys, following the same category-naming mechanism Batch
+  3 already uses (`smaksKategoriVisning()`, the B09 fix, already
+  DEPLOYED/LIVE — see Batch 3 above) so the two don't diverge on how a
   category name is localized.
 - **Keyboard/focus cases:** none anticipated — this is a
   non-interactive `<svg>`, not a focusable control.
@@ -656,14 +657,14 @@ whole-chart `aria-label`, no per-axis values to assistive tech).
 
 ## What should NOT be combined
 
-- **Batch 3 (sliders) must not be merged into Batch 2**, despite living in
-  the same file and even the same render branch as this batch's textareas/
-  judgment-group items, because it is the only batch that generates `id`s
-  in a loop rather than editing static template markup, and it carries the
-  two named cross-issue coordination points (B09 same-line collision, W5
-  same-branch overlap) that the rest of Batch 2 does not share. Bundling
-  them would force the lower-risk static edits in Batch 2 to wait on the
-  higher-risk, coordination-dependent slider fix.
+- **Batch 3 (sliders) was not merged into Batch 2**, despite living in
+  the same file and even the same render branch as that batch's textareas/
+  judgment-group items, because it was the only batch that generates `id`s
+  in a loop rather than editing static template markup, and it originally
+  carried two cross-issue coordination points (B09, W5) that the rest of
+  Batch 2 did not share — both shipped independently before Batch 3 was
+  implemented (#150), see Batch 3 above. Bundling them would have forced
+  the lower-risk static edits in Batch 2 to wait on the slider fix.
 - **Batch 4 (combobox) must not be bundled with anything else.** It is the
   single highest-regression-risk batch in this plan (a shared component
   with an arbitrary, user-controlled instance count on the malt/hop rows)
