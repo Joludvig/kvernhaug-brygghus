@@ -430,7 +430,8 @@ const TEKSTER = {
 
     "stilanalyse.innenforAlle": "✅ Innenfor alle stilens numeriske grenser.",
     "stilanalyse.innenforOmrade": "✅ Oppskriften ligger innenfor det typiske området for {stil}.",
-    "stilanalyse.ingenTreff": "Ingen stil i biblioteket treffer godt nok ennå — juster ingrediensene eller se nærliggende stiler under.",
+    "stilanalyse.ingenTreffBase": "Ingen stil i biblioteket treffer godt nok ennå — juster ingrediensene.",
+    "stilanalyse.ingenTreffNaerliggende": " Eller se nærliggende stiler under.",
     "stilanalyse.leggTilForMatch": "Legg til malt og/eller humle for å se hvordan oppskriften matcher {stil}.",
     "stilanalyse.buGu": "Bitterhetsindeks (BU:GU): {verdi}",
 
@@ -1702,7 +1703,8 @@ const TEKSTER = {
     "builder.smaksprofil.ariaLabel": "Smakshjul — sensorisk profil basert på valgte ingredienser",
     "veiledning.linje": "{label} er {niva} {retning} enn typisk for {stil}. Vanlig område: {omrade}.",
     "veiledning.tips": " Tips: {tips} vil trekke oppskriften nærmere stilen.",
-    "veiledning.samlet": "Oppskriften din er {adjektiver} enn typisk for {stil}. Se «Nærliggende stiler» under for et konkret alternativ som kan passe bedre.",
+    "veiledning.samletBase": "Oppskriften din er {adjektiver} enn typisk for {stil}.",
+    "veiledning.samletNaerliggende": " Se «Nærliggende stiler» under for et konkret alternativ som kan passe bedre.",
     "veiledning.nivaTydelig": "tydelig",
     "veiledning.nivaLitt": "litt",
     "veiledning.retningLavere": "lavere",
@@ -2179,7 +2181,8 @@ const TEKSTER = {
 
     "stilanalyse.innenforAlle": "✅ Within all of the style's numeric ranges.",
     "stilanalyse.innenforOmrade": "✅ The recipe is within the typical range for {stil}.",
-    "stilanalyse.ingenTreff": "No style in the library matches closely enough yet — adjust the ingredients or see nearby styles below.",
+    "stilanalyse.ingenTreffBase": "No style in the library matches closely enough yet — adjust the ingredients.",
+    "stilanalyse.ingenTreffNaerliggende": " Or see nearby styles below.",
     "stilanalyse.leggTilForMatch": "Add malt and/or hops to see how the recipe matches {stil}.",
     "stilanalyse.buGu": "Bitterness index (BU:GU): {verdi}",
 
@@ -3451,7 +3454,8 @@ const TEKSTER = {
     "builder.smaksprofil.ariaLabel": "Flavor wheel — sensory profile based on the chosen ingredients",
     "veiledning.linje": "{label} is {niva} {retning} than typical for {stil}. Typical range: {omrade}.",
     "veiledning.tips": " Tip: {tips} will bring the recipe closer to the style.",
-    "veiledning.samlet": "Your recipe is {adjektiver} than typical for {stil}. See «Nearby styles» below for a concrete alternative that might fit better.",
+    "veiledning.samletBase": "Your recipe is {adjektiver} than typical for {stil}.",
+    "veiledning.samletNaerliggende": " See «Nearby styles» below for a concrete alternative that might fit better.",
     "veiledning.nivaTydelig": "clearly",
     "veiledning.nivaLitt": "slightly",
     "veiledning.retningLavere": "lower",
