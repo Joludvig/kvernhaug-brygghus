@@ -374,6 +374,7 @@ function initModus() {
   for (const knapp of document.querySelectorAll(".modus-knapp")) {
     knapp.addEventListener("click", () => {
       settModus(knapp.dataset.modus);
+      renderStilPanel();
       _lukkModusForstegang();
     });
   }
@@ -1311,12 +1312,12 @@ function _stilKortHtml(s, { visBeskrivelse = false } = {}) {
 
 // ─── Stilveiledning-visning (begge moduser: vennlig, rolig språk) ────────
 
-function _renderVeiledning(container, stilEntry, stilNavn) {
+function _renderVeiledning(container, stilEntry, stilNavn, erMester) {
   if (!stilEntry) {
     container.innerHTML = "";
     return;
   }
-  const v = byggStilVeiledning(stilEntry, stilNavn);
+  const v = byggStilVeiledning(stilEntry, stilNavn, erMester);
   if (v.alleInnenfor) {
     container.innerHTML = `<p class="stil-veiledning-innenfor">${escHtml(t("stilanalyse.innenforOmrade", { stil: stilVisningsnavn(stilNavn) }))}</p>`;
     return;
@@ -1337,6 +1338,7 @@ function renderStilPanel() {
   const autoInnholdEl = document.getElementById("stil-auto-innhold");
   tomTilstandEl.hidden = harData;
   autoInnholdEl.hidden = !harData;
+  const erMester = document.body.classList.contains("modus-mester");
 
   if (harData) {
     const headlineNavn = document.getElementById("stil-headline-navn");
@@ -1345,14 +1347,14 @@ function renderStilPanel() {
 
     const autoContainer = document.getElementById("stil-veiledning-auto");
     if (a.stil === "Kreativt Brygg") {
-      headlineInfo.textContent = t("stilanalyse.ingenTreff");
+      headlineInfo.textContent = t("stilanalyse.ingenTreffBase") + (erMester ? t("stilanalyse.ingenTreffNaerliggende") : "");
       autoContainer.innerHTML = "";
     } else {
       const entry = _stilEntryFor(a.stil);
       headlineInfo.innerHTML = entry && entry.bjcp_offisiell === false
         ? `<span class="stil-merke">${escHtml(t("stilmatch.ikkeOffisiellHeadline"))}</span>`
         : "";
-      _renderVeiledning(autoContainer, entry, a.stil);
+      _renderVeiledning(autoContainer, entry, a.stil, erMester);
     }
 
     document.getElementById("bu-gu-tekst").textContent = t("stilanalyse.buGu", { verdi: a.bu_gu.toFixed(2) });
@@ -1396,7 +1398,7 @@ function renderStilManuell() {
   }
   const entry = _stilEntryFor(valgtNavn);
   resultatEl.innerHTML = entry ? _stilKortHtml(entry, { visBeskrivelse: true }) : "";
-  _renderVeiledning(veiledningEl, entry, valgtNavn);
+  _renderVeiledning(veiledningEl, entry, valgtNavn, document.body.classList.contains("modus-mester"));
 }
 
 // ─── Lagring / lasting / eksport / import ────────────────────────────────

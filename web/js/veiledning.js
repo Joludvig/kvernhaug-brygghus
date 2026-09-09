@@ -29,14 +29,20 @@ const _FELT_TIPS = {
   no: {
     ibu: { under: "mer bitterhumle (lengre koketid eller høyere alfasyre)", over: "mindre bitterhumle eller kortere koketid" },
     ebc: { under: "litt mer spesialmalt (karamell/røstet)", over: "litt mindre spesialmalt (karamell/røstet)" },
-    og: { under: "mer malt eller høyere brygghuseffektivitet", over: "mindre malt eller lavere brygghuseffektivitet" },
+    og: {
+      under: { alltid: "mer malt", mester: "mer malt eller høyere brygghuseffektivitet" },
+      over: { alltid: "mindre malt", mester: "mindre malt eller lavere brygghuseffektivitet" },
+    },
     fg: { under: "en gjær med lavere utgjæring", over: "en gjær med høyere utgjæring" },
     abv: { under: "mer malt/høyere OG", over: "mindre malt/lavere OG" },
   },
   en: {
     ibu: { under: "more bittering hops (longer boil time or higher alpha acid)", over: "less bittering hops or a shorter boil time" },
     ebc: { under: "a bit more specialty malt (caramel/roasted)", over: "a bit less specialty malt (caramel/roasted)" },
-    og: { under: "more malt or higher brewhouse efficiency", over: "less malt or lower brewhouse efficiency" },
+    og: {
+      under: { alltid: "more malt", mester: "more malt or higher brewhouse efficiency" },
+      over: { alltid: "less malt", mester: "less malt or lower brewhouse efficiency" },
+    },
     fg: { under: "a yeast with lower attenuation", over: "a yeast with higher attenuation" },
     abv: { under: "more malt/higher OG", over: "less malt/lower OG" },
   },
@@ -63,7 +69,13 @@ function _feltOmrade(felt, lo, hi) {
   return `${_fmtKomma(lo, 3)}–${_fmtKomma(hi, 3)}`;
 }
 
-function _feltNivaOgSetning(felt, avvik, stilNavn) {
+function _feltTipsTekst(felt, retning, spraak, erMester) {
+  const tips = _FELT_TIPS[spraak][felt][retning];
+  if (felt === "og") return erMester ? tips.mester : tips.alltid;
+  return tips;
+}
+
+function _feltNivaOgSetning(felt, avvik, stilNavn, erMester) {
   if (!avvik.retning) return { niva: "innenfor", tekst: null };
   const spraak = gjeldendeSprak();
   const niva = avvik.normalisert >= _VEILEDNING_TYDELIG_TERSKEL ? "tydelig" : "litt";
@@ -75,7 +87,7 @@ function _feltNivaOgSetning(felt, avvik, stilNavn) {
     stil: stilVisningsnavn(stilNavn), omrade: _feltOmrade(felt, avvik.lo, avvik.hi),
   });
   if (niva === "tydelig" && _FELT_TIPS[spraak][felt]) {
-    tekst += t("veiledning.tips", { tips: _FELT_TIPS[spraak][felt][avvik.retning] });
+    tekst += t("veiledning.tips", { tips: _feltTipsTekst(felt, avvik.retning, spraak, erMester) });
   }
   return { niva, tekst };
 }
@@ -85,7 +97,7 @@ function _listeMedOg(liste) {
   return `${liste.slice(0, -1).join(", ")} ${t("veiledning.listeOg")} ${liste[liste.length - 1]}`;
 }
 
-function _byggSamletOppsummering(feltAvvik, stilNavn) {
+function _byggSamletOppsummering(feltAvvik, stilNavn, erMester) {
   const antallAvvikende = ["og", "fg", "ibu", "ebc", "abv"].filter((f) => feltAvvik[f].retning).length;
   if (antallAvvikende < 2) return null;
 
@@ -97,17 +109,19 @@ function _byggSamletOppsummering(feltAvvik, stilNavn) {
   }
   if (adjektiver.length < 2) return null;
 
-  return t("veiledning.samlet", { adjektiver: _listeMedOg(adjektiver), stil: stilVisningsnavn(stilNavn) });
+  let tekst = t("veiledning.samletBase", { adjektiver: _listeMedOg(adjektiver), stil: stilVisningsnavn(stilNavn) });
+  if (erMester) tekst += t("veiledning.samletNaerliggende");
+  return tekst;
 }
 
 // stilEntry: ett element fra sisteStilAnalyse.stil_liste (har .felt_avvik)
-function byggStilVeiledning(stilEntry, stilNavn) {
+function byggStilVeiledning(stilEntry, stilNavn, erMester) {
   const felter = ["og", "fg", "ibu", "ebc", "abv"];
   const linjer = [];
   let alleInnenfor = true;
 
   for (const felt of felter) {
-    const { niva, tekst } = _feltNivaOgSetning(felt, stilEntry.felt_avvik[felt], stilNavn);
+    const { niva, tekst } = _feltNivaOgSetning(felt, stilEntry.felt_avvik[felt], stilNavn, erMester);
     if (niva !== "innenfor") {
       alleInnenfor = false;
       linjer.push({ felt, niva, tekst });
@@ -117,6 +131,6 @@ function byggStilVeiledning(stilEntry, stilNavn) {
   return {
     alleInnenfor,
     linjer,
-    samlet: _byggSamletOppsummering(stilEntry.felt_avvik, stilNavn),
+    samlet: _byggSamletOppsummering(stilEntry.felt_avvik, stilNavn, erMester),
   };
 }
