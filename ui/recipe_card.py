@@ -15,6 +15,7 @@ from modules.recipe_storage import (
     LoggKorruptError,
     LegacyLoggKandidatUkjent,
 )
+from modules.calculations import beregn_abv_standard
 from modules.recipe import bygg_recipe_object
 from modules.kbh_contract import bygg_kbhrecipe_konvolutt, UgyldigOppskriftForEksport
 from modules.card_template import render_card_html, render_a4_html
@@ -72,12 +73,18 @@ def _render_brewday_result_panel(ctx):
 
             if st.form_submit_button("Legg til loggoppføring", width="stretch"):
                 _profil = st.session_state.get("aktiv_prosessprofil")
+                try:
+                    actual_abv = round(beregn_abv_standard(actual_og, actual_fg), 1)
+                except ValueError:
+                    # Ugyldig måling (f.eks. FG > OG) -- lagre ingen ABV
+                    # fremfor en stille feil negativ verdi.
+                    actual_abv = None
                 entry = {
                     "date": brew_date.isoformat(),
                     "actual_volume_l": actual_volume,
                     "actual_og": actual_og,
                     "actual_fg": actual_fg,
-                    "actual_abv": round((actual_og - actual_fg) * 131.25, 1),
+                    "actual_abv": actual_abv,
                     "note": note.strip(),
                     "process_profile_navn": _profil["navn"] if _profil else None,
                 }
