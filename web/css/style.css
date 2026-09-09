@@ -1780,6 +1780,8 @@ footer {
   justify-content: center;
   width: 1.3rem;
   height: 1.3rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
   border-radius: 50%;
   border: 1px solid var(--gold);
   background: none;
@@ -1800,6 +1802,8 @@ footer {
 .hjelp-knapp-liten {
   width: 1.05rem;
   height: 1.05rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
   font-size: 0.6rem;
 }
 
