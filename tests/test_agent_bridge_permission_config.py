@@ -1,7 +1,7 @@
 """
-Kvernhaug Agent Bridge V1.3 -- regresjonstester for permission-modellen
-på "Run Claude Code"-steget (.github/workflows/claude-agent-bridge.yml,
-issue #15).
+Kvernhaug Agent Bridge V1.3/V1.4 -- regresjonstester for permission-
+modellen på "Run Claude Code"-steget
+(.github/workflows/claude-agent-bridge.yml, issue #15 / issue #154).
 
 BAKGRUNN (funnet på den første ekte E2E-kjøringen som kom forbi V1.2,
 issue #14): workflow-kjøring 33667544306 trigget korrekt, autentiserte,
@@ -27,6 +27,14 @@ beviser kontrakten issue #15 krevde:
 - ingen `gh pr merge`, `git merge`, ubegrenset `git push *`, eller bar
   Bash-tillatelse er introdusert.
 
+V1.4 (issue #154) utvider samme suite til å bevise at det eksakte,
+argumentfrie generator-kallet `Bash(python3 scripts/generate_web_i18n_pages.py)`
+er lagt til -- nøyaktig én gang, uten noen bredere `python3 *`/
+`python3 scripts/*`-variant, og uten at noe av det V1.2/V1.3 allerede
+beviste (branch-avgrensede push-regler, fravær av `git merge`/`gh pr
+merge`, `--permission-mode acceptEdits`, fravær av `Write`/`Edit`/
+`MultiEdit`) har endret seg.
+
 Kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
 """
 import os
@@ -40,6 +48,8 @@ _FORVENTEDE_PUSH_REGLER = (
     "Bash(git push -u origin ${{ steps.branch.outputs.name }})",
     "Bash(git push origin ${{ steps.branch.outputs.name }})",
 )
+
+_GENERATOR_REGEL = "Bash(python3 scripts/generate_web_i18n_pages.py)"
 
 
 def _les_workflow():
@@ -129,6 +139,59 @@ class TestPermissionConfig(unittest.TestCase):
                 verktoysnavn.startswith("Bash(gh pr merge"),
                 f"gh pr merge skal aldri være tillatt: {verktoysnavn!r}",
             )
+
+    # ─── 5 (V1.4, issue #154): kanonisk Web i18n-generator, eksakt og alene ──
+
+    def test_5a_generator_regelen_finnes_eksakt(self):
+        self.assertIn(
+            _GENERATOR_REGEL, self.verktoy,
+            "Den eksakte generator-regelen mangler i --allowedTools (issue #154).",
+        )
+
+    def test_5b_generator_regelen_forekommer_noyaktig_en_gang(self):
+        self.assertEqual(
+            self.verktoy.count(_GENERATOR_REGEL), 1,
+            "Generator-regelen skal forekomme nøyaktig én gang -- ingen duplikater.",
+        )
+
+    def test_5c_ingen_bredere_python3_variant_introdusert(self):
+        forbudte = (
+            "Bash(python3 *)",
+            "Bash(python3 scripts/*)",
+            "Bash(python3 scripts/generate_web_i18n_pages.py *)",
+            "Bash(python3 scripts/generate_web_i18n_pages.py*)",
+        )
+        for forbudt in forbudte:
+            self.assertNotIn(
+                forbudt, self.verktoy,
+                f"Bredere Python-tilgang enn den eksakte generator-regelen skal ikke finnes: {forbudt!r}",
+            )
+
+    def test_5d_kun_to_python3_regler_totalt(self):
+        # Nøyaktig `python3 -m unittest *` (V1.2) og den nye eksakte
+        # generator-regelen (V1.4) -- ingen tredje/bredere Python-inngang.
+        python3_regler = [v for v in self.verktoy if "python3" in v]
+        self.assertEqual(
+            sorted(python3_regler),
+            sorted(["Bash(python3 -m unittest *)", _GENERATOR_REGEL]),
+        )
+
+    # ─── 6 (V1.4, issue #154): resten av V1.2/V1.3-kontrakten er uendret ────
+
+    def test_6_eksisterende_kontrakt_star_ved_lag_etter_generator_tillegget(self):
+        # Gjentar kravene 4-7 fra issue #154 eksplisitt i denne bolken, slik
+        # at en fremtidig lesning av testfilen ser at generator-tillegget
+        # ikke svekket noe av det V1.2/V1.3 allerede beviste.
+        for regel in _FORVENTEDE_PUSH_REGLER:
+            self.assertIn(regel, self.verktoy)
+        push_regler = [v for v in self.verktoy if v.startswith("Bash(git push")]
+        self.assertEqual(sorted(push_regler), sorted(_FORVENTEDE_PUSH_REGLER))
+        for verktoysnavn in self.verktoy:
+            self.assertFalse(verktoysnavn.startswith("Bash(git merge"))
+            self.assertFalse(verktoysnavn.startswith("Bash(gh pr merge"))
+        self.assertIn("--permission-mode acceptEdits", self.steg)
+        for verktoysnavn in ("Write", "Edit", "MultiEdit"):
+            self.assertNotIn(verktoysnavn, self.verktoy)
 
 
 if __name__ == "__main__":
