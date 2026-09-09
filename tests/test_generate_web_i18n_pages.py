@@ -14,6 +14,7 @@ meta-description, sitemap.xml og robots.txt.
 Kjøres med:
     py -3 -m unittest discover -s tests
 """
+import re
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -172,6 +173,42 @@ class TestGenererSide(unittest.TestCase):
     def test_generator_marker_tilstede(self):
         html = gen.generer_side_html("index.html", self.en)
         self.assertIn(gen.GENERATOR_MARKER, html[:400])
+
+
+class TestHjelpDataI18nHtmlKontrakt(unittest.TestCase):
+    """B10-regresjonsvakt: en hjelp-nøkkel hvis NO- eller EN-oversettelse
+    inneholder klartekst author-kontrollert HTML-markup (<strong>, <em>,
+    <b>, <a, <br) skal ALDRI bindes via data-i18n (textContent/escaped
+    tekst) -- kun via data-i18n-html (innerHTML), jf. applyI18n()s
+    dokumenterte dual-kontrakt (web/js/i18n.js) og
+    scripts/generate_web_i18n_pages.py sin speiling av samme kontrakt
+    (_sett_tekst/_sett_innhold_html). Generell nøkkel/attributt-sjekk, ikke
+    en hardkodet liste over de 16 nøklene B10 fant -- fanger også framtidige
+    tilfeller av samme forfatterfeil."""
+
+    _MARKUP_RE = re.compile(r"<(strong|em|b|a|br)\b", re.IGNORECASE)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tekster = gen.parse_tekster()
+
+    def test_ingen_markup_barende_nokkel_bundet_via_plain_data_i18n_i_hjelp(self):
+        avvik = []
+        for page in gen.PAGES:
+            if not page.startswith("hjelp/"):
+                continue
+            html = (gen.WEB / page).read_text(encoding="utf-8")
+            soup = BeautifulSoup(html, "html.parser")
+            for el in soup.select("[data-i18n]"):
+                nokkel = el["data-i18n"]
+                for spraak in ("no", "en"):
+                    verdi = self.tekster[spraak].get(nokkel, "")
+                    if self._MARKUP_RE.search(verdi):
+                        avvik.append(
+                            f"{page}: \"{nokkel}\" ({spraak}) inneholder HTML-markup men er bundet via "
+                            "data-i18n -- bytt til data-i18n-html"
+                        )
+        self.assertEqual(avvik, [], "\n" + "\n".join(avvik))
 
 
 class TestDeterminisme(unittest.TestCase):
