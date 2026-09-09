@@ -3,6 +3,7 @@ from modules.brewday_calc import (
     lag_brewday_plan, TILSETNINGER,
     beregn_effektivitet, beregn_post_boil_og,
 )
+from modules.calculations import beregn_abv_standard
 from modules.process_profiles import normaliser_prosessprofil
 from modules.export_format import fmt_og, fmt_fg, fmt_abv, stats_linje
 from modules.brewday_template import render_brewday_html
@@ -341,8 +342,11 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
                 og_f  = float(st.session_state.get("bd_og", "") or 0)
                 fg_f  = float(st.session_state.get("bd_fg", "") or 0)
                 if og_f > 1.001 and fg_f > 1.000:
-                    st.metric("Beregnet ABV", f"{(og_f - fg_f) * 131.25:.1f}%")
+                    st.metric("Beregnet ABV", f"{beregn_abv_standard(og_f, fg_f):.1f}%")
             except (ValueError, TypeError):
+                # Inkluderer Core sin ValueError for ugyldig måling
+                # (f.eks. FG > OG) -- ingen metric vises da, i stedet
+                # for en stille negativ ABV.
                 pass
 
     # ── STEG 6: EFFEKTIVITET ────────────────────────────────────────────────
