@@ -2361,7 +2361,7 @@ footer {
   border-radius: 10px;
   padding: 1rem 1.2rem;
   margin-bottom: 1rem;
-  scroll-margin-top: 1rem;
+  scroll-margin-top: calc(var(--kompaktnav-h, 0px) + 1rem);
 }
 
 .hjelp-artikkel h3 {
@@ -2393,7 +2393,7 @@ footer {
   border-radius: 10px;
   padding: 0.9rem 1.1rem;
   margin-bottom: 1rem;
-  scroll-margin-top: 1rem;
+  scroll-margin-top: calc(var(--kompaktnav-h, 0px) + 1rem);
 }
 
 .hjelp-steg h3 {
