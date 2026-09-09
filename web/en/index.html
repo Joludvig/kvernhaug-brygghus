@@ -188,7 +188,7 @@
 </div>
 <p aria-live="polite" class="hjelpetekst utstyr-advarsel" hidden="" id="utstyr-batch-advarsel"></p>
 <div class="felt-rad mester-only">
-<label for="effektivitet"><span data-i18n="builder.grunndata.effektivitet">Brewhouse efficiency (%)</span> <button aria-label="What is brewhouse efficiency?" class="hjelp-knapp" data-hjelp="effektivitet" data-i18n-aria-label="help.effektivitetAriaLabel" type="button">?</button></label>
+<label for="effektivitet"><span data-i18n="builder.grunndata.effektivitet">Brewhouse efficiency (%)</span> <button aria-expanded="false" aria-label="What is brewhouse efficiency?" class="hjelp-knapp" data-hjelp="effektivitet" data-i18n-aria-label="help.effektivitetAriaLabel" type="button">?</button></label>
 <input id="effektivitet" max="100" min="1" step="1" type="number" value="75"/>
 </div>
 <div class="felt-rad mester-only">
@@ -227,7 +227,7 @@
 </div>
 <button class="egendefinert-knapp" data-i18n="builder.gjaer.egendefinertKnapp" id="gjaer-egendefinert-knapp" type="button">+ Custom yeast</button>
 <div class="felt-rad" id="attenuation-override-rad">
-<label for="attenuation-override"><span data-i18n="builder.gjaer.utgjaering">Expected attenuation (%)</span> <button aria-label="What is attenuation?" class="hjelp-knapp" data-hjelp="utgjaering" data-i18n-aria-label="help.utgjaeringAriaLabel" type="button">?</button></label>
+<label for="attenuation-override"><span data-i18n="builder.gjaer.utgjaering">Expected attenuation (%)</span> <button aria-expanded="false" aria-label="What is attenuation?" class="hjelp-knapp" data-hjelp="utgjaering" data-i18n-aria-label="help.utgjaeringAriaLabel" type="button">?</button></label>
 <input id="attenuation-override" max="100" min="1" step="1" type="number" value="75"/>
 </div>
 <div class="egendefinert-felt" hidden="" id="gjaer-egendefinert-felt">
@@ -297,22 +297,22 @@
 <div class="identitet-brygger" hidden="" id="identitet-brygger"></div>
 <div aria-hidden="true" class="kbh-ornament"><span>◆</span></div>
 <div class="resultat-grid">
-<div class="resultat-boks"><span class="resultat-tall" id="res-og">1.000</span><span class="resultat-label">OG <button aria-label="What is OG?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="og" data-i18n-aria-label="help.ogAriaLabel" type="button">?</button></span></div>
-<div class="resultat-boks"><span class="resultat-tall" id="res-fg">1.000</span><span class="resultat-label">FG <button aria-label="What is FG?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="fg" data-i18n-aria-label="help.fgAriaLabel" type="button">?</button></span></div>
-<div class="resultat-boks"><span class="resultat-tall" id="res-abv">0,0 %</span><span class="resultat-label">ABV <button aria-label="What is ABV?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="abv" data-i18n-aria-label="help.abvAriaLabel" type="button">?</button></span></div>
-<div class="resultat-boks"><span class="resultat-tall" id="res-ibu">0</span><span class="resultat-label">IBU <button aria-label="What is IBU?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ibu" data-i18n-aria-label="help.ibuAriaLabel" type="button">?</button></span></div>
-<div class="resultat-boks resultat-boks-ebc"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC <button aria-label="What is EBC?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ebc" data-i18n-aria-label="help.ebcAriaLabel" type="button">?</button></span><span class="ebc-swatch" id="ebc-swatch"></span></div>
+<div class="resultat-boks"><span class="resultat-tall" id="res-og">1.000</span><span class="resultat-label">OG <button aria-expanded="false" aria-label="What is OG?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="og" data-i18n-aria-label="help.ogAriaLabel" type="button">?</button></span></div>
+<div class="resultat-boks"><span class="resultat-tall" id="res-fg">1.000</span><span class="resultat-label">FG <button aria-expanded="false" aria-label="What is FG?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="fg" data-i18n-aria-label="help.fgAriaLabel" type="button">?</button></span></div>
+<div class="resultat-boks"><span class="resultat-tall" id="res-abv">0,0 %</span><span class="resultat-label">ABV <button aria-expanded="false" aria-label="What is ABV?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="abv" data-i18n-aria-label="help.abvAriaLabel" type="button">?</button></span></div>
+<div class="resultat-boks"><span class="resultat-tall" id="res-ibu">0</span><span class="resultat-label">IBU <button aria-expanded="false" aria-label="What is IBU?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ibu" data-i18n-aria-label="help.ibuAriaLabel" type="button">?</button></span></div>
+<div class="resultat-boks resultat-boks-ebc"><span class="resultat-tall" id="res-ebc">0</span><span class="resultat-label">EBC <button aria-expanded="false" aria-label="What is EBC?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="ebc" data-i18n-aria-label="help.ebcAriaLabel" type="button">?</button></span><span class="ebc-swatch" id="ebc-swatch"></span></div>
 </div>
 </section>
 <div aria-hidden="true" class="kbh-ornament kbh-ornament-hoyre"><span>◆</span></div>
 <section class="smaksprofil-seksjon" id="smaksprofil-panel">
-<h2><span data-i18n="builder.smaksprofil.tittel">Flavor Profile</span> <button aria-label="What is the flavor wheel?" class="hjelp-knapp" data-hjelp="smakshjul" data-i18n-aria-label="help.smakshjulAriaLabel" type="button">?</button></h2>
+<h2><span data-i18n="builder.smaksprofil.tittel">Flavor Profile</span> <button aria-expanded="false" aria-label="What is the flavor wheel?" class="hjelp-knapp" data-hjelp="smakshjul" data-i18n-aria-label="help.smakshjulAriaLabel" type="button">?</button></h2>
 <div class="smakshjul-wrap" id="smakshjul-container"></div>
 </section>
 <details class="stilanalyse-seksjon" id="stilanalyse-panel">
 <summary>
 <span class="stilanalyse-tittel" data-i18n="builder.stilanalyse.tittel">Style Analysis</span>
-<button aria-label="What is style matching?" class="hjelp-knapp" data-hjelp="stilmatch" data-i18n-aria-label="help.stilmatchAriaLabel" type="button">?</button>
+<button aria-expanded="false" aria-label="What is style matching?" class="hjelp-knapp" data-hjelp="stilmatch" data-i18n-aria-label="help.stilmatchAriaLabel" type="button">?</button>
 </summary>
 <div class="stilanalyse-innhold">
 <div class="stil-tom-tilstand" id="stil-tom-tilstand">
@@ -370,7 +370,7 @@
 <div class="ingrediens-rad" data-type="humle">
 <div class="combobox-mount humle-velger-mount"></div>
 <input aria-label="Alpha acid (%)" class="humle-alfa" data-i18n-aria-label="builder.humle.alfaAriaLabel" data-i18n-placeholder="builder.humle.alfaPlaceholder" min="0" placeholder="alpha" step="0.1" type="number"/>
-<span class="enhet">%α <button aria-label="What is alpha acid?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="alfasyre" data-i18n-aria-label="help.alfasyreAriaLabel" type="button">?</button></span>
+<span class="enhet">%α <button aria-expanded="false" aria-label="What is alpha acid?" class="hjelp-knapp hjelp-knapp-liten" data-hjelp="alfasyre" data-i18n-aria-label="help.alfasyreAriaLabel" type="button">?</button></span>
 <input aria-label="Hop amount (g)" class="humle-gram" data-i18n-aria-label="builder.humle.gramAriaLabel" data-i18n-placeholder="builder.humle.gramPlaceholder" min="0" placeholder="grams" step="1" type="number" value="10"/>
 <span class="enhet">g</span>
 <input aria-label="Time (min)" class="humle-tid" data-i18n-aria-label="builder.humle.tidAriaLabel" data-i18n-placeholder="builder.humle.tidPlaceholder" min="0" placeholder="min" step="1" type="number" value="60"/>

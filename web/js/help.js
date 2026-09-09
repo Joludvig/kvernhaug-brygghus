@@ -112,16 +112,35 @@ const HJELP_TEKSTER = {
 let _hjelpPopover = null;
 let _hjelpApenKnapp = null;
 
+// Delt fokusmål ved åpning: foretrekk "Les mer →"-lenken når den finnes,
+// ellers første fokuserbare kontroll (typisk lukk-knappen) -- delt logikk
+// slik at hver enkelt hjelp-knapp ikke trenger egen fokushåndtering.
+function _finnFokusMal() {
+  const lesMer = _hjelpPopover.querySelector(".hjelp-les-mer");
+  if (lesMer) return lesMer;
+  return _hjelpPopover.querySelector(
+    'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+}
+
 function _lukkHjelp() {
   if (_hjelpPopover) _hjelpPopover.hidden = true;
-  if (_hjelpApenKnapp) _hjelpApenKnapp.setAttribute("aria-expanded", "false");
+  const knapp = _hjelpApenKnapp;
   _hjelpApenKnapp = null;
+  if (knapp) {
+    knapp.setAttribute("aria-expanded", "false");
+    knapp.focus();
+  }
 }
 
 function _apneHjelp(knapp) {
   const nokkel = knapp.dataset.hjelp;
   const innhold = HJELP_TEKSTER[gjeldendeSprak()][nokkel];
   if (!innhold) return;
+
+  if (_hjelpApenKnapp && _hjelpApenKnapp !== knapp) {
+    _hjelpApenKnapp.setAttribute("aria-expanded", "false");
+  }
 
   const lesMerHtml = innhold.lesMer
     ? `<a class="hjelp-les-mer" href="${innhold.lesMer}" target="_blank" rel="noopener">${t("help.lesMer")}</a>`
@@ -156,6 +175,9 @@ function _apneHjelp(knapp) {
 
   knapp.setAttribute("aria-expanded", "true");
   _hjelpApenKnapp = knapp;
+
+  const fokusMal = _finnFokusMal();
+  if (fokusMal) fokusMal.focus();
 }
 
 function initHjelp() {
