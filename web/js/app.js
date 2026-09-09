@@ -345,11 +345,51 @@ function settModus(modus, persister = true) {
   if (persister) localStorage.setItem(MODUS_NOKKEL, modus);
 }
 
+// Batch 7: ekte modal tastaturoppførsel -- matcher den eksisterende
+// fullskjerms pointer-blokkerende bakteppen. Kun de to .modus-knapp-ene
+// inni #modus-forstegang regnes som fokuserbare her (hamburger-menyens
+// egne modus-knapper skal ikke påvirkes av fellen).
+function _modusForstegangFokuserbare() {
+  return Array.from(document.querySelectorAll("#modus-forstegang .modus-knapp"));
+}
+
+function _modusForstegangKeydownHandler(e) {
+  if (e.key === "Escape") {
+    _lukkModusForstegang();
+    return;
+  }
+  if (e.key !== "Tab") return;
+  const fokuserbare = _modusForstegangFokuserbare();
+  if (fokuserbare.length === 0) return;
+  const forste = fokuserbare[0];
+  const siste = fokuserbare[fokuserbare.length - 1];
+  const aktivIndeks = fokuserbare.indexOf(document.activeElement);
+  if (e.shiftKey) {
+    if (aktivIndeks <= 0) {
+      e.preventDefault();
+      siste.focus();
+    }
+  } else if (aktivIndeks === -1 || aktivIndeks === fokuserbare.length - 1) {
+    e.preventDefault();
+    forste.focus();
+  }
+}
+
 function _lukkModusForstegang() {
   const dialog = document.getElementById("modus-forstegang");
   const bakteppe = document.getElementById("modus-forstegang-bakteppe");
+  // Fokus skal kun flyttes til arbeidsflaten når DENNE dialogen faktisk var
+  // åpen -- ellers ville et modusbytte fra hamburger-menyen (som også
+  // kaller denne funksjonen, se initModus() under) stjele fokus fra
+  // brukerens gjeldende sted i UI-et.
+  const varApen = !!(dialog && !dialog.hidden);
   if (dialog) dialog.hidden = true;
   if (bakteppe) bakteppe.hidden = true;
+  document.removeEventListener("keydown", _modusForstegangKeydownHandler);
+  if (varApen) {
+    const navnFelt = document.getElementById("oppskrift-navn");
+    if (navnFelt) navnFelt.focus();
+  }
 }
 
 function initModus() {
@@ -369,6 +409,9 @@ function initModus() {
   if (!lagret) {
     document.getElementById("modus-forstegang").hidden = false;
     document.getElementById("modus-forstegang-bakteppe").hidden = false;
+    document.addEventListener("keydown", _modusForstegangKeydownHandler);
+    const forsteKnapp = document.querySelector("#modus-forstegang .modus-knapp");
+    if (forsteKnapp) forsteKnapp.focus();
   }
 
   for (const knapp of document.querySelectorAll(".modus-knapp")) {
