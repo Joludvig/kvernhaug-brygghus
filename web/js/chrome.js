@@ -26,6 +26,38 @@
     window.addEventListener("scroll", oppdater, { passive: true });
     window.addEventListener("resize", oppdater);
     oppdater();
+
+    // B11 -- native fragment-scroll (sidelasting med #hash i URL-en, eller
+    // klikk på en #anker-lenke i samme dokument) kan skje før
+    // --kompaktnav-h har fått riktig verdi, eller kan selv gjøre kompaktnav
+    // synlig ETTER at hoppet allerede er utført (scroll-hendelsen som
+    // oppdaterer --kompaktnav-h trigges av scrollen, ikke omvendt) -- da
+    // skjer ingen automatisk ny scroll. korrigerAnkerScroll() kjører
+    // oppdater() på nytt og gjentar scrollIntoView når målet finnes, og er
+    // trygg å kalle flere ganger (samme mål havner samme sted hver gang).
+    function korrigerAnkerScroll() {
+      var hash = location.hash;
+      if (!hash || hash.length < 2) return;
+      var mal;
+      try {
+        mal = document.getElementById(decodeURIComponent(hash.slice(1)));
+      } catch (e) {
+        mal = null;
+      }
+      if (!mal) return;
+      oppdater();
+      mal.scrollIntoView();
+      window.requestAnimationFrame(function () {
+        oppdater();
+        mal.scrollIntoView();
+      });
+    }
+
+    if (location.hash) {
+      korrigerAnkerScroll();
+      window.addEventListener("load", korrigerAnkerScroll);
+    }
+    window.addEventListener("hashchange", korrigerAnkerScroll);
   }
 
   function initSidemeny() {
