@@ -78,6 +78,35 @@
   TLS-håndtrykk, manglende sti) stopper deployen umiddelbart akkurat som
   før, uten retry.
 
+  OWNER-GATE TESTMODUS (issue #213, Chief-krav): normal deploy krever som
+  før at HEAD er nøyaktig identisk med origin/master (guard 1b over) --
+  det gjør det umulig å kjøre den ekte bolk-/retry-implementasjonen mot en
+  eksakt PR-head FØR merge, selv om det nettopp er det en Chief-review av
+  denne typen endring trenger å se bevist på ekte Windows/Domeneshop-FTPS.
+  -OwnerGateTestSha <40-tegns SHA> åpner en SNEVER, eksplisitt unntaksvei:
+  i stedet for HEAD == origin/master krever den at HEAD er NØYAKTIG den
+  oppgitte SHA-en, OG (utenfor -DryRun) at origin/<gjeldende branch> --
+  hentet FERSK -- også er nøyaktig den samme SHA-en, slik at testkjøringen
+  er bundet til akkurat den PR-branchens faktiske, pushede head og ikke en
+  lokal commit som aldri ble reviewet. Enhver avvik (feil/manglende SHA,
+  ufullstendig format, lokal HEAD som ikke matcher, eller origin-branchen
+  som ikke matcher) stopper deployen umiddelbart -- fail-closed, ikke
+  best-effort. Normal deploy (uten -OwnerGateTestSha) er HELT uendret og
+  bruker fortsatt kun HEAD == origin/master.
+
+  Owner-gate-testmodus nekter i tillegg å target normal produksjon (/www,
+  standardverdien for -RemoteRoot) uten et eksplisitt -OwnerGateAllowProductionTarget
+  -- uten det må -RemoteRoot pekes til en isolert test-sti på Domeneshop,
+  slik at en owner-gate-test aldri ved et uhell kan skrive PR-branchens
+  ureviewede bytes til den faktiske live-siden. Credential-håndtering,
+  --ssl-reqd-kravet, og selve bolk-/retry-/verifiseringslogikken er
+  UENDRET i owner-gate-testmodus -- kun HVILKEN checkout-sammenligning
+  guarden gjør, og HVOR opplastingen sendes, endres.
+
+  Eksakt owner-PC-kommando for gaten (se .EXAMPLE under for full syntaks):
+  fetch branchen, les dens faktiske head-SHA, og kjør scriptet med akkurat
+  den SHA-en pluss en isolert -RemoteRoot.
+
 .PARAMETER DryRun
   Viser source, target, filantall og full filliste. Gjør ingen FTP-/HTTPS-
   tilkobling og ingen endringer. Guardene over kjøres likevel (ren lokal
@@ -99,11 +128,31 @@
 .PARAMETER RemoteRoot
   Remote rotmappe. Standard: /www
 
+.PARAMETER OwnerGateTestSha
+  Aktiverer owner-gate testmodus (se .DESCRIPTION). Må være den fulle
+  40-tegns commit-SHA-en til PR-branchens eksakte head som skal testes.
+  Utelatt (standard): scriptet oppfører seg helt som før, og krever
+  HEAD == origin/master.
+
+.PARAMETER OwnerGateAllowProductionTarget
+  Kun relevant sammen med -OwnerGateTestSha. Bekrefter eksplisitt at
+  owner-gate-testen bevisst skal target normal produksjon (-RemoteRoot
+  fortsatt /www) i stedet for en isolert test-sti. Uten dette flagget
+  nekter owner-gate-testmodus å kjøre mot standard -RemoteRoot.
+
 .EXAMPLE
   .\scripts\deploy_web.ps1 -DryRun
 
 .EXAMPLE
   .\scripts\deploy_web.ps1
+
+.EXAMPLE
+  # Owner-gate (issue #213): kjør den ekte bolk-/retry-implementasjonen mot
+  # en isolert test-sti FØR merge, bundet til PR-branchens eksakte, pushede
+  # head -- normal produksjon (/www) røres ikke.
+  git fetch origin agent/issue-213
+  $prHead = (git rev-parse origin/agent/issue-213).Trim()
+  .\scripts\deploy_web.ps1 -OwnerGateTestSha $prHead -RemoteRoot "/www-owner-gate-test"
 #>
 
 [CmdletBinding()]
@@ -112,7 +161,9 @@ param(
     [switch]$Force,
     [string]$FtpUser,
     [string]$FtpHost = "ftp.domeneshop.no",
-    [string]$RemoteRoot = "/www"
+    [string]$RemoteRoot = "/www",
+    [string]$OwnerGateTestSha,
+    [switch]$OwnerGateAllowProductionTarget
 )
 
 $ErrorActionPreference = "Stop"
@@ -166,6 +217,63 @@ function Get-UrentWebInnhold {
         }
     }
     return @($urent | Sort-Object -Unique)
+}
+
+# Ren beslutningsfunksjon (issue #213, Chief-krav owner-gate) -- avgjør om
+# owner-gate testmodus (-OwnerGateTestSha) får lov til å erstatte den
+# vanlige HEAD==origin/master-guarden for DENNE kjøringen. Fail-closed by
+# construction: enhver ugyldig SHA-form, tom verdi, HEAD-mismatch, eller
+# (utenfor -DryRun) origin-branch-mismatch gir avslag -- aldri en stille
+# aksept. $OriginBranchRefKjentFersk er $false kun under -DryRun (som per
+# kontrakt aldri gjør `git fetch`, se .DESCRIPTION) -- da sammenlignes KUN
+# mot HEAD, og meldingen sier eksplisitt at dette ikke er en garantert
+# fersk sammenligning, samme prinsipp som den eksisterende HEAD-guarden
+# allerede bruker for -DryRun.
+function Test-OwnerGateForutsetninger {
+    param(
+        [Parameter(Mandatory)][string]$ExpectedSha,
+        [Parameter(Mandatory)][string]$LocalHead,
+        [string]$OriginBranchNavn,
+        [string]$OriginBranchRef,
+        [bool]$OriginBranchRefKjentFersk
+    )
+    if ($ExpectedSha -notmatch '^[0-9a-fA-F]{40}$') {
+        return [PSCustomObject]@{ ok = $false; reason = "OwnerGateTestSha må være en full 40-tegns commit-SHA (fikk: '$ExpectedSha')." }
+    }
+    $expected = $ExpectedSha.ToLowerInvariant()
+    if ([string]::IsNullOrWhiteSpace($LocalHead)) {
+        return [PSCustomObject]@{ ok = $false; reason = "Kunne ikke lese lokal HEAD -- kan ikke bekrefte owner-gate-forutsetningen." }
+    }
+    if ($LocalHead.ToLowerInvariant() -ne $expected) {
+        return [PSCustomObject]@{ ok = $false; reason = "HEAD ($LocalHead) matcher ikke oppgitt OwnerGateTestSha ($ExpectedSha)." }
+    }
+    if (-not $OriginBranchRefKjentFersk) {
+        return [PSCustomObject]@{ ok = $true; reason = "HEAD matcher OwnerGateTestSha (kun lokal sammenligning -- -DryRun henter aldri origin på nytt, se .DESCRIPTION)." }
+    }
+    if ([string]::IsNullOrWhiteSpace($OriginBranchRef)) {
+        return [PSCustomObject]@{ ok = $false; reason = "Fant ikke origin/$OriginBranchNavn etter fersk fetch -- kan ikke bekrefte at HEAD samsvarer med PR-branchens faktiske, pushede head." }
+    }
+    if ($OriginBranchRef.ToLowerInvariant() -ne $expected) {
+        return [PSCustomObject]@{ ok = $false; reason = "origin/$OriginBranchNavn ($OriginBranchRef) matcher ikke oppgitt OwnerGateTestSha ($ExpectedSha) -- push/fetch fersk branch-tilstand og prøv igjen." }
+    }
+    return [PSCustomObject]@{ ok = $true; reason = "HEAD OG origin/$OriginBranchNavn matcher OwnerGateTestSha." }
+}
+
+# Ren beslutningsfunksjon (issue #213, Chief-krav owner-gate) -- nekter
+# owner-gate testmodus å target normal produksjon (standard -RemoteRoot,
+# /www) med en ureviewet PR-branch sine bytes, MED MINDRE eieren
+# eksplisitt har bekreftet det med -OwnerGateAllowProductionTarget. Ren
+# streng-/boolsk-sammenligning -- ingen fil-IO/nettverk, testbar isolert.
+function Test-OwnerGateMaalErTrygt {
+    param(
+        [Parameter(Mandatory)][string]$RemoteRoot,
+        [Parameter(Mandatory)][string]$StandardRemoteRoot,
+        [Parameter(Mandatory)][bool]$AllowProductionTarget
+    )
+    if ($RemoteRoot -eq $StandardRemoteRoot -and -not $AllowProductionTarget) {
+        return [PSCustomObject]@{ ok = $false; reason = "Owner-gate testmodus target standard produksjonssti ($StandardRemoteRoot) uten -OwnerGateAllowProductionTarget. Oppgi -RemoteRoot til en isolert test-sti på Domeneshop, eller bekreft bevisst med -OwnerGateAllowProductionTarget." }
+    }
+    return [PSCustomObject]@{ ok = $true; reason = "" }
 }
 
 # curl exit code 67 = CURLE_LOGIN_DENIED -- serveren svarte FTP 530 på
@@ -354,10 +462,30 @@ if (-not (Test-Path (Join-Path $WebRoot "index.html"))) {
     exit 1
 }
 
+# ─── 1a2. Guard: owner-gate testmodus kan ikke stille target produksjon ────
+# Se .DESCRIPTION for bakgrunnen (issue #213, Chief-krav). Ren
+# parameter-sjekk -- ingen git/nettverk -- kjøres derfor tidligst mulig,
+# før noe som helst annet arbeid gjøres. Rører ingenting når
+# -OwnerGateTestSha ikke er oppgitt (normal deploy, helt uendret).
+$isOwnerGateTest = -not [string]::IsNullOrWhiteSpace($OwnerGateTestSha)
+if ($isOwnerGateTest) {
+    $maalSjekk = Test-OwnerGateMaalErTrygt -RemoteRoot $RemoteRoot -StandardRemoteRoot "/www" -AllowProductionTarget ([bool]$OwnerGateAllowProductionTarget)
+    if (-not $maalSjekk.ok) {
+        Write-Host ""
+        Write-Host "STOPPER: $($maalSjekk.reason)"
+        Write-Host ""
+        Write-Error "Ingen filer ble lastet opp -- owner-gate mål-guard feilet."
+        exit 1
+    }
+}
+
 # ─── 1b. Guard: nekt å deploye fra en checkout som ikke matcher origin/master ──
 # Se .DESCRIPTION for bakgrunnen (issue #28). Kjøres FØR filer i det hele
 # tatt listes -- fail fast, ingen grunn til å bygge en filliste fra en
-# checkout som uansett skal avvises.
+# checkout som uansett skal avvises. Owner-gate testmodus (issue #213,
+# under) ERSTATTER denne sammenligningen med en snevrere, eksplisitt
+# SHA-binding -- normal deploy (uten -OwnerGateTestSha) tar ALLTID else-
+# grenen under, helt uendret fra før.
 $gitCmd = Get-Command git.exe -ErrorAction SilentlyContinue
 if (-not $gitCmd) {
     Write-Error "git.exe ble ikke funnet i PATH. Kan ikke bekrefte at denne checkouten matcher origin/master -- avbryter uten å gjøre noe."
@@ -366,53 +494,91 @@ if (-not $gitCmd) {
 
 Push-Location $RepoRoot
 try {
-    if (-not $DryRun) {
-        # Fersk fetch KUN utenfor DryRun -- DryRun skal fortsatt gjøre 0
-        # nettverkstilkoblinger (dets egen dokumenterte kontrakt). Den
-        # faktiske FTP-deployen er der skaden faktisk kan skje, så DER skal
-        # sammenligningen være garantert fersk, ikke avhengig av at brukeren
-        # husket å `git fetch` manuelt på forhånd (nøyaktig det som gikk galt
-        # forrige gang).
-        Write-Host "--- Guard: henter fersk origin/master for å bekrefte checkouten ---"
-        & git fetch origin master --quiet
-        if ($LASTEXITCODE -ne 0) {
-            Write-Error "git fetch origin master feilet -- kan ikke bekrefte at denne checkouten er oppdatert. Avbryter uten å laste opp noe."
+    if ($isOwnerGateTest) {
+        $localBranch = (& git rev-parse --abbrev-ref HEAD).Trim()
+        $localHead = (& git rev-parse HEAD).Trim()
+        $originBranchRefKjentFersk = $false
+        $originBranchRef = $null
+
+        if (-not $DryRun) {
+            # Fersk fetch KUN utenfor DryRun -- samme dokumenterte
+            # 0-nettverkstilkoblinger-kontrakt som normalguarden under.
+            Write-Host "--- Owner-gate: henter fersk origin/$localBranch for å bekrefte PR-head ---"
+            & git fetch origin $localBranch --quiet
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "git fetch origin $localBranch feilet -- kan ikke bekrefte fersk PR-head. Avbryter uten å laste opp noe."
+                exit 1
+            }
+            $originBranchRefKjentFersk = $true
+            $originBranchRefRaw = & git rev-parse "origin/$localBranch" 2>$null
+            if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($originBranchRefRaw)) {
+                $originBranchRef = $originBranchRefRaw.Trim()
+            }
+        }
+
+        $forutsetning = Test-OwnerGateForutsetninger -ExpectedSha $OwnerGateTestSha -LocalHead $localHead -OriginBranchNavn $localBranch -OriginBranchRef $originBranchRef -OriginBranchRefKjentFersk $originBranchRefKjentFersk
+
+        if (-not $forutsetning.ok) {
+            Write-Host ""
+            Write-Host "STOPPER: owner-gate-forutsetning ikke oppfylt."
+            Write-Host "  $($forutsetning.reason)"
+            Write-Host ""
+            Write-Error "Ingen filer ble lastet opp -- owner-gate SHA-verifisering feilet."
             exit 1
         }
-    }
-
-    $localHead = (& git rev-parse HEAD).Trim()
-    $originMasterRef = (& git rev-parse origin/master).Trim()
-
-    if ([string]::IsNullOrWhiteSpace($localHead) -or [string]::IsNullOrWhiteSpace($originMasterRef)) {
-        Write-Error "Kunne ikke lese HEAD og/eller origin/master fra git i $RepoRoot -- er dette faktisk en git-klone av kvernhaug-brygghus, med en 'origin'-remote? Avbryter uten å gjøre noe."
-        exit 1
-    }
-
-    if ($localHead -ne $originMasterRef) {
-        $counts = (& git rev-list --left-right --count "HEAD...origin/master").Trim()
+        Write-Host "Owner-gate OK -- $($forutsetning.reason)"
+        Write-Host "ADVARSEL: owner-gate testmodus er aktiv -- dette er IKKE en normal produksjonsdeploy."
         Write-Host ""
-        Write-Host "STOPPER: denne checkouten matcher IKKE origin/master."
-        Write-Host "  HEAD:          $localHead"
-        Write-Host "  origin/master: $originMasterRef"
-        Write-Host "  ahead/behind (HEAD...origin/master): $counts"
-        Write-Host ""
-        Write-Host "web/ under denne checkouten kan avvike fra hva som faktisk er merget og"
-        Write-Host "godkjent -- en deploy herfra kan laste opp feil innhold til produksjon"
-        Write-Host "(nøyaktig det som skjedde med issue #28). Kjør scriptet fra en"
-        Write-Host "checkout/worktree hvis HEAD er identisk med origin/master."
-        if ($DryRun) {
-            Write-Host ""
-            Write-Host "(DryRun sammenlignet mot sist kjente origin/master uten å hente på nytt --"
-            Write-Host " kjør uten -DryRun, eller 'git fetch' manuelt her først, for en garantert"
-            Write-Host " fersk sammenligning.)"
+    }
+    else {
+        if (-not $DryRun) {
+            # Fersk fetch KUN utenfor DryRun -- DryRun skal fortsatt gjøre 0
+            # nettverkstilkoblinger (dets egen dokumenterte kontrakt). Den
+            # faktiske FTP-deployen er der skaden faktisk kan skje, så DER skal
+            # sammenligningen være garantert fersk, ikke avhengig av at brukeren
+            # husket å `git fetch` manuelt på forhånd (nøyaktig det som gikk galt
+            # forrige gang).
+            Write-Host "--- Guard: henter fersk origin/master for å bekrefte checkouten ---"
+            & git fetch origin master --quiet
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "git fetch origin master feilet -- kan ikke bekrefte at denne checkouten er oppdatert. Avbryter uten å laste opp noe."
+                exit 1
+            }
         }
+
+        $localHead = (& git rev-parse HEAD).Trim()
+        $originMasterRef = (& git rev-parse origin/master).Trim()
+
+        if ([string]::IsNullOrWhiteSpace($localHead) -or [string]::IsNullOrWhiteSpace($originMasterRef)) {
+            Write-Error "Kunne ikke lese HEAD og/eller origin/master fra git i $RepoRoot -- er dette faktisk en git-klone av kvernhaug-brygghus, med en 'origin'-remote? Avbryter uten å gjøre noe."
+            exit 1
+        }
+
+        if ($localHead -ne $originMasterRef) {
+            $counts = (& git rev-list --left-right --count "HEAD...origin/master").Trim()
+            Write-Host ""
+            Write-Host "STOPPER: denne checkouten matcher IKKE origin/master."
+            Write-Host "  HEAD:          $localHead"
+            Write-Host "  origin/master: $originMasterRef"
+            Write-Host "  ahead/behind (HEAD...origin/master): $counts"
+            Write-Host ""
+            Write-Host "web/ under denne checkouten kan avvike fra hva som faktisk er merget og"
+            Write-Host "godkjent -- en deploy herfra kan laste opp feil innhold til produksjon"
+            Write-Host "(nøyaktig det som skjedde med issue #28). Kjør scriptet fra en"
+            Write-Host "checkout/worktree hvis HEAD er identisk med origin/master."
+            if ($DryRun) {
+                Write-Host ""
+                Write-Host "(DryRun sammenlignet mot sist kjente origin/master uten å hente på nytt --"
+                Write-Host " kjør uten -DryRun, eller 'git fetch' manuelt her først, for en garantert"
+                Write-Host " fersk sammenligning.)"
+            }
+            Write-Host ""
+            Write-Error "Ingen filer ble lastet opp -- checkout matcher ikke origin/master."
+            exit 1
+        }
+        Write-Host "Guard OK -- HEAD matcher origin/master ($localHead)."
         Write-Host ""
-        Write-Error "Ingen filer ble lastet opp -- checkout matcher ikke origin/master."
-        exit 1
     }
-    Write-Host "Guard OK -- HEAD matcher origin/master ($localHead)."
-    Write-Host ""
 }
 finally {
     Pop-Location
