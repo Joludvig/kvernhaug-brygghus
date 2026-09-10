@@ -1584,6 +1584,21 @@ function _oppdaterLagreTilstandUI(oppskrift) {
   if (variantHjelp) variantHjelp.hidden = !_aktivRecipeId;
 }
 
+// Astra A2-02 (issue #205) -- delt sperre for de TRE eksplisitte handlingene
+// som kan produsere en varig identitet (lagret rad eller frosset
+// .kbhbrew-snapshot): "Lagre oppskrift", "Lagre som variant" og "Start
+// brygging". Autolagring av aktiv kladd (beregnOgVisResultat, over) går
+// BEVISST UTENOM denne sperren -- en ufullstendig kladd (inkl. tomt/0
+// batch-volum) skal fortsatt kunne mellomlagres mens brukeren fyller ut
+// skjemaet. _lesVolumFelt() returnerer allerede 0 for et tomt/ugyldig
+// tastet felt (se _lesEnhetsfelt over), så "> 0" dekker både eksplisitt 0
+// og et tomt felt i én sjekk.
+function _blokkerUgyldigBatchVolum(oppskrift, statusEl) {
+  if (oppskrift.volum > 0) return false;
+  statusEl.textContent = t("oppskrift.volumPaakrevd");
+  return true;
+}
+
 // Runde 25A -- upsert på recipeId i stedet for på navn. Redigerer kladden en
 // allerede lagret oppskrift, oppdateres NØYAKTIG den raden, også når navnet
 // er endret; tidligere opprettet et navnebytte en ny rad og lot den gamle
@@ -1592,6 +1607,7 @@ function _oppdaterLagreTilstandUI(oppskrift) {
 function lagreOppskrift() {
   const oppskrift = samleOppskrift();
   const status = document.getElementById("lagre-status");
+  if (_blokkerUgyldigBatchVolum(oppskrift, status)) return;
   const res = lagreOppskriftIStore(oppskrift, _aktivRecipeId);
   if (!res.ok) {
     status.textContent = res.melding;
@@ -1635,12 +1651,13 @@ function _forslaVariantNavn(originalNavn) {
 // B i stedet for originalen (Chief-review-fiks, PR #107, runde 3).
 function lagreSomVariant() {
   const navnFelt = document.getElementById("oppskrift-navn");
+  const status = document.getElementById("lagre-status");
   let oppskrift = samleOppskrift();
+  if (_blokkerUgyldigBatchVolum(oppskrift, status)) return;
   if (finnOppskriftVedNavn(oppskrift.navn)) {
     navnFelt.value = _forslaVariantNavn(oppskrift.navn);
     oppskrift = samleOppskrift();
   }
-  const status = document.getElementById("lagre-status");
   const res = lagreOppskriftIStore(oppskrift, null); // null tvinger frem en FERSK recipeId
   if (!res.ok) {
     status.textContent = res.melding;
@@ -1744,6 +1761,7 @@ function startBrygging() {
     status.textContent = t("builder.brygg.tomOppskrift");
     return;
   }
+  if (_blokkerUgyldigBatchVolum(oppskrift, status)) return;
   const beregning = beregnOppskrift(oppskrift, maltData, humleData, gjaerData, bjcpStyles);
   const snapshot = byggBrewSnapshot(oppskrift, beregning, maltData, humleData, gjaerData, hentAktivUtstyrsprofil());
   const res = opprettBrygg({ snapshot, recipeId: _aktivRecipeId });
