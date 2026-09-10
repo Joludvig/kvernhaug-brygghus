@@ -159,6 +159,59 @@ class TestBeregnOgVisResultatOppdatererBadge(unittest.TestCase):
         self.assertRegex(kropp, r"variantHjelp\.hidden\s*=\s*!_aktivRecipeId")
 
 
+class TestStaleLagretKvitteringBlankesVedEndring(unittest.TestCase):
+    """Astra Audit #2, A2-04 (issue #192) -- residual fra W3 (#106): badgen
+    over ("Lagret"/"Endret siden lagring") oppdateres allerede live, men den
+    enkeltstående kvitteringslinjen under lagre-knappene ("Lagret ..."/
+    "Lagret som variant ...") ble aldri i seg selv fjernet igjen etter videre
+    redigering. _lagreStatusKvittering sporer hvilken _aktivRecipeId + tekst
+    den siste kvitteringen gjaldt for, og _oppdaterLagreTilstandUI() -- samme
+    boundary som allerede kjører på HVER beregning for badgen -- blanker den
+    ut igjen så snart tilstanden ikke lenger er "lagret"."""
+
+    def test_kvitteringssporing_deklarert(self):
+        self.assertRegex(_app_js(), r"let _lagreStatusKvittering\s*=\s*null;")
+
+    def test_oppdaterLagreTilstandUI_blanker_kvitteringen_ved_ikke_lagret_tilstand(self):
+        kropp = _funksjonskropp(_app_js(), r"function _oppdaterLagreTilstandUI\(oppskrift\)\s*\{")
+        self.assertRegex(
+            kropp,
+            r'if\s*\(tilstand\s*!==\s*"lagret"\s*&&\s*_lagreStatusKvittering\s*&&\s*'
+            r"_lagreStatusKvittering\.recipeId\s*===\s*_aktivRecipeId\)",
+        )
+        self.assertIn('status.textContent === _lagreStatusKvittering.tekst', kropp)
+        self.assertIn('status.textContent = "";', kropp)
+        self.assertIn("_lagreStatusKvittering = null;", kropp)
+
+    def test_blanking_skjer_kun_nar_synlig_tekst_fortsatt_er_ordrett_kvitteringen(self):
+        # Skal ALDRI overskrive/fjerne en ANNEN statusmelding (feilmelding,
+        # "Ny oppskrift", "Åpnet fil", ...) som har erstattet kvitteringen i
+        # mellomtiden -- kun blanke ut når teksten fortsatt er den samme.
+        kropp = _funksjonskropp(_app_js(), r"function _oppdaterLagreTilstandUI\(oppskrift\)\s*\{")
+        self.assertRegex(kropp, r'if\s*\(status\s*&&\s*status\.textContent\s*===\s*_lagreStatusKvittering\.tekst\)\s*\{')
+
+    def test_lagreOppskrift_registrerer_kvitteringen(self):
+        kropp = _funksjonskropp(_app_js(), r"function lagreOppskrift\(\)\s*\{")
+        self.assertRegex(
+            kropp,
+            r"_lagreStatusKvittering\s*=\s*\{\s*recipeId:\s*_aktivRecipeId,\s*tekst:\s*status\.textContent\s*\};",
+        )
+        # Må settes ETTER selve kvitteringsteksten, ikke før.
+        tekst_idx = kropp.index('status.textContent = t("oppskrift.lagretStatus"')
+        spor_idx = kropp.index("_lagreStatusKvittering = {")
+        self.assertLess(tekst_idx, spor_idx)
+
+    def test_lagreSomVariant_registrerer_kvitteringen(self):
+        kropp = _funksjonskropp(_app_js(), r"function lagreSomVariant\(\)\s*\{")
+        self.assertRegex(
+            kropp,
+            r"_lagreStatusKvittering\s*=\s*\{\s*recipeId:\s*_aktivRecipeId,\s*tekst:\s*status\.textContent\s*\};",
+        )
+        tekst_idx = kropp.index('status.textContent = t("oppskrift.lagretVariantStatus"')
+        spor_idx = kropp.index("_lagreStatusKvittering = {")
+        self.assertLess(tekst_idx, spor_idx)
+
+
 class TestLagreOppskriftOppdatererStatusLive(unittest.TestCase):
     """A1/A3/A4 -- et eksplisitt Lagre skal umiddelbart vise "Lagret" (via
     beregnOgVisResultat() -> _oppdaterLagreTilstandUI()), og satt
