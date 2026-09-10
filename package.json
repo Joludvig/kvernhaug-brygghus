@@ -1,0 +1,12 @@
+{
+  "name": "kvernhaug-brygghus-web-browser-gate",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright Critical Browser Gate (issue #200) -- devDependency only, does not affect the dependency-free web/ runtime.",
+  "scripts": {
+    "test:browser-gate": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}
