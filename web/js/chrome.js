@@ -17,6 +17,7 @@
       var terskel = hero.offsetHeight - kompaktnav.offsetHeight;
       var synlig = window.scrollY > terskel;
       kompaktnav.classList.toggle("synlig", synlig);
+      kompaktnav.inert = !synlig;
       document.documentElement.style.setProperty(
         "--kompaktnav-h",
         (synlig ? kompaktnav.offsetHeight : 0) + "px"
@@ -69,6 +70,12 @@
 
     var sisteApnetFra = null;
 
+    // Drawer starter lukket (ingen "apen"-klasse i markup) -- sett inert i
+    // tråd med samme konvensjon: JS-styrt ved DOMContentLoaded, ikke bakt
+    // inn i HTML-kilden (se A2-03-kontrakten §3.1).
+    meny.inert = true;
+    bakteppe.inert = true;
+
     function apen() {
       return meny.classList.contains("apen");
     }
@@ -83,6 +90,8 @@
       sisteApnetFra = fraKnapp || knapper[0];
       meny.classList.add("apen");
       bakteppe.classList.add("apen");
+      meny.inert = false;
+      bakteppe.inert = false;
       settAriaExpanded("true");
       document.body.classList.add("sidemeny-aktiv");
       var forsteLenke = meny.querySelector("a, button");
@@ -92,6 +101,8 @@
     function lukk() {
       meny.classList.remove("apen");
       bakteppe.classList.remove("apen");
+      meny.inert = true;
+      bakteppe.inert = true;
       settAriaExpanded("false");
       document.body.classList.remove("sidemeny-aktiv");
       if (sisteApnetFra) sisteApnetFra.focus();
@@ -107,6 +118,27 @@
     if (lukkKnapp) lukkKnapp.addEventListener("click", lukk);
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && apen()) lukk();
+    });
+    // A2-03 half 2 / #186 OPTION A -- Tab/Shift+Tab er ikke tidligere
+    // begrenset til den åpne skuffen, så fokus kan lekke ut i bakgrunnen bak
+    // det pekerblokkerende bakteppet. Samme alltid-tilkoblede, selv-vaktende
+    // mønster som Escape-lytteren over.
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Tab" || !apen()) return;
+      var fokuserbare = Array.from(meny.querySelectorAll("a, button"));
+      if (!fokuserbare.length) return;
+      var forste = fokuserbare[0];
+      var siste = fokuserbare[fokuserbare.length - 1];
+      var aktivIndeks = fokuserbare.indexOf(document.activeElement);
+      if (e.shiftKey) {
+        if (aktivIndeks <= 0) {
+          e.preventDefault();
+          siste.focus();
+        }
+      } else if (aktivIndeks === -1 || aktivIndeks === fokuserbare.length - 1) {
+        e.preventDefault();
+        forste.focus();
+      }
     });
   }
 
