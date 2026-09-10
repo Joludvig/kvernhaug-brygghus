@@ -7,6 +7,39 @@
     var kompaktnav = document.querySelector(".kompaktnav");
     if (!hero || !kompaktnav) return;
 
+    // Chief review (issue #209) -- den ratifiserte A2-03-kontrakten (§3.1,
+    // akseptansematrise M15/M16) krever TO trinn i rekkefølge når
+    // .kompaktnav blir inert mens den fortsatt inneholder det aktive
+    // elementet: (1) native inert-fikseringsregel flytter først fokus til
+    // <body> -- det skjer automatisk idet kompaktnav.inert settes til true
+    // nedenfor, ingen egen kode trengs for selve trinnet -- og (2) den
+    // *neste* Tab-tasten (fremover, ikke Shift+Tab) skal deretter lande på
+    // sidens første fokuserbare kontroll (en skip-lenke om siden har en,
+    // ellers #meny-knapp-hero), IKKE der nettleseren ellers ville gjenopptatt
+    // sekvensiell fokusnavigasjon (empirisk: like etter kompaktnavs gamle
+    // DOM-posisjon, et vilkårlig midtsidepunkt). Bare (2) krever egen kode --
+    // fanget her som en engangslytter som venter på nøyaktig den neste
+    // fremover-Tab-tasten etter at <body> har fått fokus via fikseringen.
+    var venterPaaTrygtTabMaal = false;
+
+    function trygtTabMaal() {
+      return (
+        document.querySelector(".hopp-til-innhold") ||
+        document.getElementById("meny-knapp-hero")
+      );
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (!venterPaaTrygtTabMaal || e.key !== "Tab") return;
+      venterPaaTrygtTabMaal = false;
+      if (e.shiftKey || document.activeElement !== document.body) return;
+      var mal = trygtTabMaal();
+      if (mal) {
+        e.preventDefault();
+        mal.focus();
+      }
+    });
+
     // .hero er IKKE sticky -- den ruller bort som vanlig sideinnhold.
     // .kompaktnav er et helt separat, fast element, skjult (transform+
     // opacity) til man har scrollet forbi hero-banneret. Terskelen er
@@ -16,24 +49,11 @@
     function oppdater() {
       var terskel = hero.offsetHeight - kompaktnav.offsetHeight;
       var synlig = window.scrollY > terskel;
-      // Chief review (issue #209) -- the ratified A2-03 contract (§3.1,
-      // akseptansematrise M15/M16) krever at fokus, når .kompaktnav blir
-      // inert mens den fortsatt inneholder det aktive elementet, ender opp
-      // på sidens første fokuserbare kontroll (en skip-lenke om siden har
-      // en, ellers #meny-knapp-hero) -- ikke et vilkårlig midtsidepunkt.
-      // Native inert-fikseringsregel flytter først fokus til <body>; det
-      // alene oppfyller ikke kontraktens "neste Tab"-krav, så vi må selv
-      // sette fokus eksplisitt til det trygge målet i samme steg.
       var blirInert = !synlig && kompaktnav.classList.contains("synlig");
       var holderFokus = blirInert && kompaktnav.contains(document.activeElement);
       kompaktnav.classList.toggle("synlig", synlig);
       kompaktnav.inert = !synlig;
-      if (holderFokus) {
-        var trygtMal =
-          document.querySelector(".hopp-til-innhold") ||
-          document.getElementById("meny-knapp-hero");
-        if (trygtMal) trygtMal.focus();
-      }
+      if (holderFokus) venterPaaTrygtTabMaal = true;
       document.documentElement.style.setProperty(
         "--kompaktnav-h",
         (synlig ? kompaktnav.offsetHeight : 0) + "px"
