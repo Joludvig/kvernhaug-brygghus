@@ -10,6 +10,13 @@ __pycache__/
 # Virtual environment
 .venv/
 
+# Node (Playwright Critical Browser Gate, issue #200 -- devDependency
+# only, web/ runtime itself stays npm-free, see web/README.md)
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+
 # IDE og tool-konfig
 .vscode/
 # Hele .claude/ er lokal/maskinspesifikk konfig som standard (settings.local.json,

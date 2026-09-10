@@ -1,0 +1,74 @@
+name: Playwright Critical Browser Gate
+
+# INFRA -- Playwright Critical Browser Gate V1 (issue #200), implementing
+# Production Workflow V2 (#199), P3.
+#
+# Purpose: move repeatable Web browser evidence (currently-green,
+# already-decided behavior) from owner-PC to GitHub CI, so small
+# browser-relevant PRs do not routinely wait for a home-PC matrix.
+#
+# Scope, deliberately bounded (see docs/development/AGENT_WORKFLOW.md and
+# the issue itself for the full contract this gate must NOT exceed):
+#   - Chromium + Firefox, desktop 1280x900 + mobile 390x844, NO + EN.
+#   - Deterministic local static serving of the checked-out PR head from
+#     web/ (Python's stdlib http.server -- see playwright.config.js) --
+#     NEVER production (https://kvernhaugbrygghus.no).
+#   - console errors == 0 and page errors == 0 in every tested flow.
+#   - Only behavior already known-good on current master (see
+#     tests/playwright/ specs for the exact, documented exclusions --
+#     e.g. the retained #188 method-card offset and the open #191/A2-03
+#     navigation-containment gap are deliberately NOT asserted here).
+#
+# Deliberately NOT this gate's job (see ci-tests.yml, untouched by this
+# workflow): the full Python regression suite, or the Node "contract"
+# tests under tests/js/ -- both remain the responsibility of the
+# existing "CI Test Gate" workflow.
+
+"on":
+  pull_request:
+
+concurrency:
+  group: playwright-browser-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  browser-gate:
+    name: Playwright Critical Browser Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+
+      - name: Log exact checked-out head
+        run: git rev-parse HEAD
+
+      - name: Set up Python (for the local static web server)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Install Playwright browsers (Chromium + Firefox only)
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Run Playwright Critical Browser Gate
+        run: npx playwright test
+
+      - name: Upload Playwright report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
