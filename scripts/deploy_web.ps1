@@ -52,6 +52,23 @@
   Urelaterte urene filer utenfor web/ (f.eks. eierens egne lokale
   endringer andre steder i repoet) påvirkes ikke.
 
+  DELTA-SJEKK OG BOLK-OPPLASTING (issue #213): en deploy av ALLE 85 filene
+  traff et deterministisk FTPS-tilkoblingstak rundt fil #51 -- hver fil
+  åpnet sin egen nye FTPS-innlogging/TLS-håndtrykk, og serveren stoppet å
+  svare etter rundt 50 raske tilkoblinger. Scriptet gjør derfor nå to ting
+  FØR selve FTPS-opplastingen: (1) en read-only HTTPS-delta-sjekk (samme
+  mekanisme som INNHOLDSVERIFISERINGEN under, 0 FTPS-tilkoblinger, ingen
+  credentials) som hopper over filer som allerede er byte-identiske med
+  produksjon -- kun faktiske avvik/manglende filer sendes videre til
+  opplasting; (2) filene som faktisk skal lastes opp samles i bolker og
+  lastes opp med ÉN curl.exe-prosess per bolk (filene adskilt med --next
+  i samme -K configfil), som lar curl gjenbruke FTPS-tilkoblingen på tvers
+  av filene i samme bolk i stedet for én ny tilkobling per fil. En bolk
+  som feiler med en forbigående nettverksfeil (curl exit 56/55/18, f.eks.
+  CURLE_RECV_ERROR) prøves på nytt ÉN gang etter en kort pause -- ekte
+  feil (feil credentials, TLS-håndtrykk, manglende sti) stopper deployen
+  umiddelbart akkurat som før, uten retry.
+
 .PARAMETER DryRun
   Viser source, target, filantall og full filliste. Gjør ingen FTP-/HTTPS-
   tilkobling og ingen endringer. Guardene over kjøres likevel (ren lokal
@@ -227,6 +244,80 @@ function Invoke-DeployFileVerifisering {
     finally {
         if (Test-Path $tempFile) { Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue }
     }
+}
+
+# Ren beslutningsfunksjon (issue #213) -- klassifiserer om en curl-
+# avslutningskode er FORBIGÅENDE (verdt ett bounded retry) eller en EKTE
+# feil (skal stoppe deployen umiddelbart, akkurat som før). Bevisst
+# selvstendig/uten ekstern konstant (i motsetning til f.eks. å referere en
+# script-scope-variabel) -- testene dot-sourcer denne funksjonens tekst
+# ALENE, samme mønster som de andre rene hjelpefunksjonene over, og en
+# ekstern avhengighet ville da vært usynlig for testen.
+#
+# 56 (CURLE_RECV_ERROR) er nøyaktig feilen issue #213 observerte gjentatte
+# ganger ved høy tilkoblingsrate (serveren sluttet å svare under mottak av
+# responsen etter en ellers fullført opplasting). 55 (CURLE_SEND_ERROR) og
+# 18 (CURLE_PARTIAL_FILE) er nært beslektede forbigående nettverksglipp av
+# samme (sende/motta) karakter. BEVISST IKKE inkludert: 67 (feil
+# credentials/FTP 530), 9 (tilgang nektet), 78 (mangler fjern-sti), 35
+# (TLS-håndtrykk feilet) -- dette er ekte feil som aldri skal maskeres av
+# et automatisk retry-forsøk.
+function Test-ForbigaendeCurlFeil {
+    param([Parameter(Mandatory)][int]$ExitCode)
+    return @(55, 56, 18) -contains $ExitCode
+}
+
+# Ren funksjon (issue #213) -- deler en filliste inn i bolker av maks
+# $BolkStorrelse filer hver (siste bolk kan være mindre). Brukt til å
+# begrense antall FTPS-tilkoblinger per deploy: én curl.exe-prosess (og
+# dermed én potensielt gjenbrukt FTPS-tilkobling for alle filene i den
+# bolken) i stedet for én prosess/tilkobling per fil.
+function Split-FilerIBolker {
+    param(
+        [Parameter(Mandatory)][object[]]$Filer,
+        [Parameter(Mandatory)][int]$BolkStorrelse
+    )
+    $bolker = @()
+    for ($idx = 0; $idx -lt $Filer.Count; $idx += $BolkStorrelse) {
+        $slutt = [Math]::Min($idx + $BolkStorrelse, $Filer.Count) - 1
+        $bolker += , @($Filer[$idx..$slutt])
+    }
+    return @($bolker)
+}
+
+# Bygger INNHOLDET til ÉN curl -K configfil som laster opp flere filer i
+# samme curl.exe-prosess, adskilt med --next (issue #213) -- curl
+# gjenbruker kontrollforbindelsen til samme FTPS-server på tvers av
+# --next-adskilte overføringer i samme prosess der det er mulig, i stedet
+# for å åpne en helt ny FTPS-innlogging/TLS-håndtrykk per fil (root cause
+# for det observerte tilkoblingstaket rundt ~50 tilkoblinger). --ssl-reqd
+# og --ftp-create-dirs gjentas EKSPLISITT for HVER fil i stedet for å
+# stole på at de arves på tvers av --next -- --ssl-reqd er et
+# obligatorisk FTPS-krav (se .DESCRIPTION), og skal derfor aldri hvile på
+# en antakelse om curl sin arve-semantikk mellom --next-blokker. Ren
+# tekstbygging -- ingen fil-IO/nettverk her (testbar uten curl/nettverk,
+# samme mønster som de andre rene hjelpefunksjonene over). Gjenbruker
+# Get-CurlConfigEscaped (samme escaping som credential-linjen) for både
+# lokal sti og fjern-URL, i stedet for å duplisere escaping-logikken.
+function New-BolkOpplastingConfig {
+    param(
+        [Parameter(Mandatory)][string]$BrukerLinje,
+        [Parameter(Mandatory)][object[]]$Filer,
+        [Parameter(Mandatory)][string]$FtpHost,
+        [Parameter(Mandatory)][string]$RemoteRoot
+    )
+    $blokker = @()
+    foreach ($f in $Filer) {
+        $escapedLocal = Get-CurlConfigEscaped $f.FullName
+        $escapedUrl = Get-CurlConfigEscaped "ftp://$FtpHost$RemoteRoot/$($f.rel)"
+        $blokker += @(
+            "url = `"$escapedUrl`""
+            "--ssl-reqd"
+            "--ftp-create-dirs"
+            "-T `"$escapedLocal`""
+        ) -join "`n"
+    }
+    return ($BrukerLinje + "`n" + ($blokker -join "`n--next`n") + "`n")
 }
 
 # ─── 1. Finn repo-root/web robust ──────────────────────────────────────────
@@ -407,6 +498,51 @@ if ($DryRun) {
     exit 0
 }
 
+# ─── 2b. Delta-sjekk: hopp over filer som allerede matcher produksjon ──────
+# Se .DESCRIPTION for bakgrunnen (issue #213). Kjøres FØR curl-
+# avhengighetssjekken/bekreftelsen/credentials under -- bruker SAMME
+# read-only HTTPS-mekanisme (Invoke-DeployFileVerifisering, samme funksjon
+# INNHOLDSVERIFISERINGEN i steg 6 bruker) til å sammenligne hver lokal fil
+# mot produksjon FØR noen FTPS-tilkobling i det hele tatt åpnes -- krever
+# derfor ingen credentials. Kun filer som faktisk AVVIKER (eller ikke kan
+# verifiseres, f.eks. en ny fil som ennå ikke finnes på produksjon) sendes
+# videre til FTPS-opplastingen i steg 5c -- filer som allerede matcher
+# produksjon rører aldri FTPS-tilkoblingen.
+#
+# Ligger bevisst ETTER DryRun sin "exit 0" over -- DryRuns dokumenterte
+# kontrakt er 0 tilkoblinger, og denne seksjonen gjør ekte HTTPS-kall.
+#
+# Get-VerifiseringsStierForRetry gjenbrukes bevisst her (samme "resultat
+# var ikke ok"-seleksjon som steg 6 bruker for retry-utvelgelse -- "trenger
+# (første) opplasting" og "trenger et nytt forsøk" er samme beslutning på
+# samme resultatform, ikke to parallelle implementasjoner).
+$BaseUrl = "https://kvernhaugbrygghus.no"
+
+Write-Host ("--- Delta-sjekk: sammenligner {0} lokale filer mot produksjon over HTTPS (0 FTPS-tilkoblinger) ---" -f $DeployFiles.Count)
+$DeltaKandidatFiler = @($DeployFiles | ForEach-Object {
+    $rel = $_.FullName.Substring($WebRoot.Length + 1) -replace '\\', '/'
+    [PSCustomObject]@{ rel = $rel; FullName = $_.FullName }
+})
+
+$deltaTempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_delta_" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $deltaTempDir | Out-Null
+try {
+    $deltaResultater = @()
+    foreach ($fc in $DeltaKandidatFiler) {
+        $deltaResultater += Invoke-DeployFileVerifisering -Rel $fc.rel -LocalPath $fc.FullName -BaseUrl $BaseUrl -TempDir $deltaTempDir
+    }
+}
+finally {
+    Remove-Item -Path $deltaTempDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+$filesToUploadRels = @(Get-VerifiseringsStierForRetry -Resultater $deltaResultater)
+$FilesToUpload = @($DeltaKandidatFiler | Where-Object { $filesToUploadRels -contains $_.rel })
+$SkippedCount = $DeployFiles.Count - $FilesToUpload.Count
+
+Write-Host ("Delta-sjekk OK -- {0} av {1} filer er allerede identisk med produksjon (hoppes over). {2} fil(er) skal lastes opp over FTPS." -f $SkippedCount, $DeployFiles.Count, $FilesToUpload.Count)
+Write-Host ""
+
 # ─── 3. Dependency-sjekk ────────────────────────────────────────────────────
 $curlCmd = Get-Command curl.exe -ErrorAction SilentlyContinue
 if (-not $curlCmd) {
@@ -416,7 +552,13 @@ if (-not $curlCmd) {
 
 # ─── 4. Bekreftelse (default NO) ───────────────────────────────────────────
 if (-not $Force) {
-    $answer = Read-Host "Deploy $($DeployFiles.Count) filer fra $WebRoot til ${FtpHost}:${RemoteRoot} ? [y/N]"
+    if ($FilesToUpload.Count -lt $DeployFiles.Count) {
+        $promptTekst = "Deploy $($FilesToUpload.Count) av $($DeployFiles.Count) fil(er) (resten er allerede identisk med produksjon) fra $WebRoot til ${FtpHost}:${RemoteRoot} ? [y/N]"
+    }
+    else {
+        $promptTekst = "Deploy $($DeployFiles.Count) filer fra $WebRoot til ${FtpHost}:${RemoteRoot} ? [y/N]"
+    }
+    $answer = Read-Host $promptTekst
     if ($answer -ne "y" -and $answer -ne "Y") {
         Write-Host "Avbrutt -- ingen filer lastet opp."
         exit 0
@@ -478,33 +620,78 @@ try {
     else {
         Write-Host "Preflight OK -- innlogging fungerer."
         Write-Host ""
-        Write-Host "--- Laster opp $($DeployFiles.Count) filer (eksplisitt FTPS) ---"
-        $i = 0
-        $stoppedEarly = $false
-        foreach ($f in $DeployFiles) {
-            $i++
-            $rel = $f.FullName.Substring($WebRoot.Length + 1) -replace '\\', '/'
-            $remoteUrl = "ftp://$FtpHost$RemoteRoot/$rel"
-            Write-Host ("[{0}/{1}] {2}" -f $i, $DeployFiles.Count, $rel)
-            # --ssl-reqd: krever AUTH TLS (eksplisitt FTPS) -- feiler i stedet
-            # for å falle tilbake til klartekst. --ftp-create-dirs: oppretter
-            # manglende mapper automatisk under opplasting. Serversertifikat/
-            # hostname verifiseres normalt av curl -- ingen "-k"/"--insecure".
-            & curl.exe -K $curlConfigPath --ssl-reqd --ftp-create-dirs --silent --show-error -T "$($f.FullName)" "$remoteUrl"
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host ""
-                Write-Host ("STOPPER: {0} feilet (curl exit code {1})" -f $rel, $LASTEXITCODE)
-                Write-Host (Get-CurlFeilmelding $LASTEXITCODE)
-                Write-Host ("Deploy er UFULLSTENDIG -- kun {0} av {1} filer ble lastet opp før feilen stoppet resten." -f ($i - 1), $DeployFiles.Count)
-                Write-Host "Produksjonen skal IKKE regnes som oppdatert."
-                $stoppedEarly = $true
-                $exitCode = 1
-                break
-            }
+        if ($FilesToUpload.Count -eq 0) {
+            Write-Host ("--- Ingen filer å laste opp -- alle {0} filer er allerede identisk med produksjon (delta-sjekk, steg 2b) ---" -f $DeployFiles.Count)
         }
-        if (-not $stoppedEarly) {
-            Write-Host ""
-            Write-Host "Alle $($DeployFiles.Count) filer lastet opp."
+        else {
+            # ─── 5c. Bolk-basert opplasting (issue #213) ───────────────────
+            # Én curl.exe-prosess per bolk i stedet for én prosess/FTPS-
+            # tilkobling per fil -- se .DESCRIPTION og New-BolkOpplastingConfig
+            # for begrunnelsen. --fail-early: HELE bolk-invokeringen stopper
+            # ved første feilede overføring i bolken (bevarer det eksisterende
+            # "stopper umiddelbart ved første feil"-prinsippet, se Runde 22B.1
+            # i .DESCRIPTION, nå på bolk- i stedet for fil-nivå).
+            $UploadBolkStorrelse = 10
+            $MaxBolkOpplastingsForsok = 2  # forste forsok + ETT bounded retry ved forbigaende feil -- ikke en lokke.
+            $BolkRetryPauseSekunder = 5
+
+            Write-Host ("--- Laster opp {0} fil(er) i bolker à maks {1} (eksplisitt FTPS, {2} fil(er) allerede identisk med produksjon hoppet over) ---" -f $FilesToUpload.Count, $UploadBolkStorrelse, ($DeployFiles.Count - $FilesToUpload.Count))
+            $i = 0
+            $stoppedEarly = $false
+            $bolker = @(Split-FilerIBolker -Filer $FilesToUpload -BolkStorrelse $UploadBolkStorrelse)
+            $totalBolker = $bolker.Count
+            $bolkIndeks = 0
+            foreach ($bolk in $bolker) {
+                $bolkIndeks++
+                $forsteRel = $bolk[0].rel
+                $sisteRel = $bolk[$bolk.Count - 1].rel
+                Write-Host ("[bolk {0}/{1}] {2} fil(er) ({3} .. {4})" -f $bolkIndeks, $totalBolker, $bolk.Count, $forsteRel, $sisteRel)
+
+                $bolkConfigInnhold = New-BolkOpplastingConfig -BrukerLinje $configContent -Filer $bolk -FtpHost $FtpHost -RemoteRoot $RemoteRoot
+                $bolkConfigPath = [System.IO.Path]::GetTempFileName()
+                [System.IO.File]::WriteAllText($bolkConfigPath, $bolkConfigInnhold, (New-Object System.Text.UTF8Encoding($false)))
+
+                $forsokTeller = 0
+                $bolkOk = $false
+                $sisteExitCode = 0
+                try {
+                    do {
+                        $forsokTeller++
+                        & curl.exe -K $bolkConfigPath --fail-early --silent --show-error
+                        $sisteExitCode = $LASTEXITCODE
+                        if ($sisteExitCode -eq 0) {
+                            $bolkOk = $true
+                            break
+                        }
+                        $erForbigaende = Test-ForbigaendeCurlFeil -ExitCode $sisteExitCode
+                        if ((-not $erForbigaende) -or ($forsokTeller -ge $MaxBolkOpplastingsForsok)) {
+                            break
+                        }
+                        Write-Host ("  Forbigående feil (curl exit code {0}) -- venter {1}s og prøver bolken på nytt (forsøk {2}/{3})..." -f $sisteExitCode, $BolkRetryPauseSekunder, ($forsokTeller + 1), $MaxBolkOpplastingsForsok)
+                        Start-Sleep -Seconds $BolkRetryPauseSekunder
+                    } while ($true)
+                }
+                finally {
+                    if (Test-Path $bolkConfigPath) { Remove-Item -Path $bolkConfigPath -Force -ErrorAction SilentlyContinue }
+                }
+
+                $i += $bolk.Count
+                if (-not $bolkOk) {
+                    Write-Host ""
+                    Write-Host ("STOPPER: bolk {0}/{1} feilet (curl exit code {2})" -f $bolkIndeks, $totalBolker, $sisteExitCode)
+                    Write-Host (Get-CurlFeilmelding $sisteExitCode)
+                    Write-Host "Bolken lastes opp som ÉN curl-økt -- ingen garanti for nøyaktig hvilke enkeltfiler i akkurat denne bolken som faktisk kom gjennom før feilen. Kjør scriptet på nytt, eller verifiser produksjon manuelt, for et autoritativt svar per fil."
+                    Write-Host ("Deploy er UFULLSTENDIG -- {0} av {1} fil(er) var i bolker forsøkt lastet opp (inkludert den feilede bolken) før feilen stoppet resten." -f $i, $FilesToUpload.Count)
+                    Write-Host "Produksjonen skal IKKE regnes som oppdatert."
+                    $stoppedEarly = $true
+                    $exitCode = 1
+                    break
+                }
+            }
+            if (-not $stoppedEarly) {
+                Write-Host ""
+                Write-Host ("Alle {0} fil(er) lastet opp ({1} bolk(er), {2} fil(er) hoppet over)." -f $FilesToUpload.Count, $totalBolker, ($DeployFiles.Count - $FilesToUpload.Count))
+            }
         }
     }
 }
@@ -555,7 +742,8 @@ Write-Host ""
 Write-Host "--- Verifiserer produksjon: FAKTISK INNHOLD (SHA-256 per fil, $($DeployFiles.Count) filer) ---"
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_verify_" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $tempDir | Out-Null
-$BaseUrl = "https://kvernhaugbrygghus.no"
+# $BaseUrl er allerede satt i steg 2b (delta-sjekken, issue #213) -- samme
+# produksjons-URL, ikke duplisert her.
 # Kort, avgrenset pause (issue #81) -- ETT retry-forsøk, ikke en løkke --
 # for at en forbigående nettverksglipp ikke skal rapporteres som et
 # permanent avvik før den faktisk er bekreftet reproduserbar.
