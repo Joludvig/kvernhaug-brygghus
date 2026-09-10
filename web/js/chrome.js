@@ -53,7 +53,18 @@
       var holderFokus = blirInert && kompaktnav.contains(document.activeElement);
       kompaktnav.classList.toggle("synlig", synlig);
       kompaktnav.inert = !synlig;
-      if (holderFokus) venterPaaTrygtTabMaal = true;
+      if (holderFokus) {
+        venterPaaTrygtTabMaal = true;
+      } else if (synlig) {
+        // Chief review (issue #209, round 5) -- .kompaktnav became active/
+        // visible again (user scrolled back down) before the armed listener
+        // above ever saw its one-shot Tab: the M15 fallback context no
+        // longer applies, so disarm it. Left armed, a later Tab from
+        // <body> -- reached here by any means, not necessarily the M15
+        // fixup -- would incorrectly redirect focus to the now-scrolled-away
+        // #meny-knapp-hero instead of following normal sequential order.
+        venterPaaTrygtTabMaal = false;
+      }
       document.documentElement.style.setProperty(
         "--kompaktnav-h",
         (synlig ? kompaktnav.offsetHeight : 0) + "px"

@@ -211,3 +211,43 @@ for (const locale of ['no', 'en']) {
     expect(errors).toEqual([]);
   });
 }
+
+for (const locale of ['no', 'en']) {
+  test(`the armed M15 fallback disarms once .kompaktnav becomes active again, so a later Tab stays in the active surface instead of jumping to the scrolled-away #meny-knapp-hero [${locale}]`, async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto(localePath(locale, '/index.html'));
+    await dismissModeDialog(page);
+
+    // Arm the M15 fallback exactly as in the test above: a focused
+    // .kompaktnav control goes inert on scroll-back, native inert-fixup
+    // moves focus to <body>.
+    await scrollPastHero(page);
+    await page.locator('#meny-knapp-kompakt').evaluate((el) => el.focus());
+    await scrollBackToTop(page);
+    expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
+
+    // Chief review (issue #209, round 5): WITHOUT pressing Tab yet, the
+    // user scrolls back down -- .kompaktnav becomes active/visible (and
+    // released from inert) again, so the M15 fallback context has ended.
+    await scrollPastHero(page);
+
+    // The next Tab press must NOT be forced to the now off-screen
+    // #meny-knapp-hero -- that would reintroduce off-screen focus and
+    // break the requirement to preserve responsive active-surface
+    // semantics. It must follow normal sequential navigation, which stays
+    // within the currently active .kompaktnav surface (verified empirically
+    // in Chromium and Firefox, desktop and mobile: browsers resume
+    // sequential navigation from the just-reactivated control's own
+    // position, landing on a .kompaktnav control, not <body>'s absolute
+    // start).
+    await page.keyboard.press('Tab');
+    const erMenyKnappHero = await isFocused(page, '#meny-knapp-hero');
+    expect(erMenyKnappHero).toBe(false);
+    const erIKompaktnav = await page.evaluate(
+      () => document.activeElement.closest('.kompaktnav') !== null
+    );
+    expect(erIKompaktnav).toBe(true);
+
+    expect(errors).toEqual([]);
+  });
+}
