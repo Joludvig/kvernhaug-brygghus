@@ -111,10 +111,28 @@ const ENHET_FORKORTELSE = {
 // --allowedTools-liste). Kalles ved radopprettelse, ved enhetsbytte
 // (_rerenderAlleEnhetsfelt) og ved språkbytte (sprakendret-lytteren),
 // siden "Beregn mengde"-knappeteksten under er språkavhengig.
+//
+// WEB FIX (issue #189, Astra A2-01) -- eier nå OGSÅ feltets aria-label sitt
+// unit-suffiks. .malt-mengde/.humle-gram BEHOLDER sitt statiske
+// data-i18n-aria-label i index.html (mengdeAriaLabel/gramAriaLabel,
+// uendret "(kg)"/"(g)") -- den nøkkelen eies fortsatt av applyI18n() og av
+// scripts/generate_web_i18n_pages.py sin statiske, ikke-parameteriserte
+// pre-render-oversettelse av web/en/index.html sin malt-/humle-rad-mal
+// (side-default, alltid metrisk). Men applyI18n() kjøres FØR
+// kvernhaug:sprakendret dispatches (se settSprak()) og kjenner ikke
+// gjeldende unitSystem, så den alene ville satt aria-label tilbake til
+// metrisk tekst ved ethvert språkbytte mens US var aktivt. Denne
+// funksjonen kjører derfor ALLTID etterpå (radopprettelse,
+// _rerenderAlleEnhetsfelt ved enhetsbytte, OG sprakendret-lytteren ved
+// språkbytte) og overskriver med en egen, {enhet}-parameterisert nøkkel
+// (mengdeAriaLabelEnhet/gramAriaLabelEnhet, samme mønster som
+// builder.skaler.hjelpetekst) komponert fra ENHET_FORKORTELSE -- aldri fra
+// allerede rendret tekst -- slik at det synlige unit-suffikset alltid vinner.
 function _oppdaterMaltRadEnhet(rad) {
   const enhet = ENHET_FORKORTELSE[hentUnitSystem()];
   const felt = rad.querySelector(".malt-mengde");
   felt.placeholder = enhet.malt;
+  felt.setAttribute("aria-label", t("builder.malt.mengdeAriaLabelEnhet", { enhet: enhet.malt }));
   const enhetSpan = felt.nextElementSibling;
   if (enhetSpan && enhetSpan.classList.contains("enhet")) enhetSpan.textContent = enhet.malt;
 }
@@ -122,6 +140,7 @@ function _oppdaterHumleRadEnhet(rad) {
   const enhet = ENHET_FORKORTELSE[hentUnitSystem()];
   const felt = rad.querySelector(".humle-gram");
   felt.placeholder = enhet.humle;
+  felt.setAttribute("aria-label", t("builder.humle.gramAriaLabelEnhet", { enhet: enhet.humle }));
   const enhetSpan = felt.nextElementSibling;
   if (enhetSpan && enhetSpan.classList.contains("enhet")) enhetSpan.textContent = enhet.humle;
   const knapp = rad.querySelector(".humle-beregn-knapp");
@@ -1978,6 +1997,10 @@ window.addEventListener("kvernhaug:sprakendret", () => {
   // førstegangsdialogen fortsatt står åpen).
   settModus(document.body.classList.contains("modus-mester") ? "mester" : "laerling", false);
   for (const rad of maltRaderEl.querySelectorAll(".ingrediens-rad")) {
+    // WEB FIX (issue #189, Astra A2-01) -- .malt-mengde sin aria-label er
+    // språk- OG unit-avhengig (se _oppdaterMaltRadEnhet()), så den må
+    // rekomponeres her uansett om raden har en combobox ennå.
+    _oppdaterMaltRadEnhet(rad);
     const cb = rad._combobox;
     if (!cb) continue;
     cb.items = maltItems();
@@ -1985,6 +2008,8 @@ window.addEventListener("kvernhaug:sprakendret", () => {
     cb.inputEl.setAttribute("aria-label", t("builder.malt.comboboxAriaLabel"));
   }
   for (const rad of humleRaderEl.querySelectorAll(".ingrediens-rad")) {
+    // Se kommentaren i malt-løkken over -- samme grunn for .humle-gram.
+    _oppdaterHumleRadEnhet(rad);
     const cb = rad._combobox;
     if (!cb) continue;
     cb.inputEl.placeholder = t("builder.humle.comboboxPlaceholder");
