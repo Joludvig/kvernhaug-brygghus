@@ -17,10 +17,21 @@ av 85, identisk to ganger på rad. Fiksen:
    fra 85 til maks 9 FTPS-tilkoblinger, komfortabelt under det observerte
    taket rundt ~50.
 3. En bolk som feiler med en FORBIGÅENDE curl-avslutningskode (55/56/18 --
-   send/motta/delvis-overføring-feil) prøves på nytt ÉN gang etter en kort
-   pause. Ekte feil (67 login denied, 9 tilgang nektet, 78 mangler sti, 35
-   TLS-håndtrykk) stopper deployen umiddelbart, uten retry -- akkurat som
-   det eksisterende "stopp ved første feil"-prinsippet (Runde 22B.1).
+   send/motta/delvis-overføring-feil) reverifiseres FØRST mot produksjon
+   over HTTPS (samme mekanisme som delta-sjekken) og reduseres til kun
+   fortsatt avvikende/manglende/ikke-verifiserbare filer -- er ingen
+   igjen, regnes bolken som vellykket uten noe nytt curl-forsøk; ellers
+   prøves KUN de gjenværende filene på nytt, ÉN gang, etter en kort pause
+   (Chief review, PR #216, blocker 2 -- exit 56 ble observert ETTER at
+   filen faktisk hadde kommet frem, så et blindt retry av hele bolken
+   ville lastet opp allerede-vellykkede filer på nytt). Ekte feil (67
+   login denied, 9 tilgang nektet, 78 mangler sti, 35 TLS-håndtrykk)
+   stopper deployen umiddelbart, uten retry -- akkurat som det
+   eksisterende "stopp ved første feil"-prinsippet (Runde 22B.1).
+4. Credential-linjen (`user = "..."`) gjentas EKSPLISITT i HVER
+   --next-blokk i bolk-configen, ikke bare skrevet én gang først -- curl
+   dokumenterer at --next nullstiller alle ikke-globale opsjoner, og
+   `user = ...` er ikke global (Chief review, PR #216, blocker 1).
 
 TESTSTRATEGI (samme begrunnelse som test_deploy_web_guard.py og
 test_deploy_web_verify_retry.py): hele scriptet er Windows-orientert, og
@@ -213,6 +224,29 @@ class TestNewBolkOpplastingConfig(unittest.TestCase):
         self.assertLess(idx_a, idx_b)
         self.assertLess(idx_b, idx_c)
 
+    def test_credential_line_repeated_once_per_block_not_just_first(self):
+        """curl documents that --next resets ALL non-global options -- `user
+        = "..."` is not global, so without repeating it in every --next
+        block, only transfer 1 in the batch would actually carry explicit
+        FTPS credentials (Chief review, PR #216, blocker 1). Every block
+        must carry its own credential line, immediately before its own
+        `url =` line, in file order."""
+        files = [
+            {"rel": "a.html", "FullName": "/tmp/web/a.html"},
+            {"rel": "b.html", "FullName": "/tmp/web/b.html"},
+            {"rel": "c.html", "FullName": "/tmp/web/c.html"},
+        ]
+        out = self._run("user = \"u:p\"", files, "ftp.example.com", "/www")
+        self.assertEqual(
+            out.count('user = "u:p"'), 3,
+            "Credential-linjen skal gjentas i HVER --next-blokk, ikke bare skrives én gang først.",
+        )
+        for block in out.split("--next"):
+            self.assertRegex(
+                block.strip(), r'^user = "u:p"\nurl = ',
+                "Hver blokk skal starte med credential-linjen umiddelbart før sin egen url-linje.",
+            )
+
     def test_special_characters_in_path_are_escaped(self):
         """A local path containing a backslash or double-quote must be
         escaped exactly like the credential line already is (Get-CurlConfigEscaped
@@ -308,8 +342,66 @@ class TestSourceWiring(unittest.TestCase):
 
     def test_hard_failure_still_stops_immediately_no_retry(self):
         section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
-        section = self.text[section_start:self.text.index("finally {", section_start)]
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
         self.assertIn("erForbigaende) -or", section)
+
+    def test_transient_failure_reverifies_before_retry_not_blind_reupload(self):
+        """Chief review (PR #216, blocker 2): curl exit 56 was observed
+        AFTER the file had already arrived, so blindly retrying the whole
+        chunk would re-upload files that already succeeded. Before any
+        retry attempt, the remaining chunk must be reverified over HTTPS
+        (the same mechanism as the delta-check/production-verification) and
+        reduced to only files still differing/missing/unverifiable."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        self.assertIn(
+            "Invoke-DeployFileVerifisering -Rel $f.rel -LocalPath $f.FullName -BaseUrl $BaseUrl -TempDir $bolkRetryTempDir",
+            section,
+            "Reverifisering før retry skal gjenbruke Invoke-DeployFileVerifisering, ikke en egen duplikatimplementasjon.",
+        )
+        self.assertIn(
+            "Get-VerifiseringsStierForRetry -Resultater $bolkRetryResultater",
+            section,
+            "Reverifiseringsresultatet skal filtreres med samme rene utvelgelsesfunksjon som delta-sjekken/produksjonsverifiseringen bruker.",
+        )
+        idx_reverify = section.index("Get-VerifiseringsStierForRetry -Resultater $bolkRetryResultater")
+        idx_retry_curl = section.rindex("& curl.exe -K $bolkConfigPath")
+        self.assertLess(idx_retry_curl, idx_reverify, "Reverifiseringen skal skje ETTER det feilede curl-forsøket (og dermed FØR neste).")
+
+    def test_fully_reverified_chunk_counts_as_success_without_reupload(self):
+        """If reverification shows every remaining file already matches
+        production, the chunk must be treated as successful -- no further
+        curl invocation for files that already arrived (Chief review, PR
+        #216, blocker 2)."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        self.assertIn("$gjenstaendeFiler.Count -eq 0", section)
+        idx_zero_check = section.index("$gjenstaendeFiler.Count -eq 0")
+        idx_bolkok_true = section.index("$bolkOk = $true", idx_zero_check)
+        idx_break = section.index("break", idx_bolkok_true)
+        self.assertLess(idx_zero_check, idx_bolkok_true)
+        self.assertLess(idx_bolkok_true, idx_break)
+
+    def test_retry_uses_reduced_file_set_not_original_full_chunk(self):
+        """The retried curl config must be built from the shrunk
+        $gjenstaendeFiler set (survivors of reverification), not the
+        original, unreduced $bolk -- otherwise the reverification step
+        would compute a smaller set but never actually act on it."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        self.assertIn(
+            "New-BolkOpplastingConfig -BrukerLinje $configContent -Filer $gjenstaendeFiler -FtpHost $FtpHost -RemoteRoot $RemoteRoot",
+            section,
+        )
+        self.assertNotIn(
+            "New-BolkOpplastingConfig -BrukerLinje $configContent -Filer $bolk -FtpHost $FtpHost -RemoteRoot $RemoteRoot",
+            section,
+            "Bolk-configen skal bygges fra det (potensielt reduserte) $gjenstaendeFiler-settet, ikke ubetinget fra hele $bolk.",
+        )
 
     def test_login_preflight_unchanged(self):
         for expected in (
