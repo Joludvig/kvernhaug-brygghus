@@ -41,9 +41,19 @@ jobs:
     steps:
       - name: Checkout PR head
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Log exact checked-out head
-        run: git rev-parse HEAD
+      - name: Assert exact checked-out head (fail-closed)
+        run: |
+          actual="$(git rev-parse HEAD)"
+          expected="${{ github.event.pull_request.head.sha }}"
+          echo "Checked-out head: $actual"
+          echo "Expected PR head: $expected"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::Checked-out head ($actual) does not match PR head ($expected) -- refusing to run against a non-deterministic ref."
+            exit 1
+          fi
 
       - name: Set up Python (for the local static web server)
         uses: actions/setup-python@v5
