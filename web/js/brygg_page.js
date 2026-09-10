@@ -179,8 +179,17 @@ function _byggKort(brew) {
     visningsnavn(brew.snapshot.recipe.navn) || t("identitet.utenNavn");
   kort.querySelector(".brygg-kort-plan").textContent = _planTekst(brew);
   const faseEl = kort.querySelector(".brygg-fase");
-  faseEl.textContent = t(`brygg.fase.${fase}`);
-  faseEl.classList.add(`brygg-fase-${fase}`);
+  // Astra A2-05 (issue #193) -- bryggFase() returnerer "ferdig" så snart en
+  // dom er avgitt (se kommentaren ved bryggFase() i brew_storage.js), noe
+  // som er riktig for HVILKEN akt kortet skal vise (uendret -- rører ikke
+  // #138-kontrakten, som gjelder den ferdige LISTEN, ikke dette merket).
+  // Men dette kortet vises kun for brygg som ikke har status "done" (se
+  // aktive-filteret i visLogg()), så badge-TEKSTEN skal aldri påstå
+  // brygget er avsluttet før brukeren faktisk har trykket "Avslutt
+  // brygget" -- fram til da er det fortsatt smaking-akten.
+  const faseVisning = fase === "ferdig" && brew.status !== "done" ? "smaking" : fase;
+  faseEl.textContent = t(`brygg.fase.${faseVisning}`);
+  faseEl.classList.add(`brygg-fase-${faseVisning}`);
 
   const sporsmal = kort.querySelector(".brygg-sporsmal");
   const primar = kort.querySelector(".brygg-primar");
