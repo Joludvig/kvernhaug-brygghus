@@ -101,6 +101,114 @@ class TestRadHjelperOppdatererSynligEnhet(unittest.TestCase):
         )
 
 
+class TestRadHjelperOppdatererAriaLabel(unittest.TestCase):
+    """WEB FIX (issue #189, Astra A2-01) -- Astra Web Product Audit #2
+    (#187) fant at .malt-mengde/.humle-gram sin ACCESSIBLE NAME forble
+    statisk metrisk ("Maltmengde (kg)"/"Humlemengde (g)") selv når US
+    customary var aktivt og både tallverdi og synlig enhets-span korrekt
+    viste lb/oz -- root cause var at _oppdaterMaltRadEnhet()/
+    _oppdaterHumleRadEnhet() (fikset for placeholder/enhet-span av W1,
+    issue #102) aldri rørte selve aria-label. Disse testene låser at
+    aria-label nå komponeres unit-bevisst fra EXACT samme
+    ENHET_FORKORTELSE-verdi som placeholder/enhet-span, via en egen
+    {enhet}-parameterisert i18n-nøkkel (ikke den statiske
+    mengdeAriaLabel/gramAriaLabel-nøkkelen som eies av applyI18n()/
+    generatoren, se kommentaren over _oppdaterMaltRadEnhet())."""
+
+    def test_malt_hjelper_setter_enhetsbevisst_aria_label(self):
+        kilde = _les(_APP_JS)
+        kropp = _funksjonskropp(kilde, r"function _oppdaterMaltRadEnhet\(rad\)\s*\{")
+        self.assertRegex(
+            kropp,
+            r'felt\.setAttribute\("aria-label", t\("builder\.malt\.mengdeAriaLabelEnhet", \{ enhet: enhet\.malt \}\)\)',
+        )
+
+    def test_humle_hjelper_setter_enhetsbevisst_aria_label(self):
+        kilde = _les(_APP_JS)
+        kropp = _funksjonskropp(kilde, r"function _oppdaterHumleRadEnhet\(rad\)\s*\{")
+        self.assertRegex(
+            kropp,
+            r'felt\.setAttribute\("aria-label", t\("builder\.humle\.gramAriaLabelEnhet", \{ enhet: enhet\.humle \}\)\)',
+        )
+
+
+class TestSprakbytteRekomponererAriaLabel(unittest.TestCase):
+    """Regresjon (acceptance-kriterium 4, issue #189): applyI18n() (kjørt
+    FØR kvernhaug:sprakendret dispatches, se settSprak() i i18n.js)
+    kjenner ikke gjeldende unitSystem og ville -- uten dette -- satt
+    .malt-mengde/.humle-gram sin aria-label tilbake til en metrisk-
+    hardkodet tekst ved ethvert språkbytte mens US customary var aktivt.
+    _oppdaterMaltRadEnhet()/_oppdaterHumleRadEnhet() må derfor faktisk
+    kalles for HVER monterte rad i sprakendret-lytteren, uavhengig av om
+    raden har fått en combobox ennå."""
+
+    def _sprakendret_lytterkropp(self):
+        kilde = _les(_APP_JS)
+        m = re.search(r'window\.addEventListener\("kvernhaug:sprakendret", \(\) => \{', kilde)
+        self.assertIsNotNone(m, "fant ikke kvernhaug:sprakendret-lytteren")
+        start = m.end()
+        slutt = kilde.index("\n});", start)
+        return kilde[start:slutt]
+
+    def test_sprakbytte_lytteren_kaller_malt_hjelperen_for_hver_rad(self):
+        lytter = self._sprakendret_lytterkropp()
+        malt_lokke = lytter[lytter.index("for (const rad of maltRaderEl"):lytter.index("for (const rad of humleRaderEl")]
+        # Hjelperen må kalles FØR "if (!cb) continue;" -- ellers hoppes den
+        # over for enhver rad uten en ferdig konstruert combobox.
+        self.assertRegex(
+            malt_lokke,
+            r"_oppdaterMaltRadEnhet\(rad\);\s*\n\s*const cb = rad\._combobox;\s*\n\s*if \(!cb\) continue;",
+        )
+
+    def test_sprakbytte_lytteren_kaller_humle_hjelperen_for_hver_rad(self):
+        lytter = self._sprakendret_lytterkropp()
+        humle_lokke = lytter[lytter.index("for (const rad of humleRaderEl"):]
+        self.assertRegex(
+            humle_lokke,
+            r"_oppdaterHumleRadEnhet\(rad\);\s*\n\s*const cb = rad\._combobox;\s*\n\s*if \(!cb\) continue;",
+        )
+
+
+class TestI18nAriaLabelNoklerEnhetsparameterisert(unittest.TestCase):
+    """De to nye {enhet}-parameteriserte nøklene skal aldri hardkode et
+    metrisk enhetsnavn -- selve enheten skal alltid komme fra
+    ENHET_FORKORTELSE via _oppdaterMaltRadEnhet()/_oppdaterHumleRadEnhet()
+    (over), uansett hvilket språk som er aktivt. Den STATISKE
+    mengdeAriaLabel/gramAriaLabel-nøkkelen (eid av applyI18n()/
+    generatoren -- se web/index.html sitt data-i18n-aria-label) skal
+    derimot fortsatt være hardkodet metrisk, som side-default."""
+
+    def test_malt_enhet_noklene_bruker_parameteren_i_no_og_en(self):
+        kilde = _les(_I18N_JS)
+        alle = re.findall(r'"builder\.malt\.mengdeAriaLabelEnhet":\s*"([^"]*)"', kilde)
+        self.assertEqual(len(alle), 2, "forventet nøyaktig én NO- og én EN-verdi")
+        for tekst in alle:
+            self.assertIn("{enhet}", tekst)
+            for hardkodet in ("(kg)", "(lb)", "(g)", "(oz)"):
+                self.assertNotIn(hardkodet, tekst)
+
+    def test_humle_enhet_noklene_bruker_parameteren_i_no_og_en(self):
+        kilde = _les(_I18N_JS)
+        alle = re.findall(r'"builder\.humle\.gramAriaLabelEnhet":\s*"([^"]*)"', kilde)
+        self.assertEqual(len(alle), 2, "forventet nøyaktig én NO- og én EN-verdi")
+        for tekst in alle:
+            self.assertIn("{enhet}", tekst)
+            for hardkodet in ("(kg)", "(lb)", "(g)", "(oz)"):
+                self.assertNotIn(hardkodet, tekst)
+
+    def test_statisk_base_nokkel_forblir_metrisk_default(self):
+        """Låser designintensjonen: mengdeAriaLabel/gramAriaLabel (uten
+        Enhet-suffiks) må IKKE bli parameterisert -- de brukes fortsatt av
+        applyI18n() (data-i18n-aria-label) og av
+        scripts/generate_web_i18n_pages.py sin statiske pre-render-
+        oversettelse, som aldri kjører {enhet}-substitusjon."""
+        kilde = _les(_I18N_JS)
+        malt = re.findall(r'"builder\.malt\.mengdeAriaLabel":\s*"([^"]*)"', kilde)
+        humle = re.findall(r'"builder\.humle\.gramAriaLabel":\s*"([^"]*)"', kilde)
+        self.assertEqual(malt, ["Maltmengde (kg)", "Malt amount (kg)"])
+        self.assertEqual(humle, ["Humlemengde (g)", "Hop amount (g)"])
+
+
 class TestRadHjelperFaktiskKalt(unittest.TestCase):
     """De to hjelperne over er verdiløse hvis de ikke faktisk kalles fra
     radopprettelse, enhetsbytte og språkbytte."""
