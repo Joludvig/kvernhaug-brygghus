@@ -329,6 +329,68 @@ own issue (e.g. a future round of #146), governed by the same
 `.claude/rules/web.md` requirement that generated pages must come from
 this exact command.
 
+## Bounded Node/Playwright permission pack (V1.5, issue #201)
+
+**The bug this fixes:** issue #200's first Bridge run (workflow run
+`34447715101`) required bounded Playwright browser-gate dependency
+bootstrap and focused verification. The Claude step itself completed
+(`conclusion: success`, 46 turns) but reported
+`permission_denials_count: 2`, and post-run evidence found no open PR
+on `agent/issue-200` and no such branch pushed to the remote at all —
+the same class of dead end V1.2 (issue #12) already fixed once for
+git/gh, just recurring here for Node/npm/Playwright, which
+`--allowedTools` never covered at all: the list before this change only
+granted git, gh, `pip install -r requirements.txt`,
+`python3 -m unittest`, and the exact Web i18n generator invocation
+(V1.4) — no Node/npm/npx command of any kind.
+
+**The fix:** exactly the bounded permission pack issue #201 specifies,
+nine additional `--allowedTools` rules, each scoped as tightly as the
+official permission-rule syntax allows — eight are EXACT (argument-free
+or argument-fixed) matches, and only one is a prefix rule, reserved for
+the one command whose arguments genuinely vary per run:
+
+| Rule | Why |
+|---|---|
+| `Bash(node --version)` | Verify the Node runtime is present before anything else. |
+| `Bash(npm --version)` | Verify npm is present. |
+| `Bash(npm install --save-dev @playwright/test)` | Install the Playwright test package as a dev dependency — exact match, no wildcard, so no other package can be installed through this rule. |
+| `Bash(npm install --ignore-scripts)` | Install project dependencies from `package.json` without running arbitrary install-time scripts. |
+| `Bash(npm ci --ignore-scripts)` | Clean, lockfile-exact install without arbitrary install-time scripts, for a reproducible CI-style bootstrap. |
+| `Bash(npx playwright --version)` | Verify the installed Playwright CLI. |
+| `Bash(npx playwright install chromium firefox)` | Install the two named browser engines — exact match, no wildcard, so no other Playwright subcommand or browser (e.g. `webkit`) is granted through this rule. |
+| `Bash(npx playwright install --with-deps chromium firefox)` | Same install, with OS-level browser dependencies, for a runner that needs them — likewise exact match. |
+| `Bash(npx playwright test *)` | Run Playwright test specs — the one command whose arguments (which spec file, which project/browser) genuinely vary per run, so this is the pack's only prefix rule. |
+
+Every entry in the issue's proposed pack was kept — none was found
+demonstrably unnecessary for #200's bounded scope, so none was omitted.
+
+**Deliberately NOT granted**, for the same defense-in-depth reason as
+every other rule in this document: `Bash(npm *)`, `Bash(npx *)`, a
+generic `Bash(node *)`, any `curl`/`wget`/`sudo` rule, and (unchanged
+from V1.2/V1.3) any `git push` outside the two exact branch-scoped
+commands, `git merge`, `gh pr merge`, or a bare `Bash`/`Bash(*)` rule.
+
+**What this issue does not do:** it grants *permission* only — no
+Playwright/product implementation from #200 is performed here, no
+Web/App/Core product file is touched, and no lifecycle, Draft→Ready,
+deliverable-guard, or Chief-ready mechanism (all documented elsewhere in
+this file) is changed. `--permission-mode acceptEdits`, the two
+branch-scoped exact push rules, the absence of `git merge`/`gh pr
+merge`, and every existing Python/i18n `--allowedTools` entry are all
+unchanged by this addition. Once merged, #200 is re-triggered from a
+fresh `status:ready` round to actually use this pack.
+
+Regression coverage:
+[`tests/test_agent_bridge_permission_config.py`](../../tests/test_agent_bridge_permission_config.py)
+additionally proves: every one of the nine Node/Playwright rules above
+is present exactly once; no broader `npm *`, `npx *`, `node *`, bare
+`Bash`, `curl`, `wget`, or `sudo` permission is introduced; the two
+branch-scoped exact push rules remain the only `git push` grants;
+`git merge`/`gh pr merge` remain absent; `--permission-mode acceptEdits`
+is unchanged; and the existing Python/i18n permissions (V1.2/V1.4) are
+unchanged.
+
 ## Branch naming is deterministic and enforced (Chief review, PR #13)
 
 **The bug this fixes:** the original V1.2 draft granted `Bash(git push

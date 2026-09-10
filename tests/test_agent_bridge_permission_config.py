@@ -1,7 +1,8 @@
 """
-Kvernhaug Agent Bridge V1.3/V1.4 -- regresjonstester for permission-
-modellen på "Run Claude Code"-steget
-(.github/workflows/claude-agent-bridge.yml, issue #15 / issue #154).
+Kvernhaug Agent Bridge V1.3/V1.4/V1.5 -- regresjonstester for
+permission-modellen på "Run Claude Code"-steget
+(.github/workflows/claude-agent-bridge.yml, issue #15 / issue #154 /
+issue #201).
 
 BAKGRUNN (funnet på den første ekte E2E-kjøringen som kom forbi V1.2,
 issue #14): workflow-kjøring 33667544306 trigget korrekt, autentiserte,
@@ -35,6 +36,19 @@ beviste (branch-avgrensede push-regler, fravær av `git merge`/`gh pr
 merge`, `--permission-mode acceptEdits`, fravær av `Write`/`Edit`/
 `MultiEdit`) har endret seg.
 
+V1.5 (issue #201) utvider samme suite igjen: #200s første Bridge-kjøring
+(34447715101) fullførte Claude-steget men rapporterte
+`permission_denials_count: 2` og produserte verken branch eller PR,
+fordi `--allowedTools` aldri inneholdt noen Node/npm/Playwright-kommando
+i det hele tatt. Denne bolken beviser at den eksakte, avgrensede pakken
+issue #201 spesifiserer -- ni regler, åtte eksakte/argument-faste og én
+prefiks-regel avgrenset til `npx playwright test` -- er lagt til
+nøyaktig én gang hver, uten noen bredere `npm *`/`npx *`/`node *`-variant
+og uten `curl`/`wget`/`sudo`, og uten at noe av det V1.2/V1.3/V1.4
+allerede beviste (branch-avgrensede push-regler, fravær av `git merge`/
+`gh pr merge`, `--permission-mode acceptEdits`, fravær av `Write`/
+`Edit`/`MultiEdit`, de eksisterende Python/i18n-reglene) har endret seg.
+
 Kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
 """
 import os
@@ -50,6 +64,18 @@ _FORVENTEDE_PUSH_REGLER = (
 )
 
 _GENERATOR_REGEL = "Bash(python3 scripts/generate_web_i18n_pages.py)"
+
+_NODE_PLAYWRIGHT_REGLER = (
+    "Bash(node --version)",
+    "Bash(npm --version)",
+    "Bash(npm install --save-dev @playwright/test)",
+    "Bash(npm install --ignore-scripts)",
+    "Bash(npm ci --ignore-scripts)",
+    "Bash(npx playwright --version)",
+    "Bash(npx playwright install chromium firefox)",
+    "Bash(npx playwright install --with-deps chromium firefox)",
+    "Bash(npx playwright test *)",
+)
 
 
 def _les_workflow():
@@ -192,6 +218,73 @@ class TestPermissionConfig(unittest.TestCase):
         self.assertIn("--permission-mode acceptEdits", self.steg)
         for verktoysnavn in ("Write", "Edit", "MultiEdit"):
             self.assertNotIn(verktoysnavn, self.verktoy)
+
+    # ─── 7 (V1.5, issue #201): bundet Node/Playwright-pakke ──────────────
+
+    def test_7a_alle_node_playwright_reglene_finnes_eksakt(self):
+        for regel in _NODE_PLAYWRIGHT_REGLER:
+            self.assertIn(
+                regel, self.verktoy,
+                f"Node/Playwright-regelen mangler i --allowedTools (issue #201): {regel!r}",
+            )
+
+    def test_7b_hver_node_playwright_regel_forekommer_noyaktig_en_gang(self):
+        for regel in _NODE_PLAYWRIGHT_REGLER:
+            self.assertEqual(
+                self.verktoy.count(regel), 1,
+                f"Regelen skal forekomme nøyaktig én gang -- ingen duplikater: {regel!r}",
+            )
+
+    def test_7c_ingen_bredere_npm_npx_node_variant_introdusert(self):
+        forbudte = (
+            "Bash(npm *)",
+            "Bash(npx *)",
+            "Bash(node *)",
+            "Bash(npm install *)",
+            "Bash(npx playwright *)",
+            "Bash(npx playwright install *)",
+        )
+        for forbudt in forbudte:
+            self.assertNotIn(
+                forbudt, self.verktoy,
+                f"Bredere Node/npm/Playwright-tilgang enn den bundne pakken skal ikke finnes: {forbudt!r}",
+            )
+
+    def test_7d_ingen_curl_wget_sudo_introdusert(self):
+        for verktoysnavn in self.verktoy:
+            for forbudt_prefiks in ("Bash(curl", "Bash(wget", "Bash(sudo"):
+                self.assertFalse(
+                    verktoysnavn.startswith(forbudt_prefiks),
+                    f"{forbudt_prefiks} skal aldri være tillatt: {verktoysnavn!r}",
+                )
+
+    def test_7e_kun_en_prefiks_regel_i_pakken_resten_er_eksakte(self):
+        # Kun `npx playwright test *` skal ha wildcard -- de åtte andre
+        # er eksakte/argument-faste strenger uten `*`.
+        wildcard_regler = [r for r in _NODE_PLAYWRIGHT_REGLER if r.endswith("*)")]
+        self.assertEqual(wildcard_regler, ["Bash(npx playwright test *)"])
+
+    def test_7f_eksisterende_kontrakt_star_ved_lag_etter_node_playwright_tillegget(self):
+        # Gjentar kravene fra issue #201 (punkt 3, 5, 6) eksplisitt, slik at
+        # en fremtidig lesning av testfilen ser at V1.5-tillegget ikke
+        # svekket noe av det V1.2/V1.3/V1.4 allerede beviste.
+        for regel in _FORVENTEDE_PUSH_REGLER:
+            self.assertIn(regel, self.verktoy)
+        push_regler = [v for v in self.verktoy if v.startswith("Bash(git push")]
+        self.assertEqual(sorted(push_regler), sorted(_FORVENTEDE_PUSH_REGLER))
+        for verktoysnavn in self.verktoy:
+            self.assertFalse(verktoysnavn.startswith("Bash(git merge"))
+            self.assertFalse(verktoysnavn.startswith("Bash(gh pr merge"))
+        self.assertIn("--permission-mode acceptEdits", self.steg)
+        for verktoysnavn in ("Write", "Edit", "MultiEdit"):
+            self.assertNotIn(verktoysnavn, self.verktoy)
+        self.assertIn(_GENERATOR_REGEL, self.verktoy)
+        self.assertEqual(self.verktoy.count(_GENERATOR_REGEL), 1)
+        python3_regler = [v for v in self.verktoy if "python3" in v]
+        self.assertEqual(
+            sorted(python3_regler),
+            sorted(["Bash(python3 -m unittest *)", _GENERATOR_REGEL]),
+        )
 
 
 if __name__ == "__main__":
