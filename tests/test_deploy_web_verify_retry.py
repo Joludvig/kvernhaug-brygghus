@@ -239,8 +239,17 @@ class TestSourceWiring(unittest.TestCase):
         self.assertNotIn("$forstePass | Where-Object", section)
 
     def test_mismatch_logging_includes_expected_and_received_checksum(self):
-        """Requirement 1: file path, expected checksum, received checksum."""
-        section = self._verify_section()
+        """Requirement 1: file path, expected checksum, received checksum.
+
+        Scoped from the "# --- 6. Produksjonsverifisering" section header
+        rather than _verify_section() -- Write-VerifiseringsResultatLinje
+        (which echoes $Resultat.localHash/$Resultat.remoteHash) is now a
+        SHARED helper used by both the normal HTTPS verification path and
+        the owner-gate FTPS verification path (issue #213, Chief review, PR
+        #216, runde 5), so it is defined before _verify_section()'s own
+        anchor (the normal path's own "FAKTISK INNHOLD" header)."""
+        section_start = self.text.index("# ─── 6. Produksjonsverifisering")
+        section = self.text[section_start:]
         self.assertIn("forventet sjekksum (lokal kilde)", section)
         self.assertIn("mottatt sjekksum (produksjon)", section)
         self.assertIn("$Resultat.localHash", section)
