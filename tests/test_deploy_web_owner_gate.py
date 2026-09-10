@@ -1,6 +1,18 @@
 """
 scripts/deploy_web.ps1 -- regresjonstester for owner-gate testmodus
-(-OwnerGateTestSha), issue #213 (Chief review, PR #216, owner-gate blocker).
+(-OwnerGateTestSha/-OwnerGateTestBranch), issue #213 (Chief review, PR #216,
+owner-gate blocker).
+
+RUNDE 4 (Chief review): den forrige versjonen utledet origin-branch-navnet
+via `git rev-parse --abbrev-ref HEAD`, som returnerer den literale strengen
+"HEAD" fra en frikoblet (detached HEAD) checkout -- akkurat den tilstanden
+owner-gate-testing typisk kjøres fra, siden -OwnerGateTestSha binder testen
+til en eksakt commit. `origin/HEAD` resolver deretter til origin-repoets
+STANDARD-branch (master), ikke PR-branchen, så guarden sammenlignet stille
+master mot PR-SHA-en og feilet-lukket selv når PR-branchen faktisk var
+oppdatert. Fikset ved å fjerne branch-utledningen helt: -OwnerGateTestBranch
+er nå et obligatorisk, eksplisitt parameter som aldri avhenger av lokal
+branch-tilstand.
 
 BAKGRUNN: den ekte Windows/Domeneshop-FTPS bolk-/retry-implementasjonen
 (issue #213) kunne ikke owner-PC-verifiseres FØR merge, fordi den
@@ -205,6 +217,7 @@ class TestSourceWiring(unittest.TestCase):
             "function Test-OwnerGateForutsetninger",
             "function Test-OwnerGateMaalErTrygt",
             "[string]$OwnerGateTestSha,",
+            "[string]$OwnerGateTestBranch,",
             "[switch]$OwnerGateAllowProductionTarget",
         ):
             self.assertEqual(self.text.count(needle), 1, f"{needle!r} skal finnes nøyaktig én gang.")
@@ -254,13 +267,33 @@ class TestSourceWiring(unittest.TestCase):
     def test_owner_gate_uses_full_sha_regex(self):
         self.assertIn(r"'^[0-9a-fA-F]{40}$'", self.text)
 
-    def test_owner_gate_fresh_check_uses_current_branch_not_hardcoded_issue_branch(self):
-        """The origin-branch binding must be derived from the actual current
-        checkout's branch name (git rev-parse --abbrev-ref HEAD), not a
-        hardcoded 'agent/issue-213' literal -- this owner-gate mechanism is
-        reusable by any future PR branch, not single-issue-scoped."""
-        self.assertIn('(& git rev-parse --abbrev-ref HEAD).Trim()', self.text)
-        self.assertNotIn('"agent/issue-213"', self.text)
+    def test_owner_gate_branch_is_explicit_param_not_derived_from_checkout(self):
+        """Chief review (PR #216, round 4): deriving the origin-branch name
+        via `git rev-parse --abbrev-ref HEAD` breaks for exactly the
+        checkout state owner-gate testing is meant for -- a detached HEAD
+        pinned to the exact PR SHA -- because that call returns the literal
+        string "HEAD", and `origin/HEAD` then resolves to origin's default
+        branch (master), not the PR branch. The fix removes that derivation
+        entirely in favor of a mandatory, explicit -OwnerGateTestBranch
+        parameter that never depends on local branch state."""
+        self.assertNotIn('(& git rev-parse --abbrev-ref HEAD)', self.text)
+        self.assertIn('[string]$OwnerGateTestBranch,', self.text)
+        self.assertIn('$localBranch = $OwnerGateTestBranch', self.text)
+
+    def test_owner_gate_branch_param_required_when_sha_given(self):
+        """A bare -OwnerGateTestSha without -OwnerGateTestBranch must fail
+        closed before any git call -- this is the mandatory pairing that
+        replaces branch inference (Chief review, PR #216, round 4)."""
+        idx_owner_gate_if = self.text.index("if ($isOwnerGateTest) {")
+        idx_target_check = self.text.index("Test-OwnerGateMaalErTrygt -RemoteRoot $RemoteRoot")
+        section = self.text[idx_owner_gate_if:idx_target_check]
+        self.assertIn("[string]::IsNullOrWhiteSpace($OwnerGateTestBranch)", section)
+        self.assertIn("exit 1", section)
+
+    def test_owner_gate_branch_check_runs_before_any_git_call(self):
+        idx_branch_check = self.text.index("[string]::IsNullOrWhiteSpace($OwnerGateTestBranch)")
+        idx_first_git_call = self.text.index("Get-Command git.exe")
+        self.assertLess(idx_branch_check, idx_first_git_call, "Branch-param-sjekken skal kjøre FØR noe git-kall gjøres.")
 
     def test_owner_gate_skips_fetch_under_dryrun(self):
         idx_owner_gate = self.text.index("if ($isOwnerGateTest) {")
@@ -276,6 +309,7 @@ class TestSourceWiring(unittest.TestCase):
     def test_docs_mention_owner_gate(self):
         self.assertIn("OWNER-GATE TESTMODUS", self.text)
         self.assertIn(".PARAMETER OwnerGateTestSha", self.text)
+        self.assertIn(".PARAMETER OwnerGateTestBranch", self.text)
         self.assertIn(".PARAMETER OwnerGateAllowProductionTarget", self.text)
 
 

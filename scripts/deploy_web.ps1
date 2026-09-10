@@ -85,14 +85,31 @@
   denne typen endring trenger å se bevist på ekte Windows/Domeneshop-FTPS.
   -OwnerGateTestSha <40-tegns SHA> åpner en SNEVER, eksplisitt unntaksvei:
   i stedet for HEAD == origin/master krever den at HEAD er NØYAKTIG den
-  oppgitte SHA-en, OG (utenfor -DryRun) at origin/<gjeldende branch> --
-  hentet FERSK -- også er nøyaktig den samme SHA-en, slik at testkjøringen
-  er bundet til akkurat den PR-branchens faktiske, pushede head og ikke en
-  lokal commit som aldri ble reviewet. Enhver avvik (feil/manglende SHA,
-  ufullstendig format, lokal HEAD som ikke matcher, eller origin-branchen
+  oppgitte SHA-en, OG (utenfor -DryRun) at origin/<eksplisitt oppgitt
+  -OwnerGateTestBranch> -- hentet FERSK -- også er nøyaktig den samme
+  SHA-en, slik at testkjøringen er bundet til akkurat den PR-branchens
+  faktiske, pushede head og ikke en lokal commit som aldri ble reviewet.
+  Enhver avvik (feil/manglende SHA, ufullstendig format, manglende
+  -OwnerGateTestBranch, lokal HEAD som ikke matcher, eller origin-branchen
   som ikke matcher) stopper deployen umiddelbart -- fail-closed, ikke
   best-effort. Normal deploy (uten -OwnerGateTestSha) er HELT uendret og
   bruker fortsatt kun HEAD == origin/master.
+
+  -OwnerGateTestBranch må oppgis EKSPLISITT (aldri utledet fra checkouten)
+  fordi owner-gate-testen per konstruksjon kjøres fra en FRIKOBLET
+  (detached HEAD) checkout/worktree på nøyaktig PR-branchens head-SHA --
+  det er selve poenget, siden -OwnerGateTestSha binder testen til en
+  eksakt commit, ikke en branch-tilstand. En frikoblet HEAD har ikke noe
+  branch-navn: `git rev-parse --abbrev-ref HEAD` returnerer da bokstavelig
+  strengen "HEAD", og `origin/HEAD` er git sin symbolske peker til
+  origin-repoets STANDARD-branch (dvs. master), ikke PR-branchen -- en
+  tidligere versjon av denne testmodusen utledet branch-navnet nettopp
+  slik, og sammenlignet derfor stille master mot PR-SHA-en i stedet for
+  PR-branchen selv, noe som fikk owner-gate-testen til å feile-lukket mot
+  feil ref også når PR-branchen faktisk var oppdatert (Chief review, PR
+  #216, runde 4). Med et eksplisitt -OwnerGateTestBranch-parameter gjøres
+  aldri noe `--abbrev-ref`-kall i owner-gate-grenen -- checkoutens
+  faktiske branch-tilstand (frikoblet eller ikke) er dermed irrelevant.
 
   Owner-gate-testmodus nekter i tillegg å target normal produksjon (/www,
   standardverdien for -RemoteRoot) uten et eksplisitt -OwnerGateAllowProductionTarget
@@ -131,8 +148,18 @@
 .PARAMETER OwnerGateTestSha
   Aktiverer owner-gate testmodus (se .DESCRIPTION). Må være den fulle
   40-tegns commit-SHA-en til PR-branchens eksakte head som skal testes.
-  Utelatt (standard): scriptet oppfører seg helt som før, og krever
-  HEAD == origin/master.
+  Krever -OwnerGateTestBranch (se under). Utelatt (standard): scriptet
+  oppfører seg helt som før, og krever HEAD == origin/master.
+
+.PARAMETER OwnerGateTestBranch
+  Kun relevant sammen med -OwnerGateTestSha -- MÅ oppgis eksplisitt når
+  -OwnerGateTestSha er satt (fail-closed, ingen standardverdi/utledning).
+  Det eksakte remote-branch-navnet (f.eks. "agent/issue-213") som
+  -OwnerGateTestSha hentes fra og verifiseres FERSK mot etter
+  `git fetch`. Utledes ALDRI fra checkoutens lokale branch-tilstand --
+  owner-gate-testen kjøres typisk fra en frikoblet (detached HEAD)
+  checkout/worktree, der det ikke finnes noe lokalt branch-navn å utlede
+  (se .DESCRIPTION).
 
 .PARAMETER OwnerGateAllowProductionTarget
   Kun relevant sammen med -OwnerGateTestSha. Bekrefter eksplisitt at
@@ -149,10 +176,12 @@
 .EXAMPLE
   # Owner-gate (issue #213): kjør den ekte bolk-/retry-implementasjonen mot
   # en isolert test-sti FØR merge, bundet til PR-branchens eksakte, pushede
-  # head -- normal produksjon (/www) røres ikke.
+  # head -- normal produksjon (/www) røres ikke. -OwnerGateTestBranch må
+  # oppgis eksplisitt (fungerer også fra en frikoblet/detached-HEAD
+  # test-worktree, se .DESCRIPTION).
   git fetch origin agent/issue-213
   $prHead = (git rev-parse origin/agent/issue-213).Trim()
-  .\scripts\deploy_web.ps1 -OwnerGateTestSha $prHead -RemoteRoot "/www-owner-gate-test"
+  .\scripts\deploy_web.ps1 -OwnerGateTestSha $prHead -OwnerGateTestBranch "agent/issue-213" -RemoteRoot "/www-owner-gate-test"
 #>
 
 [CmdletBinding()]
@@ -163,6 +192,7 @@ param(
     [string]$FtpHost = "ftp.domeneshop.no",
     [string]$RemoteRoot = "/www",
     [string]$OwnerGateTestSha,
+    [string]$OwnerGateTestBranch,
     [switch]$OwnerGateAllowProductionTarget
 )
 
@@ -469,6 +499,16 @@ if (-not (Test-Path (Join-Path $WebRoot "index.html"))) {
 # -OwnerGateTestSha ikke er oppgitt (normal deploy, helt uendret).
 $isOwnerGateTest = -not [string]::IsNullOrWhiteSpace($OwnerGateTestSha)
 if ($isOwnerGateTest) {
+    if ([string]::IsNullOrWhiteSpace($OwnerGateTestBranch)) {
+        Write-Host ""
+        Write-Host "STOPPER: -OwnerGateTestBranch må oppgis eksplisitt sammen med -OwnerGateTestSha."
+        Write-Host "  Branchen kan ALDRI utledes fra checkouten selv -- owner-gate-testen kjøres"
+        Write-Host "  typisk fra en frikoblet (detached HEAD) test-worktree, der det ikke finnes"
+        Write-Host "  noe lokalt branch-navn å lese (se .DESCRIPTION)."
+        Write-Host ""
+        Write-Error "Ingen filer ble lastet opp -- -OwnerGateTestBranch mangler."
+        exit 1
+    }
     $maalSjekk = Test-OwnerGateMaalErTrygt -RemoteRoot $RemoteRoot -StandardRemoteRoot "/www" -AllowProductionTarget ([bool]$OwnerGateAllowProductionTarget)
     if (-not $maalSjekk.ok) {
         Write-Host ""
@@ -495,7 +535,18 @@ if (-not $gitCmd) {
 Push-Location $RepoRoot
 try {
     if ($isOwnerGateTest) {
-        $localBranch = (& git rev-parse --abbrev-ref HEAD).Trim()
+        # $OwnerGateTestBranch (eksplisitt parameter, validert over) -- ALDRI
+        # utledet via `git rev-parse --abbrev-ref HEAD`. En tidligere versjon
+        # gjorde nettopp det, som returnerer den literale strengen "HEAD" fra
+        # en frikoblet (detached) checkout -- akkurat den tilstanden
+        # owner-gate-testen typisk kjøres fra, siden -OwnerGateTestSha binder
+        # testen til en eksakt commit, ikke en branch. `origin/HEAD` er
+        # deretter git sin symbolske peker til origin-repoets STANDARD-branch
+        # (master) -- ikke PR-branchen -- så guarden sammenlignet stille
+        # master mot PR-SHA-en i stedet for PR-branchens faktiske head
+        # (Chief review, PR #216, runde 4). Et rent strengparameter har ingen
+        # slik avhengighet av lokal branch-tilstand.
+        $localBranch = $OwnerGateTestBranch
         $localHead = (& git rev-parse HEAD).Trim()
         $originBranchRefKjentFersk = $false
         $originBranchRef = $null
