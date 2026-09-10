@@ -405,6 +405,22 @@ jobs:
       # -- no wildcard after the script path, so it grants nothing beyond
       # that one literal invocation. See AGENT_WORKFLOW.md → "Canonical
       # Web i18n generator permission (V1.4, issue #154)".
+      #
+      # V1.5 (issue #201): #200's Bridge run (34447715101) finished the
+      # Claude step successfully after 46 turns but reported
+      # `permission_denials_count: 2`, and no branch/PR was ever produced
+      # on `agent/issue-200` -- because #200's bounded Playwright
+      # browser-gate work needs Node/npm/Playwright commands that were
+      # simply never in `--allowedTools` at all (this list previously
+      # only covered git/gh/pip/unittest/the Web i18n generator). Fixed by
+      # nine additional bounded rules -- eight EXACT (argument-free or
+      # argument-fixed) rules plus one prefix rule scoped to
+      # `npx playwright test`, the one command whose arguments genuinely
+      # vary per run (which spec file, which project) -- covering
+      # dependency bootstrap and focused verification only. Deliberately
+      # NOT granted: `Bash(npm *)`, `Bash(npx *)`, generic `Bash(node *)`,
+      # or any `curl`/`wget`/`sudo` rule. See AGENT_WORKFLOW.md → "Bounded
+      # Node/Playwright permission pack (V1.5, issue #201)".
       - name: Run Claude Code
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: claude
@@ -416,7 +432,7 @@ jobs:
             workflows: write
           base_branch: master
           claude_args: |
-            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *),Bash(python3 scripts/generate_web_i18n_pages.py)"
+            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *),Bash(python3 scripts/generate_web_i18n_pages.py),Bash(node --version),Bash(npm --version),Bash(npm install --save-dev @playwright/test),Bash(npm install --ignore-scripts),Bash(npm ci --ignore-scripts),Bash(npx playwright --version),Bash(npx playwright install chromium firefox),Bash(npx playwright install --with-deps chromium firefox),Bash(npx playwright test *)"
             --permission-mode acceptEdits
           prompt: |
             You are running as the automated Claude side of the Kvernhaug
