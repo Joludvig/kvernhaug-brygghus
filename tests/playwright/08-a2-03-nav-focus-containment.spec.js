@@ -15,19 +15,20 @@
 // Also covers the Chief-review-requested safe-fallback case (contract
 // acceptance matrix M15/M16, issue #209 acceptance 6): a control inside
 // .kompaktnav that holds focus when it becomes inert (scrolling back above
-// .hero's threshold) relies on the browser's native inert
-// focus-fixup-to-<body> rule -- verified empirically below, across all four
-// Chromium/Firefox x desktop/mobile projects. Note: the contract's §3.1
-// illustrative claim that the *following* Tab press then lands specifically
-// on #meny-knapp-hero does NOT hold under empirical test in any of the four
-// projects -- the browser's sequential focus-navigation position is
-// retained past .kompaktnav's old position in DOM order, so Tab instead
-// resumes just after it (landing on the first non-inert control in main
-// content, not back at the top of the page). That is not itself a defect:
-// the issue's actual acceptance bar (6) is "focus is moved to the
-// documented safe fallback; no focus remains inside inert content" -- both
-// hold -- so this spec asserts exactly that, not the contract's unverified
-// illustrative landing spot.
+// .hero's threshold) must not merely fall back to the browser's native
+// inert focus-fixup-to-<body> rule -- an earlier round of this PR found,
+// empirically, across all four Chromium/Firefox x desktop/mobile projects,
+// that the *following* Tab press then does NOT land on #meny-knapp-hero as
+// the contract's §3.1 illustration describes: the browser's sequential
+// focus-navigation position is retained past .kompaktnav's old position in
+// DOM order, landing Tab on an arbitrary control in main content instead.
+// Per Chief review, that is a genuine M15 violation, not an acceptable
+// alternative reading of acceptance 6 -- `oppdater()` (web/js/chrome.js)
+// now explicitly retargets focus to #meny-knapp-hero (the page's skip-link,
+// were one to precede it -- none exists yet in this codebase) the moment it
+// detects the focused control is inside .kompaktnav and about to become
+// inert, rather than relying on native fixup plus the next Tab press. This
+// spec asserts that concrete, contract-mandated landing spot.
 const { test, expect } = require('@playwright/test');
 const { localePath, collectErrors, dismissModeDialog } = require('./helpers');
 
@@ -177,7 +178,7 @@ test('Escape and backdrop click both close the drawer and restore focus to the e
 });
 
 for (const locale of ['no', 'en']) {
-  test(`a focused kompaktnav control that becomes inert on scroll-back lands focus on <body>, and the next Tab does not strand it in inert content [${locale}]`, async ({ page }) => {
+  test(`a focused kompaktnav control that becomes inert on scroll-back is explicitly refocused to #meny-knapp-hero (M15/M16) [${locale}]`, async ({ page }) => {
     const errors = collectErrors(page);
     await page.goto(localePath(locale, '/index.html'));
     await dismissModeDialog(page);
@@ -189,25 +190,28 @@ for (const locale of ['no', 'en']) {
     // Scroll back above the threshold WITHOUT moving focus away first --
     // .kompaktnav becomes inert while it still contains the focused
     // element (contract §3.1 "Where focus lands..." / acceptance matrix
-    // M15). Native inert focus-fixup moves focus to <body>; chrome.js adds
-    // no special-case code for this, it relies on the HTML Standard.
+    // M15). chrome.js's oppdater() now explicitly detects this and moves
+    // focus straight to #meny-knapp-hero (no preceding skip-link exists in
+    // this codebase) rather than leaving the browser's native
+    // inert-focus-fixup-to-<body> as the last word -- see the file-header
+    // note on why relying on fixup + the next Tab press was not sufficient.
     await scrollBackToTop(page);
-    await expect.poll(() => page.evaluate(() => document.activeElement === document.body)).toBe(true);
+    await expect(page.locator('#meny-knapp-hero')).toBeFocused();
 
-    // The next Tab press must not leave focus stranded on <body> or land it
-    // back inside now-inert nav content (.kompaktnav/.sidemeny/backdrop are
-    // all inert while closed) -- see file-header note on why this doesn't
-    // assert the contract's specific "#meny-knapp-hero" illustration.
+    // Focus must never remain inside now-inert nav content either.
+    const erInertOmraade = await page.evaluate(
+      () => document.activeElement.closest('.kompaktnav, #sidemeny, .sidemeny-bakteppe') !== null
+    );
+    expect(erInertOmraade).toBe(false);
+
+    // The next Tab press then moves forward from that sensible start-of-page
+    // position, not from an arbitrary retained mid-page position.
     await page.keyboard.press('Tab');
-    const naesteFokus = await page.evaluate(() => {
-      const el = document.activeElement;
-      return {
-        erBody: el === document.body,
-        erInertOmraade: el.closest('.kompaktnav, #sidemeny, .sidemeny-bakteppe') !== null,
-      };
-    });
-    expect(naesteFokus.erBody).toBe(false);
-    expect(naesteFokus.erInertOmraade).toBe(false);
+    expect(await isFocused(page, '#meny-knapp-hero')).toBe(false);
+    const naesteErInertOmraade = await page.evaluate(
+      () => document.activeElement.closest('.kompaktnav, #sidemeny, .sidemeny-bakteppe') !== null
+    );
+    expect(naesteErInertOmraade).toBe(false);
 
     expect(errors).toEqual([]);
   });

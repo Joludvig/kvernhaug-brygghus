@@ -16,8 +16,24 @@
     function oppdater() {
       var terskel = hero.offsetHeight - kompaktnav.offsetHeight;
       var synlig = window.scrollY > terskel;
+      // Chief review (issue #209) -- the ratified A2-03 contract (§3.1,
+      // akseptansematrise M15/M16) krever at fokus, når .kompaktnav blir
+      // inert mens den fortsatt inneholder det aktive elementet, ender opp
+      // på sidens første fokuserbare kontroll (en skip-lenke om siden har
+      // en, ellers #meny-knapp-hero) -- ikke et vilkårlig midtsidepunkt.
+      // Native inert-fikseringsregel flytter først fokus til <body>; det
+      // alene oppfyller ikke kontraktens "neste Tab"-krav, så vi må selv
+      // sette fokus eksplisitt til det trygge målet i samme steg.
+      var blirInert = !synlig && kompaktnav.classList.contains("synlig");
+      var holderFokus = blirInert && kompaktnav.contains(document.activeElement);
       kompaktnav.classList.toggle("synlig", synlig);
       kompaktnav.inert = !synlig;
+      if (holderFokus) {
+        var trygtMal =
+          document.querySelector(".hopp-til-innhold") ||
+          document.getElementById("meny-knapp-hero");
+        if (trygtMal) trygtMal.focus();
+      }
       document.documentElement.style.setProperty(
         "--kompaktnav-h",
         (synlig ? kompaktnav.offsetHeight : 0) + "px"
