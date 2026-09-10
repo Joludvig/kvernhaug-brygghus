@@ -1568,12 +1568,34 @@ function lagreTilstandForOppskrift(oppskrift) {
   return _erOppskriftLikLagret(oppskrift, lagret) ? "lagret" : "endret";
 }
 
+// Astra Audit #2, A2-04 (issue #192, residual fra W3/#106) -- badgen over
+// oppdateres allerede LIVE (denne funksjonen kjøres på HVER beregning), men
+// den enkeltstående kvitteringslinjen under lagre-knappene ("Lagret ..."/
+// "Lagret som variant ...", satt ÉN gang av lagreOppskrift()/
+// lagreSomVariant()) ble aldri i seg selv fjernet igjen -- den sto ordrett
+// selv etter at brukeren fortsatte å redigere og badgen allerede hadde
+// skiftet til "Endret siden lagring". Sporer derfor NØYAKTIG hvilken
+// _aktivRecipeId + tekst den siste "lagret"-kvitteringen gjaldt for, slik at
+// _oppdaterLagreTilstandUI() kan blanke den ut igjen så snart kladden ikke
+// lenger er bevist lik den lagrede raden -- uten å røre noen ANNEN
+// statusmelding (feilmelding, "Ny oppskrift", "Åpnet fil", ...), siden den
+// kun blankes når den synlige teksten fortsatt er ORDRETT den samme
+// kvitteringen som ble satt.
+let _lagreStatusKvittering = null;
+
 function _oppdaterLagreTilstandUI(oppskrift) {
   const tilstand = lagreTilstandForOppskrift(oppskrift);
   const badge = document.getElementById("identitet-lagretilstand");
   if (badge) {
     badge.textContent = t("identitet.lagretilstand." + tilstand);
     badge.className = "identitet-lagretilstand identitet-lagretilstand-" + tilstand;
+  }
+  if (tilstand !== "lagret" && _lagreStatusKvittering && _lagreStatusKvittering.recipeId === _aktivRecipeId) {
+    const status = document.getElementById("lagre-status");
+    if (status && status.textContent === _lagreStatusKvittering.tekst) {
+      status.textContent = "";
+    }
+    _lagreStatusKvittering = null;
   }
   // "Lagre som variant" gir bare mening når det finnes en original lagret
   // identitet å avgrene fra -- en fersk kladd har ingenting å lage en
@@ -1617,6 +1639,7 @@ function lagreOppskrift() {
   beregnOgVisResultat(); // skriver kladden på nytt, nå med recipeId
   visForrigeErfaring();
   status.textContent = t("oppskrift.lagretStatus", { navn: visningsnavn(oppskrift.navn) });
+  _lagreStatusKvittering = { recipeId: _aktivRecipeId, tekst: status.textContent };
 }
 
 // Chief-review-fiks (PR #107) -- det faste forslaget "{navn} (kopi)" er
@@ -1667,6 +1690,7 @@ function lagreSomVariant() {
   beregnOgVisResultat();
   visForrigeErfaring();
   status.textContent = t("oppskrift.lagretVariantStatus", { navn: visningsnavn(oppskrift.navn) });
+  _lagreStatusKvittering = { recipeId: _aktivRecipeId, tekst: status.textContent };
 }
 
 // Gjenoppretter en oppskrift (fra aktiv kladd, en lagret oppskrift, eller en
