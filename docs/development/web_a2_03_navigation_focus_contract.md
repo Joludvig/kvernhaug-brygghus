@@ -10,7 +10,11 @@ See [../../CLAUDE.md](../../CLAUDE.md) for the wider document system.*
 by this issue.** Every file/line/selector reference below was re-verified
 directly against current `master` (`web/index.html`, `web/css/style.css`,
 `web/js/chrome.js`, `web/js/app.js`) at the time of writing, not carried over
-unverified from either source document.
+unverified from either source document. **Re-verified a second time** after
+PR #195 (Astra A2-01, `web/js/app.js`/`web/js/i18n.js`) merged to `master`
+mid-review — only the §2.5 `web/js/app.js` line range shifted (see below);
+`web/js/chrome.js`, `web/css/style.css`, and `web/index.html` were unaffected
+by that merge.
 
 ---
 
@@ -242,8 +246,10 @@ keyboard-trap *pattern*, see §3.2.)
 
 ### 2.5 Existing reusable trap pattern in this codebase
 
-`web/js/app.js:348-390` (B06 batch 7, PR merged as `a96ebac`) already
-implements a bounded, wrap-around Tab/Shift+Tab trap plus Escape for
+`web/js/app.js:371-393` (B06 batch 7, PR merged as `a96ebac`; line range
+shifted from the original `348-390` after PR #195/`0fd99ea` inserted 23
+unrelated lines earlier in the file — re-verified against current `master`)
+already implements a bounded, wrap-around Tab/Shift+Tab trap plus Escape for
 `#modus-forstegang`:
 
 ```js
@@ -293,10 +299,14 @@ equivalent single-page limitation to design around.
 
 ## 3. Recommended smallest coherent contract
 
-Two independent, additive fixes, both confined to `web/js/chrome.js` (plus
-the two CSS rules noted), reusing existing project mechanisms — no new
-dependency, no build step, no new ARIA role, no change to `.kbhrecipe`/
-localStorage/i18n surfaces.
+Two independent, additive fixes. **Both are confined entirely to
+`web/js/chrome.js` — no other file under `web/**` is touched.** The CSS
+blocks quoted in §2.1/§2.2 above are existing-state evidence only (how
+`.kompaktnav`/`.sidemeny` are hidden today); neither fix below proposes any
+CSS edit — `inert` (§3.1) is a boolean attribute/IDL property set from JS,
+and the Tab trap (§3.2) is a pure JS keydown listener. Both reuse existing
+project mechanisms — no new dependency, no build step, no new ARIA role, no
+change to `.kbhrecipe`/localStorage/i18n surfaces.
 
 ### 3.1 Fix A2-03 half 1 — `inert` on the closed navigation surfaces
 
@@ -353,6 +363,46 @@ behavior for that user, it does not newly break anything. This contract
 treats that as sufficient justification to add `inert` with no fallback,
 but flags it explicitly as a call for whoever opens the implementation
 issue to confirm, not a silent assumption.
+
+**Where focus lands when `.kompaktnav` becomes inert while it holds focus
+(Chief review requirement — the scroll-back-above-hero case):** the scenario
+is: user Tabs to `#meny-knapp-kompakt` (or a `.sprak-knapp` inside
+`.kompaktnav`) while `.kompaktnav.synlig` is active, then scrolls back above
+`.hero`'s threshold *without* first moving focus away — `oppdater()`
+(`web/js/chrome.js:16-24`, called on every `scroll` event) then sets
+`kompaktnav.inert = true` on an ancestor that, at that exact moment, still
+contains the focused element. This is **not** a new failure mode this
+contract introduces — it is native, spec-defined `inert` behavior, not
+something `chrome.js` needs to implement: per the HTML Standard's inert
+focus-fixup rule, the moment an element containing the currently focused
+area becomes inert, the user agent immediately moves focus to the
+`<body>` element (the same fixup already used, uneventfully, whenever a
+focused element is removed from the DOM or hidden via `display:none` —
+an existing, unremarkable browser convention, not a pattern this contract
+invents). Concretely and testably:
+
+- Focus leaves `#meny-knapp-kompakt`/the `.sprak-knapp` link and lands on
+  `<body>` — no exception, no focus trap, no focus ring left rendered on an
+  now off-screen/inert control.
+- The *next* Tab press begins from the very first focusable control in that
+  page's DOM order — on every page in scope (§2), that is `.hero`'s own
+  `#meny-knapp-hero` (or the page's skip-link, if one precedes it), **not**
+  a jump into arbitrary mid-page content — i.e. this is a return to a
+  sensible, predictable start-of-page position, not the kind of orientation
+  loss (landing on an unrelated mid-page control) the review is concerned
+  about.
+- No additional `chrome.js` code is proposed to intercept or override this
+  — the spec-mandated fixup already produces the "sensible landing spot"
+  outcome above without it, keeping the fix in §3.1 exactly as described
+  (two lines per surface, no extra branching for a focused-at-toggle-time
+  special case).
+
+This is still flagged as an explicit cross-engine check for the manual
+verification sweep (§5, M15) rather than a silent assumption, exactly like
+the browser-support note above: `inert`'s focus-fixup-to-`<body>` step is
+part of the HTML Standard (not experimental/vendor-specific), but has not
+been independently re-verified byte-for-byte across this project's
+Chromium+Firefox target matrix as part of this docs-only brief.
 
 ### 3.2 Fix A2-03 half 2 / #186 OPTION A — bounded Tab/Shift+Tab trap for the open drawer
 
@@ -455,6 +505,8 @@ dimensions #186 already used for its half of this measurement.
 | M12 | Repeat M1-M10 in both NO and EN | Identical outcomes both languages; 0 raw i18n keys (none introduced) |
 | M13 | Inspect `.kompaktnav`/`.sidemeny`/`.sidemeny-bakteppe` in DevTools across all states above | No `role="dialog"`/`aria-modal` present at any point (confirms §4's non-goal held) |
 | M14 | Full scenario set M1-M13 | 0 console/page errors, both Chromium and Firefox |
+| M15 | Scroll past `.hero` so `.kompaktnav.synlig` is active; Tab forward to focus `#meny-knapp-kompakt` (or a `.sprak-knapp` inside `.kompaktnav`); **without moving focus away**, scroll back above the threshold so `.kompaktnav` becomes hidden/`inert` again | Focus is removed from the now-inert control and lands on `<body>` (native `inert` focus-fixup, §3.1); the *next* Tab press begins from the page's first focusable control (`#meny-knapp-hero` or a preceding skip-link) — not an arbitrary mid-page control, and not a stuck/trapped focus ring on the invisible `.kompaktnav` |
+| M16 | Repeat M15 on mobile viewport and in both NO/EN | Identical outcome to M15 — the fixup is engine-level, not viewport/language-dependent |
 
 ## 6. Unresolved questions for whoever opens the implementation issue
 
