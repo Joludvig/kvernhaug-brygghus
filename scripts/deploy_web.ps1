@@ -141,6 +141,25 @@
   normal produksjon. Normal deploy (uten -OwnerGateTestSha) er HELT
   uendret og bruker fortsatt utelukkende HTTPS mot $BaseUrl.
 
+  KONFIG-LEVETID OG MODUSBEVISSTE MELDINGER (issue #213, Chief-krav, runde
+  6): to gjenstående hull i owner-gate-verifiseringen over. (1)
+  $curlConfigPath (credentials-configen fra steg 5) slettes i finally
+  UMIDDELBART etter steg 5 -- FØR steg 6 i det hele tatt starter. Retry-
+  passet i steg 6 (enkeltfil, ved ethvert avvik/ikke-verifiserbar fil i
+  første FTPS-pass) pekte derfor deterministisk på en allerede slettet
+  fil og kunne aldri lykkes. Steg 6 bygger derfor nå sin EGEN, ferske
+  credentials-config ($ownerGateVerifyCurlConfigPath, fra samme
+  in-memory $configContent-streng steg 5 selv brukte) FØR
+  verifiseringen starter, og sletter den i sin egen finally -- uavhengig
+  av $curlConfigPath sin egen levetid. (2) AVVIK-/KAN-IKKE-VERIFISERE-/
+  OK-meldingene etter verifiseringen var hardkodet til "produksjon" i
+  BEGGE moduser -- en vellykket sjekk av det isolerte owner-gate-
+  testmålet kunne dermed leses som et bevis om normal produksjon, noe
+  det aldri er. $verifiseringsMaalLabel/$verifiseringsProtokollLabel
+  beregnes nå ÉN gang (owner-gate: eksplisitt $FtpHost$RemoteRoot +
+  "FTPS"; normal: "produksjon" + "HTTPS", uendret ordlyd) og gjenbrukes
+  av både per-fil-loggingen og sluttoppsummeringen.
+
   Eksakt owner-PC-kommando for gaten (se .EXAMPLE under for full syntaks):
   fetch branchen, les dens faktiske head-SHA, og kjør scriptet med akkurat
   den SHA-en pluss en isolert -RemoteRoot.
@@ -1217,8 +1236,28 @@ else {
 # BEGGE grenene under (HTTPS-mot-produksjon og FTPS-mot-owner-gate-mål).
 $RetryPauseSekunder = 5
 
+# Ren tekstetikett (issue #213, Chief review, PR #216, runde 6) -- hvilket
+# mål verifiseringsmeldingene under faktisk beskriver. Uten denne var
+# AVVIK-/KAN-IKKE-VERIFISERE-/OK-meldingene hardkodet til "produksjon" selv
+# i owner-gate testmodus -- en vellykket sjekk av det isolerte
+# owner-gate-testmålet kunne dermed leses som et bevis om normal
+# produksjon, noe det aldri er (owner-gate-modus skriver kun til
+# $RemoteRoot, aldri til $BaseUrl). Beregnes ÉN gang her og gjenbrukes av
+# BÅDE Write-VerifiseringsResultatLinje og sluttoppsummeringen lenger ned,
+# slik at de to aldri kan komme i utakt med hverandre. Normal deploy (uten
+# -OwnerGateTestSha) er uendret -- fortsatt "produksjon"/"HTTPS" i alle
+# meldinger, akkurat som før denne endringen.
+if ($isOwnerGateTest) {
+    $verifiseringsMaalLabel = "det ISOLERTE owner-gate-testmålet ($FtpHost$RemoteRoot) -- IKKE produksjon"
+    $verifiseringsProtokollLabel = "FTPS"
+}
+else {
+    $verifiseringsMaalLabel = "produksjon"
+    $verifiseringsProtokollLabel = "HTTPS"
+}
+
 function Write-VerifiseringsResultatLinje {
-    param([string]$Prefiks, [object]$Resultat)
+    param([string]$Prefiks, [object]$Resultat, [Parameter(Mandatory)][string]$MaalLabel)
     $label = switch ($Resultat.reason) {
         "ok" { "OK" }
         "mismatch" { "AVVIK" }
@@ -1227,7 +1266,7 @@ function Write-VerifiseringsResultatLinje {
     Write-Host ("  [{0}] {1,-20} {2}" -f $Prefiks, $label, $Resultat.rel)
     if ($Resultat.reason -eq "mismatch") {
         Write-Host ("        forventet sjekksum (lokal kilde):  {0}" -f $Resultat.localHash)
-        Write-Host ("        mottatt sjekksum (produksjon):     {0}" -f $Resultat.remoteHash)
+        Write-Host ("        mottatt sjekksum ({0}):     {1}" -f $MaalLabel, $Resultat.remoteHash)
     }
     elseif ($Resultat.reason -eq "unverifiable") {
         Write-Host ("        feil: {0}" -f $Resultat.error)
@@ -1250,12 +1289,27 @@ if ($isOwnerGateTest) {
     $OwnerGateVerifyBolkStorrelse = 10
     $ownerGateVerifyTempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_ownergate_verify_" + [guid]::NewGuid().ToString("N"))
     New-Item -ItemType Directory -Path $ownerGateVerifyTempDir | Out-Null
+    # $curlConfigPath (steg 5) er allerede slettet på dette punktet -- finally-
+    # blokken rundt steg 5 (preflight + bolk-opplasting) rydder den opp FØR
+    # steg 6 i det hele tatt starter, uansett om opplastingen lyktes. Første
+    # pass over ($OwnerGateVerifyBolkStorrelse-bolker) bygger sine egne
+    # -K-configer fra $configContent (en in-memory-streng, aldri den slettede
+    # filstien) og er derfor upåvirket -- men retry-passet under kaller
+    # Invoke-DeployFileVerifiseringFtps med en EKSPLISITT -CurlConfigPath, og
+    # trenger derfor sin EGEN, ferske credentials-config-fil (Chief review,
+    # PR #216, runde 6: retry-passet pekte tidligere deterministisk på den
+    # allerede slettede $curlConfigPath ved ethvert avvik/ikke-verifiserbar
+    # fil i første pass, og kunne derfor aldri lykkes). Bygges FØR
+    # try/finally slik at den er tilgjengelig uansett om retry faktisk
+    # trengs -- slettes i samme finally som tempdir, uansett utfall.
+    $ownerGateVerifyCurlConfigPath = [System.IO.Path]::GetTempFileName()
+    [System.IO.File]::WriteAllText($ownerGateVerifyCurlConfigPath, $configContent, (New-Object System.Text.UTF8Encoding($false)))
     try {
         $forstePass = @(Invoke-DeployBolkVerifiseringFtps -Filer $DeltaKandidatFiler -BrukerLinje $configContent -FtpHost $FtpHost -RemoteRoot $RemoteRoot -BolkStorrelse $OwnerGateVerifyBolkStorrelse -TempDir $ownerGateVerifyTempDir)
         $i = 0
         foreach ($resultat in $forstePass) {
             $i++
-            Write-VerifiseringsResultatLinje -Prefiks ("{0}/{1}" -f $i, $DeployFiles.Count) -Resultat $resultat
+            Write-VerifiseringsResultatLinje -Prefiks ("{0}/{1}" -f $i, $DeployFiles.Count) -Resultat $resultat -MaalLabel $verifiseringsMaalLabel
         }
 
         $relByPath = @{}
@@ -1271,8 +1325,8 @@ if ($isOwnerGateTest) {
             foreach ($rel in $retryRels) {
                 $j++
                 $fc = $relByPath[$rel]
-                $resultat = Invoke-DeployFileVerifiseringFtps -Rel $fc.rel -LocalPath $fc.FullName -CurlConfigPath $curlConfigPath -FtpHost $FtpHost -RemoteRoot $RemoteRoot -TempDir $ownerGateVerifyTempDir
-                Write-VerifiseringsResultatLinje -Prefiks ("retry {0}/{1}" -f $j, $retryRels.Count) -Resultat $resultat
+                $resultat = Invoke-DeployFileVerifiseringFtps -Rel $fc.rel -LocalPath $fc.FullName -CurlConfigPath $ownerGateVerifyCurlConfigPath -FtpHost $FtpHost -RemoteRoot $RemoteRoot -TempDir $ownerGateVerifyTempDir
+                Write-VerifiseringsResultatLinje -Prefiks ("retry {0}/{1}" -f $j, $retryRels.Count) -Resultat $resultat -MaalLabel $verifiseringsMaalLabel
                 $retryPass += $resultat
             }
         }
@@ -1281,6 +1335,7 @@ if ($isOwnerGateTest) {
     }
     finally {
         Remove-Item -Path $ownerGateVerifyTempDir -Recurse -Force -ErrorAction SilentlyContinue
+        if (Test-Path $ownerGateVerifyCurlConfigPath) { Remove-Item -Path $ownerGateVerifyCurlConfigPath -Force -ErrorAction SilentlyContinue }
     }
 }
 else {
@@ -1298,7 +1353,7 @@ else {
             $rel = $f.FullName.Substring($WebRoot.Length + 1) -replace '\\', '/'
             $relByPath[$rel] = $f
             $resultat = Invoke-DeployFileVerifisering -Rel $rel -LocalPath $f.FullName -BaseUrl $BaseUrl -TempDir $tempDir
-            Write-VerifiseringsResultatLinje -Prefiks ("{0}/{1}" -f $i, $DeployFiles.Count) -Resultat $resultat
+            Write-VerifiseringsResultatLinje -Prefiks ("{0}/{1}" -f $i, $DeployFiles.Count) -Resultat $resultat -MaalLabel $verifiseringsMaalLabel
             $forstePass += $resultat
         }
 
@@ -1313,7 +1368,7 @@ else {
                 $j++
                 $f = $relByPath[$rel]
                 $resultat = Invoke-DeployFileVerifisering -Rel $rel -LocalPath $f.FullName -BaseUrl $BaseUrl -TempDir $tempDir
-                Write-VerifiseringsResultatLinje -Prefiks ("retry {0}/{1}" -f $j, $retryRels.Count) -Resultat $resultat
+                Write-VerifiseringsResultatLinje -Prefiks ("retry {0}/{1}" -f $j, $retryRels.Count) -Resultat $resultat -MaalLabel $verifiseringsMaalLabel
                 $retryPass += $resultat
             }
         }
@@ -1331,15 +1386,15 @@ $unverifiable = @($sluttResultat | Where-Object { $_.reason -eq "unverifiable" }
 Write-Host ""
 if ($mismatches.Count -gt 0 -or $unverifiable.Count -gt 0) {
     if ($mismatches.Count -gt 0) {
-        Write-Host "INNHOLDSAVVIK -- produksjon svarer, men bytes matcher IKKE lokal kilde for $($mismatches.Count) fil(er) (uendret etter eventuelt retry):"
+        Write-Host ("INNHOLDSAVVIK -- {0} svarer, men bytes matcher IKKE lokal kilde for $($mismatches.Count) fil(er) (uendret etter eventuelt retry):" -f $verifiseringsMaalLabel)
         foreach ($m in $mismatches) {
             Write-Host ("  - {0}" -f $m.rel)
             Write-Host ("      forventet sjekksum (lokal kilde):  {0}" -f $m.localHash)
-            Write-Host ("      mottatt sjekksum (produksjon):     {0}" -f $m.remoteHash)
+            Write-Host ("      mottatt sjekksum ({0}):     {1}" -f $verifiseringsMaalLabel, $m.remoteHash)
         }
     }
     if ($unverifiable.Count -gt 0) {
-        Write-Host "KUNNE IKKE VERIFISERE $($unverifiable.Count) fil(er) (nettverksfeil/ikke tilgjengelig via HTTPS, uendret etter eventuelt retry):"
+        Write-Host ("KUNNE IKKE VERIFISERE $($unverifiable.Count) fil(er) (nettverksfeil/ikke tilgjengelig via {0}, uendret etter eventuelt retry):" -f $verifiseringsProtokollLabel)
         foreach ($u in $unverifiable) { Write-Host ("  - {0} ({1})" -f $u.rel, $u.error) }
     }
     Write-Host ""
@@ -1347,5 +1402,5 @@ if ($mismatches.Count -gt 0 -or $unverifiable.Count -gt 0) {
     exit 1
 }
 
-Write-Host "Verifisering OK -- alle $($DeployFiles.Count) filer bekreftet byte-for-byte identiske mellom $WebRoot og produksjon."
+Write-Host ("Verifisering OK -- alle $($DeployFiles.Count) filer bekreftet byte-for-byte identiske mellom $WebRoot og {0}." -f $verifiseringsMaalLabel)
 exit 0

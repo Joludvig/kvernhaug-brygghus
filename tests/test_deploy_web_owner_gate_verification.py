@@ -35,6 +35,22 @@ FIKSEN (denne filen tester):
    test_deploy_web_batch_upload.py og test_deploy_web_verify_retry.py
    (kjørt uendret av denne endringen).
 
+RUNDE 6 (Chief review, PR #216, to blokkerende forhold i selve
+owner-gate-VERIFISERINGEN, ikke opplastingen):
+5. $curlConfigPath (steg 5) slettes i steg 5 sin egen finally FØR steg 6
+   i det hele tatt starter. Retry-passet i steg 6 (owner-gate-modus)
+   kalte likevel Invoke-DeployFileVerifiseringFtps med nettopp denne
+   allerede slettede filstien -- ved ethvert avvik i første FTPS-pass
+   ville retry derfor deterministisk feile mot en manglende config. Steg
+   6 bygger nå sin EGEN, ferske credentials-config
+   ($ownerGateVerifyCurlConfigPath, fra $configContent) FØR
+   verifiseringen starter, og sletter den i sin egen finally.
+6. Suksess-/avviks-/kan-ikke-verifisere-meldingene etter steg 6 var
+   hardkodet til "produksjon" i BEGGE moduser -- en vellykket sjekk av
+   det isolerte owner-gate-testmålet kunne dermed leses som bevis om
+   normal produksjon. $verifiseringsMaalLabel/$verifiseringsProtokollLabel
+   beregnes nå ÉN gang og gjenbrukes av all logging i steg 6.
+
 TESTSTRATEGI (samme begrunnelse som de fire andre deploy_web-testfilene):
 hele scriptets imperative flyt er Windows-orientert og krever
 git.exe/curl.exe/ekte FTPS -- utenfor denne sandkassen, og forblir en
@@ -286,6 +302,151 @@ class TestSourceWiring(unittest.TestCase):
     def test_no_merge_or_new_push_command_introduced(self):
         self.assertNotIn("gh pr merge", self.text)
         self.assertNotIn("git push", self.text)
+
+    # ─── runde 6, blokker 1: config-levetid ────────────────────────────────
+
+    def test_step5_curl_config_still_deleted_before_step6_starts(self):
+        """Documents the actual bug precondition (not a regression to fix
+        away): $curlConfigPath (steg 5) IS deleted before steg 6 begins --
+        that is correct/unchanged behavior. The fix is that steg 6 must
+        never rely on that already-deleted path (see the next test)."""
+        idx_step5_delete = self.text.index(
+            "    if (Test-Path $curlConfigPath) {\n        Remove-Item -Path $curlConfigPath -Force -ErrorAction SilentlyContinue\n    }\n}"
+        )
+        idx_step6 = self.text.index("# ─── 6. Produksjonsverifisering")
+        self.assertLess(idx_step5_delete, idx_step6)
+
+    def test_step6_owner_gate_retry_never_references_deleted_step5_config(self):
+        """Chief review, PR #216, runde 6, blocker 1: the owner-gate retry
+        pass in steg 6 previously called Invoke-DeployFileVerifiseringFtps
+        with -CurlConfigPath $curlConfigPath -- a path already deleted by
+        steg 5's own finally before steg 6 ever starts. Any mismatch in the
+        first FTPS pass therefore made retry deterministically unable to
+        succeed. Steg 6 must build/use its own fresh credentials-only
+        config instead, never the deleted steg-5 path."""
+        idx_step6 = self.text.index("# ─── 6. Produksjonsverifisering")
+        idx_normal_header = self.text.index("--- Verifiserer produksjon: FAKTISK INNHOLD", idx_step6)
+        section = self.text[idx_step6:idx_normal_header]
+        self.assertNotIn(
+            "-CurlConfigPath $curlConfigPath", section,
+            "Steg 6 sin owner-gate-gren skal aldri referere den allerede slettede steg-5-configen.",
+        )
+        self.assertIn("$ownerGateVerifyCurlConfigPath = [System.IO.Path]::GetTempFileName()", section)
+        self.assertIn("[System.IO.File]::WriteAllText($ownerGateVerifyCurlConfigPath, $configContent,", section)
+        self.assertIn("-CurlConfigPath $ownerGateVerifyCurlConfigPath", section)
+
+    def test_step6_owner_gate_fresh_config_built_before_try_and_deleted_in_finally(self):
+        """The fresh config must exist BEFORE the try block starts (so a
+        retry inside it always has it available), and must be deleted in
+        the SAME finally that cleans up the temp download directory --
+        never left behind regardless of outcome."""
+        idx_step6 = self.text.index("# ─── 6. Produksjonsverifisering")
+        idx_normal_header = self.text.index("--- Verifiserer produksjon: FAKTISK INNHOLD", idx_step6)
+        section = self.text[idx_step6:idx_normal_header]
+        idx_create = section.index("$ownerGateVerifyCurlConfigPath = [System.IO.Path]::GetTempFileName()")
+        idx_try = section.index("try {", idx_create)
+        idx_finally = section.index("finally {", idx_try)
+        idx_delete = section.index(
+            "if (Test-Path $ownerGateVerifyCurlConfigPath) { Remove-Item -Path $ownerGateVerifyCurlConfigPath -Force -ErrorAction SilentlyContinue }"
+        )
+        self.assertLess(idx_create, idx_try, "Fersk config skal bygges FØR try-blokken.")
+        self.assertLess(idx_finally, idx_delete, "Fersk config skal slettes i finally-blokken.")
+
+    def test_step6_owner_gate_first_pass_unaffected_by_deleted_step5_config(self):
+        """The first (bolk) pass never touches $curlConfigPath at all --
+        it builds its own bolk configs from the in-memory $configContent
+        string via Invoke-DeployBolkVerifiseringFtps -- so it was never
+        broken by the deleted step-5 config; only the single-file retry
+        call was. Checked via the FUNCTIONAL reference (-CurlConfigPath
+        $curlConfigPath) rather than the bare substring, since the fix's
+        own explanatory comment legitimately mentions $curlConfigPath by
+        name without using it."""
+        idx_step6 = self.text.index("# ─── 6. Produksjonsverifisering")
+        idx_forste_pass = self.text.index("$forstePass = @(Invoke-DeployBolkVerifiseringFtps", idx_step6)
+        idx_retry_call = self.text.index("Invoke-DeployFileVerifiseringFtps -Rel $fc.rel", idx_step6)
+        self.assertLess(idx_step6, idx_forste_pass)
+        self.assertLess(idx_forste_pass, idx_retry_call)
+        self.assertNotIn("-CurlConfigPath $curlConfigPath", self.text[idx_step6:idx_forste_pass])
+
+    # ─── runde 6, blokker 2: modusbevisste meldinger ───────────────────────
+
+    def test_verifiserings_maal_label_defined_before_write_resultat_linje(self):
+        idx_label = self.text.index("$verifiseringsMaalLabel = ")
+        idx_func = self.text.index("function Write-VerifiseringsResultatLinje {")
+        self.assertLess(idx_label, idx_func)
+
+    def test_all_write_resultat_linje_call_sites_pass_maal_label(self):
+        calls = re.findall(r"Write-VerifiseringsResultatLinje -Prefiks[^\n]*", self.text)
+        self.assertEqual(len(calls), 4, "Forventer nøyaktig 4 kall (owner-gate forste+retry, normal forste+retry).")
+        for call in calls:
+            self.assertIn("-MaalLabel $verifiseringsMaalLabel", call)
+
+    def test_final_summary_messages_use_maal_label_not_hardcoded_produksjon(self):
+        """Chief review, PR #216, runde 6, blocker 2: the mismatch/
+        unverifiable/success messages after steg 6 must never hardcode
+        "produksjon" -- they must resolve through $verifiseringsMaalLabel/
+        $verifiseringsProtokollLabel so an owner-gate check of the isolated
+        target is never presented as proof about live production."""
+        idx_mismatches = self.text.index("$mismatches = @($sluttResultat")
+        section = self.text[idx_mismatches:]
+        self.assertIn('"INNHOLDSAVVIK -- {0} svarer', section)
+        self.assertIn("-f $verifiseringsMaalLabel)", section)
+        self.assertIn('nettverksfeil/ikke tilgjengelig via {0}', section)
+        self.assertIn("-f $verifiseringsProtokollLabel)", section)
+        self.assertIn("mottatt sjekksum ({0}):     {1}", section)
+        self.assertIn("bekreftet byte-for-byte identiske mellom $WebRoot og {0}", section)
+        self.assertNotIn('"produksjon"', section)
+
+    def test_verifiserings_maal_label_extraction_present_exactly_once(self):
+        self.assertEqual(self.text.count("$verifiseringsMaalLabel = "), 2, "Én tildeling i owner-gate-grenen, én i normal-grenen.")
+        self.assertEqual(self.text.count("$verifiseringsProtokollLabel = "), 2)
+
+
+# ─── 4: $verifiseringsMaalLabel/$verifiseringsProtokollLabel (ekte if/else, dot-kjørt) ──
+
+class TestVerifiseringsMaalLabelResolution(unittest.TestCase):
+    """Runde 6 (Chief review, PR #216, blocker 2) -- kjører den FAKTISKE
+    if/else-blokken fra scriptet (ikke en gjenskrevet kopi) med
+    $isOwnerGateTest/$FtpHost/$RemoteRoot satt på forhånd, og bekrefter at
+    owner-gate-modus produserer en etikett som eksplisitt nevner det
+    isolerte target-et og sier "IKKE produksjon", mens normal modus
+    fortsatt gir eksakt "produksjon"/"HTTPS" -- uendret ordlyd."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.script_text = _read_script()
+        start = cls.script_text.index("if ($isOwnerGateTest) {\n    $verifiseringsMaalLabel")
+        end = cls.script_text.index("function Write-VerifiseringsResultatLinje {")
+        cls.label_block = cls.script_text[start:end]
+
+    def test_owner_gate_label_names_isolated_target_and_disclaims_production(self):
+        result = self._run(True, "ftp.example.com", "/www-owner-gate-test")
+        self.assertIn("ftp.example.com", result["maalLabel"])
+        self.assertIn("/www-owner-gate-test", result["maalLabel"])
+        self.assertIn("IKKE produksjon", result["maalLabel"])
+        self.assertEqual(result["protokollLabel"], "FTPS")
+
+    def test_normal_mode_label_is_exactly_production_https_unchanged(self):
+        result = self._run(False, "ftp.domeneshop.no", "/www")
+        self.assertEqual(result["maalLabel"], "produksjon")
+        self.assertEqual(result["protokollLabel"], "HTTPS")
+
+    def _run(self, is_owner_gate_test, ftp_host, remote_root):
+        command = r"""
+$isOwnerGateTest = $%s
+$FtpHost = '%s'
+$RemoteRoot = '%s'
+%s
+[PSCustomObject]@{ maalLabel = $verifiseringsMaalLabel; protokollLabel = $verifiseringsProtokollLabel } | ConvertTo-Json -Compress
+""" % (
+            "true" if is_owner_gate_test else "false",
+            ftp_host.replace("'", "''"),
+            remote_root.replace("'", "''"),
+            self.label_block,
+        )
+        r = _run_pwsh(command)
+        self.assertEqual(r.returncode, 0, f"pwsh feilet: stdout={r.stdout!r} stderr={r.stderr!r}")
+        return json.loads(r.stdout.strip())
 
 
 if __name__ == "__main__":
