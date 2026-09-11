@@ -32,6 +32,14 @@ av 85, identisk to ganger på rad. Fiksen:
    --next-blokk i bolk-configen, ikke bare skrevet én gang først -- curl
    dokumenterer at --next nullstiller alle ikke-globale opsjoner, og
    `user = ...` er ikke global (Chief review, PR #216, blocker 1).
+5. En reell owner-gate-test mot Domeneshop viste at bolker à 10 filer kan
+   treffe vedvarende curl 18 / FTP 426 selv etter reverifisering+ett
+   bounded retry -- filer som fortsatt ikke kom gjennom degraderes derfor
+   nå til MINDRE bolkstørrelser (10 -> 5 -> 2 -> 1, Get-DegraderteBolkStorrelser)
+   i stedet for at hele deployen stopper der, helt ned til ÉN fil per
+   curl.exe-prosess (ingen --next) om nødvendig. Ekte (ikke-forbigående)
+   feil degraderer ALDRI -- de stopper deployen umiddelbart uansett
+   bolkstørrelse (Chief review, PR #216, runde 8).
 
 TESTSTRATEGI (samme begrunnelse som test_deploy_web_guard.py og
 test_deploy_web_verify_retry.py): hele scriptet er Windows-orientert, og
@@ -275,6 +283,52 @@ New-BolkOpplastingConfig -BrukerLinje '%s' -Filer $objs -FtpHost '%s' -RemoteRoo
         return r.stdout
 
 
+# ─── 3b: Get-DegraderteBolkStorrelser (ekte funksjon, dot-sourcet) ─────────
+
+class TestGetDegraderteBolkStorrelser(unittest.TestCase):
+    """Chief review, PR #216, runde 8: en reell owner-gate-test mot
+    Domeneshop viste at bolker à 10 filer kan treffe vedvarende curl 18 /
+    FTP 426 selv etter reverifisering+ett bounded retry. Get-DegraderteBolkStorrelser
+    produserer sekvensen av (halverende, gulv 1) bolkstørrelser steg 5c
+    degraderer til når en gitt størrelse har brukt opp sine bounded forsøk
+    med en forbigående feilkode."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.script_text = _read_script()
+        cls.func_text = _extract_function(cls.script_text, "Get-DegraderteBolkStorrelser")
+
+    def test_ten_halves_down_to_floor_one(self):
+        self.assertEqual(self._run(10), [10, 5, 2, 1])
+
+    def test_already_one_yields_just_one(self):
+        self.assertEqual(self._run(1), [1])
+
+    def test_odd_start_rounds_down_and_still_reaches_floor(self):
+        self.assertEqual(self._run(3), [3, 1])
+
+    def test_two_yields_two_then_one(self):
+        self.assertEqual(self._run(2), [2, 1])
+
+    def test_large_start_has_no_duplicates_and_ends_at_one(self):
+        got = self._run(100)
+        self.assertEqual(got, [100, 50, 25, 12, 6, 3, 1])
+        self.assertEqual(len(got), len(set(got)), "Sekvensen skal ikke inneholde duplikater.")
+        self.assertEqual(got[-1], 1, "Sekvensen skal alltid ende pa gulvstorrelse 1.")
+
+    def _run(self, start_storrelse):
+        command = r"""
+%s
+$got = @(Get-DegraderteBolkStorrelser -StartStorrelse %d)
+ConvertTo-Json -InputObject $got -Compress
+""" % (self.func_text, start_storrelse)
+        r = _run_pwsh(command)
+        self.assertEqual(r.returncode, 0, f"pwsh feilet: stdout={r.stdout!r} stderr={r.stderr!r}")
+        out = r.stdout.strip()
+        parsed = json.loads(out)
+        return parsed if isinstance(parsed, list) else [parsed]
+
+
 # ─── 4: hele scriptet parser uten syntaksfeil ──────────────────────────────
 
 class TestScriptParses(unittest.TestCase):
@@ -305,7 +359,7 @@ class TestSourceWiring(unittest.TestCase):
         self.text = _read_script()
 
     def test_new_functions_present_exactly_once(self):
-        for name in ("Test-ForbigaendeCurlFeil", "Split-FilerIBolker", "New-BolkOpplastingConfig", "Get-OwnerGatePreflightSti"):
+        for name in ("Test-ForbigaendeCurlFeil", "Split-FilerIBolker", "New-BolkOpplastingConfig", "Get-OwnerGatePreflightSti", "Get-DegraderteBolkStorrelser"):
             self.assertEqual(self.text.count(f"function {name}"), 1, f"{name} skal defineres nøyaktig én gang.")
 
     def test_delta_check_after_dryrun_exit_and_before_dependency_check(self):
@@ -446,6 +500,55 @@ class TestSourceWiring(unittest.TestCase):
     def test_no_merge_or_new_push_command_introduced(self):
         self.assertNotIn("gh pr merge", self.text)
         self.assertNotIn("git push", self.text)
+
+    def test_bolk_storrelser_derived_from_degradation_helper(self):
+        """Chief review, PR #216, runde 8: steg 5c must build its size
+        sequence from Get-DegraderteBolkStorrelser (not a hardcoded single
+        fixed size) -- the old "one fixed bolk-size for the whole deploy"
+        loop must actually be GONE, not merely superseded by dead code
+        sitting alongside it."""
+        self.assertIn(
+            "$BolkStorrelser = @(Get-DegraderteBolkStorrelser -StartStorrelse $UploadBolkStorrelse)",
+            self.text,
+        )
+        self.assertNotIn(
+            "$bolker = @(Split-FilerIBolker -Filer $FilesToUpload -BolkStorrelse $UploadBolkStorrelse)",
+            self.text,
+            "Den gamle, fast-storrelse opplastings-splittingen skal vaere erstattet, ikke ligge igjen ved siden av den degraderende varianten.",
+        )
+
+    def test_genuine_failure_stops_immediately_even_with_smaller_sizes_available(self):
+        """A non-transient curl exit code (bad credentials, missing path,
+        TLS handshake) must stop the whole deploy immediately regardless of
+        whether a smaller bolk size is still available to degrade to --
+        smaller batches cannot fix a real error, so degrading would only
+        mask it behind wasted retries."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        self.assertIn("if ((-not $erForbigaendeSisteFeil) -or $erGulvStorrelse) {", section)
+
+    def test_transient_failure_below_floor_size_degrades_instead_of_stopping(self):
+        """A transient failure that exhausts its bounded retries at a size
+        ABOVE the floor (1) must be carried forward to a smaller bolk size
+        instead of stopping the deploy -- this is the actual fix for the
+        real Domeneshop curl 18 / FTP 426 evidence (Chief review, PR #216,
+        runde 8)."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        self.assertIn("$nesteStorrelseFiler += $gjenstaendeFiler", section)
+        self.assertIn("$erGulvStorrelse = ($storrelseIndeks -eq $BolkStorrelser.Count - 1)", section)
+
+    def test_floor_size_fallback_paces_single_file_connections(self):
+        """The floor size (1 file, no --next at all) reintroduces the
+        original one-connection-per-file pattern -- a short pause between
+        successive floor-size uploads mitigates the original "too many
+        rapid connections" hypothesis for this fallback path specifically."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        self.assertIn("Start-Sleep -Milliseconds $EnkeltfilPauseMillisekunder", section)
 
 
 if __name__ == "__main__":

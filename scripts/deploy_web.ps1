@@ -179,6 +179,30 @@
   deploy (uten -OwnerGateTestSha) er HELT uendret og lister fortsatt
   nøyaktig -RemoteRoot.
 
+  DEGRADERENDE BOLKSTØRRELSE VED VEDVARENDE FORBIGÅENDE FEIL (issue #213,
+  runde 8): login-preflight-fiksen (runde 7) løste "mappen finnes ikke
+  ennå", men en reell owner-gate-kjøring mot Domeneshop på eksakt hode
+  3bff6d2c... traff deretter et NYTT, ekte serverproblem -- "server did
+  not report OK, got 426" (curl exit 18) på selve bolk-opplastingen, to
+  bolker à 10 filer på rad, som IKKE ble løst av eksisterende
+  reverifisering+ett bounded retry (steg 5c over). Scriptet stoppet derfor
+  hele deployen ved fil 20/85. Steg 5c prøver nå IKKE lenger bare på nytt
+  med samme bolkstørrelse -- filer som fortsatt avviker etter at en gitt
+  bolkstørrelse har brukt opp sine bounded forsøk med en FORBIGÅENDE
+  feilkode, degraderes i stedet til MINDRE bolker (10 -> 5 -> 2 -> 1, se
+  Get-DegraderteBolkStorrelser) og forsøkes der på nytt med akkurat samme
+  reverifiser-før-retry-logikk, helt ned til ÉN fil per curl.exe-prosess
+  (ingen --next i det hele tatt) om nødvendig. Hypotesen -- ikke bekreftet
+  empirisk i denne sandkassen, se tests/test_deploy_web_batch_upload.py --
+  er at færre (til slutt null) --next-adskilte overføringer per
+  kontrollforbindelse er mindre sårbart for hva enn som faktisk trigger 426
+  mot akkurat denne serveren. En EKTE (ikke-forbigående) curl-feil
+  degraderer ALDRI -- den stopper fortsatt deployen umiddelbart, uansett
+  bolkstørrelse, akkurat som før. Kun når gulvstørrelsen (1 fil, ingen
+  --next) OGSÅ har brukt opp sine bounded forsøk med en forbigående feil,
+  stopper deployen -- det finnes ingen mindre bolkstørrelse å degradere
+  videre til.
+
   Eksakt owner-PC-kommando for gaten (se .EXAMPLE under for full syntaks):
   fetch branchen, les dens faktiske head-SHA, og kjør scriptet med akkurat
   den SHA-en pluss en isolert -RemoteRoot.
@@ -547,6 +571,38 @@ function Split-FilerIBolker {
         $bolker += , @($Filer[$idx..$slutt])
     }
     return @($bolker)
+}
+
+# Ren funksjon (issue #213, Chief review PR #216, runde 8) -- en reell
+# owner-gate-test mot Domeneshop (eksakt hode 3bff6d2c...) viste at SELV
+# reverifisering+ett bounded retry (se hovedscriptets steg 5c) ikke alltid er
+# nok: to bolker à 10 filer på rad traff vedvarende "server did not report
+# OK, got 426" / curl exit 18 igjen etter retry, og scriptet stoppet HELE
+# deployen ved fil 20/85 med ingen vei videre. Returnerer en DEGRADERENDE
+# sekvens av bolkstørrelser fra $StartStorrelse (halvert for hvert steg,
+# avrundet ned, gulv 1, ingen duplikater) -- f.eks. 10 -> [10, 5, 2, 1].
+# Brukt av steg 5c til å falle tilbake til MINDRE bolker (til slutt ÉN fil
+# per curl.exe-prosess -- helt uten --next) for KUN de filene som fortsatt
+# ikke kom gjennom etter at en gitt bolkstørrelse har brukt opp sine bounded
+# forsøk, i stedet for å stoppe hele deployen der. Hypotesen (kan IKKE
+# bekreftes empirisk i denne sandkassen, se
+# tests/test_deploy_web_batch_upload.py): en mindre bolk (færre
+# --next-adskilte overføringer per kontrollforbindelse, til slutt INGEN
+# --next i det hele tatt ved gulvstørrelse 1) er mindre sårbar for hva enn
+# som faktisk trigger 426 på tvers av gjentatte overføringer i samme
+# curl.exe-prosess mot akkurat denne serveren. Ekte (ikke-forbigående)
+# curl-feil degraderer ALDRI -- de stopper fortsatt deployen umiddelbart,
+# uansett bolkstørrelse, akkurat som før (se steg 5c).
+function Get-DegraderteBolkStorrelser {
+    param([Parameter(Mandatory)][int]$StartStorrelse)
+    $storrelser = New-Object System.Collections.Generic.List[int]
+    $s = $StartStorrelse
+    while ($s -gt 1) {
+        $storrelser.Add($s)
+        $s = [Math]::Floor($s / 2)
+    }
+    $storrelser.Add(1)
+    return @($storrelser)
 }
 
 # Bygger INNHOLDET til ÉN curl -K configfil som laster opp flere filer i
@@ -1126,115 +1182,178 @@ try {
             # ved første feilede overføring i bolken (bevarer det eksisterende
             # "stopper umiddelbart ved første feil"-prinsippet, se Runde 22B.1
             # i .DESCRIPTION, nå på bolk- i stedet for fil-nivå).
+            #
+            # DEGRADERENDE BOLKSTØRRELSE (issue #213, Chief review PR #216,
+            # runde 8): en reell owner-gate-test mot Domeneshop viste at
+            # bolker à 10 filer kan treffe vedvarende curl 18 / FTP 426 selv
+            # etter reverifisering+ett bounded retry -- se
+            # Get-DegraderteBolkStorrelser over for hypotesen og
+            # begrunnelsen. Filer som fortsatt ikke kom gjennom etter at en
+            # gitt bolkstørrelse har brukt opp sine bounded forsøk prøves
+            # derfor på nytt i MINDRE bolker (samme reverifiser-før-retry-
+            # logikk, samme $MaxBolkOpplastingsForsok PER størrelse) i stedet
+            # for at hele deployen stopper der -- til slutt ÉN fil per
+            # curl.exe-prosess (ingen --next i det hele tatt) om nødvendig.
+            # Ekte (ikke-forbigående) curl-feil degraderer ALDRI -- de
+            # stopper fortsatt deployen umiddelbart, uansett bolkstørrelse,
+            # akkurat som før.
             $UploadBolkStorrelse = 10
-            $MaxBolkOpplastingsForsok = 2  # forste forsok + ETT bounded retry ved forbigaende feil -- ikke en lokke.
+            $MaxBolkOpplastingsForsok = 2  # forste forsok + ETT bounded retry PER BOLKSTORRELSE ved forbigaende feil -- ikke en lokke.
             $BolkRetryPauseSekunder = 5
+            $EnkeltfilPauseMillisekunder = 500  # kun ved gulvstorrelse 1 -- reduserer tilkoblingsraten pa tvers av enkeltfil-fallback-overforinger (samme "for mange raske tilkoblinger"-hypotese som issue #213 opprinnelig startet med).
+
+            $BolkStorrelser = @(Get-DegraderteBolkStorrelser -StartStorrelse $UploadBolkStorrelse)
 
             Write-Host ("--- Laster opp {0} fil(er) i bolker à maks {1} (eksplisitt FTPS, {2} fil(er) allerede identisk med produksjon hoppet over) ---" -f $FilesToUpload.Count, $UploadBolkStorrelse, ($DeployFiles.Count - $FilesToUpload.Count))
-            $i = 0
             $stoppedEarly = $false
-            $bolker = @(Split-FilerIBolker -Filer $FilesToUpload -BolkStorrelse $UploadBolkStorrelse)
-            $totalBolker = $bolker.Count
-            $bolkIndeks = 0
-            foreach ($bolk in $bolker) {
-                $bolkIndeks++
-                $forsteRel = $bolk[0].rel
-                $sisteRel = $bolk[$bolk.Count - 1].rel
-                Write-Host ("[bolk {0}/{1}] {2} fil(er) ({3} .. {4})" -f $bolkIndeks, $totalBolker, $bolk.Count, $forsteRel, $sisteRel)
+            $sisteExitCode = 0
+            $vellykkedeRels = @{}
+            $gjenstaendeForDenneStorrelsen = $FilesToUpload
 
-                $forsokTeller = 0
-                $bolkOk = $false
-                $sisteExitCode = 0
-                $gjenstaendeFiler = $bolk
-                do {
-                    $forsokTeller++
-                    $bolkConfigInnhold = New-BolkOpplastingConfig -BrukerLinje $configContent -Filer $gjenstaendeFiler -FtpHost $FtpHost -RemoteRoot $RemoteRoot
-                    $bolkConfigPath = [System.IO.Path]::GetTempFileName()
-                    [System.IO.File]::WriteAllText($bolkConfigPath, $bolkConfigInnhold, (New-Object System.Text.UTF8Encoding($false)))
-                    try {
-                        & curl.exe -K $bolkConfigPath --fail-early --silent --show-error
-                        $sisteExitCode = $LASTEXITCODE
-                    }
-                    finally {
-                        if (Test-Path $bolkConfigPath) { Remove-Item -Path $bolkConfigPath -Force -ErrorAction SilentlyContinue }
-                    }
+            for ($storrelseIndeks = 0; $storrelseIndeks -lt $BolkStorrelser.Count; $storrelseIndeks++) {
+                if ($gjenstaendeForDenneStorrelsen.Count -eq 0) { break }
+                $storrelse = $BolkStorrelser[$storrelseIndeks]
+                $erGulvStorrelse = ($storrelseIndeks -eq $BolkStorrelser.Count - 1)
+                if ($storrelseIndeks -gt 0) {
+                    Write-Host ""
+                    Write-Host ("--- Degraderer til bolkstorrelse {0} for {1} fil(er) som ikke kom gjennom ved forrige (storre) bolkstorrelse etter reverifisering+bounded retry ---" -f $storrelse, $gjenstaendeForDenneStorrelsen.Count)
+                }
 
-                    if ($sisteExitCode -eq 0) {
-                        $bolkOk = $true
-                        break
-                    }
-                    $erForbigaende = Test-ForbigaendeCurlFeil -ExitCode $sisteExitCode
-                    if ((-not $erForbigaende) -or ($forsokTeller -ge $MaxBolkOpplastingsForsok)) {
-                        break
-                    }
+                $bolker = @(Split-FilerIBolker -Filer $gjenstaendeForDenneStorrelsen -BolkStorrelse $storrelse)
+                $totalBolker = $bolker.Count
+                $bolkIndeks = 0
+                $nesteStorrelseFiler = @()
 
-                    # Reverifiser FØR retry (Chief review, PR #216): issue #213
-                    # observerte curl exit 56 ETTER at filen faktisk hadde
-                    # kommet frem -- et blindt retry av HELE bolken ville da
-                    # lastet opp allerede-vellykkede filer på nytt. Samme
-                    # read-only HTTPS-mekanisme som delta-sjekken (steg 2b) og
-                    # produksjonsverifiseringen (steg 6) brukes til å
-                    # reverifisere KUN filene i denne bolken mot produksjon --
-                    # gjenstående retry-forsøk begrenses til filer som
-                    # fortsatt avviker/mangler/ikke kan verifiseres. Hvis
-                    # ingen gjenstår, regnes bolken som vellykket uten et
-                    # faktisk nytt curl-forsøk.
-                    if ($isOwnerGateTest) {
-                        Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken over FTPS mot det ISOLERTE owner-gate-testmålet ($RemoteRoot) før et eventuelt retry-forsøk..." -f $sisteExitCode, $gjenstaendeFiler.Count)
-                    }
-                    else {
-                        Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken mot produksjon før et eventuelt retry-forsøk..." -f $sisteExitCode, $gjenstaendeFiler.Count)
-                    }
-                    $bolkRetryTempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_bolkretry_" + [guid]::NewGuid().ToString("N"))
-                    New-Item -ItemType Directory -Path $bolkRetryTempDir | Out-Null
-                    try {
-                        $bolkRetryResultater = @()
-                        foreach ($f in $gjenstaendeFiler) {
-                            if ($isOwnerGateTest) {
-                                $bolkRetryResultater += Invoke-DeployFileVerifiseringFtps -Rel $f.rel -LocalPath $f.FullName -CurlConfigPath $curlConfigPath -FtpHost $FtpHost -RemoteRoot $RemoteRoot -TempDir $bolkRetryTempDir
-                            }
-                            else {
-                                $bolkRetryResultater += Invoke-DeployFileVerifisering -Rel $f.rel -LocalPath $f.FullName -BaseUrl $BaseUrl -TempDir $bolkRetryTempDir
+                foreach ($bolk in $bolker) {
+                    $bolkIndeks++
+                    $forsteRel = $bolk[0].rel
+                    $sisteRel = $bolk[$bolk.Count - 1].rel
+                    Write-Host ("[storrelse {0}, bolk {1}/{2}] {3} fil(er) ({4} .. {5})" -f $storrelse, $bolkIndeks, $totalBolker, $bolk.Count, $forsteRel, $sisteRel)
+
+                    $forsokTeller = 0
+                    $bolkOk = $false
+                    $sisteExitCode = 0
+                    $gjenstaendeFiler = $bolk
+                    do {
+                        $forsokTeller++
+                        $bolkConfigInnhold = New-BolkOpplastingConfig -BrukerLinje $configContent -Filer $gjenstaendeFiler -FtpHost $FtpHost -RemoteRoot $RemoteRoot
+                        $bolkConfigPath = [System.IO.Path]::GetTempFileName()
+                        [System.IO.File]::WriteAllText($bolkConfigPath, $bolkConfigInnhold, (New-Object System.Text.UTF8Encoding($false)))
+                        try {
+                            & curl.exe -K $bolkConfigPath --fail-early --silent --show-error
+                            $sisteExitCode = $LASTEXITCODE
+                        }
+                        finally {
+                            if (Test-Path $bolkConfigPath) { Remove-Item -Path $bolkConfigPath -Force -ErrorAction SilentlyContinue }
+                        }
+
+                        if ($sisteExitCode -eq 0) {
+                            $bolkOk = $true
+                            break
+                        }
+                        $erForbigaende = Test-ForbigaendeCurlFeil -ExitCode $sisteExitCode
+                        if ((-not $erForbigaende) -or ($forsokTeller -ge $MaxBolkOpplastingsForsok)) {
+                            break
+                        }
+
+                        # Reverifiser FØR retry (Chief review, PR #216): issue #213
+                        # observerte curl exit 56 ETTER at filen faktisk hadde
+                        # kommet frem -- et blindt retry av HELE bolken ville da
+                        # lastet opp allerede-vellykkede filer på nytt. Samme
+                        # read-only HTTPS-mekanisme som delta-sjekken (steg 2b) og
+                        # produksjonsverifiseringen (steg 6) brukes til å
+                        # reverifisere KUN filene i denne bolken mot produksjon --
+                        # gjenstående retry-forsøk begrenses til filer som
+                        # fortsatt avviker/mangler/ikke kan verifiseres. Hvis
+                        # ingen gjenstår, regnes bolken som vellykket uten et
+                        # faktisk nytt curl-forsøk.
+                        if ($isOwnerGateTest) {
+                            Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken over FTPS mot det ISOLERTE owner-gate-testmålet ($RemoteRoot) før et eventuelt retry-forsøk..." -f $sisteExitCode, $gjenstaendeFiler.Count)
+                        }
+                        else {
+                            Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken mot produksjon før et eventuelt retry-forsøk..." -f $sisteExitCode, $gjenstaendeFiler.Count)
+                        }
+                        $bolkRetryTempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_bolkretry_" + [guid]::NewGuid().ToString("N"))
+                        New-Item -ItemType Directory -Path $bolkRetryTempDir | Out-Null
+                        try {
+                            $bolkRetryResultater = @()
+                            foreach ($f in $gjenstaendeFiler) {
+                                if ($isOwnerGateTest) {
+                                    $bolkRetryResultater += Invoke-DeployFileVerifiseringFtps -Rel $f.rel -LocalPath $f.FullName -CurlConfigPath $curlConfigPath -FtpHost $FtpHost -RemoteRoot $RemoteRoot -TempDir $bolkRetryTempDir
+                                }
+                                else {
+                                    $bolkRetryResultater += Invoke-DeployFileVerifisering -Rel $f.rel -LocalPath $f.FullName -BaseUrl $BaseUrl -TempDir $bolkRetryTempDir
+                                }
                             }
                         }
-                    }
-                    finally {
-                        Remove-Item -Path $bolkRetryTempDir -Recurse -Force -ErrorAction SilentlyContinue
-                    }
-                    $gjenstaendeRels = @(Get-VerifiseringsStierForRetry -Resultater $bolkRetryResultater)
-                    $gjenstaendeFiler = @($gjenstaendeFiler | Where-Object { $gjenstaendeRels -contains $_.rel })
+                        finally {
+                            Remove-Item -Path $bolkRetryTempDir -Recurse -Force -ErrorAction SilentlyContinue
+                        }
+                        $gjenstaendeRels = @(Get-VerifiseringsStierForRetry -Resultater $bolkRetryResultater)
+                        $gjenstaendeFiler = @($gjenstaendeFiler | Where-Object { $gjenstaendeRels -contains $_.rel })
 
-                    if ($gjenstaendeFiler.Count -eq 0) {
-                        Write-Host "  Reverifisering: alle filer i bolken er allerede identisk med produksjon -- bolken regnes som vellykket, ingen retry nødvendig."
-                        $bolkOk = $true
+                        if ($gjenstaendeFiler.Count -eq 0) {
+                            Write-Host "  Reverifisering: alle filer i bolken er allerede identisk med produksjon -- bolken regnes som vellykket, ingen retry nødvendig."
+                            $bolkOk = $true
+                            break
+                        }
+
+                        Write-Host ("  Reverifisering: {0} fil(er) fortsatt avvikende/ikke-verifiserbare -- venter {1}s og prøver disse på nytt (forsøk {2}/{3})..." -f $gjenstaendeFiler.Count, $BolkRetryPauseSekunder, ($forsokTeller + 1), $MaxBolkOpplastingsForsok)
+                        Start-Sleep -Seconds $BolkRetryPauseSekunder
+                    } while ($true)
+
+                    if ($bolkOk) {
+                        # Uansett hvordan $bolkOk ble $true (direkte curl-suksess,
+                        # ELLER reverifisering som viste at alle allerede matchet,
+                        # ELLER et vellykket retry-forsøk på det reduserte settet)
+                        # er HELE $bolk -- ikke bare det siste $gjenstaendeFiler --
+                        # nå bekreftet oppe: filer som ikke lenger var i
+                        # $gjenstaendeFiler ble allerede bekreftet av
+                        # reverifiseringen over.
+                        foreach ($f in $bolk) { $vellykkedeRels[$f.rel] = $true }
+                        if ($erGulvStorrelse -and $bolkIndeks -lt $totalBolker) {
+                            # Enkeltfil-fallback (gulvstorrelse 1): kort pause
+                            # mellom PÅFØLGENDE enkeltfil-tilkoblinger for å
+                            # redusere tilkoblingsraten -- samme hypotese som
+                            # selve issue #213 (for mange raske tilkoblinger)
+                            # startet med, nå anvendt kun på fallback-stien der
+                            # --next-bolking uansett ikke lenger hjelper (1 fil
+                            # = 0 --next-blokker).
+                            Start-Sleep -Milliseconds $EnkeltfilPauseMillisekunder
+                        }
+                        continue
+                    }
+
+                    $erForbigaendeSisteFeil = Test-ForbigaendeCurlFeil -ExitCode $sisteExitCode
+                    if ((-not $erForbigaendeSisteFeil) -or $erGulvStorrelse) {
+                        Write-Host ""
+                        Write-Host ("STOPPER: bolk {0}/{1} (bolkstorrelse {2}) feilet (curl exit code {3})" -f $bolkIndeks, $totalBolker, $storrelse, $sisteExitCode)
+                        Write-Host (Get-CurlFeilmelding $sisteExitCode)
+                        if ($gjenstaendeFiler.Count -lt $bolk.Count) {
+                            Write-Host ("{0} av {1} fil(er) i denne bolken ble bekreftet allerede identisk med produksjon under reverifisering -- de resterende {2} fil(er) ble forsøkt på nytt som ÉN curl-økt, ingen garanti for nøyaktig hvilke av DISSE som kom gjennom før feilen." -f ($bolk.Count - $gjenstaendeFiler.Count), $bolk.Count, $gjenstaendeFiler.Count)
+                        }
+                        elseif ($erGulvStorrelse -and $erForbigaendeSisteFeil) {
+                            Write-Host "Denne bolken er allerede på gulvstorrelse 1 (ingen --next, ÉN fil per curl.exe-prosess) -- ingen mindre bolkstorrelse å degradere videre til."
+                        }
+                        else {
+                            Write-Host "Bolken lastes opp som ÉN curl-økt -- ingen garanti for nøyaktig hvilke enkeltfiler i akkurat denne bolken som faktisk kom gjennom før feilen. Kjør scriptet på nytt, eller verifiser produksjon manuelt, for et autoritativt svar per fil."
+                        }
+                        Write-Host ("Deploy er UFULLSTENDIG -- {0} av {1} fil(er) bekreftet lastet opp før feilen stoppet resten." -f $vellykkedeRels.Count, $FilesToUpload.Count)
+                        Write-Host "Produksjonen skal IKKE regnes som oppdatert."
+                        $stoppedEarly = $true
+                        $exitCode = 1
                         break
                     }
 
-                    Write-Host ("  Reverifisering: {0} fil(er) fortsatt avvikende/ikke-verifiserbare -- venter {1}s og prøver disse på nytt (forsøk {2}/{3})..." -f $gjenstaendeFiler.Count, $BolkRetryPauseSekunder, ($forsokTeller + 1), $MaxBolkOpplastingsForsok)
-                    Start-Sleep -Seconds $BolkRetryPauseSekunder
-                } while ($true)
-
-                $i += $bolk.Count
-                if (-not $bolkOk) {
-                    Write-Host ""
-                    Write-Host ("STOPPER: bolk {0}/{1} feilet (curl exit code {2})" -f $bolkIndeks, $totalBolker, $sisteExitCode)
-                    Write-Host (Get-CurlFeilmelding $sisteExitCode)
-                    if ($gjenstaendeFiler.Count -lt $bolk.Count) {
-                        Write-Host ("{0} av {1} fil(er) i denne bolken ble bekreftet allerede identisk med produksjon under reverifisering -- de resterende {2} fil(er) ble forsøkt på nytt som ÉN curl-økt, ingen garanti for nøyaktig hvilke av DISSE som kom gjennom før feilen." -f ($bolk.Count - $gjenstaendeFiler.Count), $bolk.Count, $gjenstaendeFiler.Count)
-                    }
-                    else {
-                        Write-Host "Bolken lastes opp som ÉN curl-økt -- ingen garanti for nøyaktig hvilke enkeltfiler i akkurat denne bolken som faktisk kom gjennom før feilen. Kjør scriptet på nytt, eller verifiser produksjon manuelt, for et autoritativt svar per fil."
-                    }
-                    Write-Host ("Deploy er UFULLSTENDIG -- {0} av {1} fil(er) var i bolker forsøkt lastet opp (inkludert den feilede bolken) før feilen stoppet resten." -f $i, $FilesToUpload.Count)
-                    Write-Host "Produksjonen skal IKKE regnes som oppdatert."
-                    $stoppedEarly = $true
-                    $exitCode = 1
-                    break
+                    Write-Host ("  Bolkstorrelse {0} brukte opp bounded forsøk for {1} gjenværende fil(er) (siste curl exit code {2}, forbigående) -- degraderer disse til mindre bolker i stedet for å stoppe deployen." -f $storrelse, $gjenstaendeFiler.Count, $sisteExitCode)
+                    $nesteStorrelseFiler += $gjenstaendeFiler
                 }
+                if ($stoppedEarly) { break }
+                $gjenstaendeForDenneStorrelsen = $nesteStorrelseFiler
             }
             if (-not $stoppedEarly) {
                 Write-Host ""
-                Write-Host ("Alle {0} fil(er) lastet opp ({1} bolk(er), {2} fil(er) hoppet over)." -f $FilesToUpload.Count, $totalBolker, ($DeployFiles.Count - $FilesToUpload.Count))
+                Write-Host ("Alle {0} fil(er) lastet opp (bolkstorrelser forsokt: {1}, {2} fil(er) hoppet over)." -f $FilesToUpload.Count, ($BolkStorrelser -join ", "), ($DeployFiles.Count - $FilesToUpload.Count))
             }
         }
     }
