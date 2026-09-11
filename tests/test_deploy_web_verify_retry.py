@@ -239,10 +239,28 @@ class TestSourceWiring(unittest.TestCase):
         self.assertNotIn("$forstePass | Where-Object", section)
 
     def test_mismatch_logging_includes_expected_and_received_checksum(self):
-        """Requirement 1: file path, expected checksum, received checksum."""
-        section = self._verify_section()
+        """Requirement 1: file path, expected checksum, received checksum.
+
+        Scoped from the "# --- 6. Produksjonsverifisering" section header
+        rather than _verify_section() -- Write-VerifiseringsResultatLinje
+        (which echoes $Resultat.localHash/$Resultat.remoteHash) is now a
+        SHARED helper used by both the normal HTTPS verification path and
+        the owner-gate FTPS verification path (issue #213, Chief review, PR
+        #216, runde 5), so it is defined before _verify_section()'s own
+        anchor (the normal path's own "FAKTISK INNHOLD" header).
+
+        The "mottatt sjekksum (...)" label is mode-sensitive since runde 6
+        (Chief review, PR #216) -- it takes a $MaalLabel parameter/format
+        placeholder instead of a hardcoded "produksjon" literal, so a
+        successful owner-gate check of the isolated test target can never
+        be read as proof about live production. Asserted here via the
+        format-string placeholder shared by both call sites -- resolution
+        of $MaalLabel itself is covered by
+        test_deploy_web_owner_gate_verification.py."""
+        section_start = self.text.index("# ─── 6. Produksjonsverifisering")
+        section = self.text[section_start:]
         self.assertIn("forventet sjekksum (lokal kilde)", section)
-        self.assertIn("mottatt sjekksum (produksjon)", section)
+        self.assertIn("mottatt sjekksum ({0})", section)
         self.assertIn("$Resultat.localHash", section)
         self.assertIn("$Resultat.remoteHash", section)
         self.assertIn("$m.localHash", section)
