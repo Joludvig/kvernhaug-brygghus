@@ -7,7 +7,7 @@
 // lagreOppskrift()/lagreSomVariant()/startBrygging()) and web/js/i18n.js
 // (oppskrift.volumPaakrevd).
 const { test, expect } = require('@playwright/test');
-const { localePath, collectErrors, dismissModeDialog } = require('./helpers');
+const { localePath, collectErrors, dismissModeDialog, openSideDrawer, closeSideDrawer } = require('./helpers');
 
 const OPPSKRIFT_NOKKEL = 'kvernhaug_web_oppskrifter';
 const BREW_NOKKEL = 'kvernhaug_web_brygg';
@@ -118,6 +118,46 @@ test('empty batch volume blocks Save with the English message [en]', async ({ pa
   await page.click('#lagre-knapp');
   await expect(page.locator('#lagre-status')).toHaveText(
     'Batch volume must be greater than 0 L before you can save, save as variant, or start brewing.'
+  );
+  expect(await lagredeOppskrifter(page)).toBeNull();
+
+  expect(errors).toEqual([]);
+});
+
+test('empty batch volume blocks Save with the US customary unit wording [no]', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto(localePath('no', '/index.html'));
+  await dismissModeDialog(page);
+
+  await openSideDrawer(page);
+  await page.locator('.enhet-knapp[data-enhet="us"]').click();
+  await closeSideDrawer(page);
+
+  await page.fill('#oppskrift-navn', 'Volumsperre US NO');
+  await page.fill('#batch-volum', '');
+  await page.click('#lagre-knapp');
+  await expect(page.locator('#lagre-status')).toHaveText(
+    'Batch-volum må være over 0 US gal før du kan lagre, lagre som variant eller starte brygging.'
+  );
+  expect(await lagredeOppskrifter(page)).toBeNull();
+
+  expect(errors).toEqual([]);
+});
+
+test('empty batch volume blocks Save with the US customary unit wording [en]', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto(localePath('en', '/index.html'));
+  await dismissModeDialog(page);
+
+  await openSideDrawer(page);
+  await page.locator('.enhet-knapp[data-enhet="us"]').click();
+  await closeSideDrawer(page);
+
+  await page.fill('#oppskrift-navn', 'Volume guard US EN');
+  await page.fill('#batch-volum', '');
+  await page.click('#lagre-knapp');
+  await expect(page.locator('#lagre-status')).toHaveText(
+    'Batch volume must be greater than 0 US gal before you can save, save as variant, or start brewing.'
   );
   expect(await lagredeOppskrifter(page)).toBeNull();
 

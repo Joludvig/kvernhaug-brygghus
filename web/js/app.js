@@ -1615,9 +1615,17 @@ function _oppdaterLagreTilstandUI(oppskrift) {
 // skjemaet. _lesVolumFelt() returnerer allerede 0 for et tomt/ugyldig
 // tastet felt (se _lesEnhetsfelt over), så "> 0" dekker både eksplisitt 0
 // og et tomt felt i én sjekk.
+// WEB FAST (issue #214, Astra A2-02-residual) -- meldingen brukte tidligere
+// hardkodet "0 L" uansett unitSystem. Substansielt riktig (null er
+// enhets-invariant), men det synlige enhets-suffikset stemte ikke med
+// aktiv visning under US customary. {enhet} komponeres fra samme
+// ENHET_FORKORTELSE-oppslag resten av filen allerede bruker for
+// enhets-suffiks (over), ikke fra formatVolume() -- selve TALLET 0 er
+// identisk i begge system, det er kun ordet ("L"/"US gal") som skal følge
+// unitSystem.
 function _blokkerUgyldigBatchVolum(oppskrift, statusEl) {
   if (oppskrift.volum > 0) return false;
-  statusEl.textContent = t("oppskrift.volumPaakrevd");
+  statusEl.textContent = t("oppskrift.volumPaakrevd", { enhet: ENHET_FORKORTELSE[hentUnitSystem()].volum });
   return true;
 }
 
