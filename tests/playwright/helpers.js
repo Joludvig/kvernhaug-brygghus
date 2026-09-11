@@ -3,6 +3,7 @@
 // Shared helpers for the Playwright Critical Browser Gate (issue #200).
 // Kept dependency-free (plain @playwright/test API only), mirroring the
 // same minimal-infrastructure principle web/ itself follows.
+const { expect } = require('@playwright/test');
 
 /**
  * The NO source pages live at the web/ root; the generated EN mirror
@@ -57,4 +58,25 @@ async function openSideDrawer(page) {
   }
 }
 
-module.exports = { localePath, collectErrors, dismissModeDialog, openSideDrawer };
+/**
+ * Close the side drawer (.sidemeny) via its dedicated close button --
+ * counterpart to openSideDrawer(). An in-drawer action (e.g. the unit
+ * toggle) does not close the drawer itself (web/js/chrome.js initEnhet()
+ * is a pure display toggle, same pattern as the mode-knapp switch), so its
+ * still-open .sidemeny-bakteppe backdrop keeps intercepting pointer events
+ * over the rest of the page until this runs. Idempotent: a no-op when
+ * already closed. Waits on the "apen" class rather than a visibility
+ * state -- the closed drawer stays in the DOM, merely translated
+ * off-screen (see web/css/style.css .sidemeny), so it never reaches
+ * Playwright's "hidden" state.
+ */
+async function closeSideDrawer(page) {
+  const meny = page.locator('#sidemeny');
+  const isOpen = await meny.evaluate((el) => el.classList.contains('apen'));
+  if (isOpen) {
+    await page.locator('.sidemeny-lukk').click();
+    await expect(meny).not.toHaveClass(/apen/);
+  }
+}
+
+module.exports = { localePath, collectErrors, dismissModeDialog, openSideDrawer, closeSideDrawer };

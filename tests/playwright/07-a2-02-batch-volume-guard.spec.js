@@ -7,7 +7,7 @@
 // lagreOppskrift()/lagreSomVariant()/startBrygging()) and web/js/i18n.js
 // (oppskrift.volumPaakrevd).
 const { test, expect } = require('@playwright/test');
-const { localePath, collectErrors, dismissModeDialog, openSideDrawer } = require('./helpers');
+const { localePath, collectErrors, dismissModeDialog, openSideDrawer, closeSideDrawer } = require('./helpers');
 
 const OPPSKRIFT_NOKKEL = 'kvernhaug_web_oppskrifter';
 const BREW_NOKKEL = 'kvernhaug_web_brygg';
@@ -131,6 +131,7 @@ test('empty batch volume blocks Save with the US customary unit wording [no]', a
 
   await openSideDrawer(page);
   await page.locator('.enhet-knapp[data-enhet="us"]').click();
+  await closeSideDrawer(page);
 
   await page.fill('#oppskrift-navn', 'Volumsperre US NO');
   await page.fill('#batch-volum', '');
@@ -150,6 +151,7 @@ test('empty batch volume blocks Save with the US customary unit wording [en]', a
 
   await openSideDrawer(page);
   await page.locator('.enhet-knapp[data-enhet="us"]').click();
+  await closeSideDrawer(page);
 
   await page.fill('#oppskrift-navn', 'Volume guard US EN');
   await page.fill('#batch-volum', '');
