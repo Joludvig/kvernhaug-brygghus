@@ -223,6 +223,52 @@
   fetch branchen, les dens faktiske head-SHA, og kjør scriptet med akkurat
   den SHA-en pluss en isolert -RemoteRoot.
 
+  FROSSEN RELEASE-SHA FOR NORMAL PRODUKSJON (issue #223, Production
+  Workflow V2 #199 adopsjonssteg 7): #199 krever at 2-4 fullførte
+  LOW/MEDIUM Web-fikser normalt samles i én release/deploy/live-smoke-
+  syklus, og at HELE den syklusen -- predeploy, FTP-opplasting,
+  innholdsverifisering og live-smoke -- refererer til ÉN eksplisitt frosset
+  `RELEASE_SHA`, selv om `master` beveger seg videre etterpå. Den
+  eksisterende HEAD==origin/master-guarden (1b under, issue #28) gjør det
+  umulig å faithfully deploye en allerede merget, men nå "gammel", release-
+  SHA etter at senere commits har landet på `master` -- den ville blitt
+  avvist identisk med en faktisk feil checkout.
+
+  -ReleaseSha <40-tegns SHA> åpner en eksplisitt, fail-closed unntaksvei
+  for NORMAL produksjon (aldri owner-gate-testmodus -- se under): i stedet
+  for HEAD == origin/master krever den at (1) HEAD er NØYAKTIG den oppgitte
+  SHA-en, (2) SHA-en faktisk finnes som en commit etter en fersk
+  `git fetch origin master`, og (3) SHA-en er en ancestor av (eller
+  identisk med) det ferskt hentede `origin/master` -- dvs. faktisk merget
+  innhold, aldri en ureviewet/upushet lokal commit. -ReleaseSha krever
+  ALDRI at SHA-en er lik CURRENT origin/master -- en eldre, allerede merget
+  release forblir deploybar selv etter at `master` har rukket å bevege seg
+  videre (nettopp det #199 krever). Ethvert avvik (ugyldig SHA-format,
+  HEAD-mismatch, SHA finnes ikke, eller SHA er ikke en ancestor av
+  origin/master) stopper deployen umiddelbart -- fail-closed, ikke
+  best-effort. Normal deploy (uten -ReleaseSha) er HELT uendret og bruker
+  fortsatt kun HEAD == origin/master (guard 1b).
+
+  -ReleaseSha og -OwnerGateTestSha er gjensidig utelukkende og kan ALDRI
+  kombineres i samme kjøring -- de er to bevisst separate modiser (en
+  frosset, allerede merget produksjonsrelease vs. et isolert,
+  ureviewet PR-testmål før merge). Å tillate begge samtidig ville latt en
+  ureviewet PR-branch sine bytes binde seg til "release"-terminologien, som
+  eksplisitt aldri skal skje. Denne kombinasjonen avvises FØR noe git-kall
+  gjøres i det hele tatt.
+
+  Den eksisterende urene-web/-guarden (1c under, issue #72), full-sync-
+  opplastingen, bolk-/retry-/degraderingslogikken (issue #213) og
+  innholdsverifiseringen er ALLE helt uendret og upåvirket av
+  -ReleaseSha -- kun HVILKEN sammenligning som avgjør om HEAD i det hele
+  tatt får lov til å starte en deploy, endres. Loggmeldingene (SOURCE-
+  blokken, bekreftelsesprompten og sluttverifiseringen) inkluderer
+  eksplisitt `RELEASE_SHA: <sha>` når denne modusen er aktiv, slik at eieren
+  kan fange entydig bevis for hvilken frossen commit predeploy/FTP/
+  verifisering/live-smoke faktisk gjaldt. Se
+  [web/README.md](../web/README.md) "Web Release Batch"-seksjonen for hele
+  batch-kontrakten (batchstørrelse, solo-unntak, `MERGED != DEPLOYED`).
+
 .PARAMETER DryRun
   Viser source, target, filantall og full filliste. Gjør ingen FTP-/HTTPS-
   tilkobling og ingen endringer. Guardene over kjøres likevel (ren lokal
@@ -243,6 +289,19 @@
 
 .PARAMETER RemoteRoot
   Remote rotmappe. Standard: /www
+
+.PARAMETER ReleaseSha
+  Binder en NORMAL produksjonsdeploy til én eksplisitt, allerede merget,
+  frossen release-commit (se .DESCRIPTION, issue #223). Må være den fulle
+  40-tegns commit-SHA-en. Erstatter guard 1b sin vanlige
+  HEAD==origin/master-sammenligning med: HEAD == -ReleaseSha, -ReleaseSha
+  finnes som commit etter fersk `git fetch origin master`, og -ReleaseSha
+  er en ancestor av (eller lik) fersk origin/master. Krever IKKE at
+  -ReleaseSha er lik CURRENT origin/master -- en eldre, allerede merget
+  release forblir deploybar selv etter at master har beveget seg videre.
+  Kan ALDRI kombineres med -OwnerGateTestSha (gjensidig utelukkende, se
+  .DESCRIPTION). Utelatt (standard): scriptet oppfører seg helt som før,
+  og krever HEAD == origin/master.
 
 .PARAMETER OwnerGateTestSha
   Aktiverer owner-gate testmodus (se .DESCRIPTION). Må være den fulle
@@ -273,6 +332,14 @@
   .\scripts\deploy_web.ps1
 
 .EXAMPLE
+  # Frossen release-SHA (issue #223, Production Workflow V2 #199): deploy
+  # en eksplisitt, allerede merget release-batch selv om master har rukket
+  # å bevege seg videre siden den SHA-en ble merget. Krever at lokal HEAD
+  # faktisk ER den oppgitte SHA-en (checkout ut/worktree den commiten
+  # først).
+  .\scripts\deploy_web.ps1 -ReleaseSha "3bff6d2c1a2b3c4d5e6f70819293a4b5c6d7e8f9"
+
+.EXAMPLE
   # Owner-gate (issue #213): kjør den ekte bolk-/retry-implementasjonen mot
   # en isolert test-sti FØR merge, bundet til PR-branchens eksakte, pushede
   # head -- normal produksjon (/www) røres ikke. -OwnerGateTestBranch må
@@ -290,6 +357,7 @@ param(
     [string]$FtpUser,
     [string]$FtpHost = "ftp.domeneshop.no",
     [string]$RemoteRoot = "/www",
+    [string]$ReleaseSha,
     [string]$OwnerGateTestSha,
     [string]$OwnerGateTestBranch,
     [switch]$OwnerGateAllowProductionTarget
@@ -386,6 +454,52 @@ function Test-OwnerGateForutsetninger {
         return [PSCustomObject]@{ ok = $false; reason = "origin/$OriginBranchNavn ($OriginBranchRef) matcher ikke oppgitt OwnerGateTestSha ($ExpectedSha) -- push/fetch fersk branch-tilstand og prøv igjen." }
     }
     return [PSCustomObject]@{ ok = $true; reason = "HEAD OG origin/$OriginBranchNavn matcher OwnerGateTestSha." }
+}
+
+# Ren beslutningsfunksjon (issue #223, Production Workflow V2 #199
+# adopsjonssteg 7) -- avgjør om -ReleaseSha får lov til å erstatte den
+# vanlige HEAD==origin/master-guarden for DENNE normale
+# produksjonskjøringen (ALDRI owner-gate testmodus, se .DESCRIPTION og
+# mutual-exclusivity-guarden i hovedscriptet). Fail-closed by construction,
+# samme mønster som Test-OwnerGateForutsetninger over: enhver ugyldig
+# SHA-form, HEAD-mismatch, manglende commit, eller manglende
+# ancestor-forhold til origin/master gir avslag -- aldri en stille aksept.
+# $OriginMasterKjentFersk er $false kun under -DryRun (som per kontrakt
+# aldri gjør `git fetch`, se .DESCRIPTION) -- da sammenlignes KUN mot HEAD,
+# og meldingen sier eksplisitt at ancestor-/eksistens-sjekken mot
+# origin/master ikke er gjort, samme prinsipp som den eksisterende
+# HEAD-guarden og owner-gate-guarden allerede bruker for -DryRun. Bevisst
+# INGEN sjekk mot at ReleaseSha == CURRENT origin/master -- en eldre,
+# allerede merget release skal forbli deploybar selv etter at master har
+# beveget seg videre (selve poenget med en frossen release-SHA, #199).
+function Test-ReleaseShaForutsetninger {
+    param(
+        [Parameter(Mandatory)][string]$ReleaseSha,
+        [Parameter(Mandatory)][string]$LocalHead,
+        [bool]$CommitVerifisertEtterFetch,
+        [bool]$ErAncestorAvOriginMaster,
+        [bool]$OriginMasterKjentFersk
+    )
+    if ($ReleaseSha -notmatch '^[0-9a-fA-F]{40}$') {
+        return [PSCustomObject]@{ ok = $false; reason = "ReleaseSha må være en full 40-tegns commit-SHA (fikk: '$ReleaseSha')." }
+    }
+    $expected = $ReleaseSha.ToLowerInvariant()
+    if ([string]::IsNullOrWhiteSpace($LocalHead)) {
+        return [PSCustomObject]@{ ok = $false; reason = "Kunne ikke lese lokal HEAD -- kan ikke bekrefte ReleaseSha-forutsetningen." }
+    }
+    if ($LocalHead.ToLowerInvariant() -ne $expected) {
+        return [PSCustomObject]@{ ok = $false; reason = "HEAD ($LocalHead) matcher ikke oppgitt ReleaseSha ($ReleaseSha) -- checkout ut nøyaktig denne commiten (eller en worktree av den) og prøv igjen." }
+    }
+    if (-not $OriginMasterKjentFersk) {
+        return [PSCustomObject]@{ ok = $true; reason = "HEAD matcher ReleaseSha (kun lokal sammenligning -- -DryRun henter aldri origin på nytt, se .DESCRIPTION). Ancestor-/eksistens-sjekk mot fersk origin/master er IKKE gjort." }
+    }
+    if (-not $CommitVerifisertEtterFetch) {
+        return [PSCustomObject]@{ ok = $false; reason = "Fant ikke $ReleaseSha som en faktisk eksisterende commit etter fersk 'git fetch origin master'." }
+    }
+    if (-not $ErAncestorAvOriginMaster) {
+        return [PSCustomObject]@{ ok = $false; reason = "$ReleaseSha er IKKE en ancestor av (eller lik) fersk origin/master -- kun allerede merget innhold kan deployes som en frossen release. Merge PR-en til master først." }
+    }
+    return [PSCustomObject]@{ ok = $true; reason = "HEAD matcher ReleaseSha ($ReleaseSha), bekreftet en ancestor av fersk origin/master -- frossen release godkjent for deploy." }
 }
 
 # Ren beslutningsfunksjon (issue #213, Chief-krav owner-gate, runde 7) --
@@ -811,12 +925,34 @@ if (-not (Test-Path (Join-Path $WebRoot "index.html"))) {
     exit 1
 }
 
+# ─── 1a1. Guard: -ReleaseSha og -OwnerGateTestSha er gjensidig utelukkende ──
+# Se .DESCRIPTION for bakgrunnen (issue #223). Ren parameter-sjekk -- ingen
+# git/nettverk -- kjøres tidligst mulig, FØR noe som helst annet arbeid
+# (inkl. owner-gate sin egen mål-guard under). En frosset, allerede merget
+# produksjonsrelease og et isolert, ureviewet PR-testmål før merge er to
+# bevisst separate modiser som aldri skal kunne blandes -- se
+# "Branch naming is deterministic and enforced" / owner-gate-seksjonen i
+# docs/development/AGENT_WORKFLOW.md for hvorfor sammenblanding av
+# produksjons-/test-semantikk er nøyaktig den typen hull denne typen guard
+# finnes for å lukke.
+$isReleaseShaMode = -not [string]::IsNullOrWhiteSpace($ReleaseSha)
+$isOwnerGateTest = -not [string]::IsNullOrWhiteSpace($OwnerGateTestSha)
+if ($isReleaseShaMode -and $isOwnerGateTest) {
+    Write-Host ""
+    Write-Host "STOPPER: -ReleaseSha og -OwnerGateTestSha kan ikke brukes samtidig."
+    Write-Host "  De er to bevisst separate modiser -- en frosset, allerede merget"
+    Write-Host "  produksjonsrelease (-ReleaseSha) vs. et isolert, ureviewet PR-testmål"
+    Write-Host "  før merge (-OwnerGateTestSha). Kjør scriptet med kun ÉN av dem."
+    Write-Host ""
+    Write-Error "Ingen filer ble lastet opp -- ugyldig kombinasjon av parametre."
+    exit 1
+}
+
 # ─── 1a2. Guard: owner-gate testmodus kan ikke stille target produksjon ────
 # Se .DESCRIPTION for bakgrunnen (issue #213, Chief-krav). Ren
 # parameter-sjekk -- ingen git/nettverk -- kjøres derfor tidligst mulig,
 # før noe som helst annet arbeid gjøres. Rører ingenting når
 # -OwnerGateTestSha ikke er oppgitt (normal deploy, helt uendret).
-$isOwnerGateTest = -not [string]::IsNullOrWhiteSpace($OwnerGateTestSha)
 if ($isOwnerGateTest) {
     if ([string]::IsNullOrWhiteSpace($OwnerGateTestBranch)) {
         Write-Host ""
@@ -898,6 +1034,52 @@ try {
         }
         Write-Host "Owner-gate OK -- $($forutsetning.reason)"
         Write-Host "ADVARSEL: owner-gate testmodus er aktiv -- dette er IKKE en normal produksjonsdeploy."
+        Write-Host ""
+    }
+    elseif ($isReleaseShaMode) {
+        # Frossen release-SHA (issue #223, #199 adopsjonssteg 7) -- ERSTATTER
+        # (ikke supplerer) HEAD==origin/master-sammenligningen for DENNE
+        # kjøringen. Se .DESCRIPTION og Test-ReleaseShaForutsetninger for
+        # hele kontrakten. Bevisst SEPARAT fra owner-gate-grenen over --
+        # denne grenen kan kun nås når $isOwnerGateTest er $false (guard 1a1
+        # over avviser enhver kombinasjon av begge FØR dette punktet).
+        $localHead = (& git rev-parse HEAD).Trim()
+        $commitVerifisertEtterFetch = $false
+        $erAncestorAvOriginMaster = $false
+        $originMasterKjentFersk = $false
+
+        if (-not $DryRun) {
+            # Fersk fetch KUN utenfor DryRun -- samme 0-nettverkstilkoblinger-
+            # kontrakt som normalguarden og owner-gate-guarden.
+            Write-Host "--- Release-SHA: henter fersk origin/master for å bekrefte at $ReleaseSha faktisk er merget ---"
+            & git fetch origin master --quiet
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "git fetch origin master feilet -- kan ikke bekrefte fersk ancestor-status for ReleaseSha. Avbryter uten å laste opp noe."
+                exit 1
+            }
+            $originMasterKjentFersk = $true
+
+            & git cat-file -e "$ReleaseSha^{commit}" 2>$null
+            $commitVerifisertEtterFetch = ($LASTEXITCODE -eq 0)
+
+            if ($commitVerifisertEtterFetch) {
+                & git merge-base --is-ancestor $ReleaseSha origin/master
+                $erAncestorAvOriginMaster = ($LASTEXITCODE -eq 0)
+            }
+        }
+
+        $releaseForutsetning = Test-ReleaseShaForutsetninger -ReleaseSha $ReleaseSha -LocalHead $localHead -CommitVerifisertEtterFetch $commitVerifisertEtterFetch -ErAncestorAvOriginMaster $erAncestorAvOriginMaster -OriginMasterKjentFersk $originMasterKjentFersk
+
+        if (-not $releaseForutsetning.ok) {
+            Write-Host ""
+            Write-Host "STOPPER: release-SHA-forutsetning ikke oppfylt."
+            Write-Host "  $($releaseForutsetning.reason)"
+            Write-Host ""
+            Write-Error "Ingen filer ble lastet opp -- ReleaseSha-verifisering feilet."
+            exit 1
+        }
+        Write-Host "Release-SHA OK -- $($releaseForutsetning.reason)"
+        Write-Host "RELEASE_SHA: $ReleaseSha"
         Write-Host ""
     }
     else {
@@ -1036,6 +1218,9 @@ $TotalMB = [math]::Round($TotalBytes / 1MB, 2)
 
 Write-Host "SOURCE: $WebRoot"
 Write-Host "TARGET: $FtpHost`:$RemoteRoot"
+if ($isReleaseShaMode) {
+    Write-Host "RELEASE_SHA: $ReleaseSha (frossen release -- se .DESCRIPTION/web/README.md)"
+}
 Write-Host "Filer:  $($DeployFiles.Count) stk, $TotalMB MB"
 Write-Host "Ekskludert (utviklerdokumentasjon): $($ExcludeRelative -join ', ')"
 Write-Host ""
@@ -1114,12 +1299,13 @@ if (-not $curlCmd) {
 }
 
 # ─── 4. Bekreftelse (default NO) ───────────────────────────────────────────
+$releaseShaPromptSuffix = if ($isReleaseShaMode) { " [RELEASE_SHA: $ReleaseSha]" } else { "" }
 if (-not $Force) {
     if ($FilesToUpload.Count -lt $DeployFiles.Count) {
-        $promptTekst = "Deploy $($FilesToUpload.Count) av $($DeployFiles.Count) fil(er) (resten er allerede identisk med produksjon) fra $WebRoot til ${FtpHost}:${RemoteRoot} ? [y/N]"
+        $promptTekst = "Deploy $($FilesToUpload.Count) av $($DeployFiles.Count) fil(er) (resten er allerede identisk med produksjon) fra $WebRoot til ${FtpHost}:${RemoteRoot}$releaseShaPromptSuffix ? [y/N]"
     }
     else {
-        $promptTekst = "Deploy $($DeployFiles.Count) filer fra $WebRoot til ${FtpHost}:${RemoteRoot} ? [y/N]"
+        $promptTekst = "Deploy $($DeployFiles.Count) filer fra $WebRoot til ${FtpHost}:${RemoteRoot}$releaseShaPromptSuffix ? [y/N]"
     }
     $answer = Read-Host $promptTekst
     if ($answer -ne "y" -and $answer -ne "Y") {
@@ -1611,5 +1797,6 @@ if ($mismatches.Count -gt 0 -or $unverifiable.Count -gt 0) {
     exit 1
 }
 
-Write-Host ("Verifisering OK -- alle $($DeployFiles.Count) filer bekreftet byte-for-byte identiske mellom $WebRoot og {0}." -f $verifiseringsMaalLabel)
+$releaseShaVerifiseringSuffix = if ($isReleaseShaMode) { " (RELEASE_SHA: $ReleaseSha)" } else { "" }
+Write-Host ("Verifisering OK -- alle $($DeployFiles.Count) filer bekreftet byte-for-byte identiske mellom $WebRoot og {0}{1}." -f $verifiseringsMaalLabel, $releaseShaVerifiseringSuffix)
 exit 0
