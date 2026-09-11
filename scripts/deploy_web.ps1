@@ -160,6 +160,25 @@
   "FTPS"; normal: "produksjon" + "HTTPS", uendret ordlyd) og gjenbrukes
   av både per-fil-loggingen og sluttoppsummeringen.
 
+  LOGIN-PREFLIGHT MOT FORELDER-MAPPEN FOR ET FERSKT TESTMÅL (issue #213,
+  Chief-krav, runde 7): login-preflighten (steg 5b) listet tidligere ALLTID
+  selve -RemoteRoot for å bekrefte innlogging -- curl må cd'e inn i mappen
+  for å liste den, noe som krever at mappen allerede finnes. Et FERSKT
+  isolert owner-gate-testmål (f.eks. /www-owner-gate-test) finnes derimot
+  ikke før selve opplastingen oppretter det via --ftp-create-dirs, så
+  preflighten feilet deterministisk med curl exit 9 ("Server denied you to
+  change to the given directory") FØR noen opplasting fikk sjansen til å
+  opprette mappen -- og dermed også før den ekte bolk-/retry-/
+  verifiseringsflyten owner-gate-testen finnes for å bevise, i det hele
+  tatt kunne kjøre. Owner-gate-modus lister derfor nå i stedet -RemoteRoot
+  sin FORELDER-mappe (for standardeksempelet er det FTP-kontoens rot "/"),
+  som alltid er tilgjengelig uavhengig av om selve testmålet finnes ennå
+  (Get-OwnerGatePreflightSti). Dette endrer INGENTING ved hva som faktisk
+  valideres for ugyldige credentials/tilgang -- samme curl-innlogging,
+  samme feilkoder (f.eks. 530) -- kun HVILKEN mappe som listes. Normal
+  deploy (uten -OwnerGateTestSha) er HELT uendret og lister fortsatt
+  nøyaktig -RemoteRoot.
+
   Eksakt owner-PC-kommando for gaten (se .EXAMPLE under for full syntaks):
   fetch branchen, les dens faktiske head-SHA, og kjør scriptet med akkurat
   den SHA-en pluss en isolert -RemoteRoot.
@@ -327,6 +346,40 @@ function Test-OwnerGateForutsetninger {
         return [PSCustomObject]@{ ok = $false; reason = "origin/$OriginBranchNavn ($OriginBranchRef) matcher ikke oppgitt OwnerGateTestSha ($ExpectedSha) -- push/fetch fersk branch-tilstand og prøv igjen." }
     }
     return [PSCustomObject]@{ ok = $true; reason = "HEAD OG origin/$OriginBranchNavn matcher OwnerGateTestSha." }
+}
+
+# Ren beslutningsfunksjon (issue #213, Chief-krav owner-gate, runde 7) --
+# login-preflighten (steg 5b) validerte tidligere ALLTID mot selve
+# $RemoteRoot (`ftp://...$RemoteRoot/`) -- curl cd'er inn i mappen for å
+# liste den, noe som krever at mappen allerede finnes på serveren. Et
+# FERSKT owner-gate-testmål (f.eks. "/www-owner-gate-test") finnes derimot
+# ikke før selve opplastingen oppretter det via --ftp-create-dirs (se
+# New-BolkOpplastingConfig) -- preflighten feilet derfor deterministisk med
+# curl exit 9 ("Server denied you to change to the given directory") FØR
+# noen opplasting fikk sjansen til å opprette mappen (owner-gate-kjøring
+# observert av Chief på hode b71984a). Normal deploy ($RemoteRoot = "/www")
+# er upåvirket -- den mappen eksisterer alltid. Fiksen: i owner-gate-modus
+# valideres innlogging/tilgang i stedet mot $RemoteRoot sin FORELDER-mappe
+# (for standardeksempelet "/www-owner-gate-test" er det FTP-kontoens rot
+# "/"), som alltid er tilgjengelig uavhengig av om selve testmålet finnes
+# ennå. Dette endrer INGENTING ved hva som faktisk valideres for ugyldige
+# credentials/tilgang -- samme curl-innlogging, samme feilkoder (f.eks.
+# 530) -- kun HVILKEN mappe som listes. Normal modus (-not $IsOwnerGateTest)
+# returnerer $RemoteRoot uendret.
+function Get-OwnerGatePreflightSti {
+    param(
+        [Parameter(Mandatory)][string]$RemoteRoot,
+        [Parameter(Mandatory)][bool]$IsOwnerGateTest
+    )
+    if (-not $IsOwnerGateTest) {
+        return $RemoteRoot
+    }
+    $trimmet = $RemoteRoot.TrimEnd('/')
+    $sisteSkraastrek = $trimmet.LastIndexOf('/')
+    if ($sisteSkraastrek -le 0) {
+        return "/"
+    }
+    return $trimmet.Substring(0, $sisteSkraastrek)
 }
 
 # Ren beslutningsfunksjon (issue #213, Chief-krav owner-gate) -- nekter
@@ -1043,10 +1096,14 @@ try {
 
     # ─── 5b. Login-preflight -- 0 writes ────────────────────────────────
     # Én liten read-only listing av target-mappen for å bekrefte at
-    # innloggingen faktisk fungerer FØR noen av de 50 filene røres.
+    # innloggingen faktisk fungerer FØR noen av de 50 filene røres. I
+    # owner-gate-modus listes i stedet $RemoteRoot sin FORELDER-mappe (se
+    # Get-OwnerGatePreflightSti) -- et FERSKT isolert testmål finnes ikke
+    # ennå og opprettes først av selve opplastingen (--ftp-create-dirs).
     Write-Host ""
     Write-Host "--- Preflight: verifiserer FTP-innlogging (read-only, 0 writes) ---"
-    & curl.exe -K $curlConfigPath --ssl-reqd --silent --show-error -o "NUL" "ftp://$FtpHost$RemoteRoot/"
+    $preflightSti = Get-OwnerGatePreflightSti -RemoteRoot $RemoteRoot -IsOwnerGateTest $isOwnerGateTest
+    & curl.exe -K $curlConfigPath --ssl-reqd --silent --show-error -o "NUL" "ftp://$FtpHost$preflightSti/"
     $preflightExit = $LASTEXITCODE
 
     if ($preflightExit -ne 0) {

@@ -305,7 +305,7 @@ class TestSourceWiring(unittest.TestCase):
         self.text = _read_script()
 
     def test_new_functions_present_exactly_once(self):
-        for name in ("Test-ForbigaendeCurlFeil", "Split-FilerIBolker", "New-BolkOpplastingConfig"):
+        for name in ("Test-ForbigaendeCurlFeil", "Split-FilerIBolker", "New-BolkOpplastingConfig", "Get-OwnerGatePreflightSti"):
             self.assertEqual(self.text.count(f"function {name}"), 1, f"{name} skal defineres nøyaktig én gang.")
 
     def test_delta_check_after_dryrun_exit_and_before_dependency_check(self):
@@ -403,12 +403,22 @@ class TestSourceWiring(unittest.TestCase):
             "Bolk-configen skal bygges fra det (potensielt reduserte) $gjenstaendeFiler-settet, ikke ubetinget fra hele $bolk.",
         )
 
-    def test_login_preflight_unchanged(self):
+    def test_login_preflight_targets_preflight_sti_not_bare_remote_root(self):
+        """issue #213, Chief-krav owner-gate runde 7: preflighten mot selve
+        $RemoteRoot feilet deterministisk (curl exit 9) mot et FERSKT
+        owner-gate-testmål som ikke finnes ennå. Preflighten skal derfor
+        liste $preflightSti (Get-OwnerGatePreflightSti), aldri lenger
+        ubetinget $RemoteRoot selv."""
         for expected in (
-            '& curl.exe -K $curlConfigPath --ssl-reqd --silent --show-error -o "NUL" "ftp://$FtpHost$RemoteRoot/"',
+            "$preflightSti = Get-OwnerGatePreflightSti -RemoteRoot $RemoteRoot -IsOwnerGateTest $isOwnerGateTest",
+            '& curl.exe -K $curlConfigPath --ssl-reqd --silent --show-error -o "NUL" "ftp://$FtpHost$preflightSti/"',
             'Write-Host "--- Preflight: verifiserer FTP-innlogging (read-only, 0 writes) ---"',
         ):
             self.assertIn(expected, self.text, f"Login-preflight kildetekst mangler/endret: {expected!r}")
+        self.assertNotIn(
+            '"ftp://$FtpHost$RemoteRoot/"', self.text,
+            "Preflighten skal aldri lenger liste $RemoteRoot direkte -- kun via $preflightSti.",
+        )
 
     def test_existing_guards_untouched(self):
         for expected in (
