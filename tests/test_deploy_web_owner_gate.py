@@ -238,12 +238,20 @@ class TestSourceWiring(unittest.TestCase):
             self.assertIn(expected, self.text, f"Normal-guardens forventede kildetekst mangler/endret: {expected!r}")
 
     def test_owner_gate_is_a_branch_not_a_replacement(self):
-        """The normal-guard block must be reachable only via the `else`
-        branch of an `if ($isOwnerGateTest)` -- proving owner-gate mode can
-        never silently apply to a plain, unflagged invocation."""
+        """The normal-guard block must be reachable only via the final,
+        bare `else` branch of an `if ($isOwnerGateTest)` -- proving
+        owner-gate mode can never silently apply to a plain, unflagged
+        invocation. Issue #223 inserted a third `elseif ($isReleaseShaMode)`
+        branch (with its own, textually identical
+        `& git fetch origin master --quiet` call) between the owner-gate
+        branch and this final `else` -- the fetch-occurrence search is
+        therefore bounded to start AT idx_else, so it can only match the
+        occurrence actually inside the normal branch, never the earlier
+        release-SHA one (tests/test_deploy_web_release_sha.py covers that
+        branch's own ordering separately)."""
         idx_if = self.text.index("if ($isOwnerGateTest) {")
         idx_else = self.text.index("else {", idx_if)
-        idx_normal_fetch = self.text.index("& git fetch origin master --quiet")
+        idx_normal_fetch = self.text.index("& git fetch origin master --quiet", idx_else)
         self.assertLess(idx_if, idx_else)
         self.assertLess(idx_else, idx_normal_fetch, "Normalguardens git-fetch skal ligge i else-grenen, etter owner-gate-grenen.")
 

@@ -340,6 +340,25 @@ Ingen CI/CD — deploy er fortsatt en eksplisitt, manuell handling, men skjer n�
 - **Credentials**: spørres interaktivt hver kjøring, lagres aldri i repoet eller på disk (kun en midlertidig curl-configfil som slettes rett etter opplasting).
 - Etter vellykket opplasting kjører scriptet en enkel, read-only HTTPS-verifisering (`/`, `/en/`, `/js/app.js`, `/js/preferences.js`) og feiler tydelig (non-zero exit) hvis noe fortsatt er galt.
 
+### Web Release Batch og frossen RELEASE_SHA (issue #223, Production Workflow V2 #199)
+
+`#199` (Kvernhaug Production Workflow V2, låst eier-beslutning) definerer batchpolicyen for Web-releaser; dette avsnittet formaliserer den operasjonelt for `scripts/deploy_web.ps1` uten å endre selve #199-beslutningen:
+
+- **Default batch**: 2–4 fullførte LOW/MEDIUM Web-fikser deles normalt om én release-/deploy-/live-smoke-syklus, i stedet for én deploy per fiks.
+- **Solo-unntak**: HIGH/security/data-loss/eksisterende-produksjonsregresjoner kan releases alene, uten å vente på en full batch.
+- **Én frossen `RELEASE_SHA` per batch**: før predeploy fryses én eksplisitt, full 40-tegns commit-SHA for hele batchen. Predeploy, FTP-opplasting, byte-verifisering og live-smoke skal ALLE gjelde nøyaktig den samme SHA-en — selv om `master` beveger seg videre etterpå (nye commits, neste batch osv.).
+- **`MERGED != DEPLOYED/LIVE`**: at en PR er merget til `master` betyr ikke at den er live på `https://kvernhaugbrygghus.no` — kun en faktisk kjørt, verifisert `deploy_web.ps1`-runde (evt. med `-ReleaseSha`, se under) beviser det.
+- **Master kan ikke stille endre en allerede valgt release**: en gang en batch sin `RELEASE_SHA` er valgt, skal senere `master`-bevegelse aldri stille endre hvilken commit som faktisk deployes for den batchen.
+
+`scripts/deploy_web.ps1 -ReleaseSha <40-tegns SHA>` er den konkrete mekanismen: den erstatter scriptets vanlige `HEAD == origin/master`-guard med en eksplisitt SHA-binding (HEAD == `-ReleaseSha`, `-ReleaseSha` finnes som commit etter fersk `git fetch`, og `-ReleaseSha` er en ancestor av — men IKKE nødvendigvis identisk med — fersk `origin/master`), slik at en allerede merget, men nå "gammel", release-batch forblir deploybar selv etter at `master` har rukket å bevege seg videre. Full kontrakt, fail-closed-betingelser og eksempel: `scripts/deploy_web.ps1`s `.DESCRIPTION`/`.PARAMETER ReleaseSha`. `-ReleaseSha` er en HELT separat modus fra `-OwnerGateTestSha` (issue #213, pre-merge PR-testing mot et isolert testmål) og kan aldri kombineres med den.
+
+```powershell
+# Frossen release-batch -- deploy en eksplisitt, allerede merget SHA selv om
+# master har beveget seg videre siden den ble merget. Krever at lokal HEAD
+# faktisk ER den oppgitte SHA-en (checkout ut/worktree den commiten først).
+.\scripts\deploy_web.ps1 -ReleaseSha "<40-tegns SHA>"
+```
+
 ## Vedlikehold av formler og stillogikk
 
 Ingen delt kjøretid mellom Python- og JS-siden. `js/calc.js`, `js/flavor.js` og `js/style.js` er manuelle porter som må oppdateres for hånd hvis kilden i `modules/` endres:
