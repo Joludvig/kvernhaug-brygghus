@@ -395,10 +395,19 @@ class TestSourceWiring(unittest.TestCase):
         self.assertIn("Test-ForbigaendeCurlFeil -ExitCode $sisteExitCode", self.text)
 
     def test_hard_failure_still_stops_immediately_no_retry(self):
+        """A genuine (non-transient) curl failure must break out of the
+        attempt loop BEFORE reaching reverification at all -- reverifying a
+        real, reproducible error would only waste an HTTPS round trip on a
+        result that can never change."""
         section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
         section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
         section = self.text[section_start:section_end]
-        self.assertIn("erForbigaende) -or", section)
+        self.assertIn("if (-not $erForbigaende) {", section)
+        idx_check = section.index("if (-not $erForbigaende) {")
+        idx_break = section.index("break", idx_check)
+        idx_reverify = section.index("Get-VerifiseringsStierForRetry -Resultater $bolkRetryResultater", idx_check)
+        self.assertLess(idx_check, idx_break)
+        self.assertLess(idx_break, idx_reverify, "En ekte (ikke-forbigående) feil skal stoppe UMIDDELBART, uten å nå reverifiseringen.")
 
     def test_transient_failure_reverifies_before_retry_not_blind_reupload(self):
         """Chief review (PR #216, blocker 2): curl exit 56 was observed
@@ -456,6 +465,62 @@ class TestSourceWiring(unittest.TestCase):
             section,
             "Bolk-configen skal bygges fra det (potensielt reduserte) $gjenstaendeFiler-settet, ikke ubetinget fra hele $bolk.",
         )
+
+    def test_final_bounded_attempt_reverifies_before_exhausting_not_before(self):
+        """Chief review (PR #216, round 9): the round-8 degrading retry flow
+        only reverified before scheduling a retry (attempt 2+ at the SAME
+        bolk size) -- if that FINAL bounded attempt also failed
+        transiently, the (potentially stale) pre-attempt $gjenstaendeFiler
+        went straight to the smaller bolk size (or the STOPPER report)
+        without a fresh reverification. A file that actually arrived during
+        that last failed attempt, before curl 18/55/56 cut off the rest of
+        the chunk, could therefore be blindly re-uploaded at the next
+        (smaller) size. The exhausted-attempts check must now run AFTER
+        reverification has reduced $gjenstaendeFiler, not before it -- so a
+        final transient failure is reverified exactly like every earlier
+        retry attempt, never skipped."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        idx_not_transient_break = section.index("if (-not $erForbigaende) {")
+        idx_reverify_call = section.index("Get-VerifiseringsStierForRetry -Resultater $bolkRetryResultater")
+        idx_zero_check = section.index("$gjenstaendeFiler.Count -eq 0", idx_reverify_call)
+        idx_exhausted_check = section.index("$forsokTeller -ge $MaxBolkOpplastingsForsok", idx_zero_check)
+        self.assertLess(idx_not_transient_break, idx_reverify_call, "En ekte feil skal fortsatt stoppe FØR reverifiseringen.")
+        self.assertLess(
+            idx_reverify_call, idx_exhausted_check,
+            "Reverifiseringen skal skje FØR sjekken om bounded forsøk er brukt opp -- også for det SISTE forsøket, ikke bare før forsøk 2+.",
+        )
+
+    def test_exhausted_final_attempt_counts_as_success_if_reverify_shows_all_match(self):
+        """If reverification after the LAST bounded attempt at a given bolk
+        size shows every remaining file already matches production, the
+        bolk must be treated as fully successful -- never carried forward
+        to a smaller bolk size and never reported as a STOPPER failure,
+        even though the curl process itself exited non-zero."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        idx_zero_check = section.index("$gjenstaendeFiler.Count -eq 0")
+        idx_bolkok_true = section.index("$bolkOk = $true", idx_zero_check)
+        idx_exhausted_check = section.index("$forsokTeller -ge $MaxBolkOpplastingsForsok")
+        self.assertLess(idx_zero_check, idx_bolkok_true)
+        self.assertLess(
+            idx_bolkok_true, idx_exhausted_check,
+            "Suksess-veien (alle filer matcher etter reverifisering) skal avgjøres FØR sjekken om bounded forsøk er brukt opp -- ellers ville et fullt reverifisert bolk fortsatt kunne regnes som 'brukt opp' og degraderes/stoppes unødvendig.",
+        )
+
+    def test_degraded_file_set_comes_from_post_reverification_reduction(self):
+        """The set carried forward to a smaller bolk size ($nesteStorrelseFiler)
+        must be built from the reverified/reduced $gjenstaendeFiler, never
+        from the original, unreduced $bolk -- otherwise a file confirmed
+        already-uploaded by the final reverification would still be
+        degraded to a smaller size and re-uploaded there."""
+        section_start = self.text.index("# ─── 5c. Bolk-basert opplasting")
+        section_end = self.text.index("# ─── 6. Produksjonsverifisering", section_start)
+        section = self.text[section_start:section_end]
+        self.assertIn("$nesteStorrelseFiler += $gjenstaendeFiler", section)
+        self.assertNotIn("$nesteStorrelseFiler += $bolk", section)
 
     def test_login_preflight_targets_preflight_sti_not_bare_remote_root(self):
         """issue #213, Chief-krav owner-gate runde 7: preflighten mot selve

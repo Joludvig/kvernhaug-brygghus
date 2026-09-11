@@ -203,6 +203,22 @@
   stopper deployen -- det finnes ingen mindre bolkstørrelse å degradere
   videre til.
 
+  REVERIFISERING OGSÅ ETTER DET SISTE BOUNDED FORSØKET (issue #213, Chief
+  review PR #216, runde 9): runde 8 sin degradering reverifiserte kun FØR
+  et forsøk 2+ på SAMME bolkstørrelse -- hvis dette siste forsøket også
+  feilet forbigående, gikk det (potensielt utdaterte) gjenstående filsettet
+  fra FØR dette forsøket rett videre til neste, mindre bolkstørrelse uten
+  noen ny reverifisering. En fil som faktisk ble lastet opp under nettopp
+  dette siste forsøket, før curl 18/55/56 avbrøt resten av bolken, kunne
+  dermed bli blindt lastet opp på nytt ved den mindre bolkstørrelsen --
+  eksakt det samme problemet runde 8's reverifiser-før-retry-fiks løste for
+  forsøk 1 -> 2, bare urettet for det avsluttende forsøket. Steg 5c
+  reverifiserer nå ETTER hvert forbigående forsøk, inkludert det siste --
+  sjekken på om bounded forsøk er brukt opp skjer nå ETTER at
+  reverifiseringen har redusert filsettet, ikke før. Matcher alle
+  gjenstående filer nå produksjon, regnes bolken som vellykket uten
+  degradering; ellers degraderes kun det faktisk fortsatt avvikende settet.
+
   Eksakt owner-PC-kommando for gaten (se .EXAMPLE under for full syntaks):
   fetch branchen, les dens faktiske head-SHA, og kjør scriptet med akkurat
   den SHA-en pluss en isolert -RemoteRoot.
@@ -1252,26 +1268,30 @@ try {
                             break
                         }
                         $erForbigaende = Test-ForbigaendeCurlFeil -ExitCode $sisteExitCode
-                        if ((-not $erForbigaende) -or ($forsokTeller -ge $MaxBolkOpplastingsForsok)) {
+                        if (-not $erForbigaende) {
                             break
                         }
 
-                        # Reverifiser FØR retry (Chief review, PR #216): issue #213
-                        # observerte curl exit 56 ETTER at filen faktisk hadde
-                        # kommet frem -- et blindt retry av HELE bolken ville da
-                        # lastet opp allerede-vellykkede filer på nytt. Samme
-                        # read-only HTTPS-mekanisme som delta-sjekken (steg 2b) og
-                        # produksjonsverifiseringen (steg 6) brukes til å
+                        # Reverifiser ETTER HVERT forbigående forsøk -- OGSÅ det
+                        # SISTE bounded forsøket, ikke bare før forsøk 2+ (Chief
+                        # review, PR #216, runde 9): issue #213 observerte curl exit
+                        # 56 ETTER at filen faktisk hadde kommet frem, så et blindt
+                        # retry -- ELLER en blind degradering til mindre
+                        # bolkstørrelse -- av HELE bolken/det gjenstående settet
+                        # ville da lastet opp allerede-vellykkede filer på nytt.
+                        # Samme read-only HTTPS-mekanisme som delta-sjekken (steg
+                        # 2b) og produksjonsverifiseringen (steg 6) brukes til å
                         # reverifisere KUN filene i denne bolken mot produksjon --
-                        # gjenstående retry-forsøk begrenses til filer som
-                        # fortsatt avviker/mangler/ikke kan verifiseres. Hvis
-                        # ingen gjenstår, regnes bolken som vellykket uten et
-                        # faktisk nytt curl-forsøk.
+                        # gjenstående filer begrenses til de som fortsatt
+                        # avviker/mangler/ikke kan verifiseres, uansett om et nytt
+                        # bounded forsøk gjenstår eller bolkstørrelsen er brukt opp.
+                        # Hvis ingen gjenstår, regnes bolken som vellykket uten et
+                        # faktisk nytt curl-forsøk -- heller ikke en degradering.
                         if ($isOwnerGateTest) {
-                            Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken over FTPS mot det ISOLERTE owner-gate-testmålet ($RemoteRoot) før et eventuelt retry-forsøk..." -f $sisteExitCode, $gjenstaendeFiler.Count)
+                            Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken over FTPS mot det ISOLERTE owner-gate-testmålet ($RemoteRoot) etter forsøk {2}/{3}..." -f $sisteExitCode, $gjenstaendeFiler.Count, $forsokTeller, $MaxBolkOpplastingsForsok)
                         }
                         else {
-                            Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken mot produksjon før et eventuelt retry-forsøk..." -f $sisteExitCode, $gjenstaendeFiler.Count)
+                            Write-Host ("  Forbigående feil (curl exit code {0}) -- reverifiserer {1} fil(er) i bolken mot produksjon etter forsøk {2}/{3}..." -f $sisteExitCode, $gjenstaendeFiler.Count, $forsokTeller, $MaxBolkOpplastingsForsok)
                         }
                         $bolkRetryTempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbh_deploy_bolkretry_" + [guid]::NewGuid().ToString("N"))
                         New-Item -ItemType Directory -Path $bolkRetryTempDir | Out-Null
@@ -1293,8 +1313,21 @@ try {
                         $gjenstaendeFiler = @($gjenstaendeFiler | Where-Object { $gjenstaendeRels -contains $_.rel })
 
                         if ($gjenstaendeFiler.Count -eq 0) {
-                            Write-Host "  Reverifisering: alle filer i bolken er allerede identisk med produksjon -- bolken regnes som vellykket, ingen retry nødvendig."
+                            Write-Host "  Reverifisering: alle filer i bolken er allerede identisk med produksjon -- bolken regnes som vellykket, ingen retry/degradering nødvendig."
                             $bolkOk = $true
+                            break
+                        }
+
+                        if ($forsokTeller -ge $MaxBolkOpplastingsForsok) {
+                            # Bounded forsøk brukt opp for denne bolkstørrelsen --
+                            # selv etter reverifiseringen over gjenstår ekte
+                            # avvikende/ikke-verifiserbare filer, så INGEN flere
+                            # forsøk på DENNE størrelsen (ikke en løkke).
+                            # $gjenstaendeFiler er nå allerede redusert til
+                            # nøyaktig disse filene, så nedstrøms
+                            # STOPPER-rapportering/degradering til mindre
+                            # bolkstørrelse aldri kan inkludere en fil som
+                            # egentlig kom gjennom i det siste forsøket.
                             break
                         }
 
