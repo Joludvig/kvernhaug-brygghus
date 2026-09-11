@@ -25,6 +25,13 @@ name: CI Test Gate
   push:
     branches: [master]
 
+# PR-scoped: newer commits to the same PR cancel an older in-progress run of
+# this workflow. Push events fall back to `github.sha`, which is unique per
+# push, so unrelated master runs are never cross-cancelled by this group.
+concurrency:
+  group: ci-test-gate-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -38,6 +45,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
 
       - name: Set up Node
         uses: actions/setup-node@v4
