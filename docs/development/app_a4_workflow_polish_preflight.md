@@ -10,8 +10,8 @@ A1 (issue #170), A2, and A3 (issue #237, preflight in
 `docs/development/app_a3_state_orientation_preflight.md`, PR #238) are
 completed on master and are **not** reopened here except where this
 audit's own required trace (A4-3, "sidebar recipe selector population")
-surfaced a real interaction this document is obligated to report (Section
-8, Finding F0).
+surfaced a confirmed A3-1 interaction regression this document is
+obligated to report (Section 8, Finding F0).
 
 ---
 
@@ -243,12 +243,26 @@ the current on-disk recipe set. "Selector refresh" is therefore never a
   directly via `session_state[...] =`, bypassing the real
   `sidebar_recipe_selector` widget entirely — neither suite exercises a
   genuinely-selected recipe through the real selector before importing,
-  so neither could have caught this. It is not a new regression from
-  A3-1 specifically (the `.kbhrecipe` path has had the identical
-  `st.rerun()` + identity-clear shape since PRI 2C3, well before A3);
-  it is a pre-existing sidebar-selector defect that A3-1 faithfully
-  inherited by correctly mirroring the established pattern, as
-  instructed.
+  so neither could have caught this. **Provenance, verified against git
+  history:** before PR #238/A3-1 (commit `4da5bba`),
+  `apply_import_to_session_state()` did **not** clear
+  `_last_loaded_recipe`/`_last_loaded_recipe_file` at all (confirmed via
+  `git show 4da5bba -- modules/recipe_importer.py` — the two `pop()`
+  calls are new lines added by that commit). The `st.rerun()` at
+  `ui/sidebar.py:219` is older and unrelated to A3 (confirmed via
+  `git blame` — present since commit `03be11c4`, 2026-05-25), but on its
+  own it was harmless: with no identity pop, the reload-on-mismatch
+  check had nothing to mismatch against. A3-1 added the identity-clear
+  without also updating the `sidebar_recipe_selector` widget's own bound
+  value, which is what newly created the mismatch this rerun now walks
+  into. The confirmed text-paste behavior is therefore an **A3-1
+  interaction regression/follow-up**, not a pre-existing defect A3-1
+  merely inherited. The `.kbhrecipe` path has had rerun + identity-clear
+  together since PRI 2C3 (well before A3), so *if* it shares this exact
+  bug, that occurrence would be pre-existing there — but that path was
+  not independently reproduced in this audit (above), so it cannot be
+  used to establish that the confirmed text-paste behavior itself
+  pre-dates A3-1.
 - **"New recipe":** the App has **no dedicated "new recipe" affordance**
   at all (confirmed: no button/flow found matching this in
   `ui/sidebar.py`, `app.py`, or `ui/recipe_card.py`; this exists only on
@@ -271,10 +285,13 @@ the current on-disk recipe set. "Selector refresh" is therefore never a
   back as a small A3 follow-up, since it is really "finish what A3-4
   started," not new A4 scope.
 - F0 (import-over-loaded-recipe silent revert): **`OUT OF A4`** by strict
-  roadmap-bullet mapping (it is not one of the four bullets), but
-  **high severity** (silent data loss, not cosmetic) and directly
-  surfaced by the A4-3 trace this issue required. Recommend it become
-  its own immediate, separate `FAST` issue — see Section 15.
+  roadmap-bullet mapping (it is not one of the four bullets) and, per
+  the provenance finding above, an **A3-1 interaction
+  regression/follow-up**, not a pre-existing defect. **High severity**
+  (silent data loss, not cosmetic) and directly surfaced by the A4-3
+  trace this issue required. Recommend it become its own immediate,
+  separate regression issue, sequenced **before** ordinary A4 polish
+  implementation — see Section 15.
 - Save-as-copy selection semantics: **`DECISION`** (legitimate choice
   either way; not a defect).
 
@@ -347,15 +364,20 @@ fix (see Section 12).
 
 ## 8. Source-proven friction/trust findings ranked by severity
 
-1. **F0 — HIGH, `OUT OF A4` (see Section 15 for recommended handling).**
+1. **F0 — HIGH, `OUT OF A4`, A3-1 interaction regression/follow-up (see
+   Section 15 for recommended handling and sequencing).**
    Pasting/importing over an already-selector-loaded recipe silently
    reverts to the old recipe's content after the import's own
    `st.rerun()`, with no error shown. Actual data loss risk (a user
    could paste a new recipe, see it apply, then have it silently
    replaced by the old one), not merely cosmetic. Root-caused precisely
-   in Section 5. Confirmed on the real text-import path; the
-   `.kbhrecipe` path shares the identical code shape but was not
-   independently re-confirmed this session (Section 5, Section 14).
+   in Section 5, and confirmed via git history to be introduced by
+   PR #238/A3-1 (commit `4da5bba` added the identity-clearing pops to
+   `apply_import_to_session_state()`; the pre-existing `st.rerun()` at
+   `ui/sidebar.py:219` was harmless before that). Confirmed reproduced
+   on the real text-import path; the `.kbhrecipe` path shares a similar
+   code shape but was not independently re-confirmed this session, and
+   is therefore not used to date this regression (Section 5, Section 14).
 2. **MEDIUM — A4-3.** Rename+save leaves the sidebar selector showing
    "-- Velg oppskrift --" (looks like nothing is selected) immediately
    after a successful, identity-changing save — directly undercuts
@@ -378,14 +400,16 @@ fix (see Section 12).
 
 ## 9. Smallest recommended fix for each valid finding
 
-- **F0:** make the sidebar's reload-on-mismatch check
-  (`ui/sidebar.py:68-69`) distinguish "user picked a different option in
-  the dropdown" from "something else cleared the identity flags
-  underneath the still-selected dropdown value" — e.g. only reload when
-  `valgt_lagret_navn` differs from what the widget itself held on the
-  *previous* render, not merely from `_last_loaded_recipe`. Needs a
-  DECISION on the exact comparison (see Section 15) — not silently
-  implementable within a FAST fix without picking that semantics.
+- **F0 (A3-1 regression/follow-up, recommended before ordinary A4
+  polish — see Section 15):** make the sidebar's reload-on-mismatch
+  check (`ui/sidebar.py:68-69`) distinguish "user picked a different
+  option in the dropdown" from "something else cleared the identity
+  flags underneath the still-selected dropdown value" — e.g. only
+  reload when `valgt_lagret_navn` differs from what the widget itself
+  held on the *previous* render, not merely from `_last_loaded_recipe`.
+  Needs a DECISION on the exact comparison (see Section 15) — not
+  silently implementable within a FAST fix without picking that
+  semantics; this docs PR does not implement it.
 - **A4-3 rename-orphaning:** explicitly set
   `st.session_state["sidebar_recipe_selector"] = ny_recipe["name"]` in
   `ui/recipe_card.py`'s `lagre_endringer_btn` success branch, before the
@@ -483,7 +507,8 @@ patterns already proven in this codebase:
   import handler's own `st.rerun()`. Neither existing import test suite
   can be reused directly for this, precisely because both use harnesses
   that never populate a real selector-bound identity first (Section 5)
-  — this is the reproduction case for whichever issue F0 becomes.
+  — this is the reproduction case for the F0 A3-1 regression/follow-up
+  issue.
 - A4-4: string-content assertions (`assertIn`/`assertNotIn` on rendered
   caption/toast text) in a small extension of
   `tests/test_kbhbrew_create_panel_apptest.py` and
@@ -512,14 +537,17 @@ and risk genuinely differ:
    all in this panel" gap (Section 12) is folded into this same PR or
    tracked as its own follow-up — recommend follow-up, to keep this PR
    small.
-4. **A separate, urgent issue for F0** — recommend opening it
-   immediately (not bundled with any A4 PR), since it is a silent
-   data-loss-shaped defect discovered during this audit, not a
-   roadmap-A4 item. Risk class is likely `DECISION` at the "which
-   comparison replaces the reload check" step (Section 9), then `FAST`
-   to implement once that's chosen — Chief should confirm severity and
-   sequencing; this document does not have authority to reclassify it
-   above what #239 asked for.
+4. **A separate, urgent A3-1 regression/follow-up issue for F0** —
+   recommend opening it immediately (not bundled with any A4 PR), and
+   recommend it be **fixed/contained before ordinary A4 polish
+   implementation proceeds**, since it is a silent-content-revert
+   regression on a recently merged A3 path (PR #238), not a
+   roadmap-A4 item and not merely cosmetic polish. Risk class is likely
+   `DECISION` at the "which comparison replaces the reload check" step
+   (Section 9), then `FAST` to implement once that's chosen — Chief
+   should confirm final severity and sequencing; this document does not
+   have authority to reclassify it above what #239 asked for, and does
+   not implement it here.
 5. **A4-1 stays a pure `DECISION`, no issue opened yet** — nothing to
    implement until the product decides whether batch/brewer-name
    capture is wanted at all, and if so, its field/layer (Section 3,
@@ -529,15 +557,19 @@ and risk genuinely differ:
 
 Preference for several small issues over one large one here is
 deliberate: #1–#3 have no shared risk surface (different files/
-functions), and F0 is severity- and root-cause-distinct enough from all
-four A4 bullets that bundling it would blur its own review.
+functions), and F0 is severity-, provenance-, and root-cause-distinct
+enough from all four A4 bullets — as an A3-1 regression rather than an
+A4 polish item — that bundling it would blur its own review and its own
+sequencing.
 
 ## 16. Explicit non-goals
 
 - No product code, Core/schema, or `.kbhbrew` format change in this
   document or its branch.
-- No redo of A1 (#170), A2, or A3 (#237/PR #238) — F0 is reported, not
-  fixed, and does not alter any A1/A3 contract already in place.
+- No redo of A1 (#170), A2, or A3 (#237/PR #238) — F0 is reported and
+  its provenance traced (it is an A3-1 interaction regression/follow-up,
+  Section 5/8), not fixed here, and this document does not alter any
+  A1/A3 contract already in place.
 - No Phase 3 acceptance work.
 - No Web, Bryggeskole, Brew Lab, or Sóti change.
 - No touching #97/#98/#99/#100.
