@@ -58,6 +58,7 @@ from modules.kbhbrew_ui import (
     manglende_ingrediens_ider,
     sorter_brews_for_eksport,
 )
+from ui.i18n import t
 
 _AKTIV_BREW_ID_NOKKEL = "_aktiv_kbhbrew_brew_id"
 _IMPORT_FIL_ID_NOKKEL = "kbhbrew_import_preview_file_id"
@@ -174,9 +175,19 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
 
     aktiv_brew = _sinkroniser_aktiv_brew_mot_oppskrift()
     if aktiv_brew is not None:
+        # App A3 (issue #237, fiks A3-2) -- "aktiv" er tidligere brukt BÅDE
+        # om denne øktens Bryggdag-skrivemål OG om brygget sin egen lagrede
+        # status: active. Teksten skiller nå eksplisitt mellom de to: selve
+        # skrivemålet ("skriver til") og den lagrede statusen (samme
+        # brew_history.status.*-nøkler som Brygghistorikk-panelet selv
+        # bruker) vises som to atskilte deler -- et Ferdig/Forkastet brygg
+        # skal ALDRI kunne fremstå som om det har lagringsstatus "Aktiv"
+        # bare fordi det er denne øktens gjeldende mål (se docs/development/
+        # app_a3_state_orientation_preflight.md Section 8, funn A3-2).
         st.success(
-            f"✅ Aktivt brygg denne økten: `{aktiv_brew['brewId']}` · "
-            f"opprettet {aktiv_brew.get('createdAt', '-')} · status **{aktiv_brew.get('status')}**"
+            t("kbhbrew.skriver_til", brew_id=aktiv_brew["brewId"], opprettet=aktiv_brew.get("createdAt", "-"))
+            + "  ·  " + t("brew_history.status_label") + ": **"
+            + t(f"brew_history.status.{aktiv_brew.get('status')}") + "**"
         )
 
 
