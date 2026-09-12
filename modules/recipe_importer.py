@@ -244,6 +244,17 @@ def apply_import_to_session_state(import_result):
     """
     import streamlit as st
 
+    # App A3 (issue #237, fiks A3-1) -- speiler modules/kbh_import_apply.py
+    # sin "Import as new"-identitetsrydding EKSAKT: en tekstimport skal
+    # ALDRI kunne la en tidligere lastet/lagret oppskrifts identitet
+    # (_last_loaded_recipe/_last_loaded_recipe_file) stille henge igjen på
+    # det NYE, importerte innholdet. Uten dette matchet et allerede aktivt
+    # Bryggdag-mål (ui/kbhbrew_panel.py::aktiv_brew_id()) fortsatt den
+    # gamle identiteten etter import -- se docs/development/
+    # app_a3_state_orientation_preflight.md Section 8, funn A3-1.
+    st.session_state.pop("_last_loaded_recipe", None)
+    st.session_state.pop("_last_loaded_recipe_file", None)
+
     matched = import_result["matched"]
 
     metadata = import_result.get("metadata", {})
