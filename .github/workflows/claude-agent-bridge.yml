@@ -518,6 +518,16 @@ jobs:
               unexpected state, STOP and post a comment on the issue
               explaining exactly why, rather than guessing.
 
+            For BOTH trigger paths, perform the final post-verification
+            HO step in AGENT_WORKFLOW.md, section "HO policy — local and
+            GitHub jobs", before the final outcome report. Use the same
+            policy as local Claude: resolve #152's existing router, check
+            material change and single-writer ownership, and report
+            `HO UPDATED: YES/NO` with its evidence or reason. Do not write
+            both the legacy AUTO body and a ROLLING checkpoint. The
+            wrapper's deliverable/review/Ready checks below have not run
+            yet; keep those gates pending in any checkpoint you publish.
+
             Do not touch `raw_data/unmatched_malt.json` or any other
             unrelated local/uncommitted state. Never push directly to
             `master`. Never merge. When you are done (or when you must

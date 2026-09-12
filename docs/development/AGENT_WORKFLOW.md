@@ -1450,6 +1450,136 @@ V1 just automates the handoff:
   from the most recent Chief review, report which were addressed and
   how, and leave everything else in the PR untouched.
 
+## HO policy — local and GitHub jobs
+
+This is the single HO maintenance policy for local Claude jobs and both
+Bridge trigger paths. `CLAUDE.md` and the Bridge prompt reference this
+section; do not copy a second policy into individual prompts. It governs
+operational handover only, not product scope, merge/deploy authorization,
+or the existing deliverable/Chief-review gates.
+
+### Canonical structure and compatibility
+
+Read [#152](https://github.com/Joludvig/kvernhaug-brygghus/issues/152)
+**and its comments**, not just its body. The existing
+[HO ROUTER CONTRACT V1](https://github.com/Joludvig/kvernhaug-brygghus/issues/152#issuecomment-5615617899)
+is already the routing contract; this policy does not introduce a format.
+
+- Preserve `<!-- KBH_HO_STATIC_START -->` / `<!-- KBH_HO_STATIC_END -->`
+  and their content. Never change STATIC, curated governance, charters or
+  contracts without explicit authorization for that change and the
+  underlying versioned decision. Routine HO maintenance is no such grant.
+- Preserve `<!-- KBH_HO_AUTO_START -->` / `<!-- KBH_HO_AUTO_END -->`.
+  The body AUTO block is a legacy operational snapshot. Under the router
+  contract, advance the routed ROLLING checkpoint, **not the body as well**.
+  No routine job rewrites the body, its timestamps or its maintenance text.
+- Read all #152 comments and select the newest valid standalone line
+  `KBH_COS_CHECKPOINT_PTR_V1 issue=<positive integer> comment=<positive integer>`.
+  Fetch that exact comment on that issue in this repository and require
+  the standalone marker `KBH_COS_LIVE_CHECKPOINT_V1`. Quoted examples and
+  unmarked status comments are not replacement pointers. A missing,
+  inaccessible or ambiguous route means defer the write and report the
+  problem; never silently fall back to writing the old AUTO block.
+- Read the checkpoint, then refresh live master, relevant issues/labels,
+  PR heads, reviews/checks, merge state and production evidence. Precedence:
+  live evidence > routed checkpoint > stale operational body/comments.
+  Newer unmarked comments may contain evidence or unresolved gates to
+  reconcile with live state; do not discard them or promote them merely
+  because they are newer. Snapshot age alone proves nothing about freshness.
+
+### One writer, final post-verification step
+
+1. Establish one repository-wide HO writer at a time before publishing:
+   the executing local Claude or Bridge Claude, never both. Record the
+   current writer in the existing task/control issue or task assignment;
+   a WIP exception allowing parallel implementation does not allow parallel
+   HO writes. Prep/read lanes and the Chief consume/report evidence; they do
+   not duplicate that job's HO write. A later verified review, merge or
+   deploy is a new material event, handled serially under this same policy.
+   If another local job, Bridge run or legacy scheduled HO updater owns
+   the writer role, or ownership cannot be established, defer to it in
+   the existing task report. Per-issue Bridge concurrency does **not**
+   serialize #152 across issues or local sessions; a fresh read is not a
+   lock. Do not publish concurrently or add a second writer/workflow/hook.
+2. Finish the bounded work and required verification first, including
+   reading the latest applicable review/check results. After any authorized
+   commit/push/PR delivery, refetch the actual issue/PR/head. HO maintenance
+   is the job's **last state-changing task step before its final report**.
+   At a blocked stop, finish available verification and record only the
+   verified blocker, never success. Missing CI, Chief review, owner-PC or
+   production checks stay explicitly pending.
+   For Bridge Claude, the wrapper's independent deliverable check,
+   `status:review`, Chief-ready signal and Draft-to-Ready transition occur
+   **after** the Claude step: record them as pending, not completed or
+   approved. The wrapper remains their sole owner and does not write HO.
+3. Compare substantive operational truth with the current checkpoint.
+   Write only if a fresh Chief's next action or understanding materially
+   changes: completed bounded work, authoritative implementation/review
+   state, an active lane, blocker, dependency, owner gate, parking decision
+   or next step. No write for a rerun, timestamp refresh, rewording or facts
+   already represented. HO maintenance itself is not another material event.
+4. Prepare a compact **replacement snapshot**, using the existing checkpoint
+   marker. Replace stale transient facts; do not append a run log, duplicate
+   task reports or carry superseded statuses forward. Retain every unresolved
+   gate, dependency and deliberately parked item, including other lanes;
+   remove one only with explicit resolution evidence. Unknown is not resolved.
+   Include what is done, current authoritative state, blockers/gates and next
+   steps, with exact issue/PR references and full relevant SHAs. Distinguish
+   PR head, master/merge SHA and production/release SHA. Uncommitted local
+   work must be described as uncommitted, not implemented on master.
+   For Web, **MERGED is not DEPLOYED/LIVE**: retain the last evidenced
+   production revision (or unknown) until explicit owner FTP, independent
+   byte verification and live smoke support the same release SHA. Link that
+   evidence; CI, local browser checks and deploy-harness changes do not prove
+   production. Never close/relabel/merge/deploy/start work to tidy HO.
+5. Immediately before publication, refetch the route, target and affected
+   live facts. If they changed, reconcile and repeat the material-change
+   check; if writer ownership is uncertain, defer. Publish the replacement
+   checkpoint on the existing operative issue or the bounded task issue,
+   read it back, then append the existing standalone pointer line to #152
+   using the **returned comment ID**. Read back #152 and resolve the new
+   pointer to verify publication. Historical comments stay for audit;
+   the new pointer replaces the active snapshot, not its retained gates.
+   Never post a pointer before its target exists or append history to the
+   active snapshot. Use existing `gh issue view` / `gh issue comment`
+   capabilities (or equivalent authorized tools); no broader permission is
+   granted here. On retry/uncertain response, refetch first: reuse an already
+   published equivalent checkpoint, repair only a missing pointer if still
+   current, and do nothing if already routed. A partial/failed publication
+   must be reported; do not blindly post duplicates or overwrite newer work.
+6. Final report: `HO UPDATED: YES` only after read-back confirms the routed
+   checkpoint, plus its link and one sentence describing the change.
+   Otherwise `HO UPDATED: NO` with the reason: no material change, another
+   writer, missing access/route, or failed/deferred publication. Include any
+   pending material delta in the existing task report for the designated
+   writer; do not create a competing handover file/comment format.
+
+### Migration and rollout
+
+Older instructions to "update HO/AUTO", "refresh #152", "append a handover"
+or "always update HO when done" invoke the material-change check and the
+existing router above, not an unconditional body rewrite or extra writer.
+Instructions to wait until a chat is full do not postpone a material change.
+Legacy Vault handovers, `PROJECT_STATUS_*`, snapshots and chat summaries
+remain reference/history under their own scope; do not mirror operational
+HO into them. Durable decision promotion remains deliberate, separately
+authorized work; it is not permission to edit STATIC in this final step.
+An explicit task-specific prohibition on HO writes still applies: report
+the delta and defer. Do not reinterpret a legacy task to expand its scope.
+
+**Owner rollout gate before merge/activation:** confirm that any external
+ChatGPT/Chief scheduled HO writer or old prompt that rewrites #152 has been
+disabled or made read-only for HO, and assign the single writer across all
+lanes. Repo inspection cannot prove external scheduler state. Already-running
+jobs retain their starting instructions: let them finish or stop them before
+switching writers; a merge does not update an in-flight prompt. Review the
+first material update through target + pointer read-back before wider use.
+No schema migration, marker rename, historical-comment deletion, trigger,
+permission expansion, extra Claude invocation or scheduler is needed.
+This HO/workflow change is outside #199's optional docs-merge-preauthorized
+pilot; normal exact-head Chief review and the applicable owner merge gate
+still apply. Do not modify live #152 merely to announce this policy change.
+
 ## Owner merge gate
 
 `status:approved` is a **label**, not a merge. Nothing in this
