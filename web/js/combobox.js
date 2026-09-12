@@ -39,6 +39,12 @@ class Combobox {
     list.id = `${this.instansId}-listbox`;
     list.hidden = true;
     list.setAttribute("role", "listbox");
+    // Uten et autorisert tabindex-attributt gjør Chromium/Firefox denne
+    // overflowende (max-height + overflow-y: auto) listen til et eget
+    // Tab-stopp via "scrollable region"-heuristikken -- en uventet ekstra
+    // stopp midt i combobox-mønsteret, der listen kun skal nås via piltaster
+    // (se docs/development/web_combobox_tabindex_triage_184.md).
+    list.setAttribute("tabindex", "-1");
     input.setAttribute("aria-controls", list.id);
 
     wrap.appendChild(input);
