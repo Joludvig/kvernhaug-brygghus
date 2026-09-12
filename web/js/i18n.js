@@ -793,7 +793,7 @@ const TEKSTER = {
     "hjelp.idx.forsteOppskrift.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Det finnes ingen \"feil\" startpunkt. Prøv deg fram, se hvordan tallene endrer seg, og juster til de treffer stilen du har lyst på — eller bare det du synes høres godt ut.",
 
     "hjelp.idx.laerlingMester.tittel": "Bryggelærling og Bryggmester",
-    "hjelp.idx.laerlingMester.tekst": "De to knappene øverst bytter mellom to visninger av <em>samme</em> oppskrift. <strong>Bryggelærling</strong> skjuler tekniske detaljer og viser mer veiledning — fin når du er ny. <strong>Bryggmester</strong> viser alt: BU:GU, nærliggende stiler, full stilanalyse. Ingen data forsvinner når du bytter — det er bare hvor mye som vises på skjermen som endrer seg.",
+    "hjelp.idx.laerlingMester.tekst": "Den lille bryteren i hamburgermenyen — pluss valget du gjør første gang du åpner byggeren — bytter mellom to visninger av <em>samme</em> oppskrift. <strong>Bryggelærling</strong> skjuler tekniske detaljer og viser mer veiledning — fin når du er ny. <strong>Bryggmester</strong> viser alt: BU:GU, nærliggende stiler, full stilanalyse. Ingen data forsvinner når du bytter — det er bare hvor mye som vises på skjermen som endrer seg.",
     "hjelp.idx.laerlingMester.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Du kan bytte fram og tilbake så mye du vil, når som helst i prosessen. Mange starter i Bryggelærling og går over til Bryggmester etter hvert som begrepene blir kjente.",
 
     "hjelp.idx.maleenheter.tittel": "Måleenheter: Metrisk eller US customary",
@@ -813,11 +813,11 @@ const TEKSTER = {
     "hjelp.idx.brukProsentfordeling.hvorfor": "<strong>Eksempel:</strong> Har du 5 kg totalt fordelt på to malter, skriver 70 % i den ene raden og trykker knappen, får den andre automatisk de resterende 30 % — og kg-feltene oppdateres til å matche (3,5 kg / 1,5 kg). Har du ikke skrevet i noe %-felt ennå, gjør knappen ingenting: den har ingenting \"låst\" å fordele resten rundt.",
 
     "hjelp.idx.malIbu.tittel": "Mål-IBU: baklengs bitterhetsberegning",
-    "hjelp.idx.malIbu.tekst": "Vanligvis regner byggeren bitterhet fremover: du oppgir gram, koketid og alfasyre for en humletilsetning, og IBU-bidraget beregnes automatisk. \"Mål-IBU (denne tilsetningen)\" snur regningen: du oppgir hvor mange IBU akkurat denne tilsetningen skal bidra med, og trykker \"Beregn gram\" — da regner byggeren ut hvor mange gram som trengs, gitt koketid, alfasyre, batch-volum og forventet OG. Dette er den inverse Tinseth-beregningen, og feltet vises kun for tilsetninger med koketid over 0 minutter (dryhumling har ingen kokeutnyttelse å regne på).",
-    "hjelp.idx.malIbu.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Sier du \"denne tilsetningen skal bidra med ca. 15 IBU\", fyller \"Beregn gram\" inn den gramvekten som gir omtrent det bidraget — med samme formel som resten av byggeren, bare baklengs. Mål-IBU er ikke en live-kobling; beregningen skjer kun når du trykker knappen, akkurat som skalering og \"Bruk prosentfordeling\". Husk at dette er en beregnet startverdi, ikke en garanti — faktisk bitterhet i det ferdige ølet påvirkes også av kokekar, fordampning, vørterklarhet og andre forhold i din egen bryggeprosess.",
+    "hjelp.idx.malIbu.tekst": "Vanligvis regner byggeren bitterhet fremover: du oppgir mengde, koketid og alfasyre for en humletilsetning, og IBU-bidraget beregnes automatisk. \"Mål-IBU (denne tilsetningen)\" snur regningen: du oppgir hvor mange IBU akkurat denne tilsetningen skal bidra med, og trykker knappen for å beregne mengden — da regner byggeren ut hvor mye som trengs, gitt koketid, alfasyre, batch-volum og forventet OG. Dette er den inverse Tinseth-beregningen, og feltet vises kun for tilsetninger med koketid over 0 minutter (dryhumling har ingen kokeutnyttelse å regne på).",
+    "hjelp.idx.malIbu.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Sier du \"denne tilsetningen skal bidra med ca. 15 IBU\", fyller knappen inn den mengden som gir omtrent det bidraget — med samme formel som resten av byggeren, bare baklengs. Mål-IBU er ikke en live-kobling; beregningen skjer kun når du trykker knappen, akkurat som skalering og \"Bruk prosentfordeling\". Husk at dette er en beregnet startverdi, ikke en garanti — faktisk bitterhet i det ferdige ølet påvirkes også av kokekar, fordampning, vørterklarhet og andre forhold i din egen bryggeprosess.",
 
     "hjelp.idx.lagreOppskrift.tittel": "Lagre en oppskrift",
-    "hjelp.idx.lagreOppskrift.tekst": "\"💾 Lagre oppskrift\" lagrer oppskriften <strong>i denne nettleseren</strong> (localStorage) under navnet du har gitt den. Den dukker opp i \"Mine lagrede oppskrifter\" lenger ned, og du kan laste den inn igjen når som helst — også etter at du har lukket fanen.",
+    "hjelp.idx.lagreOppskrift.tekst": "\"💾 Lagre oppskrift\" lagrer oppskriften <strong>i denne nettleseren</strong> (localStorage) under navnet du har gitt den. Den dukker opp under \"📂 Mine oppskrifter\" i sidemenyen, og du kan laste den inn igjen når som helst — også etter at du har lukket fanen.",
     "hjelp.idx.lagreOppskrift.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Oppskriften lagres lokalt i denne nettleseren, så den finnes kun på denne enheten. Vil du ta backup eller flytte den til en annen datamaskin eller telefon, bruk heller \"📄 Lagre oppskriftsfil (.kbhrecipe)\" — det er den vanlige, portable måten å sikkerhetskopiere og dele en oppskrift på. Rå JSON-eksport finnes fortsatt under \"Avansert\" for eldre filer eller videre bearbeiding, men .kbhrecipe er anbefalt format til vanlig bruk.",
 
     "hjelp.idx.aapneImportere.tittel": "Åpne eller importere en oppskrift",
@@ -861,7 +861,7 @@ const TEKSTER = {
 
     "hjelp.idx.effektivitet.tittel": "Brygghuseffektivitet",
     "hjelp.idx.effektivitet.tekst": "Effektivitet er hvor stor andel av maltens sukkerpotensial du faktisk får ut i vørteren på ditt eget utstyr og med din egen teknikk — 75 % er et vanlig utgangspunkt, men det varierer fra bryggeri til bryggeri.",
-    "hjelp.idx.effektivitet.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Effektiviteten går rett inn i <a href=\"#og\">OG</a>-beregningen. Bryggelærling skjuler feltet og bruker 75 % som estimat, slik at du kan komme i gang uten å måtte vite dette først. I Bryggmester kan du justere det etter egne, målte brygg — se også <a href=\"#faq-traff-ikke-og\">FAQ</a>.",
+    "hjelp.idx.effektivitet.hvorfor": "<strong>Hvorfor du bryr deg:</strong> Effektiviteten går rett inn i <a href=\"#og\">OG</a>-beregningen. Bryggelærling skjuler feltet; for en fersk oppskrift brukes 75 % som utgangspunkt, men har du allerede satt en annen verdi i Bryggmester, blir den verdien liggende og brukt i beregningen selv om feltet er skjult. I Bryggmester kan du justere det etter egne, målte brygg — se også <a href=\"#faq-traff-ikke-og\">FAQ</a>.",
 
     "hjelp.idx.maltpotensial.tittel": "Maltpotensial",
     "hjelp.idx.maltpotensial.tekst": "Maltpotensial sier hvor mye sukker en gitt malt kan bidra med per kilo — grunnlaget for OG-beregningen. Ulike malttyper har ulikt potensial; en ren basemalt gir mer enn en spesialmalt med lavere gjærbart innhold.",
@@ -1165,7 +1165,7 @@ const TEKSTER = {
     "hjelp.dag.steg15.folgMed": "Riktig sukkermengde ved flaskekarbonering (for mye kan gi overtrykk/eksplosjonsfare), eller riktig trykk/tid ved tvangskarbonering på fat. Se <a href=\"index.html#priming-flaskekarbonering\">priming/flaskekarbonering</a> for hvordan sukkermengden beregnes.",
     "hjelp.dag.steg15.feil": "Å drikke ølet for tidlig — de fleste øl blir tydelig bedre etter noen ukers modning, se <a href=\"index.html#modning-lagring\">modning og lagring</a>.",
 
-    "hjelp.dag.avslutning": "Lag et konkret bryggedagsark for din egen oppskrift fra oppskriftsbyggerens <a href=\"../index.html\">Skriv ut</a>-panel.",
+    "hjelp.dag.avslutning": "Lag et konkret bryggedagsark for din egen oppskrift fra <a href=\"../utskrift.html\">Skriv ut</a>-siden, som du finner i sidemenyen.",
 
     "hjelp.metoder.toc.biab": "BIAB",
     "hjelp.metoder.toc.allgrain": "Vanlig all-grain",
@@ -2547,7 +2547,7 @@ const TEKSTER = {
     "hjelp.idx.forsteOppskrift.hvorfor": "<strong>Why this matters:</strong> There's no \"wrong\" starting point. Experiment, watch how the numbers change, and adjust until they match the style you're going for — or just whatever sounds good to you.",
 
     "hjelp.idx.laerlingMester.tittel": "Brewing Apprentice and Brewing Master",
-    "hjelp.idx.laerlingMester.tekst": "The two buttons at the top switch between two views of the <em>same</em> recipe. <strong>Brewing Apprentice</strong> hides technical detail and shows more guidance — good when you're new. <strong>Brewing Master</strong> shows everything: BU:GU, nearby styles, full style analysis. No data disappears when you switch — only how much shows on screen changes.",
+    "hjelp.idx.laerlingMester.tekst": "The small toggle in the hamburger menu — plus the choice you make the first time you open the builder — switches between two views of the <em>same</em> recipe. <strong>Brewing Apprentice</strong> hides technical detail and shows more guidance — good when you're new. <strong>Brewing Master</strong> shows everything: BU:GU, nearby styles, full style analysis. No data disappears when you switch — only how much shows on screen changes.",
     "hjelp.idx.laerlingMester.hvorfor": "<strong>Why this matters:</strong> You can switch back and forth as often as you like, at any point in the process. Many people start in Brewing Apprentice and move to Brewing Master as the terms become familiar.",
 
     "hjelp.idx.maleenheter.tittel": "Units: Metric or US customary",
@@ -2567,11 +2567,11 @@ const TEKSTER = {
     "hjelp.idx.brukProsentfordeling.hvorfor": "<strong>Example:</strong> With 5 kg total split across two malts, type 70% in one row and click the button — the other row automatically gets the remaining 30%, and the kg fields update to match (3.5 kg / 1.5 kg). If you haven't typed into any % field yet, the button does nothing — it has nothing \"locked\" to split the rest around.",
 
     "hjelp.idx.malIbu.tittel": "Target IBU: bitterness worked backwards",
-    "hjelp.idx.malIbu.tekst": "Normally the builder works bitterness out forwards: you enter grams, boil time, and alpha acid for a hop addition, and the IBU contribution is calculated automatically. \"Target IBU (this addition)\" reverses that: you enter how many IBU you want this specific addition to contribute, then click \"Calculate grams\" — the builder works out how many grams that takes, given boil time, alpha acid, batch volume, and expected OG. This is the inverse Tinseth calculation, and the field only appears for additions with a boil time above 0 minutes (dry hops have no boil utilisation to calculate).",
-    "hjelp.idx.malIbu.hvorfor": "<strong>Why this matters:</strong> Say \"I want this addition to contribute about 15 IBU\" — \"Calculate grams\" fills in the gram weight that gives roughly that contribution, using the same formula as the rest of the builder, just backwards. Target IBU isn't a live link; the calculation only runs when you click the button, just like scaling and \"Apply percentage split\". Keep in mind this is a calculated starting point, not a guarantee — actual bitterness in the finished beer is also shaped by your kettle, boil-off, wort clarity, and the rest of your own brewing process.",
+    "hjelp.idx.malIbu.tekst": "Normally the builder works bitterness out forwards: you enter an amount, boil time, and alpha acid for a hop addition, and the IBU contribution is calculated automatically. \"Target IBU (this addition)\" reverses that: you enter how many IBU you want this specific addition to contribute, then click the button to calculate the amount — the builder works out how much that takes, given boil time, alpha acid, batch volume, and expected OG. This is the inverse Tinseth calculation, and the field only appears for additions with a boil time above 0 minutes (dry hops have no boil utilisation to calculate).",
+    "hjelp.idx.malIbu.hvorfor": "<strong>Why this matters:</strong> Say \"I want this addition to contribute about 15 IBU\" — the button fills in the amount that gives roughly that contribution, using the same formula as the rest of the builder, just backwards. Target IBU isn't a live link; the calculation only runs when you click the button, just like scaling and \"Apply percentage split\". Keep in mind this is a calculated starting point, not a guarantee — actual bitterness in the finished beer is also shaped by your kettle, boil-off, wort clarity, and the rest of your own brewing process.",
 
     "hjelp.idx.lagreOppskrift.tittel": "Save a Recipe",
-    "hjelp.idx.lagreOppskrift.tekst": "\"💾 Save recipe\" saves the recipe <strong>in this browser</strong> (localStorage) under the name you gave it. It shows up under \"My saved recipes\" further down, and you can reload it any time — even after closing the tab.",
+    "hjelp.idx.lagreOppskrift.tekst": "\"💾 Save recipe\" saves the recipe <strong>in this browser</strong> (localStorage) under the name you gave it. It shows up under \"📂 My Recipes\" in the side menu, and you can reload it any time — even after closing the tab.",
     "hjelp.idx.lagreOppskrift.hvorfor": "<strong>Why this matters:</strong> The recipe is stored locally in this browser, so it only exists on this device. To back it up or move it to another computer or phone, use \"📄 Save recipe file (.kbhrecipe)\" instead — that's the normal, portable way to back up and share a recipe. Raw JSON export is still available under \"Advanced\" for legacy files or further processing, but .kbhrecipe is the recommended format for everyday use.",
 
     "hjelp.idx.aapneImportere.tittel": "Open or Import a Recipe",
@@ -2615,7 +2615,7 @@ const TEKSTER = {
 
     "hjelp.idx.effektivitet.tittel": "Brewhouse Efficiency",
     "hjelp.idx.effektivitet.tekst": "Efficiency is how much of the malt's sugar potential you actually get into the wort with your own equipment and technique — 75% is a common starting point, but it varies from brewery to brewery.",
-    "hjelp.idx.effektivitet.hvorfor": "<strong>Why this matters:</strong> Efficiency feeds directly into the <a href=\"#og\">OG</a> calculation. Brewing Apprentice hides the field and uses 75% as an estimate, so you can get started without needing to know this first. In Brewing Master you can adjust it based on your own measured brews — see also the <a href=\"#faq-traff-ikke-og\">FAQ</a>.",
+    "hjelp.idx.effektivitet.hvorfor": "<strong>Why this matters:</strong> Efficiency feeds directly into the <a href=\"#og\">OG</a> calculation. Brewing Apprentice hides the field; for a fresh recipe, 75% is used as a starting point, but if you've already set a different value in Brewing Master, that value stays in place and is still used in the calculation even while the field is hidden. In Brewing Master you can adjust it based on your own measured brews — see also the <a href=\"#faq-traff-ikke-og\">FAQ</a>.",
 
     "hjelp.idx.maltpotensial.tittel": "Malt Potential",
     "hjelp.idx.maltpotensial.tekst": "Malt potential is how much sugar a given malt can contribute per kilo — the basis for the OG calculation. Different malt types have different potential; a pure base malt gives more than a specialty malt with lower fermentable content.",
@@ -2919,7 +2919,7 @@ const TEKSTER = {
     "hjelp.dag.steg15.folgMed": "The correct sugar amount for bottle carbonation (too much can cause overpressure/explosion risk), or the correct pressure/time for force-carbonating in a keg. See <a href=\"index.html#priming-flaskekarbonering\">priming/bottle carbonation</a> for how the sugar amount is calculated.",
     "hjelp.dag.steg15.feil": "Drinking the beer too soon — most beers improve noticeably after a few weeks of conditioning, see <a href=\"index.html#modning-lagring\">conditioning and storage</a>.",
 
-    "hjelp.dag.avslutning": "Build a concrete brew day sheet for your own recipe from the recipe builder's <a href=\"../index.html\">Print</a> panel.",
+    "hjelp.dag.avslutning": "Build a concrete brew day sheet for your own recipe from the <a href=\"../utskrift.html\">Print</a> page, found in the side menu.",
 
     "hjelp.metoder.toc.biab": "BIAB",
     "hjelp.metoder.toc.allgrain": "Traditional All-Grain",
