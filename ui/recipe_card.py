@@ -163,10 +163,11 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         if st.session_state.get("_last_loaded_recipe"):
             if st.button("💾 Lagre endringer", width="stretch", key="lagre_endringer_btn"):
                 ny_recipe = _bygg_recipe_fra_session(ctx)
+                _gammelt_filnavn = st.session_state.get("_last_loaded_recipe_file")
                 try:
                     nytt_filnavn = lagre_oppskrift(
                         ny_recipe,
-                        kilde_filnavn=st.session_state.get("_last_loaded_recipe_file"),
+                        kilde_filnavn=_gammelt_filnavn,
                     )
                 except (OppskriftNavnKollisjon, UgyldigKildefilnavn, LegacyLoggKandidatUkjent) as e:
                     st.error(f"❌ {e}")
@@ -175,6 +176,17 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                     st.session_state["_last_loaded_recipe_file"] = nytt_filnavn
                     st.session_state["_gjeldende_navn_preserved"] = ny_recipe["name"]
                     st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
+                    # App A3 (issue #237, fiks A3-4) -- en navneendring her
+                    # ugyldiggjør et evt. aktivt Bryggdag-brygg (App A1,
+                    # issue #170, via ui/kbhbrew_panel.py::
+                    # _sinkroniser_aktiv_brew_mot_oppskrift() sin
+                    # identitetssjekk mot NETTOPP _last_loaded_recipe_file)
+                    # -- uten en umiddelbar rerun forble det usynlig helt
+                    # til neste, urelaterte rerun. Et lagre-klikk UTEN
+                    # navneendring får INGEN ny rerun-oppførsel (samme
+                    # synlige suksess-semantikk som før denne fiksen).
+                    if nytt_filnavn != _gammelt_filnavn:
+                        st.rerun()
 
         # Lagre som ny kopi og slett
         btn_col1, btn_col2 = st.columns(2)

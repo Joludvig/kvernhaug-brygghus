@@ -12,6 +12,7 @@ from modules.export_format import fmt_og, fmt_fg, fmt_abv, stats_linje
 from modules.brewday_template import render_brewday_html
 from ui.kbhbrew_panel import aktiv_brew_id, render_kbhbrew_create_panel
 from ui.kbhbrew_history_panel import render_kbhbrew_history_panel
+from ui.i18n import t as _t
 
 # App A1 (issue #170): et privat sentinel-objekt for å skille "Steg
 # 4/5 sine målefelt er ALDRI synket mot et aktivt brygg før" fra "de er
@@ -421,6 +422,19 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         else:
             _lagre_mal_navn = ((_lagre_mal_brew.get("snapshot") or {}).get("recipe") or {}).get("navn") or "(uten navn)"
             st.caption(f"Målbrygg: **{_lagre_mal_navn}** · `{_lagre_mal_brew_id}`")
+            # App A3 (issue #237, fiks A3-3) -- Brygghistorikk sitt
+            # eksplisitte utvalg retargetterer BEVISST dette skrivemålet
+            # (App A1, issue #170 "Identity safety" #3) -- det beholdes
+            # UENDRET her. Denne advarselen legger KUN til synlig
+            # orientering FØR selve lagre-klikket når målet ikke lenger har
+            # lagret status "active", uten å deaktivere knappen eller endre
+            # noen skrivevei (se docs/development/
+            # app_a3_state_orientation_preflight.md Section 8, funn A3-3).
+            if _lagre_mal_brew.get("status") != "active":
+                st.warning(_t(
+                    "kbhbrew.advarsel_ikke_aktiv_status",
+                    status=_t(f"brew_history.status.{_lagre_mal_brew.get('status')}"),
+                ))
         if st.button(
             "💾 Lagre OG/FG/post-boil-volum + bryggedato",
             key="bd_lagre_maalinger_btn",
