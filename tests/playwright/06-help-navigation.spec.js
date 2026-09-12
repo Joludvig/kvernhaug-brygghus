@@ -1,10 +1,11 @@
 'use strict';
 
 // Issue #200 V1 scope item 6: representative help hash/anchor navigation
-// that is already known-good. Deliberately does NOT assert the retained
-// #188 method-card scroll-offset behavior (still open, see issue #188) --
-// only that a "Les mer ->" popover link actually lands on its target
-// article in web/hjelp/index.html.
+// that is already known-good. Deliberately does NOT assert the
+// .hjelp-metode-kort scroll-margin behavior fixed by issue #188 -- see
+// 09-b11-metode-kort-scroll-margin.spec.js -- only that a "Les mer ->"
+// popover link actually lands on its target article in
+// web/hjelp/index.html.
 const { test, expect } = require('@playwright/test');
 const { localePath, collectErrors, dismissModeDialog } = require('./helpers');
 
