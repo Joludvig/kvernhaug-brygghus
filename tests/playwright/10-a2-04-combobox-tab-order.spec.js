@@ -22,6 +22,12 @@ const { localePath, collectErrors, dismissModeDialog } = require('./helpers');
 const STIL_INPUT = '#stilvalg-panel .combobox-input';
 const STIL_LIST = '#stilvalg-panel .combobox-list';
 
+// The next real control after the style input in DOM/tab order: the
+// combobox input of the first (default, always-present) malt row. Verified
+// directly (not assumed) across chromium-desktop/firefox-desktop x NO/EN
+// before writing this assertion.
+const MALT_INPUT = '#malt-rader .combobox-input';
+
 for (const locale of ['no', 'en']) {
   test(`overflowing combobox listbox is skipped by Tab, stays keyboard-scrollable, and keeps arrow-key navigation [${locale}]`, async ({ page }) => {
     const errors = collectErrors(page);
@@ -49,16 +55,15 @@ for (const locale of ['no', 'en']) {
 
     // Acceptance test 1 (triage doc): a single Tab from the combobox input
     // moves focus to the next real interactive control -- never to the
-    // listbox itself or one of its options.
+    // listbox itself or one of its options. Asserts the exact expected
+    // control (the first malt row's combobox input, #malt-panel being the
+    // next panel in DOM order) is focused, not merely that focus landed
+    // somewhere outside the listbox -- a generic "not in listbox" check
+    // would pass vacuously even if focus fell through to <body> or some
+    // other unintended element.
+    const maltInput = page.locator(MALT_INPUT);
     await page.keyboard.press('Tab');
-    const afterOneTab = await page.evaluate(() => ({
-      tag: document.activeElement.tagName,
-      role: document.activeElement.getAttribute('role'),
-      insideList: document.activeElement.closest('.combobox-list') !== null,
-    }));
-    expect(afterOneTab.insideList).toBe(false);
-    expect(afterOneTab.role).not.toBe('listbox');
-    expect(afterOneTab.role).not.toBe('option');
+    await expect(maltInput).toBeFocused();
 
     // Acceptance test 2: the listbox remains keyboard-scrollable via arrow
     // keys past the visible region -- a future fix must not achieve (1) by
