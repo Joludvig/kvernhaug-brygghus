@@ -20,6 +20,7 @@ from modules.recipe import bygg_recipe_object
 from modules.kbh_contract import bygg_kbhrecipe_konvolutt, UgyldigOppskriftForEksport
 from modules.card_template import render_card_html, render_a4_html
 from ui.branding import _logo_base64
+from ui.sidebar import _SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER
 
 _LOGO_PATH = os.path.join("assets", "branding", "kbh_emblem_master.png")
 
@@ -186,6 +187,26 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                     # navneendring får INGEN ny rerun-oppførsel (samme
                     # synlige suksess-semantikk som før denne fiksen).
                     if nytt_filnavn != _gammelt_filnavn:
+                        # App A4-3 (issue #246) -- uten dette forblir
+                        # ui/sidebar.py sin "sidebar_recipe_selector"-widget
+                        # bundet til det GAMLE navnet, som ikke lenger finnes
+                        # i den ferske oppskrift-listen etter omdøpingen.
+                        # Streamlit faller da selv tilbake til plassholder-
+                        # indeksen for widgeten, og sidebarens EGEN,
+                        # eksisterende "elif valgt_lagret_navn ==
+                        # _INGEN_OPPSKRIFT_VALGT"-gren (ment for et bevisst
+                        # plassholder-valg) tolker det som nettopp det -- og
+                        # sletter _last_loaded_recipe/_last_loaded_recipe_file
+                        # vi NETTOPP satte over, rett før de i det hele tatt
+                        # rekker å bli lest andre steder i denne rerunen. Kan
+                        # ikke settes direkte her (selectboksen er allerede
+                        # instansiert lenger OPPE i script-kjøringen enn
+                        # denne knappen) -- samme fallgruve/løsningsmønster
+                        # som _nullstill_oppskrift_selector_neste_render
+                        # (issue #242, se ui/sidebar.py): et engangsflagg
+                        # konsumert i render_sidebar() FØR selectboksen
+                        # instansieres på den kommende rerunen.
+                        st.session_state[_SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER] = ny_recipe["name"]
                         st.rerun()
 
         # Lagre som ny kopi og slett
