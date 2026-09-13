@@ -65,6 +65,20 @@ _IMPORT_FIL_ID_NOKKEL = "kbhbrew_import_preview_file_id"
 _VIS_UTSTYR_SNARVEI_NOKKEL = "_vis_kbhbrew_utstyr_bekreft_snarvei"
 
 
+def _brew_oppskrift_navn(brew):
+    """App A4-4 (issue #248) -- felles kilde for et brygg sitt
+    brukervendte visningsnavn: ALLTID fra det aktuelle brygget sitt EGET,
+    frosne snapshot (`brew["snapshot"]["recipe"]["navn"]`), aldri fra
+    gjeldende editor-/session-tilstand (`_last_loaded_recipe` m.fl.) --
+    et gammelt/importert/aktivt brygg skal beskrive SEG SELV, uansett
+    hva som for øvrig er lastet i Bryggkortet akkurat nå. Samme trygge,
+    lokale fallback-mønster som forhåndsvisningen lenger ned i denne
+    filen allerede bruker (`snapshot_recipe.get("navn", ...)`) -- en
+    legacy-/korrupt brew uten forventet sti skal aldri krasje UI-et."""
+    navn = ((brew or {}).get("snapshot") or {}).get("recipe", {}).get("navn") if brew else None
+    return navn or t("kbhbrew.oppskrift_ukjent_fallback")
+
+
 def aktiv_brew_id():
     """Nøytral, delt leser for `_AKTIV_BREW_ID_NOKKEL` -- App A1 (issue
     #170) sitt "eneste in-session mål for Bryggdag-målinger". Andre
@@ -137,13 +151,8 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
     if DEMO_MODE:
         return
 
-    st.markdown("**🍺 Start nytt brygg (lagre historisk snapshot)**")
-    st.caption(
-        "Fryser gjeldende oppskrift, utstyrsprofil og spådde verdier som ET NYTT, "
-        "historisk Core V1-brygg (.kbhbrew). Senere endringer i oppskrift/utstyr/"
-        "masterdata påvirker ALDRI dette snapshotet igjen. Hvert klikk oppretter et "
-        "NYTT batch — flere reelle brygg fra samme oppskrift er normalt."
-    )
+    st.markdown(f"**{t('kbhbrew.start_ny_brew_tittel')}**")
+    st.caption(t("kbhbrew.start_ny_brew_beskrivelse"))
     if st.button("▶️ Start nytt brygg", key="kbhbrew_start_ny_brew_btn"):
         manglende = manglende_ingrediens_ider(
             ctx.get("recipe"), malt_database, humle_database, gjaer_database,
@@ -157,11 +166,7 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
             )
             st.session_state[_VIS_UTSTYR_SNARVEI_NOKKEL] = True
         elif manglende:
-            st.error(
-                "❌ Kunne ikke starte nytt brygg — følgende ingrediens-ID-er finnes ikke i "
-                "gjeldende masterdata og ville blitt hoppet stille over i snapshotet: "
-                f"{', '.join(manglende)}. Oppdater masterdata eller oppskriften og prøv igjen."
-            )
+            st.error(t("kbhbrew.manglende_ingrediens_feil", ider=", ".join(manglende)))
         else:
             try:
                 brew = opprett_og_lagre_ny_brew(
@@ -173,7 +178,7 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
                 st.error(f"❌ Kunne ikke starte nytt brygg — oppskriften er ikke gyldig for eksport: {e}")
             else:
                 sett_aktiv_brew_id(brew["brewId"])
-                st.toast(f"Nytt brygg startet: {brew['brewId']}", icon="🍺")
+                st.toast(t("kbhbrew.nytt_brygg_toast", oppskriftsnavn=_brew_oppskrift_navn(brew)), icon="🍺")
 
     # App A4-2 (issue #244) -- fjerner første-gangs-dødvekten fra sikkerhets-
     # sperren over UTEN å svekke den: sperren ("if not equipment_kilde_er_lagret()")
@@ -209,7 +214,7 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
         # bare fordi det er denne øktens gjeldende mål (se docs/development/
         # app_a3_state_orientation_preflight.md Section 8, funn A3-2).
         st.success(
-            t("kbhbrew.skriver_til", brew_id=aktiv_brew["brewId"], opprettet=aktiv_brew.get("createdAt", "-"))
+            t("kbhbrew.skriver_til", oppskriftsnavn=_brew_oppskrift_navn(aktiv_brew), opprettet=aktiv_brew.get("createdAt", "-"))
             + "  ·  " + t("brew_history.status_label") + ": **"
             + t(f"brew_history.status.{aktiv_brew.get('status')}") + "**"
         )
@@ -228,11 +233,7 @@ def render_kbhbrew_import_panel():
 
     st.write("---")
     st.subheader("📦 Importer .kbhbrew-fil")
-    st.caption(
-        "Åpne en .kbhbrew-fil (Core V1 — et historisk brygg, IKKE en oppskrift). "
-        "Importeres alltid som et HELT NYTT, lokalt brygg med sin egen, ferskt "
-        "mintede identitet — ingenting skrives før du selv trykker «Importer brygg»."
-    )
+    st.caption(t("kbhbrew.import_beskrivelse"))
 
     kbhbrew_fil = st.file_uploader(
         "Velg .kbhbrew-fil", type=["kbhbrew"], key="kbhbrew_import_uploader",
@@ -293,7 +294,7 @@ def render_kbhbrew_import_panel():
                     "er allerede importert lokalt — ingenting ble skrevet."
                 )
             elif resultat.get("ok"):
-                st.success(f"✅ Importert som nytt lokalt brygg: `{resultat['brewId']}`")
+                st.success(t("kbhbrew.import_bekreftet", oppskriftsnavn=_brew_oppskrift_navn(resultat.get("brew"))))
                 st.session_state.pop("kbhbrew_import_preview", None)
                 st.session_state.pop("kbhbrew_import_preview_tekst", None)
                 st.session_state.pop("kbhbrew_import_feil", None)
@@ -315,10 +316,7 @@ def render_kbhbrew_export_panel():
     st.subheader("📥 Eksporter lagret .kbhbrew-brygg")
     brews = hent_alle_brews()
     if not brews:
-        st.caption(
-            "Ingen Core V1-brygg lagret lokalt ennå. Bruk «▶️ Start nytt brygg» i "
-            "Bryggdag-fanen, eller importer en .kbhbrew-fil over."
-        )
+        st.caption(t("kbhbrew.export_tomt"))
         return
 
     valg = sorter_brews_for_eksport(brews)

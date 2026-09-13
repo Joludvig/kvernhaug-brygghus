@@ -143,8 +143,13 @@ class TestKbhbrewCreatePanelAppTest(unittest.TestCase):
         self.assertEqual(len(kbhbrew_storage.hent_alle_brews()), 1)
         self.assertEqual(_ss(at, "_aktiv_kbhbrew_brew_id"), brew_id_etter_klikk)
 
+        # App A4-4 (issue #248) -- skriver_til-meldingen viser nå
+        # oppskriftsnavnet (frosset i snapshotet), ikke den rå brewId-en
+        # -- se tests/test_kbhbrew_terminology_apptest.py for full
+        # dekning av selve wording-fiksen.
         suksessmeldinger = [e.value for e in at.success]
-        self.assertTrue(any(brew_id_etter_klikk in m for m in suksessmeldinger))
+        self.assertTrue(any("Harness Pilsner" in m for m in suksessmeldinger))
+        self.assertFalse(any(brew_id_etter_klikk in m for m in suksessmeldinger))
 
     # ─── 4: et nytt eksplisitt klikk = et nytt, uavhengig batch ────────
 
