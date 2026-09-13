@@ -218,6 +218,7 @@ exact, argument-free/argument-fixed rules where they don't):
 | `Bash(pip install -r requirements.txt)` | Install project dependencies before running tests — **exact match, no wildcard**: this and only this invocation, deliberately not `pip install <anything>`. |
 | `Bash(python3 -m unittest *)` | Run the project's test suite (full `discover -s tests -b` or a focused module). |
 | `Bash(python3 scripts/generate_web_i18n_pages.py)` | Run the repository's canonical Web NO/EN generator entry point for bounded Web work (issue #154) — **exact match, no wildcard**: this and only this invocation, deliberately not `Bash(python3 *)` or `Bash(python3 scripts/*)`. See "Canonical Web i18n generator permission (V1.4, issue #154)" below for why. |
+| `Bash(python3 .github/scripts/ho_router_check.py pointer)` / `Bash(python3 .github/scripts/ho_router_check.py verify)` | Run the HO router freshness/orphan check (issue #252) — **two exact matches, no wildcard**: only these two literal invocations. See "HO router freshness check (V1.6, issue #252)" below. |
 
 **Deliberately NOT granted**, as a defense-in-depth backstop to the
 "never merge" rule the prompt also states in plain language:
@@ -390,6 +391,69 @@ branch-scoped exact push rules remain the only `git push` grants;
 `git merge`/`gh pr merge` remain absent; `--permission-mode acceptEdits`
 is unchanged; and the existing Python/i18n permissions (V1.2/V1.4) are
 unchanged.
+
+## HO router freshness check (V1.6, issue #252)
+
+**The bug this fixes:** unlike every other governance decision in this
+document (trigger authorization, deliverable verification, Draft/Ready
+transition, Chief-ready signal, GO/NO-GO notification — each a pure,
+unit-tested Python function), the HO router chain described in "HO
+policy — local and GitHub jobs" below (`#152` → newest valid
+`KBH_COS_CHECKPOINT_PTR_V1` → target `KBH_COS_LIVE_CHECKPOINT_V1`) was
+verified by prose alone ("read it back", "verify publication") — no
+code actually proved the pointer named the *newest* valid checkpoint.
+Issue #252's documented incident: a newer valid checkpoint existed on
+issue #196 (comment `5648280519`) while #152's newest pointer still
+targeted an older one (comment `5648254902`) — routed HO was silently
+stale until a human noticed and manually repaired it (comment
+`5654816841` → `5654816412`).
+
+**The fix:** one new pure, dependency-free module,
+[`.github/scripts/ho_router_check.py`](../../.github/scripts/ho_router_check.py)
+(`sjekk_router`, `nyeste_gyldig_pointer`, `gyldige_sjekkpunkt_id_er`),
+following the exact same pattern as every sibling module in
+`.github/scripts/` — enhanced-tested without touching GitHub, in
+[`tests/test_agent_bridge_ho_router_check.py`](../../tests/test_agent_bridge_ho_router_check.py),
+which includes issue #252's own exact historical comment IDs as a
+regression case (`test_3b_orphan_gjenskaper_issue_252s_eksakte_hendelse`).
+It does not replace the HO policy or introduce a parallel handover
+store — it is the concrete, fail-closed implementation of the policy's
+own step 5 ("Immediately before publication, refetch the route, target
+and affected live facts... read it back... resolve the new pointer to
+verify publication"), callable in two phases:
+
+1. `ho_router_check.py pointer` — given #152's comments, resolves the
+   newest valid pointer line (line-anchored, exact-format match; a
+   quoted example, a mid-line mention, or a near-miss variant never
+   counts — same immunity `chief_ready_signal.py`'s marker already has).
+   Tells the caller which issue's comments to fetch next.
+2. `ho_router_check.py verify` — given BOTH #152's comments and the
+   target issue's comments (both freshly fetched), re-resolves the
+   pointer itself (never trusts phase 1's cached result) and checks it
+   against every valid checkpoint comment on the target issue. Exit 0
+   only on `status=OK` (the pointer names the newest valid checkpoint);
+   `status=ORPHAN` (a newer valid checkpoint exists but the pointer
+   still targets an older one — issue #252's exact failure mode),
+   `NO_POINTER`, `INVALID_TARGET`, or `POINTER_ISSUE_MISMATCH` all exit
+   1, fail-closed.
+
+Local Claude can run this unconditionally (no `--allowedTools`
+restriction applies locally). Bridge Claude gained the two exact,
+argument-fixed `--allowedTools` entries needed to run both phases (see
+the allowed-tools table above) — no wildcard, nothing beyond these two
+literal invocations. The HO policy's step 6 (`HO UPDATED: YES/NO`) now
+requires a `verify` exit-0/`status=OK` result as the evidence for `YES`
+on any run that actually published a checkpoint+pointer pair — see "HO
+policy — local and GitHub jobs" below and the updated Bridge prompt in
+`claude-agent-bridge.yml`.
+
+**What this does not do:** it does not touch `#152`'s STATIC content,
+does not change the checkpoint/pointer *format* (same markers, same
+router contract), does not add a scheduled workflow or any new trigger
+surface, does not enable automatic deployment/merge/arming of any
+issue, and does not change Core/App/Web/Brew Lab product code. It is a
+read-only verification tool; publishing itself is still the existing
+`gh issue comment` mechanism the policy already describes, unchanged.
 
 ## Branch naming is deterministic and enforced (Chief review, PR #13)
 
@@ -1547,12 +1611,25 @@ is already the routing contract; this policy does not introduce a format.
    published equivalent checkpoint, repair only a missing pointer if still
    current, and do nothing if already routed. A partial/failed publication
    must be reported; do not blindly post duplicates or overwrite newer work.
+   **(V1.6, issue #252) "Read back #152 and resolve the new pointer to
+   verify publication" is now a concrete, fail-closed check, not prose
+   alone:** after appending the pointer, run
+   `python3 .github/scripts/ho_router_check.py verify` with fresh #152
+   comments as `pointer_comments`, the checkpoint issue's fresh comments
+   as `target_comments`, and its number as `target_issue`. Only treat
+   publication as verified on exit 0 / `status=OK`. Any other status
+   (`ORPHAN`, `NO_POINTER`, `INVALID_TARGET`, `POINTER_ISSUE_MISMATCH`)
+   means the publish did not verifiably land — report it as a
+   failed/deferred publication per step 6, never as success. See "HO
+   router freshness check (V1.6, issue #252)" above.
 6. Final report: `HO UPDATED: YES` only after read-back confirms the routed
-   checkpoint, plus its link and one sentence describing the change.
+   checkpoint **and** (V1.6) `ho_router_check.py verify` exited 0 with
+   `status=OK`, plus its link and one sentence describing the change.
    Otherwise `HO UPDATED: NO` with the reason: no material change, another
-   writer, missing access/route, or failed/deferred publication. Include any
-   pending material delta in the existing task report for the designated
-   writer; do not create a competing handover file/comment format.
+   writer, missing access/route, orphaned/unverified pointer, or
+   failed/deferred publication. Include any pending material delta in the
+   existing task report for the designated writer; do not create a
+   competing handover file/comment format.
 
 ### Migration and rollout
 
