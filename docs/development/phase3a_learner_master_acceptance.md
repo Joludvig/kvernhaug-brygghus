@@ -28,46 +28,94 @@ novice.** See §7/§8.
 | Target environment (production revision check only) | `https://kvernhaugbrygghus.no` (read-only content fetch, no state changed) |
 | Browsers exercised | Chromium (`@playwright/test` bundled build) + Firefox (`@playwright/test` bundled build), via the 4 existing `projects` in `playwright.config.js` |
 
-### 1.1 Production revision — determined independently, not assumed
+### 1.1 Production revision — three separate facts, not conflated
 
-There is **no embedded version/release marker anywhere in the deployed
-site** (no `version.json`, no meta tag, no baked-in git SHA — confirmed by
-reading `scripts/deploy_web.ps1`, which instead relies on (a) a pre-deploy
-git-HEAD-vs-`origin/master` guard and (b) a **post-upload, per-file SHA-256
-byte comparison** between what was just uploaded and what HTTPS serves
-back, not a discoverable marker). "Merged ≠ deployed" per #250, so this was
-resolved independently by content-fetching production and diffing it
-against the local tree, rather than trusting `origin/master`'s SHA:
+An earlier revision of this document conflated three genuinely different
+concepts — current source SHA, Web source-tree equivalence, and actual
+deployed/frozen production release — under a single "production ==
+`origin/master`" conclusion. Corrected per Chief review (PR #251, review
+5191289817). The three facts, kept separate:
 
-1. `git log --oneline -- web/ scripts/deploy_web.ps1` shows the most recent
-   commit touching `web/` is `499a69f` (issue #230, combobox listbox
-   `tabindex="-1"` fix). Every commit after it up to `origin/master`
-   (`18ac6f6`) is App-only (`app/a3-*`, `app/a4-*` — the A3/A4 terminology
-   work from PR #237–#249).
-2. `git diff --stat 499a69f origin/master -- web/` returns **empty** — the
-   `web/` tree is byte-identical between `499a69f` and current
-   `origin/master`. So "is production current" reduces to "is production
-   at least at `499a69f`".
-3. Fetched four representative live files directly from
-   `https://kvernhaugbrygghus.no` and diffed them byte-for-byte against the
-   local working tree (`git diff --check`-clean, unmodified `web/`):
-   `js/combobox.js`, `css/style.css`, `js/app.js`, `index.html`. All four
-   are **byte-identical**, including the `list.setAttribute("tabindex",
-   "-1")` line that `499a69f` introduced.
+**(a) Current source/master SHA:** `18ac6f6c509b755d51522c474b5ba7f49a6a458a`
+(fresh `git fetch origin`, unchanged since this branch was created).
 
-**Conclusion: production is currently serving `web/` content identical to
-`origin/master` at `18ac6f6c509b755d51522c474b5ba7f49a6a458a`.** In this
-specific instance "merged == deployed" holds, but only because it was
-checked, not assumed — the four-file diff is the actual evidence, not the
-git-log inference alone. A future Phase 3A-style check must repeat this
-content diff rather than reuse this conclusion, since any subsequent
-`web/**` merge without a deploy would immediately invalidate it.
+**(b) Last actually deployed + independently verified Web release SHA:**
+no authoritative deployment log or version marker exists that names one.
+What was found instead, by inspecting existing release-prep records:
+
+- `docs/development/web_release_checklist_astra_audit_3.md` (commit
+  `557ac08`, issue [#232](https://github.com/Joludvig/kvernhaug-brygghus/issues/232),
+  "WEB RELEASE PREP — freeze `7aa076a` for Astra Audit #3") proposed
+  freezing `RELEASE_SHA=7aa076a2210e4bf745f5c814db2ea924797b4227` and gave
+  an owner-PC command sequence (`deploy_web.ps1 -ReleaseSha`) plus a
+  4-item evidence checklist. That file only exists on the unmerged remote
+  branch `origin/agent/issue-232` — it never landed on `master` — and its
+  own evidence checklist is **unchecked as committed**.
+- Issue #232 itself is **closed as "not planned"** on GitHub, with no
+  comment recording that the `-ReleaseSha 7aa076a` deploy was actually run
+  or verified. So the GitHub issue trail does **not** confirm `7aa076a`
+  was the deployed SHA — it only shows it was prepared as a candidate.
+- The retained release worktree `D:\Development\kbh-release-7aa076a`
+  (pinned to `7aa076a`, clean, no extra files) is consistent with step 2a
+  of that checklist having been carried out, but a worktree existing only
+  proves *that step*, not that the real FTP deploy (step 2c) followed.
+
+**Conclusion for (b): no document/issue trail authoritatively names a
+deployed RELEASE_SHA.** Given `scripts/deploy_web.ps1` publishes no
+discoverable release marker on the live site itself, the only way to
+establish what is actually deployed *right now* is direct, independent,
+read-only measurement — done next.
+
+**(c) Does current master's `web/` tree differ from what's actually live?**
+Answered empirically this session with a full canonical-file byte
+verification, not the earlier four-file spot check alone:
+
+- Enumerated every file under the working tree's `web/` directory (the
+  exact set `deploy_web.ps1` uploads — `Get-ChildItem -Recurse -File`,
+  no exclusions): **87 files**.
+- Fetched each one's corresponding path directly from
+  `https://kvernhaugbrygghus.no/<path>` over plain read-only HTTPS (no
+  credentials, no FTP, no state changed) and byte-compared it against the
+  local working tree.
+
+  **Result: TOTAL 87 / IDENTICAL 85 / DIFFERING 0 / MISSING 2.**
+
+  The 2 "missing" (HTTP 404) are `web/CHANGELOG.md` and `web/README.md` —
+  repo-internal developer docs, not product/UI files; the production
+  static-file server does not serve `.md` paths (nothing under the app's
+  own navigation ever links to them). **Every one of the 85 files that are
+  actually part of the served product is byte-identical.** Zero
+  differences, zero unexplained missing files.
+- `git diff 7aa076a..18ac6f6 -- web/` → **empty**. `git diff
+  499a69f..18ac6f6 -- web/` → **empty**. `7aa076a` is confirmed an
+  ancestor of `origin/master`. So current master's `web/` tree, `7aa076a`'s
+  `web/` tree, and `499a69f`'s `web/` tree are all one and the same content.
+
+**Conclusion: production is currently serving `web/` content byte-identical
+to current master (`18ac6f6`)'s `web/` tree, proven directly (85/85
+servable files, 0 differing) rather than inferred from git history alone.**
+Because that same content is also identical to `7aa076a` and `499a69f`'s
+`web/` tree, production is content-equivalent to the release-prep
+candidate from issue #232 as well — **but this is established by today's
+direct measurement, not by treating issue #232 as proof that `7aa076a` was
+actually deployed.** Precise statement to use going forward: *"Current
+repository master is `18ac6f6`. No authoritative log confirms which exact
+SHA was last deployed by commit hash, but a fresh, full, read-only
+production byte verification (85/85 servable files identical) confirms the
+live site's content is, right now, identical to current master's `web/`
+tree — and therefore also to `7aa076a`'s, since `web/` has had zero
+commits between them."* This does not mean the App-only portions of master
+were deployed (Web has no App/Core coupling) — only `web/` is claimed here.
+
+A future Phase 3A-style check must repeat this content verification rather
+than reuse this conclusion, since any subsequent `web/**` merge without a
+new deploy would immediately invalidate it.
 
 ### 1.2 Source revision actually tested
 
 The automated matrix below (§3) runs against the **local working tree at
 `origin/master` (`18ac6f6`)**, served locally — i.e. exactly the content
-verified in §1.1 to already be live in production. No `web/**` file was
+verified in §1.1(c) to already be live in production. No `web/**` file was
 modified for this acceptance pass.
 
 ---
@@ -203,15 +251,21 @@ this one assertion. Not required for Phase 3A PASS as scoped by #250's own
 ### 6.2 No live production version marker
 
 `scripts/deploy_web.ps1` has no mechanism to publish a discoverable
-release marker on `https://kvernhaugbrygghus.no` itself (§1.1) — determining
-"what's actually live" required an ad hoc four-file content diff this
-session, not a repeatable one-command check. This is a process/tooling
-observation, not a Web *product* defect, and is recorded here rather than
-filed as a new issue (no GitHub write access this session — see §9).
-Recommended bounded follow-up for a future issue: a tiny static
-`web/version.json` (or an HTML comment in `index.html`) written at deploy
-time from the release SHA, verified post-upload exactly like every other
-deployed file already is.
+release marker on `https://kvernhaugbrygghus.no` itself, and no GitHub
+issue trail authoritatively names the exact deployed RELEASE_SHA by commit
+hash (§1.1(b) — issue #232's freeze-`7aa076a` prep was closed "not
+planned", checklist unchecked). Determining "what's actually live"
+required an ad hoc full-tree content verification this session (§1.1(c):
+87 files enumerated, 85 servable ones fetched and byte-compared), not a
+repeatable one-command check. This is a process/tooling observation, not a
+Web *product* defect, and is recorded here rather than filed as a new
+issue (no GitHub write access this session — see §9). Recommended bounded
+follow-up for a future issue: a tiny static `web/version.json` (or an HTML
+comment in `index.html`) written at deploy time from the release SHA,
+verified post-upload exactly like every other deployed file already is —
+this would also let issue-level release-prep records (like #232) actually
+be closed with attached proof of completion instead of ambiguously
+"not planned".
 
 ---
 
@@ -306,8 +360,9 @@ Pending HO delta for the owner/Chief to apply once write access exists:
 > App exposes no start-brew batch/brewer fields to preserve, so there is
 > nothing to carry across a mode/session boundary yet. Phase 3A automated
 > acceptance for Learner/Master (issue #250) is **PASS** against the
-> currently-deployed Web revision (verified via direct content diff against
-> production, not assumed from `origin/master`) — see
+> currently-live Web content (verified via a full read-only production
+> byte check, 85/85 servable files identical — not assumed from
+> `origin/master` or from an unconfirmed release-prep issue) — see
 > `docs/development/phase3a_learner_master_acceptance.md`. The human novice
 > gate required before any "novice-ready" claim is **PENDING** (script
 > prepared, not yet run with a real participant). No new product defect was
@@ -322,8 +377,10 @@ Pending HO delta for the owner/Chief to apply once write access exists:
 ## 10. Overall
 
 **`AUTOMATED 3A: PASS`** — every one of #250's 12 acceptance criteria that
-automation can prove was proven, against content independently verified to
-already be live in production, with zero new Web product defects found and
+automation can prove was proven, against content independently verified —
+via a full 85-file read-only production byte check, not an assumption —
+to already be live in production, with zero new Web product defects found
+and
 zero regressions in the existing 172-test Critical Browser Gate or the
 230+54 relevant Python Web/i18n unit tests. The two recorded scope notes
 (§6) are bounded and do not block this result.
