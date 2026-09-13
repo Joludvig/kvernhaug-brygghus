@@ -30,6 +30,16 @@ from ui.i18n import render_sprak_valger, t
 # `test_sprak_bytte_med_plassholder_valgt_endrer_ikke_widgetverdi`.
 _INGEN_OPPSKRIFT_VALGT = "__ingen_oppskrift_valgt__"
 
+# App A4-3 (issue #246) -- samme engangs-UI-koordineringsmønster som
+# _nullstill_oppskrift_selector_neste_render (#242) rett under, men i
+# MOTSATT retning: peker selectboksen FREMOVER til en navngitt oppskrift
+# i stedet for tilbake til plassholderen. Satt av ui/recipe_card.py sin
+# "💾 Lagre endringer"-handler idet en navneendring trigger sin egen,
+# eksisterende A3-4-rerun (se preflight-dokumentets Section om A4-3) --
+# ALDRI av selve selectboks-instansieringen. Konsumeres HER, FØR
+# selectboksen instansieres, akkurat som #242-flagget.
+_SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER = "_sett_oppskrift_selector_neste_render"
+
 def _last_master_db(filnavn):
     try:
         with open(f"data/{filnavn}", encoding="utf-8") as f:
@@ -62,7 +72,8 @@ def render_sidebar():
     # verdi til plassholderen. Ingen ny identitetsmodell: dette korrigerer
     # kun EN EKSISTERENDE widgets egen state, se
     # tests/test_app_a3_import_revert_regression_apptest.py.
-    if st.session_state.pop("_nullstill_oppskrift_selector_neste_render", False):
+    _nullstilt_denne_rerunen = st.session_state.pop("_nullstill_oppskrift_selector_neste_render", False)
+    if _nullstilt_denne_rerunen:
         st.session_state["sidebar_recipe_selector"] = _INGEN_OPPSKRIFT_VALGT
 
     if DEMO_MODE:
@@ -72,6 +83,22 @@ def render_sidebar():
     _oppskrift_mappe_kwargs = {"mappe": "demo_recipes"} if DEMO_MODE else {}
     lagrede_brygg = hent_alle_oppskrifter(**_oppskrift_mappe_kwargs)
     filnavn_kart = hent_oppskrift_filnavn_kart(**_oppskrift_mappe_kwargs)
+
+    # App A4-3 (issue #246) -- konsumeres HER, FØR selectboksen under
+    # instansieres (se konstantens egen kommentar over). Krever et
+    # FERSKT treff i den NETTOPP innlastede lagrede-oppskrifter-dicten
+    # over -- aldri antatt gyldig -- slik at en (i praksis utenkelig)
+    # etterfølgende feil/kollisjon aldri kan sette selectboksen til et
+    # navn som ikke faktisk finnes ennå. Hvis #242 sitt
+    # plassholder-flagg OGSÅ ble konsumert i akkurat denne rerunen
+    # (reelle brukerflyter gjør disse to gjensidig utelukkende: denne
+    # krever en eksisterende _last_loaded_recipe, import rydder alltid
+    # nettopp DEN), vinner plassholder-nullstillingen deterministisk --
+    # den mer konservative importsemantikken ("nyimportert innhold skal
+    # ALDRI kunne erstattes stille") skal aldri kunne overstyres.
+    _sett_selector_til = st.session_state.pop(_SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER, None)
+    if _sett_selector_til is not None and not _nullstilt_denne_rerunen and _sett_selector_til in lagrede_brygg:
+        st.session_state["sidebar_recipe_selector"] = _sett_selector_til
 
     if not DEMO_MODE:
         duplikater = finn_duplikate_oppskrift_navn()
