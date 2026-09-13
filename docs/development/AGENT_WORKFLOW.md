@@ -1480,6 +1480,27 @@ is already the routing contract; this policy does not introduce a format.
   unmarked status comments are not replacement pointers. A missing,
   inaccessible or ambiguous route means defer the write and report the
   problem; never silently fall back to writing the old AUTO block.
+- **Detect an orphan checkpoint (issue #252):** while reading the target
+  issue's comments for the fetch above, also check whether any *other*
+  comment on that same issue carries the standalone
+  `KBH_COS_LIVE_CHECKPOINT_V1` marker and is newer than the one the
+  newest #152 pointer currently references. A newer marked checkpoint
+  without a matching, newer pointer on #152 is an orphan — the exact
+  2026-09-13 incident this issue records, where later material work
+  (App, Phase 3A) completed and a newer checkpoint existed on #196
+  without the routed pointer ever advancing. Treat a detected orphan
+  exactly like a missing/ambiguous route above: defer the write, and
+  report the orphan explicitly (both comment IDs) rather than silently
+  treating the older referenced checkpoint as current.
+  [`.github/scripts/ho_router_orphan_check.py`](../../.github/scripts/ho_router_orphan_check.py)
+  (`finn_foreldrelos_sjekkpunkt`, unit-tested in
+  [`tests/test_ho_router_orphan_check.py`](../../tests/test_ho_router_orphan_check.py))
+  is a standalone diagnostic helper for this check, given comment data
+  already fetched via `gh issue view` — it has no GitHub dependency of
+  its own, is not wired into `claude-agent-bridge.yml` or any other
+  workflow trigger, and running it is optional and manual. It exists to
+  make the check repeatable and regression-tested, not to arm any new
+  automation.
 - Read the checkpoint, then refresh live master, relevant issues/labels,
   PR heads, reviews/checks, merge state and production evidence. Precedence:
   live evidence > routed checkpoint > stale operational body/comments.
@@ -1518,6 +1539,11 @@ is already the routing contract; this policy does not introduce a format.
    state, an active lane, blocker, dependency, owner gate, parking decision
    or next step. No write for a rerun, timestamp refresh, rewording or facts
    already represented. HO maintenance itself is not another material event.
+   **A material change found here obligates step 5** — completing bounded
+   material work and then finishing the run without attempting (and
+   reporting the outcome of) the write below is itself the failure mode
+   issue #252 records ("Later App and Phase 3A work also completed
+   without advancing the routed pointer").
 4. Prepare a compact **replacement snapshot**, using the existing checkpoint
    marker. Replace stale transient facts; do not append a run log, duplicate
    task reports or carry superseded statuses forward. Retain every unresolved
@@ -1538,7 +1564,12 @@ is already the routing contract; this policy does not introduce a format.
    checkpoint on the existing operative issue or the bounded task issue,
    read it back, then append the existing standalone pointer line to #152
    using the **returned comment ID**. Read back #152 and resolve the new
-   pointer to verify publication. Historical comments stay for audit;
+   pointer to verify publication. **Both halves are required, not just the
+   first**: a checkpoint published without its matching pointer read-back
+   is exactly the orphan state the new bullet above detects, so treat an
+   incomplete pair (checkpoint published, pointer publish/read-back failed
+   or skipped) as a failed publication under this step, not a partial
+   success. Historical comments stay for audit;
    the new pointer replaces the active snapshot, not its retained gates.
    Never post a pointer before its target exists or append history to the
    active snapshot. Use existing `gh issue view` / `gh issue comment`
