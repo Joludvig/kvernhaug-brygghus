@@ -71,12 +71,30 @@ def _brew_oppskrift_navn(brew):
     frosne snapshot (`brew["snapshot"]["recipe"]["navn"]`), aldri fra
     gjeldende editor-/session-tilstand (`_last_loaded_recipe` m.fl.) --
     et gammelt/importert/aktivt brygg skal beskrive SEG SELV, uansett
-    hva som for øvrig er lastet i Bryggkortet akkurat nå. Samme trygge,
-    lokale fallback-mønster som forhåndsvisningen lenger ned i denne
-    filen allerede bruker (`snapshot_recipe.get("navn", ...)`) -- en
-    legacy-/korrupt brew uten forventet sti skal aldri krasje UI-et."""
-    navn = ((brew or {}).get("snapshot") or {}).get("recipe", {}).get("navn") if brew else None
-    return navn or t("kbhbrew.oppskrift_ukjent_fallback")
+    hva som for øvrig er lastet i Bryggkortet akkurat nå.
+
+    Chief review (PR #249, review 5190987416) -- `_skann_alle_brews()` i
+    modules/kbhbrew_storage.py godtar enhver dekodet dict med en truthy
+    `brewId`, og validerer IKKE at `snapshot`/`snapshot.recipe` faktisk
+    er dict-er eller at `navn` er en brukbar streng. Denne hjelperen må
+    derfor sjekke type explisitt i HVERT lag (brew/snapshot/recipe/navn)
+    før den kjeder .get()-kall videre -- ellers krasjer UI-et på et
+    legacy/korrupt lokalt brygg (f.eks. snapshot="bad" eller
+    recipe=None). Faller ALLTID trygt tilbake til
+    `kbhbrew.oppskrift_ukjent_fallback` i stedet, uten å røre selve
+    lagrings-/valideringslogikken i modules/kbhbrew_storage.py."""
+    if not isinstance(brew, dict):
+        return t("kbhbrew.oppskrift_ukjent_fallback")
+    snapshot = brew.get("snapshot")
+    if not isinstance(snapshot, dict):
+        return t("kbhbrew.oppskrift_ukjent_fallback")
+    recipe = snapshot.get("recipe")
+    if not isinstance(recipe, dict):
+        return t("kbhbrew.oppskrift_ukjent_fallback")
+    navn = recipe.get("navn")
+    if not isinstance(navn, str) or not navn.strip():
+        return t("kbhbrew.oppskrift_ukjent_fallback")
+    return navn
 
 
 def aktiv_brew_id():

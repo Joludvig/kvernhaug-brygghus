@@ -37,6 +37,7 @@ from streamlit.testing.v1 import AppTest
 import modules.kbhbrew_storage as kbhbrew_storage
 from modules.kbhbrew import bygg_kbhbrew_konvolutt, bygg_ny_brew
 from modules.recipe import bygg_recipe_object
+from ui.kbhbrew_panel import _brew_oppskrift_navn
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _CREATE_HARNESS = os.path.join(_REPO_ROOT, "tests", "fixtures", "streamlit_harness", "kbhbrew_create_harness.py")
@@ -286,6 +287,114 @@ class TestA44NoEnNoklerLoserBeggeSprak(unittest.TestCase):
                     tekst.startswith("??") and tekst.endswith("??"),
                     f"{nokkel}/{sprak} ga en manglende-nøkkel-markør: {tekst!r}",
                 )
+
+
+
+# ─── Chief review (PR #249, review 5190987416): _brew_oppskrift_navn() må
+# være type-defensiv i hvert lag, siden modules/kbhbrew_storage.py::
+# _skann_alle_brews() godtar enhver dekodet dict med en truthy brewId og
+# IKKE validerer snapshot-/recipe-formen. Kaller hjelperen direkte (den er
+# en ren funksjon utenom selve t()-oppslaget, som fungerer trygt uten en
+# løpende Streamlit-scriptkontekst -- samme som modules/kbhbrew_ui.py sine
+# rene hjelpere testes direkte i tests/test_kbhbrew_ui_helpers.py).
+
+class TestBrewOppskriftNavnRobusthetMotKorruptLokalData(unittest.TestCase):
+    def _gyldig_brew(self, navn="Robusthet Pilsner"):
+        return {"brewId": "b-1", "snapshot": {"recipe": {"navn": navn}}}
+
+    def test_gyldig_frosset_oppskriftsnavn_returneres(self):
+        self.assertEqual(_brew_oppskrift_navn(self._gyldig_brew()), "Robusthet Pilsner")
+
+    def test_brew_er_none(self):
+        self.assertEqual(_brew_oppskrift_navn(None), "Ukjent oppskrift")
+
+    def test_brew_er_ikke_en_dict(self):
+        self.assertEqual(_brew_oppskrift_navn("ikke-en-dict"), "Ukjent oppskrift")
+        self.assertEqual(_brew_oppskrift_navn(["ikke", "en", "dict"]), "Ukjent oppskrift")
+
+    def test_manglende_snapshot_noekkel(self):
+        self.assertEqual(_brew_oppskrift_navn({"brewId": "b-1"}), "Ukjent oppskrift")
+
+    def test_snapshot_er_none(self):
+        self.assertEqual(_brew_oppskrift_navn({"brewId": "b-1", "snapshot": None}), "Ukjent oppskrift")
+
+    def test_snapshot_er_ikke_en_dict(self):
+        for korrupt in ("bad", [], 42):
+            with self.subTest(snapshot=korrupt):
+                self.assertEqual(
+                    _brew_oppskrift_navn({"brewId": "b-1", "snapshot": korrupt}),
+                    "Ukjent oppskrift",
+                )
+
+    def test_manglende_recipe_noekkel(self):
+        self.assertEqual(_brew_oppskrift_navn({"brewId": "b-1", "snapshot": {}}), "Ukjent oppskrift")
+
+    def test_recipe_er_none(self):
+        self.assertEqual(
+            _brew_oppskrift_navn({"brewId": "b-1", "snapshot": {"recipe": None}}),
+            "Ukjent oppskrift",
+        )
+
+    def test_recipe_er_ikke_en_dict(self):
+        for korrupt in ("bad", [], 42):
+            with self.subTest(recipe=korrupt):
+                self.assertEqual(
+                    _brew_oppskrift_navn({"brewId": "b-1", "snapshot": {"recipe": korrupt}}),
+                    "Ukjent oppskrift",
+                )
+
+    def test_manglende_navn_noekkel(self):
+        self.assertEqual(
+            _brew_oppskrift_navn({"brewId": "b-1", "snapshot": {"recipe": {}}}),
+            "Ukjent oppskrift",
+        )
+
+    def test_navn_er_blank_eller_bare_whitespace(self):
+        for blank in ("", "   "):
+            with self.subTest(navn=repr(blank)):
+                self.assertEqual(
+                    _brew_oppskrift_navn({"brewId": "b-1", "snapshot": {"recipe": {"navn": blank}}}),
+                    "Ukjent oppskrift",
+                )
+
+    def test_navn_er_ikke_en_streng(self):
+        for korrupt in (None, 42, [], {}):
+            with self.subTest(navn=korrupt):
+                self.assertEqual(
+                    _brew_oppskrift_navn({"brewId": "b-1", "snapshot": {"recipe": {"navn": korrupt}}}),
+                    "Ukjent oppskrift",
+                )
+
+    def test_ingen_unntak_kastes_for_noen_av_de_korrupte_formene(self):
+        korrupte_brews = [
+            None, "bad", [], 42,
+            {"brewId": "b-1"},
+            {"brewId": "b-1", "snapshot": None},
+            {"brewId": "b-1", "snapshot": "bad"},
+            {"brewId": "b-1", "snapshot": []},
+            {"brewId": "b-1", "snapshot": {"recipe": None}},
+            {"brewId": "b-1", "snapshot": {"recipe": "bad"}},
+            {"brewId": "b-1", "snapshot": {"recipe": {}}},
+            {"brewId": "b-1", "snapshot": {"recipe": {"navn": ""}}},
+            {"brewId": "b-1", "snapshot": {"recipe": {"navn": None}}},
+        ]
+        for korrupt in korrupte_brews:
+            with self.subTest(brew=korrupt):
+                try:
+                    _brew_oppskrift_navn(korrupt)
+                except Exception as e:
+                    self.fail(f"_brew_oppskrift_navn({korrupt!r}) kastet {type(e).__name__}: {e}")
+
+    def test_fallback_loeser_pa_begge_sprak(self):
+        from modules.i18n import t as ren_t
+
+        for sprak in ("no", "en"):
+            tekst = ren_t("kbhbrew.oppskrift_ukjent_fallback", sprak)
+            self.assertTrue(tekst, f"kbhbrew.oppskrift_ukjent_fallback/{sprak} ga en tom/falsy tekst")
+            self.assertFalse(
+                tekst.startswith("??") and tekst.endswith("??"),
+                f"kbhbrew.oppskrift_ukjent_fallback/{sprak} ga en manglende-nøkkel-markør: {tekst!r}",
+            )
 
 
 if __name__ == "__main__":
