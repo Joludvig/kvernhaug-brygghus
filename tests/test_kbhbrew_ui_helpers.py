@@ -15,6 +15,7 @@ from modules.kbhbrew_ui import (
     bygg_brew_eksport_label,
     bygg_predicted_fra_ctx,
     manglende_ingrediens_ider,
+    oppskrift_har_kbhbrew,
     sorter_brews_for_eksport,
 )
 
@@ -235,6 +236,43 @@ class TestAktivBrewMatcherRecipe(unittest.TestCase):
     def test_6_ugyldig_brew_behandles_som_tomt_dict(self):
         self.assertFalse(aktiv_brew_matcher_recipe(None, "oppskrift-a.json"))
         self.assertTrue(aktiv_brew_matcher_recipe(None, None))
+
+
+class TestOppskriftHarKbhbrew(unittest.TestCase):
+    """Issue #256 (dual-truth-vakt for legacy Bryggelogg):
+    oppskrift_har_kbhbrew() er den pure sannhetskilden ui/recipe_card.py
+    bruker for å avgjøre om den gamle, per-oppskrift Bryggeloggen skal
+    advare om at et .kbhbrew-brygg allerede finnes for DENNE oppskriften.
+    Samme identitetsregel som aktiv_brew_matcher_recipe()."""
+
+    def test_1_ingen_brews_gir_false(self):
+        self.assertFalse(oppskrift_har_kbhbrew({}, "oppskrift-a.json"))
+
+    def test_2_ett_brew_med_matchende_recipe_id_gir_true(self):
+        brews = {"brew-1": {"recipeId": "oppskrift-a.json"}}
+        self.assertTrue(oppskrift_har_kbhbrew(brews, "oppskrift-a.json"))
+
+    def test_3_kun_brews_for_andre_oppskrifter_gir_false(self):
+        brews = {
+            "brew-1": {"recipeId": "oppskrift-b.json"},
+            "brew-2": {"recipeId": "oppskrift-c.json"},
+        }
+        self.assertFalse(oppskrift_har_kbhbrew(brews, "oppskrift-a.json"))
+
+    def test_4_flere_brews_samme_oppskrift_gir_fortsatt_true(self):
+        brews = {
+            "brew-1": {"recipeId": "oppskrift-a.json"},
+            "brew-2": {"recipeId": "oppskrift-a.json"},
+        }
+        self.assertTrue(oppskrift_har_kbhbrew(brews, "oppskrift-a.json"))
+
+    def test_5_recipe_id_none_matcher_kun_brew_med_recipe_id_none(self):
+        self.assertTrue(oppskrift_har_kbhbrew({"brew-1": {"recipeId": None}}, None))
+        self.assertFalse(oppskrift_har_kbhbrew({"brew-1": {"recipeId": "oppskrift-a.json"}}, None))
+
+    def test_6_ugyldig_brews_dict_behandles_som_tomt(self):
+        self.assertFalse(oppskrift_har_kbhbrew(None, "oppskrift-a.json"))
+        self.assertFalse(oppskrift_har_kbhbrew("ikke-en-dict", "oppskrift-a.json"))
 
 
 if __name__ == "__main__":

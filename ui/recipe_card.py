@@ -18,6 +18,8 @@ from modules.recipe_storage import (
 from modules.calculations import beregn_abv_standard
 from modules.recipe import bygg_recipe_object
 from modules.kbh_contract import bygg_kbhrecipe_konvolutt, UgyldigOppskriftForEksport
+from modules.kbhbrew_storage import hent_alle_brews
+from modules.kbhbrew_ui import oppskrift_har_kbhbrew
 from modules.card_template import render_card_html, render_a4_html
 from ui.branding import _logo_base64
 from ui.sidebar import _SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER
@@ -40,6 +42,20 @@ def _render_brewday_result_panel(ctx):
     except LoggKorruptError as e:
         logg = []
         logg_korrupt = e
+
+    # Issue #256 (Phase 3B durable decision #253) -- App eier det
+    # gjeldende strukturerte bryggrecordet; Web/legacy-loggen er ALDRI
+    # en parallell "live" logg. Skal ALDRI skjule den gamle Bryggeloggen
+    # (historisk kompatibilitet, se saken), men et brygg som allerede
+    # finnes som .kbhbrew for DENNE oppskriften skal advares tydelig FØR
+    # skjemaet under -- samme batch skal aldri logges dobbelt.
+    if oppskrift_har_kbhbrew(hent_alle_brews(), st.session_state.get("_last_loaded_recipe_file")):
+        st.warning(
+            "⚠️ Denne oppskriften har ett eller flere registrerte brygg i "
+            "**Bryggdag** (`.kbhbrew`). Bruk Bryggdag for å logge det "
+            "aktive/nåværende brygget — den gamle Bryggeloggen under er kun "
+            "historisk, og samme batch skal ikke logges begge steder."
+        )
 
     with st.expander(f"📓 Bryggelogg ({len(logg)} oppføringer)" if logg else "📓 Bryggelogg", expanded=False):
         if logg_korrupt is not None:
