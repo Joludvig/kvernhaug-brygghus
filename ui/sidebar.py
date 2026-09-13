@@ -40,6 +40,31 @@ def _last_master_db(filnavn):
 def render_sidebar():
     render_sprak_valger()
 
+    # App #242 (A3-1-interaksjonsregresjon) -- et engangs, eksplisitt
+    # UI-koordineringsflagg. En vellykket import (tekst ELLER .kbhrecipe,
+    # se knappehandlerne lenger nede) rydder _last_loaded_recipe/
+    # _last_loaded_recipe_file og kaller SIN EGEN st.rerun() -- men rører
+    # ALDRI selectboksens (key="sidebar_recipe_selector") EGEN, bundne
+    # widget-verdi. Uten dette flagget ville selectboksen på den
+    # påfølgende rerunen fortsatt returnere den FORRIGE lagrede
+    # oppskriftens navn, som reload-ved-mismatch-sjekken rett under (nå
+    # ryddet identitet != gammelt widget-valg) feiltolker som et bevisst
+    # nytt valg -- og stille laster den gamle oppskriften over det
+    # nyimporterte innholdet (issue #242).
+    #
+    # Kan IKKE settes direkte i knappehandleren selv: Streamlit forbyr å
+    # skrive st.session_state[<widget-key>] for en widget som ALLEREDE er
+    # instansiert tidligere i SAMME scriptkjøring (selectboksen rendres
+    # lenger OPPE i denne funksjonen enn importknappene). Handlerne setter
+    # derfor i stedet dette flagget rett før sin egen st.rerun(); det
+    # konsumeres HER, FØR selectboksen instansieres på den kommende
+    # rerunen -- eneste trygge tidspunkt å nullstille widgetens bundne
+    # verdi til plassholderen. Ingen ny identitetsmodell: dette korrigerer
+    # kun EN EKSISTERENDE widgets egen state, se
+    # tests/test_app_a3_import_revert_regression_apptest.py.
+    if st.session_state.pop("_nullstill_oppskrift_selector_neste_render", False):
+        st.session_state["sidebar_recipe_selector"] = _INGEN_OPPSKRIFT_VALGT
+
     if DEMO_MODE:
         st.sidebar.warning(t("sidebar.demo_advarsel"))
 
@@ -216,6 +241,10 @@ def render_sidebar():
                     apply_import_to_session_state(preview)
                     del st.session_state["import_preview"]
                     del st.session_state["import_parsed"]
+                    # Issue #242 -- se det store kommentarblokken øverst i
+                    # render_sidebar() for hvorfor dette må være et
+                    # engangsflagg i stedet for en direkte tildeling her.
+                    st.session_state["_nullstill_oppskrift_selector_neste_render"] = True
                     st.rerun()
 
     # PRI 2C3 -- .kbhrecipe V1-fil-import (KBH Core Contract). Bruker den
@@ -312,5 +341,10 @@ def render_sidebar():
                 st.session_state.pop("kbhrecipe_import_preview", None)
                 st.session_state.pop("kbhrecipe_import_feil", None)
                 st.session_state.pop("kbhrecipe_import_preview_file_id", None)
+                # Issue #242 -- samme regresjon/samme fiks som tekstimport
+                # over (se det store kommentarblokken øverst i
+                # render_sidebar()); .kbhrecipe-stien deler EKSAKT samme
+                # rerun + identitetsryddings-mekanisme.
+                st.session_state["_nullstill_oppskrift_selector_neste_render"] = True
                 st.sidebar.success(f"Importert: {_r['name']}")
                 st.rerun()
