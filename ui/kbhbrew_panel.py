@@ -41,7 +41,7 @@ import json
 import streamlit as st
 
 from config import DEMO_MODE
-from modules.equipment import equipment_kilde_er_lagret, last_equipment
+from modules.equipment import equipment_kilde_er_lagret, lagre_equipment, last_equipment
 from modules.kbh_contract import UgyldigOppskriftForEksport
 from modules.kbhbrew import UgyldigKbhbrewForImport, parse_kbhbrew_json
 from modules.kbhbrew_storage import (
@@ -62,6 +62,7 @@ from ui.i18n import t
 
 _AKTIV_BREW_ID_NOKKEL = "_aktiv_kbhbrew_brew_id"
 _IMPORT_FIL_ID_NOKKEL = "kbhbrew_import_preview_file_id"
+_VIS_UTSTYR_SNARVEI_NOKKEL = "_vis_kbhbrew_utstyr_bekreft_snarvei"
 
 
 def aktiv_brew_id():
@@ -154,6 +155,7 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
                 "som om den var ditt faktiske utstyr. Gå til «🔧 Verktøy» → «⚙️ "
                 "Utstyrsprofil» og trykk «💾 Lagre utstyrsprofil» først."
             )
+            st.session_state[_VIS_UTSTYR_SNARVEI_NOKKEL] = True
         elif manglende:
             st.error(
                 "❌ Kunne ikke starte nytt brygg — følgende ingrediens-ID-er finnes ikke i "
@@ -172,6 +174,28 @@ def render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_databa
             else:
                 sett_aktiv_brew_id(brew["brewId"])
                 st.toast(f"Nytt brygg startet: {brew['brewId']}", icon="🍺")
+
+    # App A4-2 (issue #244) -- fjerner første-gangs-dødvekten fra sikkerhets-
+    # sperren over UTEN å svekke den: sperren ("if not equipment_kilde_er_lagret()")
+    # forblir uendret og nekter fortsatt en .kbhbrew-opprettelse mot en ubekreftet
+    # standardprofil. Denne knappen er KUN en eksplisitt snarvei til den samme,
+    # allerede eksisterende lagringsveien (lagre_equipment(last_equipment())) som
+    # ui/equipment_panel.py sin "💾 Lagre utstyrsprofil" bruker -- ingen ny
+    # utstyrsmodell, ingen ny sperrelogikk. Flagget må leve i session_state (ikke
+    # bare nestes inne i "if st.button(...)"-blokken over) fordi selve
+    # bekreftelsesklikket trigger en NY rendering der "▶️ Start nytt brygg" sin
+    # egen st.button() på nytt returnerer False -- uten flagget ville rendering av
+    # DENNE knappen (og dermed klikket på den) aldri nå frem. Flagget skjules
+    # automatisk igjen så snart equipment_kilde_er_lagret() blir True (enten via
+    # denne snarveien eller via selve Verktøy-panelet) -- brukeren må uansett
+    # trykke "▶️ Start nytt brygg" på nytt for faktisk å opprette et brygg.
+    if st.session_state.get(_VIS_UTSTYR_SNARVEI_NOKKEL) and not equipment_kilde_er_lagret():
+        st.caption(t("kbhbrew.bekreft_standardutstyr_hjelp"))
+        if st.button(t("kbhbrew.bekreft_standardutstyr_btn"), key="kbhbrew_bekreft_standardutstyr_btn"):
+            lagre_equipment(last_equipment())
+            st.session_state.pop(_VIS_UTSTYR_SNARVEI_NOKKEL, None)
+            st.toast(t("kbhbrew.standardutstyr_bekreftet_ok"), icon="⚙️")
+            st.rerun()
 
     aktiv_brew = _sinkroniser_aktiv_brew_mot_oppskrift()
     if aktiv_brew is not None:
