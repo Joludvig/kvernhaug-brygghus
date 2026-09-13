@@ -49,6 +49,15 @@ allerede beviste (branch-avgrensede push-regler, fravær av `git merge`/
 `gh pr merge`, `--permission-mode acceptEdits`, fravær av `Write`/
 `Edit`/`MultiEdit`, de eksisterende Python/i18n-reglene) har endret seg.
 
+V1.6 (issue #252) utvider samme suite igjen: HO-router-freshness-sjekken
+(`.github/scripts/ho_router_check.py`) trenger to eksakte, argument-faste
+`--allowedTools`-regler for at Bridge Claude skal kunne kjøre den samme
+fail-closed orphan-deteksjonen som lokal Claude nå bruker som obligatorisk
+post-publiserings-verifisering. Denne bolken beviser at nøyaktig disse to
+reglene er lagt til én gang hver, uten noen bredere `python3 .github/
+scripts/*`-variant, og uten at noe av det V1.2/V1.3/V1.4/V1.5 allerede
+beviste har endret seg.
+
 Kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
 """
 import os
@@ -75,6 +84,11 @@ _NODE_PLAYWRIGHT_REGLER = (
     "Bash(npx playwright install chromium firefox)",
     "Bash(npx playwright install --with-deps chromium firefox)",
     "Bash(npx playwright test *)",
+)
+
+_HO_ROUTER_CHECK_REGLER = (
+    "Bash(python3 .github/scripts/ho_router_check.py pointer)",
+    "Bash(python3 .github/scripts/ho_router_check.py verify)",
 )
 
 
@@ -199,7 +213,7 @@ class TestPermissionConfig(unittest.TestCase):
         python3_regler = [v for v in self.verktoy if "python3" in v]
         self.assertEqual(
             sorted(python3_regler),
-            sorted(["Bash(python3 -m unittest *)", _GENERATOR_REGEL]),
+            sorted(["Bash(python3 -m unittest *)", _GENERATOR_REGEL, *_HO_ROUTER_CHECK_REGLER]),
         )
 
     # ─── 6 (V1.4, issue #154): resten av V1.2/V1.3-kontrakten er uendret ────
@@ -283,8 +297,60 @@ class TestPermissionConfig(unittest.TestCase):
         python3_regler = [v for v in self.verktoy if "python3" in v]
         self.assertEqual(
             sorted(python3_regler),
-            sorted(["Bash(python3 -m unittest *)", _GENERATOR_REGEL]),
+            sorted(["Bash(python3 -m unittest *)", _GENERATOR_REGEL, *_HO_ROUTER_CHECK_REGLER]),
         )
+
+    # ─── 8 (V1.6, issue #252): HO router freshness-sjekk ─────────────────
+
+    def test_8a_begge_ho_router_check_reglene_finnes_eksakt(self):
+        for regel in _HO_ROUTER_CHECK_REGLER:
+            self.assertIn(
+                regel, self.verktoy,
+                f"HO router-check-regelen mangler i --allowedTools (issue #252): {regel!r}",
+            )
+
+    def test_8b_hver_ho_router_check_regel_forekommer_noyaktig_en_gang(self):
+        for regel in _HO_ROUTER_CHECK_REGLER:
+            self.assertEqual(
+                self.verktoy.count(regel), 1,
+                f"Regelen skal forekomme nøyaktig én gang -- ingen duplikater: {regel!r}",
+            )
+
+    def test_8c_ingen_bredere_ho_router_check_variant_introdusert(self):
+        forbudte = (
+            "Bash(python3 .github/scripts/ho_router_check.py *)",
+            "Bash(python3 .github/scripts/ho_router_check.py)",
+            "Bash(python3 .github/scripts/*)",
+        )
+        for forbudt in forbudte:
+            self.assertNotIn(
+                forbudt, self.verktoy,
+                f"Bredere tilgang enn de to eksakte ho_router_check.py-reglene skal ikke finnes: {forbudt!r}",
+            )
+
+    def test_8d_kun_fire_python3_regler_totalt(self):
+        # V1.2 (`python3 -m unittest *`), V1.4 (generator), V1.6 (de to
+        # ho_router_check.py-modusene) -- ingen femte/bredere Python-inngang.
+        python3_regler = [v for v in self.verktoy if "python3" in v]
+        self.assertEqual(
+            sorted(python3_regler),
+            sorted(["Bash(python3 -m unittest *)", _GENERATOR_REGEL, *_HO_ROUTER_CHECK_REGLER]),
+        )
+
+    def test_8e_eksisterende_kontrakt_star_ved_lag_etter_ho_router_check_tillegget(self):
+        for regel in _FORVENTEDE_PUSH_REGLER:
+            self.assertIn(regel, self.verktoy)
+        push_regler = [v for v in self.verktoy if v.startswith("Bash(git push")]
+        self.assertEqual(sorted(push_regler), sorted(_FORVENTEDE_PUSH_REGLER))
+        for verktoysnavn in self.verktoy:
+            self.assertFalse(verktoysnavn.startswith("Bash(git merge"))
+            self.assertFalse(verktoysnavn.startswith("Bash(gh pr merge"))
+        self.assertIn("--permission-mode acceptEdits", self.steg)
+        for verktoysnavn in ("Write", "Edit", "MultiEdit"):
+            self.assertNotIn(verktoysnavn, self.verktoy)
+        for regel in _NODE_PLAYWRIGHT_REGLER:
+            self.assertIn(regel, self.verktoy)
+            self.assertEqual(self.verktoy.count(regel), 1)
 
 
 if __name__ == "__main__":
