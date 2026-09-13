@@ -202,17 +202,24 @@ class TestA32SkrivemaalTekstSkillerFraStatus(_MedIsolertEquipmentOgRecipes):
         at.run()
         self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
 
+        # App A4-4 (issue #248) -- skrivemål-meldingen viser nå
+        # oppskriftsnavnet (frosset i snapshotet) i stedet for den rå
+        # brewId-en, så meldingen lokaliseres via selve "skriver til"-
+        # frasen i stedet for brew_id (se tests/test_kbhbrew_terminology_
+        # apptest.py for full dekning av selve wording-fiksen).
         suksessmeldinger = [e.value for e in at.success]
-        treff = [m for m in suksessmeldinger if brew_id in m]
+        treff = [m for m in suksessmeldinger if "skriver til" in m]
         self.assertEqual(len(treff), 1, f"Fant ikke skrivemål-meldingen: {suksessmeldinger}")
         melding = treff[0]
 
         # Den nye teksten skal fortelle at DETTE er skrivemålet, og vise
         # den lagrede statusen (Ferdig) SEPARAT -- aldri fremstille et
-        # Ferdig-brygg som om det har lagret status "Aktiv".
+        # Ferdig-brygg som om det har lagret status "Aktiv". Den rå
+        # brewId-en skal heller ikke lenger være synlig i meldingen selv.
         self.assertIn("skriver til", melding)
         self.assertIn("Ferdig", melding)
         self.assertNotIn("Aktivt brygg denne økten", melding)
+        self.assertNotIn(brew_id, melding)
 
 
 # ═══════════════════════════════════════════════════════════════════

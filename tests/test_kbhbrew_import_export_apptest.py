@@ -114,7 +114,8 @@ class TestKbhbrewImportExportAppTest(unittest.TestCase):
         at = self._ny_apptest()
         self.assertEqual(list(at.selectbox), [])
         captions = [c.value for c in at.caption]
-        self.assertTrue(any("Ingen Core V1-brygg lagret lokalt ennå" in c for c in captions))
+        self.assertTrue(any("Ingen brygg lagret lokalt ennå" in c for c in captions))
+        self.assertFalse(any("Core V1" in c for c in captions))
 
     # ─── 2: opplasting alene skriver ingenting ─────────────────────────
 

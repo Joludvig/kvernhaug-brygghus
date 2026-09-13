@@ -85,11 +85,43 @@ TEKSTER = {
         "brew_history.status.active": "Aktiv",
         "brew_history.status.done": "Ferdig",
         "brew_history.status.discarded": "Forkastet",
-        "kbhbrew.skriver_til": "🎯 Bryggdag skriver til: `{brew_id}` · opprettet {opprettet}",
+        "kbhbrew.skriver_til": "🎯 Bryggdag skriver til: {oppskriftsnavn} · opprettet {opprettet}",
         "kbhbrew.advarsel_ikke_aktiv_status": "⚠️ Dette bryggets lagrede status er **{status}** — lagring her oppdaterer et brygg som ikke lenger er aktivt, ikke et nytt.",
         "kbhbrew.bekreft_standardutstyr_btn": "✅ Bruk og bekreft standardutstyr",
         "kbhbrew.bekreft_standardutstyr_hjelp": "Lagrer nåværende (eventuelt standard BrewZilla 35L) utstyrsprofil som din BEKREFTEDE utstyrsprofil, slik at «▶️ Start nytt brygg» kan brukes. Kan endres senere under «🔧 Verktøy» → «⚙️ Utstyrsprofil».",
         "kbhbrew.standardutstyr_bekreftet_ok": "Utstyrsprofil bekreftet og lagret. Trykk «▶️ Start nytt brygg» på nytt for å opprette brygget.",
+        # App A4-4 (issue #248) -- fjerner internt implementasjonsspråk
+        # ("snapshot", "Core V1", rå brewId) fra den brukervendte
+        # create/import/eksport-flaten i ui/kbhbrew_panel.py, uten å endre
+        # opprettelses-/import-/eksportoppførsel eller skjema. Legitim
+        # bryggeterminologi (OG/FG/ABV/IBU/EBC, effektivitet, mash ratio,
+        # boil-off, dead space, kettle capacity, selve ".kbhbrew"/
+        # ".kbhrecipe"-filendelsene) er UENDRET -- se preflight-dokumentets
+        # Section 6.
+        "kbhbrew.start_ny_brew_tittel": "🍺 Start nytt brygg (fryser dagens oppskrift og utstyr)",
+        "kbhbrew.start_ny_brew_beskrivelse": (
+            "Fryser gjeldende oppskrift, utstyrsprofil og spådde verdier som ET NYTT, "
+            "historisk brygg (.kbhbrew). Senere endringer i oppskrift/utstyr/masterdata "
+            "påvirker ALDRI dette brygget igjen. Hvert klikk oppretter et NYTT batch — "
+            "flere reelle brygg fra samme oppskrift er normalt."
+        ),
+        "kbhbrew.manglende_ingrediens_feil": (
+            "❌ Kunne ikke starte nytt brygg — følgende ingrediens-ID-er finnes ikke i "
+            "gjeldende masterdata og ville blitt hoppet stille over i det lagrede "
+            "brygget: {ider}. Oppdater masterdata eller oppskriften og prøv igjen."
+        ),
+        "kbhbrew.nytt_brygg_toast": "Nytt brygg startet: {oppskriftsnavn}",
+        "kbhbrew.import_beskrivelse": (
+            "Åpne en .kbhbrew-fil (et historisk brygg, IKKE en oppskrift). Importeres "
+            "alltid som et HELT NYTT, lokalt brygg med sin egen, ferskt mintede "
+            "identitet — ingenting skrives før du selv trykker «Importer brygg»."
+        ),
+        "kbhbrew.import_bekreftet": "✅ Importert som nytt lokalt brygg: {oppskriftsnavn}",
+        "kbhbrew.export_tomt": (
+            "Ingen brygg lagret lokalt ennå. Bruk «▶️ Start nytt brygg» i "
+            "Bryggdag-fanen, eller importer en .kbhbrew-fil over."
+        ),
+        "kbhbrew.oppskrift_ukjent_fallback": "Ukjent oppskrift",
         "brew_history.actuals_tittel": "🧪 Målte verdier (faktisk)",
         "brew_history.actual_og_label": "Faktisk OG",
         "brew_history.actual_fg_label": "Faktisk FG",
@@ -157,11 +189,35 @@ TEKSTER = {
         "brew_history.status.active": "Active",
         "brew_history.status.done": "Done",
         "brew_history.status.discarded": "Discarded",
-        "kbhbrew.skriver_til": "🎯 Brewday writes to: `{brew_id}` · created {opprettet}",
+        "kbhbrew.skriver_til": "🎯 Brewday writes to: {oppskriftsnavn} · created {opprettet}",
         "kbhbrew.advarsel_ikke_aktiv_status": "⚠️ This brew's stored status is **{status}** — saving here updates a brew that is no longer active, not a new one.",
         "kbhbrew.bekreft_standardutstyr_btn": "✅ Use and confirm default equipment",
         "kbhbrew.bekreft_standardutstyr_hjelp": "Saves the current (or default BrewZilla 35L) equipment profile as your CONFIRMED equipment profile, so «▶️ Start new brew» can be used. Can be changed later under «🔧 Tools» → «⚙️ Equipment profile».",
         "kbhbrew.standardutstyr_bekreftet_ok": "Equipment profile confirmed and saved. Click «▶️ Start new brew» again to create the brew.",
+        "kbhbrew.start_ny_brew_tittel": "🍺 Start new brew (freezes today's recipe and equipment)",
+        "kbhbrew.start_ny_brew_beskrivelse": (
+            "Freezes the current recipe, equipment profile and predicted values as a "
+            "NEW, historical brew (.kbhbrew). Later changes to the recipe/equipment/"
+            "masterdata NEVER affect this brew again. Each click creates a NEW batch — "
+            "multiple real brews from the same recipe are normal."
+        ),
+        "kbhbrew.manglende_ingrediens_feil": (
+            "❌ Could not start new brew — the following ingredient IDs do not exist "
+            "in current masterdata and would have been silently skipped in the stored "
+            "brew: {ider}. Update masterdata or the recipe and try again."
+        ),
+        "kbhbrew.nytt_brygg_toast": "New brew started: {oppskriftsnavn}",
+        "kbhbrew.import_beskrivelse": (
+            "Open a .kbhbrew file (a historical brew, NOT a recipe). Always imported "
+            "as a BRAND NEW, local brew with its own freshly minted identity — "
+            "nothing is written until you click «Importer brygg» yourself."
+        ),
+        "kbhbrew.import_bekreftet": "✅ Imported as new local brew: {oppskriftsnavn}",
+        "kbhbrew.export_tomt": (
+            "No brews are stored locally yet. Use «▶️ Start new brew» in the Brewday "
+            "tab, or import a .kbhbrew file above."
+        ),
+        "kbhbrew.oppskrift_ukjent_fallback": "Unknown recipe",
         "brew_history.actuals_tittel": "🧪 Measured values (actual)",
         "brew_history.actual_og_label": "Actual OG",
         "brew_history.actual_fg_label": "Actual FG",
