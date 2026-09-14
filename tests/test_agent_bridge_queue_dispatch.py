@@ -20,10 +20,16 @@ fravær-bevis på selve broen.)
 
 `TestHarAktivBroKjoring`/`TestVelgNeste`s `test_11_*`/`test_12_*` og
 `TestCliKontrakt`s `test_cli_aktiv_bro_kjoring_*` dekker Chief-reviewens
-BLOCKER på PR #263: en repo-vid, IKKE-kølagt Claude Agent Bridge-kjøring
-(claude-agent-bridge.yml bruker per-issue `concurrency`, ikke ett globalt
-lag) må også pause køen, og køen må fortsette igjen når den aktiviteten
-er borte.
+runde 1-BLOCKER på PR #263: en repo-vid, IKKE-kølagt Claude Agent
+Bridge-kjøring (claude-agent-bridge.yml bruker per-issue `concurrency`,
+ikke ett globalt lag) må også pause køen, og køen må fortsette igjen
+når den aktiviteten er borte.
+
+`TestHarAktivBroKjoring.test_ukjent_status_telles_som_aktiv_fail_closed`/
+`test_manglende_status_felt_telles_som_aktiv_fail_closed` og
+`TestVelgNeste.test_13_*` dekker Chief-reviewens runde 2-BLOCKER: ukjent
+eller manglende `status`-evidens skal BLOKKERE dispatch (fail-closed),
+ikke tillate den.
 
 Ren stdlib-test, ingen GitHub-kall, ingen bash/YAML-avhengighet --
 kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
@@ -116,11 +122,21 @@ class TestHarAktivBroKjoring(unittest.TestCase):
     def test_blanding_av_completed_og_aktiv_gir_true(self):
         self.assertTrue(_QD.har_aktiv_bro_kjoring([{"status": "completed"}, {"status": "queued"}]))
 
-    def test_ukjent_status_telles_ikke_som_aktiv(self):
-        self.assertFalse(_QD.har_aktiv_bro_kjoring([{"status": "some_future_status"}]))
+    def test_ukjent_status_telles_som_aktiv_fail_closed(self):
+        # Chief review runde 2 (PR #263): workflowen forhåndsfiltrerer
+        # allerede til status != "completed", så ETHVERT element som
+        # kommer inn her ER bevis på en ikke-fullført kjøring -- også en
+        # fremtidig/ukjent statusstreng GitHub Actions ennå ikke bruker.
+        self.assertTrue(_QD.har_aktiv_bro_kjoring([{"status": "some_future_status"}]))
 
-    def test_manglende_status_felt_telles_ikke_som_aktiv(self):
-        self.assertFalse(_QD.har_aktiv_bro_kjoring([{}]))
+    def test_manglende_status_felt_telles_som_aktiv_fail_closed(self):
+        # Malformert/ufullstendig evidens skal aldri tolkes som "trygt
+        # å dispatche" -- en falsk pause er reverserbar, en falsk
+        # fravær-av-aktivitet er nettopp scope-kollisjonen issue #260
+        # skal forhindre.
+        self.assertTrue(_QD.har_aktiv_bro_kjoring([{}]))
+        self.assertTrue(_QD.har_aktiv_bro_kjoring([{"status": None}]))
+        self.assertTrue(_QD.har_aktiv_bro_kjoring([{"status": ""}]))
 
 
 class TestVelgNeste(unittest.TestCase):
@@ -243,6 +259,17 @@ class TestVelgNeste(unittest.TestCase):
         nummer, begrunnelse = _QD.velg_neste([], aktive_bro_kjoringer=[{"status": "in_progress"}])
         self.assertIsNone(nummer)
         self.assertIn("Tom kø", begrunnelse)
+
+    def test_13_ukjent_eller_manglende_status_pauser_koen_fail_closed(self):
+        # Chief review runde 2 (PR #263): malformert/ukjent evidens skal
+        # BLOKKERE dispatch, ikke tillate den -- samme scenario som
+        # test_11, men med statusverdier har_aktiv_bro_kjoring() ikke
+        # gjenkjenner fra AKTIVE_KJORINGSSTATUSER-listen.
+        for kjoring in ({"status": "some_future_status"}, {}, {"status": None}):
+            with self.subTest(kjoring=kjoring):
+                nummer, begrunnelse = _QD.velg_neste([_ko(101)], aktive_bro_kjoringer=[kjoring])
+                self.assertIsNone(nummer)
+                self.assertIn("pause", begrunnelse)
 
 
 class TestCliKontrakt(unittest.TestCase):

@@ -84,6 +84,24 @@ ser på queue:pa-jobb-issuenes egne status:*-etiketter. Dette er additivt:
 `AKTIVE_BRO_KJORINGER` er valgfri (tom/fraværende = ingen kjent
 repo-vid aktivitet), så eksisterende kall uten den er uendret.
 
+REPO-VID BRO-AKTIVITET, RUNDE 2 (Chief review, PR #263 -- BLOCKER):
+runde 1 sin `har_aktiv_bro_kjoring()` sjekket status mot en HARDKODET
+liste kjente ikke-fullførte statuser og telte ukjent/manglende status
+IKKE som aktiv -- fail-OPEN på uventet evidens, stikk i strid med resten
+av køens fail-closed-design. Workflowen forhåndsfiltrerer allerede
+`AKTIVE_BRO_KJORINGER` til `status != "completed"`
+(`pa-jobb-queue.yml`), så ETHVERT element som faktisk kommer inn her ER
+allerede bevis på en ikke-fullført kjøring -- uansett hvilken konkret
+statusstreng GitHub Actions måtte returnere, også en fremtidig/ukjent
+en. Fikset ved å snu klassifiseringen: `"completed"` er nå den ENESTE
+statusen som IKKE teller som aktiv; alt annet -- kjent ikke-fullført
+status, en ukjent fremtidig status, eller et helt manglende/tomt
+status-felt -- teller som aktiv og pauser køen. En falsk pause
+(malformert evidens blokkerer køen unødig) er trygt og reverserbart;
+en falsk fravær-av-aktivitet (to Bridge-kjøringer samtidig) er nettopp
+scope-kollisjonen issue #260 skal forhindre -- se
+`har_aktiv_bro_kjoring()` under.
+
 CLI-bruk (det workflowen gjør):
     gh issue list --repo "$REPO" --label queue:pa-jobb --state open \
       --json number,labels,state \
@@ -116,10 +134,18 @@ LIVSSYKLUS_ETIKETTER = (
 AKTIVE_LIVSSYKLUS_ETIKETTER = ("status:ready", "status:working", "status:changes-requested")
 FERDIGE_LIVSSYKLUS_ETIKETTER = ("status:review", "status:approved")
 
-# GitHub Actions' egne, ikke-fullførte kjøre-"status"-verdier (aldri
-# "completed", uansett hvilken "conclusion" en fullført kjøring endte
-# med -- success/failure/cancelled/... er alle "completed"). Se
-# moduldoc "REPO-VID BRO-AKTIVITET" over.
+# GitHub Actions' egen, FULLFØRTE kjøre-"status"-verdi -- uansett hvilken
+# "conclusion" kjøringen endte med (success/failure/cancelled/... er
+# ALLE "completed"). Dette er den ENESTE statusen har_aktiv_bro_kjoring()
+# under klassifiserer som "ikke aktiv" -- se moduldoc "REPO-VID
+# BRO-AKTIVITET, RUNDE 2".
+FULLFORT_KJORINGSSTATUS = "completed"
+
+# Kjente ikke-fullførte GitHub Actions-statuser -- kun til dokumentasjon
+# og testdekning (se TestHarAktivBroKjoring.test_hver_kjent_ikke_fullfort_status_gjenkjennes
+# i tests/test_agent_bridge_queue_dispatch.py); har_aktiv_bro_kjoring()
+# selv gater IKKE på denne listen (fail-closed mot UKJENTE statuser
+# krever nettopp at den ikke gjør det).
 AKTIVE_KJORINGSSTATUSER = ("in_progress", "queued", "requested", "waiting", "pending")
 
 
@@ -163,15 +189,16 @@ def har_aktiv_bro_kjoring(kjoringer):
 
     `kjoringer`: liste av {"status": str, ...} -- rå (eller
     jq-forhåndsfiltrert) `gh api .../actions/workflows/
-    claude-agent-bridge.yml/runs`-utdata. Ukjente/manglende `status`
-    telles bevisst IKKE som aktiv (fail-closed her ville blokkert køen
-    permanent på malformert evidens; den globale sjekken er allerede et
-    STRENGERE, IKKE et svakere, lag enn køens egen status:*-sjekk under,
-    som fortsatt dekker samme issue om det også er et køelement).
+    claude-agent-bridge.yml/runs`-utdata. FAIL-CLOSED (Chief review
+    runde 2, PR #263): `"completed"` er den ENESTE statusen som IKKE
+    teller som aktiv. Enhver annen verdi -- en kjent ikke-fullført
+    status, en ukjent/fremtidig status, ELLER et manglende/tomt
+    `status`-felt -- teller som aktiv og pauser køen. Se moduldoc
+    "REPO-VID BRO-AKTIVITET, RUNDE 2" for begrunnelsen.
     """
     for kjoring in kjoringer or []:
         status = str((kjoring or {}).get("status", "")).strip().lower()
-        if status in AKTIVE_KJORINGSSTATUSER:
+        if status != FULLFORT_KJORINGSSTATUS:
             return True
     return False
 

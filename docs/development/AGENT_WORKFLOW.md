@@ -733,7 +733,7 @@ number. If, and only if, an issue number is returned, the workflow:
   ever selects among issues the owner has *already* labeled
   `queue:pa-jobb`; it never adds that label to anything on its own.
 
-### Chief review fix (PR #263): repo-wide Bridge activity guard
+### Chief review fixes (PR #263): repo-wide Bridge activity guard
 
 **BLOCKER found on this issue's first round:** the queue's own "aktiv"
 check above only reads the `status:*` label of `queue:pa-jobb` issues
@@ -756,31 +756,50 @@ filtered to non-`completed` runs — entirely independent of any issue
 label, so it catches a currently executing run whether or not it
 belongs to a queue item. That evidence is passed to
 `queue_dispatch.py` via the `AKTIVE_BRO_KJORINGER` environment
-variable (JSON array of `{"status": ...}` run objects); the new pure
-function `har_aktiv_bro_kjoring()` classifies GitHub Actions' own
-non-terminal run statuses (`in_progress`, `queued`, `requested`,
-`waiting`, `pending` — never `completed`, regardless of conclusion),
-and `velg_neste()` pauses the queue on **any** such repo-wide activity
-— checked *before* it even looks at the `queue:pa-jobb` issues' own
-`status:*` labels. The parameter is optional and defaults to "no known
-repo-wide activity", so every pre-existing call site/behavior is
-unchanged. No new permission is required: this job's existing `actions:
-write` scope (needed for the `gh workflow run` call) already includes
-read access to the Actions API.
+variable (JSON array of `{"status": ...}` run objects); the pure
+function `har_aktiv_bro_kjoring()` pauses the queue on **any** such
+repo-wide activity — checked *before* it even looks at the
+`queue:pa-jobb` issues' own `status:*` labels. The parameter is
+optional and defaults to "no known repo-wide activity", so every
+pre-existing call site/behavior is unchanged. No new permission is
+required: this job's existing `actions: write` scope (needed for the
+`gh workflow run` call) already includes read access to the Actions
+API.
+
+**BLOCKER found on this issue's second round:** the first-round
+`har_aktiv_bro_kjoring()` matched status against a hardcoded list of
+known non-terminal statuses (`in_progress`, `queued`, `requested`,
+`waiting`, `pending`) and treated an unknown or missing `status` field
+as **not** active — fail-*open* on unexpected evidence, even though the
+workflow step already pre-filters `AKTIVE_BRO_KJORINGER` to
+`status != "completed"`, so anything reaching the function at all is
+already proof of a non-completed run.
+
+**The fix:** the classification is inverted. `"completed"` (constant
+`FULLFORT_KJORINGSSTATUS`) is now the *only* status treated as not
+active; any other value — a known non-terminal status, an
+unknown/future one, or a missing/empty `status` field — counts as
+active and pauses the queue. `AKTIVE_KJORINGSSTATUSER` is kept only as
+documentation/test enumeration of known non-terminal statuses; it no
+longer gates the classification itself.
 
 Regression coverage (`tests/test_agent_bridge_queue_dispatch.py`):
-`TestHarAktivBroKjoring` (every non-terminal status recognized,
-`completed`/unknown/missing statuses correctly not counted as active);
+`TestHarAktivBroKjoring` (every known non-terminal status recognized;
+`test_ukjent_status_telles_som_aktiv_fail_closed` and
+`test_manglende_status_felt_telles_som_aktiv_fail_closed` prove unknown
+and missing/empty `status` values now count as active);
 `TestVelgNeste.test_11_repo_vid_ikke_ko_bro_kjoring_pauser_koen` (a
 non-queued issue's active Bridge run pauses a queue whose own items are
-otherwise idle — the exact scenario the blocker named);
+otherwise idle — the round-1 blocker's scenario);
 `test_12_repo_vid_aktivitet_borte_lar_koen_fortsette` (once that
 activity is gone/absent, the next queued item dispatches again);
 `test_12b_...bakoverkompatibel` (omitting the parameter entirely is
 unchanged); `test_12c_...` (an empty queue still reports "empty", not
 "paused", even with repo-wide activity present — no point pausing
-nothing); and `TestCliKontrakt`'s `test_cli_aktiv_bro_kjoring_*` series
-proves the same at the CLI/env-var boundary the workflow actually uses.
+nothing); `test_13_ukjent_eller_manglende_status_pauser_koen_fail_closed`
+(the round-2 blocker's scenario at the `velg_neste()` level); and
+`TestCliKontrakt`'s `test_cli_aktiv_bro_kjoring_*` series proves the
+same at the CLI/env-var boundary the workflow actually uses.
 
 **What this does not change:** the existing queue-internal "aktiv"
 check (still the *other* independent layer catching a queued item's own
