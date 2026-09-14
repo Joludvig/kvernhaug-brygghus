@@ -455,6 +455,95 @@ issue, and does not change Core/App/Web/Brew Lab product code. It is a
 read-only verification tool; publishing itself is still the existing
 `gh issue comment` mechanism the policy already describes, unchanged.
 
+## Robust branch setup and missing-deliverable diagnosis (V1.7, issue #259)
+
+**The bug this fixes:** issue #257 failed twice in the same distinctive
+way -- the "Run Claude Code" step itself completed with `conclusion:
+success`, the run's own record showed `permission_denials_count=1`, and
+no `agent/issue-257` branch ever existed afterward, so the deliverable
+gate (correctly) left the issue at `status:working`. The leading
+hypothesis: `--allowedTools` permitted `Bash(git checkout *)` but not
+`Bash(git switch *)`, and Claude Code commonly reaches for the modern
+`git switch -c <branch>` form for branch creation even when a prompt
+suggests `git checkout -b` -- so the very first branch-setup command of
+the run was silently denied, Claude (correctly) refused to commit
+directly on `master`, and the run exited cleanly with analysis but no
+deliverable.
+
+**The fix has two independent halves, matching the issue's own two
+preferred options -- this repo chose the narrower one (add the missing
+permission) rather than relocating branch ownership into the wrapper,
+since the narrower change closes the exact observed gap without
+restructuring who creates the branch:**
+
+1. **Two new, branch-scoped, wildcard-free `--allowedTools` entries** --
+   `Bash(git switch -c <branch> origin/master)` and
+   `Bash(git switch <branch>)`, built by a new function,
+   `.github/scripts/branch_policy.py`'s `tillatte_switch_kommandoer`,
+   following the **exact same pattern** as `tillatte_push_kommandoer`
+   (V1.2/PR #13): since `<branch>` is always `agent/issue-<N>` for an
+   integer `N` (never `"master"`), no variant of either string can ever
+   be textually identical to a command that switches to or creates a
+   local branch literally named `master` -- denied by construction, not
+   by model obedience, exactly like the push rules. Regression coverage:
+   `tests/test_agent_bridge_branch_policy.py` (`test_4c`-`test_4f`,
+   mirroring `test_2`-`test_4b` for the push rules) and
+   `tests/test_agent_bridge_permission_config.py` (`test_9a`-`test_9f`,
+   mirroring the V1.5/V1.6 sections: both exact rules present once each,
+   no broader `Bash(git switch *)` variant, and the full V1.2-V1.6
+   contract -- branch-scoped push rules, absence of `git merge`/`gh pr
+   merge`, `--permission-mode acceptEdits`, absence of `Write`/`Edit`/
+   `MultiEdit`, existing Python/i18n/Node/Playwright/HO-router rules --
+   unchanged). The "Run Claude Code" prompt text is updated to mention
+   `git switch -c <branch> origin/master` / `git switch <branch>` as
+   accepted alternatives to `git checkout -b`/`git checkout <branch>`
+   for both trigger labels, so the prompt and the allowlist agree on
+   what is actually permitted.
+2. **Improved no-deliverable diagnostics (scope item 5):** when the
+   deliverable gate rejects a run, the report previously carried only
+   `deliverable_guard.py`'s generic reason ("no open PR found", etc.),
+   which does not distinguish a permission-denied branch-setup command
+   (issue #257's fingerprint) from any other cause, including a
+   deliberate Claude decision to stop. A new step, "Check remote branch
+   existence for missing-deliverable diagnosis", runs only when the
+   deliverable gate has just failed, using the workflow's own token
+   (never Claude's `--allowedTools`, and never the Claude transcript
+   itself -- no "unsafe full-output logging" is introduced) to check one
+   independent fact: whether the issue's deterministic branch
+   (`agent/issue-<N>`) exists on `origin` at all (`git ls-remote --heads
+   origin <branch>`). A new pure, dependency-free module,
+   `.github/scripts/branch_setup_diagnosis.py`
+   (`diagnoser_manglende_leveranse`, unit-tested in
+   `tests/test_agent_bridge_branch_setup_diagnosis.py`), turns that fact
+   plus the trigger label and pre-run PR state into one of a small,
+   fixed set of diagnoses:
+   - `status:ready`, no remote branch at all: `branch_never_pushed` --
+     issue #257's exact fingerprint, a likely permission-denied
+     branch-setup step, explicitly **not** described as a Claude
+     decision.
+   - `status:ready`, remote branch exists: `branch_pushed_no_pr` --
+     branch setup succeeded, so the missing deliverable is a later-stage
+     issue (no PR opened, or a decision to stop), not a branch-setup
+     permission problem.
+   - `status:changes-requested`: the branch/PR is expected to already
+     exist from a *prior* round (the Draft handoff already requires it),
+     so mere branch existence proves nothing about *this* run's own
+     branch access -- these branches report `no_new_commits` or
+     `missing_prior_state` instead, and never `branch_never_pushed`.
+   The "Report missing deliverable" comment now includes this diagnosis
+   and its reason alongside the existing `deliverable_guard.py` reason.
+
+**What this does not change:** the branch-scoped push rules (`git push
+-u origin <branch>` / `git push origin <branch>`), the absence of `git
+merge`/`gh pr merge`, `--permission-mode acceptEdits`, the fixed
+deterministic branch-naming rule itself, the deliverable gate's own
+pass/fail decision (`deliverable_guard.py` is untouched -- the new
+diagnosis step only explains an existing rejection, it never overrides
+one), and no owner/anti-loop authorization control from any earlier
+section. No `Bash(git switch *)` wildcard was introduced. Per the
+issue's own instruction, issue #257 can only be retried once this fix is
+Chief-reviewed/merged.
+
 ## Branch naming is deterministic and enforced (Chief review, PR #13)
 
 **The bug this fixes:** the original V1.2 draft granted `Bash(git push

@@ -113,6 +113,30 @@ class TestBranchPolicy(unittest.TestCase):
             self.assertNotIn("git push origin master", tillatt)
             self.assertNotIn("git push -u origin master", tillatt)
 
+    # ─── 4c (V1.7, issue #259): tillatte_switch_kommandoer -- samme mønster
+    #      som push-reglene, for `git switch` branch-oppsett (#257) ──────
+
+    def test_4c_tillatte_switch_kommandoer_har_noyaktig_forventet_form(self):
+        self.assertEqual(
+            _BP.tillatte_switch_kommandoer("agent/issue-12"),
+            ("git switch -c agent/issue-12 origin/master", "git switch agent/issue-12"),
+        )
+
+    def test_4d_switch_kan_aldri_bygges_for_master_selv(self):
+        with self.assertRaises(ValueError):
+            _BP.tillatte_switch_kommandoer("master")
+
+    def test_4e_ingen_master_targeting_forsok_matcher_en_tillatt_switch_streng(self):
+        tillatt = _BP.tillatte_switch_kommandoer("agent/issue-12")
+        for forsok in ("git switch master", "git switch -c master origin/master", "git switch -c master"):
+            self.assertNotIn(forsok, tillatt)
+
+    def test_4f_gjelder_for_flere_ulike_issue_branches_switch(self):
+        for issue in (1, 42, 9999):
+            navn = _BP.agent_branch_navn(issue)
+            tillatt = _BP.tillatte_switch_kommandoer(navn)
+            self.assertNotIn("git switch master", tillatt)
+
     # ─── 5: CLI-kontrakten workflowen faktisk bruker ────────────────────
 
     def _kjor_cli(self, *argv):
