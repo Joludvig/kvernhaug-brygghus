@@ -17,18 +17,25 @@ ikke gjøre endringer" (en annen feilklasse, som IKKE etterlater dette
 fingeravtrykket), UTEN å aktivere usikker full-output-logging av selve
 Claude-transkriptet (issue #259, punkt 5 sin eksplisitte begrensning).
 
-MEKANISMEN: workflowen sjekker (med sitt eget token, IKKE gjennom Claudes
---allowedTools) om issuens deterministiske branch (agent/issue-<N>) faktisk
-finnes på `origin` ETTER at Claude-steget er ferdig (`git ls-remote --heads
-origin <branch>`) -- et faktum som er 100 % uavhengig av hva som står i
-Claudes egen rapport/transkript. Denne modulen tar det faktumet, sammen med
-data leveranse-porten allerede fanget (trigger-etikett, FØR-tilstand), og
-returnerer én av et lite, fast sett med diagnoser:
+MEKANISMEN: workflowen sjekker (med sitt eget token, via `gh api`, IKKE
+gjennom Claudes --allowedTools, og IKKE avhengig av Git-credential-tilstanden
+Claude-steget etterlater) om issuens deterministiske branch (agent/issue-<N>)
+faktisk finnes på `origin` ETTER at Claude-steget er ferdig -- et faktum som
+er 100 % uavhengig av hva som står i Claudes egen rapport/transkript. Denne
+modulen tar det faktumet, sammen med data leveranse-porten allerede fanget
+(trigger-etikett, FØR-tilstand), og returnerer én av et lite, fast sett med
+diagnoser:
 
 - `status:ready`, INGEN remote branch i det hele tatt: nøyaktig #257s
-  fingeravtrykk -- sterk indikasjon på et avvist branch-oppsett-steg, ikke
-  et bevisst Claude-valg (et bevisst "jeg gjør ingenting" ville normalt
-  fortsatt fått LOV til å opprette branchen selv om den aldri ble brukt).
+  fingeravtrykk -- en STERK, KONSISTENT INDIKATOR på et avvist
+  branch-oppsett-steg, men IKKE et bevis på det. Branch-fravær alene kan
+  ikke skille mellom "branch-oppsettet ble avvist av tillatelsesmodellen"
+  og "Claude tok et bevisst valg om ikke å gjøre endringer og branchen ble
+  derfor aldri opprettet" -- begge etterlater nøyaktig det samme
+  observerbare fingeravtrykket. Denne diagnosen skal derfor leses som en
+  indikasjon som peker mot #257s kjente feilklasse, ikke som et bevist
+  utfall, med mindre uavhengig bevis (f.eks. en eksplisitt permission
+  denial synlig i kjøringens egne logger) faktisk identifiserer årsaken.
 - `status:ready`, remote branch finnes: branch-oppsettet lyktes -- den
   manglende leveransen skyldes noe SENERE i kjøringen (ingen PR åpnet,
   eller et bevisst valg om å stoppe), ikke en tillatelses-blokkering på
@@ -66,10 +73,15 @@ def diagnoser_manglende_leveranse(*, trigger_label, remote_branch_finnes, forrig
         if not remote_branch_finnes:
             return "branch_never_pushed", (
                 "Ingen remote branch dukket opp for denne status:ready-kjøringen i det "
-                "hele tatt (git ls-remote fant ingenting) -- dette er nøyaktig "
-                "fingeravtrykket fra issue #257/#259 (prosessen fullførte, men "
-                "branch-oppsettet ble sannsynligvis avvist av tillatelsesmodellen), "
-                "IKKE et bevisst valg fra Claude om å gjøre ingenting."
+                "hele tatt (gh api-oppslag mot workflowens eget token fant ingenting) -- "
+                "dette er nøyaktig fingeravtrykket fra issue #257/#259 (prosessen "
+                "fullførte, men branch-oppsettet ble antakelig avvist av "
+                "tillatelsesmodellen). Dette er en sterk, konsistent indikator, IKKE et "
+                "bevis: branch-fravær alene kan ikke skille en avvist tillatelse fra et "
+                "bevisst Claude-valg om å gjøre ingenting, som ville gitt samme "
+                "observerbare fingeravtrykk -- les diagnosen som en indikasjon, ikke som "
+                "en bekreftet årsak, med mindre uavhengig bevis (f.eks. en eksplisitt "
+                "permission denial i kjøringens logg) identifiserer den faktiske årsaken."
             )
         return "branch_pushed_no_pr", (
             "En remote branch finnes for denne kjøringen, så selve branch-oppsettet "

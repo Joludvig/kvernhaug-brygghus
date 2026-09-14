@@ -621,13 +621,35 @@ jobs:
 
       # V1.7 (issue #259, scope item 5): only runs when the deliverable
       # gate above just rejected the run -- cheap, workflow-token-only
-      # `git ls-remote` fact-check (never Claude's --allowedTools, never
-      # the Claude transcript itself, so this adds no "unsafe full-output
-      # logging" surface). Whether the issue's deterministic branch made
-      # it to `origin` at all is a fact fully independent of what Claude
-      # said about itself, and is exactly the fingerprint issue #257
-      # exhibited (no branch, ever) versus a run that got further before
-      # stopping.
+      # fact-check (never Claude's --allowedTools, never the Claude
+      # transcript itself, so this adds no "unsafe full-output logging"
+      # surface). Whether the issue's deterministic branch made it to
+      # `origin` at all is a fact fully independent of what Claude said
+      # about itself, and is exactly the fingerprint issue #257 exhibited
+      # (no branch, ever) versus a run that got further before stopping.
+      #
+      # Chief review fix (PR #261, blocker 1): the ORIGINAL version of this
+      # step used `git ls-remote --heads origin "$BRANCH"`, which resolves
+      # its Git remote credentials however the "Run Claude Code" step left
+      # them -- but `anthropics/claude-code-action` installs a temporary
+      # GitHub App token for that step and revokes it again in its own
+      # post-step, so relying on whatever Git credential state remains
+      # afterward was fragile in exactly the failure path this diagnostic
+      # exists to help with. Fixed: `gh api`, authenticated purely by this
+      # job's own `GH_TOKEN` (`${{ github.token }}`, set at job level
+      # above) -- the same workflow token every other step in this job
+      # already uses for `gh issue`/`gh pr` calls, entirely independent of
+      # anything Claude's own step did to Git's credential helper.
+      # Fail-closed, unchanged in direction from before: any non-2xx
+      # response from `gh api` (a genuine "branch not found", or any other
+      # API error) is treated the same way this step already treated a
+      # `git ls-remote` miss -- `remote_branch_exists=false` -- so this
+      # step still cannot silently report "the branch exists" when the
+      # check itself was unable to confirm that. `if gh api ...; then`
+      # is deliberately used (not `gh api ... || true`) so `set -euo
+      # pipefail` still catches any *other* unexpected failure in this
+      # step, since a failing command inside an `if` condition does not
+      # trigger `errexit` in bash.
       - name: Check remote branch existence for missing-deliverable diagnosis (issue #259)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok != 'true'
         id: branch_check
@@ -635,7 +657,7 @@ jobs:
           BRANCH: ${{ steps.branch.outputs.name }}
         run: |
           set -euo pipefail
-          if [ -n "$(git ls-remote --heads origin "$BRANCH")" ]; then
+          if gh api "repos/$REPO/branches/$BRANCH" --silent; then
             echo "remote_branch_exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "remote_branch_exists=false" >> "$GITHUB_OUTPUT"

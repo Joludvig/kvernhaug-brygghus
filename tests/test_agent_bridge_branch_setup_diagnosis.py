@@ -12,12 +12,14 @@ kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
 """
 import importlib.util
 import os
+import re
 import subprocess
 import sys
 import unittest
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _SCRIPT = os.path.join(_REPO_ROOT, ".github", "scripts", "branch_setup_diagnosis.py")
+_WORKFLOW = os.path.join(_REPO_ROOT, ".github", "workflows", "claude-agent-bridge.yml")
 
 
 def _last_modul():
@@ -41,12 +43,21 @@ class TestBranchSetupDiagnosis(unittest.TestCase):
         self.assertEqual(diagnosis, "branch_never_pushed")
         self.assertIn("257", reason)
 
-    def test_1b_branch_never_pushed_nevner_ikke_bevisst_valg_som_arsak(self):
+    def test_1b_branch_never_pushed_er_indikator_ikke_bevis(self):
+        # Chief review (PR #261, punkt 2): branch-fravær alene kan ikke
+        # BEVISE at årsaken var en avvist tillatelse -- et bevisst
+        # Claude-valg om å gjøre ingenting ville gitt nøyaktig samme
+        # observerbare fingeravtrykk. Reasonen skal derfor eksplisitt si
+        # "indikator, ikke bevis" og nevne det alternative Claude-valget
+        # som en gyldig mulighet, ikke utelukke det som fakta.
         _diagnosis, reason = _BSD.diagnoser_manglende_leveranse(
             trigger_label="status:ready",
             remote_branch_finnes=False,
         )
-        self.assertIn("IKKE et bevisst valg", reason)
+        self.assertIn("IKKE et bevis", reason)
+        self.assertIn("indikator", reason)
+        self.assertIn("bevisst Claude-valg", reason)
+        self.assertIn("kan ikke skille", reason)
 
     # ─── 2: status:ready, branch finnes -- IKKE et tillatelsesproblem ────
 
@@ -127,6 +138,55 @@ class TestBranchSetupDiagnosis(unittest.TestCase):
         res = subprocess.run([sys.executable, _SCRIPT], capture_output=True, text=True, env=env)
         self.assertEqual(res.returncode, 0)
         self.assertIn("diagnosis=unknown_trigger", res.stdout)
+
+
+class TestBranchCheckStepUsesWorkflowToken(unittest.TestCase):
+    """Chief review (PR #261, blocker 1): the "Check remote branch existence"
+    step in claude-agent-bridge.yml must resolve branch existence through
+    `gh api` (authenticated by the job's own GH_TOKEN), never through
+    `git ls-remote` -- which depends on whatever Git remote credential state
+    the "Run Claude Code" step's temporary GitHub App token leaves behind
+    after it is revoked in that action's own post-step, making the check
+    unreliable in exactly the failure path it exists to diagnose."""
+
+    def setUp(self):
+        with open(_WORKFLOW, "r", encoding="utf-8") as f:
+            self.text = f.read()
+        match = re.search(
+            r'- name: Check remote branch existence for missing-deliverable diagnosis \(issue #259\).*?'
+            r'(?=\n {6}- name:)',
+            self.text,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, "Fant ikke branch-check-steget i workflow-filen.")
+        self.step_text = match.group(0)
+
+    def test_6_steget_bruker_gh_api_ikke_git_ls_remote(self):
+        # Selve KOMMANDOEN i step-bodyen (`run:`-blokken) skal bruke `gh
+        # api`, ikke `git ls-remote` -- en forklarende kommentar OVENFOR
+        # steget får fortsatt nevne det gamle, erstattede kommandonavnet
+        # som historisk kontekst (se `Chief review fix (PR #261 ...)`-
+        # kommentaren), så denne testen isolerer kun selve `run:`-blokken.
+        run_block = self.step_text.split("run: |", 1)[1]
+        self.assertIn('gh api "repos/$REPO/branches/$BRANCH"', run_block)
+        self.assertNotIn("git ls-remote", run_block)
+
+    def test_6c_steget_bruker_repo_env_variabelen_ikke_origin_remote(self):
+        # `$REPO` (github.token-autentisert, job-level env) -- ikke
+        # avhengig av en lokal `origin`-remote/dens credential-helper.
+        # (Kommentaren over steget nevner fortsatt "origin" som del av det
+        # historiske `git ls-remote --heads origin`-kallet den erstatter --
+        # denne testen isolerer derfor `run:`-blokken alene, som test_6.)
+        run_block = self.step_text.split("run: |", 1)[1]
+        self.assertIn("$REPO", run_block)
+        self.assertNotIn("origin", run_block)
+
+    def test_6d_fail_closed_default_er_false_ved_ethvert_annet_utfall(self):
+        # if gh api ...; then true; else false -- ikke en bar `|| true`
+        # som ville skjult en ekte gh-feil bak "branch finnes".
+        run_block = self.step_text.split("run: |", 1)[1]
+        self.assertIn("remote_branch_exists=false", run_block)
+        self.assertNotIn("|| true", run_block)
 
 
 if __name__ == "__main__":

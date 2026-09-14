@@ -510,17 +510,17 @@ restructuring who creates the branch:**
    (never Claude's `--allowedTools`, and never the Claude transcript
    itself -- no "unsafe full-output logging" is introduced) to check one
    independent fact: whether the issue's deterministic branch
-   (`agent/issue-<N>`) exists on `origin` at all (`git ls-remote --heads
-   origin <branch>`). A new pure, dependency-free module,
-   `.github/scripts/branch_setup_diagnosis.py`
+   (`agent/issue-<N>`) exists on `origin` at all. A new pure,
+   dependency-free module, `.github/scripts/branch_setup_diagnosis.py`
    (`diagnoser_manglende_leveranse`, unit-tested in
    `tests/test_agent_bridge_branch_setup_diagnosis.py`), turns that fact
    plus the trigger label and pre-run PR state into one of a small,
    fixed set of diagnoses:
    - `status:ready`, no remote branch at all: `branch_never_pushed` --
-     issue #257's exact fingerprint, a likely permission-denied
-     branch-setup step, explicitly **not** described as a Claude
-     decision.
+     issue #257's exact fingerprint, and a **strong, consistent
+     indicator** of a likely permission-denied branch-setup step -- see
+     "Chief review fixes (PR #261)" below for exactly how that indicator
+     is now worded.
    - `status:ready`, remote branch exists: `branch_pushed_no_pr` --
      branch setup succeeded, so the missing deliverable is a later-stage
      issue (no PR opened, or a decision to stop), not a branch-setup
@@ -532,6 +532,57 @@ restructuring who creates the branch:**
      `missing_prior_state` instead, and never `branch_never_pushed`.
    The "Report missing deliverable" comment now includes this diagnosis
    and its reason alongside the existing `deliverable_guard.py` reason.
+
+**Chief review fixes (PR #261):** the review of this issue's first round
+found two bounded problems, both fixed on the same branch/PR before
+merge, scope held to exactly these two points:
+
+1. **BLOCKER -- unreliable evidence source.** The "Check remote branch
+   existence" step originally used `git ls-remote --heads origin
+   <branch>`, which resolves its Git remote credentials however the "Run
+   Claude Code" step happened to leave them. `anthropics/claude-code-
+   action` installs a temporary GitHub App token for that step and
+   revokes it again in its own post-step, so depending on leftover Git
+   credential state made this diagnostic unreliable in exactly the
+   failure path (a rejected branch-setup step) it exists to help
+   diagnose. **Fixed:** the step now uses `gh api
+   "repos/$REPO/branches/$BRANCH"`, authenticated purely by this job's
+   own `GH_TOKEN` (`${{ github.token }}`, the same job-level workflow
+   token every other step in this job already uses for `gh issue`/`gh
+   pr` calls) -- entirely independent of anything Claude's step did to
+   Git's credential helper. Fail-closed behavior is preserved in the
+   same direction as before: any non-2xx response from `gh api` (a
+   genuine "branch not found", or any other API error) still resolves to
+   `remote_branch_exists=false`, so the step can never silently report
+   "the branch exists" when the check itself couldn't confirm that.
+   Regression coverage: `tests/test_agent_bridge_branch_setup_diagnosis.py`
+   `TestBranchCheckStepUsesWorkflowToken` inspects the step's own `run:`
+   body and proves it calls `gh api "repos/$REPO/branches/$BRANCH"`, uses
+   no `git ls-remote`/`origin` remote at all, and still defaults to
+   `remote_branch_exists=false` (no bare `|| true` that would hide a real
+   `gh` failure behind a false "branch exists").
+2. **ACCURACY -- overclaimed causation.** Branch absence alone cannot
+   prove the cause was a permission denial, and cannot prove it was
+   *not* a deliberate Claude decision to make no changes -- a conscious
+   no-op that never even attempted to create the branch would leave
+   **exactly the same** observable fingerprint as a denied branch-setup
+   command. The original wording asserted the "not a deliberate choice"
+   half as if it were established fact. **Fixed:**
+   `branch_setup_diagnosis.py`'s `branch_never_pushed` reason (and the
+   module's docstring) now explicitly frames the diagnosis as a strong,
+   consistent *indicator*, never a *proof*, and states in plain language
+   that it cannot rule out a deliberate Claude no-op unless independent
+   evidence (e.g. an explicit permission denial visible in the run's own
+   logs) actually identifies the cause. The diagnosis code
+   (`branch_never_pushed`) itself is unchanged -- only the certainty of
+   the causal claim in its accompanying reason text. Regression coverage:
+   `tests/test_agent_bridge_branch_setup_diagnosis.py`
+   `test_1b_branch_never_pushed_er_indikator_ikke_bevis` (replacing the
+   round-1 test that asserted the old, overclaiming phrase) proves the
+   reason text says "IKKE et bevis" ("NOT proof"), calls itself an
+   "indikator", and explicitly names the "bevisst Claude-valg" (deliberate
+   Claude choice) alternative it "kan ikke skille" (cannot distinguish)
+   from.
 
 **What this does not change:** the branch-scoped push rules (`git push
 -u origin <branch>` / `git push origin <branch>`), the absence of `git
