@@ -433,6 +433,25 @@ jobs:
       # step (see the prompt below and AGENT_WORKFLOW.md → "HO policy —
       # local and GitHub jobs"). No wildcard: only these two exact
       # invocations, nothing broader.
+      #
+      # V1.7 (issue #259): issue #257 failed twice in the same distinctive
+      # way -- the Claude step itself completed successfully, but
+      # `permission_denials_count=1` and no `agent/issue-257` branch ever
+      # existed afterward, so the deliverable gate correctly left the
+      # issue at `status:working`. Leading hypothesis: Claude Code
+      # commonly uses modern `git switch -c <branch>` for branch creation
+      # even when the prompt below suggests `git checkout -b`, and
+      # `--allowedTools` only ever granted `Bash(git checkout *)`. Fixed
+      # by two additional EXACT (argument-fixed, branch-scoped) rules --
+      # `Bash(git switch -c <branch> origin/master)` and
+      # `Bash(git switch <branch>)`, mirroring the same wildcard-free
+      # pattern as the branch-scoped push rules (V1.2) via
+      # `.github/scripts/branch_policy.py`'s new `tillatte_switch_kommandoer`
+      # -- never a bare `Bash(git switch *)`. This does not change the
+      # push rules, the absence of `git merge`/`gh pr merge`,
+      # `--permission-mode acceptEdits`, or any other existing control.
+      # See "Diagnose missing deliverable" below for the accompanying
+      # diagnostics improvement.
       - name: Run Claude Code
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: claude
@@ -444,7 +463,7 @@ jobs:
             workflows: write
           base_branch: master
           claude_args: |
-            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *),Bash(python3 scripts/generate_web_i18n_pages.py),Bash(python3 .github/scripts/ho_router_check.py pointer),Bash(python3 .github/scripts/ho_router_check.py verify),Bash(node --version),Bash(npm --version),Bash(npm install --save-dev @playwright/test),Bash(npm install --ignore-scripts),Bash(npm ci --ignore-scripts),Bash(npx playwright --version),Bash(npx playwright install chromium firefox),Bash(npx playwright install --with-deps chromium firefox),Bash(npx playwright test *)"
+            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git switch -c ${{ steps.branch.outputs.name }} origin/master),Bash(git switch ${{ steps.branch.outputs.name }}),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *),Bash(python3 scripts/generate_web_i18n_pages.py),Bash(python3 .github/scripts/ho_router_check.py pointer),Bash(python3 .github/scripts/ho_router_check.py verify),Bash(node --version),Bash(npm --version),Bash(npm install --save-dev @playwright/test),Bash(npm install --ignore-scripts),Bash(npm ci --ignore-scripts),Bash(npx playwright --version),Bash(npx playwright install chromium firefox),Bash(npx playwright install --with-deps chromium firefox),Bash(npx playwright test *)"
             --permission-mode acceptEdits
           prompt: |
             You are running as the automated Claude side of the Kvernhaug
@@ -467,7 +486,9 @@ jobs:
             link to a PR creation page, which is not good enough here.
             You have explicit Bash access to a fixed set of git/gh
             commands (see this step's `--allowedTools`) — use them
-            directly: `git fetch`, `git checkout -b <branch>`,
+            directly: `git fetch`, `git checkout -b <branch>` (or the
+            modern `git switch -c <branch> origin/master`, also allowed —
+            use whichever you'd normally reach for),
             `git add`/`git commit`/`git push`, and `gh pr create` /
             `gh pr view` / `gh pr edit` / `gh pr comment` /
             `gh pr list` / `gh issue view` / `gh issue comment`. Install
@@ -508,7 +529,9 @@ jobs:
             - If `${{ env.TRIGGER_LABEL }}` is `status:ready`: this is a
               fresh implementation pass. Fetch origin/master, create
               branch `${{ steps.branch.outputs.name }}` from it
-              (`git checkout -b ${{ steps.branch.outputs.name }} origin/master`),
+              (`git checkout -b ${{ steps.branch.outputs.name }} origin/master`
+              or `git switch -c ${{ steps.branch.outputs.name }} origin/master`
+              — either is allowed, exactly for this branch name),
               implement exactly what the issue specifies, run the tests
               it requests, commit, push, and open a PR to `master` with
               `gh pr create --draft`, with a report following the
@@ -519,7 +542,9 @@ jobs:
             - If `${{ env.TRIGGER_LABEL }}` is `status:changes-requested`:
               this is a follow-up pass against the SAME branch,
               `${{ steps.branch.outputs.name }}` — fetch and check it
-              out (`git fetch origin ${{ steps.branch.outputs.name }} && git checkout ${{ steps.branch.outputs.name }}`),
+              out (`git fetch origin ${{ steps.branch.outputs.name }} && git checkout ${{ steps.branch.outputs.name }}`
+              or `git switch ${{ steps.branch.outputs.name }}` — either is
+              allowed, exactly for this branch name),
               then use `gh pr view` / `gh pr list --head ${{ steps.branch.outputs.name }}`
               to find its PR. Read the latest Chief review on that PR
               and address ONLY the CHANGES REQUESTED points from the
@@ -593,6 +618,68 @@ jobs:
         run: |
           set -euo pipefail
           python3 .github/scripts/deliverable_guard.py < "$RUNNER_TEMP/deliverable_prs.json" >> "$GITHUB_OUTPUT"
+
+      # V1.7 (issue #259, scope item 5): only runs when the deliverable
+      # gate above just rejected the run -- cheap, workflow-token-only
+      # fact-check (never Claude's --allowedTools, never the Claude
+      # transcript itself, so this adds no "unsafe full-output logging"
+      # surface). Whether the issue's deterministic branch made it to
+      # `origin` at all is a fact fully independent of what Claude said
+      # about itself, and is exactly the fingerprint issue #257 exhibited
+      # (no branch, ever) versus a run that got further before stopping.
+      #
+      # Chief review fix (PR #261, blocker 1): the ORIGINAL version of this
+      # step used `git ls-remote --heads origin "$BRANCH"`, which resolves
+      # its Git remote credentials however the "Run Claude Code" step left
+      # them -- but `anthropics/claude-code-action` installs a temporary
+      # GitHub App token for that step and revokes it again in its own
+      # post-step, so relying on whatever Git credential state remains
+      # afterward was fragile in exactly the failure path this diagnostic
+      # exists to help with. Fixed: `gh api`, authenticated purely by this
+      # job's own `GH_TOKEN` (`${{ github.token }}`, set at job level
+      # above) -- the same workflow token every other step in this job
+      # already uses for `gh issue`/`gh pr` calls, entirely independent of
+      # anything Claude's own step did to Git's credential helper.
+      # Fail-closed, unchanged in direction from before: any non-2xx
+      # response from `gh api` (a genuine "branch not found", or any other
+      # API error) is treated the same way this step already treated a
+      # `git ls-remote` miss -- `remote_branch_exists=false` -- so this
+      # step still cannot silently report "the branch exists" when the
+      # check itself was unable to confirm that. `if gh api ...; then`
+      # is deliberately used (not `gh api ... || true`) so `set -euo
+      # pipefail` still catches any *other* unexpected failure in this
+      # step, since a failing command inside an `if` condition does not
+      # trigger `errexit` in bash.
+      - name: Check remote branch existence for missing-deliverable diagnosis (issue #259)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok != 'true'
+        id: branch_check
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/$REPO/branches/$BRANCH" --silent; then
+            echo "remote_branch_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "remote_branch_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Pure, unit-tested decision -- see
+      # .github/scripts/branch_setup_diagnosis.py and
+      # tests/test_agent_bridge_branch_setup_diagnosis.py. Distinguishes a
+      # likely permission-denied branch-setup step (status:ready, no
+      # remote branch at all -- issue #257's exact fingerprint) from
+      # every other missing-deliverable cause, so the report below can say
+      # which one this run hit instead of a single generic message.
+      - name: Diagnose missing deliverable (issue #259)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok != 'true'
+        id: diagnose
+        env:
+          REMOTE_BRANCH_EXISTS: ${{ steps.branch_check.outputs.remote_branch_exists }}
+          BEFORE_HEAD_SHA: ${{ steps.before.outputs.before_head_sha }}
+          BEFORE_PR_NUMBER: ${{ steps.before.outputs.before_pr_number }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/branch_setup_diagnosis.py >> "$GITHUB_OUTPUT"
 
       - name: Move to status:review on success (exclusive lifecycle transition)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok == 'true'
@@ -856,12 +943,21 @@ jobs:
       # `status:working`, same as a hard failure, but with a comment
       # that says clearly this was a *verification* failure, not a
       # crash.
+      #
+      # V1.7 (issue #259): the comment now also carries the diagnosis from
+      # "Diagnose missing deliverable" above, so a likely permission-denied
+      # branch-setup step (issue #257's exact fingerprint --
+      # `branch_never_pushed`) reads as a distinguishable diagnosis in the
+      # report, not folded into the same generic message as every other
+      # missing-deliverable cause.
       - name: Report missing deliverable — leave at status:working for manual follow-up
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok != 'true'
         env:
           REASON: ${{ steps.deliverable.outputs.reason }}
+          DIAGNOSIS: ${{ steps.diagnose.outputs.diagnosis }}
+          DIAGNOSIS_REASON: ${{ steps.diagnose.outputs.reason }}
         run: |
-          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Diagnosis (issue #259): \`$DIAGNOSIS\` — $DIAGNOSIS_REASON Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
 
       # Issue #32: scoped to exclude the case where "Move to
       # status:review" already succeeded -- that case has its own,
