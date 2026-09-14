@@ -1,0 +1,184 @@
+name: PÅ JOBB Queue Dispatcher
+
+# INFRA -- PÅ JOBB sequential Claude queue (GitHub Issue #260).
+#
+# Purpose: let the owner pre-arm several bounded, already-authorized
+# issues for unattended Claude Agent Bridge work (`agent:claude` +
+# `queue:pa-jobb`) while away/asleep, and have them run ONE AT A TIME,
+# in order, without any risk of two Bridge runs executing concurrently
+# and colliding on overlapping files. See
+# docs/development/AGENT_WORKFLOW.md, section "PÅ JOBB sequential
+# queue (issue #260)", for the full, authoritative design rationale.
+#
+# This workflow does exactly one thing: decide whether a NEW queued
+# item should be armed (moved to `status:ready`) and started via the
+# EXISTING `claude-agent-bridge.yml` workflow's `workflow_dispatch`
+# path -- never a fake owner-applied label event (that path is
+# preferred explicitly by issue #260 itself, since `workflow_dispatch`
+# already uses live `agent:claude` + `status:ready`/
+# `status:changes-requested` state and does not depend on the
+# owner-only issue-label sender check).
+#
+# It NEVER touches `status:working`/`status:review`/
+# `status:changes-requested`/`status:approved` itself -- those
+# transitions remain entirely owned by claude-agent-bridge.yml and the
+# owner/Chief, exactly as today. It never merges, deploys, or pushes to
+# any branch. The selection logic itself is a pure, dependency-free
+# function -- .github/scripts/queue_dispatch.py -- unit-tested in
+# tests/test_agent_bridge_queue_dispatch.py without touching GitHub.
+#
+# Repo-wide Bridge activity guard (Chief review, PR #263 -- BLOCKER):
+# claude-agent-bridge.yml uses PER-ISSUE `concurrency`
+# (`claude-agent-bridge-<issue_number>`), not one global lane, so a
+# perfectly normal, non-queued Bridge run on one issue can execute
+# concurrently with a queued run this dispatcher starts on another --
+# which would defeat issue #260's "at most one queued Claude
+# implementation task is active at a time" / "avoid parallel scope
+# collisions" requirements. Before arming/dispatching anything, this
+# workflow therefore also fetches LIVE, repo-wide GitHub Actions run
+# state for the `claude-agent-bridge.yml` workflow itself (independent
+# of any issue label) and feeds it to `queue_dispatch.py` alongside the
+# queue snapshot -- see the "Fetch repo-wide Claude Agent Bridge
+# activity" step below.
+#
+# Triggers:
+#   - `issues: labeled` for exactly the `queue:pa-jobb` label -- covers
+#     "owner adds a fresh item to an idle queue" (a human/PAT-authored
+#     label event, so it fires normally).
+#   - `workflow_run` on completion of "Claude Agent Bridge" -- covers
+#     "the previously active item just left status:working" (a
+#     `status:review`/`status:approved`/still-`status:working` label
+#     PUT performed by claude-agent-bridge.yml's own GITHUB_TOKEN does
+#     NOT itself re-trigger `issues: labeled` workflows -- GitHub
+#     suppresses that cascade for the default token by design -- so
+#     `workflow_run` is the correct, standard cross-workflow wake-up
+#     here, independent of which token performed the upstream label
+#     change).
+#   - `workflow_dispatch` -- manual resume/start, e.g. after fixing a
+#     stuck item or reordering the queue.
+#
+# Idempotency / anti-loop: a single global `concurrency` group (not
+# per-issue -- the queue itself is one shared sequential resource)
+# ensures at most one dispatcher run evaluates/arms the queue at a
+# time, so two near-simultaneous triggers can never both see "no
+# active item" and both arm a winner. The selection function itself
+# additionally treats `status:ready` (the state the dispatcher's own
+# arming step produces) as "active", so even a run that starts a few
+# seconds after another already armed an item will find that item
+# active and pause -- fail-closed, not fail-open.
+"on":
+  issues:
+    types: [labeled]
+  workflow_run:
+    workflows: ["Claude Agent Bridge"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+  # Required to call `gh workflow run claude-agent-bridge.yml` (the
+  # workflow_dispatch API) -- this job never uses `actions: write` for
+  # anything else, and never touches `contents: write`/`pull-requests:
+  # write` at all (it commits nothing and opens no PR itself).
+  actions: write
+
+concurrency:
+  group: pa-jobb-queue
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    # Skip entirely for any `issues: labeled` event whose label isn't
+    # the one this workflow cares about -- GitHub already fires
+    # `issues: labeled` for every label addition, not just this one.
+    if: >-
+      github.event_name != 'issues' || github.event.label.name == 'queue:pa-jobb'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      # queue_dispatch.py is checked out from the repo, same pattern as
+      # every other .github/scripts/*.py helper this bridge uses.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch live PÅ JOBB queue state
+        id: fetch
+        run: |
+          set -euo pipefail
+          gh issue list --repo "$REPO" --label "queue:pa-jobb" --state open \
+            --json number,labels,state \
+            --jq '[.[] | {number: .number, state: .state, labels: [.labels[].name]}]' \
+            > "$RUNNER_TEMP/queue_issues.json"
+          echo "Live queue:pa-jobb issues:"
+          cat "$RUNNER_TEMP/queue_issues.json"
+
+      # Repo-wide guard (Chief review, PR #263 -- BLOCKER): independent
+      # of any issue label, so it also catches a normal, non-queued
+      # Bridge run that is currently executing. `actions: write` (this
+      # job's existing permission, needed for the `gh workflow run` call
+      # below) already includes read access to the Actions API, so no
+      # additional permission is granted for this step.
+      - name: Fetch repo-wide Claude Agent Bridge activity
+        id: bridge_activity
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPO/actions/workflows/claude-agent-bridge.yml/runs?per_page=30" \
+            --jq '[.workflow_runs[] | select(.status != "completed") | {status: .status, head_branch: .head_branch}]' \
+            > "$RUNNER_TEMP/bridge_runs.json"
+          echo "Repo-wide non-completed Claude Agent Bridge runs:"
+          cat "$RUNNER_TEMP/bridge_runs.json"
+
+      # The decision itself lives in .github/scripts/queue_dispatch.py
+      # (pure, unit-tested -- see
+      # tests/test_agent_bridge_queue_dispatch.py), so it is testable
+      # without touching GitHub at all. Mirrors exactly how
+      # trigger_guard.py is invoked in claude-agent-bridge.yml.
+      - name: Select next queue item
+        id: select
+        run: |
+          set -euo pipefail
+          export AKTIVE_BRO_KJORINGER="$(cat "$RUNNER_TEMP/bridge_runs.json")"
+          python3 .github/scripts/queue_dispatch.py < "$RUNNER_TEMP/queue_issues.json" >> "$GITHUB_OUTPUT"
+
+      # Arming reuses the EXISTING exclusive lifecycle transition
+      # (.github/scripts/lifecycle_labels.py) -- the identical
+      # mechanism claude-agent-bridge.yml itself already uses for
+      # status:working/status:review. No new label-transition logic is
+      # introduced by this workflow.
+      - name: Arm selected issue (set status:ready)
+        if: steps.select.outputs.dispatch == 'true'
+        env:
+          ISSUE: ${{ steps.select.outputs.issue_number }}
+        run: |
+          set -euo pipefail
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]' \
+            | python3 .github/scripts/lifecycle_labels.py status:ready \
+            | gh api --method PUT "repos/$REPO/issues/$ISSUE/labels" --input -
+          echo "Armed issue #$ISSUE -- labels now:"
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
+
+      # The actual Bridge run itself -- via workflow_dispatch, exactly
+      # as issue #260 requires ("preferably via its `workflow_dispatch`
+      # path rather than faking an owner-applied label event"). This is
+      # gated purely on the live `agent:claude` + `status:ready` state
+      # this step just established -- claude-agent-bridge.yml's own
+      # guard (trigger_guard.py) re-checks that live, independent of
+      # this workflow.
+      - name: Start Claude Agent Bridge for the selected issue
+        if: steps.select.outputs.dispatch == 'true'
+        env:
+          ISSUE: ${{ steps.select.outputs.issue_number }}
+        run: |
+          set -euo pipefail
+          gh workflow run claude-agent-bridge.yml --repo "$REPO" \
+            -f issue_number="$ISSUE" -f dry_run=false
+          gh issue comment "$ISSUE" --repo "$REPO" \
+            --body "🤖 **PÅ JOBB queue**: armed \`status:ready\` and dispatched the Claude Agent Bridge for this queued issue."
+
+      - name: No dispatch this run
+        if: steps.select.outputs.dispatch != 'true'
+        run: |
+          echo "No queue item armed/dispatched this run -- see the 'Select next queue item' step log above for the reason (empty queue, an active item, or no eligible candidate)."

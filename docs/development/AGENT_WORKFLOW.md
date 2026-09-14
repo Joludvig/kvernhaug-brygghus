@@ -455,6 +455,415 @@ issue, and does not change Core/App/Web/Brew Lab product code. It is a
 read-only verification tool; publishing itself is still the existing
 `gh issue comment` mechanism the policy already describes, unchanged.
 
+## Robust branch setup and missing-deliverable diagnosis (V1.7, issue #259)
+
+**The bug this fixes:** issue #257 failed twice in the same distinctive
+way -- the "Run Claude Code" step itself completed with `conclusion:
+success`, the run's own record showed `permission_denials_count=1`, and
+no `agent/issue-257` branch ever existed afterward, so the deliverable
+gate (correctly) left the issue at `status:working`. The leading
+hypothesis: `--allowedTools` permitted `Bash(git checkout *)` but not
+`Bash(git switch *)`, and Claude Code commonly reaches for the modern
+`git switch -c <branch>` form for branch creation even when a prompt
+suggests `git checkout -b` -- so the very first branch-setup command of
+the run was silently denied, Claude (correctly) refused to commit
+directly on `master`, and the run exited cleanly with analysis but no
+deliverable.
+
+**The fix has two independent halves, matching the issue's own two
+preferred options -- this repo chose the narrower one (add the missing
+permission) rather than relocating branch ownership into the wrapper,
+since the narrower change closes the exact observed gap without
+restructuring who creates the branch:**
+
+1. **Two new, branch-scoped, wildcard-free `--allowedTools` entries** --
+   `Bash(git switch -c <branch> origin/master)` and
+   `Bash(git switch <branch>)`, built by a new function,
+   `.github/scripts/branch_policy.py`'s `tillatte_switch_kommandoer`,
+   following the **exact same pattern** as `tillatte_push_kommandoer`
+   (V1.2/PR #13): since `<branch>` is always `agent/issue-<N>` for an
+   integer `N` (never `"master"`), no variant of either string can ever
+   be textually identical to a command that switches to or creates a
+   local branch literally named `master` -- denied by construction, not
+   by model obedience, exactly like the push rules. Regression coverage:
+   `tests/test_agent_bridge_branch_policy.py` (`test_4c`-`test_4f`,
+   mirroring `test_2`-`test_4b` for the push rules) and
+   `tests/test_agent_bridge_permission_config.py` (`test_9a`-`test_9f`,
+   mirroring the V1.5/V1.6 sections: both exact rules present once each,
+   no broader `Bash(git switch *)` variant, and the full V1.2-V1.6
+   contract -- branch-scoped push rules, absence of `git merge`/`gh pr
+   merge`, `--permission-mode acceptEdits`, absence of `Write`/`Edit`/
+   `MultiEdit`, existing Python/i18n/Node/Playwright/HO-router rules --
+   unchanged). The "Run Claude Code" prompt text is updated to mention
+   `git switch -c <branch> origin/master` / `git switch <branch>` as
+   accepted alternatives to `git checkout -b`/`git checkout <branch>`
+   for both trigger labels, so the prompt and the allowlist agree on
+   what is actually permitted.
+2. **Improved no-deliverable diagnostics (scope item 5):** when the
+   deliverable gate rejects a run, the report previously carried only
+   `deliverable_guard.py`'s generic reason ("no open PR found", etc.),
+   which does not distinguish a permission-denied branch-setup command
+   (issue #257's fingerprint) from any other cause, including a
+   deliberate Claude decision to stop. A new step, "Check remote branch
+   existence for missing-deliverable diagnosis", runs only when the
+   deliverable gate has just failed, using the workflow's own token
+   (never Claude's `--allowedTools`, and never the Claude transcript
+   itself -- no "unsafe full-output logging" is introduced) to check one
+   independent fact: whether the issue's deterministic branch
+   (`agent/issue-<N>`) exists on `origin` at all. A new pure,
+   dependency-free module, `.github/scripts/branch_setup_diagnosis.py`
+   (`diagnoser_manglende_leveranse`, unit-tested in
+   `tests/test_agent_bridge_branch_setup_diagnosis.py`), turns that fact
+   plus the trigger label and pre-run PR state into one of a small,
+   fixed set of diagnoses:
+   - `status:ready`, no remote branch at all: `branch_never_pushed` --
+     issue #257's exact fingerprint, and a **strong, consistent
+     indicator** of a likely permission-denied branch-setup step -- see
+     "Chief review fixes (PR #261)" below for exactly how that indicator
+     is now worded.
+   - `status:ready`, remote branch exists: `branch_pushed_no_pr` --
+     branch setup succeeded, so the missing deliverable is a later-stage
+     issue (no PR opened, or a decision to stop), not a branch-setup
+     permission problem.
+   - `status:changes-requested`: the branch/PR is expected to already
+     exist from a *prior* round (the Draft handoff already requires it),
+     so mere branch existence proves nothing about *this* run's own
+     branch access -- these branches report `no_new_commits` or
+     `missing_prior_state` instead, and never `branch_never_pushed`.
+   The "Report missing deliverable" comment now includes this diagnosis
+   and its reason alongside the existing `deliverable_guard.py` reason.
+
+**Chief review fixes (PR #261):** the review of this issue's first round
+found two bounded problems, both fixed on the same branch/PR before
+merge, scope held to exactly these two points:
+
+1. **BLOCKER -- unreliable evidence source.** The "Check remote branch
+   existence" step originally used `git ls-remote --heads origin
+   <branch>`, which resolves its Git remote credentials however the "Run
+   Claude Code" step happened to leave them. `anthropics/claude-code-
+   action` installs a temporary GitHub App token for that step and
+   revokes it again in its own post-step, so depending on leftover Git
+   credential state made this diagnostic unreliable in exactly the
+   failure path (a rejected branch-setup step) it exists to help
+   diagnose. **Fixed:** the step now uses `gh api
+   "repos/$REPO/branches/$BRANCH"`, authenticated purely by this job's
+   own `GH_TOKEN` (`${{ github.token }}`, the same job-level workflow
+   token every other step in this job already uses for `gh issue`/`gh
+   pr` calls) -- entirely independent of anything Claude's step did to
+   Git's credential helper. Fail-closed behavior is preserved in the
+   same direction as before: any non-2xx response from `gh api` (a
+   genuine "branch not found", or any other API error) still resolves to
+   `remote_branch_exists=false`, so the step can never silently report
+   "the branch exists" when the check itself couldn't confirm that.
+   Regression coverage: `tests/test_agent_bridge_branch_setup_diagnosis.py`
+   `TestBranchCheckStepUsesWorkflowToken` inspects the step's own `run:`
+   body and proves it calls `gh api "repos/$REPO/branches/$BRANCH"`, uses
+   no `git ls-remote`/`origin` remote at all, and still defaults to
+   `remote_branch_exists=false` (no bare `|| true` that would hide a real
+   `gh` failure behind a false "branch exists").
+2. **ACCURACY -- overclaimed causation.** Branch absence alone cannot
+   prove the cause was a permission denial, and cannot prove it was
+   *not* a deliberate Claude decision to make no changes -- a conscious
+   no-op that never even attempted to create the branch would leave
+   **exactly the same** observable fingerprint as a denied branch-setup
+   command. The original wording asserted the "not a deliberate choice"
+   half as if it were established fact. **Fixed:**
+   `branch_setup_diagnosis.py`'s `branch_never_pushed` reason (and the
+   module's docstring) now explicitly frames the diagnosis as a strong,
+   consistent *indicator*, never a *proof*, and states in plain language
+   that it cannot rule out a deliberate Claude no-op unless independent
+   evidence (e.g. an explicit permission denial visible in the run's own
+   logs) actually identifies the cause. The diagnosis code
+   (`branch_never_pushed`) itself is unchanged -- only the certainty of
+   the causal claim in its accompanying reason text. Regression coverage:
+   `tests/test_agent_bridge_branch_setup_diagnosis.py`
+   `test_1b_branch_never_pushed_er_indikator_ikke_bevis` (replacing the
+   round-1 test that asserted the old, overclaiming phrase) proves the
+   reason text says "IKKE et bevis" ("NOT proof"), calls itself an
+   "indikator", and explicitly names the "bevisst Claude-valg" (deliberate
+   Claude choice) alternative it "kan ikke skille" (cannot distinguish)
+   from.
+
+**What this does not change:** the branch-scoped push rules (`git push
+-u origin <branch>` / `git push origin <branch>`), the absence of `git
+merge`/`gh pr merge`, `--permission-mode acceptEdits`, the fixed
+deterministic branch-naming rule itself, the deliverable gate's own
+pass/fail decision (`deliverable_guard.py` is untouched -- the new
+diagnosis step only explains an existing rejection, it never overrides
+one), and no owner/anti-loop authorization control from any earlier
+section. No `Bash(git switch *)` wildcard was introduced. Per the
+issue's own instruction, issue #257 can only be retried once this fix is
+Chief-reviewed/merged.
+
+## PÅ JOBB sequential queue (issue #260)
+
+**Why this exists:** every trigger documented above starts from one
+bounded issue the owner labels by hand. Issue #260 asks for a safe way
+to pre-arm several already-bounded, already-authorized issues at once
+for unattended work while the owner is away/asleep ("PÅ JOBB"), so
+throughput increases without allowing autonomous merge/deploy or
+parallel scope collisions. This section is purely additive: it adds one
+new workflow, [`.github/workflows/pa-jobb-queue.yml`](../../.github/workflows/pa-jobb-queue.yml),
+and one new pure module,
+[`.github/scripts/queue_dispatch.py`](../../.github/scripts/queue_dispatch.py)
+(unit-tested in
+[`tests/test_agent_bridge_queue_dispatch.py`](../../tests/test_agent_bridge_queue_dispatch.py)) —
+it does not change `claude-agent-bridge.yml`, `trigger_guard.py`,
+`lifecycle_labels.py`, or `deliverable_guard.py` in any way. Every
+safety property already established for a single bounded run (the
+state machine, the deliverable gate, the owner merge gate, Draft →
+Ready, the Bash allowlist) applies completely unchanged to a queue-
+started run — the queue only ever decides *when* to call the existing,
+unmodified `workflow_dispatch` entry point.
+
+### Model: two new, additive labels
+
+Neither label is part of the exclusive `status:*` lifecycle
+(`lifecycle_labels.py`'s `LIVSSYKLUS_ETIKETTER`) — both are purely
+additive, like `agent:claude`/`area:*`, and survive every lifecycle
+transition untouched:
+
+| Label | Who applies it | Meaning |
+|---|---|---|
+| `queue:pa-jobb` | Owner | Marks this issue as a PÅ JOBB queue item. Requires `agent:claude` to already be present — the same pre-authorization gate every other trigger in this document uses; `queue:pa-jobb` without `agent:claude` is not a queue item at all (`queue_dispatch.py`'s `er_ko_element`). |
+| `queue:priority` | Owner | Optional. Moves a queued item to the FRONT of the queue (ahead of plain queued items, still FIFO by issue number among other `queue:priority` items). This is the reordering mechanism — see "Add / remove / reorder" below. |
+
+### How a queue item's state is read
+
+The queue never invents a parallel state of its own. It reads the
+*same* `status:*` label every other part of this document already
+uses, and classifies it into exactly one of three buckets
+(`queue_dispatch.py`'s `elementets_tilstand`):
+
+| `status:*` label | Bucket | Meaning for the queue |
+|---|---|---|
+| *(none)* | `ikke_startet` | Waiting in the queue, eligible to be picked next. |
+| `status:ready` | `aktiv` | Just armed by the dispatcher (see below) and about to be, or already, picked up by `claude-agent-bridge.yml`. |
+| `status:working` | `aktiv` | A Bridge run is genuinely executing — **or** a prior run's deliverable gate rejected it and left it here (fail-closed by design, "What this fixes" in "Deliverable verification gate" above) — either way, the queue cannot tell the two apart from the label alone, and must not advance past it. |
+| `status:changes-requested` | `aktiv` | This item needs *another* Claude round before it can be considered done — the issue's own "Proposed queue model" is explicit that this state pauses the queue, not just `status:working`. |
+| `status:review` | `ferdig` | Chief review is now in charge of this item; never blocks the next queue item. |
+| `status:approved` | `ferdig` | Same — awaiting the owner's manual merge; never blocks the next queue item. |
+
+**One queued item "aktiv" pauses the whole queue**, regardless of how
+many other `ikke_startet` items are waiting — this is the literal
+implementation of "at most one queued Claude implementation task is
+active at a time by default" and "a failed/no-deliverable task must
+STOP queue progression... default = fail closed." There is no
+"safe-to-skip" override in this implementation; the safe, explicit way
+to un-stick a queue item that will never resolve on its own is to
+remove `queue:pa-jobb` from it (see below) — the queue then simply
+treats it as not-a-queue-item and moves on to the next one on the very
+next trigger.
+
+### Dispatcher workflow
+
+[`pa-jobb-queue.yml`](../../.github/workflows/pa-jobb-queue.yml) fires
+on three triggers:
+
+- `issues: labeled` scoped to exactly the `queue:pa-jobb` label —
+  covers "owner arms a fresh item while the queue is idle." This is a
+  human/PAT-authored label event, so it fires normally (unlike a label
+  PUT performed by a workflow's own `GITHUB_TOKEN`, which GitHub
+  deliberately does not cascade into further `issues: labeled` runs —
+  see "Anti-loop / idempotency behavior" above, guard 3).
+- `workflow_run` on completion of the `Claude Agent Bridge` workflow —
+  covers "the previously active item just left `status:working`" (to
+  `status:review`, `status:approved`, or back to `status:working` on
+  failure). `workflow_run` is the correct cross-workflow wake-up here
+  specifically *because* it does not depend on which token performed
+  the upstream label change — it fires on the run's completion event
+  itself, independent of guard 3 above.
+- `workflow_dispatch` — manual resume, e.g. after the owner fixes or
+  removes a stuck item, or reorders the queue with `queue:priority`.
+
+On every trigger, the job re-fetches the *live* `queue:pa-jobb` issue
+list (`gh issue list --label queue:pa-jobb --state open`, never the
+webhook payload) and feeds it to `queue_dispatch.py`, which returns
+either "no dispatch" (with a reason logged) or exactly one issue
+number. If, and only if, an issue number is returned, the workflow:
+
+1. **Arms it** — sets `status:ready`, reusing the *existing*
+   `lifecycle_labels.py status:ready | gh api --method PUT ...`
+   mechanism verbatim (the identical command `claude-agent-bridge.yml`
+   itself already uses for `status:working`/`status:review`). No new
+   label-transition logic exists anywhere in this feature.
+2. **Starts the Bridge** — `gh workflow run claude-agent-bridge.yml -f
+   issue_number=<N> -f dry_run=false`. This is the `workflow_dispatch`
+   path issue #260 itself asked for ("preferably via its
+   `workflow_dispatch` path rather than faking an owner-applied label
+   event") — it depends only on the live `agent:claude` +
+   `status:ready` state this step just established, exactly like any
+   manual `workflow_dispatch` test run described elsewhere in this
+   document; it does **not** depend on, or attempt to fake, the
+   owner-sender check that gates `issues: labeled` (`trigger_guard.py`
+   `vurder_trigger`'s `workflow_dispatch` branch already treats live
+   state as sufficient, independent of `sender.login`).
+
+### Safety / idempotency
+
+- **One writer, one active run**: a single, repo-wide `concurrency:
+  group: pa-jobb-queue` (not per-issue — the queue is one shared
+  sequential resource) ensures at most one dispatcher evaluation runs
+  at a time, so two near-simultaneous triggers can never both observe
+  "queue idle" and both arm a winner.
+- **`status:ready` counts as active, not "not started"**: even if the
+  concurrency group were somehow bypassed, a second evaluation that
+  runs moments after the first armed an item will see that item's new
+  `status:ready` label and treat it as `aktiv` — fail-closed, not
+  fail-open. This is the queue's own answer to "duplicate event -> no
+  duplicate Claude run"; `claude-agent-bridge.yml`'s own concurrency
+  group and live re-check (guards 4–5, "Anti-loop / idempotency
+  behavior") independently cover the same property for the run it then
+  starts.
+- **No merge/deploy path exists**: this workflow never carries
+  `contents: write` or a merge/deploy permission, never calls `gh pr
+  merge`/`git merge`/`git push`, and is not part of any deploy
+  mechanism (`scripts/deploy_web.ps1` remains the only, owner-run,
+  interactive deploy path — untouched by this issue). Its only mutating
+  calls are one `gh api --method PUT .../labels` (via the existing,
+  unchanged `lifecycle_labels.py`) and one `gh workflow run` against
+  `claude-agent-bridge.yml`'s own `workflow_dispatch` input, which is
+  itself bounded by that workflow's unchanged guard/deliverable/owner-
+  merge-gate chain.
+- **Only pre-authorized bounded issues may enter the queue**:
+  `queue:pa-jobb` alone is not enough — `er_ko_element` requires
+  `agent:claude` too, the same owner-only authorization gate every
+  other trigger in this document already requires.
+- **Does not change roadmap priority by itself**: the dispatcher only
+  ever selects among issues the owner has *already* labeled
+  `queue:pa-jobb`; it never adds that label to anything on its own.
+
+### Chief review fixes (PR #263): repo-wide Bridge activity guard
+
+**BLOCKER found on this issue's first round:** the queue's own "aktiv"
+check above only reads the `status:*` label of `queue:pa-jobb` issues
+themselves. But `claude-agent-bridge.yml` uses **per-issue**
+`concurrency` (`claude-agent-bridge-<issue_number>`), not one global
+lane — so a perfectly normal, non-queued Bridge run on issue A could
+execute **concurrently** with a queued run this dispatcher starts on
+issue B. The new `workflow_run` trigger made this worse: completion of
+*any* Bridge run wakes the queue, while the dispatcher's `gh issue
+list --label queue:pa-jobb` snapshot structurally cannot see, or block
+on, an issue that never carried that label at all. This directly
+contradicted issue #260's "avoid parallel scope collisions" goal and the
+original PR/docs claim that two Bridge runs could never run at once.
+
+**The fix:** a new step, "Fetch repo-wide Claude Agent Bridge activity"
+in `pa-jobb-queue.yml`, queries GitHub's own Actions run state for the
+`claude-agent-bridge.yml` workflow directly —
+`gh api repos/<repo>/actions/workflows/claude-agent-bridge.yml/runs`,
+filtered to non-`completed` runs — entirely independent of any issue
+label, so it catches a currently executing run whether or not it
+belongs to a queue item. That evidence is passed to
+`queue_dispatch.py` via the `AKTIVE_BRO_KJORINGER` environment
+variable (JSON array of `{"status": ...}` run objects); the pure
+function `har_aktiv_bro_kjoring()` pauses the queue on **any** such
+repo-wide activity — checked *before* it even looks at the
+`queue:pa-jobb` issues' own `status:*` labels. The parameter is
+optional and defaults to "no known repo-wide activity", so every
+pre-existing call site/behavior is unchanged. No new permission is
+required: this job's existing `actions: write` scope (needed for the
+`gh workflow run` call) already includes read access to the Actions
+API.
+
+**BLOCKER found on this issue's second round:** the first-round
+`har_aktiv_bro_kjoring()` matched status against a hardcoded list of
+known non-terminal statuses (`in_progress`, `queued`, `requested`,
+`waiting`, `pending`) and treated an unknown or missing `status` field
+as **not** active — fail-*open* on unexpected evidence, even though the
+workflow step already pre-filters `AKTIVE_BRO_KJORINGER` to
+`status != "completed"`, so anything reaching the function at all is
+already proof of a non-completed run.
+
+**The fix:** the classification is inverted. `"completed"` (constant
+`FULLFORT_KJORINGSSTATUS`) is now the *only* status treated as not
+active; any other value — a known non-terminal status, an
+unknown/future one, or a missing/empty `status` field — counts as
+active and pauses the queue. `AKTIVE_KJORINGSSTATUSER` is kept only as
+documentation/test enumeration of known non-terminal statuses; it no
+longer gates the classification itself.
+
+Regression coverage (`tests/test_agent_bridge_queue_dispatch.py`):
+`TestHarAktivBroKjoring` (every known non-terminal status recognized;
+`test_ukjent_status_telles_som_aktiv_fail_closed` and
+`test_manglende_status_felt_telles_som_aktiv_fail_closed` prove unknown
+and missing/empty `status` values now count as active);
+`TestVelgNeste.test_11_repo_vid_ikke_ko_bro_kjoring_pauser_koen` (a
+non-queued issue's active Bridge run pauses a queue whose own items are
+otherwise idle — the round-1 blocker's scenario);
+`test_12_repo_vid_aktivitet_borte_lar_koen_fortsette` (once that
+activity is gone/absent, the next queued item dispatches again);
+`test_12b_...bakoverkompatibel` (omitting the parameter entirely is
+unchanged); `test_12c_...` (an empty queue still reports "empty", not
+"paused", even with repo-wide activity present — no point pausing
+nothing); `test_13_ukjent_eller_manglende_status_pauser_koen_fail_closed`
+(the round-2 blocker's scenario at the `velg_neste()` level); and
+`TestCliKontrakt`'s `test_cli_aktiv_bro_kjoring_*` series proves the
+same at the CLI/env-var boundary the workflow actually uses.
+
+**What this does not change:** the existing queue-internal "aktiv"
+check (still the *other* independent layer catching a queued item's own
+`status:ready`/`status:working`/`status:changes-requested`), the
+`pa-jobb-queue` concurrency group, the arming/dispatch mechanism, any
+`claude-agent-bridge.yml` guard/deliverable/owner-merge-gate behavior,
+or any merge/deploy path (still none).
+
+### Add / remove / reorder — the owner/Chief-facing operations
+
+- **Add**: apply `agent:claude` (if not already present) and then
+  `queue:pa-jobb` to a bounded, ready-to-run issue — same safe-arming
+  order already documented above ("Safe arming order — always") for
+  `agent:claude` relative to any status label.
+- **Remove**: remove `queue:pa-jobb` from the issue. `queue_dispatch.py`
+  stops counting it immediately on the next dispatcher run — this is
+  also the mechanism for un-sticking a queue that is paused on an item
+  that will never resolve on its own (see "fail closed" above).
+- **Reorder**: apply `queue:priority` to any `ikke_startet` item to
+  move it to the front of the queue, ahead of plain queued items
+  (still FIFO by issue number among other `queue:priority` items, and
+  FIFO by issue number among the remaining plain items). Removing
+  `queue:priority` returns an item to plain FIFO ordering. There is no
+  other reordering primitive (GitHub issues have no native manual
+  ordering field); this two-tier scheme was chosen as the smallest
+  mechanism that satisfies "reorder" without inventing a numeric
+  position label per issue.
+- **Pause / resume**: pausing is implicit and automatic — any `aktiv`
+  queue item pauses everything behind it, as described above; nothing
+  is deleted or forgotten while paused. Resuming is likewise automatic
+  once the active item reaches `status:review`/`status:approved` (the
+  next `workflow_run` completion trigger picks the next item up) — or
+  can be forced immediately with a manual `workflow_dispatch` run of
+  `pa-jobb-queue.yml` once the blocking condition is actually resolved
+  (e.g. after the owner removes a stuck item's `queue:pa-jobb` label,
+  or after `status:changes-requested` work completes and the issue
+  reaches `status:review` again).
+
+### Acceptance test coverage (issue #260)
+
+All ten of the issue's acceptance tests are covered by pure,
+GitHub-free unit tests in `tests/test_agent_bridge_queue_dispatch.py`
+(numbered to match): (1) empty queue → no dispatch; (2) one eligible
+item → exactly one selection; (3) multiple items → only the first;
+(4)/(6) an active/`status:working`/`status:changes-requested` item →
+the queue pauses, the second item does not start; (5) the first item
+reaching `status:review`/`status:approved` → the next may start; (7) a
+duplicate evaluation of the same live snapshot → no duplicate
+selection (the armed item shows as `status:ready`, i.e. `aktiv`); (8) a
+non-queued issue (missing `queue:pa-jobb` or missing `agent:claude`) →
+ignored; (10) the dispatch path is driven entirely by live
+`gh issue list` state on every run, never a cached/webhook snapshot.
+Acceptance test 9 ("no merge/deploy path exists") is an absence-of-code
+proof rather than a unit test — see "Safety / idempotency" above.
+
+### First real queue candidates
+
+Per the issue's own instruction, this infrastructure does **not**
+itself arm #257, further Phase 3B prep/regression work, or any other
+issue into the queue — that remains a separate, explicit owner
+decision after this issue's own PR is reviewed, exactly as issue #260
+specifies. `#98`/`#100`/`#233`/`#241` remain explicitly not to be
+auto-enqueued.
+
 ## Branch naming is deterministic and enforced (Chief review, PR #13)
 
 **The bug this fixes:** the original V1.2 draft granted `Bash(git push
@@ -1774,6 +2183,24 @@ non-destructive, listed here for reference):
 `agent:claude`, `status:ready`, `status:working`, `status:review`,
 `status:changes-requested`, `status:approved`, `area:core`,
 `area:web`, `area:app`, `area:infra`.
+
+`queue:pa-jobb` and `queue:priority` (issue #260, see "PÅ JOBB
+sequential queue" above) follow the same non-destructive `gh label
+create` pattern, but were **not** created by this PR itself — Bridge
+Claude's own `--allowedTools` set (see above) does not include `gh
+label create`/`gh label list`, by the same defense-in-depth principle
+as every other command deliberately left off that list. The owner (or
+Chief, via the connected identity) must run, once:
+```
+gh label create "queue:pa-jobb" --color 0E8A16 --description "PÅ JOBB queue item (issue #260)"
+gh label create "queue:priority" --color 5319E7 --description "PÅ JOBB queue reorder: move to front (issue #260)"
+```
+before either label can be applied to an issue — GitHub's label-set API
+rejects a name that doesn't already exist as a label object in the
+repository. Until then, `pa-jobb-queue.yml` still runs safely on every
+trigger; it simply always finds an empty queue (`gh issue list --label
+queue:pa-jobb` returns nothing for a label that doesn't exist yet) and
+takes no action.
 
 ## What this document does not do
 

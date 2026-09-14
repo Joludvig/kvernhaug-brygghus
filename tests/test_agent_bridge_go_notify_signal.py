@@ -142,9 +142,10 @@ class TestVurderGoNotify(unittest.TestCase):
     # ─── 3: den gyldige veien ─────────────────────────────────────────────
 
     def test_3_lykkes_naar_alt_stemmer(self):
-        post, duplicate, pr_nummer, head_sha, kommentar, begrunnelse = _vurder()
+        post, duplicate, allerede_merget, pr_nummer, head_sha, kommentar, begrunnelse = _vurder()
         self.assertTrue(post)
         self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
         self.assertEqual(pr_nummer, 66)
         self.assertEqual(head_sha, _HEAD_A)
         self.assertIsNotNone(kommentar)
@@ -153,21 +154,25 @@ class TestVurderGoNotify(unittest.TestCase):
 
     def test_2_duplikat_for_samme_issue_og_head(self):
         eksisterende = [_GNS.bygg_marker(66, _HEAD_A)]
-        post, duplicate, pr_nummer, head_sha, kommentar, _ = _vurder(eksisterende_kommentarer=eksisterende)
+        post, duplicate, allerede_merget, pr_nummer, head_sha, kommentar, _ = _vurder(
+            eksisterende_kommentarer=eksisterende
+        )
         self.assertFalse(post)
         self.assertTrue(duplicate)
+        self.assertFalse(allerede_merget)
         self.assertIsNone(kommentar)
         self.assertEqual(head_sha, _HEAD_A)
 
     def test_4_ny_head_er_ikke_duplikat_selv_om_gammel_markor_finnes(self):
         eksisterende = [_GNS.bygg_marker(66, _HEAD_A)]
-        post, duplicate, _, head_sha, _, _ = _vurder(
+        post, duplicate, allerede_merget, _, head_sha, _, _ = _vurder(
             prs=[_pr(head_sha=_HEAD_B)],
             pr_reviews=[_review(head_sha=_HEAD_B)],
             eksisterende_kommentarer=eksisterende,
         )
         self.assertTrue(post)
         self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
         self.assertEqual(head_sha, _HEAD_B)
 
     # ─── fail-closed: livssyklus ────────────────────────────────────────
@@ -188,12 +193,6 @@ class TestVurderGoNotify(unittest.TestCase):
         self.assertFalse(duplicate)
 
     # ─── fail-closed: PR-tilstand ───────────────────────────────────────
-
-    def test_avviser_merget_pr(self):
-        # MERGED er ikke OPEN -- finnes ikke i kandidatlisten i det hele tatt.
-        post, duplicate, *_ = _vurder(prs=[_pr(state="MERGED")])
-        self.assertFalse(post)
-        self.assertFalse(duplicate)
 
     def test_avviser_lukket_pr(self):
         post, duplicate, *_ = _vurder(prs=[_pr(state="CLOSED")])
@@ -258,11 +257,93 @@ class TestVurderGoNotify(unittest.TestCase):
         self.assertFalse(duplicate)
 
     def test_ukjente_input_nokler_krasjer_ikke(self):
-        post, duplicate, pr_nummer, head_sha, kommentar, _ = _vurder()
+        post, duplicate, allerede_merget, pr_nummer, head_sha, kommentar, _ = _vurder()
         self.assertTrue(post)
+        self.assertFalse(allerede_merget)
         self.assertNotIn("issue_body", kommentar)
         self.assertEqual(pr_nummer, 66)
         self.assertEqual(head_sha, _HEAD_A)
+
+
+class TestAlleredeMergetRase(unittest.TestCase):
+    """Issue #264, run #512-rasen: mellom `status:approved`-refetchet som
+    autoriserte denne jobben og notify-jobbens EGET refetch kan eieren
+    allerede ha merget nøyaktig den Chief-godkjente PR-en. Det skal ikke
+    lenger gi en fail-closed rødt-workflow-avvisning -- men en vilkårlig
+    MERGED PR skal heller ALDRI godtas som bevis alene."""
+
+    def test_512_merget_pr_med_bekreftet_review_pa_eget_hode_er_benign_no_op(self):
+        # 0 åpne PR-er (som i run #512s faktiske logg), men nøyaktig én
+        # MERGED PR på nøyaktig samme branch, med sin egen APPROVED-review
+        # for nettopp sitt eget eksakte head.
+        post, duplicate, allerede_merget, pr_nummer, head_sha, kommentar, begrunnelse = _vurder(
+            prs=[_pr(state="MERGED")],
+        )
+        self.assertFalse(post)
+        self.assertFalse(duplicate)
+        self.assertTrue(allerede_merget)
+        self.assertEqual(pr_nummer, 66)
+        self.assertEqual(head_sha, _HEAD_A)
+        self.assertIsNone(kommentar)
+        self.assertIn("MERGED", begrunnelse)
+
+    def test_merget_pr_uten_matchende_approved_review_forblir_fail_closed(self):
+        # En vilkårlig MERGED PR er ALDRI nok alene -- her mangler en
+        # APPROVED-review for nettopp dens eksakte (merged) head.
+        post, duplicate, allerede_merget, *_ = _vurder(prs=[_pr(state="MERGED")], pr_reviews=[])
+        self.assertFalse(post)
+        self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
+
+    def test_merget_pr_med_approved_review_for_annet_hode_forblir_fail_closed(self):
+        # Godkjenningen gjaldt et ELDRE hode enn PR-en faktisk ble merget
+        # på -- skal ikke telle som bevis for det merged hodet.
+        post, duplicate, allerede_merget, *_ = _vurder(
+            prs=[_pr(state="MERGED", head_sha=_HEAD_B)],
+            pr_reviews=[_review(state="APPROVED", head_sha=_HEAD_A)],
+        )
+        self.assertFalse(post)
+        self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
+
+    def test_merget_pr_mangler_head_sha_forblir_fail_closed(self):
+        pr = _pr(state="MERGED")
+        pr["headRefOid"] = None
+        post, duplicate, allerede_merget, *_ = _vurder(prs=[pr])
+        self.assertFalse(post)
+        self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
+
+    def test_flere_merget_pr_kandidater_pa_samme_branch_er_ambiguost_forblir_fail_closed(self):
+        post, duplicate, allerede_merget, *_ = _vurder(
+            prs=[_pr(number=66, state="MERGED"), _pr(number=67, state="MERGED")],
+        )
+        self.assertFalse(post)
+        self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
+
+    def test_merget_pr_pa_feil_branch_teller_ikke_forblir_fail_closed(self):
+        post, duplicate, allerede_merget, *_ = _vurder(
+            prs=[_pr(state="MERGED", head_branch="agent/issue-999")],
+        )
+        self.assertFalse(post)
+        self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
+
+    def test_apen_pr_prioriteres_over_urelatert_merget_historikk_pa_samme_branch(self):
+        # En ÅPEN, gyldig PR finnes samtidig med en historisk MERGED PR på
+        # samme branch (branchen ble gjenbrukt over flere runder) -- den
+        # åpne stien skal vinne uendret, den merged PR-en skal aldri
+        # engang vurderes.
+        post, duplicate, allerede_merget, pr_nummer, head_sha, kommentar, _ = _vurder(
+            prs=[_pr(number=66, state="OPEN"), _pr(number=65, state="MERGED", head_sha=_HEAD_B)],
+        )
+        self.assertTrue(post)
+        self.assertFalse(duplicate)
+        self.assertFalse(allerede_merget)
+        self.assertEqual(pr_nummer, 66)
+        self.assertEqual(head_sha, _HEAD_A)
+        self.assertIsNotNone(kommentar)
 
 
 class TestCli(unittest.TestCase):
@@ -310,6 +391,29 @@ class TestCli(unittest.TestCase):
             self.assertEqual(res.returncode, 0, res.stderr)
             self.assertIn("post=false", res.stdout)
             self.assertIn("duplicate=true", res.stdout)
+            self.assertFalse(os.path.exists(out_path))
+
+    def test_cli_already_merged_true_exit_0_ingen_fil(self):
+        # Issue #264, run #512-rasen, via CLI: 0 åpne PR-er, men én MERGED
+        # PR på branchen med bekreftet APPROVED-review for sitt eget hode
+        # -- skal exit 0 (ikke lenger rødt), uten å skrive kommentarfilen.
+        import json as _json
+        payload = _json.dumps({
+            "issue_number": 66,
+            "issue_labels": ["agent:claude", "status:approved"],
+            "prs": [_pr(state="MERGED")],
+            "reviews": [_review()],
+            "branch": "agent/issue-66",
+            "comments": [],
+        })
+        with tempfile.TemporaryDirectory() as tmp:
+            out_path = os.path.join(tmp, "comment.txt")
+            res = self._kjor_cli(payload, out_path)
+            self.assertEqual(res.returncode, 0, res.stderr)
+            self.assertIn("post=false", res.stdout)
+            self.assertIn("duplicate=false", res.stdout)
+            self.assertIn("already_merged=true", res.stdout)
+            self.assertIn(f"head_sha={_HEAD_A}", res.stdout)
             self.assertFalse(os.path.exists(out_path))
 
     def test_cli_fail_closed_avvisning_exit_1(self):
