@@ -27,6 +27,20 @@ name: PÅ JOBB Queue Dispatcher
 # function -- .github/scripts/queue_dispatch.py -- unit-tested in
 # tests/test_agent_bridge_queue_dispatch.py without touching GitHub.
 #
+# Repo-wide Bridge activity guard (Chief review, PR #263 -- BLOCKER):
+# claude-agent-bridge.yml uses PER-ISSUE `concurrency`
+# (`claude-agent-bridge-<issue_number>`), not one global lane, so a
+# perfectly normal, non-queued Bridge run on one issue can execute
+# concurrently with a queued run this dispatcher starts on another --
+# which would defeat issue #260's "at most one queued Claude
+# implementation task is active at a time" / "avoid parallel scope
+# collisions" requirements. Before arming/dispatching anything, this
+# workflow therefore also fetches LIVE, repo-wide GitHub Actions run
+# state for the `claude-agent-bridge.yml` workflow itself (independent
+# of any issue label) and feeds it to `queue_dispatch.py` alongside the
+# queue snapshot -- see the "Fetch repo-wide Claude Agent Bridge
+# activity" step below.
+#
 # Triggers:
 #   - `issues: labeled` for exactly the `queue:pa-jobb` label -- covers
 #     "owner adds a fresh item to an idle queue" (a human/PAT-authored
@@ -101,6 +115,22 @@ jobs:
           echo "Live queue:pa-jobb issues:"
           cat "$RUNNER_TEMP/queue_issues.json"
 
+      # Repo-wide guard (Chief review, PR #263 -- BLOCKER): independent
+      # of any issue label, so it also catches a normal, non-queued
+      # Bridge run that is currently executing. `actions: write` (this
+      # job's existing permission, needed for the `gh workflow run` call
+      # below) already includes read access to the Actions API, so no
+      # additional permission is granted for this step.
+      - name: Fetch repo-wide Claude Agent Bridge activity
+        id: bridge_activity
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPO/actions/workflows/claude-agent-bridge.yml/runs?per_page=30" \
+            --jq '[.workflow_runs[] | select(.status != "completed") | {status: .status, head_branch: .head_branch}]' \
+            > "$RUNNER_TEMP/bridge_runs.json"
+          echo "Repo-wide non-completed Claude Agent Bridge runs:"
+          cat "$RUNNER_TEMP/bridge_runs.json"
+
       # The decision itself lives in .github/scripts/queue_dispatch.py
       # (pure, unit-tested -- see
       # tests/test_agent_bridge_queue_dispatch.py), so it is testable
@@ -110,6 +140,7 @@ jobs:
         id: select
         run: |
           set -euo pipefail
+          export AKTIVE_BRO_KJORINGER="$(cat "$RUNNER_TEMP/bridge_runs.json")"
           python3 .github/scripts/queue_dispatch.py < "$RUNNER_TEMP/queue_issues.json" >> "$GITHUB_OUTPUT"
 
       # Arming reuses the EXISTING exclusive lifecycle transition

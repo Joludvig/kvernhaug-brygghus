@@ -733,6 +733,62 @@ number. If, and only if, an issue number is returned, the workflow:
   ever selects among issues the owner has *already* labeled
   `queue:pa-jobb`; it never adds that label to anything on its own.
 
+### Chief review fix (PR #263): repo-wide Bridge activity guard
+
+**BLOCKER found on this issue's first round:** the queue's own "aktiv"
+check above only reads the `status:*` label of `queue:pa-jobb` issues
+themselves. But `claude-agent-bridge.yml` uses **per-issue**
+`concurrency` (`claude-agent-bridge-<issue_number>`), not one global
+lane — so a perfectly normal, non-queued Bridge run on issue A could
+execute **concurrently** with a queued run this dispatcher starts on
+issue B. The new `workflow_run` trigger made this worse: completion of
+*any* Bridge run wakes the queue, while the dispatcher's `gh issue
+list --label queue:pa-jobb` snapshot structurally cannot see, or block
+on, an issue that never carried that label at all. This directly
+contradicted issue #260's "avoid parallel scope collisions" goal and the
+original PR/docs claim that two Bridge runs could never run at once.
+
+**The fix:** a new step, "Fetch repo-wide Claude Agent Bridge activity"
+in `pa-jobb-queue.yml`, queries GitHub's own Actions run state for the
+`claude-agent-bridge.yml` workflow directly —
+`gh api repos/<repo>/actions/workflows/claude-agent-bridge.yml/runs`,
+filtered to non-`completed` runs — entirely independent of any issue
+label, so it catches a currently executing run whether or not it
+belongs to a queue item. That evidence is passed to
+`queue_dispatch.py` via the `AKTIVE_BRO_KJORINGER` environment
+variable (JSON array of `{"status": ...}` run objects); the new pure
+function `har_aktiv_bro_kjoring()` classifies GitHub Actions' own
+non-terminal run statuses (`in_progress`, `queued`, `requested`,
+`waiting`, `pending` — never `completed`, regardless of conclusion),
+and `velg_neste()` pauses the queue on **any** such repo-wide activity
+— checked *before* it even looks at the `queue:pa-jobb` issues' own
+`status:*` labels. The parameter is optional and defaults to "no known
+repo-wide activity", so every pre-existing call site/behavior is
+unchanged. No new permission is required: this job's existing `actions:
+write` scope (needed for the `gh workflow run` call) already includes
+read access to the Actions API.
+
+Regression coverage (`tests/test_agent_bridge_queue_dispatch.py`):
+`TestHarAktivBroKjoring` (every non-terminal status recognized,
+`completed`/unknown/missing statuses correctly not counted as active);
+`TestVelgNeste.test_11_repo_vid_ikke_ko_bro_kjoring_pauser_koen` (a
+non-queued issue's active Bridge run pauses a queue whose own items are
+otherwise idle — the exact scenario the blocker named);
+`test_12_repo_vid_aktivitet_borte_lar_koen_fortsette` (once that
+activity is gone/absent, the next queued item dispatches again);
+`test_12b_...bakoverkompatibel` (omitting the parameter entirely is
+unchanged); `test_12c_...` (an empty queue still reports "empty", not
+"paused", even with repo-wide activity present — no point pausing
+nothing); and `TestCliKontrakt`'s `test_cli_aktiv_bro_kjoring_*` series
+proves the same at the CLI/env-var boundary the workflow actually uses.
+
+**What this does not change:** the existing queue-internal "aktiv"
+check (still the *other* independent layer catching a queued item's own
+`status:ready`/`status:working`/`status:changes-requested`), the
+`pa-jobb-queue` concurrency group, the arming/dispatch mechanism, any
+`claude-agent-bridge.yml` guard/deliverable/owner-merge-gate behavior,
+or any merge/deploy path (still none).
+
 ### Add / remove / reorder — the owner/Chief-facing operations
 
 - **Add**: apply `agent:claude` (if not already present) and then

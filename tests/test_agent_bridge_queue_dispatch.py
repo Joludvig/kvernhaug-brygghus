@@ -18,6 +18,13 @@ dekket av at denne modulen aldri kaller gh/git i det hele tatt, se
 tests/test_agent_bridge_permission_config.py for tilsvarende
 fravær-bevis på selve broen.)
 
+`TestHarAktivBroKjoring`/`TestVelgNeste`s `test_11_*`/`test_12_*` og
+`TestCliKontrakt`s `test_cli_aktiv_bro_kjoring_*` dekker Chief-reviewens
+BLOCKER på PR #263: en repo-vid, IKKE-kølagt Claude Agent Bridge-kjøring
+(claude-agent-bridge.yml bruker per-issue `concurrency`, ikke ett globalt
+lag) må også pause køen, og køen må fortsette igjen når den aktiviteten
+er borte.
+
 Ren stdlib-test, ingen GitHub-kall, ingen bash/YAML-avhengighet --
 kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
 """
@@ -89,6 +96,31 @@ class TestErKoElement(unittest.TestCase):
         self.assertFalse(_QD.er_ko_element(["queue:pa-jobb"]))
         self.assertFalse(_QD.er_ko_element(["agent:claude"]))
         self.assertFalse(_QD.er_ko_element([]))
+
+
+class TestHarAktivBroKjoring(unittest.TestCase):
+    def test_tomt_gir_false(self):
+        self.assertFalse(_QD.har_aktiv_bro_kjoring([]))
+        self.assertFalse(_QD.har_aktiv_bro_kjoring(None))
+
+    def test_kun_completed_gir_false(self):
+        self.assertFalse(_QD.har_aktiv_bro_kjoring([{"status": "completed"}, {"status": "completed"}]))
+
+    def test_in_progress_gir_true(self):
+        self.assertTrue(_QD.har_aktiv_bro_kjoring([{"status": "in_progress"}]))
+
+    def test_hver_aktiv_status_gjenkjennes(self):
+        for status in _QD.AKTIVE_KJORINGSSTATUSER:
+            self.assertTrue(_QD.har_aktiv_bro_kjoring([{"status": status}]), status)
+
+    def test_blanding_av_completed_og_aktiv_gir_true(self):
+        self.assertTrue(_QD.har_aktiv_bro_kjoring([{"status": "completed"}, {"status": "queued"}]))
+
+    def test_ukjent_status_telles_ikke_som_aktiv(self):
+        self.assertFalse(_QD.har_aktiv_bro_kjoring([{"status": "some_future_status"}]))
+
+    def test_manglende_status_felt_telles_ikke_som_aktiv(self):
+        self.assertFalse(_QD.har_aktiv_bro_kjoring([{}]))
 
 
 class TestVelgNeste(unittest.TestCase):
@@ -177,19 +209,86 @@ class TestVelgNeste(unittest.TestCase):
         nummer, _ = _QD.velg_neste([_ko(103, priority=True), _ko(101, priority=True)])
         self.assertEqual(nummer, 101)
 
+    def test_11_repo_vid_ikke_ko_bro_kjoring_pauser_koen(self):
+        # Chief-reviewens BLOCKER (PR #263): et rent "ikke_startet"
+        # køelement, uten at NOEN queue:pa-jobb-issue selv er "aktiv" --
+        # men en helt vanlig, ikke-kølagt Bridge-kjøring (issue #999, som
+        # aldri vises i queue:pa-jobb-snapshotten i det hele tatt) kjører
+        # akkurat nå repo-vidt. Køen må likevel pause.
+        nummer, begrunnelse = _QD.velg_neste(
+            [_ko(101)],
+            aktive_bro_kjoringer=[{"status": "in_progress", "head_branch": "agent/issue-999"}],
+        )
+        self.assertIsNone(nummer)
+        self.assertIn("pause", begrunnelse)
+
+    def test_12_repo_vid_aktivitet_borte_lar_koen_fortsette(self):
+        # Samme kø som over, men den repo-vide kjøringen er nå completed
+        # (eller helt fraværende) -- køen skal velge neste kandidat igjen.
+        nummer, _ = _QD.velg_neste(
+            [_ko(101)],
+            aktive_bro_kjoringer=[{"status": "completed", "head_branch": "agent/issue-999"}],
+        )
+        self.assertEqual(nummer, 101)
+        nummer2, _ = _QD.velg_neste([_ko(101)], aktive_bro_kjoringer=[])
+        self.assertEqual(nummer2, 101)
+
+    def test_12b_ingen_aktive_bro_kjoringer_arg_er_bakoverkompatibel(self):
+        nummer, _ = _QD.velg_neste([_ko(101)])
+        self.assertEqual(nummer, 101)
+
+    def test_12c_tom_ko_gir_tom_ko_begrunnelse_selv_med_aktiv_bro_kjoring(self):
+        # Ingen vits i å pause noe som ikke finnes -- tom kø rapporteres
+        # som tom kø, ikke som "pauset av repo-vid aktivitet".
+        nummer, begrunnelse = _QD.velg_neste([], aktive_bro_kjoringer=[{"status": "in_progress"}])
+        self.assertIsNone(nummer)
+        self.assertIn("Tom kø", begrunnelse)
+
 
 class TestCliKontrakt(unittest.TestCase):
     """Selve CLI-kontrakten workflowen faktisk bruker (subprocess.run(),
     samme mønster som tests/test_agent_bridge_deliverable_guard.py sin
     'test_11_...'-serie)."""
 
-    def _kjor(self, issues):
+    def _kjor(self, issues, aktive_bro_kjoringer=None):
+        env = dict(os.environ)
+        if aktive_bro_kjoringer is not None:
+            env["AKTIVE_BRO_KJORINGER"] = json.dumps(aktive_bro_kjoringer)
+        else:
+            env.pop("AKTIVE_BRO_KJORINGER", None)
         return subprocess.run(
             [sys.executable, _SCRIPT],
             input=json.dumps(issues),
             capture_output=True,
             text=True,
+            env=env,
         )
+
+    def test_cli_aktiv_bro_kjoring_pauser_dispatch(self):
+        resultat = self._kjor([_ko(101)], aktive_bro_kjoringer=[{"status": "queued"}])
+        self.assertEqual(resultat.returncode, 0)
+        self.assertIn("dispatch=false", resultat.stdout)
+        self.assertNotIn("issue_number=", resultat.stdout)
+        self.assertIn("pause", resultat.stderr)
+
+    def test_cli_uten_aktiv_bro_kjoring_env_dispatcher_som_for(self):
+        resultat = self._kjor([_ko(101)], aktive_bro_kjoringer=None)
+        self.assertEqual(resultat.returncode, 0)
+        self.assertIn("dispatch=true", resultat.stdout)
+        self.assertIn("issue_number=101", resultat.stdout)
+
+    def test_cli_avviser_ugyldig_aktive_bro_kjoringer_json(self):
+        env = dict(os.environ)
+        env["AKTIVE_BRO_KJORINGER"] = "{ikke gyldig json"
+        resultat = subprocess.run(
+            [sys.executable, _SCRIPT],
+            input=json.dumps([_ko(101)]),
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        self.assertEqual(resultat.returncode, 2)
+        self.assertIn("dispatch=false", resultat.stdout)
 
     def test_cli_dispatch_true_med_issue_number(self):
         resultat = self._kjor([_ko(101)])

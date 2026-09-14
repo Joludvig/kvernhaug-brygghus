@@ -64,16 +64,38 @@ gh api --method PUT ...`, identisk mønster som claude-agent-bridge.yml
 allerede bruker for status:working/status:review) -- ingen ny
 etikett-overgangslogikk er skrevet for dette; se pa-jobb-queue.yml.
 
+REPO-VID BRO-AKTIVITET (Chief review, PR #263 -- BLOCKER): køens egen
+"aktiv"-sjekk over leser bare status:*-etiketten til queue:pa-jobb-
+issuene selv. Men claude-agent-bridge.yml bruker PER-ISSUE
+`concurrency` (`claude-agent-bridge-<issue_number>`), IKKE ett globalt
+lag -- så en helt vanlig, IKKE-kølagt Bridge-kjøring på issue A kan
+kjøre samtidig med en kølagt kjøring dispatcheren nettopp startet på
+issue B. Det bryter issue #260s eget krav om at høyst ÉN
+implementasjonskjøring skal være aktiv om gangen, kølagt eller ikke.
+Fikset ved at dispatcheren i tillegg henter REPO-VID GitHub
+Actions-kjøretilstand for selve `claude-agent-bridge.yml`-workflowen
+(`gh api repos/<repo>/actions/workflows/claude-agent-bridge.yml/runs`,
+se pa-jobb-queue.yml) og sender den inn som JSON i miljøvariabelen
+`AKTIVE_BRO_KJORINGER`. `har_aktiv_bro_kjoring()` under avgjør om NOEN
+av disse kjøringene fortsatt er i en ikke-fullført GitHub
+Actions-status -- uavhengig av om den tilhører et køelement -- og
+`velg_neste()` pauser køen om så er tilfelle, FØR den i det hele tatt
+ser på queue:pa-jobb-issuenes egne status:*-etiketter. Dette er additivt:
+`AKTIVE_BRO_KJORINGER` er valgfri (tom/fraværende = ingen kjent
+repo-vid aktivitet), så eksisterende kall uten den er uendret.
+
 CLI-bruk (det workflowen gjør):
     gh issue list --repo "$REPO" --label queue:pa-jobb --state open \
       --json number,labels,state \
       --jq '[.[] | {number:.number, state:.state, labels:[.labels[].name]}]' \
-      | python3 .github/scripts/queue_dispatch.py >> "$GITHUB_OUTPUT"
+      | AKTIVE_BRO_KJORINGER="$(cat bridge_runs.json)" \
+        python3 .github/scripts/queue_dispatch.py >> "$GITHUB_OUTPUT"
 Skriver `dispatch=true`/`dispatch=false`, og `issue_number=<N>` når
 `dispatch=true`, som GITHUB_OUTPUT-linjer på stdout, og en
 menneskelesbar begrunnelse til stderr.
 """
 import json
+import os
 import sys
 
 AGENT_ETIKETT = "agent:claude"
@@ -93,6 +115,12 @@ LIVSSYKLUS_ETIKETTER = (
 )
 AKTIVE_LIVSSYKLUS_ETIKETTER = ("status:ready", "status:working", "status:changes-requested")
 FERDIGE_LIVSSYKLUS_ETIKETTER = ("status:review", "status:approved")
+
+# GitHub Actions' egne, ikke-fullførte kjøre-"status"-verdier (aldri
+# "completed", uansett hvilken "conclusion" en fullført kjøring endte
+# med -- success/failure/cancelled/... er alle "completed"). Se
+# moduldoc "REPO-VID BRO-AKTIVITET" over.
+AKTIVE_KJORINGSSTATUSER = ("in_progress", "queued", "requested", "waiting", "pending")
 
 
 def er_ko_element(labels):
@@ -124,16 +152,45 @@ def elementets_tilstand(labels):
     return "ferdig"
 
 
-def velg_neste(issues):
+def har_aktiv_bro_kjoring(kjoringer):
+    """True hvis MINST ÉN Claude Agent Bridge-workflowkjøring repo-vidt
+    fortsatt er i en ikke-fullført GitHub Actions-status -- uavhengig av
+    om den kjøringen tilhører et queue:pa-jobb-element eller en helt
+    vanlig, ikke-kølagt issue (Chief review, PR #263: claude-agent-
+    bridge.yml bruker PER-ISSUE `concurrency`, ikke ett globalt lag, så
+    en vanlig kjøring på én issue kan kjøre samtidig med en kølagt
+    kjøring på en annen -- se moduldoc "REPO-VID BRO-AKTIVITET").
+
+    `kjoringer`: liste av {"status": str, ...} -- rå (eller
+    jq-forhåndsfiltrert) `gh api .../actions/workflows/
+    claude-agent-bridge.yml/runs`-utdata. Ukjente/manglende `status`
+    telles bevisst IKKE som aktiv (fail-closed her ville blokkert køen
+    permanent på malformert evidens; den globale sjekken er allerede et
+    STRENGERE, IKKE et svakere, lag enn køens egen status:*-sjekk under,
+    som fortsatt dekker samme issue om det også er et køelement).
+    """
+    for kjoring in kjoringer or []:
+        status = str((kjoring or {}).get("status", "")).strip().lower()
+        if status in AKTIVE_KJORINGSSTATUSER:
+            return True
+    return False
+
+
+def velg_neste(issues, aktive_bro_kjoringer=None):
     """
     `issues`: liste av {"number": int, "state": "OPEN"/"CLOSED",
     "labels": [str, ...]} -- rå `gh issue list --label queue:pa-jobb`-
     utdata, normalisert til strengnavn.
+    `aktive_bro_kjoringer`: valgfri liste av {"status": str, ...} --
+    repo-vid GitHub Actions-kjøretilstand for claude-agent-bridge.yml,
+    se `har_aktiv_bro_kjoring` over. Utelates/tom = ingen kjent
+    repo-vid aktivitet (bakoverkompatibelt med eksisterende kall).
 
     Returnerer (issue_number: int|None, begrunnelse: str).
     `issue_number` er None når køen ikke skal starte noe nytt element nå
-    (tom kø, satt på pause av et aktivt element, eller ingen gyldig
-    kandidat igjen) -- aldri et gjettet fallback-nummer.
+    (tom kø, en repo-vid aktiv Bridge-kjøring, satt på pause av et
+    aktivt køelement, eller ingen gyldig kandidat igjen) -- aldri et
+    gjettet fallback-nummer.
     """
     ko = [
         i for i in (issues or [])
@@ -141,6 +198,16 @@ def velg_neste(issues):
     ]
     if not ko:
         return None, "Tom kø: ingen åpne issues har både agent:claude og queue:pa-jobb."
+
+    if har_aktiv_bro_kjoring(aktive_bro_kjoringer):
+        return (
+            None,
+            "Køen er satt på pause: minst én Claude Agent Bridge-kjøring er "
+            "aktiv et sted i repoet akkurat nå (ikke nødvendigvis et "
+            "køelement -- claude-agent-bridge.yml bruker per-issue "
+            "concurrency) -- maks én aktiv implementasjonskjøring om "
+            "gangen, kølagt eller ikke.",
+        )
 
     aktive = [i for i in ko if elementets_tilstand(i.get("labels", [])) == "aktiv"]
     if aktive:
@@ -177,7 +244,19 @@ def main():
         print("dispatch=false")
         return 2
 
-    issue_number, begrunnelse = velg_neste(issues)
+    try:
+        bro_raatekst = os.environ.get("AKTIVE_BRO_KJORINGER", "")
+        aktive_bro_kjoringer = json.loads(bro_raatekst) if bro_raatekst.strip() else []
+    except (TypeError, ValueError) as e:
+        print(f"AKTIVE_BRO_KJORINGER er ikke gyldig JSON: {e}", file=sys.stderr)
+        print("dispatch=false")
+        return 2
+    if not isinstance(aktive_bro_kjoringer, list):
+        print("AKTIVE_BRO_KJORINGER må være et JSON-array med kjøre-objekter.", file=sys.stderr)
+        print("dispatch=false")
+        return 2
+
+    issue_number, begrunnelse = velg_neste(issues, aktive_bro_kjoringer)
     print(begrunnelse, file=sys.stderr)
     if issue_number is None:
         print("dispatch=false")
