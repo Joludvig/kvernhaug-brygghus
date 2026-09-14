@@ -1058,21 +1058,31 @@ jobs:
       # comments (not the PR's) because the GO/NO-GO notification is
       # posted on the issue — the same place every other owner-facing
       # Bridge notice in this workflow already goes.
-      - name: Refetch live state for GO/NO-GO notification (issue #66)
+      #
+      # `--state all` (issue #264, run #512 race) — not `--state open` —
+      # because the exact-head-approved PR can legitimately already be
+      # MERGED by the time this job refetches (owner merged between the
+      # status:approved event and this refetch). go_notify_signal.py's
+      # `vurder_go_notify` needs to SEE that MERGED PR to tell that benign
+      # case apart from a genuinely missing/wrong PR; it still only ever
+      # accepts it as proof if it is the one exact-branch candidate with
+      # its own APPROVED review on its own exact head. Reviews are fetched
+      # for every candidate PR found (not just the first) so ordering
+      # never matters and the open-PR path's reviews are never dropped.
+      - name: Refetch live state for GO/NO-GO notification (issue #66, #264)
         id: notify_state
         env:
           BRANCH: ${{ steps.branch.outputs.name }}
         run: |
           set -euo pipefail
           labels_json=$(gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]')
-          prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+          prs_json=$(gh pr list --repo "$REPO" --head "$BRANCH" --base master --state all \
             --json number,state,baseRefName,headRefOid,headRefName)
-          pr_number_for_lookup=$(echo "$prs_json" | jq -r '.[0].number // empty')
-          if [ -n "$pr_number_for_lookup" ]; then
-            reviews_json=$(gh pr view "$pr_number_for_lookup" --repo "$REPO" --json reviews -q '.reviews')
-          else
-            reviews_json='[]'
-          fi
+          reviews_json='[]'
+          for pr_number_for_lookup in $(echo "$prs_json" | jq -r '.[].number'); do
+            pr_reviews_json=$(gh pr view "$pr_number_for_lookup" --repo "$REPO" --json reviews -q '.reviews')
+            reviews_json=$(jq -c -n --argjson a "$reviews_json" --argjson b "$pr_reviews_json" '$a + $b')
+          done
           comments_json=$(gh issue view "$ISSUE" --repo "$REPO" --json comments -q '[.comments[].body]')
           jq -n --argjson issue_number "$ISSUE" \
                 --argjson issue_labels "$labels_json" \

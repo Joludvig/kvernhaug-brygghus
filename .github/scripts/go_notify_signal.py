@@ -53,25 +53,49 @@ CLI-bruk (det workflowen gjør):
     jq -n '{issue_number: 66, issue_labels: [...], prs: [...],
             reviews: [...], branch: "agent/issue-66", comments: [...]}' \
       | python3 .github/scripts/go_notify_signal.py "$RUNNER_TEMP/go_notify_comment.txt"
-Skriver GITHUB_OUTPUT-linjer (`post`, `duplicate`, `pr_number`,
-`head_sha`, `reason`) til stdout og begrunnelsen til stderr. Skriver
-den ferdige kommentarteksten til filstien gitt som argv[1] KUN når
-`post=true` -- selve `gh issue comment --body-file`-kallet gjøres av
-workflowen, ikke her (ingen `gh`-avhengighet i denne modulen).
+Skriver GITHUB_OUTPUT-linjer (`post`, `duplicate`, `already_merged`,
+`pr_number`, `head_sha`, `reason`) til stdout og begrunnelsen til
+stderr. Skriver den ferdige kommentarteksten til filstien gitt som
+argv[1] KUN når `post=true` -- selve `gh issue comment --body-file`-
+kallet gjøres av workflowen, ikke her (ingen `gh`-avhengighet i denne
+modulen).
 
 EXIT-KODE (samme kontrakt som chief_ready_signal.py/pr_ready_handoff.py):
-`post=true` og `duplicate=true` gir begge exit 0 -- et postet varsel og
-et idempotent no-op er begge suksess. En fail-closed AVVISNING
-(`post=false` OG `duplicate=false` -- live-tilstanden tilfredsstiller
-ikke lenger varsel-kontrakten) gir exit 1, slik at workflowens eget
-"Decide GO/NO-GO notification"-steg feiler og en dedikert
-rapport-oppfølger kjører, i stedet for at jobben blir grønn uten både
-varsel og rapport.
+`post=true`, `duplicate=true` og (issue #264) `already_merged=true` gir
+ALLE exit 0 -- et postet varsel, et idempotent no-op og en allerede
+fullført eier-merge er alle suksess, ikke en feil. En fail-closed
+AVVISNING (`post=false` OG `duplicate=false` OG `already_merged=false`
+-- live-tilstanden tilfredsstiller ikke lenger varsel-kontrakten, eller
+en eventuell MERGED PR kunne ikke verifiseres som bevis) gir exit 1,
+slik at workflowens eget "Decide GO/NO-GO notification"-steg feiler og
+en dedikert rapport-oppfølger kjører, i stedet for at jobben blir grønn
+uten både varsel og rapport.
 
 Ingen hemmeligheter/token/miljøverdier eller vilkårlig Claude-output
 inngår noensinne i markøren eller kommentarteksten -- kun issue-nummer,
 PR-nummer og PR-head-SHA, alle strukturerte tall/hex-strenger fra
 `vurder_go_notify`s egne parametre.
+
+RASE-TILFELLET (issue #264, observert i run #512): denne modulen kalles
+etter et FERSKT refetch, men mellom `status:approved`-hendelsen og
+akkurat dette refetch-et kan eieren allerede ha merget nøyaktig den PR-en
+Chief godkjente -- da finner refetch-et 0 åpne PR-er på branchen, som før
+#264 ga en fail-closed AVVISNING (exit 1) selv om utfallet i realiteten
+var en suksess. `vurder_go_notify` skiller derfor nå eksplisitt mellom
+TRE utfall når ingen ÅPEN PR finnes:
+  1. nøyaktig én ÅPEN, uslått PR med bekreftet APPROVED-review på sitt
+     eksakte hode -- uendret varslingssti (post=True);
+  2. INGEN åpen PR, men nøyaktig én MERGED PR på nøyaktig samme
+     deterministiske branch/base MED bekreftet APPROVED-review for
+     NETTOPP sitt eget eksakte head -- benign no-op (exit 0, intet
+     varsel postes; se `allerede_merget`-returverdien og
+     `already_merged`-CLI-outputen);
+  3. alt annet (0 PR-er, flere kandidater, MERGED uten matchende
+     APPROVED-review på sitt eget hode, osv.) -- uendret fail-closed
+     AVVISNING (exit 1). En vilkårlig MERGED PR teller ALDRI som bevis
+     alene -- den må være den ENE kandidaten på nøyaktig denne branchen
+     OG bære sin egen APPROVED-review for sitt eget eksakte head, samme
+     strenghet som den ÅPNE stien allerede krevde.
 """
 import json
 import re
@@ -152,6 +176,26 @@ def _apen_uslatt_pr_pa_branch(prs, branch_navn):
     return kandidater[0]
 
 
+def _merget_pr_pa_branch(prs, branch_navn):
+    """Issue #264: samme "eksakt én kandidat på nøyaktig denne branchen
+    mot master"-strenghet som `_apen_uslatt_pr_pa_branch`, men for
+    `state == "MERGED"`. Brukt UTELUKKENDE som det sekundære
+    "allerede merget"-sporet i `vurder_go_notify` når ingen ÅPEN PR
+    finnes -- aldri i stedet for OPEN-sjekken over, og aldri som bevis
+    alene (kalleren krever i tillegg en APPROVED-review for nøyaktig
+    denne PR-ens eget head via `_godkjent_review_for_head`, akkurat som
+    den åpne stien)."""
+    kandidater = [
+        pr for pr in (prs or [])
+        if pr.get("state") == "MERGED"
+        and pr.get("baseRefName") == "master"
+        and pr.get("headRefName") == branch_navn
+    ]
+    if len(kandidater) != 1:
+        return None
+    return kandidater[0]
+
+
 def _godkjent_review_for_head(pr_reviews, head_sha):
     for review in pr_reviews or []:
         commit = review.get("commit") or {}
@@ -162,22 +206,28 @@ def _godkjent_review_for_head(pr_reviews, head_sha):
 
 def vurder_go_notify(*, issue_nummer, issue_labels, prs, branch_navn, pr_reviews, eksisterende_kommentarer):
     """
-    Returnerer (post: bool, duplicate: bool, pr_nummer: int|None,
-    head_sha: str|None, kommentar: str|None, begrunnelse: str).
+    Returnerer (post: bool, duplicate: bool, allerede_merget: bool,
+    pr_nummer: int|None, head_sha: str|None, kommentar: str|None,
+    begrunnelse: str).
 
     ALT input her skal være FERSKT refetch'et av workflowen rett før
     kallet. Fail-closed: enhver uklarhet (feil/manglende livssyklus-
     etikett, null eller flere PR-kandidater, manglende head-SHA, ingen
     APPROVED-review for nettopp dette hodet) gir `post=False` uten
     unntak/krasj.
+
+    `allerede_merget=True` (issue #264) er en EGEN, ikke-fail-closed
+    suksess-avslutning: ingen åpen PR ble funnet, men nøyaktig én MERGED
+    PR på nøyaktig denne branchen bar sin egen bekreftede APPROVED-review
+    for sitt eget eksakte head -- se moduldocstringens "RASE-TILFELLET".
     """
     if issue_nummer is None:
-        return False, False, None, None, None, "Mangler issue-nummer -- avviser GO-varsling (fail-closed)."
+        return False, False, False, None, None, None, "Mangler issue-nummer -- avviser GO-varsling (fail-closed)."
 
     issue_labels = list(issue_labels or [])
     livssyklus_i_bruk = [e for e in issue_labels if e in LIVSSYKLUS_ETIKETTER]
     if livssyklus_i_bruk != ["status:approved"]:
-        return False, False, None, None, None, (
+        return False, False, False, None, None, None, (
             f"Issue #{issue_nummer} er ikke (lenger) eksklusivt status:approved "
             f"ved refetch (livssyklus-etiketter funnet: {livssyklus_i_bruk}) -- "
             "avviser GO-varsling (fail-closed)."
@@ -185,12 +235,31 @@ def vurder_go_notify(*, issue_nummer, issue_labels, prs, branch_navn, pr_reviews
 
     pr = _apen_uslatt_pr_pa_branch(prs, branch_navn)
     if pr is None:
+        # Issue #264 (run #512-rasen): mellom `status:approved`-refetchet
+        # som autoriserte denne jobben og DETTE refetchet kan eieren
+        # allerede ha merget nøyaktig den Chief-godkjente PR-en -- det er
+        # en suksess, ikke et hull. En vilkårlig MERGED PR er likevel
+        # ALDRI nok alene: den må være den ENE kandidaten på nøyaktig
+        # denne deterministiske branchen OG bære sin egen APPROVED-review
+        # for sitt eget eksakte head, samme strenghet som OPEN-sporet
+        # over. Alt annet faller uendret gjennom til fail-closed under.
+        merget_pr = _merget_pr_pa_branch(prs, branch_navn)
+        if merget_pr is not None:
+            merget_head = merget_pr.get("headRefOid")
+            if merget_head and _godkjent_review_for_head(pr_reviews, merget_head):
+                return False, False, True, merget_pr.get("number"), merget_head, None, (
+                    f"PR #{merget_pr.get('number')} på branch {branch_navn!r} er "
+                    f"allerede MERGED, med bekreftet APPROVED-review for nettopp "
+                    f"sitt eksakte head {merget_head} -- eier har allerede fullført "
+                    "merge. Ingen GO-varsling nødvendig (benign no-op, ikke en feil)."
+                )
+
         antall = len([
             p for p in (prs or [])
             if p.get("state") == "OPEN" and p.get("baseRefName") == "master"
             and p.get("headRefName") == branch_navn
         ])
-        return False, False, None, None, None, (
+        return False, False, False, None, None, None, (
             f"Fant ikke nøyaktig én åpen, uslått PR mot master på branch "
             f"{branch_navn!r} ved refetch (fant {antall}) -- avviser "
             "GO-varsling (fail-closed)."
@@ -199,25 +268,25 @@ def vurder_go_notify(*, issue_nummer, issue_labels, prs, branch_navn, pr_reviews
     pr_nummer = pr.get("number")
     head_sha = pr.get("headRefOid")
     if not head_sha:
-        return False, False, pr_nummer, None, None, (
+        return False, False, False, pr_nummer, None, None, (
             f"PR #{pr_nummer} mangler headRefOid ved refetch -- avviser GO-varsling (fail-closed)."
         )
 
     if not _godkjent_review_for_head(pr_reviews, head_sha):
-        return False, False, pr_nummer, head_sha, None, (
+        return False, False, False, pr_nummer, head_sha, None, (
             f"Fant ingen formell APPROVED-review for PR #{pr_nummer}s eksakte "
             f"live head {head_sha} ved refetch -- avviser GO-varsling (fail-closed)."
         )
 
     eksisterende = finn_eksisterende_markorer(eksisterende_kommentarer)
     if (int(issue_nummer), head_sha) in eksisterende:
-        return False, True, pr_nummer, head_sha, None, (
+        return False, True, False, pr_nummer, head_sha, None, (
             f"GO-varslingsmarkør for issue #{issue_nummer}/head {head_sha} "
             f"finnes allerede -- behandlet som idempotent no-op, ikke en feil."
         )
 
     kommentar = bygg_kommentar(issue_nummer, pr_nummer, head_sha)
-    return True, False, pr_nummer, head_sha, kommentar, (
+    return True, False, False, pr_nummer, head_sha, kommentar, (
         f"Issue #{issue_nummer} eksklusivt status:approved, PR #{pr_nummer} "
         f"(head {head_sha}) åpen/uslått med bekreftet APPROVED-review på "
         "nettopp dette hodet, ingen tidligere varslingsmarkør funnet -- postes."
@@ -238,7 +307,7 @@ def main(argv):
     if not isinstance(data, dict):
         data = {}
 
-    post, duplicate, pr_nummer, head_sha, kommentar, begrunnelse = vurder_go_notify(
+    post, duplicate, allerede_merget, pr_nummer, head_sha, kommentar, begrunnelse = vurder_go_notify(
         issue_nummer=data.get("issue_number"),
         issue_labels=data.get("issue_labels"),
         prs=data.get("prs"),
@@ -250,6 +319,7 @@ def main(argv):
     print(begrunnelse, file=sys.stderr)
     print(f"post={'true' if post else 'false'}")
     print(f"duplicate={'true' if duplicate else 'false'}")
+    print(f"already_merged={'true' if allerede_merget else 'false'}")
     if pr_nummer is not None:
         print(f"pr_number={pr_nummer}")
     if head_sha is not None:
@@ -264,6 +334,14 @@ def main(argv):
     if duplicate:
         # Idempotent no-op, not a failure: the exact (issue, head) marker
         # already exists, so there is nothing left to do.
+        return 0
+
+    if allerede_merget:
+        # Issue #264 (run #512 race): the verified, exact-head-approved
+        # PR was already merged by the owner before this job's own
+        # refetch. Success, not a failure -- there is nothing left to
+        # notify about, and no comment is posted since the owner already
+        # completed the merge that made this notification moot.
         return 0
 
     # Fail-closed rejection: live state no longer satisfies the notify
