@@ -452,6 +452,29 @@ jobs:
       # `--permission-mode acceptEdits`, or any other existing control.
       # See "Diagnose missing deliverable" below for the accompanying
       # diagnostics improvement.
+      #
+      # V1.8 (PÅ JOBB bot-actor allowlist fix): the PÅ JOBB queue
+      # dispatcher (.github/workflows/pa-jobb-queue.yml) starts this
+      # workflow via `gh workflow run claude-agent-bridge.yml -f ...`,
+      # authenticated with the job's own `GITHUB_TOKEN` -- so the
+      # resulting `workflow_dispatch` event's actor is the built-in
+      # `github-actions[bot]` identity, not a human. Run 34890311304 /
+      # job 104131119753 failed exactly here with `anthropics/claude-
+      # code-action@v1`'s own actor-verification step: "Workflow
+      # initiated by non-human actor: github-actions (type: Bot). Add
+      # bot to allowed_bots list or use '*' to allow all bots." --
+      # confirmed against the action's source (actor.ts): it strips the
+      # `[bot]` suffix and lowercases before comparing against
+      # `allowed_bots`, so `github-actions[bot]` normalizes to exactly
+      # `github-actions`. `allowed_bots` below allowlists ONLY that one
+      # normalized actor name -- not the `'*'` wildcard the action also
+      # supports, which would accept ANY bot actor GitHub might ever
+      # report here. This does not touch `--allowedTools`, the branch-
+      # scoped push/switch rules, `--permission-mode acceptEdits`, the
+      # trigger/label guards, or the human/manual `issues: labeled`
+      # trigger path -- a human sender never reaches this actor check at
+      # all (see actor.ts: "Human actors skip the allowlist check
+      # entirely").
       - name: Run Claude Code
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         id: claude
@@ -459,6 +482,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: github-actions
           additional_permissions: |
             workflows: write
           base_branch: master
