@@ -87,6 +87,20 @@
 <p class="hjelpetekst" data-i18n="brygg.intro">What you planned, what actually happened, and what you take with you.</p>
 <p class="hjelpetekst" data-i18n="brygg.localFirst">Your brew log is stored only in this browser.</p>
 <p class="hjelpetekst" data-i18n-html="brygg.tomLogg" hidden="" id="brygg-tom-melding">You do not have any brews yet. Open a recipe in the <a href="index.html">Recipe Builder</a> and press «🪓 Start brewing» when you are ready.</p>
+<div class="knapperad">
+<button data-i18n="brygg.importerKnapp" id="brygg-importer-knapp" type="button">📂 Import brew</button>
+</div>
+<input accept=".kbhbrew,application/json" hidden="" id="brygg-importer-input" type="file"/>
+<p aria-live="polite" class="hjelpetekst" hidden="" id="brygg-import-status"></p>
+</section>
+<section class="panel" hidden="" id="brygg-import-forhandsvisning-blokk">
+<h2 data-i18n="brygg.importForhandsvisningTittel">Import preview</h2>
+<p id="brygg-import-forhandsvisning-navn"></p>
+<p class="hjelpetekst" id="brygg-import-forhandsvisning-plan"></p>
+<div class="knapperad">
+<button data-i18n="brygg.importBekreftKnapp" id="brygg-import-bekreft" type="button">Import this brew</button>
+<button data-i18n="brygg.importAvbrytKnapp" id="brygg-import-avbryt" type="button">Cancel</button>
+</div>
 </section>
 <div hidden="" id="brygg-aktive-blokk">
 <section class="panel">
@@ -155,6 +169,7 @@
 <div class="knapperad brygg-handlinger">
 <button class="brygg-primar" type="button"></button>
 <button class="brygg-lagre-notat" hidden="" type="button"></button>
+<button class="brygg-eksporter" type="button"></button>
 <button class="brygg-forkast" type="button"></button>
 <button class="brygg-slett fjern-knapp" type="button">✕</button>
 </div>
@@ -170,6 +185,7 @@
 <span class="brygg-dom-merke"></span>
 <div class="utstyr-rad-handlinger">
 <button class="brygg-gjenapne utstyr-rad-rediger" type="button"></button>
+<button class="brygg-eksporter utstyr-rad-rediger" type="button"></button>
 <button class="utstyr-rad-slett brygg-slett" type="button"></button>
 </div>
 </li>

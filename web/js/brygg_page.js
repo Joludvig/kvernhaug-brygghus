@@ -356,6 +356,10 @@ function _byggKort(brew) {
     forkastKnapp.hidden = true;
   }
 
+  const eksporterKnapp = kort.querySelector(".brygg-eksporter");
+  eksporterKnapp.textContent = t("brygg.eksporterKnapp");
+  eksporterKnapp.addEventListener("click", () => _eksporterBrygg(brew));
+
   forkastKnapp.addEventListener("click", () => {
     if (!confirm(t("brygg.forkastConfirm"))) return;
     const res = oppdaterBrygg(brew.brewId, { status: "discarded" });
@@ -401,6 +405,9 @@ function _byggFerdigRad(brew) {
     if (!res.ok) return _visBryggVarsel(res.melding);
     visLogg(null, brew.brewId);
   });
+  const eksporter = li.querySelector(".brygg-eksporter");
+  eksporter.textContent = t("brygg.eksporterKnapp");
+  eksporter.addEventListener("click", () => _eksporterBrygg(brew));
   const slett = li.querySelector(".brygg-slett");
   slett.textContent = t("utstyr.slett");
   slett.addEventListener("click", () => {
@@ -409,6 +416,86 @@ function _byggFerdigRad(brew) {
     visLogg(null, null);
   });
   return li;
+}
+
+// ─── .kbhbrew fil-portabilitet (issue #275) ───────────────────────────────
+// Samme fil-mønster som pantry_page.js sin backup-blokk (Blob-nedlasting /
+// FileReader + skjult <input type="file">), men import er IKKE erstatt/
+// merge: brukeren ser en eksplisitt FORHÅNDSVISNING av det parsede brygget
+// og må trykke "Importer dette brygget" før noe skrives. Duplikat (samme
+// originBrewId) avvises av importerBrygg() selv (brew_storage.js) -- ingen
+// overskriving/sammenslåing her. En forkastet forhåndsvisning (avbryt, ny
+// fil, ugyldig fil) skriver aldri noe til lageret.
+
+function _bryggEksportFilnavn(brew) {
+  let navn = (visningsnavn(brew.snapshot.recipe.navn) || "Brygg").trim();
+  navn = navn.replace(/[\\/:*?"<>|]/g, "-").replace(/\s+/g, "-").replace(/-{2,}/g, "-").replace(/^-+|-+$/g, "");
+  if (!navn) navn = "Brygg";
+  const dato = String(brew.brewedAt || brew.createdAt || "").slice(0, 10) || new Date().toISOString().slice(0, 10);
+  return `Kvernhaug-Brygg-${navn}-${dato}`;
+}
+
+function _eksporterBrygg(brew) {
+  const blob = new Blob([JSON.stringify(byggKbhBrewInnhold(brew), null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${_bryggEksportFilnavn(brew)}.kbhbrew`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+let _ventendeImportBrew = null;
+
+function _visImportStatus(tekst) {
+  const el = document.getElementById("brygg-import-status");
+  if (!tekst) {
+    el.hidden = true;
+    return;
+  }
+  el.textContent = tekst;
+  el.hidden = false;
+}
+
+function _skjulImportForhandsvisning() {
+  _ventendeImportBrew = null;
+  document.getElementById("brygg-import-forhandsvisning-blokk").hidden = true;
+}
+
+function _visImportForhandsvisning(brew) {
+  _ventendeImportBrew = brew;
+  document.getElementById("brygg-import-forhandsvisning-navn").textContent =
+    visningsnavn(brew.snapshot.recipe.navn) || t("identitet.utenNavn");
+  document.getElementById("brygg-import-forhandsvisning-plan").textContent = _planTekst(brew);
+  document.getElementById("brygg-import-forhandsvisning-blokk").hidden = false;
+}
+
+function _handleImporterBryggFil(fil) {
+  _skjulImportForhandsvisning();
+  const reader = new FileReader();
+  reader.onload = () => {
+    const resultat = parseKbhBrewInnhold(reader.result);
+    if (!resultat.ok) {
+      _visImportStatus(resultat.melding);
+      return;
+    }
+    _visImportStatus(null);
+    _visImportForhandsvisning(resultat.brew);
+  };
+  reader.onerror = () => _visImportStatus(t("brygg.lesefeil"));
+  reader.readAsText(fil);
+}
+
+function _bekreftImportBrygg() {
+  if (!_ventendeImportBrew) return;
+  const res = importerBrygg(_ventendeImportBrew);
+  if (!res.ok) {
+    _visImportStatus(res.melding);
+    return;
+  }
+  _skjulImportForhandsvisning();
+  visLogg(null, null);
+  _visImportStatus(t("brygg.importertStatus"));
 }
 
 // ─── Hovedvisning ─────────────────────────────────────────────────────────
@@ -479,5 +566,19 @@ function init() {
 
 document.addEventListener("kvernhaug:enhetendret", () => visLogg(null, null));
 window.addEventListener("kvernhaug:sprakendret", () => visLogg(null, null));
+
+document.getElementById("brygg-importer-knapp").addEventListener("click", () => {
+  document.getElementById("brygg-importer-input").click();
+});
+document.getElementById("brygg-importer-input").addEventListener("change", () => {
+  const input = document.getElementById("brygg-importer-input");
+  if (input.files[0]) _handleImporterBryggFil(input.files[0]);
+  input.value = "";
+});
+document.getElementById("brygg-import-bekreft").addEventListener("click", _bekreftImportBrygg);
+document.getElementById("brygg-import-avbryt").addEventListener("click", () => {
+  _skjulImportForhandsvisning();
+  _visImportStatus(null);
+});
 
 init();
