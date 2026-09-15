@@ -83,6 +83,22 @@
     <p class="hjelpetekst" data-i18n="brygg.intro">Hva du planla, hva som faktisk skjedde, og hva du tar med videre.</p>
     <p class="hjelpetekst" data-i18n="brygg.localFirst">Bryggeloggen lagres bare i denne nettleseren.</p>
     <p class="hjelpetekst" id="brygg-tom-melding" data-i18n-html="brygg.tomLogg" hidden>Du har ingen brygg ennå. Åpne en oppskrift i <a href="index.html">Oppskriftsbyggeren</a> og trykk «🪓 Start brygging» når du er klar.</p>
+
+    <div class="knapperad">
+      <button type="button" id="brygg-importer-knapp" data-i18n="brygg.importerKnapp">📂 Importer brygg</button>
+    </div>
+    <input type="file" id="brygg-importer-input" accept=".kbhbrew,application/json" hidden>
+    <p class="hjelpetekst" id="brygg-import-status" aria-live="polite" hidden></p>
+  </section>
+
+  <section class="panel" id="brygg-import-forhandsvisning-blokk" hidden>
+    <h2 data-i18n="brygg.importForhandsvisningTittel">Forhåndsvisning av import</h2>
+    <p id="brygg-import-forhandsvisning-navn"></p>
+    <p class="hjelpetekst" id="brygg-import-forhandsvisning-plan"></p>
+    <div class="knapperad">
+      <button type="button" id="brygg-import-bekreft" data-i18n="brygg.importBekreftKnapp">Importer dette brygget</button>
+      <button type="button" id="brygg-import-avbryt" data-i18n="brygg.importAvbrytKnapp">Avbryt</button>
+    </div>
   </section>
 
   <div id="brygg-aktive-blokk" hidden>
@@ -162,6 +178,7 @@
     <div class="knapperad brygg-handlinger">
       <button type="button" class="brygg-primar"></button>
       <button type="button" class="brygg-lagre-notat" hidden></button>
+      <button type="button" class="brygg-eksporter"></button>
       <button type="button" class="brygg-forkast"></button>
       <button type="button" class="brygg-slett fjern-knapp">✕</button>
     </div>
@@ -178,6 +195,7 @@
     <span class="brygg-dom-merke"></span>
     <div class="utstyr-rad-handlinger">
       <button type="button" class="brygg-gjenapne utstyr-rad-rediger"></button>
+      <button type="button" class="brygg-eksporter utstyr-rad-rediger"></button>
       <button type="button" class="utstyr-rad-slett brygg-slett"></button>
     </div>
   </li>
