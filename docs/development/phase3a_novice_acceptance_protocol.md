@@ -23,10 +23,15 @@ existing Playwright coverage in `tests/playwright/02-mode-dialog.spec.js`,
 Phase 3A that automation can prove — the same-recipe Learner/Master task, a
 full L→M→L→M persistence cycle, a genuine Master-only advanced-control
 witness (hop grams from target IBU), NO+EN, desktop+mobile, zero console
-errors — against content independently verified to be byte-identical to what
-is live in production. That document's own §8 drafted a first script for the
-one thing automation explicitly cannot prove: a real novice using Learner
-mode with no oral coaching. **This document supersedes that draft (§8) as the
+errors — against content that was, at the time of that verification, checked
+byte-identical to what was then live in production. That check was a
+snapshot scoped to #250's own run; it is not a standing claim about
+today's production — see §3's build-under-test rule for how *this*
+protocol establishes what is actually being tested in each new session.
+
+That document's own §8 drafted a first script for the one thing automation
+explicitly cannot prove: a real novice using Learner mode with no oral
+coaching. **This document supersedes that draft (§8) as the
 canonical, repeatable protocol** — it keeps its core task statement (still
 accurate against current source) but restructures it to satisfy issue #278's
 full 12-point specification, adds explicit decision rules, an evidence
@@ -78,11 +83,29 @@ asserted in code.
 ## 3. Environment and device assumptions
 
 - **Required**: one desktop or laptop browser session (any of Chrome,
-  Firefox, Edge, Safari), Norwegian UI, on the live product
-  (`https://kvernhaugbrygghus.no`) or an equivalent up-to-date local build —
-  whichever the owner can hand the participant with the least friction.
-  Desktop is required because it is the lowest-friction environment to
-  observe someone in real time; it is not a claim that mobile doesn't matter.
+  Firefox, Edge, Safari), Norwegian UI. Desktop is required because it is
+  the lowest-friction environment to observe someone in real time; it is
+  not a claim that mobile doesn't matter.
+- **Build-under-test rule (fail closed)**: in this project a merge to
+  `master` does not mean deployed/live — `master` can and does advance
+  ahead of the last confirmed production deploy. A novice run against a
+  stale production build must never be allowed to clear a current-`master`
+  Phase 3A gate.
+  - **Default**: run the session against a local build checked out at the
+    exact `master` commit the gate is being claimed for (record that git
+    SHA — see §8). This is always valid and requires no extra verification.
+  - **Live production** (`https://kvernhaugbrygghus.no`) may be used
+    *instead* of a local build only if the tester first independently
+    verifies — for that specific session, not from memory of an older
+    check — that the deployed release is equivalent to the target/current
+    `master` for every surface this protocol exercises (mode dialog,
+    Learner guidance panel, save/draft flow, start-brygging action, the
+    Master-only hop control). If that verification is not done, or fails,
+    use the local build instead — do not proceed on production "probably
+    being close enough."
+  - Record the exact tested build in the evidence template (§8): either
+    the local git SHA, or, for a production run, the verified-equivalent
+    `master` SHA plus how equivalence was confirmed.
 - **Optional, not required for this round**: a mobile/touch device repeat.
   The existing automated matrix already exercises 390×844 mechanically
   (layout, overflow, console errors) in both browsers — see
@@ -239,6 +262,7 @@ passed.
 | Participant familiarity with Kvernhaug Brygghus (must be none/minimal) | |
 | Language used | NO (default) / EN |
 | Device/browser | |
+| Build tested (§3): local git SHA, or production + verified-equivalent `master` SHA and how equivalence was confirmed | |
 | Start time | |
 | End time (or abandonment time) | |
 | Mode chosen at first-visit dialog | Learner / Master / unclear-dismiss |
