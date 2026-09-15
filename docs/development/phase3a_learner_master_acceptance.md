@@ -284,9 +284,17 @@ PASS`.
 Per #250 and Roadmap #101 item 5, **at least one real novice must use
 Learner mode with no oral coaching before any "novice-ready" claim.** This
 was NOT performed in this session (automation cannot substitute for it, and
-#250 explicitly forbids claiming novice-ready without it). What follows is
-the prepared script and observation sheet for the owner (or a delegate) to
-run with a real person.
+#250 explicitly forbids claiming novice-ready without it). What follows was
+the first prepared script and observation sheet for this gate.
+
+**Superseded (issue #278):** the canonical, repeatable protocol for this gate
+is now
+[`docs/development/phase3a_novice_acceptance_protocol.md`](phase3a_novice_acceptance_protocol.md) —
+it keeps this section's task statement (still accurate against current
+source) but adds participant/environment criteria, explicit
+PASS/CONDITIONAL PASS/FAIL rules, an evidence template, and folds in the
+owner's own L→M→L→M/Master-control mechanical confirmation. Run that
+document, not this section, for any future novice session.
 
 ### 8.1 Participant requirements
 
