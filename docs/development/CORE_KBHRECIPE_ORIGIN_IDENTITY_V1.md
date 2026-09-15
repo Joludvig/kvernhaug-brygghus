@@ -357,8 +357,12 @@ document).
 ### 3.3 Export rule
 
 A canonical `.kbhrecipe` writer includes `originRecipeId` in every
-export once the recipe has one (i.e., after the first export under
-this contract). `recipeId` continues to never appear (§7, unchanged).
+export once the recipe has one, per §3.2's per-surface minting point:
+for Web, that is any export from the first *save* onward (the field is
+already present before the first export happens, since Web mints at
+save time); for App, that is any export from the first *export*
+onward (App has no earlier point to mint at). `recipeId` continues to
+never appear (§7, unchanged).
 
 ### 3.4 Import / duplicate-detection rule
 
@@ -421,8 +425,9 @@ field's passthrough behavior is completely unchanged by this document.
   same content."
 - No writer ever accepts an externally-supplied `originRecipeId`
   override on a plain edit (§3.2's last bullet) — the only two ways
-  `originRecipeId` is ever set are "mint at first export" (§3.2) and
-  "carry forward from an imported file" (§3.4).
+  `originRecipeId` is ever set are "mint at creation, per §3.2's
+  per-surface rule" (Web: first save; App: first export) and "carry
+  forward from an imported file" (§3.4).
 - **This document deliberately does not adopt `.kbhbrew`'s
   reject-on-missing-origin reader policy** (§1.5's App behavior) for
   `.kbhrecipe` — see §2.5 for why that asymmetry is required, not an
@@ -585,19 +590,40 @@ round, §8).
 
 ## 8. Migration / non-migration policy
 
-**No migration is performed or proposed.** No existing recipe file, on
-either App's local disk store or Web's `localStorage`, is rewritten by
-this document or by adopting this contract. `originRecipeId` is minted
-**lazily, on-demand, only at the next explicit user-triggered export**
-(§3.2) — exactly the mechanism [KBH_CORE_CONTRACT_V1.md](KBH_CORE_CONTRACT_V1.md)
-§6 already specified for App's never-built `recipe_id` ("this happens
-only on an explicit, user-triggered export... it never happens as a
-background migration"), reused verbatim for `originRecipeId`. There is
-no batch rewrite of `recipes/*.json`, no forced re-save prompt, and no
-schema migration for `recipeSchemaVersion` or the envelope `version`.
-A recipe that is never re-exported after this contract lands simply
-never gains an `originRecipeId` — this is an accepted, permanent
-steady state, not a temporary gap requiring cleanup.
+**No migration is performed or proposed, for any existing record on
+either surface.** No existing recipe file, on either App's local disk
+store or Web's `localStorage`, is rewritten by this document or by
+adopting this contract. There is no batch rewrite of `recipes/*.json`,
+no forced re-save prompt, no rewrite of any existing Web `localStorage`
+entry, and no schema migration for `recipeSchemaVersion` or the
+envelope `version`. This "no background migration" rule applies
+identically to both surfaces — it governs *existing, already-stored*
+recipes only, never a bulk rewrite of what is already on disk/in
+storage.
+
+Whether, and when, a **genuinely new or freshly-edited** record first
+gains an `originRecipeId` is governed by §3.2's per-surface minting
+rule, not by a single shared trigger — the two surfaces differ because
+only Web has a local `recipeId` to default from:
+
+- **Web**: gains `originRecipeId` at the recipe's next **save** —
+  including the very first save of a brand-new recipe, and (per §3.2's
+  "default to the existing local `recipeId`" rule) the next save of an
+  existing recipe that predates this contract. A Web recipe that is
+  saved but never re-exported still gains `originRecipeId` at that
+  save; it does not wait for an export to happen.
+- **App**: gains `originRecipeId` only at the next explicit,
+  user-triggered **export** (§3.2, reusing
+  [KBH_CORE_CONTRACT_V1.md](KBH_CORE_CONTRACT_V1.md) §6's never-built
+  rule verbatim: "this happens only on an explicit, user-triggered
+  export... it never happens as a background migration") — App has no
+  earlier save-time hook to mint at, since it has no local `recipeId`
+  to default from (§1.2/§2.3).
+
+A recipe that is never saved again (Web) or never re-exported (App)
+after this contract lands simply never gains an `originRecipeId` —
+this is an accepted, permanent steady state on both surfaces, not a
+temporary gap requiring cleanup.
 
 ---
 
@@ -640,6 +666,13 @@ steady state, not a temporary gap requiring cleanup.
   phase3c brief's own Recommendation B claims (§3.9 found one
   imprecision, corrected here) rather than treating that brief as
   authoritative without re-checking. `pip install -r requirements.txt`
-  was run to confirm the test environment installs cleanly; no test
-  was run against product code since none was changed, and no test
-  file was touched by this document.
+  was run to confirm the test environment installs cleanly.
+- No product file, fixture, or test file is created or modified by
+  this document (docs-only round) — the test runs below are read-only
+  regression verification, not evidence of a product-code change.
+  Focused: `python3 -m unittest tests.test_kbh_contract
+  tests.test_kbh_import tests.test_kbhbrew_schema_contract
+  tests.test_kbhbrew_storage_identity -b` — 142 tests, OK. Full suite:
+  `python3 -m unittest discover -s tests -b` — 2548 tests, OK (53
+  skipped). Both runs confirm this document introduces no regression,
+  matching the PR's own report.
