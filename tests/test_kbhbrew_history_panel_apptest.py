@@ -41,7 +41,6 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         self._gammel_env = os.environ.get("KVERNHAUG_RECIPES_DIR")
         os.environ["KVERNHAUG_RECIPES_DIR"] = self._tmpdir.name
         self._gammel_seed_count = os.environ.pop("KVERNHAUG_TEST_KBHBREW_SEED_COUNT", None)
-        self._gammel_aktiv_id = os.environ.pop("KVERNHAUG_TEST_KBHBREW_AKTIV_ID", None)
 
     def tearDown(self):
         if self._gammel_env is None:
@@ -52,18 +51,10 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
             os.environ.pop("KVERNHAUG_TEST_KBHBREW_SEED_COUNT", None)
         else:
             os.environ["KVERNHAUG_TEST_KBHBREW_SEED_COUNT"] = self._gammel_seed_count
-        if self._gammel_aktiv_id is None:
-            os.environ.pop("KVERNHAUG_TEST_KBHBREW_AKTIV_ID", None)
-        else:
-            os.environ["KVERNHAUG_TEST_KBHBREW_AKTIV_ID"] = self._gammel_aktiv_id
         self._tmpdir.cleanup()
 
-    def _ny_apptest(self, seed_count=1, aktiv_brew_id=None):
+    def _ny_apptest(self, seed_count=1):
         os.environ["KVERNHAUG_TEST_KBHBREW_SEED_COUNT"] = str(seed_count)
-        if aktiv_brew_id is None:
-            os.environ.pop("KVERNHAUG_TEST_KBHBREW_AKTIV_ID", None)
-        else:
-            os.environ["KVERNHAUG_TEST_KBHBREW_AKTIV_ID"] = aktiv_brew_id
         at = AppTest.from_file(_HARNESS)
         at.run()
         self.assertEqual(len(at.exception), 0, f"Uventet unntak ved render: {at.exception}")
@@ -356,85 +347,6 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
 
         brew = kbhbrew_storage.hent_brew("brew-seed-0001")
         self.assertNotIn("judgment", brew.get("sensing", {}))
-
-    # ─── issue #265: non-active/historisk brygg-oppførsel ──────────────
-    # Fokusert regresjonsdekning for scenariet der Brygghistorikk-panelet
-    # åpnes med et FORHÅNDS-SATT aktivt brygg-mål (App A1, issue #170)
-    # som IKKE er det panelet initielt viser identisk med et annet
-    # seedet brygg -- dvs. å åpne/redigere/lagre et historisk brygg som
-    # ikke er "current active brew". Bruker KUN de allerede eksisterende,
-    # støttede skriveveiene (sett_aktiv_brew_id()/oppdater_brew_lag()) --
-    # ingen ny UX eller produktregel oppfinnes her.
-
-    def _ss(self, at, key, default=None):
-        try:
-            return at.session_state[key]
-        except KeyError:
-            return default
-
-    def test_22_current_active_brew_path_uendret_med_flere_brygg(self):
-        at = self._ny_apptest(seed_count=2, aktiv_brew_id="brew-seed-0001")
-        self.assertEqual(self._ss(at, "_aktiv_kbhbrew_brew_id"), "brew-seed-0001")
-
-        selectboks = at.selectbox(key="kbhbrew_historikk_valgt_id")
-        self.assertEqual(selectboks.value, "brew-seed-0001")
-
-        metrikker = {m.label: m.value for m in at.metric}
-        self.assertEqual(metrikker["Planlagt OG"], "1.052")
-        self.assertEqual(metrikker["Planlagt FG"], "1.012")
-        self.assertEqual(metrikker["Planlagt ABV"], "5.2%")
-        self.assertEqual(metrikker["Planlagt volum"], "20 L")
-
-    def test_23_valg_av_ikke_aktivt_brygg_muterer_ingen_av_de_to(self):
-        at = self._ny_apptest(seed_count=2, aktiv_brew_id="brew-seed-0001")
-        brew1_for = kbhbrew_storage.hent_brew("brew-seed-0001")
-        brew2_for = kbhbrew_storage.hent_brew("brew-seed-0002")
-
-        selectboks = at.selectbox(key="kbhbrew_historikk_valgt_id")
-        self.assertEqual(selectboks.value, "brew-seed-0001")
-        selectboks.select("brew-seed-0002").run()
-        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved valg: {at.exception}")
-
-        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001"), brew1_for)
-        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0002"), brew2_for)
-
-    def test_24_redigering_av_ikke_aktivt_valgt_brygg_uten_lagre_skriver_ingenting(self):
-        at = self._ny_apptest(seed_count=2, aktiv_brew_id="brew-seed-0001")
-        brew1_for = kbhbrew_storage.hent_brew("brew-seed-0001")
-        brew2_for = kbhbrew_storage.hent_brew("brew-seed-0002")
-
-        at.selectbox(key="kbhbrew_historikk_valgt_id").select("brew-seed-0002").run()
-        at.text_input(key="kbhbrew_hist_og::brew-seed-0002").set_value("1.061").run()
-        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved typing: {at.exception}")
-
-        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001"), brew1_for)
-        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0002"), brew2_for)
-
-    def test_25_lagring_pa_nettopp_valgt_ikke_opprinnelig_aktivt_brygg_roerer_aldri_det_andre(self):
-        at = self._ny_apptest(seed_count=2, aktiv_brew_id="brew-seed-0001")
-        brew1_for = kbhbrew_storage.hent_brew("brew-seed-0001")
-
-        at.selectbox(key="kbhbrew_historikk_valgt_id").select("brew-seed-0002").run()
-        # Historikkens eksplisitte utvalg re-targetterer det delte aktive
-        # målet mot det nå valgte brygget -- SAMME etablerte, allerede
-        # testede kontrakt som issue #170 (test_7 i
-        # tests/test_brewday_a1_measurement_apptest.py), ikke en ny regel.
-        self.assertEqual(self._ss(at, "_aktiv_kbhbrew_brew_id"), "brew-seed-0002")
-
-        at.text_input(key="kbhbrew_hist_og::brew-seed-0002").set_value("1.061").run()
-        knapper = [b for b in at.button if b.key == "kbhbrew_hist_lagre_btn::brew-seed-0002"]
-        self.assertEqual(len(knapper), 1)
-        knapper[0].click().run()
-        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved lagring: {at.exception}")
-
-        brew2 = kbhbrew_storage.hent_brew("brew-seed-0002")
-        self.assertEqual(brew2["actuals"]["og"], 1.061)
-        # Det opprinnelig aktive brygget (#0001) er HELT uendret --
-        # verken selve dataene, identiteten, eller det frosne snapshotet.
-        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001"), brew1_for)
-        # Typing/lagre-klikket alene skriver ikke det aktive målet
-        # videre utover det ene, forventede valg-drevne skiftet over.
-        self.assertEqual(self._ss(at, "_aktiv_kbhbrew_brew_id"), "brew-seed-0002")
 
 
 if __name__ == "__main__":

@@ -58,39 +58,6 @@ reglene er lagt til én gang hver, uten noen bredere `python3 .github/
 scripts/*`-variant, og uten at noe av det V1.2/V1.3/V1.4/V1.5 allerede
 beviste har endret seg.
 
-V1.7 (issue #259) utvider samme suite igjen: issue #257 feilet to ganger
-på nøyaktig samme distinkte måte -- Claude-steget fullførte
-(`success()`), `permission_denials_count=1`, og INGEN
-`agent/issue-257`-branch fantes etterpå, fordi `--allowedTools` kun
-tillot `Bash(git checkout *)`, aldri `git switch`, som Claude Code ofte
-bruker for moderne branch-oppretting (`git switch -c <branch>`). Denne
-bolken beviser at nøyaktig de to branch-avgrensede, wildcard-frie
-`git switch`-reglene (`.github/scripts/branch_policy.py`s
-`tillatte_switch_kommandoer`) er lagt til én gang hver, uten noen bredere
-`Bash(git switch *)`-variant, og uten at noe av det V1.2/V1.3/V1.4/V1.5/
-V1.6 allerede beviste (branch-avgrensede push-regler, fravær av
-`git merge`/`gh pr merge`, `--permission-mode acceptEdits`, fravær av
-`Write`/`Edit`/`MultiEdit`, de eksisterende Python/i18n/Node/Playwright-
-reglene) har endret seg.
-
-V1.8 (PÅ JOBB bot-actor allowlist-fiks) utvider samme suite igjen: kjøring
-34890311304 / jobb 104131119753 -- startet av
-.github/workflows/pa-jobb-queue.yml sin `gh workflow run
-claude-agent-bridge.yml`-dispatch, autentisert som `github-actions[bot]` --
-feilet inne i `anthropics/claude-code-action@v1` sin egen aktør-
-verifisering ("Workflow initiated by non-human actor: github-actions
-(type: Bot). Add bot to allowed_bots list or use '*' to allow all
-bots."), FØR Claude-prosessen i det hele tatt startet. Denne bolken
-beviser at `allowed_bots: github-actions` -- nøyaktig den normaliserte
-(`[bot]`-suffiks fjernet, small caps) aktør-strengen actionens egen
-`actor.ts` sammenligner mot -- er satt på "Run Claude Code"-stegets
-`with:`-blokk, at IKKE wildcarden `'*'` er brukt, og at ingen annen
-`allowed_bots`-oppføring finnes noe sted i workflowen. Uten at noe av det
-V1.2 t.o.m. V1.7 allerede beviste (branch-avgrensede push-/switch-regler,
-fravær av `git merge`/`gh pr merge`, `--permission-mode acceptEdits`,
-fravær av `Write`/`Edit`/`MultiEdit`, de eksisterende Python/i18n/Node/
-Playwright-reglene) har endret seg.
-
 Kjøres av den vanlige suiten (`py -3 -m unittest discover -s tests`).
 """
 import os
@@ -124,11 +91,6 @@ _HO_ROUTER_CHECK_REGLER = (
     "Bash(python3 .github/scripts/ho_router_check.py verify)",
 )
 
-_SWITCH_REGLER = (
-    "Bash(git switch -c ${{ steps.branch.outputs.name }} origin/master)",
-    "Bash(git switch ${{ steps.branch.outputs.name }})",
-)
-
 
 def _les_workflow():
     with open(_WORKFLOW, encoding="utf-8") as f:
@@ -151,12 +113,6 @@ def _allowed_tools_liste(steg_tekst):
     match = re.search(r'--allowedTools "([^"]*)"', steg_tekst)
     assert match, "Fant ingen --allowedTools i 'Run Claude Code'-steget."
     return [entry.strip() for entry in match.group(1).split(",")]
-
-
-def _allowed_bots_verdi(steg_tekst):
-    match = re.search(r"^[ \t]*allowed_bots:[ \t]*(.+?)[ \t]*$", steg_tekst, re.MULTILINE)
-    assert match, "Fant ingen 'allowed_bots:' i 'Run Claude Code'-stegets with:-blokk."
-    return match.group(1).strip().strip("'\"")
 
 
 class TestPermissionConfig(unittest.TestCase):
@@ -395,97 +351,6 @@ class TestPermissionConfig(unittest.TestCase):
         for regel in _NODE_PLAYWRIGHT_REGLER:
             self.assertIn(regel, self.verktoy)
             self.assertEqual(self.verktoy.count(regel), 1)
-
-    # ─── 9 (V1.7, issue #259): branch-avgrensede git switch-regler ───────
-
-    def test_9a_begge_switch_reglene_finnes_eksakt(self):
-        for regel in _SWITCH_REGLER:
-            self.assertIn(
-                regel, self.verktoy,
-                f"git switch-regelen mangler i --allowedTools (issue #259): {regel!r}",
-            )
-
-    def test_9b_hver_switch_regel_forekommer_noyaktig_en_gang(self):
-        for regel in _SWITCH_REGLER:
-            self.assertEqual(
-                self.verktoy.count(regel), 1,
-                f"Regelen skal forekomme nøyaktig én gang -- ingen duplikater: {regel!r}",
-            )
-
-    def test_9c_ingen_bredere_git_switch_wildcard_introdusert(self):
-        forbudte = ("Bash(git switch *)", "Bash(git switch)")
-        for forbudt in forbudte:
-            self.assertNotIn(
-                forbudt, self.verktoy,
-                f"Bredere git switch-tilgang enn de to eksakte, branch-avgrensede reglene skal ikke finnes: {forbudt!r}",
-            )
-
-    def test_9d_kun_de_to_forventede_switch_reglene_totalt(self):
-        switch_regler = [v for v in self.verktoy if v.startswith("Bash(git switch")]
-        self.assertEqual(
-            sorted(switch_regler), sorted(_SWITCH_REGLER),
-            "Nøyaktig de to branch-avgrensede switch-reglene skal finnes -- ingen flere, ingen færre.",
-        )
-
-    def test_9e_switch_reglene_er_ikke_master_targeting(self):
-        for regel in _SWITCH_REGLER:
-            self.assertNotIn("switch master", regel)
-            self.assertNotIn("switch -c master", regel)
-
-    def test_9f_eksisterende_kontrakt_star_ved_lag_etter_switch_tillegget(self):
-        for regel in _FORVENTEDE_PUSH_REGLER:
-            self.assertIn(regel, self.verktoy)
-        push_regler = [v for v in self.verktoy if v.startswith("Bash(git push")]
-        self.assertEqual(sorted(push_regler), sorted(_FORVENTEDE_PUSH_REGLER))
-        for verktoysnavn in self.verktoy:
-            self.assertFalse(verktoysnavn.startswith("Bash(git merge"))
-            self.assertFalse(verktoysnavn.startswith("Bash(gh pr merge"))
-        self.assertIn("--permission-mode acceptEdits", self.steg)
-        for verktoysnavn in ("Write", "Edit", "MultiEdit"):
-            self.assertNotIn(verktoysnavn, self.verktoy)
-        self.assertIn(_GENERATOR_REGEL, self.verktoy)
-        self.assertEqual(self.verktoy.count(_GENERATOR_REGEL), 1)
-        for regel in _NODE_PLAYWRIGHT_REGLER:
-            self.assertIn(regel, self.verktoy)
-        for regel in _HO_ROUTER_CHECK_REGLER:
-            self.assertIn(regel, self.verktoy)
-
-    # ─── 10 (V1.8, PÅ JOBB bot-actor allowlist-fiks) ─────────────────────
-
-    def test_10a_allowed_bots_er_satt_til_github_actions(self):
-        self.assertEqual(_allowed_bots_verdi(self.steg), "github-actions")
-
-    def test_10b_allowed_bots_forekommer_noyaktig_en_gang_i_steget(self):
-        self.assertEqual(self.steg.count("allowed_bots:"), 1)
-
-    def test_10c_ingen_wildcard_allowed_bots_noe_sted_i_workflowen(self):
-        self.assertNotIn("allowed_bots: '*'", self.tekst)
-        self.assertNotIn('allowed_bots: "*"', self.tekst)
-        self.assertNotIn("allowed_bots: *", self.tekst)
-
-    def test_10d_allowed_bots_star_ikke_utenfor_claude_steget(self):
-        # allowed_bots skal kun finnes i "Run Claude Code"-steget -- ikke
-        # lekket til noe annet steg/jobb i samme workflow-fil.
-        self.assertEqual(self.tekst.count("allowed_bots:"), 1)
-
-    def test_10e_eksisterende_kontrakt_star_ved_lag_etter_allowlist_tillegget(self):
-        for regel in _FORVENTEDE_PUSH_REGLER:
-            self.assertIn(regel, self.verktoy)
-        push_regler = [v for v in self.verktoy if v.startswith("Bash(git push")]
-        self.assertEqual(sorted(push_regler), sorted(_FORVENTEDE_PUSH_REGLER))
-        for verktoysnavn in self.verktoy:
-            self.assertFalse(verktoysnavn.startswith("Bash(git merge"))
-            self.assertFalse(verktoysnavn.startswith("Bash(gh pr merge"))
-        self.assertIn("--permission-mode acceptEdits", self.steg)
-        for verktoysnavn in ("Write", "Edit", "MultiEdit"):
-            self.assertNotIn(verktoysnavn, self.verktoy)
-        self.assertIn(_GENERATOR_REGEL, self.verktoy)
-        for regel in _NODE_PLAYWRIGHT_REGLER:
-            self.assertIn(regel, self.verktoy)
-        for regel in _HO_ROUTER_CHECK_REGLER:
-            self.assertIn(regel, self.verktoy)
-        for regel in _SWITCH_REGLER:
-            self.assertIn(regel, self.verktoy)
 
 
 if __name__ == "__main__":

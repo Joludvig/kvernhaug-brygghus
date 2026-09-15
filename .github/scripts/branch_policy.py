@@ -73,28 +73,6 @@ def tillatte_push_kommandoer(branch_navn):
     )
 
 
-def tillatte_switch_kommandoer(branch_navn):
-    """V1.7 (issue #259): to eksakte `git switch`-strenger, samme
-    avgrensning som `tillatte_push_kommandoer` -- Claude Code bruker ofte
-    moderne `git switch -c <branch>` for branch-oppretting selv når en
-    prompt foreslår `git checkout -b`. Issue #257 feilet to ganger i
-    nøyaktig dette mønsteret: prosessen fullførte, men
-    `permission_denials_count=1` og INGEN `agent/issue-257`-branch fantes
-    etterpå -- fordi `--allowedTools` kun tillot `git checkout *`, aldri
-    `git switch`. Samme wildcard-frie logikk som push-reglene: siden
-    `branch_navn` aldri kan bli MASTER, kan ingen variant av disse to
-    strengene noensinne bytte til/opprette en lokal branch ved navn
-    "master". (Selve push-grensen håndheves fortsatt utelukkende av
-    `tillatte_push_kommandoer` -- denne funksjonen gjør kun branch-
-    oppsettet robust, ikke push-policyen.)"""
-    if branch_navn == MASTER:
-        raise ValueError("branch_navn kan aldri være 'master' -- det ville brutt hele poenget med denne modulen.")
-    return (
-        f"git switch -c {branch_navn} origin/master",
-        f"git switch {branch_navn}",
-    )
-
-
 def gh_pr_list_args(repo, branch_navn):
     """De eksakte argumentene workflowen sender til `gh pr list` for å
     finne PR-en assosiert med denne branchen -- selve

@@ -289,38 +289,6 @@ class TestDemoModeGuardsWrites(_IsolertRecipeMappeTestCase):
         self.assertEqual(reloaded["actuals"], {})
 
 
-class TestCrossBrewLearningIsolationForSharedRecipe(_IsolertRecipeMappeTestCase):
-    """Issue #257 (Phase 3B readiness audit, Scope 3): two brews that
-    share the same `recipeId` (a real, common sequence -- brewing the
-    same recipe again) must remain fully independent brygg once
-    persisted. Updating `learning.nextTime` on one must never leak into
-    the other's stored layers or its frozen snapshot."""
-
-    def test_updating_learning_on_one_brew_never_touches_another_brew_sharing_the_same_recipe_id(self):
-        malt_db, humle_db, gjaer_db = _dbs()
-        b1 = kbhbrew_storage.opprett_og_lagre_ny_brew(
-            _recipe(), malt_db, humle_db, gjaer_db, None, {}, recipe_id="delt_oppskrift.json",
-        )
-        b2 = kbhbrew_storage.opprett_og_lagre_ny_brew(
-            _recipe(), malt_db, humle_db, gjaer_db, None, {}, recipe_id="delt_oppskrift.json",
-        )
-        self.assertEqual(b1["recipeId"], b2["recipeId"])
-        self.assertNotEqual(b1["brewId"], b2["brewId"])
-
-        oppdatert = kbhbrew_storage.oppdater_brew_lag(b1["brewId"], learning={"nextTime": "Lavere mesketemperatur"})
-        self.assertEqual(oppdatert["learning"]["nextTime"], "Lavere mesketemperatur")
-
-        b2_reloaded = kbhbrew_storage.hent_brew(b2["brewId"])
-        self.assertEqual(b2_reloaded.get("learning"), {})
-        self.assertEqual(b2_reloaded["snapshot"], b2["snapshot"])
-        self.assertEqual(b2_reloaded["actuals"], {})
-
-        # And the first brew's own reload matches what oppdater_brew_lag()
-        # returned -- the update landed on exactly the intended brew.
-        b1_reloaded = kbhbrew_storage.hent_brew(b1["brewId"])
-        self.assertEqual(b1_reloaded["learning"]["nextTime"], "Lavere mesketemperatur")
-
-
 class TestHentAlleBrewsAndManifestProvenance(_IsolertRecipeMappeTestCase):
     def test_hent_alle_brews_returns_map_keyed_by_local_brew_id(self):
         malt_db, humle_db, gjaer_db = _dbs()

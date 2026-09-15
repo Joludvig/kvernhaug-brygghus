@@ -11,20 +11,6 @@
 # opprette et NYTT duplikat-brygg ved hver AppTest-rerun (knappeklikk
 # kjører HELE dette skriptet på nytt) -- samme "aldri dobbel-seed"-
 # forsiktighet som andre AppTest-harnesser i dette prosjektet.
-#
-# KVERNHAUG_TEST_KBHBREW_AKTIV_ID (issue #265, valgfri) -- forhånds-
-# setter det delte "aktive brygg"-målet (App A1, issue #170) til en
-# gitt seedet brew_id FØR panelets første rendring, via den samme
-# nøytrale sett_aktiv_brew_id()-skriveveien ui/kbhbrew_panel.py sin
-# "Start nytt brygg" bruker -- INGEN ny state-nøkkel. Anvendes KUN på
-# den aller første kjøringen (samme "aldri dobbel-init"-vakt som
-# seedingen over) -- ellers ville denne stille TVUNGET det aktive
-# målet tilbake ved hver etterfølgende AppTest .run(), og dermed
-# maskert nøyaktig den frittstående historikk-utvalg -> aktiv-mål-
-# synkroniseringen (render_kbhbrew_history_panel()) issue #265 skal
-# dekke.
-_AKTIV_INIT_NOKKEL = "_kbhbrew_history_harness_aktiv_init_gjort"
-
 import os
 
 import streamlit as st
@@ -32,7 +18,6 @@ import streamlit as st
 from modules.kbhbrew_storage import hent_brew, opprett_og_lagre_ny_brew
 from modules.recipe import bygg_recipe_object
 from ui.kbhbrew_history_panel import render_kbhbrew_history_panel
-from ui.kbhbrew_panel import sett_aktiv_brew_id
 
 _MALT_DB = {"weyermann_pilsner": {"display_name": "Weyermann Pilsner", "ebc": 3.5, "potensiale": 1.037}}
 _HUMLE_DB = {}
@@ -63,10 +48,5 @@ for brew_id, navn, predicted in _SEED_DEFS[:_seed_count]:
         opprett_og_lagre_ny_brew(
             _recipe(navn), _MALT_DB, _HUMLE_DB, _GJAER_DB, _EQUIPMENT, predicted, brew_id=brew_id,
         )
-
-_aktiv_override = os.environ.get("KVERNHAUG_TEST_KBHBREW_AKTIV_ID")
-if _aktiv_override and not st.session_state.get(_AKTIV_INIT_NOKKEL):
-    sett_aktiv_brew_id(_aktiv_override)
-    st.session_state[_AKTIV_INIT_NOKKEL] = True
 
 render_kbhbrew_history_panel()
