@@ -161,6 +161,18 @@ def aktiv_brew_matcher_recipe(brew, recipe_id):
     return brew.get("recipeId") == recipe_id
 
 
+def oppskrift_har_kbhbrew(brews, recipe_id):
+    """Issue #256 (dual-truth-vakt for legacy Bryggelogg): True hvis
+    minst ett lokalt lagret `.kbhbrew`-brygg i `brews` (modules/
+    kbhbrew_storage.py::hent_alle_brews() sin brewId -> brew-dict) har
+    nøyaktig denne `recipe_id` som sin egen frosne `recipeId` -- samme
+    identitetsregel som aktiv_brew_matcher_recipe() over (recipe_id=None
+    matcher KUN et brygg med recipeId=None, aldri et jokertreff mot et
+    brygg med en FAKTISK satt recipeId, og omvendt)."""
+    brews = brews if isinstance(brews, dict) else {}
+    return any(aktiv_brew_matcher_recipe(brew, recipe_id) for brew in brews.values())
+
+
 def manglende_ingrediens_ider(recipe, malt_db, humle_db, gjaer_db):
     """Chief review-fiks (PR #30 blocker 3) -- opprettelses-preflight:
     forutsier NØYAKTIG hvilke malt-/humle-/gjær-ID-er
