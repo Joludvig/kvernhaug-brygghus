@@ -1,6 +1,6 @@
 # KBH Core Contract
 
-Version: 2.0
+Version: 2.1
 Status: Active
 Supersedes: `docs/development/KBH_CORE_CONTRACT_V1.md` (Version 1.0,
 "KBH Core Contract", established 2026-08-15) as the governing Core
@@ -195,10 +195,17 @@ rather than only from conversation history:
    `docs/development/CORE_STATUS_PROVENANCE.md`,
    `docs/development/GIT_RULES.md`, etc.).
 3. Relevant context in the separate Obsidian Vault
-   (`C:\Vault\Kvernhaug Brygghus`) — see
+   (`D:\Vault\Kvernhaug Brygghus`) — see
    [VAULT.md](VAULT.md).
 4. Historical/superseded documents (e.g.
    `KBH_CORE_CONTRACT_V1.md`).
+
+**Correction (2026-09-16, v2.1):** item 3's Vault path was a stale
+pre-migration reference (`C:\Vault\Kvernhaug Brygghus`); the Vault has
+since moved and `D:\Vault\Kvernhaug Brygghus` is the current active
+path, matching the already-corrected [VAULT.md](VAULT.md). This is a
+factual path correction only — no domain ownership, authority order,
+or other contract meaning changes.
 
 A newer, explicit decision at a higher level always takes precedence
 over an older document at the same or a lower level. **Git is
