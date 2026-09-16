@@ -13,8 +13,8 @@ landed.*
 |---|---|
 | Issue | [#291](https://github.com/Joludvig/kvernhaug-brygghus/issues/291) |
 | Roadmap | [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101) Phase 3C |
-| `origin/master` at audit time | `1227cb0` (queue baseline was `a817de6`; one unrelated merge, #295/`test(kbhbrew): fresh-session restart coverage`, landed in between — no Phase 3C file touched) |
-| Inputs audited | [phase3c_brew_data_handoff_contract_decision_brief.md](phase3c_brew_data_handoff_contract_decision_brief.md) (#270/PR #274); [CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md](CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) (#276/PR #279, ratified #281/PR #282); Web `.kbhbrew` UI (#275/PR #277); App `originRecipeId` (#283/PR #286); Web `originRecipeId` (#284/PR #287); cross-surface handoff test (#288/PR #292); malformed-origin fix (#293, commit `7345809`); [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md); [CORE_KBHBREW_V1.md](CORE_KBHBREW_V1.md); [#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253) (Phase 3B ownership decision); [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101) Phase 3C's own 5-bullet definition. |
+| `origin/master` at audit time | `a9df524` (refreshed from this audit's original `1227cb0` baseline per Chief review round 2 on this PR; one more merge landed in between, #296/issue #290, `docs(core): correct stale App-counterpart claims in CORE_KBHBREW_V1.md`, which fixes the first of §5.1's two originally-still-unfixed findings — the queue baseline was `a817de6`) |
+| Inputs audited | [phase3c_brew_data_handoff_contract_decision_brief.md](phase3c_brew_data_handoff_contract_decision_brief.md) (#270/PR #274); [CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md](CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) (#276/PR #279, ratified #281/PR #282); Web `.kbhbrew` UI (#275/PR #277); App `originRecipeId` (#283/PR #286); Web `originRecipeId` (#284/PR #287); cross-surface handoff test (#288/PR #292); malformed-origin fix (#293, commit `7345809`); `CORE_KBHBREW_V1.md` staleness fix (#296/issue #290, merged `a9df524`); [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md); [CORE_KBHBREW_V1.md](CORE_KBHBREW_V1.md); [#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253) (Phase 3B ownership decision); [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101) Phase 3C's own 5-bullet definition. |
 | Method | Direct source read of `modules/kbh_contract.py`, `modules/kbh_import.py`, `modules/recipe_storage.py`, `web/js/kbhrecipe.js`, `web/js/recipe_storage.js`, `web/js/brygg_page.js`, `web/js/brew_storage.js`, plus the governing Core docs above — not documentation summaries alone. Every claim below is grounded in a current file:line citation or a rerun test result, not carried forward from the decision brief's own (now nine-day-old) source read. |
 | Tests run this session | `python3 -m unittest tests.test_kbh_contract tests.test_kbh_import tests.test_kbh_import_apply tests.test_kbhrecipe_origin_identity tests.test_kbh_passthrough tests.test_kbhbrew_storage_identity tests.test_kbhbrew_schema_contract tests.test_kbhbrew_roundtrip -b` — 232 tests, OK. Full suite: `python3 -m unittest discover -s tests -b` — 2597 tests, OK (53 skipped, pre-existing). JS contract tests (`tests/js/test_kbhrecipe_contract.js`, `tests/js/test_kbhbrew_contract.js`) were **not** re-executed in this Bridge sandbox — `node <file>` is outside `--allowedTools` here, the same documented constraint PR #287 hit; their last-known-green state is CI evidence from PR #286/#287/#292/#293, not re-verified by this audit. |
 
@@ -63,14 +63,19 @@ decision, structurally the same kind of gap #253 itself was written to
 close for Phase 3B. See §7 for the precise, bounded follow-up this
 implies.
 
-Two further caveats, unchanged from the initial pass, remain:
+Two further caveats, unchanged in substance from the initial pass but
+refreshed against master's advance to `a9df524` (§0), remain:
 
-1. Two pre-existing doc-staleness findings from the decision brief
-   (§9 there) are **still unfixed** on current master (§5 below) — a
-   small, bounded, already-described follow-up, not a blocker.
+1. Of the two pre-existing doc-staleness findings from the decision
+   brief (§9 there), one is now **fixed and merged** on current master
+   (#296/issue #290 fixed `CORE_KBHBREW_V1.md`'s "No App-side
+   counterpart exists" claim) and one remains **still unfixed**
+   (`CORE_KBHRECIPE_V1.md`'s "Not yet wired into a Streamlit import
+   UI... PRI 2C3" claim) — a small, bounded, already-described
+   follow-up, not a blocker (§5.1 below).
 2. This audit found one **new, previously unflagged** staleness item:
    `CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md`'s own header still reads as
-   an unratified preflight (§5.3 below) — also small and bounded, not
+   an unratified preflight (§5.2 below) — also small and bounded, not
    a blocker, and does not affect the *active* contract text
    (`CORE_KBHRECIPE_V1.md`), which is correct.
 
@@ -246,21 +251,29 @@ automatic conflict resolver"), not a defect.
 
 ## 5. Documentation staleness found
 
-### 5.1 Already flagged, still unfixed (decision brief §2/§9 — not new)
+### 5.1 Already flagged (decision brief §2/§9 — not new): one now fixed, one still open
 
-- `CORE_KBHBREW_V1.md` lines 197-199: *"No App-side counterpart
-  exists... App has no `.kbhbrew` reader or writer today."* Still
-  present verbatim on current master; App's `.kbhbrew` engine has
-  existed since PRI 3B (issue #24).
+- `CORE_KBHBREW_V1.md` lines 197-199 (as read at this audit's original
+  baseline, `1227cb0`): *"No App-side counterpart exists... App has no
+  `.kbhbrew` reader or writer today."* **Now fixed and merged** —
+  #296/issue #290 (`docs(core): correct stale App-counterpart claims
+  in CORE_KBHBREW_V1.md`, merged to master as `a9df524`) replaced this
+  claim with a source-grounded description of App's current
+  `.kbhbrew` engine (that document's Section 2/3), and separately
+  corrected a related Web-UI-caller staleness Chief flagged on that
+  PR's own review round. Re-read directly against current master
+  (`a9df524`) for this round: the stale sentence is gone.
 - `CORE_KBHRECIPE_V1.md` lines 232-233 and 376-378: *"Not yet wired
-  into a Streamlit import UI... that is PRI 2C3."* Still present
-  verbatim on current master; PRI 2C3 shipped this UI long ago
-  (commit `18093dc`).
+  into a Streamlit import UI... that is PRI 2C3."* **Still present
+  verbatim** on current master (`a9df524`); PRI 2C3 shipped this UI
+  long ago (commit `18093dc`). Unaffected by #296 (that PR only
+  touched `CORE_KBHBREW_V1.md`).
 
 Both were explicitly recorded as a "small, bounded, separately-scoped
-follow-up — not performed here" by the decision brief, twice now
-(§2 and §9 there). They remain exactly that: recorded, not fixed,
-not a Phase 3C blocker.
+follow-up — not performed here" by the decision brief, twice
+(§2 and §9 there). One has since been fixed by a dedicated follow-up
+issue in this same lineage (#290); the other remains recorded, not
+fixed, not a Phase 3C blocker.
 
 ### 5.2 New finding — `CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md`'s own status header is now stale
 
@@ -344,11 +357,13 @@ alone — no code change — would close the one Phase 3C bullet (§101)
 this audit found undefined and would let a follow-up audit call Phase
 3C a full TECHNICAL PASS.
 
-Separately, if the owner wants the two still-stale doc sections (§5.1)
-and the one newly-found stale status header (§5.2) refreshed, that is
-one small, bounded, docs-only follow-up (three header/section edits
-across two files) — independent of the ownership decision above, and
-not a blocker either way.
+Separately, if the owner wants the one still-stale doc section (§5.1 —
+`CORE_KBHRECIPE_V1.md`'s PRI 2C3 claim; `CORE_KBHBREW_V1.md`'s
+counterpart claim was already fixed by #296/issue #290 during this
+PR's review) and the one newly-found stale status header (§5.2)
+refreshed, that is one small, bounded, docs-only follow-up (two
+header/section edits across two files) — independent of the ownership
+decision above, and not a blocker either way.
 
 ---
 
@@ -385,3 +400,24 @@ owner decision, described but not filed in §7. No other section
 (§2.2–§2.5, §3, §5, §6, §8, §0) needed a content change — only §1's
 verdict and its cross-references to §2.1/§4/§7 were inconsistent with
 the audit's own evidence.
+
+## 10. Revision note 2 (Chief review round 2, PR #297)
+
+Between this audit's round-1 fix (§9) and Chief's round-2 review,
+master advanced from `1227cb0` to `a9df524` via PR #296/issue #290,
+which fixed the first of §5.1's two "already flagged, still unfixed"
+findings (`CORE_KBHBREW_V1.md`'s stale "No App-side counterpart
+exists" claim) — a fix this audit's own §7 had itself recommended as
+exactly the kind of small, bounded, docs-only follow-up worth doing.
+Chief flagged (round 2, head `c4f2fab`) that this audit still
+described that finding as open, making it stale relative to current
+master. Fixed by re-reading `CORE_KBHBREW_V1.md` directly against
+`a9df524` (confirmed the stale sentence is gone) and updating §0's
+baseline row, §1's caveat list, §5.1, and §7 to state the first
+finding as fixed/merged, while leaving the second finding
+(`CORE_KBHRECIPE_V1.md`'s PRI 2C3 claim, unaffected by #296), the
+TECHNICAL PARTIAL verdict, the ownership/current-copy gap (§2.1/§4),
+and every other finding, source citation, and test result unchanged —
+per Chief's own instruction to keep the verdict stable "unless the
+refreshed source evidence materially says otherwise," which it does
+not.
