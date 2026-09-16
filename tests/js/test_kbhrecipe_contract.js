@@ -29,9 +29,21 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const KBHRECIPE_JS = path.join(ROOT, 'web', 'js', 'kbhrecipe.js');
 const RECIPE_STORAGE_JS = path.join(ROOT, 'web', 'js', 'recipe_storage.js');
 const FIXTURES_DIR = path.join(ROOT, 'tests', 'fixtures', 'legacy', 'kbhrecipe');
+// issue #288 -- delt, IKKE-legacy fixture med en gyldig originRecipeId,
+// lest ORDRETT av BÅDE denne filen og
+// tests/test_kbh_import.py::TestOriginRecipeIdDeltCrossSurfaceFixture,
+// for å bevise identisk wire-tolkning på tvers av App/Web på ÉN og
+// samme fil -- ikke bare at hver side for seg gir riktig svar på sin
+// egen syntetiske payload.
+const DELT_FIXTURES_DIR = path.join(ROOT, 'tests', 'fixtures', 'kbhrecipe');
+const DELT_ORIGIN_RECIPE_ID = '55555555-5555-5555-5555-555555555555';
 
 function lastFixture(navn) {
   return fs.readFileSync(path.join(FIXTURES_DIR, `${navn}.json`), 'utf8');
+}
+
+function lastDeltFixture(navn) {
+  return fs.readFileSync(path.join(DELT_FIXTURES_DIR, `${navn}.json`), 'utf8');
 }
 
 // Ny, isolert context per test -- kbhrecipe.js/recipe_storage.js har
@@ -802,6 +814,84 @@ kjor('originRecipeId (11): Chief-review-fiks (PR#287 runde 2) -- mirrors lagreSo
   assert.strictEqual(vanligLagring.ok, true);
   assert.strictEqual(vanligLagring.recipeId, forsteLagring.recipeId);
   assert.strictEqual(vanligLagring.originRecipeId, forsteLagring.originRecipeId, 'origin skal IKKE ha blitt re-mintet etter det avbrutte variant-forsøket');
+});
+
+// ─── issue #288 -- delt cross-surface origin-fixture ────────────────────
+//
+// tests/fixtures/kbhrecipe/with_origin.json er BEVISST IKKE en frossen
+// legacy-fixture (tests/fixtures/legacy/kbhrecipe/*.json) -- den er en
+// fersk, ikke-legacy fixture som allerede har en gyldig originRecipeId,
+// lest ORDRETT av BÅDE denne seksjonen og
+// tests/test_kbh_import.py::TestOriginRecipeIdDeltCrossSurfaceFixture,
+// som speiler DELT_ORIGIN_RECIPE_ID sin eksakte strengverdi. Dette er
+// den konkrete, delte wire-artifakten issue #288 ber om -- App/Web-
+// tolkning av ÉN og samme fil, ikke bare hver sides egen syntetiske
+// payload.
+
+kjor('originRecipeId (12a): delt fixture aksepteres av Web og gir eksakt samme origin som App', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(lastDeltFixture('with_origin'));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.oppskrift.originRecipeId, DELT_ORIGIN_RECIPE_ID);
+});
+
+kjor('originRecipeId (12b): delt fixture har ingen recipeId på selve wire-artifakten', () => {
+  const raa = JSON.parse(lastDeltFixture('with_origin'));
+  assert.strictEqual('recipeId' in raa.recipe, false);
+});
+
+kjor('originRecipeId (12c): delt fixture full rundtur import -> lagring -> eksport -> reimport bevarer origin uendret', () => {
+  const ctx = nyContext(true);
+  const importRes = ctx.parseKbhRecipeInnhold(lastDeltFixture('with_origin'));
+  assert.strictEqual(importRes.ok, true);
+
+  const lagreRes = ctx.lagreOppskriftIStore(importRes.oppskrift, null);
+  assert.strictEqual(lagreRes.ok, true);
+  assert.strictEqual(lagreRes.originRecipeId, DELT_ORIGIN_RECIPE_ID);
+  assert.notStrictEqual(lagreRes.recipeId, DELT_ORIGIN_RECIPE_ID, 'lokal recipeId er alltid egen, aldri lik den importerte originen');
+
+  const funnet = ctx.finnOppskrift(lagreRes.recipeId);
+  const eksportert = ctx.byggKbhRecipeInnhold(funnet.recipe);
+  assert.strictEqual(eksportert.recipe.originRecipeId, DELT_ORIGIN_RECIPE_ID);
+  assert.strictEqual('recipeId' in eksportert.recipe, false);
+
+  const reimportRes = ctx.parseKbhRecipeInnhold(JSON.stringify(eksportert));
+  assert.strictEqual(reimportRes.ok, true);
+  assert.strictEqual(reimportRes.oppskrift.originRecipeId, DELT_ORIGIN_RECIPE_ID);
+});
+
+kjor('originRecipeId (12d): malformerte varianter av delt fixture (ikke-streng/tom origin) gir intet dedup-signal, aldri avvisning -- speiler Python-testens to identiske mutasjoner', () => {
+  for (const ugyldig of [12345, '   ']) {
+    const raa = JSON.parse(lastDeltFixture('with_origin'));
+    raa.recipe.originRecipeId = ugyldig;
+    const res = nyContext(false).parseKbhRecipeInnhold(JSON.stringify(raa));
+    assert.strictEqual(res.ok, true, `${JSON.stringify(ugyldig)} skal aldri avvise importen`);
+    assert.strictEqual(res.oppskrift.originRecipeId, undefined, `${JSON.stringify(ugyldig)} skal gi "intet dedup-signal", ikke en falsk verdi`);
+  }
+});
+
+kjor('originRecipeId (12e): eksakt-streng duplikat-deteksjon på den delte fixturens EGEN origin, uten overskriving/sammenslåing ved treff', () => {
+  const ctx = nyContext(true);
+  const importRes = ctx.parseKbhRecipeInnhold(lastDeltFixture('with_origin'));
+  ctx.lagreOppskriftIStore(importRes.oppskrift, null);
+
+  assert.strictEqual(ctx.finnesOppskriftMedOrigin(DELT_ORIGIN_RECIPE_ID), true);
+  const antallForOpp = ctx.alleOppskrifter().length;
+  // Speiler importer_page.js/app.js: duplikatsjekken kjøres FØR et nytt
+  // forsøk på å lagre samme fil på nytt -- ved treff skrives ingenting.
+  if (!ctx.finnesOppskriftMedOrigin(DELT_ORIGIN_RECIPE_ID)) {
+    ctx.lagreOppskriftIStore(importRes.oppskrift, null); // skal ALDRI nås
+  }
+  assert.strictEqual(ctx.alleOppskrifter().length, antallForOpp, 'et avvist duplikat skal ikke legge til noen rad');
+});
+
+kjor('originRecipeId (12f): frosne legacy-fixturer gir samme "ingen origin"-resultat som App sin egen kryssjekk mot de samme filnavnene', () => {
+  const ctx = nyContext(false);
+  for (const navn of ['minimal', 'partial_water']) {
+    const res = ctx.parseKbhRecipeInnhold(lastFixture(navn));
+    assert.strictEqual(res.ok, true);
+    assert.strictEqual(res.oppskrift.originRecipeId, undefined);
+  }
 });
 
 // ─── Oppsummering ───────────────────────────────────────────────────────

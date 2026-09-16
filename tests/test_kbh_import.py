@@ -31,6 +31,12 @@ from modules.process_profiles import hent_standardprofil, bygg_egendefinert_prof
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FIXTURES_DIR = os.path.join(_REPO_ROOT, "tests", "fixtures", "legacy", "kbhrecipe")
+# issue #288 -- delt, IKKE-legacy fixture med en gyldig originRecipeId,
+# lest av BÅDE denne filen og tests/js/test_kbhrecipe_contract.js, for å
+# bevise identisk wire-tolkning på tvers av App/Web -- ikke bare at hver
+# side for seg gir riktig svar på sin egen syntetiske payload.
+_DELT_FIXTURES_DIR = os.path.join(_REPO_ROOT, "tests", "fixtures", "kbhrecipe")
+_DELT_ORIGIN_RECIPE_ID = "55555555-5555-5555-5555-555555555555"
 
 # ─── Masterdata ─────────────────────────────────────────────────────────
 # Reelle master-databaser (samme mønster som tests/test_process_profiles.py)
@@ -57,6 +63,11 @@ _GJAER_DB = {"safale_us_05": {}}
 
 def _last_fixture(navn):
     with open(os.path.join(_FIXTURES_DIR, f"{navn}.json"), encoding="utf-8") as f:
+        return f.read()
+
+
+def _last_delt_fixture(navn):
+    with open(os.path.join(_DELT_FIXTURES_DIR, f"{navn}.json"), encoding="utf-8") as f:
         return f.read()
 
 
@@ -728,6 +739,71 @@ class TestOriginRecipeId(unittest.TestCase):
         konvolutt = bygg_kbhrecipe_konvolutt(original, "2026-09-01T00:00:00Z")
         importert = parse_kbhrecipe_json(json.dumps(konvolutt), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
         self.assertEqual(importert["recipe"]["originRecipeId"], "33333333-3333-3333-3333-333333333333")
+
+
+# ─── issue #288 -- delt cross-surface origin-fixture ────────────────────
+#
+# tests/fixtures/kbhrecipe/with_origin.json er BEVISST IKKE en frossen
+# legacy-fixture (tests/fixtures/legacy/kbhrecipe/*.json, §1.8 i
+# CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) -- den er en fersk, ikke-legacy
+# fixture som allerede har en gyldig originRecipeId, lest ORDRETT av
+# BÅDE denne klassen og tests/js/test_kbhrecipe_contract.js sin
+# "originRecipeId (12)"-seksjon, som konstant _DELT_ORIGIN_RECIPE_ID
+# speiler eksakt (samme strengverdi begge steder). Dette er den
+# konkrete, delte wire-artifakten kravet i issue #288 ber om --
+# App/Web-tolkning av ÉN og samme fil, ikke bare hver sides egen
+# syntetiske payload.
+class TestOriginRecipeIdDeltCrossSurfaceFixture(unittest.TestCase):
+    def test_1_delt_fixture_aksepteres_og_gir_forventet_origin(self):
+        res = parse_kbhrecipe_json(_last_delt_fixture("with_origin"), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+        self.assertEqual(res["recipe"]["originRecipeId"], _DELT_ORIGIN_RECIPE_ID)
+
+    def test_2_delt_fixture_har_ingen_recipeId_paa_disk(self):
+        # "local-only recipeId never appears on the wire" -- bevist direkte
+        # på selve wire-artifakten, ikke bare på en writers output.
+        raw = json.loads(_last_delt_fixture("with_origin"))
+        self.assertNotIn("recipeId", raw["recipe"])
+
+    def test_3_delt_fixture_full_roundtrip_reader_writer_reader_bevarer_origin(self):
+        # read -> (edit-nøytral) gjenoppbygging -> eksport -> re-import,
+        # ved å bruke parserens EGNE returnerte felt direkte (ikke
+        # hardkodede duplikater) -- ekte reader/writer-rundtur, ikke bare
+        # en påstand om at feltet "burde" overleve.
+        importert = parse_kbhrecipe_json(_last_delt_fixture("with_origin"), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+        r = importert["recipe"]
+        recipe = bygg_recipe_object(
+            navn=r["name"], batch_size=r["batch_size"], efficiency=r["efficiency"],
+            malts=r["malts"], hops=r["hops"], yeast=r["yeast"],
+            og=1.045, fg=1.010, abv=4.5, ibu=0, ebc=8, flavor_profile={},
+            brygger_stil=r["brygger_stil"],
+            origin_recipe_id=r["originRecipeId"],
+        )
+        konvolutt = bygg_kbhrecipe_konvolutt(recipe, "2026-09-16T00:00:00Z")
+        self.assertEqual(konvolutt["recipe"]["originRecipeId"], _DELT_ORIGIN_RECIPE_ID)
+        self.assertNotIn("recipeId", konvolutt["recipe"])
+
+        reimportert = parse_kbhrecipe_json(json.dumps(konvolutt), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+        self.assertEqual(reimportert["recipe"]["originRecipeId"], _DELT_ORIGIN_RECIPE_ID)
+
+    def test_4_malformed_variant_av_delt_fixture_gir_ingen_dedup_signal_ikke_avvisning(self):
+        # Samme delte fixture, med originRecipeId mutert til hhv. en
+        # ikke-streng og en tom streng -- §3.8: "no dedup signal
+        # available", ALDRI en avvist import. Speiles i JS-testen med
+        # nøyaktig samme to mutasjoner på samme fixture.
+        for ugyldig_verdi in (12345, "   "):
+            raw = json.loads(_last_delt_fixture("with_origin"))
+            raw["recipe"]["originRecipeId"] = ugyldig_verdi
+            res = parse_kbhrecipe_json(json.dumps(raw), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+            self.assertIsNone(res["recipe"]["originRecipeId"])
+
+    def test_5_frosne_legacy_fixturer_gir_samme_ingen_origin_resultat_som_web(self):
+        # Krysssjekk mot samme fixture-navn som JS-testens
+        # "originRecipeId (7)" itererer over -- begge sider skal komme
+        # til nøyaktig samme "ingen origin"-konklusjon for de samme,
+        # uendrede frosne fixturene (§5, backwards-compatibility).
+        for navn in ("minimal", "partial_water"):
+            res = parse_kbhrecipe_json(_last_fixture(navn), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+            self.assertIsNone(res["recipe"]["originRecipeId"])
 
 
 if __name__ == "__main__":
