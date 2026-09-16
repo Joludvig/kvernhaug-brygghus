@@ -728,6 +728,17 @@ kjor('originRecipeId (9): gjenkjennes som kjent felt ved import -- havner ALDRI 
   if (passthrough) assert.strictEqual('originRecipeId' in passthrough, false);
 });
 
+kjor('originRecipeId (9b): issue #293 -- en ikke-streng/tom originRecipeId på selve importen (parseKbhRecipeInnhold, IKKE bare lagreOppskriftIStore/finnesOppskriftMedOrigin) sanitizes til fraværende, aldri avvisning og aldri den rå verdien videre', () => {
+  const ctx = nyContext(false);
+  for (const ugyldig of [12345, '   ', '', null, {}, []]) {
+    const raa = JSON.parse(lastFixture('minimal'));
+    raa.recipe.originRecipeId = ugyldig;
+    const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+    assert.strictEqual(res.ok, true, `${JSON.stringify(ugyldig)} skal aldri avvise importen`);
+    assert.strictEqual(res.oppskrift.originRecipeId, undefined, `${JSON.stringify(ugyldig)} skal gi "intet dedup-signal", ikke den rå verdien`);
+  }
+});
+
 kjor('originRecipeId (10): mirrors app.js -- "Lagre som variant" mint en FERSK originRecipeId, arver aldri kildens (§3.5)', () => {
   const ctx = nyContext(true);
   const original = { navn: 'Original', volum: 20, effektivitet: 75, malt: [], humle: [] };
