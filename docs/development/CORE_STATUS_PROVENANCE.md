@@ -126,7 +126,7 @@ one defined here: the Vault's model governs narrative/identity/
 historical claims (outside this repository, not part of the Core
 domain), while this document governs Core brewing masterdata claims
 (malt/humle/gjær and future Core datasets, inside this repository).
-Nothing in `KBH_CORE_CONTRACT.md` (v2.0) or elsewhere states that Core
+Nothing in `KBH_CORE_CONTRACT.md` (v2.1) or elsewhere states that Core
 must reuse the Vault's vocabulary, and the two vocabularies do not
 actually overlap in meaning (`reviewed`/`verified` here vs.
 `review`/`approved` there; a 5-value `documented_fact`/…/`proposal`
