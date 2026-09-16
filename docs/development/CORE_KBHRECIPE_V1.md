@@ -68,6 +68,8 @@ vann:
   maalinger
 
 lagretDato
+
+originRecipeId
 ```
 
 `lagretDato` is a Web-only field, not in the original V1 text (§3–§11).
@@ -109,6 +111,29 @@ equivalent fields are natively modeled (`bryggerStil` → `brygger_stil`,
 `prosess` → `process_profile`, `vann.*` → `water_*`, see §13) — this is
 a Web-implementation-specific gap being closed, not a Core V1 rule
 change.
+
+**`originRecipeId` (KBHR-021, issue #276/#281):** newly recognized as
+an optional known V1 payload field, joining the list above — no
+envelope or `recipeSchemaVersion` bump (§8/§9 unchanged). It is the
+historical-link identifier already named but never precisified in
+[KBH_CORE_CONTRACT_V1.md](KBH_CORE_CONTRACT_V1.md) §7, distinct from
+local `recipeId` (§7 below, still forbidden from export, unchanged). In
+outline: Web mints it at first save (default = the recipe's existing
+local `recipeId`); App mints it only on an explicit, user-triggered
+export (fresh UUID, written back atomically to that one recipe file
+only, never a background migration); import performs exact-string-
+equality duplicate detection against every locally stored recipe's
+`originRecipeId` and rejects a match outright (never a silent merge or
+overwrite); a missing/empty/non-string value is treated as "no dedup
+signal available" so every `.kbhrecipe` file that predates this field —
+including all three frozen legacy fixtures — remains importable
+unchanged; "save as new"/fork always mints a fresh `originRecipeId` for
+the copy; a `parentRecipeId`/lineage concept is explicitly NOT NOW. The
+complete, normative contract — creation/minting, export, import/
+duplicate-detection, save-as-new, and malformed-value handling — is
+defined in
+[CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md](CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md)
+(accepted owner decision, merged PR #279); not duplicated here.
 
 ## 4. Units
 
@@ -224,6 +249,15 @@ Web enforces this at two independent points (capture-time exclusion
 during import, and merge-time exclusion during export) so a forbidden
 field cannot leak even if it somehow ended up inside the passthrough
 container itself (e.g. a hand-edited local draft).
+
+**`originRecipeId` is not on this list and must never be treated as if
+it were.** It is a distinct, portable historical-link identifier,
+explicitly designed to travel *with* an exported file (§3) —
+[KBH_CORE_CONTRACT_V1.md](KBH_CORE_CONTRACT_V1.md) §6 already states the
+two "must not be conflated." Only local `recipeId` is forbidden from
+export; see
+[CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md](CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md)
+for `originRecipeId`'s full contract.
 
 ## 8. Version policy
 
@@ -475,7 +509,15 @@ data** — only for the fields and cases explicitly covered above.
   only wires its `passthrough` result into the recipe object,
   `session_state`, storage, and the writer (§13); the UI itself is PRI
   2C3.
-- Does not implement `recipeId`/`originRecipeId` end-to-end identity.
+- Does not implement `recipeId`/`originRecipeId` end-to-end identity in
+  App/Web product code. `originRecipeId`'s wire-level contract is now
+  normatively defined in
+  [CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md](CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md)
+  (§3/§7 above reference it, issue #276/#281) — implementing it in App
+  and Web is separate, later work, following the same contract-first
+  pattern already established for custom-ingredient identity below.
+  `recipeId` remains local-only and forbidden from export (§7),
+  unchanged.
 - Does not build a `recipeSchemaVersion` migrator — an unsupported
   schema is rejected explicitly (§9), never interpreted or upgraded.
 - Does not standardize custom-ingredient identity — see
