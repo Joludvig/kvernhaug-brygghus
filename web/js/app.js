@@ -44,6 +44,19 @@ let _aktivRecipeId = null;
 // redigering -> lagring/eksport. null = ingen bevart passthrough.
 let _aktivKbhUkjenteFelt = null;
 
+// CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2/§3.5 (issue #284) -- den
+// portable, historiske originRecipeId (DISTINKT fra _aktivRecipeId over,
+// som er ren lokal lagringsidentitet). Følger samme
+// gjenopprettingspunkt som _aktivGjaerCustomId/_aktivKbhUkjenteFelt (satt
+// av _gjenopprettOppskrift(), lest tilbake av samleOppskrift()). Selve
+// mintingen ("ingen origin ennå -> bruk lokal recipeId") skjer i
+// recipe_storage.js::lagreOppskriftIStore() ved faktisk lagring, ikke
+// her -- denne variabelen bærer kun verdien videre gjennom
+// redigering -> lagring/eksport, og resultatet leses tilbake inn etter
+// et vellykket lagre-kall (se lagreOppskrift()/lagreSomVariant()) slik at
+// en påfølgende eksport i samme økt allerede har den ferske originen.
+let _aktivOriginRecipeId = null;
+
 // ─── Enhetsbevisste felt-lesing/-skriving (Runde 22) ───────────────────────
 // Et unit-bærende input sitt SYNLIGE .value viser tallet i GJELDENDE
 // unitSystem (metric/us), mens dataset.canonical alltid holder full
@@ -1466,7 +1479,7 @@ function renderStilManuell() {
 // ─── Lagring / lasting / eksport / import ────────────────────────────────
 
 function samleOppskrift() {
-  return {
+  const oppskrift = {
     // Runde 25A -- semantisk versjon på selve payloaden, ikke på wrapperen.
     // Følger oppskriften overalt: aktiv kladd, lagret rad, .kbhrecipe-fil og
     // (senere) frosne .kbhbrew-snapshots. Se recipe_storage.js.
@@ -1494,6 +1507,13 @@ function samleOppskrift() {
     // et V1-kontraktfelt selv -- kun en bærer for felt Web ikke forstår.
     _kbhUkjenteFelt: _aktivKbhUkjenteFelt,
   };
+  // CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.1/§3.2 -- kun tatt med når den
+  // faktisk finnes (en fersk, aldri lagret kladd har ingen ennå, og feltet
+  // er valgfritt på skriving inntil første lagring, §3.3) -- IKKE satt til
+  // null som gjaerId over, siden originRecipeId sin fraværs-semantikk er
+  // "ikke mintet ennå", ikke en meningsfull verdi i seg selv.
+  if (_aktivOriginRecipeId) oppskrift.originRecipeId = _aktivOriginRecipeId;
+  return oppskrift;
 }
 
 // ─── Lagre-tilstand (WEB STAB W3, issue #106) ──────────────────────────────
@@ -1644,6 +1664,7 @@ function lagreOppskrift() {
     return;
   }
   _aktivRecipeId = res.recipeId;
+  _aktivOriginRecipeId = res.originRecipeId || null; // ev. nettopp mintet av lagreOppskriftIStore(), §3.2
   beregnOgVisResultat(); // skriver kladden på nytt, nå med recipeId
   visForrigeErfaring();
   status.textContent = t("oppskrift.lagretStatus", { navn: visningsnavn(oppskrift.navn) });
@@ -1683,6 +1704,17 @@ function _forslaVariantNavn(originalNavn) {
 function lagreSomVariant() {
   const navnFelt = document.getElementById("oppskrift-navn");
   const status = document.getElementById("lagre-status");
+  // CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.5 -- "Lagre som variant" er en
+  // bevisst fork: kopien skal ALDRI arve kildeoppskriftens originRecipeId
+  // (det ville gjort en senere eksport av kopien kollidere med kildens
+  // egen origin ved en fremtidig import, §2.4). Nullstilles FØR
+  // samleOppskrift() kalles, slik at ingenting av det nedenfor kan hente
+  // den gamle verdien tilbake -- lagreOppskriftIStore() mint deretter en
+  // fersk origin (= den ferske recipeId-en den selv genererer for kopien,
+  // §3.2), akkurat som recipeId-nullstillingen
+  // (`lagreOppskriftIStore(oppskrift, null)` under) allerede gjør for
+  // lokal identitet.
+  _aktivOriginRecipeId = null;
   let oppskrift = samleOppskrift();
   if (_blokkerUgyldigBatchVolum(oppskrift, status)) return;
   if (finnOppskriftVedNavn(oppskrift.navn)) {
@@ -1695,6 +1727,7 @@ function lagreSomVariant() {
     return;
   }
   _aktivRecipeId = res.recipeId;
+  _aktivOriginRecipeId = res.originRecipeId || null; // den ferske originen lagreOppskriftIStore() nettopp mintet
   beregnOgVisResultat();
   visForrigeErfaring();
   status.textContent = t("oppskrift.lagretVariantStatus", { navn: visningsnavn(oppskrift.navn) });
@@ -1721,6 +1754,15 @@ function _gjenopprettOppskrift(oppskrift) {
   _aktivGjaerCustomId =
     (oppskrift && oppskrift.gjaerCustom && typeof oppskrift.gjaerCustom.id === "string" && oppskrift.gjaerCustom.id)
       ? oppskrift.gjaerCustom.id
+      : null;
+
+  // CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2/§3.4 -- samme gjenopprettings-
+  // punkt bærer også originRecipeId videre: en allerede satt origin (lagret
+  // rad, eller en importert fils egen origin, carried forward uendret)
+  // PRESERVERES, en blank/origin-løs oppskrift nullstilles til null.
+  _aktivOriginRecipeId =
+    (oppskrift && typeof oppskrift.originRecipeId === "string" && oppskrift.originRecipeId)
+      ? oppskrift.originRecipeId
       : null;
 
   // Runde 18A -- den interne sentinelen "Uten navn" (satt av samleOppskrift()
@@ -1890,6 +1932,16 @@ function apneOppskriftsfil(fil) {
     const resultat = parseKbhRecipeInnhold(reader.result);
     if (!resultat.ok) {
       status.textContent = resultat.melding;
+      return;
+    }
+    // CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4/§3.6 -- eksakt-streng
+    // duplikatsjekk FØR noe overskrives: en fil hvis originRecipeId
+    // allerede finnes lokalt avvises eksplisitt, ingen stille
+    // sammenslåing/overskriving. En manglende/tom/ikke-streng origin
+    // (enhver fil eksportert før dette feltet fantes) er "intet
+    // dedup-signal" og importeres som ny, uendret oppførsel (§2.5).
+    if (finnesOppskriftMedOrigin(resultat.oppskrift.originRecipeId)) {
+      status.textContent = t("oppskrift.importDuplikat");
       return;
     }
     if (oppskriftHarInnhold(samleOppskrift())) {

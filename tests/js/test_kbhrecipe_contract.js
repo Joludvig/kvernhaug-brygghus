@@ -607,6 +607,161 @@ kjor('PR#3 (4): mirrors app.js -- kjent, redigert navn vinner selv gjennom hele 
   assert.strictEqual(JSON.stringify(eksportert.recipe.prosess), JSON.stringify(raa.recipe.prosess));
 });
 
+// ─── originRecipeId (docs/development/CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md,
+// issue #276/#281/#284) ─────────────────────────────────────────────────
+//
+// Dekker kontraktdokumentets §7 acceptance/fixture/test-matrise
+// (1)-(9), avgrenset til det Web-laget faktisk implementerer i denne
+// runden (§3.2/§3.4/§3.5/§3.7/§3.8/§5): mint ved første lagring, bevart
+// ved vanlig rediger-og-lagre, eksport inkluderer origin og ekskluderer
+// recipeId, importert origin bevares uendret, eksakt-streng duplikat-
+// deteksjon, manglende/tom/ikke-streng origin = "intet dedup-signal",
+// legacy-fixtures uten origin importeres fortsatt uendret, og
+// "Lagre som variant" mint en FERSK origin (aldri kildens).
+
+kjor('originRecipeId (1): ny oppskrift uten origin mint origin = den ferske lokale recipeId-en ved første lagring', () => {
+  const ctx = nyContext(true);
+  const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  const res = ctx.lagreOppskriftIStore(oppskrift, null);
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.originRecipeId, res.recipeId);
+  const funnet = ctx.finnOppskrift(res.recipeId);
+  assert.strictEqual(funnet.recipe.originRecipeId, res.recipeId);
+});
+
+kjor('originRecipeId (2): vanlig rediger-og-lagre-på-nytt av SAMME oppskrift bevarer samme origin uendret', () => {
+  const ctx = nyContext(true);
+  const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  const forste = ctx.lagreOppskriftIStore(oppskrift, null);
+  const redigert = { ...oppskrift, navn: 'X redigert', originRecipeId: forste.originRecipeId };
+  const andre = ctx.lagreOppskriftIStore(redigert, forste.recipeId);
+  assert.strictEqual(andre.ok, true);
+  assert.strictEqual(andre.recipeId, forste.recipeId, 'samme lokale identitet -- oppdatering, ikke duplikat');
+  assert.strictEqual(andre.originRecipeId, forste.originRecipeId, 'origin re-mintes ALDRI av en vanlig re-lagring');
+});
+
+kjor('originRecipeId (3): eksport inkluderer originRecipeId og ekskluderer lokal recipeId, som før', () => {
+  const ctx = nyContext(true);
+  const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  const res = ctx.lagreOppskriftIStore(oppskrift, null);
+  const funnet = ctx.finnOppskrift(res.recipeId);
+  const eksportert = ctx.byggKbhRecipeInnhold(funnet.recipe);
+  assert.strictEqual(eksportert.recipe.originRecipeId, res.originRecipeId);
+  assert.strictEqual('recipeId' in eksportert.recipe, false);
+});
+
+kjor('originRecipeId (4): gyldig importert origin bevares UENDRET gjennom import -> lagring -> eksport', () => {
+  const ctx = nyContext(true);
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.recipe.originRecipeId = 'origin-fra-en-annen-nettleser';
+  const importRes = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(importRes.ok, true);
+  assert.strictEqual(importRes.oppskrift.originRecipeId, 'origin-fra-en-annen-nettleser');
+
+  const lagreRes = ctx.lagreOppskriftIStore(importRes.oppskrift, null);
+  assert.strictEqual(lagreRes.ok, true);
+  assert.strictEqual(lagreRes.originRecipeId, 'origin-fra-en-annen-nettleser');
+  // Lokal recipeId er ALLTID en fersk, egen streng -- aldri lik den
+  // importerte originen (recipeId er lokal identitet, originRecipeId er
+  // portabel historisk lenke, V1 §6/§7).
+  assert.notStrictEqual(lagreRes.recipeId, 'origin-fra-en-annen-nettleser');
+
+  const funnet = ctx.finnOppskrift(lagreRes.recipeId);
+  const eksportert = ctx.byggKbhRecipeInnhold(funnet.recipe);
+  assert.strictEqual(eksportert.recipe.originRecipeId, 'origin-fra-en-annen-nettleser');
+});
+
+kjor('originRecipeId (5): finnesOppskriftMedOrigin finner et eksakt duplikat -- speiler app.js sin avvis-før-noe-skrives-bruk', () => {
+  const ctx = nyContext(true);
+  const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  const res = ctx.lagreOppskriftIStore(oppskrift, null);
+  assert.strictEqual(ctx.finnesOppskriftMedOrigin(res.originRecipeId), true);
+  assert.strictEqual(ctx.finnesOppskriftMedOrigin('finnes-ikke-lokalt'), false);
+
+  // Speiler apneOppskriftsfil()/importerJsonFil(): duplikatsjekken kjøres
+  // FØR lagreOppskriftIStore() i det hele tatt kalles -- ved treff skrives
+  // ingenting, ingen stille sammenslåing/overskriving/duplisering.
+  const antallForOpp = ctx.alleOppskrifter().length;
+  const erDuplikat = ctx.finnesOppskriftMedOrigin(res.originRecipeId);
+  assert.strictEqual(erDuplikat, true);
+  if (!erDuplikat) ctx.lagreOppskriftIStore(oppskrift, null); // skal ALDRI nås her
+  assert.strictEqual(ctx.alleOppskrifter().length, antallForOpp, 'et avvist duplikat skal ikke legge til noen rad');
+});
+
+kjor('originRecipeId (6): manglende/tom/ikke-streng origin er "intet dedup-signal" -- ALDRI en falsk duplikat-treff', () => {
+  const ctx = nyContext(true);
+  const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  ctx.lagreOppskriftIStore(oppskrift, null);
+  for (const ugyldig of [undefined, null, '', 0, 123, {}, [], false]) {
+    assert.strictEqual(ctx.finnesOppskriftMedOrigin(ugyldig), false, `${JSON.stringify(ugyldig)} skal aldri gi et duplikat-treff`);
+  }
+});
+
+kjor('originRecipeId (7): legacy fixtures uten originRecipeId importeres fortsatt uendret, aldri avvist (bakoverkompatibilitet, §5)', () => {
+  const ctx = nyContext(false);
+  for (const navn of ['minimal', 'full', 'partial_water']) {
+    const res = ctx.parseKbhRecipeInnhold(lastFixture(navn));
+    assert.strictEqual(res.ok, true, `${navn} skal fortsatt importeres`);
+    assert.strictEqual(res.oppskrift.originRecipeId, undefined, `${navn} skal ikke late som den har en origin den ikke har`);
+  }
+});
+
+kjor('originRecipeId (8): en ikke-streng/tom verdi krasjer eller avviser ALDRI lagring -- sanitizeres til fraværende, deretter mintes en fersk origin', () => {
+  const ctx = nyContext(true);
+  for (const ugyldig of [123, '', null, {}, []]) {
+    const oppskrift = { navn: 'X', volum: 20, effektivitet: 75, malt: [], humle: [], originRecipeId: ugyldig };
+    const res = ctx.lagreOppskriftIStore(oppskrift, null);
+    assert.strictEqual(res.ok, true, `${JSON.stringify(ugyldig)} skal aldri avvise lagringen`);
+    assert.strictEqual(typeof res.originRecipeId, 'string');
+    assert.strictEqual(res.originRecipeId, res.recipeId);
+  }
+});
+
+kjor('originRecipeId (9): gjenkjennes som kjent felt ved import -- havner ALDRI i generisk _kbhUkjenteFelt-passthrough', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.recipe.originRecipeId = 'en-origin';
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.oppskrift.originRecipeId, 'en-origin');
+  const passthrough = res.oppskrift['_kbhUkjenteFelt'];
+  if (passthrough) assert.strictEqual('originRecipeId' in passthrough, false);
+});
+
+kjor('originRecipeId (10): mirrors app.js -- "Lagre som variant" mint en FERSK originRecipeId, arver aldri kildens (§3.5)', () => {
+  const ctx = nyContext(true);
+  const original = { navn: 'Original', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  const forsteLagring = ctx.lagreOppskriftIStore(original, null);
+  assert.strictEqual(forsteLagring.ok, true);
+
+  // Mirrors _gjenopprettOppskrift()'s originRecipeId-linje: gjenoppretter
+  // den lagrede originalen inn i "aktiv kladd" (f.eks. bruker åpner
+  // "Mine oppskrifter" og redigerer den).
+  const lagretOriginal = ctx.finnOppskrift(forsteLagring.recipeId).recipe;
+  let aktivOriginRecipeId = (typeof lagretOriginal.originRecipeId === 'string' && lagretOriginal.originRecipeId)
+    ? lagretOriginal.originRecipeId
+    : null;
+  assert.strictEqual(aktivOriginRecipeId, forsteLagring.originRecipeId);
+
+  // Mirrors lagreSomVariant()'s ALLERFØRSTE linje: nullstiller sporings-
+  // variabelen FØR samleOppskrift() kalles, slik at kopien aldri kan
+  // arve kildens origin.
+  aktivOriginRecipeId = null;
+  const samlet = { ...lagretOriginal, navn: 'Original (kopi)' };
+  if (aktivOriginRecipeId) samlet.originRecipeId = aktivOriginRecipeId;
+  else delete samlet.originRecipeId; // mirrors samleOppskrift()'s betingede felt
+
+  const variantLagring = ctx.lagreOppskriftIStore(samlet, null); // null -> fersk lokal recipeId, som lagreSomVariant() alltid bruker
+  assert.strictEqual(variantLagring.ok, true);
+  assert.notStrictEqual(variantLagring.recipeId, forsteLagring.recipeId, 'variant skal få en FERSK lokal recipeId');
+  assert.notStrictEqual(variantLagring.originRecipeId, forsteLagring.originRecipeId, 'variant skal få en FERSK originRecipeId, aldri kildens');
+  assert.strictEqual(variantLagring.originRecipeId, variantLagring.recipeId, 'fersk origin = variantens egen nye lokale id (§3.2)');
+
+  // Originalen selv er uberørt.
+  const originalEtterpaa = ctx.finnOppskrift(forsteLagring.recipeId);
+  assert.strictEqual(originalEtterpaa.recipe.originRecipeId, forsteLagring.originRecipeId);
+});
+
 // ─── Oppsummering ───────────────────────────────────────────────────────
 
 console.log(`Kbhrecipe contract-tester: ${bestatt}/${bestatt + feil.length} bestått.`);
