@@ -20,7 +20,10 @@ landed.*
 
 ---
 
-## 1. Verdict: **TECHNICAL PASS**
+## 1. Verdict: **TECHNICAL PARTIAL**
+
+*(Revised from an initial TECHNICAL PASS after Chief review on this
+PR flagged an internal contradiction — see "Revision note" below.)*
 
 Phase 3C's own definition (issue #101, `## 3C — brew-data handoff
 contract`) asks for exactly five things to be *defined* before this
@@ -30,16 +33,37 @@ may be called anything more than manual file exchange:
 > behavior; safe continuation; conflict expectations. No cloud/backend
 > is implied by this phase.
 
-All five are now defined **and implemented**, source-grounded on
-current `master`, for both formats Phase 3C actually governs
-(`.kbhrecipe`, `.kbhbrew`). No cloud/backend/account mechanism exists
-anywhere in the touched code (confirmed by the same grep the decision
-brief ran, repeated in §2 below). This audit found **no product
-blocker** to calling Phase 3C technically complete at the scope the
-roadmap itself defines.
+Four of the five are now defined **and implemented**, source-grounded
+on current `master`, for both formats Phase 3C actually governs
+(`.kbhrecipe`, `.kbhbrew`): export/import semantics (§2.2),
+duplicate/origin behavior (§2.3), safe continuation (§2.4), and
+conflict expectations (§2.5). No cloud/backend/account mechanism
+exists anywhere in the touched code (confirmed by the same grep the
+decision brief ran, repeated in §2 below).
 
-Two caveats keep this a *technical* pass rather than an unqualified
-"done, nothing left":
+The fifth — **ownership/current copy** — is only partially settled.
+[#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253)
+decided ownership for the Phase 3B real-brew acceptance run only, and
+says so in its own text (its "Phase 3C boundary" section: *"Phase 3C
+will separately define App↔Web handoff semantics, including:
+ownership/current copy..."*). No later issue in this lineage made that
+separate, general Phase-3C-scoped ownership decision (§2.1, §4). What
+Phase 3C's implementation work actually delivered for this bullet is
+**capability symmetry** (both surfaces can now export/import both
+formats) and a **duplicate/origin signal** (§2.3) a user can act on —
+real, useful, source-grounded progress — but not the *policy decision*
+the roadmap's own bullet asks for. Calling that "defined" would not be
+source-grounded against #253's own text, so this audit does not do so.
+
+This is why the verdict is **TECHNICAL PARTIAL**, not PASS: four of
+the five Phase 3C bullets are fully closed; the fifth has strong
+supporting mechanism but no decision record. It is not a product
+defect — nothing is broken, and no test fails — it is an open owner
+decision, structurally the same kind of gap #253 itself was written to
+close for Phase 3B. See §7 for the precise, bounded follow-up this
+implies.
+
+Two further caveats, unchanged from the initial pass, remain:
 
 1. Two pre-existing doc-staleness findings from the decision brief
    (§9 there) are **still unfixed** on current master (§5 below) — a
@@ -57,15 +81,25 @@ test result — both are pure documentation freshness gaps.
 
 ## 2. Proven behavior (source-grounded, current master)
 
-### 2.1 Ownership / current copy
+### 2.1 Ownership / current copy — **not fully defined** (the reason for PARTIAL)
 
 [#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253)
 (APPROVED 2026-09-13) remains the only ownership *decision record*,
-scoped explicitly to Phase 3B ("App owns the current structured brew
-record... Web = no parallel live logging copy in Phase 3B"). Nothing
-in the code enforces this — a user remains free to use either
-surface's engine. What Phase 3C's implementation work changed is
-**capability symmetry**, not ownership policy:
+and it scopes itself explicitly to Phase 3B: *"For Phase 3B real-brew
+acceptance, the App owns the current structured brew record / running
+logging copy... Web = no parallel live logging copy in Phase 3B."*
+#253 does not stop there — its own "Phase 3C boundary" section states
+in plain language that this question is deliberately left open for
+Phase 3C to answer separately: *"Phase 3C will separately define
+App↔Web handoff semantics, including: ownership/current copy..."* No
+later issue in this lineage (#270/#274, #275/#277, #276/#281, #283/
+#286, #284/#287, #288/#292, #293) made that separate, general
+Phase-3C-scoped ownership decision. Nothing in the code enforces any
+ownership policy either way — a user remains free to use either
+surface's engine as "the" current copy.
+
+What Phase 3C's implementation work actually changed is **capability
+symmetry**, not ownership policy:
 
 - `.kbhrecipe`: already symmetric before this round (both surfaces
   have full import/export UI) — unchanged.
@@ -77,11 +111,13 @@ surface's engine. What Phase 3C's implementation work changed is
   now has real UI callers, closing the gap the decision brief
   documented in its §3.1.
 
-A **general**, Phase-3C-scoped ownership decision (analogous to #253
-but covering ongoing logging beyond the Phase 3B acceptance run) was
-explicitly *not* made by any of the implementation issues and remains
-a separate, later owner call — this is a manual gate, not a technical
-gap (§4).
+Capability symmetry is real, useful progress, and it is what makes
+safe continuation (§2.4) and duplicate/origin detection (§2.3) work on
+both surfaces. But the roadmap's own bullet asks for ownership/current
+copy to be *defined*, and #253 explicitly did not define it beyond
+Phase 3B — so this bullet is not closed, and the general,
+Phase-3C-scoped ownership decision remains a separate, later owner
+call (§4, §7).
 
 ### 2.2 Export/import semantics
 
@@ -191,9 +227,11 @@ automatic conflict resolver"), not a defect.
   App-only scope — was explicitly deferred by every implementation
   issue in this lineage (decision brief §3.8/§6, restated, not
   reopened, by #281's ratification) and remains a separate, later
-  owner call. Not required for Phase 3C's own technical definition
-  (§101's five bullets, §1 above), but real product policy the owner
-  will eventually want to state explicitly.
+  owner call. This is not optional polish: it is the one Phase 3C
+  bullet (§101's five bullets, §1/§2.1 above) this audit found not yet
+  defined, and it is the reason this audit's verdict is TECHNICAL
+  PARTIAL rather than PASS. See §7 for the precise, bounded follow-up
+  this implies.
 - Divergence *visibility* (§2.5) — surfacing "you already have a copy
   of this, imported/edited on `<date>`" using the new `originRecipeId`/
   `originBrewId` signals — is possible now that the identifiers exist,
@@ -286,15 +324,31 @@ nothing in this round's implementation altered any of it:
 
 ## 7. Genuine blocker requiring a later bounded issue
 
-**None found.** The one real product defect this lineage's own process
-surfaced (§2.3, malformed `originRecipeId` on Web import) was already
-caught by a TEST-only issue (#288), fixed by a dedicated FAST issue
-(#293), and is merged on current master — this audit re-confirms it is
-closed, not open. If the owner wants the two still-stale doc sections
-(§5.1) and the one newly-found stale status header (§5.2) refreshed,
-that is one small, bounded, docs-only follow-up (three header/section
-edits across two files) — not a blocker to calling Phase 3C technically
-complete at the scope §101 itself defines.
+**No product/code blocker found.** The one real product defect this
+lineage's own process surfaced (§2.3, malformed `originRecipeId` on
+Web import) was already caught by a TEST-only issue (#288), fixed by a
+dedicated FAST issue (#293), and is merged on current master — this
+audit re-confirms it is closed, not open.
+
+What *is* still open is a **decision**, not a defect: the general,
+Phase-3C-scoped ownership/current-copy call (§2.1, §4) that #253 itself
+deferred to Phase 3C and that no later issue in this lineage made. The
+precise, bounded follow-up this audit recommends — describing it per
+this issue's own instruction, not implementing or filing it here — is
+a single DECISION-type issue, structurally identical to #253 itself:
+state which surface owns the current/ongoing logging copy once Phase
+3B's acceptance run ends (or state explicitly that no single-owner
+policy is required going forward and manual dual-surface use is
+accepted), record it as a durable decision, and no more. That decision
+alone — no code change — would close the one Phase 3C bullet (§101)
+this audit found undefined and would let a follow-up audit call Phase
+3C a full TECHNICAL PASS.
+
+Separately, if the owner wants the two still-stale doc sections (§5.1)
+and the one newly-found stale status header (§5.2) refreshed, that is
+one small, bounded, docs-only follow-up (three header/section edits
+across two files) — independent of the ownership decision above, and
+not a blocker either way.
 
 ---
 
@@ -312,3 +366,22 @@ Mirrors issue #291's own hard guards:
 - Does not touch parked #98/#100/#233/#241 or owner-private data.
 - Does not fix the doc staleness it found (§5) — recorded per this
   issue's own "describe precisely but do not implement" instruction.
+
+## 9. Revision note (Chief review, PR #297)
+
+This audit's first version verdicted **TECHNICAL PASS** while its own
+§2.1/§4 already stated that a general Phase-3C ownership/current-copy
+decision had not been made — an internal contradiction Chief review
+caught on exact head `a9a0ca7`. Reconciling it required checking which
+side was accurate rather than picking one by default: #253's own text
+(its "Phase 3C boundary" section) explicitly defers the general
+ownership question to Phase 3C, so it cannot also be read as having
+answered it. That makes §2.1/§4's finding the correct one, and the
+verdict the part that needed to change. Fixed by downgrading the
+verdict to **TECHNICAL PARTIAL** and reworking §1/§2.1/§4/§7 so the
+document is internally consistent: four of five Phase 3C bullets
+closed, the fifth (ownership/current copy) open pending one bounded
+owner decision, described but not filed in §7. No other section
+(§2.2–§2.5, §3, §5, §6, §8, §0) needed a content change — only §1's
+verdict and its cross-references to §2.1/§4/§7 were inconsistent with
+the audit's own evidence.
