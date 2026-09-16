@@ -194,13 +194,73 @@ exported `.kbhbrew` file).
   merge/overwrite is ever automatic. `recipeId` is dropped on import
   (it is local-machine-scoped and meaningless on a receiving machine);
   the snapshot alone keeps the imported brew fully readable.
-- **No App-side counterpart exists.** Nothing under `modules/`
-  references `"kbhbrew"`, `brewId`, or an equivalent import/export
-  format. App has no `.kbhbrew` reader or writer today.
+- **App has its own full `.kbhbrew` counterpart (PRI 3B, issue #24,
+  commit `111b0a7`, 2026-09-03).** `modules/kbhbrew.py` is App's pure
+  reader/writer engine for the same five-layer model documented above;
+  `modules/kbhbrew_storage.py` owns disk persistence, identity
+  (`finnes_brew_med_origin()`) and file import/export
+  (`eksporter_kbhbrew()`/`importer_kbhbrew()`); `ui/kbhbrew_panel.py`
+  wires create/import/export to Streamlit. See Section 3 below for the
+  full current-state inventory. *(Correction, issue #290, 2026-09-16:
+  this bullet previously read "No App-side counterpart exists... App
+  has no `.kbhbrew` reader or writer today" — accurate only until PRI
+  3B shipped; already flagged as stale in
+  [phase3b_kbhbrew_acceptance_gap_audit.md](phase3b_kbhbrew_acceptance_gap_audit.md)
+  and
+  [phase3c_brew_data_handoff_contract_decision_brief.md](phase3c_brew_data_handoff_contract_decision_brief.md)
+  §2/§9.)*
 
 ---
 
-## 3. Inventory — App brew log (current implementation)
+## 3. Inventory — App `.kbhbrew` engine (current) and legacy brew log (compatibility)
+
+**App's current `.kbhbrew` engine (PRI 3B, issue #24, commit `111b0a7`,
+2026-09-03).** App implements the same five-layer model as Web
+(Section 1) as a structured, per-brew record — this is the current App
+counterpart this contract governs, distinct from the legacy flat log
+documented below.
+
+- **Engine**: `modules/kbhbrew.py` — pure reader/writer and snapshot
+  freezing, with the same known-field lists, per-layer/envelope
+  passthrough containers (Section 5.13), and forbidden-derived-ABV
+  export filter (`FORBUDTE_ACTUALS_EKSPORTFELT`, mirroring Web's
+  `BREW_ACTUALS_FORBUDTE_EKSPORTFELT`) documented for Web above.
+- **Storage/identity**: `modules/kbhbrew_storage.py` — one JSON file
+  per brew; `finnes_brew_med_origin()` implements the same
+  `originBrewId` duplicate-detection policy as Web's `importerBrygg()`
+  (Section 5.3/5.14); `opprett_og_lagre_ny_brew()`/`oppdater_brew_lag()`
+  read/write layers 1–5; `eksporter_kbhbrew()`/`importer_kbhbrew()` are
+  App's file import/export — this file-portability layer is fully
+  wired end-to-end, unlike Web's equivalent functions in
+  `web/js/brew_storage.js`, which currently have no UI caller.
+- **UI**: `ui/kbhbrew_panel.py` — `render_kbhbrew_create_panel()`
+  (freeze a new brew from the active recipe/equipment/predicted
+  values), `render_kbhbrew_import_panel()`/`render_kbhbrew_export_panel()`
+  (file import via `st.file_uploader`, file export/download).
+  `ui/kbhbrew_history_panel.py` renders the read/history surface (list,
+  select, edit actuals/sensing/learning/status), backed by the pure
+  helper modules `modules/kbhbrew_ui.py`/`modules/kbhbrew_history_ui.py`
+  (formatting/extraction only, no I/O).
+- **Identity fields match Web field-for-field**: `modules/kbhbrew.py`'s
+  `_KJENTE_BREW_FELT` (`brewId`, `originBrewId`, `parentBrewId`,
+  `recipeId`, `status`, `createdAt`, `brewedAt`, `snapshot`, `actuals`,
+  `sensing`, `learning`) matches `web/js/brew_storage.js`'s known-fields
+  list — the Section 5.3 identity policy is implemented identically on
+  both sides, not merely conceptually compatible.
+
+This does not change the field-mapping table in Section 4 below, which
+documents App's pre-PRI-3B state (the legacy log only) — the state
+actually used to derive the Section 8 ratified decisions; see the note
+at the top of that table.
+
+---
+
+### Legacy per-recipe brew log (still present, compatibility-only)
+
+The following documents App's older, flat per-recipe log — unchanged,
+still live, and distinct from the `.kbhbrew` engine above. It predates
+PRI 3B and remains historical/compatibility behavior, not the current
+structured brew-record path.
 
 Source: `modules/recipe_storage.py`
 (`lagre_logg_entry()`/`hent_logg()`/`_logg_filsti()`/
@@ -265,8 +325,14 @@ production behavior with real regression coverage, not a stub.
   `actuals.notes` and `sensing.notes` — App has no concept of "measured
   observation" vs. "subjective tasting note" as separate fields, and no
   `whatWorked`/`whatChanged`/`nextTime` equivalent at all.
-- **No `.kbhbrew` import/export exists.** App cannot read or write a
-  `.kbhbrew` file today, in either direction.
+- **This legacy log itself has no `.kbhbrew` import/export** — it is
+  read/written exclusively by `modules/recipe_storage.py`, untouched by
+  the `.kbhbrew` engine. *(Correction, issue #290, 2026-09-16: this
+  bullet previously read "No `.kbhbrew` import/export exists... App
+  cannot read or write a `.kbhbrew` file today, in either direction,"
+  which was true of the whole App at the time but is no longer true of
+  App overall — see the current `.kbhbrew` engine documented at the top
+  of this section.)*
 - **Related but distinct: App's Recipe Object already caches computed
   values on the *recipe* itself.** `modules/recipe.py::bygg_recipe_object()`
   stores `stats` (`og`/`fg`/`abv`/`ibu`/`ebc`) and `flavor_profile`
@@ -289,6 +355,15 @@ concept, shape/name needs controlled change · `APP_ONLY`/`WEB_ONLY` =
 legitimate product-local state, not wire contract · `DEFER` = useful,
 not safe/necessary for V1 · `REJECT` = should not enter the Core
 contract as-is.
+
+**Historical snapshot note (added issue #290, 2026-09-16):** the "App
+field/path" column below reflects App's state *before* PRI 3B — i.e.
+the legacy per-recipe log only (Section 3) — the actual state this
+discovery round used to derive the Section 8 ratified decisions. It is
+preserved unchanged as that historical evidence and is **not** a
+description of App's current `.kbhbrew` engine, which now implements
+most of these concepts field-for-field identically to Web (see Section
+3's lead note).
 
 | Concept | Web field/path | App field/path | Proposed Core meaning | Disposition |
 |---|---|---|---|---|
@@ -605,21 +680,30 @@ already, and remains, the only implementation that satisfies the
 five-layer model, the identity policy, and the derived-value discipline
 this contract requires.
 
-**App compatibility/gap summary.**
-App implements, at most, the **actuals** layer of the five-layer model,
-in a structurally different, non-frozen, non-identified shape (Section
-3): no `brewId`/`originBrewId`, no frozen snapshot of any kind, no
-`sensing`/`learning` layers, no `status`, one merged `note` field, and
-one derived value (`actual_abv`) stored where Core/Web say it should be
-recomputed. App also has **zero** `.kbhbrew` reader or writer today.
-Adopting `.kbhbrew` in App would therefore be **new App feature work**,
-not a migration of an existing compatible format — there is no
-"convert App's brew log to `.kbhbrew`" adapter that can be written
-today without first resolving what a frozen App-side snapshot would
-even contain (App's Recipe Object does not carry the same
-plan/prediction separation Web's does — see Section 3's closing note).
-This confirms the App gap is real and non-trivial, not a naming
-mismatch.
+**Legacy log compatibility/gap summary.** *(Retitled and corrected,
+issue #290, 2026-09-16 — this subsection previously said "App
+compatibility/gap summary" and "App also has **zero** `.kbhbrew`
+reader or writer today," which was accurate only until PRI 3B shipped;
+see the current `.kbhbrew` engine documented at the top of Section 3.
+This subsection is, and always was, about the legacy per-recipe log
+specifically, not about App's overall `.kbhbrew` capability.)*
+App's legacy per-recipe log implements, at most, the **actuals** layer
+of the five-layer model, in a structurally different, non-frozen,
+non-identified shape (Section 3): no `brewId`/`originBrewId`, no frozen
+snapshot of any kind, no `sensing`/`learning` layers, no `status`, one
+merged `note` field, and one derived value (`actual_abv`) stored where
+Core/Web say it should be recomputed. Migrating *this legacy log's
+existing entries* to `.kbhbrew` would still be **new adapter/migration
+work**, not something App's current `.kbhbrew` engine (which writes new
+brews directly, with a real frozen snapshot) already does for old
+entries — there is no "convert App's legacy log to `.kbhbrew`" adapter
+that can be written today without first resolving what a frozen
+App-side snapshot for those *old* entries would even contain (App's
+Recipe Object does not carry the same plan/prediction separation Web's
+does — see Section 3's closing note). This confirms the legacy-log
+migration gap is real and non-trivial, not a naming mismatch — it says
+nothing about App's current, separate `.kbhbrew` engine, which has no
+such gap for brews created going forward.
 
 **What legacy data must remain readable.**
 `tests/fixtures/legacy/app/brew_log.json` (flat App shape) and
@@ -630,19 +714,25 @@ document what each implementation actually produces today and must
 keep validating unchanged regardless of any future Core `.kbhbrew`
 work. This document does not touch them.
 
-**What cannot currently be represented / requires an adapter.**
-An App brew-log entry cannot be losslessly represented as a Core
-`.kbhbrew` brew record today, because it lacks the entire snapshot
-layer (there is nothing to freeze — App has no per-brew capture of
-"what the recipe/ingredients/equipment looked like at brew time"). A
-future App→`.kbhbrew` writer would need to either (a) freeze the
-recipe/ingredients/equipment *at the moment* a log entry is created —
-new App behavior, not a data transformation of existing entries — or
-(b) explicitly represent old App log entries as `.kbhbrew` records with
-an empty/absent snapshot, which the current `_gyldigSnapshot()` policy
-in Web (`recipe` + `predicted` objects required) does not allow. Neither
-option is decided or built here — this is exactly the kind of
-cross-product migration this issue explicitly excludes.
+**What cannot currently be represented / requires an adapter.** *(Scope
+clarified, issue #290, 2026-09-16: this paragraph is about migrating
+existing **legacy log** entries — App's separate, current `.kbhbrew`
+engine, PRI 3B, already freezes exactly this snapshot for every *new*
+brew it creates, see Section 3's lead note.)*
+An existing legacy App brew-log entry cannot be losslessly represented
+as a Core `.kbhbrew` brew record today, because it lacks the entire
+snapshot layer (there is nothing to freeze retroactively — the legacy
+log never captured "what the recipe/ingredients/equipment looked like
+at brew time"). A future legacy-log→`.kbhbrew` migration adapter would
+need to either (a) freeze the recipe/ingredients/equipment *at the
+moment* such a migration ran — necessarily approximate, since it cannot
+reconstruct the actual state at the historical brew's original time —
+or (b) explicitly represent old legacy log entries as `.kbhbrew`
+records with an empty/absent snapshot, which the current
+`_gyldigSnapshot()` policy in Web (`recipe` + `predicted` objects
+required) does not allow. Neither option is decided or built here —
+this is exactly the kind of cross-product migration this issue
+explicitly excludes.
 
 ---
 
@@ -892,7 +982,11 @@ must not invent.
 ## 9. What this document (and PRI 3A.2) does not do
 
 - Does not implement `.kbhbrew` in App — no new reader/writer/UI code
-  is added anywhere (PRI 3B, separately authorized).
+  is added anywhere by *this* document/round (PRI 3B, separately
+  authorized). *(Status note, issue #290, 2026-09-16: PRI 3B has since
+  shipped separately, commit `111b0a7`, 2026-09-03 — this bullet
+  describes PRI 3A.2's own scope at the time, not App's current
+  capability; see Section 2/3's current-status notes.)*
 - Does not modify `web/README.md` or any Web file other than
   `web/js/brew_storage.js` (Section 2, the required unknown-field
   passthrough fix — the one Web change this ratification round makes).
