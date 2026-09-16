@@ -477,6 +477,74 @@ def lagre_oppskrift(recipe, kilde_filnavn=None, bloker_ved_navnekollisjon=False)
 
     return nytt_filnavn
 
+def sikre_origin_recipe_id(kilde_filnavn):
+    """
+    Issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2) -- App sin
+    mint-mekanisme for et EKSISTERENDE, tidligere lagret oppskrift-filen
+    som ennå mangler en gyldig `originRecipeId`. App har ingen lokal
+    `recipeId` å arve fra (§1.2 i kontrakten), så dette er den eksakte,
+    tidligere spesifiserte-men-aldri-bygde V1 §6-mekanismen: les den
+    LAGREDE filen `kilde_filnavn` fra disk, og hvis den mangler en
+    gyldig `originRecipeId` (ikke en streng, eller en tom streng), mint
+    en fresh `uuid4` og skriv KUN det ene feltet atomisk tilbake til
+    AKKURAT den ene filen -- ingen andre felt i filen røres, og ingen
+    andre filer skrives.
+
+    Kalles fra en eksplisitt, brukerutløst eksport-handling
+    (ui/recipe_card.py sin "📦 Eksporter KBH-oppskrift"-knapp) -- ALDRI
+    som bakgrunnsmigrering, ALDRI ved vanlig lasting/redigering/lagring.
+    Dette er IKKE det eneste stedet App minter en `originRecipeId`: §3.5
+    krever i tillegg en UMIDDELBAR fresh mint ved "💾 Lagre som ny kopi"
+    (ui/recipe_card.py), som gjøres direkte der (ikke via denne
+    funksjonen, siden den kopien ennå ikke har noen fil å lese fra).
+
+    Returnerer den (evt. nymintede) `originRecipeId`-verdien, eller
+    `None` i DEMO_MODE, hvis `kilde_filnavn` er tom/manglende (en helt
+    ny, aldri lagret oppskrift -- ingen fil å skrive til), eller hvis
+    filen ikke lenger finnes på disk.
+    """
+    if DEMO_MODE:
+        return None
+    if not kilde_filnavn:
+        return None
+    filsti = _valider_kildefilnavn(kilde_filnavn)
+    if not os.path.exists(filsti):
+        return None
+    with open(filsti, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    eksisterende = data.get("originRecipeId")
+    if isinstance(eksisterende, str) and eksisterende.strip():
+        return eksisterende
+    ny_origin_recipe_id = str(uuid.uuid4())
+    data["originRecipeId"] = ny_origin_recipe_id
+    _skriv_json_atomisk(filsti, data)
+    return ny_origin_recipe_id
+
+def finnes_oppskrift_med_origin(origin_recipe_id, mappe=None):
+    """
+    Issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4) -- True hvis
+    MINST ÉN lokalt lagret oppskrift allerede har akkurat denne
+    `originRecipeId`-verdien (eksakt strenglikhet -- samme prinsipp som
+    modules/kbhbrew_storage.py sin `finnes_brew_med_origin`). Brukes av
+    import-flyten (ui/sidebar.py) for å avvise en duplikat-import
+    EKSPLISITT, FØR noe skrives -- aldri en stille sammenslåing/
+    overskriving.
+
+    `origin_recipe_id` som ikke er en ikke-tom streng gir alltid False
+    ("ingen dedup-signal", §2.5 i kontrakten) -- kallestedet skal uansett
+    aldri sende inn noe annet enn det parse_kbhrecipe_json() allerede har
+    normalisert, men denne funksjonen stoler ikke blindt på det.
+    """
+    if not isinstance(origin_recipe_id, str) or not origin_recipe_id.strip():
+        return False
+    if mappe is None:
+        mappe = _mappe()
+        if not os.path.exists(mappe):
+            return False
+    elif not os.path.exists(mappe):
+        return False
+    return any(data.get("originRecipeId") == origin_recipe_id for _, data in _skann_oppskriftsfiler(mappe))
+
 def _logg_filsti(oppskrift_navn):
     """NY plassering for bryggelogger: recipes/_logs/<generert
     filnavn>_logg.json -- en EGEN undermappe, adskilt fra selve

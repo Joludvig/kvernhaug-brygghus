@@ -31,6 +31,9 @@ logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 from streamlit.testing.v1 import AppTest
 
+from modules.recipe import bygg_recipe_object
+from modules.recipe_storage import lagre_oppskrift, sikre_origin_recipe_id
+
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _HARNESS = os.path.join(_REPO_ROOT, "tests", "fixtures", "streamlit_harness", "sidebar_harness.py")
 
@@ -294,6 +297,61 @@ class TestKbhrecipeImportUiAppTest(unittest.TestCase):
         self._klikk(at, "kbhrecipe_analyser_btn")
         self.assertIsNone(_ss(at, "kbhrecipe_import_preview"))
         self.assertEqual([b for b in at.sidebar.button if b.key == "kbhrecipe_bekreft_btn"], [])
+
+    # ─── 10-11: originRecipeId-duplikatdeteksjon (issue #283) ───────────
+
+    def test_10_duplikat_origin_recipe_id_avvises_uten_mutasjon(self):
+        lagret = bygg_recipe_object(
+            "Allerede Lagret", 20.0, 0.75,
+            [{"id": "weyermann_pilsner", "mengde": 5.0}], [], "safale_us_05",
+            1.050, 1.012, 5.0, 20, 8, {},
+        )
+        filnavn = lagre_oppskrift(lagret)
+        origin = sikre_origin_recipe_id(filnavn)
+
+        at = self._ny_apptest()
+        self._last_opp(at, "duplikat.kbhrecipe", _kbhrecipe_tekst(originRecipeId=origin))
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self.assertIsNotNone(_ss(at, "kbhrecipe_import_preview"))
+
+        self._klikk(at, "kbhrecipe_bekreft_btn")
+
+        # Avvist -- ingen mutasjon av den aktive oppskriften/økten.
+        self.assertEqual(_ss(at, "gjeldende_navn"), "Kvernhaug Spesial")
+        self.assertIsNone(_ss(at, "_aktiv_kbh_origin_recipe_id"))
+        feilmeldinger = [e.value for e in at.sidebar.error]
+        self.assertTrue(any("allerede importert" in m for m in feilmeldinger))
+        # Forhåndsvisningen lever fortsatt -- ingen skjult mutasjon av
+        # preview-state ved en avvist duplikat.
+        self.assertIsNotNone(_ss(at, "kbhrecipe_import_preview"))
+
+    def test_11_ikke_duplikat_origin_recipe_id_importeres_som_normalt(self):
+        lagret = bygg_recipe_object(
+            "En Annen Oppskrift", 20.0, 0.75,
+            [{"id": "weyermann_pilsner", "mengde": 5.0}], [], "safale_us_05",
+            1.050, 1.012, 5.0, 20, 8, {},
+        )
+        filnavn = lagre_oppskrift(lagret)
+        sikre_origin_recipe_id(filnavn)
+
+        at = self._ny_apptest()
+        self._last_opp(at, "ny.kbhrecipe", _kbhrecipe_tekst(originRecipeId="en-helt-annen-origin-id"))
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self._klikk(at, "kbhrecipe_bekreft_btn")
+
+        self.assertEqual(_ss(at, "gjeldende_navn"), "AppTest Smoke Ale")
+        self.assertEqual(_ss(at, "_aktiv_kbh_origin_recipe_id"), "en-helt-annen-origin-id")
+
+    def test_12_import_uten_origin_recipe_id_importeres_som_ny(self):
+        # Legacy-fil uten originRecipeId i det hele tatt -- "ingen
+        # dedup-signal", importeres alltid som ny (§2.5 i kontrakten).
+        at = self._ny_apptest()
+        self._last_opp(at, "legacy.kbhrecipe", _kbhrecipe_tekst())
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self._klikk(at, "kbhrecipe_bekreft_btn")
+
+        self.assertEqual(_ss(at, "gjeldende_navn"), "AppTest Smoke Ale")
+        self.assertIsNone(_ss(at, "_aktiv_kbh_origin_recipe_id"))
 
 
 if __name__ == "__main__":

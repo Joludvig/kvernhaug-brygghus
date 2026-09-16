@@ -2,6 +2,7 @@
 import json
 import re
 import os
+import uuid
 import streamlit as st
 from datetime import date, datetime, timezone
 from config import DEMO_MODE
@@ -10,6 +11,7 @@ from modules.recipe_storage import (
     slett_oppskrift_fil,
     lagre_logg_entry,
     hent_logg,
+    sikre_origin_recipe_id,
     OppskriftNavnKollisjon,
     UgyldigKildefilnavn,
     LoggKorruptError,
@@ -141,7 +143,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         placeholder="Eksempel: Imperial Nordisk Røykstaut",
     )
 
-    def _bygg_recipe_fra_session(ctx):
+    def _bygg_recipe_fra_session(ctx, origin_recipe_id=None):
         return bygg_recipe_object(
             st.session_state.get("gjeldende_navn") or "Kvernhaug Spesial",
             st.session_state.get("batch_volum_input", 20.0),
@@ -170,6 +172,13 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             # over -- ellers ville et vanlig "Lagre endringer"-klikk
             # stille mistet metadataen.
             kbh_passthrough=st.session_state.get("_aktiv_kbh_passthrough"),
+            # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2/§3.5) --
+            # kalleren avgjør EKSPLISITT hva som skal skje med identiteten
+            # for HVER handling (preserve ved "Lagre endringer"/eksport,
+            # fresh mint ved "Lagre som ny kopi") -- ALDRI et implisitt
+            # session_state-fallback her, siden det ville latt en kopi
+            # arve kildens origin ved en feil.
+            origin_recipe_id=origin_recipe_id,
         )
 
     if not DEMO_MODE:
@@ -179,7 +188,14 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         # modules/recipe_storage.py::lagre_oppskrift()).
         if st.session_state.get("_last_loaded_recipe"):
             if st.button("💾 Lagre endringer", width="stretch", key="lagre_endringer_btn"):
-                ny_recipe = _bygg_recipe_fra_session(ctx)
+                # issue #283 -- en vanlig redigering/re-lagring av SAMME
+                # oppskrift skal ALDRI endre originRecipeId (§3.2 siste
+                # kulepunkt: "aldri re-mintet av en senere vanlig
+                # redigering/re-lagring") -- preserver den aktive verdien
+                # uendret (None hvis oppskriften ennå ikke har noen).
+                ny_recipe = _bygg_recipe_fra_session(
+                    ctx, origin_recipe_id=st.session_state.get("_aktiv_kbh_origin_recipe_id")
+                )
                 _gammelt_filnavn = st.session_state.get("_last_loaded_recipe_file")
                 try:
                     nytt_filnavn = lagre_oppskrift(
@@ -229,7 +245,17 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
             if st.button("💾 Lagre som ny kopi", width="stretch", key="lagre_ny_kopi_btn"):
-                ny_recipe = _bygg_recipe_fra_session(ctx)
+                # issue #283 (§3.5, Chief-korreksjon PR #286) -- "Lagre som
+                # ny kopi" skal ALDRI arve kildeoppskriftens originRecipeId
+                # (ville kollidert med kilden ved en senere .kbhrecipe-
+                # import av begge), men skal heller ikke lagres UTEN en
+                # egen origin i mellomtiden -- kontrakten krever at kopien
+                # får en FRESH originRecipeId med det samme, ikke først ved
+                # en senere eksport. Mintes derfor her, direkte -- dette er
+                # det ENE unntaket fra "App minter aldri ved lagring"
+                # (§3.2/§8), siden §3.5 eksplisitt krever mint nettopp ved
+                # denne handlingen.
+                ny_recipe = _bygg_recipe_fra_session(ctx, origin_recipe_id=str(uuid.uuid4()))
                 try:
                     # kilde_filnavn=None -- en ny kopi har per definisjon
                     # ingen kjent tidligere kildefil.
@@ -285,6 +311,11 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                                 # kan settes direkte, samme mønster som
                                 # _aktiv_recipe_efficiency over.
                                 st.session_state["_aktiv_kbh_passthrough"] = None
+                                # issue #283 -- samme prinsipp som
+                                # _aktiv_kbh_passthrough over: en ny, blank
+                                # oppskrift skal ikke arve den nettopp
+                                # arkiverte oppskriftens originRecipeId.
+                                st.session_state["_aktiv_kbh_origin_recipe_id"] = None
                                 # "gjeldende_navn" er bundet til Bryggnavn-widgeten
                                 # (instansiert lenger opp i DENNE samme renderingen)
                                 # -- kan derfor ikke settes direkte her (Streamlit
@@ -377,7 +408,26 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         st.write("---")
         st.caption("Eksporter oppskriften som en portabel .kbhrecipe-fil (KBH Core Contract V1) — kan åpnes i Kvernhaug Brygghus Web.")
         if st.button("📦 Eksporter KBH-oppskrift (.kbhrecipe)", width="stretch"):
-            eksport_recipe = _bygg_recipe_fra_session(ctx)
+            # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2) --
+            # App sitt ENESTE mint-tidspunkt: hvis den lagrede kildefilen
+            # (om noen) mangler en gyldig originRecipeId, mintes en fresh
+            # uuid4 og skrives atomisk tilbake til AKKURAT den ene filen
+            # HER, FØR selve eksporten bygges -- aldri ved vanlig
+            # lasting/redigering/lagring (se
+            # modules/recipe_storage.py::sikre_origin_recipe_id()). En
+            # HELT ny, aldri lagret oppskrift har ingen fil å mint til --
+            # da faller vi tilbake til en evt. allerede-aktiv origin (f.eks.
+            # nettopp importert, men ikke lagret ennå); en helt fersk,
+            # aldri importert oppskrift eksporteres da uten feltet
+            # (valgfritt V1-felt, §3.1).
+            _kilde_filnavn_eksport = st.session_state.get("_last_loaded_recipe_file")
+            if _kilde_filnavn_eksport:
+                _origin_recipe_id = sikre_origin_recipe_id(_kilde_filnavn_eksport)
+                if _origin_recipe_id:
+                    st.session_state["_aktiv_kbh_origin_recipe_id"] = _origin_recipe_id
+            else:
+                _origin_recipe_id = st.session_state.get("_aktiv_kbh_origin_recipe_id")
+            eksport_recipe = _bygg_recipe_fra_session(ctx, origin_recipe_id=_origin_recipe_id)
             generert_tidspunkt = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
             try:
                 konvolutt = bygg_kbhrecipe_konvolutt(eksport_recipe, generert_tidspunkt)

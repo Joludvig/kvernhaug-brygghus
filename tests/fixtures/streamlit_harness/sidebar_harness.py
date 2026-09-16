@@ -24,6 +24,8 @@ if "_aktiv_recipe_efficiency" not in st.session_state:
     st.session_state["_aktiv_recipe_efficiency"] = None
 if "_aktiv_kbh_passthrough" not in st.session_state:
     st.session_state["_aktiv_kbh_passthrough"] = None
+if "_aktiv_kbh_origin_recipe_id" not in st.session_state:
+    st.session_state["_aktiv_kbh_origin_recipe_id"] = None
 if "import_versjon" not in st.session_state:
     st.session_state["import_versjon"] = 0
 

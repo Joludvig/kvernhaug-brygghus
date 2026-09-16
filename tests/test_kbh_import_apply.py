@@ -50,6 +50,7 @@ def _native_recipe(**overrides):
         "water_target_profile": None,
         "water_treatment": None,
         "water_measurements": None,
+        "originRecipeId": None,
     }
     base.update(overrides)
     return base
@@ -305,6 +306,37 @@ class TestApplyKbhrecipeImportTilSessionState(unittest.TestCase):
         })
         self.assertNotIn("_last_loaded_recipe", st.session_state)
         self.assertNotIn("_last_loaded_recipe_file", st.session_state)
+
+
+# ─── originRecipeId (issue #283, CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) ──
+
+class TestOriginRecipeIdHydrering(unittest.TestCase):
+    def setUp(self):
+        st.session_state.clear()
+
+    def tearDown(self):
+        st.session_state.clear()
+
+    def test_gyldig_origin_recipe_id_hydreres(self):
+        resultat = _import_resultat(originRecipeId="44444444-4444-4444-4444-444444444444")
+        apply_kbhrecipe_import_to_session_state(resultat)
+        self.assertEqual(
+            st.session_state["_aktiv_kbh_origin_recipe_id"], "44444444-4444-4444-4444-444444444444"
+        )
+
+    def test_manglende_origin_recipe_id_gir_none(self):
+        resultat = _import_resultat()
+        apply_kbhrecipe_import_to_session_state(resultat)
+        self.assertIsNone(st.session_state["_aktiv_kbh_origin_recipe_id"])
+
+    def test_ny_import_overskriver_forrige_aktive_origin(self):
+        # Samme "settes UBETINGET på hvert import"-prinsipp som
+        # _aktiv_kbh_passthrough -- en tidligere importert oppskrifts
+        # origin skal ALDRI henge igjen etter en NY import uten origin.
+        st.session_state["_aktiv_kbh_origin_recipe_id"] = "gammel-origin-fra-forrige-import"
+        resultat = _import_resultat()
+        apply_kbhrecipe_import_to_session_state(resultat)
+        self.assertIsNone(st.session_state["_aktiv_kbh_origin_recipe_id"])
 
 
 if __name__ == "__main__":

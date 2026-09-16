@@ -683,5 +683,52 @@ class TestFullPositivImportCase(unittest.TestCase):
         self.assertEqual(r["brygger_stil"], "QA Testbryggeriets egen stil")
 
 
+# ─── originRecipeId (issue #283, CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) ──
+
+class TestOriginRecipeId(unittest.TestCase):
+    def test_gyldig_origin_recipe_id_foeres_videre_uendret(self):
+        res = _parse({"originRecipeId": "22222222-2222-2222-2222-222222222222"})
+        self.assertEqual(res["recipe"]["originRecipeId"], "22222222-2222-2222-2222-222222222222")
+        self.assertNotIn("originRecipeId", res["passthrough"])
+
+    def test_manglende_origin_recipe_id_gir_none_ikke_avvisning(self):
+        res = _parse({})
+        self.assertIsNone(res["recipe"]["originRecipeId"])
+
+    def test_tom_streng_origin_recipe_id_gir_none(self):
+        res = _parse({"originRecipeId": "   "})
+        self.assertIsNone(res["recipe"]["originRecipeId"])
+
+    def test_ikke_streng_origin_recipe_id_gir_none_ikke_avvisning(self):
+        res = _parse({"originRecipeId": 12345})
+        self.assertIsNone(res["recipe"]["originRecipeId"])
+
+    def test_legacy_fixtures_uten_origin_recipe_id_importeres_fortsatt(self):
+        # "full" er ekskludert her -- den avvises for import av en helt
+        # urelatert, allerede kjent/dokumentert grunn (avvikende
+        # prosessprofil, se test_2_full_fixture_er_gyldig_historisk_
+        # evidence_men_avvises_for_import over), ikke noe denne testen
+        # dekker.
+        for navn in ("minimal", "partial_water"):
+            res = parse_kbhrecipe_json(_last_fixture(navn), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+            self.assertIsNone(res["recipe"]["originRecipeId"])
+
+        raw = json.loads(_last_fixture("full"))
+        del raw["recipe"]["prosess"]
+        res = parse_kbhrecipe_json(json.dumps(raw), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+        self.assertIsNone(res["recipe"]["originRecipeId"])
+
+    def test_roundtrip_via_ekte_writer_bevarer_origin_recipe_id(self):
+        original = bygg_recipe_object(
+            navn="Roundtrip Origin", batch_size=20.0, efficiency=0.75,
+            malts=[{"id": "weyermann_pilsner", "mengde": 4.0}], hops=[], yeast="safale_us_05",
+            og=1.045, fg=1.010, abv=4.5, ibu=0, ebc=8, flavor_profile={},
+            origin_recipe_id="33333333-3333-3333-3333-333333333333",
+        )
+        konvolutt = bygg_kbhrecipe_konvolutt(original, "2026-09-01T00:00:00Z")
+        importert = parse_kbhrecipe_json(json.dumps(konvolutt), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+        self.assertEqual(importert["recipe"]["originRecipeId"], "33333333-3333-3333-3333-333333333333")
+
+
 if __name__ == "__main__":
     unittest.main()

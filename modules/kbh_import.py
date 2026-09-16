@@ -52,6 +52,7 @@ _PROSESS_STRUKTURELLE_FELT = (
 _KJENTE_PAYLOAD_FELT = frozenset({
     "recipeSchemaVersion", "navn", "volum", "effektivitet", "malt", "humle",
     "gjaerId", "gjaerCustom", "attenuationOverride", "bryggerStil", "prosess", "vann",
+    "originRecipeId",
 })
 
 # Felt som ALDRI skal havne i passthrough, uansett hva en (evt. hånd-
@@ -471,6 +472,7 @@ def parse_kbhrecipe_json(tekst, malt_db=None, humle_db=None, gjaer_db=None):
               "process_profile",
               "water_source_profile", "water_target_profile",
               "water_treatment", "water_measurements",
+              "originRecipeId",
           },
           "passthrough": {...},   # se _bygg_passthrough() -- kan være {}
         }
@@ -479,6 +481,10 @@ def parse_kbhrecipe_json(tekst, malt_db=None, humle_db=None, gjaer_db=None):
     -- disse beregnes av App, aldri importert som om de var kildedata.
     `recipe` inneholder heller ingen lokal identitet (recipeId) --
     import er "import as new" (KBHR-010), håndtert av kalleren (PRI 2C2).
+    `originRecipeId` (issue #283) er derimot en PORTABEL identitet og
+    føres videre uendret hvis gyldig -- None hvis feltet mangler, er tomt
+    eller ikke en streng (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4/§3.8:
+    "ingen dedup-signal tilgjengelig", ikke en avvisning).
 
     Kaster UgyldigKbhrecipeForImport (se kategoriene øverst i denne
     filen) ved ethvert valideringsbrudd -- ALDRI en fallback-/gjettet
@@ -505,6 +511,20 @@ def parse_kbhrecipe_json(tekst, malt_db=None, humle_db=None, gjaer_db=None):
     if bryggerstil is not None and not isinstance(bryggerstil, str):
         _feil(KATEGORI_INVALID_PAYLOAD, f"bryggerStil har ugyldig type: {bryggerstil!r}")
 
+    # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4/§3.8) --
+    # manglende/tom/ikke-streng behandles som "ingen dedup-signal
+    # tilgjengelig", ALDRI en avvisning av hele importen (§2.5 -- hver
+    # eneste .kbhrecipe-fil som fantes FØR dette feltet, inkl. alle tre
+    # frosne legacy-fixturene, mangler det og skal fortsatt importeres
+    # uendret). Selve duplikat-sjekken (eksakt strenglikhet mot lokalt
+    # lagrede oppskrifters originRecipeId) skjer IKKE her -- denne
+    # modulen er en ren parser uten filsystemtilgang -- den skjer i
+    # UI-laget (ui/sidebar.py), FØR apply_kbhrecipe_import_to_session_state()
+    # kalles.
+    origin_recipe_id = payload.get("originRecipeId")
+    if not _ikke_tom_streng(origin_recipe_id):
+        origin_recipe_id = None
+
     native = {
         "name": navn,
         "batch_size": volum,
@@ -520,5 +540,6 @@ def parse_kbhrecipe_json(tekst, malt_db=None, humle_db=None, gjaer_db=None):
         "water_target_profile": maal,
         "water_treatment": behandling,
         "water_measurements": maalinger,
+        "originRecipeId": origin_recipe_id,
     }
     return {"recipe": native, "passthrough": _bygg_passthrough(payload)}

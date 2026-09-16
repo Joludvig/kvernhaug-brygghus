@@ -6,6 +6,7 @@ from modules.recipe_storage import (
     hent_alle_oppskrifter,
     hent_oppskrift_filnavn_kart,
     finn_duplikate_oppskrift_navn,
+    finnes_oppskrift_med_origin,
 )
 from modules.process_profiles import normaliser_prosessprofil
 from modules.recipe import resolve_recipe_efficiency
@@ -152,6 +153,15 @@ def render_sidebar():
                 if isinstance(_lagret_passthrough, dict) and _lagret_passthrough
                 else None
             )
+            # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2) --
+            # den lagrede filens `originRecipeId` (satt av en tidligere
+            # eksplisitt eksport, eller arvet fra en tidligere import)
+            # følger med gjennom load, UBETINGET på HVERT load, akkurat
+            # som _aktiv_kbh_passthrough over -- en eldre oppskrift uten
+            # feltet gir bevisst None, ALDRI gjettet/mintet her (minting
+            # skjer KUN ved eksplisitt eksport, se
+            # modules/recipe_storage.py::sikre_origin_recipe_id()).
+            st.session_state["_aktiv_kbh_origin_recipe_id"] = r_data.get("originRecipeId")
             # Normaliser en EVENTUELT lagret prosessprofil FØR den blir
             # aktiv — en kjent standardprofil (Hochkurz osv.) kan da
             # ALDRI hydreres inn med en korrupt/hybrid meskeplan fra en
@@ -364,14 +374,29 @@ def render_sidebar():
                 st.caption(f"📎 {len(_pt)} bevart metadata-felt følger med opakt (f.eks. notater/stil).")
 
             if st.button("✅ Importer som ny oppskrift", key="kbhrecipe_bekreft_btn", width="stretch"):
-                apply_kbhrecipe_import_to_session_state(kbhrecipe_preview)
-                st.session_state.pop("kbhrecipe_import_preview", None)
-                st.session_state.pop("kbhrecipe_import_feil", None)
-                st.session_state.pop("kbhrecipe_import_preview_file_id", None)
-                # Issue #242 -- samme regresjon/samme fiks som tekstimport
-                # over (se det store kommentarblokken øverst i
-                # render_sidebar()); .kbhrecipe-stien deler EKSAKT samme
-                # rerun + identitetsryddings-mekanisme.
-                st.session_state["_nullstill_oppskrift_selector_neste_render"] = True
-                st.sidebar.success(f"Importert: {_r['name']}")
-                st.rerun()
+                # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4) --
+                # eksakt strenglikhet mot ALLE lokalt lagrede oppskrifters
+                # originRecipeId, FØR noe som helst state hydreres.
+                # Manglende/tom/ikke-streng originRecipeId (_r["originRecipeId"]
+                # er allerede normalisert til None av parse_kbhrecipe_json())
+                # gir alltid "ingen dedup-signal" -- importen fortsetter da som
+                # ny, akkurat som i dag.
+                _origin_recipe_id = _r.get("originRecipeId")
+                if finnes_oppskrift_med_origin(_origin_recipe_id, **_oppskrift_mappe_kwargs):
+                    st.error(
+                        "❌ Denne oppskriften er allerede importert tidligere "
+                        "(samme originRecipeId finnes blant dine lagrede "
+                        "oppskrifter) — importen ble avvist for å unngå en duplikat."
+                    )
+                else:
+                    apply_kbhrecipe_import_to_session_state(kbhrecipe_preview)
+                    st.session_state.pop("kbhrecipe_import_preview", None)
+                    st.session_state.pop("kbhrecipe_import_feil", None)
+                    st.session_state.pop("kbhrecipe_import_preview_file_id", None)
+                    # Issue #242 -- samme regresjon/samme fiks som tekstimport
+                    # over (se det store kommentarblokken øverst i
+                    # render_sidebar()); .kbhrecipe-stien deler EKSAKT samme
+                    # rerun + identitetsryddings-mekanisme.
+                    st.session_state["_nullstill_oppskrift_selector_neste_render"] = True
+                    st.sidebar.success(f"Importert: {_r['name']}")
+                    st.rerun()

@@ -39,6 +39,7 @@ _GENERATOR = "Kvernhaug Brygghus (Streamlit)"
 _KJENTE_PAYLOAD_FELT = frozenset({
     "recipeSchemaVersion", "navn", "volum", "effektivitet", "malt", "humle",
     "gjaerId", "gjaerCustom", "attenuationOverride", "bryggerStil", "prosess", "vann",
+    "originRecipeId",
 })
 
 # Felt som ALDRI skal kunne re-eksporteres via passthrough, uansett hva en
@@ -218,6 +219,17 @@ def recipe_to_kbhrecipe_payload(recipe):
     vann = _bygg_vann_blokk(recipe)
     if vann is not None:
         payload["vann"] = vann
+
+    # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.1/§3.3) --
+    # skrives KUN hvis recipe faktisk allerede har en gyldig, ikke-tom
+    # streng. Selve mintingen (ny uuid4 + atomisk skriving tilbake til
+    # DISK-filen ved eksplisitt eksport) skjer ALDRI her -- denne
+    # funksjonen er en ren oversetter, uten sideeffekter/filsystemtilgang
+    # (se modules/recipe_storage.py::sikre_origin_recipe_id() og
+    # ui/recipe_card.py sin eksportknapp for selve mint-stedet).
+    origin_recipe_id = recipe.get("originRecipeId")
+    if isinstance(origin_recipe_id, str) and origin_recipe_id.strip():
+        payload["originRecipeId"] = origin_recipe_id
 
     _flett_inn_passthrough(payload, recipe.get("_kbh_passthrough"))
 
