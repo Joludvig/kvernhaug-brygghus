@@ -42,6 +42,17 @@ import streamlit as st
 from modules.recipe import bygg_recipe_object
 import modules.recipe_storage as recipe_storage
 
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# issue #288 -- samme delte, IKKE-legacy fixture som
+# tests/test_kbh_import.py::TestOriginRecipeIdDeltCrossSurfaceFixture og
+# tests/js/test_kbhrecipe_contract.js sin "originRecipeId (12)"-seksjon.
+_DELT_FIXTURE_PATH = os.path.join(_REPO_ROOT, "tests", "fixtures", "kbhrecipe", "with_origin.json")
+
+
+def _last_delt_fixture_payload():
+    with open(_DELT_FIXTURE_PATH, encoding="utf-8") as f:
+        return json.load(f)["recipe"]
+
 
 def _recipe(navn="Identitetstest"):
     return bygg_recipe_object(
@@ -155,6 +166,34 @@ class TestFinnesOppskriftMedOrigin(_IsolertRecipeMappeTestCase):
         recipe_storage.sikre_origin_recipe_id(filnavn)
         for kandidat in (None, "", "   ", 12345, [], {}):
             self.assertFalse(recipe_storage.finnes_oppskrift_med_origin(kandidat))
+
+    def test_delt_cross_surface_fixture_gjenkjennes_som_duplikat_uten_overskriving(self):
+        # issue #288 -- bruker den SAMME delte, ikke-legacy fixturen
+        # (tests/fixtures/kbhrecipe/with_origin.json) som
+        # tests/test_kbh_import.py::TestOriginRecipeIdDeltCrossSurfaceFixture
+        # og JS-testens "originRecipeId (12)"-seksjon leser, i stedet for
+        # en syntetisk verdi definert kun her -- beviser at App sitt
+        # persistenslag gjenkjenner AKKURAT den reelle wire-artifaktens
+        # originRecipeId som et duplikat, uten å skrive noe ved treffet.
+        payload = _last_delt_fixture_payload()
+        origin = payload["originRecipeId"]
+        recipe = bygg_recipe_object(
+            payload["navn"], payload["volum"], payload["effektivitet"] / 100.0,
+            [{"id": rad["id"], "mengde": rad["mengde"]} for rad in payload["malt"]],
+            [{"id": rad["id"], "gram": rad["gram"], "tid": rad["tid"]} for rad in payload["humle"]],
+            None, 1.048, 1.012, 4.7, 25, 8, {},
+            origin_recipe_id=origin,
+        )
+        recipe_storage.lagre_oppskrift(recipe)
+
+        self.assertTrue(recipe_storage.finnes_oppskrift_med_origin(origin))
+        filer_foer = sorted(os.listdir(self._tmpdir.name))
+        # Selve sjekken (speiler ui/sidebar.py sin bekreft-import-gren,
+        # som kjøres FØR apply_kbhrecipe_import_to_session_state()) er
+        # rent lesende -- et gjentatt kall etter et "avvist" treff må
+        # aldri ha endret filsystemet.
+        self.assertTrue(recipe_storage.finnes_oppskrift_med_origin(origin))
+        self.assertEqual(sorted(os.listdir(self._tmpdir.name)), filer_foer)
 
     def test_mappe_som_ikke_finnes_gir_false(self):
         self.assertFalse(
