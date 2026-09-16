@@ -231,8 +231,13 @@ documented below.
   (Section 5.3/5.14); `opprett_og_lagre_ny_brew()`/`oppdater_brew_lag()`
   read/write layers 1–5; `eksporter_kbhbrew()`/`importer_kbhbrew()` are
   App's file import/export — this file-portability layer is fully
-  wired end-to-end, unlike Web's equivalent functions in
-  `web/js/brew_storage.js`, which currently have no UI caller.
+  wired end-to-end, matching Web's equivalent functions in
+  `web/js/brew_storage.js`, which are likewise wired to a UI caller
+  (`web/js/brygg_page.js`'s `_eksporterBrygg()`/`importerBrygg()` call
+  sites, surfaced from `web/bryggelogg.html`, issue #275/PR #277).
+  *(Correction, issue #290, 2026-09-16: this bullet previously said
+  Web's functions "currently have no UI caller" — accurate only until
+  issue #275/PR #277 wired them into `web/js/brygg_page.js`.)*
 - **UI**: `ui/kbhbrew_panel.py` — `render_kbhbrew_create_panel()`
   (freeze a new brew from the active recipe/equipment/predicted
   values), `render_kbhbrew_import_panel()`/`render_kbhbrew_export_panel()`
