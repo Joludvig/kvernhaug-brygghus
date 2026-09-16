@@ -56,10 +56,18 @@ const KBHRECIPE_STOTTET_RECIPE_SCHEMA_VERSION = 1;
 // (§6), som app.js allerede korrekt bærer gjennom hele
 // redigerings-/lagringssyklusen for ALLE slike felt. Ingen endring i
 // app.js var nødvendig -- kun denne klassifiseringen.
+// originRecipeId (docs/development/CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md,
+// issue #276/#281/#284) -- den portable, historiske lenke-identiteten,
+// DISTINKT fra recipeId (lokal lagringsidentitet, KBHRECIPE_FORBUDTE_FELT
+// under). Den er nå et kjent V1-payloadfelt i stedet for å falle inn i
+// generisk passthrough (§1.7 i kontraktdokumentet) -- selve
+// mint-/duplikatsjekk-logikken bor i recipe_storage.js (§3.2/§3.4), ikke
+// her; denne filen sørger kun for at feltet gjenkjennes ved import og
+// eksporteres når det finnes.
 const KBHRECIPE_KJENTE_FELT = new Set([
   "recipeSchemaVersion", "navn", "volum", "effektivitet", "malt", "humle",
   "gjaerId", "gjaerCustom", "attenuationOverride", "valgtStil",
-  "brygger", "bryggeri", "notater", "lagretDato",
+  "brygger", "bryggeri", "notater", "lagretDato", "originRecipeId",
 ]);
 
 // Felt som ALDRI skal eksporteres og ALDRI skal bevares via passthrough,

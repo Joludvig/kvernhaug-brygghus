@@ -45,6 +45,14 @@ function importerJsonFil(fil) {
       status.textContent = resultat.melding;
       return;
     }
+    // CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4/§3.6 -- speiler app.js sin
+    // apneOppskriftsfil(): eksakt-streng duplikatsjekk FØR hand-off til
+    // byggeren, ingen stille sammenslåing/overskriving. Krever
+    // recipe_storage.js lastet på denne siden (se importer.html).
+    if (finnesOppskriftMedOrigin(resultat.oppskrift.originRecipeId)) {
+      status.textContent = t("oppskrift.importDuplikat");
+      return;
+    }
     apneIByggeren(resultat.oppskrift);
   };
   reader.onerror = () => {

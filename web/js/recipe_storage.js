@@ -85,6 +85,15 @@ function _erOppskriftForm(o) {
 // web/js/kbhrecipe.js::parseKbhRecipeInnhold() -- dette er et uavhengig
 // andre forsvarslag i selve lagringslaget (samme mønster som de forbudte
 // feltene i kbhrecipe.js).
+// CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.8 -- en ugyldig originRecipeId
+// (ikke streng, eller tom streng) skal ALDRI krasje eller avvise noe, kun
+// regnes som fraværende. Denne funksjonen kjører på HVER lesing (via
+// _normalisertItem under) OG på hver lagring (lagreOppskriftIStore) --
+// den mint IKKE en manglende verdi selv (det ville tilbakedatert en
+// eldre, ikke-nylig-lagret rad hver gang den bare LESES, stikk i strid
+// med §8: "en oppskrift som aldri lagres på nytt får aldri
+// originRecipeId"). Selve mintingen (§3.2) skjer bevisst kun i
+// lagreOppskriftIStore().
 function _normalisertRecipe(recipe) {
   const ut = { ...recipe };
   delete ut.recipeId;
@@ -93,6 +102,7 @@ function _normalisertRecipe(recipe) {
   }
   if (!Array.isArray(ut.malt)) ut.malt = [];
   if (!Array.isArray(ut.humle)) ut.humle = [];
+  if (typeof ut.originRecipeId !== "string" || !ut.originRecipeId) delete ut.originRecipeId;
   return ut;
 }
 
@@ -230,6 +240,18 @@ function finnOppskriftVedNavn(navn) {
   return alleOppskrifter().find((i) => i.recipe.navn === navn) || null;
 }
 
+// CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4 -- import-duplikatsjekk: eksakt
+// streng-likhet mot hver lokalt lagrede oppskrifts originRecipeId. Speiler
+// .kbhbrew sitt finnesBrewMedOrigin/importerBrygg()-mønster
+// (web/js/brew_storage.js). En manglende/tom/ikke-streng verdi er "ingen
+// dedup-signal" (§2.5/§3.4, bakoverkompatibilitet med enhver fil som
+// mangler feltet) -- returnerer da ALLTID false, aldri en falsk
+// duplikat-treff.
+function finnesOppskriftMedOrigin(originRecipeId) {
+  if (typeof originRecipeId !== "string" || !originRecipeId) return false;
+  return alleOppskrifter().some((i) => i.recipe.originRecipeId === originRecipeId);
+}
+
 // ─── Skriving ─────────────────────────────────────────────────────────────
 
 // Lagrer en oppskrift og returnerer { ok: true, recipeId } eller
@@ -252,11 +274,25 @@ function lagreOppskriftIStore(recipe, recipeId) {
   const normalisert = _normalisertRecipe(recipe);
   const id = recipeId || _genererRecipeId();
 
+  // CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2 -- originRecipeId mintes KUN
+  // her, ved faktisk lagring, og KUN når oppskriften ikke allerede har en
+  // (fra en tidligere lagring, eller carried forward fra en importert
+  // fil, §3.4). Default er nøyaktig den lokale identiteten DENNE
+  // lagringen bruker -- speiler .kbhbrew sin `originBrewId: brewId`
+  // (brew_storage.js::opprettBrygg()). En allerede satt origin er UENDRET
+  // her -- vanlig rediger-og-lagre-på-nytt re-minter aldri.
+  // "Lagre som variant" mister sin kildes origin via den vanlige
+  // recipeId-nullstillingen (kaller med recipeId=null OG et oppskrift-
+  // objekt der originRecipeId allerede er nullstilt av app.js FØR kallet
+  // -- se lagreSomVariant()), slik at denne linjen mint en FERSK origin
+  // for kopien, akkurat som §3.5 krever.
+  if (!normalisert.originRecipeId) normalisert.originRecipeId = id;
+
   state.items = state.items.filter((i) => i.recipeId !== id && i.recipe.navn !== normalisert.navn);
   state.items.push({ recipeId: id, recipe: normalisert });
 
   if (!_skrivOppskriftState(state)) return { ok: false, melding: t("oppskrift.lagreFeil") };
-  return { ok: true, recipeId: id };
+  return { ok: true, recipeId: id, originRecipeId: normalisert.originRecipeId };
 }
 
 function slettOppskriftFraStore(recipeId) {
