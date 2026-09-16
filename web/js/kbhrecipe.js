@@ -230,6 +230,16 @@ function _normaliserOppskriftForImport(raw) {
   if (!Array.isArray(o.malt)) o.malt = [];
   if (!Array.isArray(o.humle)) o.humle = [];
 
+  // issue #293 -- §3.4/§3.8 i CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md: en
+  // manglende, tom eller ikke-streng originRecipeId er "intet dedup-signal
+  // tilgjengelig", ikke en avvisningsgrunn -- en gyldig, ikke-tom streng
+  // beholdes UENDRET (ingen trim av en faktisk verdi).
+  if ("originRecipeId" in o) {
+    if (typeof o.originRecipeId !== "string" || o.originRecipeId.trim() === "") {
+      delete o.originRecipeId;
+    }
+  }
+
   const ukjente = {};
   for (const [nokkel, verdi] of Object.entries(raw)) {
     if (nokkel === "recipeId") continue;
