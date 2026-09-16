@@ -480,7 +480,8 @@ def lagre_oppskrift(recipe, kilde_filnavn=None, bloker_ved_navnekollisjon=False)
 def sikre_origin_recipe_id(kilde_filnavn):
     """
     Issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2) -- App sin
-    ENESTE mint-mekanisme for `originRecipeId`. App har ingen lokal
+    mint-mekanisme for et EKSISTERENDE, tidligere lagret oppskrift-filen
+    som ennå mangler en gyldig `originRecipeId`. App har ingen lokal
     `recipeId` å arve fra (§1.2 i kontrakten), så dette er den eksakte,
     tidligere spesifiserte-men-aldri-bygde V1 §6-mekanismen: les den
     LAGREDE filen `kilde_filnavn` fra disk, og hvis den mangler en
@@ -489,9 +490,13 @@ def sikre_origin_recipe_id(kilde_filnavn):
     AKKURAT den ene filen -- ingen andre felt i filen røres, og ingen
     andre filer skrives.
 
-    Kalles UTELUKKENDE fra en eksplisitt, brukerutløst eksport-handling
+    Kalles fra en eksplisitt, brukerutløst eksport-handling
     (ui/recipe_card.py sin "📦 Eksporter KBH-oppskrift"-knapp) -- ALDRI
     som bakgrunnsmigrering, ALDRI ved vanlig lasting/redigering/lagring.
+    Dette er IKKE det eneste stedet App minter en `originRecipeId`: §3.5
+    krever i tillegg en UMIDDELBAR fresh mint ved "💾 Lagre som ny kopi"
+    (ui/recipe_card.py), som gjøres direkte der (ikke via denne
+    funksjonen, siden den kopien ennå ikke har noen fil å lese fra).
 
     Returnerer den (evt. nymintede) `originRecipeId`-verdien, eller
     `None` i DEMO_MODE, hvis `kilde_filnavn` er tom/manglende (en helt

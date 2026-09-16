@@ -6,9 +6,9 @@ tests/test_kbhbrew_storage_identity.py sitt etablerte mønster for
 `.kbhbrew` sin `originBrewId`.
 
 Dekker:
-  - App sin ENESTE mint-mekanisme (sikre_origin_recipe_id()): mint +
-    atomisk enkelt-felt-skriving KUN til den ene kildefilen, KUN når
-    feltet mangler/er ugyldig;
+  - App sin mint-mekanisme for EKSISTERENDE filer (sikre_origin_recipe_id()):
+    mint + atomisk enkelt-felt-skriving KUN til den ene kildefilen, KUN
+    når feltet mangler/er ugyldig;
   - andre kall (uendret fil) returnerer samme, eksisterende verdi --
     ALDRI re-mintet;
   - DEMO_MODE og "ingen kjent kildefil" er begge no-op, ingen skriving;
@@ -18,7 +18,9 @@ Dekker:
     som ny kopi/Eksporter), speilet via en lokal `_bygg_recipe_fra_session()`-
     hjelpefunksjon -- samme forenkling som
     tests/test_kbh_passthrough.py bruker for _kbh_passthrough, uten å
-    bygge et fullt AppTest-harness for selve UI-et.
+    bygge et fullt AppTest-harness for selve UI-et. "Lagre som ny kopi"
+    minter en FRESH origin UMIDDELBART ved lagring (§3.5, Chief-
+    korreksjon PR #286) -- ikke først ved en senere eksport.
 
 Bruker UTELUKKENDE tempfile.TemporaryDirectory() via
 KVERNHAUG_RECIPES_DIR -- aldri den ekte recipes/-mappen.
@@ -31,6 +33,7 @@ import logging
 import os
 import tempfile
 import unittest
+import uuid
 from unittest import mock
 
 logging.getLogger("streamlit").setLevel(logging.ERROR)
@@ -248,22 +251,26 @@ class TestRecipeCardKnappLivssyklus(_IsolertRecipeMappeTestCase):
 
         self.assertEqual(self._les_fil(nytt_filnavn)["originRecipeId"], origin_foer)
 
-    def test_5_lagre_som_ny_kopi_far_ingen_origin_foer_egen_eksport(self):
+    def test_5_lagre_som_ny_kopi_far_fresh_origin_umiddelbart(self):
         filnavn = recipe_storage.lagre_oppskrift(_bygg_recipe_fra_session())
-        self._eksporter(filnavn)  # kilden har nå en origin
+        kilde_eksportert = self._eksporter(filnavn)  # kilden har nå en origin
 
-        # "💾 Lagre som ny kopi" -- ALDRI arv kildens origin (§3.5).
+        # "💾 Lagre som ny kopi" (Chief-korreksjon, PR #286) -- minter en
+        # FRESH origin UMIDDELBART ved lagring, ALDRI kildens (§3.5), og
+        # skal ALDRI lagres uten sin egen stabile origin i mellomtiden.
         st.session_state["gjeldende_navn"] = "Livssyklustest Kopi"
-        kopi = _bygg_recipe_fra_session(origin_recipe_id=None)
+        kopi = _bygg_recipe_fra_session(origin_recipe_id=str(uuid.uuid4()))
         kopi_filnavn = recipe_storage.lagre_oppskrift(kopi, kilde_filnavn=None, bloker_ved_navnekollisjon=True)
 
-        self.assertNotIn("originRecipeId", self._les_fil(kopi_filnavn))
+        kopi_origin_paa_disk = self._les_fil(kopi_filnavn).get("originRecipeId")
+        self.assertIsInstance(kopi_origin_paa_disk, str)
+        self.assertTrue(kopi_origin_paa_disk.strip())
+        self.assertNotEqual(kopi_origin_paa_disk, kilde_eksportert["originRecipeId"])
 
-        # Kopiens EGEN, senere eksport minter en FRESH origin, forskjellig
-        # fra kildens.
+        # En senere eksport av kopien bevarer AKKURAT denne origin --
+        # ALDRI re-mintet.
         kopi_eksportert = self._eksporter(kopi_filnavn)
-        kilde_data = self._les_fil(filnavn)
-        self.assertNotEqual(kopi_eksportert["originRecipeId"], kilde_data["originRecipeId"])
+        self.assertEqual(kopi_eksportert["originRecipeId"], kopi_origin_paa_disk)
 
 
 if __name__ == "__main__":

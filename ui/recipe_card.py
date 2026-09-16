@@ -2,6 +2,7 @@
 import json
 import re
 import os
+import uuid
 import streamlit as st
 from datetime import date, datetime, timezone
 from config import DEMO_MODE
@@ -174,7 +175,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2/§3.5) --
             # kalleren avgjør EKSPLISITT hva som skal skje med identiteten
             # for HVER handling (preserve ved "Lagre endringer"/eksport,
-            # reset ved "Lagre som ny kopi") -- ALDRI et implisitt
+            # fresh mint ved "Lagre som ny kopi") -- ALDRI et implisitt
             # session_state-fallback her, siden det ville latt en kopi
             # arve kildens origin ved en feil.
             origin_recipe_id=origin_recipe_id,
@@ -244,13 +245,17 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
         btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
             if st.button("💾 Lagre som ny kopi", width="stretch", key="lagre_ny_kopi_btn"):
-                # issue #283 (§3.5) -- "Lagre som ny kopi" skal ALDRI arve
-                # kildeoppskriftens originRecipeId (ville kollidert med
-                # kilden ved en senere .kbhrecipe-import av begge). App
-                # mint aldri ved lagring (§3.2/§8) -- kopien lagres derfor
-                # bevisst UTEN originRecipeId; en fresh én mintes først
-                # ved kopiens EGEN, senere, eksplisitte eksport.
-                ny_recipe = _bygg_recipe_fra_session(ctx, origin_recipe_id=None)
+                # issue #283 (§3.5, Chief-korreksjon PR #286) -- "Lagre som
+                # ny kopi" skal ALDRI arve kildeoppskriftens originRecipeId
+                # (ville kollidert med kilden ved en senere .kbhrecipe-
+                # import av begge), men skal heller ikke lagres UTEN en
+                # egen origin i mellomtiden -- kontrakten krever at kopien
+                # får en FRESH originRecipeId med det samme, ikke først ved
+                # en senere eksport. Mintes derfor her, direkte -- dette er
+                # det ENE unntaket fra "App minter aldri ved lagring"
+                # (§3.2/§8), siden §3.5 eksplisitt krever mint nettopp ved
+                # denne handlingen.
+                ny_recipe = _bygg_recipe_fra_session(ctx, origin_recipe_id=str(uuid.uuid4()))
                 try:
                     # kilde_filnavn=None -- en ny kopi har per definisjon
                     # ingen kjent tidligere kildefil.
