@@ -38,7 +38,7 @@ def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg,
                         brygger_stil="", process_profile=None,
                         water_source_profile=None, water_target_profile=None,
                         water_treatment=None, water_measurements=None,
-                        kbh_passthrough=None):
+                        kbh_passthrough=None, origin_recipe_id=None):
     """
     `process_profile` (se modules/process_profiles.py) er bevisst et helt
     separat, valgfritt felt — HVORDAN ølet brygges (meskesteg, skyllemetode,
@@ -67,6 +67,16 @@ def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg,
     i det lagrede recipe-objektet) — en tom/manglende verdi betyr "ingen
     bevart import-metadata for denne oppskriften", og feltet utelates da
     helt, i stedet for å skrive en tom/None-verdi.
+
+    `origin_recipe_id` (issue #283, docs/development/
+    CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2) — det portable,
+    historiske lenke-feltet `.kbhrecipe` V1 sitt `originRecipeId`
+    oversettes til/fra native. App har INGEN lokal `recipeId` (§1.2 i
+    kontrakten) — dette feltet er derfor App sin ENESTE identitet mot
+    et senere `.kbhrecipe`-import-dedup-sjekk, og skrives KUN inn her
+    hvis kalleren allerede har en gyldig, ikke-tom streng (mint/lesing
+    skjer i modules/recipe_storage.py/ui/recipe_card.py -- ALDRI her,
+    denne funksjonen forblir ren og sideeffektfri).
     """
     recipe = {
         "name": navn if navn else "Navnløs Brygg",
@@ -92,4 +102,6 @@ def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg,
     }
     if isinstance(kbh_passthrough, dict) and kbh_passthrough:
         recipe["_kbh_passthrough"] = copy.deepcopy(kbh_passthrough)
+    if isinstance(origin_recipe_id, str) and origin_recipe_id.strip():
+        recipe["originRecipeId"] = origin_recipe_id
     return recipe

@@ -100,6 +100,12 @@ if "_aktiv_kbh_passthrough" not in st.session_state:
     # settes direkte her og i ui/recipe_card.py sin arkiver-/blank-flyt,
     # samme mønster som _aktiv_recipe_efficiency over.
     st.session_state["_aktiv_kbh_passthrough"] = None
+if "_aktiv_kbh_origin_recipe_id" not in st.session_state:
+    # Issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2) -- None =
+    # "ingen originRecipeId ennå" for en helt ny/blank økt. Ikke
+    # widget-bundet, kan settes direkte her og i ui/recipe_card.py sin
+    # arkiver-/blank-flyt, samme mønster som _aktiv_kbh_passthrough over.
+    st.session_state["_aktiv_kbh_origin_recipe_id"] = None
 
 # Løs opp pending batch-volum fra skalering (må skje før widgeten instansieres)
 if "_pending_batch_volum" in st.session_state:

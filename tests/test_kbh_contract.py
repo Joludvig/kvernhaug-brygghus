@@ -264,6 +264,49 @@ class TestRecipeToKbhrecipePayload(unittest.TestCase):
         with self.assertRaises(UgyldigOppskriftForEksport):
             recipe_to_kbhrecipe_payload(recipe)
 
+    # ── originRecipeId (issue #283, CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) ──
+
+    def test_origin_recipe_id_eksporteres_naar_gyldig(self):
+        recipe = bygg_recipe_object(
+            navn="Med Origin", batch_size=20.0, efficiency=0.75,
+            malts=[{"id": "weyermann_pilsner", "mengde": 4.0}], hops=[], yeast="safale_us_05",
+            og=1.045, fg=1.010, abv=4.5, ibu=0, ebc=8, flavor_profile={},
+            origin_recipe_id="11111111-1111-1111-1111-111111111111",
+        )
+        payload = recipe_to_kbhrecipe_payload(recipe)
+        self.assertEqual(payload["originRecipeId"], "11111111-1111-1111-1111-111111111111")
+
+    def test_origin_recipe_id_mangler_naar_ikke_satt(self):
+        payload = recipe_to_kbhrecipe_payload(_minimal_oppskrift())
+        self.assertNotIn("originRecipeId", payload)
+
+    def test_origin_recipe_id_tom_streng_utelates(self):
+        recipe = _minimal_oppskrift()
+        recipe["originRecipeId"] = "   "
+        payload = recipe_to_kbhrecipe_payload(recipe)
+        self.assertNotIn("originRecipeId", payload)
+
+    def test_origin_recipe_id_ugyldig_type_utelates_uten_krasj(self):
+        recipe = _minimal_oppskrift()
+        recipe["originRecipeId"] = 12345
+        payload = recipe_to_kbhrecipe_payload(recipe)
+        self.assertNotIn("originRecipeId", payload)
+
+    def test_origin_recipe_id_kan_ikke_overskrives_av_stale_passthrough(self):
+        # _KJENTE_PAYLOAD_FELT-vernet (samme mønster som andre kjente felt,
+        # se _flett_inn_passthrough()) -- en gammel/hånd-redigert
+        # passthrough-verdi under samme navn skal ALDRI vinne over den
+        # ferske, aktive originRecipeId-verdien.
+        recipe = bygg_recipe_object(
+            navn="Med Origin", batch_size=20.0, efficiency=0.75,
+            malts=[{"id": "weyermann_pilsner", "mengde": 4.0}], hops=[], yeast="safale_us_05",
+            og=1.045, fg=1.010, abv=4.5, ibu=0, ebc=8, flavor_profile={},
+            origin_recipe_id="fresh-id",
+        )
+        recipe["_kbh_passthrough"] = {"originRecipeId": "gammel-stale-id"}
+        payload = recipe_to_kbhrecipe_payload(recipe)
+        self.assertEqual(payload["originRecipeId"], "fresh-id")
+
 
 class TestByggKbhrecipeKonvolutt(unittest.TestCase):
 

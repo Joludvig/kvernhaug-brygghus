@@ -69,6 +69,13 @@ def apply_kbhrecipe_import_to_session_state(import_resultat):
     st.session_state["_aktiv_kbh_passthrough"] = (
         copy.deepcopy(passthrough) if isinstance(passthrough, dict) and passthrough else None
     )
+    # issue #283 (CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.4) -- en
+    # importert fils originRecipeId (allerede validert/normalisert til
+    # None-hvis-ugyldig av parse_kbhrecipe_json()) føres videre UENDRET
+    # inn i den nye, ulagrede oppskriftens aktive identitet -- den
+    # eksakte-strenglikhet-duplikatsjekken skjer FØR dette kalles (se
+    # ui/sidebar.py sin bekreft-knapp), aldri her.
+    st.session_state["_aktiv_kbh_origin_recipe_id"] = r.get("originRecipeId")
     # Samme forsvar som ui/sidebar.py sin last-fra-disk-flyt: en
     # normalisering her (selv om parseren allerede har normalisert en
     # kjent standardprofil, eller aldri endrer en "egendefinert") er
