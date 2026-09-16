@@ -1707,19 +1707,29 @@ function lagreSomVariant() {
   // CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.5 -- "Lagre som variant" er en
   // bevisst fork: kopien skal ALDRI arve kildeoppskriftens originRecipeId
   // (det ville gjort en senere eksport av kopien kollidere med kildens
-  // egen origin ved en fremtidig import, §2.4). Nullstilles FØR
-  // samleOppskrift() kalles, slik at ingenting av det nedenfor kan hente
-  // den gamle verdien tilbake -- lagreOppskriftIStore() mint deretter en
-  // fersk origin (= den ferske recipeId-en den selv genererer for kopien,
-  // §3.2), akkurat som recipeId-nullstillingen
+  // egen origin ved en fremtidig import, §2.4). lagreOppskriftIStore()
+  // mint deretter en fersk origin (= den ferske recipeId-en den selv
+  // genererer for kopien, §3.2), akkurat som recipeId-nullstillingen
   // (`lagreOppskriftIStore(oppskrift, null)` under) allerede gjør for
   // lokal identitet.
-  _aktivOriginRecipeId = null;
+  // Chief-review-fiks (PR #287, runde 2) -- origin-nullstillingen skjer på
+  // den SAMLEDE KOPIEN her, IKKE på det delte, globale
+  // `_aktivOriginRecipeId`-sporet. Forrige versjon nullstilte sporet FØR
+  // batch-volum-sjekken/lagringen, så et avbrutt variant-forsøk (ugyldig
+  // volum, eller en skrivefeil fra lagreOppskriftIStore()) etterlot
+  // kildeoppskriftens origin nullstilt i minnet -- en påfølgende vanlig
+  // "Lagre oppskrift" ville da mint en NY origin for den allerede lagrede
+  // kilden, og brutt kontraktens "vanlig rediger-og-lagre-på-nytt bevarer
+  // samme origin". `_aktivOriginRecipeId` selv røres derfor ikke før
+  // variant-lagringen faktisk har lyktes (`res.ok` under) -- ethvert
+  // avbrutt forsøk lar kildens origin stå helt uendret.
   let oppskrift = samleOppskrift();
+  delete oppskrift.originRecipeId;
   if (_blokkerUgyldigBatchVolum(oppskrift, status)) return;
   if (finnOppskriftVedNavn(oppskrift.navn)) {
     navnFelt.value = _forslaVariantNavn(oppskrift.navn);
     oppskrift = samleOppskrift();
+    delete oppskrift.originRecipeId;
   }
   const res = lagreOppskriftIStore(oppskrift, null); // null tvinger frem en FERSK recipeId
   if (!res.ok) {

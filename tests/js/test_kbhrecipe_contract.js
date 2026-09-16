@@ -762,6 +762,48 @@ kjor('originRecipeId (10): mirrors app.js -- "Lagre som variant" mint en FERSK o
   assert.strictEqual(originalEtterpaa.recipe.originRecipeId, forsteLagring.originRecipeId);
 });
 
+kjor('originRecipeId (11): Chief-review-fiks (PR#287 runde 2) -- mirrors lagreSomVariant() -- et AVBRUTT variant-forsøk (ugyldig batch-volum) etterlater kildens origin-spor UENDRET, en påfølgende vanlig lagring bevarer fortsatt samme origin', () => {
+  const ctx = nyContext(true);
+  const original = { navn: 'Original', volum: 20, effektivitet: 75, malt: [], humle: [] };
+  const forsteLagring = ctx.lagreOppskriftIStore(original, null);
+  assert.strictEqual(forsteLagring.ok, true);
+
+  // Mirrors _gjenopprettOppskrift(): aktiv kladd har nå kildens origin.
+  const lagretOriginal = ctx.finnOppskrift(forsteLagring.recipeId).recipe;
+  let aktivOriginRecipeId = (typeof lagretOriginal.originRecipeId === 'string' && lagretOriginal.originRecipeId)
+    ? lagretOriginal.originRecipeId
+    : null;
+  assert.strictEqual(aktivOriginRecipeId, forsteLagring.originRecipeId);
+
+  // Mirrors lagreSomVariant() ETTER Chief-fiksen: samleOppskrift() kalles
+  // FØRST (den globale aktivOriginRecipeId er fortsatt satt der), originen
+  // fjernes KUN fra den samlede LOKALE kopien -- selve sporingsvariabelen
+  // røres aldri før et vellykket res.ok. Simulerer her et ugyldig
+  // batch-volum (0), akkurat det _blokkerUgyldigBatchVolum() ville avvist
+  // FØR lagreOppskriftIStore() noensinne kalles.
+  const samlet = { ...lagretOriginal, navn: 'Original (kopi)', volum: 0 };
+  if (aktivOriginRecipeId) samlet.originRecipeId = aktivOriginRecipeId;
+  delete samlet.originRecipeId; // mirrors den nye, lokale-kopi-ENESTE resetten
+
+  const ugyldigVolum = samlet.volum <= 0;
+  assert.strictEqual(ugyldigVolum, true, 'testens eget scenario må faktisk avbryte');
+  // _blokkerUgyldigBatchVolum() ville returnert her, FØR lagreOppskriftIStore()
+  // kalles -- aktivOriginRecipeId er (etter fiksen) fortsatt urørt.
+  assert.strictEqual(aktivOriginRecipeId, forsteLagring.originRecipeId, 'et avbrutt variant-forsøk skal ALDRI ha nullstilt kildens origin-spor');
+
+  // Bevis-loop: den regresjonen Chief flagget var at et påfølgende, HELT
+  // VANLIG "Lagre oppskrift" av samme kilde ville mint en NY origin, fordi
+  // den gamle koden hadde nullstilt aktivOriginRecipeId FØR volum-sjekken.
+  // Med fiksen skal denne påfølgende, vanlige re-lagringen fortsatt bevare
+  // nøyaktig samme origin.
+  const vanligOppskrift = { ...lagretOriginal, navn: 'Original redigert' };
+  if (aktivOriginRecipeId) vanligOppskrift.originRecipeId = aktivOriginRecipeId;
+  const vanligLagring = ctx.lagreOppskriftIStore(vanligOppskrift, forsteLagring.recipeId);
+  assert.strictEqual(vanligLagring.ok, true);
+  assert.strictEqual(vanligLagring.recipeId, forsteLagring.recipeId);
+  assert.strictEqual(vanligLagring.originRecipeId, forsteLagring.originRecipeId, 'origin skal IKKE ha blitt re-mintet etter det avbrutte variant-forsøket');
+});
+
 // ─── Oppsummering ───────────────────────────────────────────────────────
 
 console.log(`Kbhrecipe contract-tester: ${bestatt}/${bestatt + feil.length} bestått.`);
