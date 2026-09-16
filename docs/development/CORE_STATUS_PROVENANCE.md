@@ -2,7 +2,7 @@
 
 Version: 1.1
 Status: Active
-Governed by: [KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md) (v2.0) —
+Governed by: [KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md) (v2.1) —
 this document defines the status and provenance model for the **Core**
 domain established there. See also
 [CORE_VERSIONING.md](CORE_VERSIONING.md) (`schema_version`,
