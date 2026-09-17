@@ -1,8 +1,8 @@
 # Core Status & Provenance Model
 
-Version: 1.0
+Version: 1.1
 Status: Active
-Governed by: [KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md) (v2.0) —
+Governed by: [KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md) (v2.1) —
 this document defines the status and provenance model for the **Core**
 domain established there. See also
 [CORE_VERSIONING.md](CORE_VERSIONING.md) (`schema_version`,
@@ -113,7 +113,7 @@ piece of Core data represents:
 
 ### 3.1 Relationship to the existing Vault Canon `source_layer` model
 
-The project's separate Obsidian Vault (`C:\Vault\Kvernhaug Brygghus`,
+The project's separate Obsidian Vault (`D:\Vault\Kvernhaug Brygghus`,
 outside this repository — see
 [VAULT.md](VAULT.md)) already has its own, pre-existing `source_layer`
 field (`fact` / `probable` / `canon`) and its own `status` lifecycle
@@ -126,7 +126,7 @@ one defined here: the Vault's model governs narrative/identity/
 historical claims (outside this repository, not part of the Core
 domain), while this document governs Core brewing masterdata claims
 (malt/humle/gjær and future Core datasets, inside this repository).
-Nothing in `KBH_CORE_CONTRACT.md` (v2.0) or elsewhere states that Core
+Nothing in `KBH_CORE_CONTRACT.md` (v2.1) or elsewhere states that Core
 must reuse the Vault's vocabulary, and the two vocabularies do not
 actually overlap in meaning (`reviewed`/`verified` here vs.
 `review`/`approved` there; a 5-value `documented_fact`/…/`proposal`
@@ -139,6 +139,14 @@ governance to make unprompted. Flagged explicitly in the Oppdrag 4
 report as a non-blocking observation for Core-Chief awareness, not
 treated as a blocking conflict, since the two apply to disjoint data
 domains today.
+
+**Correction (2026-09-16, v1.1):** the Vault path above was a stale
+pre-migration reference (`C:\Vault\Kvernhaug Brygghus`); the Vault has
+since moved and `D:\Vault\Kvernhaug Brygghus` is the current active
+path, matching the already-corrected [VAULT.md](VAULT.md). This is a
+factual path correction only — the status model, provenance fields,
+claim/evidence types, and the Vault-relationship analysis above are
+unchanged.
 
 ---
 
