@@ -16,6 +16,16 @@
 const KBHRECIPE_FORMAT = "kbhrecipe";
 const KBHRECIPE_VERSION = 1;
 
+// issue #300 -- de to kjente `generator`-verdiene i konvolutten (CORE_
+// KBHRECIPE_V1.md §1), brukt UTELUKKENDE til å avlede en menneskelesbar
+// "eksportert fra Web/App"-hint ved import (se kbhRecipeHandoffKilde()
+// under). App sin verdi er speilet ORDRETT fra modules/kbh_contract.py
+// sin _GENERATOR-konstant -- IKKE importert derfra (ingen delt kjøretid
+// mellom Python og JS), så de to må holdes i synk manuelt ved en
+// fremtidig endring av strengen på App-siden.
+const KBHRECIPE_GENERATOR_WEB = "Kvernhaug Brygghus";
+const KBHRECIPE_GENERATOR_APP = "Kvernhaug Brygghus (Streamlit)";
+
 // PRI 2B (KBHR-008) -- støttet recipe-PAYLOAD-schema (ikke å forveksle med
 // KBHRECIPE_VERSION over, som styrer selve ENVELOPE-formatet). Egen,
 // lokal konstant -- IKKE recipe_storage.js sin RECIPE_SCHEMA_VERSION,
@@ -182,7 +192,7 @@ function byggKbhRecipeInnhold(oppskrift) {
     format: KBHRECIPE_FORMAT,
     version: KBHRECIPE_VERSION,
     exportedAt: new Date().toISOString(),
-    generator: "Kvernhaug Brygghus",
+    generator: KBHRECIPE_GENERATOR_WEB,
     recipe: payload,
   };
 }
@@ -305,7 +315,19 @@ function parseKbhRecipeInnhold(tekst) {
       return { ok: false, melding: t("kbhrecipe.ustottetRecipeSchemaVersion") };
     }
 
-    return { ok: true, oppskrift: _normaliserOppskriftForImport(parsed.recipe), legacy: false };
+    // issue #300 -- envelope-metadata (exportedAt/generator) tas med i
+    // returverdien UTELUKKENDE til visning (kbhRecipeHandoffHint() under),
+    // ALDRI som en del av selve oppskriftsobjektet/-kontrakten. Et
+    // ikke-strengfelt (håndredigert/uventet fil) blir null her -- "intet
+    // signal", aldri kastet videre uverifisert (CORE_KBHRECIPE_V1.md §1:
+    // "a reader must not fail if it can't interpret them further").
+    return {
+      ok: true,
+      oppskrift: _normaliserOppskriftForImport(parsed.recipe),
+      legacy: false,
+      exportedAt: typeof parsed.exportedAt === "string" ? parsed.exportedAt : null,
+      generator: typeof parsed.generator === "string" ? parsed.generator : null,
+    };
   }
 
   // Ingen wrapper -- prøv som eldre, rå oppskrifts-JSON. recipeSchemaVersion
@@ -314,8 +336,91 @@ function parseKbhRecipeInnhold(tekst) {
   // "preserved as-is") -- IKKE den nye, strenge recipeSchemaVersion-
   // kontrollen over, som kun gjelder den wrappede .kbhrecipe-formen.
   if (_erGyldigOppskriftForm(parsed)) {
-    return { ok: true, oppskrift: _normaliserOppskriftForImport(parsed), legacy: true };
+    // issue #300 -- rå, uwrappet legacy-JSON har aldri hatt en konvolutt,
+    // altså intet exportedAt/generator å hente -- alltid null, aldri
+    // gjettet fra selve oppskriftsinnholdet.
+    return { ok: true, oppskrift: _normaliserOppskriftForImport(parsed), legacy: true, exportedAt: null, generator: null };
   }
 
   return { ok: false, melding: t("kbhrecipe.ikkeGyldigOppskrift") };
+}
+
+// issue #300 -- Phase 3C-avgjørelsen i issue #299 (punkt 2/4): et kjent,
+// utvetydig `generator`-felt gir en "eksportert fra Web/App"-kilde;
+// alt annet (ukjent streng, håndredigert, manglende) er INGEN kilde --
+// aldri en gjettet verdi. Ren/testbar uten i18n.js.
+function kbhRecipeHandoffKilde(generator) {
+  if (generator === KBHRECIPE_GENERATOR_WEB) return "web";
+  if (generator === KBHRECIPE_GENERATOR_APP) return "app";
+  return null;
+}
+
+// Bygger selve visningsteksten for importforhåndsvisningen -- ren
+// handoff-metadata (hvor/når filen ble eksportert), ALDRI en synk- eller
+// autoritetspåstand (CLAUDE.md/issue #299 punkt 2). `resultat` er
+// parseKbhRecipeInnhold() sitt returobjekt. Bruker t()/gjeldendeSprak()
+// fra i18n.js -- som enhver side som laster denne filen allerede laster
+// (se filens toppkommentar) -- så dette forblir utenfor det rene,
+// i18n-frie Node-kontraktstestomfanget for kbhRecipeHandoffKilde() over.
+// Returnerer null (ingen hint å vise) når verken kilde eller tidspunkt
+// kan utledes trygt -- aldri en fabrikert verdi (issue #300 punkt 3).
+function kbhRecipeHandoffHint(resultat) {
+  if (!resultat || !resultat.ok) return null;
+  const kilde = kbhRecipeHandoffKilde(resultat.generator);
+  let tidLokal = null;
+  if (typeof resultat.exportedAt === "string" && resultat.exportedAt) {
+    const d = new Date(resultat.exportedAt);
+    if (!isNaN(d)) {
+      tidLokal = d.toLocaleString(gjeldendeSprak() === "en" ? "en-GB" : "no-NO");
+    }
+  }
+  if (!kilde && !tidLokal) return null;
+  const kildeTekst = kilde ? t(`kbhrecipe.handoffKilde.${kilde}`) : null;
+  if (kildeTekst && tidLokal) return t("kbhrecipe.handoffKildeOgTid", { kilde: kildeTekst, tid: tidLokal });
+  if (kildeTekst) return t("kbhrecipe.handoffKunKilde", { kilde: kildeTekst });
+  return t("kbhrecipe.handoffKunTid", { tid: tidLokal });
+}
+
+// Delt konfirmasjonstekst for "Åpne denne oppskriften?"-dialogen (app.js
+// sin apneOppskriftsfil() og importer_page.js sin apneIByggeren()) -- den
+// ENE eksisterende "preview"-modalen begge overflatene allerede viser når
+// en aktiv kladd ville blitt overskrevet. `hint` er valgfri
+// (kbhRecipeHandoffHint()-resultat eller undefined for tekstimport, som
+// ikke har noen konvolutt); uendret basistekst når den mangler.
+function kbhRecipeApneConfirmMelding(hint) {
+  const basis = t("oppskrift.apneConfirm");
+  return hint ? `${basis}\n\n${hint}` : basis;
+}
+
+// Chief review (PR #305) -- importer_page.js sin apneIByggeren() navigerer
+// ALLTID videre til index.html (window.location.href), også på det vanlige
+// "ingen aktiv kladd"-sporet der ingen confirm()-dialog noensinne vises --
+// på det sporet fantes det FØR denne fiksen ingen DOM igjen på denne siden
+// til å vise hinten i før den allerede var borte, så hinten ble aldri
+// synlig i det hele tatt. sessionStorage er en engangs "flash"-melding
+// (IKKE AKTIV_KLADD_NOKKEL -- dette er en flyktig visningsmelding, ikke
+// oppskriftsdata): skrevet rett før redirect, lest og fjernet med det
+// samme av app.js sin init() på den andre siden av navigasjonen (se
+// hentOgFjernHandoffHintFlash()), slik at den aldri kan vises igjen ved en
+// senere, urelatert sidelasting.
+const KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL = "kvernhaug_web_handoff_hint_flash";
+
+function lagreHandoffHintFlash(hint) {
+  if (!hint) return;
+  try {
+    sessionStorage.setItem(KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL, hint);
+  } catch {
+    // Privat modus/kvote -- hinten tapes, aldri en krasj for en ren
+    // visningsforbedring.
+  }
+}
+
+function hentOgFjernHandoffHintFlash() {
+  try {
+    const hint = sessionStorage.getItem(KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL);
+    if (hint) sessionStorage.removeItem(KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL);
+    return hint || null;
+  } catch {
+    return null;
+  }
 }

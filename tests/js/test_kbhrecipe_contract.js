@@ -51,8 +51,24 @@ function lastDeltFixture(navn) {
 // uavhengige av rekkefølge uansett. `t()` stubbes til en gjenkjennelig
 // streng (ingen i18n.js lastet -- ikke del av det denne testen dekker).
 function nyContext(inkluderRecipeStorage) {
-  const ctx = { t: (k) => `[i18n:${k}]`, console, crypto: globalThis.crypto };
+  // issue #300 (Chief review, PR #305, round 4) -- kbhRecipeHandoffHint()
+  // calls gjeldendeSprak() from i18n.js (not loaded here, out of this
+  // file's scope) whenever exportedAt is present -- deterministic stub,
+  // same pattern as the existing t() stub above.
+  const ctx = { t: (k) => `[i18n:${k}]`, gjeldendeSprak: () => 'no', console, crypto: globalThis.crypto };
   vm.createContext(ctx);
+  // issue #300 (Chief review, PR #305) -- kbhrecipe.js sin
+  // lagreHandoffHintFlash()/hentOgFjernHandoffHintFlash() bruker
+  // sessionStorage direkte, akkurat som recipe_storage.js bruker
+  // localStorage under -- samme minimale i-minnet stub, alltid til stede
+  // (ikke gated bak inkluderRecipeStorage) siden kbhrecipe.js lastes i
+  // ALLE kontekster denne fila lager.
+  const flashLager = new Map();
+  ctx.sessionStorage = {
+    getItem: (k) => (flashLager.has(k) ? flashLager.get(k) : null),
+    setItem: (k, v) => flashLager.set(k, String(v)),
+    removeItem: (k) => flashLager.delete(k),
+  };
   vm.runInContext(fs.readFileSync(KBHRECIPE_JS, 'utf8'), ctx, { filename: KBHRECIPE_JS });
   if (inkluderRecipeStorage) {
     // recipe_storage.js bruker localStorage -- en minimal, i minnet
@@ -903,6 +919,138 @@ kjor('originRecipeId (12f): frosne legacy-fixturer gir samme "ingen origin"-resu
     assert.strictEqual(res.ok, true);
     assert.strictEqual(res.oppskrift.originRecipeId, undefined);
   }
+});
+
+// ─── issue #300 -- handoff-hint metadata (exportedAt/generator) ────────
+// Phase 3C-avgjørelsen i issue #299 (punkt 4): en kompakt "hvor/når ble
+// denne filen eksportert"-hint i importforhåndsvisningen, avledet
+// UTELUKKENDE fra eksisterende, allerede skrevne envelope-felt -- ingen
+// ny .kbhrecipe-versjon, ingen fabrikert kilde/tid. Dekker de tre
+// tilfellene issue #300 selv krever: metadata til stede, metadata
+// mangler/er ugyldig, og en ukjent (men gyldig streng) generator.
+
+kjor('issue #300: kbhRecipeHandoffKilde() kjenner kun de to eksisterende generator-strengene', () => {
+  const ctx = nyContext(false);
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde('Kvernhaug Brygghus'), 'web');
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde('Kvernhaug Brygghus (Streamlit)'), 'app');
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde('Et ukjent fremtidig verktøy'), null);
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde(undefined), null);
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde(null), null);
+});
+
+kjor('issue #300: parseKbhRecipeInnhold() gir gyldig exportedAt/generator videre uendret (metadata til stede)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.exportedAt = '2026-09-17T12:00:00.000Z';
+  raa.generator = 'Kvernhaug Brygghus (Streamlit)';
+  const res = nyContext(false).parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.exportedAt, '2026-09-17T12:00:00.000Z');
+  assert.strictEqual(res.generator, 'Kvernhaug Brygghus (Streamlit)');
+});
+
+kjor('issue #300: manglende/ikke-streng envelope-metadata gir null, aldri en fabrikert verdi eller en avvist import (metadata mangler)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  delete raa.exportedAt;
+  raa.generator = 12345; // håndredigert/ugyldig type -- må aldri kastes videre uverifisert
+  const res = nyContext(false).parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true, 'malformert metadata skal aldri svekke selve importvalideringen');
+  assert.strictEqual(res.exportedAt, null);
+  assert.strictEqual(res.generator, null);
+});
+
+kjor('issue #300: ukjent, men gyldig streng-generator gis videre uendret, men kartlegges bevisst til ingen kilde (ukjent generator)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.generator = 'Et helt annet, ukjent eksportverktøy';
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.generator, 'Et helt annet, ukjent eksportverktøy');
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde(res.generator), null);
+});
+
+kjor('issue #300: rå/legacy oppskrifts-JSON uten konvolutt gir alltid null-metadata, aldri gjettet fra selve innholdet', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify({ navn: 'Gammel oppskrift', malt: [], humle: [], volum: 20 }));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.legacy, true);
+  assert.strictEqual(res.exportedAt, null);
+  assert.strictEqual(res.generator, null);
+});
+
+kjor('issue #300: kbhRecipeHandoffHint() gir null når verken kilde eller tidspunkt er kjent -- nøytral forhåndsvisning, ingen fabrikert tekst', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify({ navn: 'Gammel oppskrift', malt: [], humle: [], volum: 20 }));
+  assert.strictEqual(ctx.kbhRecipeHandoffHint(res), null);
+});
+
+kjor('issue #300: kbhRecipeHandoffHint() gir en kilde-hint selv uten gyldig tidspunkt (kjent generator, manglende exportedAt)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  delete raa.exportedAt;
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.generator, 'Kvernhaug Brygghus (Streamlit)');
+  assert.strictEqual(ctx.kbhRecipeHandoffHint(res), '[i18n:kbhrecipe.handoffKunKilde]');
+});
+
+// ─── Chief review (PR #305) -- handoff-hint "flash" over navigasjon ────
+// Blokkeren fra første Chief-review av issue #300: importer_page.js sin
+// apneIByggeren() navigerer ALLTID videre til index.html, også på det
+// vanlige "ingen aktiv kladd"-sporet der ingen confirm()-dialog vises --
+// uten en mekanisme for å bære hinten over selve navigasjonen ble den
+// aldri synlig på det sporet. Disse testene dekker den nye,
+// sessionStorage-baserte engangs-mekanismen (lagreHandoffHintFlash()/
+// hentOgFjernHandoffHintFlash()) direkte -- selve DOM-/redirect-koden i
+// importer_page.js/app.js er utenfor denne filens Node-vm-omfang (se
+// forklaringen ved PR#3-testene over), men disse to funksjonene ER hele
+// den nye kontrakten de to sidene bygger på.
+
+kjor('issue #300 (Chief review): lagreHandoffHintFlash() + hentOgFjernHandoffHintFlash() -- rundtur bevarer hinten nøyaktig én gang', () => {
+  const ctx = nyContext(false);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, 'ingen flash skrevet ennå');
+  ctx.lagreHandoffHintFlash('Eksportert fra Web, 17.09.2026, 14:32.');
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), 'Eksportert fra Web, 17.09.2026, 14:32.');
+  // Engangs -- andre kall (f.eks. en påfølgende, urelatert sidelasting)
+  // skal ALDRI se den samme meldingen igjen.
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, 'flashen skal være fjernet etter første lesning');
+});
+
+kjor('issue #300 (Chief review): lagreHandoffHintFlash() er et no-op for en manglende/tom hint (tekstimport, eller ukjent/manglende metadata)', () => {
+  const ctx = nyContext(false);
+  for (const ugyldig of [undefined, null, '']) {
+    ctx.lagreHandoffHintFlash(ugyldig);
+    assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, `${JSON.stringify(ugyldig)} skal aldri skrive en flash`);
+  }
+});
+
+kjor('issue #300 (Chief review): "clean import" (ingen aktiv kladd, ingen confirm()) og overskrivings-sporet skriver samme flash-verdi -- speiler apneIByggeren() sin nye, ubetingede lagreHandoffHintFlash()-linje', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.generator = 'Kvernhaug Brygghus';
+  const importRes = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  const hint = ctx.kbhRecipeHandoffHint(importRes);
+  assert.ok(hint, 'testens eget scenario må faktisk gi en hint å bære over');
+
+  // "Clean import"-sporet: apneIByggeren() kaller lagreHandoffHintFlash(hint)
+  // UANSETT om _aktivKladdHarInnhold() var true eller false -- simulert her
+  // direkte på de to eksponerte funksjonene, siden selve apneIByggeren() er
+  // DOM-bundet (window.location.href) og utenfor denne filens omfang.
+  ctx.lagreHandoffHintFlash(hint);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), hint);
+
+  // Overskrivings-sporet (en aktiv kladd fantes, confirm() ble vist og
+  // godtatt) skriver EKSAKT samme flash-verdi etterpå -- ingen egen,
+  // divergerende oppførsel mellom de to grenene.
+  ctx.lagreHandoffHintFlash(hint);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), hint);
+});
+
+kjor('issue #300 (Chief review): ukjent/manglende metadata gir en null-hint, som fortsatt aldri skriver noen flash (nøytral forhåndsvisning helt til index.html)', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify({ navn: 'Gammel oppskrift', malt: [], humle: [], volum: 20 }));
+  const hint = ctx.kbhRecipeHandoffHint(res);
+  assert.strictEqual(hint, null);
+  ctx.lagreHandoffHintFlash(hint);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, 'en null-hint skal aldri skrive en synlig flash-melding');
 });
 
 // ─── Oppsummering ───────────────────────────────────────────────────────

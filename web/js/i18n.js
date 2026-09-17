@@ -562,6 +562,11 @@ const TEKSTER = {
     "kbhrecipe.manglerOppskrift": "Denne oppskriftsfilen mangler selve oppskriften.",
     "kbhrecipe.manglerRecipeSchemaVersion": "Denne oppskriftsfilen mangler informasjon om oppskriftens schema-versjon (recipeSchemaVersion) og kan ikke åpnes sikkert her.",
     "kbhrecipe.ustottetRecipeSchemaVersion": "Denne oppskriften bruker en nyere eller ukjent schema-versjon (recipeSchemaVersion) som ikke støttes her ennå.",
+    "kbhrecipe.handoffKilde.web": "Web",
+    "kbhrecipe.handoffKilde.app": "App",
+    "kbhrecipe.handoffKildeOgTid": "Eksportert fra {kilde}, {tid}.",
+    "kbhrecipe.handoffKunKilde": "Eksportert fra {kilde}.",
+    "kbhrecipe.handoffKunTid": "Eksportert {tid}.",
 
     "meta.mineOppskrifter.sidetittel": "📂 Mine oppskrifter",
     "mineOppskrifter.tittel": "Mine lagrede oppskrifter",
@@ -2324,6 +2329,11 @@ const TEKSTER = {
     "kbhrecipe.manglerOppskrift": "This recipe file is missing the actual recipe.",
     "kbhrecipe.manglerRecipeSchemaVersion": "This recipe file is missing recipe schema version information (recipeSchemaVersion) and can't be safely opened here.",
     "kbhrecipe.ustottetRecipeSchemaVersion": "This recipe uses a newer or unknown recipe schema version (recipeSchemaVersion) that isn't supported here yet.",
+    "kbhrecipe.handoffKilde.web": "Web",
+    "kbhrecipe.handoffKilde.app": "App",
+    "kbhrecipe.handoffKildeOgTid": "Exported from {kilde}, {tid}.",
+    "kbhrecipe.handoffKunKilde": "Exported from {kilde}.",
+    "kbhrecipe.handoffKunTid": "Exported {tid}.",
 
     "meta.mineOppskrifter.sidetittel": "📂 My Recipes",
     "mineOppskrifter.tittel": "My saved recipes",

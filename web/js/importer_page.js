@@ -25,11 +25,25 @@ function _aktivKladdHarInnhold() {
   }
 }
 
-function apneIByggeren(oppskrift) {
+// `hint` (issue #300) -- kbhRecipeHandoffHint()-resultat fra fil-import,
+// eller undefined fra tekstimport (bekreftImportTekst() under, som ikke
+// har noen .kbhrecipe-konvolutt å hente hint fra) -- se kbhrecipe.js.
+function apneIByggeren(oppskrift, hint) {
   if (_aktivKladdHarInnhold()) {
-    const ok = confirm(t("oppskrift.apneConfirm"));
+    const ok = confirm(kbhRecipeApneConfirmMelding(hint));
     if (!ok) return;
   }
+  // Chief review (PR #305) -- denne funksjonen navigerer ALLTID bort fra
+  // siden rett under, også når ingen aktiv kladd fantes å bekrefte
+  // overskriving av (ingen confirm() over i det hele tatt) -- uten dette
+  // ble hinten aldri vist på det vanlige, "rene" import-sporet. Skrives
+  // UBETINGET (ikke bare i overskrivings-grenen over) for å speile
+  // app.js sin egen apneOppskriftsfil(): der vises hinten BÅDE i
+  // confirm()-dialogen OG i status-teksten etterpå, uansett om en aktiv
+  // kladd fantes. No-op når hint er undefined/null (tekstimport, eller
+  // ukjent/manglende metadata) -- se lagreHandoffHintFlash() i
+  // kbhrecipe.js.
+  lagreHandoffHintFlash(hint);
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
   window.location.href = "index.html";
 }
@@ -53,7 +67,7 @@ function importerJsonFil(fil) {
       status.textContent = t("oppskrift.importDuplikat");
       return;
     }
-    apneIByggeren(resultat.oppskrift);
+    apneIByggeren(resultat.oppskrift, kbhRecipeHandoffHint(resultat));
   };
   reader.onerror = () => {
     status.textContent = t("oppskrift.lesefeil");

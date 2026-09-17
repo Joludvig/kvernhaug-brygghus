@@ -1954,8 +1954,12 @@ function apneOppskriftsfil(fil) {
       status.textContent = t("oppskrift.importDuplikat");
       return;
     }
+    // issue #300 -- handoff-hint (hvor/når filen ble eksportert, kun fra
+    // eksisterende envelope-metadata) vises både i overskrivings-
+    // bekreftelsen og i status-teksten etterpå, se kbhrecipe.js.
+    const handoffHint = kbhRecipeHandoffHint(resultat);
     if (oppskriftHarInnhold(samleOppskrift())) {
-      const ok = confirm(t("oppskrift.apneConfirm"));
+      const ok = confirm(kbhRecipeApneConfirmMelding(handoffHint));
       if (!ok) return;
     }
     // Runde 25A -- en importert fil har ingen LOKAL identitet: recipeId
@@ -1964,7 +1968,7 @@ function apneOppskriftsfil(fil) {
     _aktivRecipeId = null;
     visForrigeErfaring();
     _gjenopprettOppskrift(resultat.oppskrift);
-    status.textContent = t("oppskrift.apnetStatus");
+    status.textContent = handoffHint ? `${t("oppskrift.apnetStatus")} ${handoffHint}` : t("oppskrift.apnetStatus");
   };
   reader.onerror = () => {
     status.textContent = t("oppskrift.lesefeil");
@@ -2078,6 +2082,17 @@ async function init() {
     leggTilMaltRad();
     leggTilHumleRad();
     beregnOgVisResultat();
+  }
+  // Chief review (PR #305) -- forbruker en ev. handoff-hint lagt igjen av
+  // importer_page.js sin apneIByggeren() FØR redirect til denne siden (se
+  // lagreHandoffHintFlash()/hentOgFjernHandoffHintFlash() i kbhrecipe.js)
+  // -- speiler samme status-tekstmønster som apneOppskriftsfil() over. Et
+  // no-op (ingen tekst satt, "lagre-status" uendret) for ethvert annet
+  // init()-kall: vanlig sidelasting, Mine oppskrifter-hand-off (ingen
+  // envelope å hente hint fra) eller tekstimport (samme grunn).
+  const handoffHintFlash = hentOgFjernHandoffHintFlash();
+  if (handoffHintFlash) {
+    document.getElementById("lagre-status").textContent = `${t("oppskrift.apnetStatus")} ${handoffHintFlash}`;
   }
   // Skaler-til-feltet foreslår gjeldende volum som startpunkt (som desktop-
   // appens number_input(value=ctx["volum"])) -- oppdateres kun her og etter
