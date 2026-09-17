@@ -45,7 +45,7 @@ _GYLDIG_HUMLE_ID = "amarillo"
 _GYLDIG_GJAER_ID = "lalbrew_house_ale"
 
 
-def _kbhrecipe_tekst(**overrides):
+def _kbhrecipe_tekst(_generator="test", _exported_at="2026-09-02T00:00:00Z", **overrides):
     payload = {
         "recipeSchemaVersion": 1,
         "navn": "AppTest Smoke Ale",
@@ -59,8 +59,8 @@ def _kbhrecipe_tekst(**overrides):
     }
     payload.update(overrides)
     return json.dumps({
-        "format": "kbhrecipe", "version": 1, "exportedAt": "2026-09-02T00:00:00Z",
-        "generator": "test", "recipe": payload,
+        "format": "kbhrecipe", "version": 1, "exportedAt": _exported_at,
+        "generator": _generator, "recipe": payload,
     })
 
 
@@ -352,6 +352,42 @@ class TestKbhrecipeImportUiAppTest(unittest.TestCase):
 
         self.assertEqual(_ss(at, "gjeldende_navn"), "AppTest Smoke Ale")
         self.assertIsNone(_ss(at, "_aktiv_kbh_origin_recipe_id"))
+
+    # ─── 13-15: handoff-hint i forhåndsvisningen (issue #302) ───────────
+    #
+    # Phase 3C-avgjørelsen i issue #299 (punkt 4), speilet av App: en
+    # kompakt "eksportert fra Web/App, <tid>"-hint fra eksisterende
+    # envelope-metadata (exportedAt/generator), synlig i selve
+    # forhåndsvisningen -- se ui/sidebar.py og
+    # modules/kbh_import.py::kbhrecipe_handoff_hint().
+
+    def test_13_kjent_web_generator_og_gyldig_tid_viser_kombinert_hint(self):
+        at = self._ny_apptest()
+        self._last_opp(at, "web.kbhrecipe", _kbhrecipe_tekst(
+            _generator="Kvernhaug Brygghus", _exported_at="2026-09-01T12:30:00Z",
+        ))
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        captions = [c.value for c in at.sidebar.caption]
+        self.assertTrue(any("🔖 Eksportert fra Web, 2026-09-01 12:30." in c for c in captions))
+
+    def test_14_ukjent_generator_og_ugyldig_tid_viser_ingen_hint(self):
+        at = self._ny_apptest()
+        self._last_opp(at, "ukjent.kbhrecipe", _kbhrecipe_tekst(
+            _generator="et ukjent verktoy", _exported_at="ikke en gyldig dato",
+        ))
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        self.assertIsNotNone(_ss(at, "kbhrecipe_import_preview"))
+        captions = [c.value for c in at.sidebar.caption]
+        self.assertFalse(any(c.startswith("🔖") for c in captions))
+
+    def test_15_kjent_app_generator_uten_gyldig_tid_viser_kun_kilde_hint(self):
+        at = self._ny_apptest()
+        self._last_opp(at, "app.kbhrecipe", _kbhrecipe_tekst(
+            _generator="Kvernhaug Brygghus (Streamlit)", _exported_at=None,
+        ))
+        self._klikk(at, "kbhrecipe_analyser_btn")
+        captions = [c.value for c in at.sidebar.caption]
+        self.assertTrue(any("🔖 Eksportert fra App." in c for c in captions))
 
 
 if __name__ == "__main__":

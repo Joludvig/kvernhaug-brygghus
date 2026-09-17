@@ -15,7 +15,7 @@ from modules.recipe_importer import (
     match_imported_ingredients,
     apply_import_to_session_state,
 )
-from modules.kbh_import import parse_kbhrecipe_json, UgyldigKbhrecipeForImport
+from modules.kbh_import import parse_kbhrecipe_json, kbhrecipe_handoff_hint, UgyldigKbhrecipeForImport
 from modules.kbh_import_apply import apply_kbhrecipe_import_to_session_state
 from ui.i18n import render_sprak_valger, t
 
@@ -359,6 +359,15 @@ def render_sidebar():
             _r = kbhrecipe_preview["recipe"]
             _pt = kbhrecipe_preview.get("passthrough")
             st.markdown("**Forhåndsvisning:**")
+            # issue #302 -- Phase 3C-avgjørelsen i issue #299 (punkt 4): en
+            # kompakt "eksportert fra Web/App, <tid>"-hint fra eksisterende
+            # envelope-metadata (exportedAt/generator) -- INGEN ny .kbhrecipe-
+            # kontrakt, INGEN synk-/autoritetspåstand, aldri fabrikert (se
+            # modules/kbh_import.py sin kbhrecipe_handoff_hint()). None ->
+            # ingen linje vises, akkurat som web-siden sin ekvivalent.
+            _handoff_hint = kbhrecipe_handoff_hint(kbhrecipe_preview)
+            if _handoff_hint:
+                st.caption(f"🔖 {_handoff_hint}")
             st.caption(f"📛 Navn: **{_r['name']}**")
             st.caption(
                 f"🪣 Volum: **{_r['batch_size']:g} L** · "

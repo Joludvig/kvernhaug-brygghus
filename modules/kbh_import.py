@@ -26,11 +26,24 @@ dybden -- en importert fil er utrengt input, ulikt et App-internt
 Recipe Object.
 """
 import copy
+from datetime import datetime
 
 from modules.process_profiles import normaliser_prosessprofil, STANDARDPROFILER
 
 KBHRECIPE_FORMAT = "kbhrecipe"
 KBHRECIPE_VERSION = 1
+
+# issue #302 -- de to kjente `generator`-verdiene i konvolutten. Speilet,
+# IKKE importert fra modules/kbh_contract.py sin `_GENERATOR` -- samme
+# bevisste reader/writer-frikobling som KBHRECIPE_FORMAT/KBHRECIPE_VERSION
+# over (denne modulens docstring: "reverse adapter", uavhengig av
+# writeren) og samme mønster som web/js/kbhrecipe.js sine
+# KBHRECIPE_GENERATOR_WEB/APP-konstanter. Brukt UTELUKKENDE til å avlede
+# en menneskelesbar "eksportert fra Web/App"-hint ved import (se
+# kbhrecipe_handoff_kilde()/kbhrecipe_handoff_hint() under) -- må
+# oppdateres manuelt her hvis strengen noensinne endres i kbh_contract.py.
+KBHRECIPE_GENERATOR_WEB = "Kvernhaug Brygghus"
+KBHRECIPE_GENERATOR_APP = "Kvernhaug Brygghus (Streamlit)"
 
 # Egen, lokal konstant -- IKKE modules/recipe_storage.py sin ekvivalent
 # (denne modulen har ingen slik fil å dele med i Python, men følger
@@ -475,7 +488,19 @@ def parse_kbhrecipe_json(tekst, malt_db=None, humle_db=None, gjaer_db=None):
               "originRecipeId",
           },
           "passthrough": {...},   # se _bygg_passthrough() -- kan være {}
+          "exportedAt": "2026-...Z" | None,
+          "generator": "Kvernhaug Brygghus (Streamlit)" | None,
         }
+
+    `exportedAt`/`generator` (issue #302, Phase 3C-avgjørelsen i issue
+    #299) er de eksisterende, allerede-skrevne envelope-feltene (IKKE en
+    ny .kbhrecipe-schemaendring) -- tatt med UTELUKKENDE til visning (se
+    kbhrecipe_handoff_hint() under), ALDRI som en del av selve
+    oppskriftskontrakten (`recipe`/`passthrough`). Et ikke-strengfelt
+    (håndredigert/uventet fil) blir None her -- "intet signal", aldri
+    kastet videre uverifisert (CORE_KBHRECIPE_V1.md §1: "a reader must
+    not fail if it can't interpret them further"). Speiler
+    web/js/kbhrecipe.js sin parseKbhRecipeInnhold().
 
     `recipe` inneholder BEVISST IKKE `stats`/`flavor_profile` (OPPGAVE I)
     -- disse beregnes av App, aldri importert som om de var kildedata.
@@ -542,4 +567,69 @@ def parse_kbhrecipe_json(tekst, malt_db=None, humle_db=None, gjaer_db=None):
         "water_measurements": maalinger,
         "originRecipeId": origin_recipe_id,
     }
-    return {"recipe": native, "passthrough": _bygg_passthrough(payload)}
+    exported_at = parsed.get("exportedAt")
+    generator = parsed.get("generator")
+    return {
+        "recipe": native,
+        "passthrough": _bygg_passthrough(payload),
+        "exportedAt": exported_at if isinstance(exported_at, str) else None,
+        "generator": generator if isinstance(generator, str) else None,
+    }
+
+
+def kbhrecipe_handoff_kilde(generator):
+    """
+    issue #302 -- Phase 3C-avgjørelsen i issue #299 (punkt 2/4): et
+    kjent, utvetydig `generator`-felt gir en "eksportert fra Web/App"-
+    kilde; alt annet (ukjent streng, håndredigert, manglende/None) er
+    INGEN kilde -- aldri en gjettet verdi. Speiler web/js/kbhrecipe.js
+    sin kbhRecipeHandoffKilde().
+    """
+    if generator == KBHRECIPE_GENERATOR_WEB:
+        return "web"
+    if generator == KBHRECIPE_GENERATOR_APP:
+        return "app"
+    return None
+
+
+# Menneskelesbare kildenavn til hint-teksten under -- App har ingen
+# bilingual visning av denne .kbhrecipe-importseksjonen i dag (ui/
+# sidebar.py sin "📦 Importer .kbhrecipe-fil"-ekspander er utenfor
+# ui/i18n.py sin migrering, se den filens øvrige innhold), så hint-
+# teksten er bevisst norsk-only, i samme stil som resten av seksjonen.
+_HANDOFF_KILDE_NAVN = {"web": "Web", "app": "App"}
+
+
+def kbhrecipe_handoff_hint(import_resultat):
+    """
+    Bygger en kort, menneskelesbar "eksportert fra Web/App, <tid>"-hint
+    fra parse_kbhrecipe_json() sitt returobjekt (`exportedAt`/
+    `generator`) -- REN handoff-metadata (hvor/når filen ble
+    eksportert), ALDRI en synk- eller autoritetspåstand (CLAUDE.md/
+    issue #299 punkt 2). Returnerer None (ingen hint å vise) når verken
+    kilde eller tidspunkt kan utledes trygt -- ALDRI en fabrikert verdi
+    (issue #300/#302 punkt 3). Speiler web/js/kbhrecipe.js sin
+    kbhRecipeHandoffHint(), tilpasset App sin norsk-only visning av
+    denne importseksjonen (se _HANDOFF_KILDE_NAVN over).
+    """
+    if not import_resultat:
+        return None
+    kilde_tekst = _HANDOFF_KILDE_NAVN.get(kbhrecipe_handoff_kilde(import_resultat.get("generator")))
+
+    tid_tekst = None
+    exported_at = import_resultat.get("exportedAt")
+    if isinstance(exported_at, str) and exported_at:
+        try:
+            tidspunkt = datetime.fromisoformat(exported_at.replace("Z", "+00:00"))
+        except ValueError:
+            tidspunkt = None
+        if tidspunkt is not None:
+            tid_tekst = tidspunkt.strftime("%Y-%m-%d %H:%M")
+
+    if not kilde_tekst and not tid_tekst:
+        return None
+    if kilde_tekst and tid_tekst:
+        return f"Eksportert fra {kilde_tekst}, {tid_tekst}."
+    if kilde_tekst:
+        return f"Eksportert fra {kilde_tekst}."
+    return f"Eksportert {tid_tekst}."
