@@ -5,25 +5,32 @@ Phase 3C ("brew-data handoff contract"). This is a docs-only, read-only
 audit — no App/Web/Core product behavior, schema, or version is changed
 by this document. It supersedes no prior decision; it confirms what is
 now true on current `master` after the handoff implementation pieces
-landed.*
+landed. Updated by [#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299)
+(owner DECISION, docs-only) to record the general Phase-3C-scoped
+ownership/current-copy decision this audit's own §2.1/§4/§7 identified
+as the one still-open bullet — see §11.*
 
 ## 0. Baseline
 
 | Item | Value |
 |---|---|
-| Issue | [#291](https://github.com/Joludvig/kvernhaug-brygghus/issues/291) |
+| Issue | [#291](https://github.com/Joludvig/kvernhaug-brygghus/issues/291); ownership/current-copy closure recorded by [#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299) |
 | Roadmap | [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101) Phase 3C |
-| `origin/master` at audit time | `a9df524` (refreshed from this audit's original `1227cb0` baseline per Chief review round 2 on this PR; one more merge landed in between, #296/issue #290, `docs(core): correct stale App-counterpart claims in CORE_KBHBREW_V1.md`, which fixes the first of §5.1's two originally-still-unfixed findings — the queue baseline was `a817de6`) |
-| Inputs audited | [phase3c_brew_data_handoff_contract_decision_brief.md](phase3c_brew_data_handoff_contract_decision_brief.md) (#270/PR #274); [CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md](CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) (#276/PR #279, ratified #281/PR #282); Web `.kbhbrew` UI (#275/PR #277); App `originRecipeId` (#283/PR #286); Web `originRecipeId` (#284/PR #287); cross-surface handoff test (#288/PR #292); malformed-origin fix (#293, commit `7345809`); `CORE_KBHBREW_V1.md` staleness fix (#296/issue #290, merged `a9df524`); [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md); [CORE_KBHBREW_V1.md](CORE_KBHBREW_V1.md); [#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253) (Phase 3B ownership decision); [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101) Phase 3C's own 5-bullet definition. |
+| `origin/master` at audit time | `a9df524` (refreshed from this audit's original `1227cb0` baseline per Chief review round 2 on this PR; one more merge landed in between, #296/issue #290, `docs(core): correct stale App-counterpart claims in CORE_KBHBREW_V1.md`, which fixes the first of §5.1's two originally-still-unfixed findings — the queue baseline was `a817de6`); refreshed again to `3dfeb4d` for the #299 ownership-decision update in §11 (no further audited source file changed between `a9df524` and `3dfeb4d` — that range is PR #297's own merge plus #298's unrelated Vault-path doc fix) |
+| Inputs audited | [phase3c_brew_data_handoff_contract_decision_brief.md](phase3c_brew_data_handoff_contract_decision_brief.md) (#270/PR #274); [CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md](CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md) (#276/PR #279, ratified #281/PR #282); Web `.kbhbrew` UI (#275/PR #277); App `originRecipeId` (#283/PR #286); Web `originRecipeId` (#284/PR #287); cross-surface handoff test (#288/PR #292); malformed-origin fix (#293, commit `7345809`); `CORE_KBHBREW_V1.md` staleness fix (#296/issue #290, merged `a9df524`); [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md); [CORE_KBHBREW_V1.md](CORE_KBHBREW_V1.md); [#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253) (Phase 3B ownership decision); [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101) Phase 3C's own 5-bullet definition; [#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299) (general Phase-3C ownership/current-copy owner decision, §11). |
 | Method | Direct source read of `modules/kbh_contract.py`, `modules/kbh_import.py`, `modules/recipe_storage.py`, `web/js/kbhrecipe.js`, `web/js/recipe_storage.js`, `web/js/brygg_page.js`, `web/js/brew_storage.js`, plus the governing Core docs above — not documentation summaries alone. Every claim below is grounded in a current file:line citation or a rerun test result, not carried forward from the decision brief's own (now nine-day-old) source read. |
-| Tests run this session | `python3 -m unittest tests.test_kbh_contract tests.test_kbh_import tests.test_kbh_import_apply tests.test_kbhrecipe_origin_identity tests.test_kbh_passthrough tests.test_kbhbrew_storage_identity tests.test_kbhbrew_schema_contract tests.test_kbhbrew_roundtrip -b` — 232 tests, OK. Full suite: `python3 -m unittest discover -s tests -b` — 2597 tests, OK (53 skipped, pre-existing). JS contract tests (`tests/js/test_kbhrecipe_contract.js`, `tests/js/test_kbhbrew_contract.js`) were **not** re-executed in this Bridge sandbox — `node <file>` is outside `--allowedTools` here, the same documented constraint PR #287 hit; their last-known-green state is CI evidence from PR #286/#287/#292/#293, not re-verified by this audit. |
+| Tests run this session | `python3 -m unittest tests.test_kbh_contract tests.test_kbh_import tests.test_kbh_import_apply tests.test_kbhrecipe_origin_identity tests.test_kbh_passthrough tests.test_kbhbrew_storage_identity tests.test_kbhbrew_schema_contract tests.test_kbhbrew_roundtrip -b` — 232 tests, OK. Full suite: `python3 -m unittest discover -s tests -b` — 2597 tests, OK (53 skipped, pre-existing). JS contract tests (`tests/js/test_kbhrecipe_contract.js`, `tests/js/test_kbhbrew_contract.js`) were **not** re-executed in this Bridge sandbox — `node <file>` is outside `--allowedTools` here, the same documented constraint PR #287 hit; their last-known-green state is CI evidence from PR #286/#287/#292/#293, not re-verified by this audit. §11's #299 update is a pure text/decision-recording change to this document only — no source file it audits changed, so no test rerun is applicable to that update itself. |
 
 ---
 
-## 1. Verdict: **TECHNICAL PARTIAL**
+## 1. Verdict: **TECHNICAL PASS**
 
-*(Revised from an initial TECHNICAL PASS after Chief review on this
-PR flagged an internal contradiction — see "Revision note" below.)*
+*(Revised from an initial TECHNICAL PASS to TECHNICAL PARTIAL after
+Chief review on this PR flagged an internal contradiction — see
+"Revision note" below — and now back to TECHNICAL PASS following
+[#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299)'s
+owner decision, which closes the one bullet that kept the verdict at
+PARTIAL. See §11.)*
 
 Phase 3C's own definition (issue #101, `## 3C — brew-data handoff
 contract`) asks for exactly five things to be *defined* before this
@@ -33,35 +40,46 @@ may be called anything more than manual file exchange:
 > behavior; safe continuation; conflict expectations. No cloud/backend
 > is implied by this phase.
 
-Four of the five are now defined **and implemented**, source-grounded
-on current `master`, for both formats Phase 3C actually governs
-(`.kbhrecipe`, `.kbhbrew`): export/import semantics (§2.2),
-duplicate/origin behavior (§2.3), safe continuation (§2.4), and
+Four of the five were already defined **and implemented**,
+source-grounded on current `master`, for both formats Phase 3C
+actually governs (`.kbhrecipe`, `.kbhbrew`): export/import semantics
+(§2.2), duplicate/origin behavior (§2.3), safe continuation (§2.4), and
 conflict expectations (§2.5). No cloud/backend/account mechanism
 exists anywhere in the touched code (confirmed by the same grep the
 decision brief ran, repeated in §2 below).
 
-The fifth — **ownership/current copy** — is only partially settled.
+The fifth — **ownership/current copy** — was only partially settled at
+this audit's original writing.
 [#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253)
 decided ownership for the Phase 3B real-brew acceptance run only, and
 says so in its own text (its "Phase 3C boundary" section: *"Phase 3C
 will separately define App↔Web handoff semantics, including:
-ownership/current copy..."*). No later issue in this lineage made that
-separate, general Phase-3C-scoped ownership decision (§2.1, §4). What
-Phase 3C's implementation work actually delivered for this bullet is
-**capability symmetry** (both surfaces can now export/import both
-formats) and a **duplicate/origin signal** (§2.3) a user can act on —
-real, useful, source-grounded progress — but not the *policy decision*
-the roadmap's own bullet asks for. Calling that "defined" would not be
-source-grounded against #253's own text, so this audit does not do so.
+ownership/current copy..."*). No issue between #253 and #291 in this
+lineage made that separate, general Phase-3C-scoped ownership decision
+(§2.1, §4 as originally written). What Phase 3C's implementation work
+had delivered for this bullet by that point was **capability symmetry**
+(both surfaces can export/import both formats) and a **duplicate/origin
+signal** (§2.3) a user can act on — real, useful, source-grounded
+progress — but not yet the *policy decision* the roadmap's own bullet
+asks for.
 
-This is why the verdict is **TECHNICAL PARTIAL**, not PASS: four of
-the five Phase 3C bullets are fully closed; the fifth has strong
-supporting mechanism but no decision record. It is not a product
-defect — nothing is broken, and no test fails — it is an open owner
-decision, structurally the same kind of gap #253 itself was written to
-close for Phase 3B. See §7 for the precise, bounded follow-up this
-implies.
+**#299 (owner DECISION, 2026-09-17) now makes that policy decision** —
+see §11 for the decision text and §2.1 for the updated, closed reading.
+It states plainly that no global master/current copy exists across App
+and Web in V1, that current copy is surface-local, and that cross-surface
+continuation is explicit handoff, never synchronization — an
+**intentionally manual-by-policy** answer, not a mechanism yet to be
+built. That is a defined outcome for the bullet exactly as §101 asks
+("define... ownership/current copy"), even though the definition itself
+is "no single owner is required; both surfaces are valid; the user
+chooses" rather than a single-surface rule like #253's Phase 3B answer.
+
+All five Phase 3C bullets are therefore now either defined/implemented
+or intentionally manual by policy, source-grounded against current
+`master` (§11). The verdict is accordingly **TECHNICAL PASS**. This is
+not a product-code change — nothing was built, and no test result
+changed — it is the same kind of durable owner decision record #253
+itself was for Phase 3B, now made for Phase 3C's broader scope.
 
 Two further caveats, unchanged in substance from the initial pass but
 refreshed against master's advance to `a9df524` (§0), remain:
@@ -86,25 +104,56 @@ test result — both are pure documentation freshness gaps.
 
 ## 2. Proven behavior (source-grounded, current master)
 
-### 2.1 Ownership / current copy — **not fully defined** (the reason for PARTIAL)
+### 2.1 Ownership / current copy — **now defined, closed by #299**
 
 [#253](https://github.com/Joludvig/kvernhaug-brygghus/issues/253)
-(APPROVED 2026-09-13) remains the only ownership *decision record*,
-and it scopes itself explicitly to Phase 3B: *"For Phase 3B real-brew
-acceptance, the App owns the current structured brew record / running
-logging copy... Web = no parallel live logging copy in Phase 3B."*
-#253 does not stop there — its own "Phase 3C boundary" section states
-in plain language that this question is deliberately left open for
-Phase 3C to answer separately: *"Phase 3C will separately define
-App↔Web handoff semantics, including: ownership/current copy..."* No
-later issue in this lineage (#270/#274, #275/#277, #276/#281, #283/
-#286, #284/#287, #288/#292, #293) made that separate, general
-Phase-3C-scoped ownership decision. Nothing in the code enforces any
-ownership policy either way — a user remains free to use either
-surface's engine as "the" current copy.
+(APPROVED 2026-09-13) was, until now, the only ownership *decision
+record*, and it scopes itself explicitly to Phase 3B: *"For Phase 3B
+real-brew acceptance, the App owns the current structured brew record /
+running logging copy... Web = no parallel live logging copy in Phase
+3B."* #253 does not stop there — its own "Phase 3C boundary" section
+states in plain language that the general question is deliberately
+left open for Phase 3C to answer separately: *"Phase 3C will separately
+define App↔Web handoff semantics, including: ownership/current
+copy..."* No issue between #253 and #291 in this lineage (#270/#274,
+#275/#277, #276/#281, #283/#286, #284/#287, #288/#292, #293) made that
+separate, general Phase-3C-scoped ownership decision.
+[#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299)
+(owner DECISION, 2026-09-17) now makes it:
 
-What Phase 3C's implementation work actually changed is **capability
-symmetry**, not ownership policy:
+> 1. No global master/current copy exists across App and Web in V1.
+>    Current copy is surface-local. App and Web are both valid primary
+>    working surfaces for the user who actually uses them.
+> 2. Cross-surface continuation is explicit handoff, not
+>    synchronization. App ↔ Web continuation happens only through
+>    explicit export/import of `.kbhrecipe` / `.kbhbrew`. Import/export
+>    does not create a live shared copy, shared clock, or automatic
+>    conflict resolution. File exchange must not be described as sync.
+> 5. Divergent local copies are allowed; the user chooses which to
+>    continue from. Existing `originRecipeId` / brew origin identity
+>    remains the cross-surface lineage signal. If the same origin
+>    already exists locally, the product should warn rather than
+>    pretend it knows which copy is authoritative. No automatic merge
+>    or silent overwrite policy is authorized.
+
+(#299's decision points 3 and 4 — draft-vs-saved visibility and
+transfer/change provenance metadata — are forward product expectations
+for *later* implementation work, not implemented by #299 itself; see
+§4 below for what remains open there. Only points 1/2/5 above bear on
+this bullet's closure.)
+
+This matches nothing in the code changing, and nothing needing to:
+consistent with #253's own precedent, an ownership *decision* does not
+require an ownership *mechanism* — #253 didn't add code either. Nothing
+in the code enforces a single-owner policy, and #299 confirms that is
+correct by design: no single-owner rule was ever the intended answer
+for V1. A user remains free to use either surface's engine as a current
+working copy; #299 states that this is not a gap to close but the
+adopted policy itself.
+
+What Phase 3C's implementation work already changed, independent of
+this decision, is **capability symmetry**, which #299 relies on as the
+mechanism underpinning "both surfaces are valid":
 
 - `.kbhrecipe`: already symmetric before this round (both surfaces
   have full import/export UI) — unchanged.
@@ -118,11 +167,13 @@ symmetry**, not ownership policy:
 
 Capability symmetry is real, useful progress, and it is what makes
 safe continuation (§2.4) and duplicate/origin detection (§2.3) work on
-both surfaces. But the roadmap's own bullet asks for ownership/current
-copy to be *defined*, and #253 explicitly did not define it beyond
-Phase 3B — so this bullet is not closed, and the general,
-Phase-3C-scoped ownership decision remains a separate, later owner
-call (§4, §7).
+both surfaces, and what makes #299's "both surfaces are valid primary
+working surfaces" answer a source-grounded one rather than an
+aspirational one. #253 explicitly did not define general ownership
+beyond Phase 3B, and no code change was ever going to define it either
+— that was always the shape of the gap: a missing decision record, not
+a missing mechanism. #299 supplies that record. This bullet is
+therefore now closed (§4, §7).
 
 ### 2.2 Export/import semantics
 
@@ -227,22 +278,33 @@ automatic conflict resolver"), not a defect.
 
 ## 4. Remaining OWNER/manual gates
 
-- A **general, Phase-3C-scoped ownership decision** — "which surface
+- The **general, Phase-3C-scoped ownership decision** — "which surface
   owns ongoing brew logging" beyond the Phase 3B acceptance run's
   App-only scope — was explicitly deferred by every implementation
   issue in this lineage (decision brief §3.8/§6, restated, not
-  reopened, by #281's ratification) and remains a separate, later
-  owner call. This is not optional polish: it is the one Phase 3C
-  bullet (§101's five bullets, §1/§2.1 above) this audit found not yet
-  defined, and it is the reason this audit's verdict is TECHNICAL
-  PARTIAL rather than PASS. See §7 for the precise, bounded follow-up
-  this implies.
+  reopened, by #281's ratification), and is **now made** by
+  [#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299)
+  (§11): no single-surface owner is required for V1; ownership is
+  surface-local; continuation is explicit handoff, never sync. This was
+  the one Phase 3C bullet (§101's five bullets, §1/§2.1 above) this
+  audit found not yet defined, and its closure is why the verdict is
+  now TECHNICAL PASS rather than PARTIAL. Nothing further is owed here.
 - Divergence *visibility* (§2.5) — surfacing "you already have a copy
   of this, imported/edited on `<date>`" using the new `originRecipeId`/
   `originBrewId` signals — is possible now that the identifiers exist,
   but nothing today builds that UI. This is optional future work, not
   a Phase 3C requirement; the roadmap's own "no automatic conflict
-  resolver" non-goal does not require it either.
+  resolver" non-goal does not require it either. #299's decision points
+  3 (draft-vs-saved visibility) and 4 (transfer/change provenance
+  metadata, e.g. surfacing "last saved/exported/imported: Web/App +
+  timestamp") state the *product expectation* for this future work —
+  reusing existing portable identity/envelope metadata, no cloud
+  identity or backend — but #299 does not itself build it; this remains
+  a separate, later, bounded implementation issue. #299's point 5 (warn
+  rather than silently pick an authoritative copy when the same origin
+  already exists locally) likewise states a future product expectation
+  for that same not-yet-built UI, not a change to today's silent-fork
+  behavior described in §2.5/§2.3.
 - Real cross-machine handoff exercise (an actual `.kbhrecipe`/`.kbhbrew`
   file physically moved between App and a different browser/device by
   the owner) remains owner/real-use evidence this audit cannot itself
@@ -337,25 +399,26 @@ nothing in this round's implementation altered any of it:
 
 ## 7. Genuine blocker requiring a later bounded issue
 
-**No product/code blocker found.** The one real product defect this
-lineage's own process surfaced (§2.3, malformed `originRecipeId` on
-Web import) was already caught by a TEST-only issue (#288), fixed by a
-dedicated FAST issue (#293), and is merged on current master — this
-audit re-confirms it is closed, not open.
+**No product/code blocker found, and (as of #299) no open decision
+either.** The one real product defect this lineage's own process
+surfaced (§2.3, malformed `originRecipeId` on Web import) was already
+caught by a TEST-only issue (#288), fixed by a dedicated FAST issue
+(#293), and is merged on current master — this audit re-confirms it is
+closed, not open.
 
-What *is* still open is a **decision**, not a defect: the general,
-Phase-3C-scoped ownership/current-copy call (§2.1, §4) that #253 itself
-deferred to Phase 3C and that no later issue in this lineage made. The
-precise, bounded follow-up this audit recommends — describing it per
-this issue's own instruction, not implementing or filing it here — is
-a single DECISION-type issue, structurally identical to #253 itself:
-state which surface owns the current/ongoing logging copy once Phase
-3B's acceptance run ends (or state explicitly that no single-owner
-policy is required going forward and manual dual-surface use is
-accepted), record it as a durable decision, and no more. That decision
-alone — no code change — would close the one Phase 3C bullet (§101)
-this audit found undefined and would let a follow-up audit call Phase
-3C a full TECHNICAL PASS.
+What *was* still open at this audit's original writing was a
+**decision**, not a defect: the general, Phase-3C-scoped
+ownership/current-copy call (§2.1, §4) that #253 itself deferred to
+Phase 3C and that no issue between #253 and #291 in this lineage made.
+[#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299) is
+exactly the precise, bounded follow-up this audit had recommended here
+— a single DECISION-type issue, structurally identical to #253 itself
+— and it makes the call: no single-surface owner is required going
+forward; ownership is surface-local; manual dual-surface use with
+explicit handoff (never sync) is the accepted, adopted policy (§11).
+That decision — no code change — closes the one Phase 3C bullet (§101)
+this audit originally found undefined, which is why this audit now
+calls Phase 3C a full TECHNICAL PASS (§1).
 
 Separately, if the owner wants the one still-stale doc section (§5.1 —
 `CORE_KBHRECIPE_V1.md`'s PRI 2C3 claim; `CORE_KBHBREW_V1.md`'s
@@ -364,6 +427,13 @@ PR's review) and the one newly-found stale status header (§5.2)
 refreshed, that is one small, bounded, docs-only follow-up (two
 header/section edits across two files) — independent of the ownership
 decision above, and not a blocker either way.
+
+Also separately, per #299 §4 above, a later bounded implementation
+issue remains open (not a blocker, optional future work, not a Phase
+3C requirement) for whichever of #299's decision points 3/4/5 the owner
+wants built into product UI: draft-vs-saved visibility, transfer/change
+provenance metadata, and a "you already have a local copy of this"
+warning at import/continuation time.
 
 ---
 
@@ -421,3 +491,77 @@ and every other finding, source citation, and test result unchanged —
 per Chief's own instruction to keep the verdict stable "unless the
 refreshed source evidence materially says otherwise," which it does
 not.
+
+## 11. Ownership/current-copy decision recorded — #299 (owner DECISION)
+
+This audit's §7 recommended, and did not itself file, "a single
+DECISION-type issue, structurally identical to #253 itself" to close
+the one Phase 3C bullet this audit found undefined.
+[#299](https://github.com/Joludvig/kvernhaug-brygghus/issues/299)
+("DECISION — Phase 3C surface-local current-copy and explicit handoff
+policy") is exactly that issue, and its "Owner decision" section is
+reproduced here in full as the durable record this document exists to
+carry:
+
+> 1. **No global master/current copy exists across App and Web in V1.**
+>    Current copy is **surface-local**. App and Web are both valid
+>    primary working surfaces for the user who actually uses them. App
+>    may be the owner's primary brew/work surface, while a Web-only
+>    user may legitimately use Web as their only/primary surface.
+> 2. **Cross-surface continuation is explicit handoff, not
+>    synchronization.** App ↔ Web continuation happens only through
+>    explicit export/import of `.kbhrecipe` / `.kbhbrew`. Import/export
+>    does not create a live shared copy, shared clock, or automatic
+>    conflict resolution. File exchange must not be described as sync.
+> 3. **Draft vs saved state should be visible locally.** A user
+>    actively editing a recipe should be able to distinguish an
+>    unsaved/draft working state from an explicitly saved state. This
+>    decision defines the product expectation; it does not broaden this
+>    issue into unrelated UI redesign.
+> 4. **Transfer/change provenance should be visible where useful.**
+>    When practical within existing V1 contracts, UI may surface simple
+>    metadata such as where/when a recipe/brew was last explicitly
+>    saved/exported/imported (for example `Web` / `App` + timestamp).
+>    Reuse existing portable identity/envelope metadata where possible;
+>    do not create a cloud identity or backend.
+> 5. **Divergent local copies are allowed; user chooses which to
+>    continue from.** Existing `originRecipeId` / brew origin identity
+>    remains the cross-surface lineage signal. If the same origin
+>    already exists locally, the product should warn rather than
+>    pretend it knows which copy is authoritative. No automatic merge
+>    or silent overwrite policy is authorized.
+
+**Effect on this audit:** points 1, 2 and 5 directly answer §2.1's open
+question — they state that no single-surface owner is required for V1,
+that ownership is deliberately surface-local, and that divergence is
+handled by user choice plus an origin signal, never an automatic
+resolver. That is a definition of "ownership/current copy" in the sense
+§101's Phase 3C bullet asks for, even though the definition is "manual
+by policy" rather than a single-owner rule like #253's Phase 3B answer
+— #299's own body states this explicitly ("the product should warn
+rather than pretend it knows which copy is authoritative," "no
+automatic merge... is authorized"). §1, §2.1, §4 and §7 above are
+updated accordingly; the verdict changes from TECHNICAL PARTIAL to
+**TECHNICAL PASS**.
+
+Points 3 and 4 are additional, forward-looking product expectations
+#299 records for later implementation work — draft-vs-saved visibility
+and transfer/change provenance metadata. Neither is implemented by
+#299 itself (#299 is docs-only, per its own hard guards: "No App/Web/
+Core product implementation in this issue... No schema/version
+change... No cloud/backend/account architecture"), and neither was a
+named Phase 3C bullet in §101's original five — they do not gate this
+audit's verdict, and are recorded here only so a future implementation
+issue has the exact adopted expectation to build against (§4 above).
+
+**No product/code/test was touched to produce this section.** This is
+a pure documentation update recording an owner decision already made
+on issue #299, consistent with every other "docs-only, no schema/
+product change" constraint stated throughout this document (§8).
+`origin/master` for this update is `3dfeb4d` (§0) — no source file this
+audit cites (`modules/kbh_contract.py`, `modules/kbh_import.py`,
+`modules/recipe_storage.py`, `web/js/kbhrecipe.js`,
+`web/js/recipe_storage.js`, `web/js/brygg_page.js`,
+`web/js/brew_storage.js`, or either governing Core doc) changed between
+`a9df524` and `3dfeb4d`, so no re-audit of §2–§6 was required; only
+§1/§2.1/§4/§7 and this section changed.
