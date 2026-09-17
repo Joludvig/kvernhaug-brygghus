@@ -1,12 +1,19 @@
-# Core `.kbhrecipe` Origin Identity — Decision Preflight (issue #276)
+# Core `.kbhrecipe` Origin Identity V1 Contract (ratified, issue #276/#281)
 
-Status: **DECISION preflight — one recommended contract stated below;
-not authorized for implementation by this document alone.** Awaiting
-owner/Chief review. If accepted, a separate, later round updates
-[CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) (§3, §7) to reference this
-document exactly as it already references
+Status: **Active — ratified into the active `.kbhrecipe` V1
+precisification and implemented on both surfaces.** Originally drafted
+as a decision preflight; the owner accepted this document's recommended
+contract on merge of PR #279, and issue #281/PR #282 then adopted it
+into [CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) (§3, §7, §14) exactly
+as it already references
 [CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md](CORE_CUSTOM_INGREDIENT_IDENTITY_V1.md)
-(§10) — not performed here.
+(§10). The contract described below is now implemented on App
+(issue #283/PR #286) and Web (issue #284/PR #287), cross-surface tested
+(issue #288/PR #292), and had one real defect found and fixed against it
+(issue #293). This document remains the normative source for
+`originRecipeId`'s wire-level contract —
+[CORE_KBHRECIPE_V1.md](CORE_KBHRECIPE_V1.md) points here rather than
+duplicating the text.
 
 Governed by: [KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md) (v2.0, Core
 domain). Precisifies a gap

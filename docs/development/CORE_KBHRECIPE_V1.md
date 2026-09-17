@@ -229,8 +229,8 @@ is never itself a V1 field — `modules/kbh_contract.py`'s writer merges
 its *contents* back into a fresh export as unknown top-level fields
 (`_flett_inn_passthrough()`), and a known Core field the writer already
 builds always wins over a stale passthrough value with the same key.
-**Not yet wired into a Streamlit import UI** (no file uploader, no
-import preview, no save-on-import) — that is PRI 2C3.
+**Wired into the Streamlit import UI since PRI 2C3** (`ui/sidebar.py`'s
+`.kbhrecipe` file uploader, import preview, and save-on-import flow).
 
 ## 7. Forbidden export fields
 
@@ -373,9 +373,9 @@ reader (parse + validate + reverse-adapt to App-native recipe data —
 the mirror of `modules/kbh_contract.py`'s writer direction). Its
 `passthrough` result is wired into the App-native recipe object,
 `session_state`, `recipe_storage`, and the writer's re-export (PRI
-2C2 — see §6 and the bullet below). **Not yet wired into a Streamlit
-import UI** (no file uploader, no import preview, no save-on-import)
-— that is PRI 2C3.
+2C2 — see §6 and the bullet below). **Wired into the Streamlit import
+UI since PRI 2C3** (`ui/sidebar.py`'s `.kbhrecipe` file uploader,
+import preview, and save-on-import flow).
 
 **This section describes what today's App reader accepts or rejects.
 It is a statement of current App capability, not a new normative rule
