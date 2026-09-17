@@ -905,6 +905,77 @@ kjor('originRecipeId (12f): frosne legacy-fixturer gir samme "ingen origin"-resu
   }
 });
 
+// ─── issue #300 -- handoff-hint metadata (exportedAt/generator) ────────
+// Phase 3C-avgjørelsen i issue #299 (punkt 4): en kompakt "hvor/når ble
+// denne filen eksportert"-hint i importforhåndsvisningen, avledet
+// UTELUKKENDE fra eksisterende, allerede skrevne envelope-felt -- ingen
+// ny .kbhrecipe-versjon, ingen fabrikert kilde/tid. Dekker de tre
+// tilfellene issue #300 selv krever: metadata til stede, metadata
+// mangler/er ugyldig, og en ukjent (men gyldig streng) generator.
+
+kjor('issue #300: kbhRecipeHandoffKilde() kjenner kun de to eksisterende generator-strengene', () => {
+  const ctx = nyContext(false);
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde('Kvernhaug Brygghus'), 'web');
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde('Kvernhaug Brygghus (Streamlit)'), 'app');
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde('Et ukjent fremtidig verktøy'), null);
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde(undefined), null);
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde(null), null);
+});
+
+kjor('issue #300: parseKbhRecipeInnhold() gir gyldig exportedAt/generator videre uendret (metadata til stede)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.exportedAt = '2026-09-17T12:00:00.000Z';
+  raa.generator = 'Kvernhaug Brygghus (Streamlit)';
+  const res = nyContext(false).parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.exportedAt, '2026-09-17T12:00:00.000Z');
+  assert.strictEqual(res.generator, 'Kvernhaug Brygghus (Streamlit)');
+});
+
+kjor('issue #300: manglende/ikke-streng envelope-metadata gir null, aldri en fabrikert verdi eller en avvist import (metadata mangler)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  delete raa.exportedAt;
+  raa.generator = 12345; // håndredigert/ugyldig type -- må aldri kastes videre uverifisert
+  const res = nyContext(false).parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true, 'malformert metadata skal aldri svekke selve importvalideringen');
+  assert.strictEqual(res.exportedAt, null);
+  assert.strictEqual(res.generator, null);
+});
+
+kjor('issue #300: ukjent, men gyldig streng-generator gis videre uendret, men kartlegges bevisst til ingen kilde (ukjent generator)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.generator = 'Et helt annet, ukjent eksportverktøy';
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.generator, 'Et helt annet, ukjent eksportverktøy');
+  assert.strictEqual(ctx.kbhRecipeHandoffKilde(res.generator), null);
+});
+
+kjor('issue #300: rå/legacy oppskrifts-JSON uten konvolutt gir alltid null-metadata, aldri gjettet fra selve innholdet', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify({ navn: 'Gammel oppskrift', malt: [], humle: [], volum: 20 }));
+  assert.strictEqual(res.ok, true);
+  assert.strictEqual(res.legacy, true);
+  assert.strictEqual(res.exportedAt, null);
+  assert.strictEqual(res.generator, null);
+});
+
+kjor('issue #300: kbhRecipeHandoffHint() gir null når verken kilde eller tidspunkt er kjent -- nøytral forhåndsvisning, ingen fabrikert tekst', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify({ navn: 'Gammel oppskrift', malt: [], humle: [], volum: 20 }));
+  assert.strictEqual(ctx.kbhRecipeHandoffHint(res), null);
+});
+
+kjor('issue #300: kbhRecipeHandoffHint() gir en kilde-hint selv uten gyldig tidspunkt (kjent generator, manglende exportedAt)', () => {
+  const raa = JSON.parse(lastFixture('minimal'));
+  delete raa.exportedAt;
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.generator, 'Kvernhaug Brygghus (Streamlit)');
+  assert.strictEqual(ctx.kbhRecipeHandoffHint(res), '[i18n:kbhrecipe.handoffKunKilde]');
+});
+
 // ─── Oppsummering ───────────────────────────────────────────────────────
 
 console.log(`Kbhrecipe contract-tester: ${bestatt}/${bestatt + feil.length} bestått.`);

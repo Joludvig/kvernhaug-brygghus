@@ -25,9 +25,12 @@ function _aktivKladdHarInnhold() {
   }
 }
 
-function apneIByggeren(oppskrift) {
+// `hint` (issue #300) -- kbhRecipeHandoffHint()-resultat fra fil-import,
+// eller undefined fra tekstimport (bekreftImportTekst() under, som ikke
+// har noen .kbhrecipe-konvolutt å hente hint fra) -- se kbhrecipe.js.
+function apneIByggeren(oppskrift, hint) {
   if (_aktivKladdHarInnhold()) {
-    const ok = confirm(t("oppskrift.apneConfirm"));
+    const ok = confirm(kbhRecipeApneConfirmMelding(hint));
     if (!ok) return;
   }
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
@@ -53,7 +56,7 @@ function importerJsonFil(fil) {
       status.textContent = t("oppskrift.importDuplikat");
       return;
     }
-    apneIByggeren(resultat.oppskrift);
+    apneIByggeren(resultat.oppskrift, kbhRecipeHandoffHint(resultat));
   };
   reader.onerror = () => {
     status.textContent = t("oppskrift.lesefeil");
