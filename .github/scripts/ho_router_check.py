@@ -44,6 +44,34 @@ monotont med opprettelsestidspunkt for et gitt repository. "Nyeste
 gyldige pointer" og "nyeste gyldige sjekkpunkt" velges derfor ved
 størst kommentar-ID, ikke ved å parse `created_at`-strenger.
 
+HERDING (issue #301): en oppfølgende audit av denne modulen fant fire
+konkrete, ikke-hypotetiske hull i selve markør-parsingen (aldri i
+`sjekk_router`s status-logikk, som er uendret):
+  1. En ellers gyldig, linje-ankret markør-linje ble avvist hvis
+     kommentaren brukte CRLF-linjeskift, fordi `$`/`^` i MULTILINE-modus
+     kun forholder seg til `\n` -- en gjenværende `\r` gjorde at linjen
+     aldri matchet slutten av mønsteret. Fikset ved å normalisere
+     CRLF/CR til LF (`_normalisert_linjeskift`) før noe regex kjører.
+  2. En pointer- eller sjekkpunkt-lignende linje vist som EKSEMPEL inni
+     en fenced Markdown-kodeblokk (``` ... ``` eller ~~~ ... ~~~) ble
+     talt som en aktiv markør, siden regexene tidligere søkte hele
+     kommentar-teksten uendret. Fikset ved å fjerne fenced kodeblokker
+     (`_uten_fenced_kodeblokker`) før markør-søket.
+  3. og 4. To (eller flere) uavhengige, gyldige, standalone markør-linjer
+     i SAMME kommentar ble tidligere stille løst til én av dem (den siste
+     `finditer`-treffet vant) i stedet for å bli avvist som tvetydig. Nå
+     krever begge `nyeste_gyldig_pointer` og `gyldige_sjekkpunkt_id_er`
+     NØYAKTIG ett treff per (rensket) kommentar-body for at den
+     kommentaren skal telle som en gyldig markør-kilde i det hele tatt --
+     en kommentar med 0 eller >1 treff bidrar ikke, samme fail-closed-
+     prinsip for begge markør-typene.
+Alle fire er dekket av fokuserte regresjonstester i
+tests/test_agent_bridge_ho_router_check.py. `sjekk_router`s egen
+status-kontrakt (OK/ORPHAN/NO_POINTER/INVALID_TARGET/
+POINTER_ISSUE_MISMATCH) og #152-rutingsemantikken er uendret av denne
+herdingen -- kun hvilke linjer som i utgangspunktet regnes som en gyldig
+markør-linje, er strammet inn.
+
 Ren, avhengighetsfri stdlib-Python -- ingen `gh`/GitHub-kall i denne
 modulen selv (samme uavhengighets-konvensjon som hver søster-modul i
 .github/scripts/). Enhetstestet i
@@ -102,44 +130,102 @@ SJEKKPUNKT_LINJE_RE = re.compile(
     r"(?m)^" + re.escape(SJEKKPUNKT_VERSJON) + r"\b"
 )
 
+# Åpner/lukker en fenced Markdown-kodeblokk (``` eller ~~~, opptil 3
+# mellomrom innrykk per CommonMark). Brukes til å fjerne EKSEMPEL-tekst før
+# markør-regexene kjører -- se `_uten_fenced_kodeblokker`.
+_FENCE_LINJE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
+
+
+def _normalisert_linjeskift(tekst):
+    """Normaliserer CRLF/CR til LF før noen markør-regex kjører, slik at en
+    ellers gyldig, linje-ankret markør-linje ikke avvises bare fordi
+    kommentaren bruker CRLF-linjeskift (`$`/`^` i MULTILINE-modus forholder
+    seg kun til `\\n`, aldri en gjenværende `\\r`)."""
+    return tekst.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _uten_fenced_kodeblokker(tekst):
+    """Fjerner innholdet i fenced Markdown-kodeblokker (``` ... ``` eller
+    ~~~ ... ~~~) fra `tekst` før markør-regexene kjøres, slik at en
+    pointer-/sjekkpunkt-lignende linje vist som EKSEMPEL inni en kodeblokk
+    aldri telles som en aktiv, gyldig markør-linje. Linjetall bevares
+    (fjernede linjer blir tomme, ikke slettet) -- ikke at det er strengt
+    nødvendig her, men det gjør resultatet lettere å resonnere om."""
+    ut_linjer = []
+    apen_fence = None  # tegnet ('`' eller '~') for den åpne fencen, eller None
+    for linje in tekst.split("\n"):
+        m = _FENCE_LINJE_RE.match(linje)
+        if apen_fence is None:
+            if m:
+                apen_fence = m.group(1)[0]
+                ut_linjer.append("")
+            else:
+                ut_linjer.append(linje)
+        else:
+            if m and m.group(1)[0] == apen_fence:
+                apen_fence = None
+            ut_linjer.append("")
+    return "\n".join(ut_linjer)
+
+
+def _rensket_body(body):
+    """Felles forbehandling for begge markør-søkene: CRLF-normalisering
+    (issue #301, revisjon 1) etterfulgt av fenced-kodeblokk-fjerning
+    (issue #301, revisjon 2), i den rekkefølgen (fence-gjenkjenningen ser
+    kun etter LF-linjeskift)."""
+    return _uten_fenced_kodeblokker(_normalisert_linjeskift(body))
+
 
 def nyeste_gyldig_pointer(kommentarer):
     """Returnerer {"issue": int, "comment": int, "kilde_id": int} for den
     nyeste (størst kommentar-ID) gyldige, linje-ankrede
     `KBH_COS_CHECKPOINT_PTR_V1 issue=<N> comment=<M>`-linja funnet i
     `kommentarer` (liste av {"id": int, "body": str}), eller None hvis
-    ingen gyldig linje finnes. Et sitat, en midt-i-linja-forekomst eller
-    en nesten-lik variant matcher bevisst ikke regexen (se moduldocstring)."""
+    ingen gyldig linje finnes. Et sitat, en midt-i-linja-forekomst, en
+    nesten-lik variant eller en forekomst inni en fenced kodeblokk matcher
+    bevisst ikke regexen (se moduldocstring). CRLF-linjeskift godtas på
+    linje med LF (issue #301). Hvis EN OG SAMME kommentar inneholder MER
+    ENN ÉN aktiv, standalone pointer-linje, er den kommentaren tvetydig --
+    den avvises i sin helhet som pointer-kilde (fail-closed, issue #301)
+    i stedet for at en av linjene stille velges."""
     beste = None
     for kommentar in kommentarer or []:
         kid = kommentar.get("id")
         body = kommentar.get("body") or ""
         if kid is None:
             continue
-        for m in POINTER_LINJE_RE.finditer(body):
-            kandidat = {
-                "issue": int(m.group("issue")),
-                "comment": int(m.group("comment")),
-                "kilde_id": int(kid),
-            }
-            if beste is None or kandidat["kilde_id"] >= beste["kilde_id"]:
-                beste = kandidat
+        treff = list(POINTER_LINJE_RE.finditer(_rensket_body(body)))
+        if len(treff) != 1:
+            continue
+        m = treff[0]
+        kandidat = {
+            "issue": int(m.group("issue")),
+            "comment": int(m.group("comment")),
+            "kilde_id": int(kid),
+        }
+        if beste is None or kandidat["kilde_id"] >= beste["kilde_id"]:
+            beste = kandidat
     return beste
 
 
 def gyldige_sjekkpunkt_id_er(kommentarer):
     """Returnerer sortert liste av kommentar-ID-er (int) blant
-    `kommentarer` hvis body har en gyldig, linje-ankret
-    `KBH_COS_LIVE_CHECKPOINT_V1`-markør. Samme sitat-/midt-i-linja-
-    unntak som `nyeste_gyldig_pointer`."""
+    `kommentarer` hvis body har NØYAKTIG ÉN gyldig, linje-ankret
+    `KBH_COS_LIVE_CHECKPOINT_V1`-markør. Samme sitat-/midt-i-linja-/
+    fenced-kodeblokk-unntak og CRLF-toleranse som `nyeste_gyldig_pointer`
+    (issue #301). En kommentar med MER ENN ÉN aktiv, standalone
+    sjekkpunkt-markør er tvetydig og telles ikke som gyldig (samme
+    fail-closed-prinsipp som for pointer-linjer, issue #301)."""
     treff = []
     for kommentar in kommentarer or []:
         kid = kommentar.get("id")
         body = kommentar.get("body") or ""
         if kid is None:
             continue
-        if SJEKKPUNKT_LINJE_RE.search(body):
-            treff.append(int(kid))
+        funn = list(SJEKKPUNKT_LINJE_RE.finditer(_rensket_body(body)))
+        if len(funn) != 1:
+            continue
+        treff.append(int(kid))
     return sorted(treff)
 
 

@@ -114,6 +114,121 @@ class TestNyesteGyldigPointer(unittest.TestCase):
         self.assertEqual(pointer, {"issue": 196, "comment": 5654816412, "kilde_id": 5654816841})
 
 
+class TestMarkorHerdingIssue301(unittest.TestCase):
+    """Fokuserte regresjonstester for de fire audit-hullene issue #301
+    lukket i selve markør-parsingen (CRLF, fenced kodeblokker, tvetydige
+    doble markør-linjer for hhv. pointer og sjekkpunkt). Se
+    ho_router_check.py sin moduldocstring, avsnittet "HERDING (issue
+    #301)", for det fulle resonnementet."""
+
+    def test_6a_pointer_linje_med_crlf_linjeskift_godtas(self):
+        kommentarer = [
+            {"id": 100, "body": "noe innledende tekst\r\nKBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=555\r\nmer tekst"},
+        ]
+        pointer = hrc.nyeste_gyldig_pointer(kommentarer)
+        self.assertEqual(pointer, {"issue": 196, "comment": 555, "kilde_id": 100})
+
+    def test_6b_sjekkpunkt_linje_med_crlf_linjeskift_godtas(self):
+        kommentarer = [
+            {"id": 3, "body": "innledning\r\nKBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- gyldig\r\n"},
+        ]
+        self.assertEqual(hrc.gyldige_sjekkpunkt_id_er(kommentarer), [3])
+
+    def test_6c_pointer_linje_inni_fenced_kodeblokk_ignoreres(self):
+        kommentarer = [
+            {
+                "id": 100,
+                "body": (
+                    "Eksempel på hvordan en pointer-linje ser ut:\n"
+                    "```\n"
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=999\n"
+                    "```\n"
+                    "(ingen reell pointer i denne kommentaren)"
+                ),
+            },
+        ]
+        self.assertIsNone(hrc.nyeste_gyldig_pointer(kommentarer))
+
+    def test_6d_sjekkpunkt_linje_inni_fenced_kodeblokk_ignoreres(self):
+        kommentarer = [
+            {
+                "id": 1,
+                "body": (
+                    "Eksempel:\n"
+                    "~~~\n"
+                    "KBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- kun eksempel\n"
+                    "~~~\n"
+                ),
+            },
+        ]
+        self.assertEqual(hrc.gyldige_sjekkpunkt_id_er(kommentarer), [])
+
+    def test_6e_fenced_kodeblokk_skjuler_ikke_en_reell_linje_utenfor_blokken(self):
+        kommentarer = [
+            {
+                "id": 100,
+                "body": (
+                    "```\n"
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=999\n"
+                    "```\n"
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=555\n"
+                ),
+            },
+        ]
+        pointer = hrc.nyeste_gyldig_pointer(kommentarer)
+        self.assertEqual(pointer, {"issue": 196, "comment": 555, "kilde_id": 100})
+
+    def test_6f_to_aktive_pointer_linjer_i_samme_kommentar_avvises_som_tvetydig(self):
+        kommentarer = [
+            {"id": 100, "body": "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=111\nKBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=222"},
+        ]
+        self.assertIsNone(hrc.nyeste_gyldig_pointer(kommentarer))
+
+    def test_6g_tvetydig_kommentar_hindrer_ikke_en_annen_gyldig_kommentar_fra_a_vinne(self):
+        kommentarer = [
+            {"id": 100, "body": "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=111\nKBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=222"},
+            {"id": 50, "body": "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=333"},
+        ]
+        pointer = hrc.nyeste_gyldig_pointer(kommentarer)
+        self.assertEqual(pointer, {"issue": 196, "comment": 333, "kilde_id": 50})
+
+    def test_6h_to_aktive_sjekkpunkt_linjer_i_samme_kommentar_avvises_som_tvetydig(self):
+        kommentarer = [
+            {
+                "id": 3,
+                "body": (
+                    "KBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- forste\n"
+                    "KBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- andre\n"
+                ),
+            },
+        ]
+        self.assertEqual(hrc.gyldige_sjekkpunkt_id_er(kommentarer), [])
+
+    def test_6i_tvetydig_sjekkpunkt_kommentar_hindrer_ikke_andre_gyldige(self):
+        kommentarer = [
+            {
+                "id": 3,
+                "body": (
+                    "KBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- forste\n"
+                    "KBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- andre\n"
+                ),
+            },
+            {"id": 4, "body": "KBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- gyldig"},
+        ]
+        self.assertEqual(hrc.gyldige_sjekkpunkt_id_er(kommentarer), [4])
+
+    def test_6j_ambigu_pointer_kommentar_gir_no_pointer_via_sjekk_router(self):
+        status, pointer, begrunnelse = hrc.sjekk_router(
+            pointer_kommentarer=[
+                {"id": 100, "body": "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=111\nKBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=222"},
+            ],
+            target_issue_nummer=196,
+            target_kommentarer=_LIVE_196_SJEKKPUNKTER_FERSK,
+        )
+        self.assertEqual(status, "NO_POINTER")
+        self.assertIsNone(pointer)
+
+
 class TestGyldigeSjekkpunktIder(unittest.TestCase):
     def test_2a_ingen_kommentarer_gir_tom_liste(self):
         self.assertEqual(hrc.gyldige_sjekkpunkt_id_er([]), [])
