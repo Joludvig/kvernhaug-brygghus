@@ -51,7 +51,11 @@ function lastDeltFixture(navn) {
 // uavhengige av rekkefølge uansett. `t()` stubbes til en gjenkjennelig
 // streng (ingen i18n.js lastet -- ikke del av det denne testen dekker).
 function nyContext(inkluderRecipeStorage) {
-  const ctx = { t: (k) => `[i18n:${k}]`, console, crypto: globalThis.crypto };
+  // issue #300 (Chief review, PR #305, round 4) -- kbhRecipeHandoffHint()
+  // calls gjeldendeSprak() from i18n.js (not loaded here, out of this
+  // file's scope) whenever exportedAt is present -- deterministic stub,
+  // same pattern as the existing t() stub above.
+  const ctx = { t: (k) => `[i18n:${k}]`, gjeldendeSprak: () => 'no', console, crypto: globalThis.crypto };
   vm.createContext(ctx);
   // issue #300 (Chief review, PR #305) -- kbhrecipe.js sin
   // lagreHandoffHintFlash()/hentOgFjernHandoffHintFlash() bruker
