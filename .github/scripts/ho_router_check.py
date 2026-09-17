@@ -72,6 +72,25 @@ POINTER_ISSUE_MISMATCH) og #152-rutingsemantikken er uendret av denne
 herdingen -- kun hvilke linjer som i utgangspunktet regnes som en gyldig
 markør-linje, er strammet inn.
 
+HERDING (issue #301, runde 2 -- Chief-blocker): punkt 2 over fjernet
+fenced kodeblokker, men `_uten_fenced_kodeblokker` sin egen
+closing-fence-gjenkjenning fulgte ikke CommonMarks closing-fence-semantikk
+-- enhver senere linje som startet med SAMME fence-tegn (uansett lengde
+eller etterfølgende tekst) lukket blokken. To konkrete, ikke-hypotetiske
+konsekvenser: (a) en 4-backtick-opener ble stille lukket av en påfølgende
+3-backtick-linje, og (b) en fence-lignende linje med tekst etter
+fence-tegnene (f.eks. "``` fortsatt eksempel") lukket blokken selv om
+CommonMark aldri tillater en info-streng på en closing fence. Begge lot en
+pointer-/sjekkpunkt-lignende EKSEMPEL-markør som fulgte en slik ugyldig
+pseudo-closer, men lå FØR den faktiske closeren, bli feilaktig behandlet
+som aktiv -- samme klasse fail-closed-brudd som punkt 2 selv ble skrevet
+for å lukke. Fikset ved å la `_uten_fenced_kodeblokker` spore både
+åpnerens fence-tegn OG -lengde, og kreve at en kandidat-closer har samme
+tegn, minst like stor lengde, OG kun whitespace etter fence-tegnene før
+den regnes som gyldig -- ellers behandles kandidat-linja som fortsatt
+innhold inni den åpne blokken (uendret linjetall-bevaring). `sjekk_router`
+og de fire opprinnelige herdings-punktene over er uendret.
+
 Ren, avhengighetsfri stdlib-Python -- ingen `gh`/GitHub-kall i denne
 modulen selv (samme uavhengighets-konvensjon som hver søster-modul i
 .github/scripts/). Enhetstestet i
@@ -132,8 +151,15 @@ SJEKKPUNKT_LINJE_RE = re.compile(
 
 # Åpner/lukker en fenced Markdown-kodeblokk (``` eller ~~~, opptil 3
 # mellomrom innrykk per CommonMark). Brukes til å fjerne EKSEMPEL-tekst før
-# markør-regexene kjører -- se `_uten_fenced_kodeblokker`.
-_FENCE_LINJE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
+# markør-regexene kjører -- se `_uten_fenced_kodeblokker`. `fence`-gruppen
+# fanger HELE den sammenhengende tegn-strengen (samme tegn, 3+); `info`-
+# gruppen fanger resten av linja -- en gyldig CLOSING-fence krever i tillegg
+# (utover samme tegn) at `info` kun er whitespace og at `fence` er minst like
+# lang som åpnerens (issue #301 herding, runde 2: en 4-backtick-opener
+# lukkes IKKE av en 3-backtick-linje, og en fence-lignende linje med
+# etterfølgende tekst er aldri en gyldig closer -- kun en OPENER tillater en
+# info-streng etter fence-tegnene, per CommonMark).
+_FENCE_LINJE_RE = re.compile(r"^\s{0,3}(?P<fence>`{3,}|~{3,})(?P<info>.*)$")
 
 
 def _normalisert_linjeskift(tekst):
@@ -150,20 +176,40 @@ def _uten_fenced_kodeblokker(tekst):
     pointer-/sjekkpunkt-lignende linje vist som EKSEMPEL inni en kodeblokk
     aldri telles som en aktiv, gyldig markør-linje. Linjetall bevares
     (fjernede linjer blir tomme, ikke slettet) -- ikke at det er strengt
-    nødvendig her, men det gjør resultatet lettere å resonnere om."""
+    nødvendig her, men det gjør resultatet lettere å resonnere om.
+
+    CLOSING-fence-semantikk (issue #301 herding, runde 2): en kandidat-linje
+    lukker kun den åpne fencen dersom (1) samme fence-tegn som åpneren, (2)
+    closer-lengden er >= åpner-lengden, og (3) kun whitespace følger
+    fence-tegnene på closer-linja. En 4-backtick-opener lukkes derfor IKKE
+    av en 3-backtick-linje, og en fence-lignende linje med etterfølgende
+    tekst (f.eks. "``` fortsatt inni blokken") lukker aldri blokken -- den
+    behandles i stedet som fortsatt innhold INNI den åpne fencen, akkurat
+    som enhver annen linje der. En pointer-/sjekkpunkt-lignende markør som
+    står etter en slik ugyldig pseudo-closer, men før den faktiske gyldige
+    closeren, forblir dermed korrekt inni blokken og ignoreres."""
     ut_linjer = []
-    apen_fence = None  # tegnet ('`' eller '~') for den åpne fencen, eller None
+    apen_fence_tegn = None  # tegnet ('`' eller '~') for den åpne fencen, eller None
+    apen_fence_lengde = 0  # lengden (antall tegn) på åpningsfencen
     for linje in tekst.split("\n"):
         m = _FENCE_LINJE_RE.match(linje)
-        if apen_fence is None:
+        if apen_fence_tegn is None:
             if m:
-                apen_fence = m.group(1)[0]
+                apen_fence_tegn = m.group("fence")[0]
+                apen_fence_lengde = len(m.group("fence"))
                 ut_linjer.append("")
             else:
                 ut_linjer.append(linje)
         else:
-            if m and m.group(1)[0] == apen_fence:
-                apen_fence = None
+            gyldig_closer = (
+                m is not None
+                and m.group("fence")[0] == apen_fence_tegn
+                and len(m.group("fence")) >= apen_fence_lengde
+                and m.group("info").strip() == ""
+            )
+            if gyldig_closer:
+                apen_fence_tegn = None
+                apen_fence_lengde = 0
             ut_linjer.append("")
     return "\n".join(ut_linjer)
 

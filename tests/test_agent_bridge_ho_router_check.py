@@ -228,6 +228,76 @@ class TestMarkorHerdingIssue301(unittest.TestCase):
         self.assertEqual(status, "NO_POINTER")
         self.assertIsNone(pointer)
 
+    # ─── Runde 2 (Chief-blocker): closing-fence-semantikk i
+    # `_uten_fenced_kodeblokker` selv -- en closer må ha samme fence-tegn
+    # som åpneren, closer-lengde >= åpner-lengde, og kun whitespace etter
+    # fence-tegnene. Se ho_router_check.py, "HERDING (issue #301, runde 2)".
+
+    def test_6k_fire_backtick_opener_lukkes_ikke_av_tre_backtick_pseudo_closer(self):
+        kommentarer = [
+            {
+                "id": 100,
+                "body": (
+                    "````\n"
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=999\n"
+                    "```\n"  # for kort (3 < 4) -- lukker IKKE fire-backtick-fencen
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=888\n"
+                    "````\n"  # faktisk gyldig closer (samme tegn, lengde 4 >= 4)
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=555\n"
+                ),
+            },
+        ]
+        pointer = hrc.nyeste_gyldig_pointer(kommentarer)
+        self.assertEqual(pointer, {"issue": 196, "comment": 555, "kilde_id": 100})
+
+    def test_6l_samme_tegn_pseudo_closer_med_trailing_tekst_lukker_ikke_blokken(self):
+        kommentarer = [
+            {
+                "id": 100,
+                "body": (
+                    "```\n"
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=999\n"
+                    "``` fortsatt eksempel, ikke en gyldig closer\n"  # info-streng -- ugyldig closer
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=888\n"
+                    "```\n"  # faktisk gyldig closer (ingen tekst etter fence-tegnene)
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=555\n"
+                ),
+            },
+        ]
+        pointer = hrc.nyeste_gyldig_pointer(kommentarer)
+        self.assertEqual(pointer, {"issue": 196, "comment": 555, "kilde_id": 100})
+
+    def test_6m_markor_rett_etter_pseudo_closer_forblir_ignorert_helt_til_kommentarens_slutt(self):
+        kommentarer = [
+            {
+                "id": 5,
+                "body": (
+                    "````\n"
+                    "``` (for kort til å lukke fire-backtick-fencen ovenfor)\n"
+                    "KBH_COS_LIVE_CHECKPOINT_V1 CHIEF LIVE CHECKPOINT -- fortsatt inni blokken\n"
+                ),
+            },
+        ]
+        # Blokken har ingen gyldig closer i det hele tatt her -- markøren
+        # rett etter pseudo-closeren skal derfor aldri telle som aktiv,
+        # uavhengig av at den ligner en fence-lukking.
+        self.assertEqual(hrc.gyldige_sjekkpunkt_id_er(kommentarer), [])
+
+    def test_6n_gyldig_lengre_closer_med_kun_whitespace_etter_lukker_korrekt(self):
+        kommentarer = [
+            {
+                "id": 100,
+                "body": (
+                    "```\n"
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=999\n"
+                    "````   \n"  # gyldig: lengde 4 >= åpner-lengde 3, kun whitespace etter
+                    "KBH_COS_CHECKPOINT_PTR_V1 issue=196 comment=555\n"
+                ),
+            },
+        ]
+        pointer = hrc.nyeste_gyldig_pointer(kommentarer)
+        self.assertEqual(pointer, {"issue": 196, "comment": 555, "kilde_id": 100})
+
 
 class TestGyldigeSjekkpunktIder(unittest.TestCase):
     def test_2a_ingen_kommentarer_gir_tom_liste(self):
