@@ -33,6 +33,17 @@ function apneIByggeren(oppskrift, hint) {
     const ok = confirm(kbhRecipeApneConfirmMelding(hint));
     if (!ok) return;
   }
+  // Chief review (PR #305) -- denne funksjonen navigerer ALLTID bort fra
+  // siden rett under, også når ingen aktiv kladd fantes å bekrefte
+  // overskriving av (ingen confirm() over i det hele tatt) -- uten dette
+  // ble hinten aldri vist på det vanlige, "rene" import-sporet. Skrives
+  // UBETINGET (ikke bare i overskrivings-grenen over) for å speile
+  // app.js sin egen apneOppskriftsfil(): der vises hinten BÅDE i
+  // confirm()-dialogen OG i status-teksten etterpå, uansett om en aktiv
+  // kladd fantes. No-op når hint er undefined/null (tekstimport, eller
+  // ukjent/manglende metadata) -- se lagreHandoffHintFlash() i
+  // kbhrecipe.js.
+  lagreHandoffHintFlash(hint);
   localStorage.setItem(AKTIV_KLADD_NOKKEL, JSON.stringify(oppskrift));
   window.location.href = "index.html";
 }

@@ -53,6 +53,18 @@ function lastDeltFixture(navn) {
 function nyContext(inkluderRecipeStorage) {
   const ctx = { t: (k) => `[i18n:${k}]`, console, crypto: globalThis.crypto };
   vm.createContext(ctx);
+  // issue #300 (Chief review, PR #305) -- kbhrecipe.js sin
+  // lagreHandoffHintFlash()/hentOgFjernHandoffHintFlash() bruker
+  // sessionStorage direkte, akkurat som recipe_storage.js bruker
+  // localStorage under -- samme minimale i-minnet stub, alltid til stede
+  // (ikke gated bak inkluderRecipeStorage) siden kbhrecipe.js lastes i
+  // ALLE kontekster denne fila lager.
+  const flashLager = new Map();
+  ctx.sessionStorage = {
+    getItem: (k) => (flashLager.has(k) ? flashLager.get(k) : null),
+    setItem: (k, v) => flashLager.set(k, String(v)),
+    removeItem: (k) => flashLager.delete(k),
+  };
   vm.runInContext(fs.readFileSync(KBHRECIPE_JS, 'utf8'), ctx, { filename: KBHRECIPE_JS });
   if (inkluderRecipeStorage) {
     // recipe_storage.js bruker localStorage -- en minimal, i minnet
@@ -974,6 +986,67 @@ kjor('issue #300: kbhRecipeHandoffHint() gir en kilde-hint selv uten gyldig tids
   const res = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
   assert.strictEqual(res.generator, 'Kvernhaug Brygghus (Streamlit)');
   assert.strictEqual(ctx.kbhRecipeHandoffHint(res), '[i18n:kbhrecipe.handoffKunKilde]');
+});
+
+// ─── Chief review (PR #305) -- handoff-hint "flash" over navigasjon ────
+// Blokkeren fra første Chief-review av issue #300: importer_page.js sin
+// apneIByggeren() navigerer ALLTID videre til index.html, også på det
+// vanlige "ingen aktiv kladd"-sporet der ingen confirm()-dialog vises --
+// uten en mekanisme for å bære hinten over selve navigasjonen ble den
+// aldri synlig på det sporet. Disse testene dekker den nye,
+// sessionStorage-baserte engangs-mekanismen (lagreHandoffHintFlash()/
+// hentOgFjernHandoffHintFlash()) direkte -- selve DOM-/redirect-koden i
+// importer_page.js/app.js er utenfor denne filens Node-vm-omfang (se
+// forklaringen ved PR#3-testene over), men disse to funksjonene ER hele
+// den nye kontrakten de to sidene bygger på.
+
+kjor('issue #300 (Chief review): lagreHandoffHintFlash() + hentOgFjernHandoffHintFlash() -- rundtur bevarer hinten nøyaktig én gang', () => {
+  const ctx = nyContext(false);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, 'ingen flash skrevet ennå');
+  ctx.lagreHandoffHintFlash('Eksportert fra Web, 17.09.2026, 14:32.');
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), 'Eksportert fra Web, 17.09.2026, 14:32.');
+  // Engangs -- andre kall (f.eks. en påfølgende, urelatert sidelasting)
+  // skal ALDRI se den samme meldingen igjen.
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, 'flashen skal være fjernet etter første lesning');
+});
+
+kjor('issue #300 (Chief review): lagreHandoffHintFlash() er et no-op for en manglende/tom hint (tekstimport, eller ukjent/manglende metadata)', () => {
+  const ctx = nyContext(false);
+  for (const ugyldig of [undefined, null, '']) {
+    ctx.lagreHandoffHintFlash(ugyldig);
+    assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, `${JSON.stringify(ugyldig)} skal aldri skrive en flash`);
+  }
+});
+
+kjor('issue #300 (Chief review): "clean import" (ingen aktiv kladd, ingen confirm()) og overskrivings-sporet skriver samme flash-verdi -- speiler apneIByggeren() sin nye, ubetingede lagreHandoffHintFlash()-linje', () => {
+  const ctx = nyContext(false);
+  const raa = JSON.parse(lastFixture('minimal'));
+  raa.generator = 'Kvernhaug Brygghus';
+  const importRes = ctx.parseKbhRecipeInnhold(JSON.stringify(raa));
+  const hint = ctx.kbhRecipeHandoffHint(importRes);
+  assert.ok(hint, 'testens eget scenario må faktisk gi en hint å bære over');
+
+  // "Clean import"-sporet: apneIByggeren() kaller lagreHandoffHintFlash(hint)
+  // UANSETT om _aktivKladdHarInnhold() var true eller false -- simulert her
+  // direkte på de to eksponerte funksjonene, siden selve apneIByggeren() er
+  // DOM-bundet (window.location.href) og utenfor denne filens omfang.
+  ctx.lagreHandoffHintFlash(hint);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), hint);
+
+  // Overskrivings-sporet (en aktiv kladd fantes, confirm() ble vist og
+  // godtatt) skriver EKSAKT samme flash-verdi etterpå -- ingen egen,
+  // divergerende oppførsel mellom de to grenene.
+  ctx.lagreHandoffHintFlash(hint);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), hint);
+});
+
+kjor('issue #300 (Chief review): ukjent/manglende metadata gir en null-hint, som fortsatt aldri skriver noen flash (nøytral forhåndsvisning helt til index.html)', () => {
+  const ctx = nyContext(false);
+  const res = ctx.parseKbhRecipeInnhold(JSON.stringify({ navn: 'Gammel oppskrift', malt: [], humle: [], volum: 20 }));
+  const hint = ctx.kbhRecipeHandoffHint(res);
+  assert.strictEqual(hint, null);
+  ctx.lagreHandoffHintFlash(hint);
+  assert.strictEqual(ctx.hentOgFjernHandoffHintFlash(), null, 'en null-hint skal aldri skrive en synlig flash-melding');
 });
 
 // ─── Oppsummering ───────────────────────────────────────────────────────

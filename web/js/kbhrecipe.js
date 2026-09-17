@@ -391,3 +391,36 @@ function kbhRecipeApneConfirmMelding(hint) {
   const basis = t("oppskrift.apneConfirm");
   return hint ? `${basis}\n\n${hint}` : basis;
 }
+
+// Chief review (PR #305) -- importer_page.js sin apneIByggeren() navigerer
+// ALLTID videre til index.html (window.location.href), også på det vanlige
+// "ingen aktiv kladd"-sporet der ingen confirm()-dialog noensinne vises --
+// på det sporet fantes det FØR denne fiksen ingen DOM igjen på denne siden
+// til å vise hinten i før den allerede var borte, så hinten ble aldri
+// synlig i det hele tatt. sessionStorage er en engangs "flash"-melding
+// (IKKE AKTIV_KLADD_NOKKEL -- dette er en flyktig visningsmelding, ikke
+// oppskriftsdata): skrevet rett før redirect, lest og fjernet med det
+// samme av app.js sin init() på den andre siden av navigasjonen (se
+// hentOgFjernHandoffHintFlash()), slik at den aldri kan vises igjen ved en
+// senere, urelatert sidelasting.
+const KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL = "kvernhaug_web_handoff_hint_flash";
+
+function lagreHandoffHintFlash(hint) {
+  if (!hint) return;
+  try {
+    sessionStorage.setItem(KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL, hint);
+  } catch {
+    // Privat modus/kvote -- hinten tapes, aldri en krasj for en ren
+    // visningsforbedring.
+  }
+}
+
+function hentOgFjernHandoffHintFlash() {
+  try {
+    const hint = sessionStorage.getItem(KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL);
+    if (hint) sessionStorage.removeItem(KBHRECIPE_HANDOFF_HINT_FLASH_NOKKEL);
+    return hint || null;
+  } catch {
+    return null;
+  }
+}

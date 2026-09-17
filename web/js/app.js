@@ -2083,6 +2083,17 @@ async function init() {
     leggTilHumleRad();
     beregnOgVisResultat();
   }
+  // Chief review (PR #305) -- forbruker en ev. handoff-hint lagt igjen av
+  // importer_page.js sin apneIByggeren() FØR redirect til denne siden (se
+  // lagreHandoffHintFlash()/hentOgFjernHandoffHintFlash() i kbhrecipe.js)
+  // -- speiler samme status-tekstmønster som apneOppskriftsfil() over. Et
+  // no-op (ingen tekst satt, "lagre-status" uendret) for ethvert annet
+  // init()-kall: vanlig sidelasting, Mine oppskrifter-hand-off (ingen
+  // envelope å hente hint fra) eller tekstimport (samme grunn).
+  const handoffHintFlash = hentOgFjernHandoffHintFlash();
+  if (handoffHintFlash) {
+    document.getElementById("lagre-status").textContent = `${t("oppskrift.apnetStatus")} ${handoffHintFlash}`;
+  }
   // Skaler-til-feltet foreslår gjeldende volum som startpunkt (som desktop-
   // appens number_input(value=ctx["volum"])) -- oppdateres kun her og etter
   // vellykket skalering, ALDRI på hvert tastetrykk i beregnOgVisResultat(),
