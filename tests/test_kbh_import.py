@@ -14,6 +14,10 @@ import unittest
 
 from modules.kbh_import import (
     parse_kbhrecipe_json,
+    kbhrecipe_handoff_kilde,
+    kbhrecipe_handoff_hint,
+    KBHRECIPE_GENERATOR_WEB,
+    KBHRECIPE_GENERATOR_APP,
     UgyldigKbhrecipeForImport,
     KATEGORI_INVALID_JSON,
     KATEGORI_INVALID_ENVELOPE,
@@ -84,12 +88,12 @@ def _payload(**overrides):
     return base
 
 
-def _envelope_tekst(payload, version=1, format_="kbhrecipe"):
+def _envelope_tekst(payload, version=1, format_="kbhrecipe", exported_at="2026-09-01T00:00:00Z", generator="test"):
     return json.dumps({
         "format": format_,
         "version": version,
-        "exportedAt": "2026-09-01T00:00:00Z",
-        "generator": "test",
+        "exportedAt": exported_at,
+        "generator": generator,
         "recipe": payload,
     })
 
@@ -804,6 +808,97 @@ class TestOriginRecipeIdDeltCrossSurfaceFixture(unittest.TestCase):
         for navn in ("minimal", "partial_water"):
             res = parse_kbhrecipe_json(_last_fixture(navn), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
             self.assertIsNone(res["recipe"]["originRecipeId"])
+
+
+# ─── issue #302 -- handoff-metadata (exportedAt/generator) i preview ───
+
+class TestHandoffMetadataParsing(unittest.TestCase):
+    """parse_kbhrecipe_json() sin exportedAt/generator-returverdi --
+    speiler tests/js/test_kbhrecipe_contract.js sin dekning av Web sin
+    parseKbhRecipeInnhold()-ekvivalent (issue #300)."""
+
+    def test_kjent_web_generator_og_gyldig_tid_foeres_videre(self):
+        res = _parse(envelope_kwargs={"generator": KBHRECIPE_GENERATOR_WEB, "exported_at": "2026-09-01T12:00:00Z"})
+        self.assertEqual(res["generator"], KBHRECIPE_GENERATOR_WEB)
+        self.assertEqual(res["exportedAt"], "2026-09-01T12:00:00Z")
+
+    def test_kjent_app_generator_foeres_videre(self):
+        res = _parse(envelope_kwargs={"generator": KBHRECIPE_GENERATOR_APP})
+        self.assertEqual(res["generator"], KBHRECIPE_GENERATOR_APP)
+
+    def test_ukjent_generator_streng_foeres_videre_uendret(self):
+        # Selve parseren gjetter INGENTING -- kildeavledningen (kun
+        # kjente strenger -> "web"/"app") skjer i kbhrecipe_handoff_kilde().
+        res = _parse(envelope_kwargs={"generator": "en helt annen ukjent klient"})
+        self.assertEqual(res["generator"], "en helt annen ukjent klient")
+
+    def test_manglende_generator_og_exported_at_gir_none(self):
+        raw = json.loads(_envelope_tekst(_payload()))
+        del raw["generator"]
+        del raw["exportedAt"]
+        res = parse_kbhrecipe_json(json.dumps(raw), _MALT_DB, _HUMLE_DB, _GJAER_DB)
+        self.assertIsNone(res["generator"])
+        self.assertIsNone(res["exportedAt"])
+
+    def test_ikke_streng_generator_og_exported_at_gir_none_ikke_avvisning(self):
+        raw = json.loads(_envelope_tekst(_payload()))
+        raw["generator"] = 12345
+        raw["exportedAt"] = ["ikke", "en", "streng"]
+        res = parse_kbhrecipe_json(json.dumps(raw), _MALT_DB, _HUMLE_DB, _GJAER_DB)
+        self.assertIsNone(res["generator"])
+        self.assertIsNone(res["exportedAt"])
+
+    def test_frossen_legacy_fixture_har_faktisk_kjent_app_generator(self):
+        # "minimal"-fixturen er selv en ekte, tidligere App-eksport (se
+        # tests/fixtures/legacy/kbhrecipe/minimal.json sitt eget
+        # generator-felt) -- et konkret, ikke-syntetisk eksempel på at
+        # kildeavledningen fungerer på en fil som faktisk fantes FØR
+        # denne hint-funksjonaliteten ble lagt til (issue #302).
+        res = parse_kbhrecipe_json(_last_fixture("minimal"), _EKTE_MALT_DB, _EKTE_HUMLE_DB, _EKTE_GJAER_DB)
+        self.assertEqual(res["generator"], "Kvernhaug Brygghus (Streamlit)")
+        self.assertEqual(kbhrecipe_handoff_kilde(res["generator"]), "app")
+
+
+class TestHandoffKilde(unittest.TestCase):
+    def test_web_generator_gir_web(self):
+        self.assertEqual(kbhrecipe_handoff_kilde(KBHRECIPE_GENERATOR_WEB), "web")
+
+    def test_app_generator_gir_app(self):
+        self.assertEqual(kbhrecipe_handoff_kilde(KBHRECIPE_GENERATOR_APP), "app")
+
+    def test_ukjent_streng_gir_none(self):
+        self.assertIsNone(kbhrecipe_handoff_kilde("noe helt annet"))
+
+    def test_none_gir_none(self):
+        self.assertIsNone(kbhrecipe_handoff_kilde(None))
+
+
+class TestHandoffHint(unittest.TestCase):
+    def test_kilde_og_tid_gir_kombinert_hint(self):
+        res = _parse(envelope_kwargs={"generator": KBHRECIPE_GENERATOR_WEB, "exported_at": "2026-09-01T12:30:00Z"})
+        self.assertEqual(kbhrecipe_handoff_hint(res), "Eksportert fra Web, 2026-09-01 12:30.")
+
+    def test_kun_kjent_kilde_uten_gyldig_tid(self):
+        res = _parse(envelope_kwargs={"generator": KBHRECIPE_GENERATOR_APP, "exported_at": "ikke en gyldig dato"})
+        self.assertEqual(kbhrecipe_handoff_hint(res), "Eksportert fra App.")
+
+    def test_kun_gyldig_tid_uten_kjent_kilde(self):
+        res = _parse(envelope_kwargs={"generator": "ukjent verktoy", "exported_at": "2026-09-01T12:30:00Z"})
+        self.assertEqual(kbhrecipe_handoff_hint(res), "Eksportert 2026-09-01 12:30.")
+
+    def test_ingen_kilde_og_ingen_tid_gir_none(self):
+        res = _parse(envelope_kwargs={"generator": "ukjent verktoy", "exported_at": "ikke en gyldig dato"})
+        self.assertIsNone(kbhrecipe_handoff_hint(res))
+
+    def test_manglende_metadata_gir_none(self):
+        raw = json.loads(_envelope_tekst(_payload()))
+        del raw["generator"]
+        del raw["exportedAt"]
+        res = parse_kbhrecipe_json(json.dumps(raw), _MALT_DB, _HUMLE_DB, _GJAER_DB)
+        self.assertIsNone(kbhrecipe_handoff_hint(res))
+
+    def test_none_import_resultat_gir_none(self):
+        self.assertIsNone(kbhrecipe_handoff_hint(None))
 
 
 if __name__ == "__main__":
