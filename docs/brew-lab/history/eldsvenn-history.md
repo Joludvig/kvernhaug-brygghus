@@ -76,6 +76,9 @@ A **small beer / parti-gyle** was made from the same Eldsvenn brewing session an
 
 These are batch observations and should remain separate from recipe targets until the complete timeline is reconstructed.
 
+### App-local search result
+No second Eldsvenn-named local recipe/log was found in the read-only App archaeology pass. The later/current Eldsvenn therefore remains sourced from the user-authored brew chat and direct brewer clarification, not from the older local App files.
+
 ## Open reconstruction work
 - Reconstruct the detailed brewday/process timeline for the first Eldsvenn that became Skumring; App-local evidence now anchors its log date and actual OG/FG/volume.
 - Reconstruct the exact date/timeline for the current/later Eldsvenn now fermenting.
