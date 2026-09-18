@@ -118,21 +118,55 @@ class OllamaProvider(ModelProvider):
                 f"Ollama-svaret manglet et gyldig 'message'-felt for modell {self._model!r}: {raw!r}"
             )
 
-        tool_calls = message.get("tool_calls") or []
-        if tool_calls:
-            forste = tool_calls[0]
-            fn = forste.get("function", {})
-            args = fn.get("arguments", {})
-            if isinstance(args, str):
-                try:
-                    args = json.loads(args)
-                except (json.JSONDecodeError, TypeError):
-                    args = {}
-            return ProviderSvar(
-                tekst=message.get("content", ""),
-                tool_kall=ToolKall(navn=fn.get("name", ""), argumenter=args),
+        tool_kall = self._uttrekk_tool_kall(message)
+        return ProviderSvar(tekst=message.get("content", ""), tool_kall=tool_kall)
+
+    def _uttrekk_tool_kall(self, message):
+        """Validerer og oversetter Ollamas `tool_calls[0]` til en `ToolKall`.
+        Kaster `OllamaSvarFeil` for enhver uventet form (feil type på
+        `tool_calls`/`function`, tomt/manglende funksjonsnavn, argumenter
+        som ikke er eller ikke tolkes til et JSON-objekt) i stedet for å
+        la en rå `AttributeError`/`TypeError`/`IndexError` lekke ut til
+        `SotiRuntime`/`ToolRegistry`, eller å stille normalisere en
+        ugyldig verdi (f.eks. ugyldig JSON i argumentene) til `{}` som om
+        modellen faktisk ba om et tomt, gyldig kall -- se Chief-
+        gjennomgangen av PR #316. Returnerer `None` når det ikke var noe
+        verktøykall i svaret."""
+        tool_calls = message.get("tool_calls")
+        if not tool_calls:
+            return None
+        if not isinstance(tool_calls, list) or not isinstance(tool_calls[0], dict):
+            raise OllamaSvarFeil(
+                f"Ollama sendte et uventet 'tool_calls'-format for modell {self._model!r}: {tool_calls!r}"
             )
-        return ProviderSvar(tekst=message.get("content", ""))
+
+        fn = tool_calls[0].get("function")
+        if not isinstance(fn, dict):
+            raise OllamaSvarFeil(
+                f"Ollama sendte et uventet 'function'-felt i tool_calls for modell {self._model!r}: {fn!r}"
+            )
+
+        navn = fn.get("name")
+        if not isinstance(navn, str) or not navn.strip():
+            raise OllamaSvarFeil(
+                f"Ollama sendte et verktøykall uten et gyldig funksjonsnavn for modell {self._model!r}: {fn!r}"
+            )
+
+        args = fn.get("arguments", {})
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except (json.JSONDecodeError, TypeError) as e:
+                raise OllamaSvarFeil(
+                    f"Ollama sendte ugyldig JSON i verktøyargumentene for {navn!r} (modell {self._model!r}): {e}"
+                ) from e
+        if not isinstance(args, dict):
+            raise OllamaSvarFeil(
+                f"Ollama sendte verktøyargumenter som ikke var et JSON-objekt for {navn!r} "
+                f"(modell {self._model!r}): {args!r}"
+            )
+
+        return ToolKall(navn=navn, argumenter=args)
 
     def sjekk_tilgjengelig(self):
         """Rask helsesjekk: bekrefter at Ollama-serveren svarer og at den
@@ -186,7 +220,13 @@ class OllamaProvider(ModelProvider):
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
             raise OllamaSvarFeil(f"Ollama svarte med noe som ikke var gyldig JSON: {e}") from e
 
-        if isinstance(parsed, dict) and "error" in parsed and "message" not in parsed:
+        if not isinstance(parsed, dict):
+            raise OllamaSvarFeil(
+                f"Ollama svarte med et uventet JSON-format for modell {self._model!r} "
+                f"(forventet et objekt, fikk {type(parsed).__name__}): {parsed!r}"
+            )
+
+        if "error" in parsed and "message" not in parsed:
             feiltekst = str(parsed["error"])
             if "not found" in feiltekst.lower():
                 raise OllamaModellFeil(

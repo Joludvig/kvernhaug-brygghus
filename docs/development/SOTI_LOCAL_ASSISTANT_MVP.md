@@ -102,9 +102,11 @@ whole terminal session.
 ## Trust boundary (unchanged from the V1 runtime MVP)
 
 Still local, in-process, synchronous, no persistence beyond the
-caller-owned `SotiSession`, no account system. The one addition is a
-single outbound HTTP call per turn to `127.0.0.1:11434` — the owner's own
-already-running local Ollama process, never a remote host.
+caller-owned `SotiSession`, no account system. The one addition is local
+loopback HTTP calls to Ollama as required by the runtime/tool loop
+(`127.0.0.1:11434`, the owner's own already-running local Ollama process,
+never a remote host) — a user turn is at least one call, and up to
+`MAKS_VERKTOY_RUNDER` (2) when a tool round occurs.
 
 ## Running it
 

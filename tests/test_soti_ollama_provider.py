@@ -90,7 +90,11 @@ class TestMeldingsOgVerktoyOversettelse(unittest.TestCase):
 
         self.assertEqual(svar.tool_kall.argumenter, {"datasett": "humle", "sok": "cascade"})
 
-    def test_ukjent_tool_arguments_json_gir_tomt_dict_ikke_krasj(self):
+    def test_ugyldig_json_streng_i_arguments_gir_ollama_svarfeil_ikke_stille_tomt_dict(self):
+        # Chief-gjennomgang av PR #316: ugyldig JSON i tool-argumentene
+        # skal aldri stille normaliseres til {} -- det ville fått
+        # SotiRuntime til å kalle verktøyet med argumenter modellen
+        # aldri faktisk ba om.
         raw = {
             "message": {
                 "role": "assistant", "content": "",
@@ -99,9 +103,8 @@ class TestMeldingsOgVerktoyOversettelse(unittest.TestCase):
         }
         with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
             provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
-            svar = provider.generate([{"role": "user", "content": "..."}], [])
-
-        self.assertEqual(svar.tool_kall.argumenter, {})
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
 
     def test_meldingsroller_og_innhold_videreformidles_uendret(self):
         raw = {"message": {"role": "assistant", "content": "ok"}}
@@ -297,6 +300,131 @@ class TestFeilkartlegging(unittest.TestCase):
         self.assertTrue(issubclass(OllamaTidsavbrudd, OllamaProviderFeil))
         self.assertTrue(issubclass(OllamaModellFeil, OllamaProviderFeil))
         self.assertTrue(issubclass(OllamaSvarFeil, OllamaProviderFeil))
+
+
+class TestMalformedMenGyldigJsonHardening(unittest.TestCase):
+    """Chief-gjennomgang av PR #316 (exact head 752fd2d): syntaktisk
+    gyldig JSON i uventet FORM skal aldri gi en rå Python-feil
+    (AttributeError/TypeError/IndexError) eller bli stille normalisert --
+    den skal alltid gi OllamaSvarFeil."""
+
+    def test_toppniva_liste_i_stedet_for_objekt_gir_ollama_svarfeil(self):
+        raw = []
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_toppniva_streng_i_stedet_for_objekt_gir_ollama_svarfeil(self):
+        class _FakeRespStreng:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                return json.dumps("bare en streng").encode("utf-8")
+
+        with mock.patch("urllib.request.urlopen", return_value=_FakeRespStreng()):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_tool_calls_som_streng_i_stedet_for_liste_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": "ikke en liste"}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_tool_calls_forste_element_som_streng_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": ["ikke et objekt"]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_function_som_liste_i_stedet_for_objekt_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": ["ikke et objekt"]}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_function_mangler_navn_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"arguments": {}}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_function_navn_er_tom_streng_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "   ", "arguments": {}}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_function_navn_som_ikke_er_streng_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": 123, "arguments": {}}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_arguments_json_streng_som_parses_til_liste_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "hent_ingrediens_info", "arguments": "[1, 2, 3]"}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_arguments_json_streng_som_parses_til_streng_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "hent_ingrediens_info", "arguments": '"bare en streng"'}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_arguments_json_streng_som_parses_til_null_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "hent_ingrediens_info", "arguments": "null"}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_arguments_json_streng_som_parses_til_tall_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "hent_ingrediens_info", "arguments": "42"}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_arguments_som_liste_direkte_uten_json_streng_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "hent_ingrediens_info", "arguments": [1, 2]}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_arguments_som_null_direkte_gir_ollama_svarfeil(self):
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "hent_ingrediens_info", "arguments": None}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(OllamaSvarFeil):
+                provider.generate([{"role": "user", "content": "..."}], [])
+
+    def test_manglende_arguments_felt_gir_tomt_dict_ikke_feil(self):
+        # Fravær av "arguments" er en legitim "ingen argumenter"-form
+        # (samme som Ollama sender for et verktøy uten parametre) -- kun
+        # en TILSTEDEVÆRENDE, feilformet verdi skal gi OllamaSvarFeil.
+        raw = {"message": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "hent_ingrediens_info"}}]}}
+        with mock.patch("urllib.request.urlopen", return_value=_fake_urlopen_response(raw)):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            svar = provider.generate([{"role": "user", "content": "..."}], [])
+
+        self.assertEqual(svar.tool_kall.argumenter, {})
 
 
 class TestSjekkTilgjengelig(unittest.TestCase):
