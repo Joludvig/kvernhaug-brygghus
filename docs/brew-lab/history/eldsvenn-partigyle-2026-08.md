@@ -11,27 +11,13 @@ Source context: small-beer / parti-gyle branch from the **current/later Eldsvenn
 - One conversation records **18 L water** with the grain and a reading around **1.025** early in the mash, before a full 30 min at 65 °C.
 - Mashout and runoff were performed before boiling.
 - An opened East Kent Goldings pack at **5.8% AA** was available/considered.
-- The brewer has directly clarified that the small beer used the **same yeast as the main Eldsvenn**. In the current Eldsvenn reconstruction, that yeast is **Wyeast 1318**.
-- Historical discussion of adding harvested W-34/70 from Sommerglød is therefore preserved only as a considered option, **not the actual final yeast choice** for this small beer.
+- The brewer has directly clarified that the small beer used the **same yeast as the main Eldsvenn**: **Wyeast 1318**.
+- A later gravity message around **1.036–1.037** belongs to this Eldsvenn small-beer path and should remain attached here until the exact stage/timeline is reconstructed.
+- Adding harvested W-34/70 from Sommerglød was discussed as a possible extra pitch, but it was not the chosen final yeast for this Eldsvenn small beer.
 
-## Historical measurement conflict
+## Important correction
+The previously attached **13.5 L @ 1.015 / FG 1.000 / 8 L + 4 L packaged** path does **not** belong to this Eldsvenn small beer. That evidence belongs to the separate **Märzen-derived Kvernhaug Suttlevatn** after-beer and is now recorded separately.
 
-Two reconstructed value paths exist and must not be silently merged:
-
-### Path A
-A durable summary records:
-- after boil: **13.5 L @ 1.015**
-- FG: **1.000**
-- packaged: **1 × 8 L + 1 × 4 L**
-
-### Path B
-The live brewing conversation also contains a later gravity message around:
-- **1.036–1.037**
-
-The exact stage represented by the 1.036–1.037 reading is not yet resolved in this reconstruction pass.
-
-## Sensory / naming
-The beer was jokingly referred to as **“Kvernhaug suttlevatn”**, while the brewer also questioned whether that name really fit because this came from a double-mash Eldsvenn process.
-
-## Open question
-Resolve the gravity timeline before treating either 1.015 or 1.036–1.037 as canonical post-boil OG.
+## Open reconstruction work
+- Resolve the exact stage represented by the **1.036–1.037** reading.
+- Reconstruct final OG/FG/package volumes for the Eldsvenn small beer from primary chat evidence.
