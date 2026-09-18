@@ -28,6 +28,18 @@ These are observations from this batch/timeline, not a recommended fermentation 
 ### Interpretation
 - Later Kvernhaug discussion treated the **7% Rauchmalz** smoke level in v1 as too subtle/short-lived for the intended Kvernhaug smoke signature.
 
+### App-local evidence
+Legacy App log `recipes/kvernhaug_sommerglød_logg.json` records:
+- date **2026-06-01**
+- volume **25.0 L**
+- OG **1.050**
+- FG **1.0086588198424**
+- ABV **5.4%**
+
+The legacy FG is byte-identical to the recipe-computed FG, so the App file alone does not prove it was independently measured. The user-authored chat's later hydrometer reading around **1.009** remains separate evidence.
+
+The App recipe plan records **25.0 L**, W-34/70 and a 7% Rauchmalz grist consistent with the chat reconstruction.
+
 ### Open questions
 - Exact packaged volume and exact pressure history are not safely reconstructed in this pass.
 
@@ -51,6 +63,13 @@ These are observations from this batch/timeline, not a recommended fermentation 
 
 ### Sensory observations
 - Later discussion described the smoke in Sommerglød v2 as still too subtle for the stronger Kvernhaug smoke signature desired in darker beers.
+
+### App-local evidence
+Legacy App log `recipes/kvernhaug_sommerglodv2_logg.json` contains **two entries on 2026-07-13**:
+- entry A: volume **25.0 L**, OG **1.052**, FG **1.0086588198424**, ABV **5.7%**
+- entry B: volume **25.0 L**, OG **1.052**, FG **1.010**, ABV **5.5%**, process `Enkel infusjon`
+
+These entries conflict on FG/ABV and are preserved separately. Entry A's FG is byte-identical to the recipe-computed FG, so it may be auto-carried; no silent reconciliation is made.
 
 ### Interpretation
 - v2 became a practical reference point showing that 10% smoke malt in this specific beer/process did not read as strongly smoky to the brewer.
