@@ -1,42 +1,49 @@
-# Eldsvenn — reconstructed historical record and naming conflict
+# Eldsvenn — reconstructed historical record
 
 Reconstruction status: **review required**
 
-Eldsvenn history contains at least one **historical naming/value conflict**. This file preserves that conflict rather than silently choosing one old value set.
+Important clarification from the brewer: the first beer that was initially discussed as “Eldsvenn” did **not** remain Eldsvenn. Its ingredient bill was wrong for the intended Eldsvenn recipe, so that batch was reclassified / became a different beer.
 
-## Historical candidate set A
+It must therefore not be treated as an Eldsvenn version when reconstructing the lineage.
 
-A prior report associated “Eldsvenn V1” with:
+## Reclassified pre-Eldsvenn batch
+
+A prior report associated the following values with an early batch that had initially been discussed under the Eldsvenn name:
+
 - OG **1.092**
 - ABV **8.8%**
 - IBU **9.9**
 - EBC **29.3**
 - Rauchmalz **18.8%**
 
-Sensory notes attached to that historical candidate:
+Sensory notes attached to that batch:
 - dark tones
 - coffee
 - light smoke
 - dry finish
 - drinkable
 
-### Conflict
-A later conversation explicitly corrected that an earlier ~1.092 / ~8.8% candidate **was not the actual Eldsvenn** and that the label/history should distinguish it from finished Eldsvenn and Varðeldr.
+### Identity status
 
-Therefore this candidate set must **not** be treated as canonical Eldsvenn without further source review.
+This batch is **not Eldsvenn**.
+
+The brewer later clarified that it had the wrong ingredients to be Eldsvenn and therefore became/reclassified as another beer.
+
+The final name/identity of that reclassified beer is not established in this reconstruction pass and must not be guessed.
 
 ---
 
-## Historical candidate set B
+## Corrected Eldsvenn historical candidate
 
 A later user correction recorded Eldsvenn as:
+
 - OG **1.079**
 - FG **1.021**
 - ABV **7.5%**
 - IBU **45**
 - EBC **17**
 
-This is the stronger candidate for the corrected Eldsvenn identity from that discussion, but this pass does not erase candidate set A.
+This is the corrected historical Eldsvenn value set from that discussion.
 
 ## Later Eldsvenn brew — 2026-08-22/23
 
@@ -57,5 +64,6 @@ This is the stronger candidate for the corrected Eldsvenn identity from that dis
 - Later gravity reading: **1.075**
 
 ## Interpretation / open questions
-- Exact canonical identity/versioning between the older “Eldsvenn V1” candidate sets still needs source-level cleanup.
-- The 2026-08 brew should remain a separate concrete batch record rather than being merged into the older naming conflict.
+- The early 1.092 / 8.8% batch belongs in a separate beer lineage, not under Eldsvenn.
+- Its final beer name still needs source-level reconstruction.
+- The 2026-08 brew remains a separate concrete Eldsvenn batch record.
