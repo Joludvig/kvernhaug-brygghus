@@ -50,6 +50,17 @@ Sensory notes attached to that batch:
 - not sweet/sticky/syrupy
 - highly drinkable
 
+### Historical naming discussion
+Older June 2026 chat contains a temporary naming phase where **Varðeldr** was proposed/accepted for the dark first-Eldsvenn beer because it had drifted away from the intended Gamlegut-like direction. The brewer's newer direct clarification supersedes that historical naming attempt:
+
+- the physical first Eldsvenn batch is **Skumring**;
+- **Varðeldr** is the later changed-recipe development from Skumring.
+
+Keep the older Varðeldr naming messages as historical naming-process evidence, not as current batch identity.
+
+### Original design intent and sensory direction
+User-authored chat records the first Eldsvenn concept as **"Gamlegut + litt røyk"**. The brewer later described the result as **very good**, but not truly the intended Eldsvenn/Gamlegut direction; smoke also became less prominent over time. This helps explain why the batch was separated from the later Eldsvenn line rather than treated as a successful final version of that concept.
+
 ### Identity status
 This batch's later/final name is **Skumring**.
 
