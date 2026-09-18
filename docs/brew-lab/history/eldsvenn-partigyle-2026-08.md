@@ -1,18 +1,18 @@
-# Eldsvenn parti-gyle / small beer — reconstructed record
+# Eldsvenn small beer / parti-gyle — reconstructed record
 
 Reconstruction status: **review required**
 
 Date range: **2026-08-22 to 2026-08-25**
 
-Source context: second runnings / small-beer branch from the Eldsvenn double-mash brew.
+Source context: small-beer / parti-gyle branch from the **current/later Eldsvenn** brewing session — the same Eldsvenn batch that is now fermenting in the brewer's September 2026 context.
 
 ## Process observations
 - Spent grain from the Eldsvenn mash was reused for a small-beer / parti-gyle branch.
 - One conversation records **18 L water** with the grain and a reading around **1.025** early in the mash, before a full 30 min at 65 °C.
 - Mashout and runoff were performed before boiling.
 - An opened East Kent Goldings pack at **5.8% AA** was available/considered.
-- Remaining 1318 starter/slurry was added.
-- A small amount of harvested W-34/70 slurry from Sommerglød was discussed as a possible additional pitch.
+- The brewer has directly clarified that the small beer used the **same yeast as the main Eldsvenn**. In the current Eldsvenn reconstruction, that yeast is **Wyeast 1318**.
+- Historical discussion of adding harvested W-34/70 from Sommerglød is therefore preserved only as a considered option, **not the actual final yeast choice** for this small beer.
 
 ## Historical measurement conflict
 
