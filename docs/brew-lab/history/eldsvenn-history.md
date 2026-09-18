@@ -1,4 +1,4 @@
-# Eldsvenn — reconstructed historical record
+# Skumring / Eldsvenn V1 — reconstructed historical record
 
 Reconstruction status: **review required**
 
@@ -40,11 +40,13 @@ Historical numeric values attached to the pre-Eldsvenn/Varðeldr lineage are not
 
 ---
 
-## Eldsvenn V1 — corrected identity
+## Eldsvenn V1 → Skumring — corrected identity
 
-The intended Eldsvenn is the **lighter Kinn Gamlegut-inspired stout/strong ale** with smoke in the background rather than the darker imperial-smoked direction that became Varðeldr.
+The intended Eldsvenn V1 was the **lighter Kinn Gamlegut-inspired stout/strong ale** with smoke in the background rather than the darker imperial-smoked direction that became Varðeldr.
 
-From the “Eldsvenn V1 Gjenopptas” history, the intended Eldsvenn V1 was a **25 L** strong malt-forward ale.
+The brewer later renamed **Eldsvenn V1 to Skumring**. Skumring is therefore **not a separate missing batch** in this reconstruction; it is the later/final name for this same Eldsvenn V1 lineage.
+
+From the “Eldsvenn V1 Gjenopptas” history, the beer later named **Skumring** was a **25 L** strong malt-forward ale.
 
 Recorded target / recipe values:
 - OG **1.079**
@@ -69,7 +71,7 @@ Yeast:
 
 That distinction is important when reconstructing the recipe lineage.
 
-## Later concrete brew observations in the same Eldsvenn thread
+## Later concrete brew observations in the Eldsvenn V1 / Skumring thread
 
 The conversation also records a concrete Eldsvenn brew process with:
 - pre-boil **30 L @ 1.052**
@@ -86,6 +88,6 @@ These are batch observations and should remain separate from recipe-target value
 
 ## Open reconstruction work
 
-- Reconstruct the exact brewday date/timeline from “Eldsvenn V1 Gjenopptas”, including the starter-delay sequence.
+- Reconstruct the exact brewday date/timeline from “Eldsvenn V1 Gjenopptas”, including the starter-delay sequence and the point at which the beer was renamed Skumring.
 - Keep target values (1.079 / 1.021 / ~7.5%) distinct from observed brewday gravities (1.052 / 1.061 / 1.075).
 - Preserve any conflicting historical Varðeldr/pre-Eldsvenn gravity values as separate evidence until their batch relationship is resolved.
