@@ -28,6 +28,10 @@ A one-batch observation is never promoted to general brewing truth.
 - Existing Ragnarok R1–R6 files remain the authoritative preserved research snapshot for that research.
 - App batch data and Brew Lab evidence may overlap, but ownership remains separate: App may hold structured batch records; Brew Lab owns experiments, observations, interpretations and learning.
 
+## Canonical identity map
+
+- `BATCH_INDEX.md` — separates physical batches, renames, recipe development and after-beer branches. Use this before interpreting historical names.
+
 ## Pass 1 records
 
 - `sommerglod-v1-v2.md`
