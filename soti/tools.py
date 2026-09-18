@@ -31,7 +31,7 @@ import os
 from dataclasses import dataclass
 from typing import Callable
 
-from bryggeskole.course_fact_registry import find_verified_records, get_verified_record
+from bryggeskole.course_fact_registry import find_verified_records, get_verified_record, read_verified_records
 from modules.master_data_io import les_master_json
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -187,6 +187,49 @@ def hent_verifisert_fagfakta(argumenter):
     return {"funnet": True, "fakta": [_fagfakta_til_felt(record) for record in records]}
 
 
+def hent_verifiserte_konsepter_og_moduler():
+    """Henter de faktiske, unike concept-/module-verdiene som forekommer
+    på de VERIFISERTE postene akkurat nå -- utelukkende via den betrodde
+    `read_verified_records()`-API-en, aldri rå/uverifiserte poster. Brukes
+    til å bygge et selvoppdaterende verktøyskjema for
+    `hent_verifisert_fagfakta` (se `hent_verifisert_fagfakta_skjema()`
+    under) i stedet for en hardkodet vokabularliste som stille kan gå ut
+    av synk med registeret (Chief-korreksjon runde 2, PR #320, issue
+    #317). Returnerer (konsepter, moduler) som to sorterte lister --
+    aldri None. Kaster CourseFactRegistryError uendret for et ugyldig
+    register, uten noen fallback."""
+    poster = read_verified_records(_COURSE_FACT_REGISTRY_PATH)
+    konsepter = sorted({konsept for post in poster for konsept in (post.get("concepts") or [])})
+    moduler = sorted({modul for post in poster for modul in (post.get("modules") or [])})
+    return konsepter, moduler
+
+
+def hent_verifisert_fagfakta_skjema():
+    """Bygger et ferskt JSON-skjema for `hent_verifisert_fagfakta` sine
+    argumenter, med 'enum' på 'concept'/'module' satt til dagens faktiske
+    verifiserte vokabular (se `hent_verifiserte_konsepter_og_moduler()`
+    over). Kalt på nytt av soti.ollama_provider for hvert providerkall --
+    aldri en frosset kopi tatt ved oppstart -- slik at modellen alltid ser
+    de faktiske gyldige selector-verdiene FØR den velger argumenter, i
+    stedet for å gjette et bundet, men ikke-eksisterende, filter. Ingen
+    'enum' legges til for et felt uten noen kjente verdier (et tomt
+    register/tomt vokabular gir det uendrede åpne strengfeltet)."""
+    konsepter, moduler = hent_verifiserte_konsepter_og_moduler()
+    skjema = {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "concept": {"type": "string"},
+            "module": {"type": "string"},
+        },
+    }
+    if konsepter:
+        skjema["properties"]["concept"]["enum"] = konsepter
+    if moduler:
+        skjema["properties"]["module"]["enum"] = moduler
+    return skjema
+
+
 def bygg_standard_registry():
     """Registry med Sóti sine skrivebeskyttede standardverktøy: Core-
     oppslaget og det verifiserte fagfakta-oppslaget over. Hvilke av disse
@@ -212,7 +255,12 @@ def bygg_standard_registry():
             "eksakt oppslag, eller {concept: ..., module: ...} (én eller "
             "begge) for et bundet filteroppslag. Ingen fritekst-/semantisk "
             "søk. Minst én av id/concept/module må oppgis -- uten noen av "
-            "dem gis et bundet 'ingen treff'-svar, aldri en full liste."
+            "dem gis et bundet 'ingen treff'-svar, aldri en full liste. "
+            "Gyldige verdier for 'concept'/'module' er akkurat nå listet "
+            "som 'enum' i dette verktøyets eget JSON-skjema (aldri "
+            "hardkodet her -- avledet på nytt fra registeret for hvert "
+            "kall) -- velg alltid en av dem, gjett aldri en verdi som "
+            "ikke er listet der."
         ),
         handler=hent_verifisert_fagfakta,
     ))

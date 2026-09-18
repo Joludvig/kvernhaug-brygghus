@@ -10,10 +10,12 @@ Kjøres med:
 """
 import io
 import json
+import os
 import unittest
 import urllib.error
 from unittest import mock
 
+from bryggeskole.course_fact_registry import CourseFactRegistryError
 from soti.ollama_provider import (
     STANDARD_NUM_CTX,
     OllamaModellFeil,
@@ -25,6 +27,16 @@ from soti.ollama_provider import (
 )
 from soti.providers import ModelProvider
 from soti.tools import Tool
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_FIXTURES = os.path.join(_ROOT, "tests", "fixtures", "course_fact_registry")
+_MIXED_FIXTURE = os.path.join(_FIXTURES, "verified_consumer_mixed.json")
+_VOCAB_LEAK_FIXTURE = os.path.join(_FIXTURES, "verified_vocabulary_leak_check.json")
+_MALFORMED_FIXTURE = os.path.join(_FIXTURES, "invalid_document_shape.json")
+
+
+def _patch_registry_path(path):
+    return mock.patch("soti.tools._COURSE_FACT_REGISTRY_PATH", path)
 
 
 def _fake_urlopen_response(payload_dict):
@@ -162,8 +174,69 @@ class TestMeldingsOgVerktoyOversettelse(unittest.TestCase):
         sendt_skjema = captured["body"]["tools"][0]["function"]["parameters"]
         self.assertEqual(sendt_skjema["type"], "object")
         self.assertEqual(set(sendt_skjema["properties"]), {"id", "concept", "module"})
-        for felt in ("id", "concept", "module"):
-            self.assertEqual(sendt_skjema["properties"][felt], {"type": "string"})
+        self.assertEqual(sendt_skjema["properties"]["id"], {"type": "string"})
+        # concept/module tar formen {"type": "string"[, "enum": [...]]} --
+        # 'enum' er alltid avledet FERSKT fra den ekte produksjonsregisteret
+        # her (ingen registerpatch), ikke en hardkodet liste.
+        for felt in ("concept", "module"):
+            self.assertEqual(sendt_skjema["properties"][felt]["type"], "string")
+
+    def test_fagfakta_skjema_enum_inneholder_kun_verifisert_vokabular(self):
+        # V2-5C1 runde 2 (Chief-korreksjon, PR #320, issue #317): 'enum'
+        # må vise akkurat de faktiske verifiserte concept-/module-
+        # verdiene, aldri en frosset/hardkodet liste.
+        kjent_tool = Tool(navn="hent_verifisert_fagfakta", beskrivelse="test", handler=lambda a: {})
+        raw = {"message": {"role": "assistant", "content": "ok"}}
+        captured = {}
+
+        def fake_urlopen(req, timeout=None):
+            captured["body"] = json.loads(req.data.decode("utf-8"))
+            return _fake_urlopen_response(raw)
+
+        with _patch_registry_path(_MIXED_FIXTURE), \
+             mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            provider.generate([{"role": "user", "content": "..."}], [kjent_tool])
+
+        sendt_skjema = captured["body"]["tools"][0]["function"]["parameters"]
+        self.assertEqual(sorted(sendt_skjema["properties"]["concept"]["enum"]), ["c.a", "c.b"])
+        self.assertEqual(sorted(sendt_skjema["properties"]["module"]["enum"]), ["m.a", "m.b"])
+
+    def test_fagfakta_skjema_enum_lekker_aldri_draft_reviewed_deprecated_vokabular(self):
+        kjent_tool = Tool(navn="hent_verifisert_fagfakta", beskrivelse="test", handler=lambda a: {})
+        raw = {"message": {"role": "assistant", "content": "ok"}}
+        captured = {}
+
+        def fake_urlopen(req, timeout=None):
+            captured["body"] = json.loads(req.data.decode("utf-8"))
+            return _fake_urlopen_response(raw)
+
+        with _patch_registry_path(_VOCAB_LEAK_FIXTURE), \
+             mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            provider.generate([{"role": "user", "content": "..."}], [kjent_tool])
+
+        sendt_skjema = captured["body"]["tools"][0]["function"]["parameters"]
+        self.assertEqual(sendt_skjema["properties"]["concept"]["enum"], ["vocab.verified.concept"])
+        self.assertEqual(sendt_skjema["properties"]["module"]["enum"], ["vocab.verified.module"])
+        for lekkasje in (
+            "vocab.draft.only.concept", "vocab.draft.only.module",
+            "vocab.deprecated.only.concept", "vocab.deprecated.only.module",
+            "vocab.reviewed.only.concept", "vocab.reviewed.only.module",
+        ):
+            self.assertNotIn(lekkasje, sendt_skjema["properties"]["concept"].get("enum", []))
+            self.assertNotIn(lekkasje, sendt_skjema["properties"]["module"].get("enum", []))
+
+    def test_fagfakta_skjema_for_ugyldig_register_feiler_synlig_ikke_fallback(self):
+        # Fail-closed: et ugyldig register skal aldri stille gi et tomt/
+        # fallback-skjema -- CourseFactRegistryError skal forplante seg
+        # uendret, allerede før noe kall til Ollama sendes.
+        kjent_tool = Tool(navn="hent_verifisert_fagfakta", beskrivelse="test", handler=lambda a: {})
+
+        with _patch_registry_path(_MALFORMED_FIXTURE):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            with self.assertRaises(CourseFactRegistryError):
+                provider.generate([{"role": "user", "content": "..."}], [kjent_tool])
 
     def test_ukjent_verktoynavn_far_apent_skjema_ikke_krasj(self):
         ukjent_tool = Tool(navn="fremtidig_verktoy", beskrivelse="test", handler=lambda a: {})

@@ -40,12 +40,19 @@ from soti.skills import (
     SOTI_KOMBINERT_SKILL,
     registry_for_skill,
 )
-from soti.tools import bygg_standard_registry, hent_ingrediens_info, hent_verifisert_fagfakta
+from soti.tools import (
+    bygg_standard_registry,
+    hent_ingrediens_info,
+    hent_verifisert_fagfakta,
+    hent_verifisert_fagfakta_skjema,
+    hent_verifiserte_konsepter_og_moduler,
+)
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FIXTURES = os.path.join(_ROOT, "tests", "fixtures", "course_fact_registry")
 _PRODUCTION_REGISTRY = os.path.join(_ROOT, "bryggeskole", "data", "course_fact_registry.json")
 _MIXED_FIXTURE = os.path.join(_FIXTURES, "verified_consumer_mixed.json")
+_VOCAB_LEAK_FIXTURE = os.path.join(_FIXTURES, "verified_vocabulary_leak_check.json")
 _MALFORMED_FIXTURE = os.path.join(_FIXTURES, "invalid_document_shape.json")
 _KJENT_MALT_ID = "bohemian_pilsner_floor"
 
@@ -290,6 +297,60 @@ class TestUgyldigRegisterFeilerSynlig(unittest.TestCase):
         self.assertTrue(any("fagfakta-registeret er ugyldig" in linje.lower() for linje in utskrift))
         self.assertTrue(any(linje.startswith("Sóti: et ekte svar") for linje in utskrift))
         self.assertEqual(runtime.handle_message.call_count, 2)
+
+
+class TestVerifisertVokabularForDynamiskSkjema(unittest.TestCase):
+    """Chief-korreksjon runde 2 (PR #320, issue #317): den ekte modellen
+    gjettet concept-/module-verdier som ikke fantes i registeret. Disse
+    testene beviser at hent_verifiserte_konsepter_og_moduler()/
+    hent_verifisert_fagfakta_skjema() -- grunnlaget for det dynamiske
+    skjemaet soti.ollama_provider sender til Ollama -- utelukkende
+    avleder dagens vokabular fra VERIFISERTE poster, aldri lekker draft/
+    reviewed/deprecated-vokabular, og feiler synlig for et ugyldig
+    register i stedet for en rå/uverifisert fallback."""
+
+    def test_kun_verifisert_vokabular_er_med(self):
+        with _patch_registry_path(_MIXED_FIXTURE):
+            konsepter, moduler = hent_verifiserte_konsepter_og_moduler()
+        self.assertEqual(konsepter, ["c.a", "c.b"])
+        self.assertEqual(moduler, ["m.a", "m.b"])
+
+    def test_draft_reviewed_deprecated_vokabular_lekker_aldri(self):
+        with _patch_registry_path(_VOCAB_LEAK_FIXTURE):
+            konsepter, moduler = hent_verifiserte_konsepter_og_moduler()
+        self.assertEqual(konsepter, ["vocab.verified.concept"])
+        self.assertEqual(moduler, ["vocab.verified.module"])
+
+    def test_skjema_setter_enum_fra_verifisert_vokabular(self):
+        with _patch_registry_path(_VOCAB_LEAK_FIXTURE):
+            skjema = hent_verifisert_fagfakta_skjema()
+        self.assertEqual(skjema["properties"]["concept"]["enum"], ["vocab.verified.concept"])
+        self.assertEqual(skjema["properties"]["module"]["enum"], ["vocab.verified.module"])
+        self.assertEqual(skjema["properties"]["id"], {"type": "string"})
+
+    def test_tomt_vokabular_gir_skjema_uten_enum(self):
+        # bygg_standard_registry()/ingen concepts/modules noe sted --
+        # skjemaet skal aldri sette et tomt 'enum' (som ville avvist ALLE
+        # verdier), bare utelate feltet.
+        with mock.patch("soti.tools.hent_verifiserte_konsepter_og_moduler", return_value=([], [])):
+            skjema = hent_verifisert_fagfakta_skjema()
+        self.assertNotIn("enum", skjema["properties"]["concept"])
+        self.assertNotIn("enum", skjema["properties"]["module"])
+
+    def test_malformet_register_feiler_synlig_ingen_fallback(self):
+        with _patch_registry_path(_MALFORMED_FIXTURE):
+            with self.assertRaises(CourseFactRegistryError):
+                hent_verifiserte_konsepter_og_moduler()
+            with self.assertRaises(CourseFactRegistryError):
+                hent_verifisert_fagfakta_skjema()
+
+    def test_produksjonsregisteret_gir_ikke_tomt_vokabular(self):
+        # Ingen registerpatch -- mot den ekte produksjonsfilen, for å
+        # bevise at den ekte fermentation-vokabularen Chief-røyktesten
+        # etterspurte faktisk dukker opp.
+        konsepter, moduler = hent_verifiserte_konsepter_og_moduler()
+        self.assertTrue(konsepter)
+        self.assertTrue(moduler)
 
 
 class TestKombinertSkillEksponererKunDeToTiltenkteVerktoyene(unittest.TestCase):
