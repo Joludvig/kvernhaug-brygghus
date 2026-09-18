@@ -65,6 +65,10 @@ class OllamaMaalinger:
         self.prompt_eval_duration_ns = raw.get("prompt_eval_duration")
         self.eval_count = raw.get("eval_count")
         self.eval_duration_ns = raw.get("eval_duration")
+        # Kun satt når kallet ba om think=True og modellen/runtimen støtter
+        # det -- brukt av den avgrensede 8K/16K + thinking av/på
+        # tuning-runden for de to finalistene (Chief execution note).
+        self.thinking = raw.get("message", {}).get("thinking") if "message" in raw else raw.get("thinking")
 
     def tokens_per_sekund(self):
         if not self.eval_count or not self.eval_duration_ns:
@@ -76,16 +80,30 @@ class OllamaProvider(ModelProvider):
     """En ekte ModelProvider mot en lokal Ollama-server. `siste_maalinger`
     holder OllamaMaalinger for forrige generate()-kall, slik at
     evalueringsscriptet kan lese ytelsestall uten at ProviderSvar/
-    SotiRuntime må endres for å bære dem."""
+    SotiRuntime må endres for å bære dem.
 
-    def __init__(self, model, base_url=_DEFAULT_BASE_URL, temperature=0.2, seed=None, timeout_s=180):
+    `tool_kall_logg` er en append-only liste, ett element per generate()-
+    kall i rekkefølge (`{"navn": ..., "argumenter": ...}`, eller
+    `{"navn": None, "argumenter": None}` for kall uten verktøykall). Dette
+    finnes fordi `siste_raw_response` alene ikke er nok til å rekonstruere
+    verktøykall-argumenter i ettertid: SotiRuntime.handle_message kan gjøre
+    flere generate()-runder per henvendelse (MAKS_VERKTOY_RUNDER), og hvert
+    nytt kall overskriver `siste_raw_response` -- uten denne loggen ville
+    det tidligere kallets faktiske argumenter (selektiv-kritisk telemetri,
+    se Chief-gjennomgangen av PR #312) vært tapt allerede før
+    evalueringsscriptet fikk lest dem."""
+
+    def __init__(self, model, base_url=_DEFAULT_BASE_URL, temperature=0.2, seed=None, timeout_s=180, num_ctx=None, think=None):
         self._model = model
         self._base_url = base_url.rstrip("/")
         self._temperature = temperature
         self._seed = seed
         self._timeout_s = timeout_s
+        self._num_ctx = num_ctx
+        self._think = think
         self.siste_maalinger = None
         self.siste_raw_response = None
+        self.tool_kall_logg = []
 
     def generate(self, meldinger, verktoy):
         payload = {
@@ -96,6 +114,10 @@ class OllamaProvider(ModelProvider):
         }
         if self._seed is not None:
             payload["options"]["seed"] = self._seed
+        if self._num_ctx is not None:
+            payload["options"]["num_ctx"] = self._num_ctx
+        if self._think is not None:
+            payload["think"] = self._think
         if verktoy:
             payload["tools"] = [_tool_to_ollama_schema(t) for t in verktoy]
 
@@ -118,7 +140,9 @@ class OllamaProvider(ModelProvider):
                     args = json.loads(args)
                 except (json.JSONDecodeError, TypeError):
                     args = {}
+            self.tool_kall_logg.append({"navn": fn.get("name", ""), "argumenter": args})
             return ProviderSvar(tekst=message.get("content", ""), tool_kall=ToolKall(navn=fn.get("name", ""), argumenter=args))
+        self.tool_kall_logg.append({"navn": None, "argumenter": None})
         return ProviderSvar(tekst=message.get("content", ""))
 
     def _oversett_melding(self, melding):
@@ -139,7 +163,7 @@ class OllamaProvider(ModelProvider):
             return json.loads(resp.read().decode("utf-8"))
 
 
-def raw_generate(model, prompt, base_url=_DEFAULT_BASE_URL, temperature=0.2, seed=None, timeout_s=180, system=None):
+def raw_generate(model, prompt, base_url=_DEFAULT_BASE_URL, temperature=0.2, seed=None, timeout_s=180, system=None, num_ctx=None, think=None):
     """Direkte /api/generate-kall uten SotiRuntime/verktøy -- brukes av
     evalueringsscriptet for de rene språk-/resonnement-/JSON-testene der
     verktøyløkken ikke er relevant. Returnerer (svartekst, OllamaMaalinger)."""
@@ -151,6 +175,10 @@ def raw_generate(model, prompt, base_url=_DEFAULT_BASE_URL, temperature=0.2, see
     }
     if seed is not None:
         payload["options"]["seed"] = seed
+    if num_ctx is not None:
+        payload["options"]["num_ctx"] = num_ctx
+    if think is not None:
+        payload["think"] = think
     if system:
         payload["system"] = system
 
