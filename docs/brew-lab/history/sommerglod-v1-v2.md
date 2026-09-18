@@ -5,22 +5,31 @@ Reconstruction status: **review required**
 ## Sommerglød v1 — 2026-06-01
 
 ### Instrument measurements
-- OG measured: **1.050**
 - Expected OG noted in conversation: **1.048**
+- Measured OG: **1.050**
+- Later hydrometer FG: **1.009**
+- Later stated ABV: approximately **5.4%**
+- Temperature at the later FG-check context: approximately **15 °C**
 
-### Process
+### Process observations
 - Beer direction: pils/lager with smoke.
-- Yeast: **W-34/70, 2 packs**.
+- Rauchmalz: **7%**.
+- Yeast: **W-34/70**.
+- Historical fermentation discussion records a warm storm-fermentation period reaching approximately **18–20 °C**, followed by cooling to approximately **9 °C**.
+- At the 1.009 FG discussion, about **12 days** had passed since pitching and there had been no meaningful pressure increase for several days.
+- The brewer planned a cold crash before kegging to reduce suspended material/grums.
+
+These are observations from this batch/timeline, not a recommended fermentation program.
 
 ### Sensory observations
+- Malt/bread character was noted, with a light smoke character.
 - Smoke character was observed to fade/disappear quickly.
 
 ### Interpretation
-- Later Kvernhaug discussion treated the smoke level in v1 as too subtle/short-lived for the intended signature.
+- Later Kvernhaug discussion treated the **7% Rauchmalz** smoke level in v1 as too subtle/short-lived for the intended Kvernhaug smoke signature.
 
 ### Open questions
-- Exact smoke-malt percentage for v1 is not safely reconstructed in this pass.
-- FG, exact packaged volume and exact fermentation pressure/temperature are not reconstructed here.
+- Exact packaged volume and exact pressure history are not safely reconstructed in this pass.
 
 ---
 
@@ -34,6 +43,8 @@ Reconstruction status: **review required**
 ### Process
 - Smoke malt target recorded as **10%**.
 - Yeast: **W-34/70, 2 packs**.
+- No stirring after mash-in and the upper screen were used; the brewer noted clearer wort.
+- One whole Whirlfloc tablet was added at about **15 min** remaining, although roughly half a tablet had been planned.
 - Kegged: **2026-07-25**.
 - W-34/70 slurry harvested: **2026-07-25**.
 - Keg/batch recorded as empty: **2026-08-27**.
