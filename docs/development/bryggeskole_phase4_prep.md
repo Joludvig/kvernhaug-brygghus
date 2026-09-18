@@ -44,16 +44,16 @@ tracks — but citing either without this note risks confusion:
    from *App*/*Web*).
 3. **The hard gate itself.** Phase 3A's protocol
    (`docs/development/phase3a_novice_acceptance_protocol.md`, issue #278,
-   PR #280) is Chief-approved and awaiting an owner GO/NO-GO
-   (`KBH_GO_READY_V1 issue=278`), but the actual *human* novice run — one
-   real person completing the task in Learner mode without oral coaching —
-   is the part no document or PR can satisfy. Per issue #325's own text,
-   that run lives in "the owner-only acceptance issue created after #278";
-   this audit did not locate that issue's number in any doc reachable from
-   `master` (it is evidently tracked as a live, owner-run task rather than
-   a written artifact) and does not invent one. Implementation of this
-   Phase 4 slice remains blocked on that human result, whatever issue ends
-   up recording it.
+   PR #280) is merged — PR #280 merged 2026-09-15 at commit
+   `46584d0ca23b8a2b646dcb1314524a5ef13bfc1c`, and issue #278 is closed —
+   but the actual *human* novice run — one real person completing the task
+   in Learner mode without oral coaching — is the part no document or PR
+   can satisfy. That run is tracked in open owner issue
+   [#324 — OWNER ACCEPTANCE — Phase 3A real novice Learner gate](https://github.com/Joludvig/kvernhaug-brygghus/issues/324),
+   which requires the protocol's evidence template to be completed with a
+   result of PASS, CONDITIONAL PASS, FAIL, or INCONCLUSIVE. Implementation
+   of this Phase 4 slice remains blocked until #324 records PASS or
+   CONDITIONAL PASS under that canonical protocol.
 
 ## 1. Current foundation on master
 
@@ -267,8 +267,9 @@ only which side of the App/`bryggeskole` boundary the guard lives on.
 - Any change to the Course Fact Registry, the fermentation fact pack, the
   pilot content JSON, or the mastery model/store modules themselves —
   reuse only, per Q1/Q5.
-- Starting implementation itself before the real human Phase 3A novice
-  gate clears (see §0.3) — this document does not lift that gate.
+- Starting implementation itself before #324 records PASS or CONDITIONAL
+  PASS for the real human Phase 3A novice gate (see §0.3) — this document
+  does not lift that gate.
 
 ### Q8 — Learner acceptance findings usable for placement/copy (without conflating domains)
 
@@ -315,11 +316,12 @@ Part of Roadmap V2.1 #101 Phase 4 ("Complete learning loop"). Prepared by
 PREP audit #325 (docs/development/bryggeskole_phase4_prep.md).
 
 ## Hard gate
-Do not start until the real human Phase 3A novice gate (owner-run, per the
-protocol in docs/development/phase3a_novice_acceptance_protocol.md, issue
-#278/PR #280) has actually been run and passed/conditionally passed. This
-issue exists in draft form ahead of that so it is ready to arm immediately
-once the gate clears — arming itself is a separate owner action.
+Do not start until owner issue #324 (OWNER ACCEPTANCE — Phase 3A real
+novice Learner gate), which executes the canonical protocol in
+docs/development/phase3a_novice_acceptance_protocol.md (merged via #278/PR
+#280), records a result of PASS or CONDITIONAL PASS. This issue exists in
+draft form ahead of that so it is ready to arm immediately once the gate
+clears — arming itself is a separate owner action.
 
 ## Scope
 - Add ui/bryggeskole_panel.py (render_bryggeskole_panel()) rendering the
