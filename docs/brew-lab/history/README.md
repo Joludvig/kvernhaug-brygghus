@@ -31,6 +31,7 @@ A one-batch observation is never promoted to general brewing truth.
 ## Canonical identity map
 
 - `BATCH_INDEX.md` — separates physical batches, renames, recipe development and after-beer branches. Use this before interpreting historical names.
+- `APP_LOCAL_EVIDENCE_2026-09-18.md` — read-only extraction of local App recipes, legacy logs, structured brew records and backups, with PLAN/ACTUAL provenance and conflicts preserved.
 
 ## Pass 1 records
 
