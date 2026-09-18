@@ -12,7 +12,7 @@ That chat should be treated as the main reconstruction source for Eldsvenn. Olde
 
 ## Reclassified pre-Eldsvenn batch
 
-An earlier batch was initially discussed under the Eldsvenn name, but the brewer later clarified that it had the **wrong ingredients to be Eldsvenn** and therefore became/reclassified as another beer.
+An earlier batch was initially discussed under the Eldsvenn name, but the brewer later clarified that it had the **wrong identity to be the intended Eldsvenn**.
 
 Historical values attached to that earlier batch include:
 
@@ -27,17 +27,22 @@ Sensory notes attached to that batch:
 - coffee
 - light smoke
 - dry finish
-- drinkable
+- not sweet/sticky/syrupy
+- highly drinkable
 
 ### Identity status
 
-This batch is **not Eldsvenn**.
+This batch is **not the intended Eldsvenn**.
 
-Its final beer name/identity has not yet been safely reconstructed in this pass and must not be guessed.
+The brewer explicitly reassigned the dark beer to **Varðeldr** and kept **Eldsvenn** for the lighter, Kinn Gamlegut-inspired beer. That identity decision is a user decision, not an interpretation added during reconstruction.
+
+Historical numeric values attached to the pre-Eldsvenn/Varðeldr lineage are not silently normalized here; any conflicting values from other Varðeldr records must remain visible until their exact batch/timeline relationship is resolved.
 
 ---
 
 ## Eldsvenn V1 — corrected identity
+
+The intended Eldsvenn is the **lighter Kinn Gamlegut-inspired stout/strong ale** with smoke in the background rather than the darker imperial-smoked direction that became Varðeldr.
 
 From the “Eldsvenn V1 Gjenopptas” history, the intended Eldsvenn V1 was a **25 L** strong malt-forward ale.
 
@@ -81,6 +86,6 @@ These are batch observations and should remain separate from recipe-target value
 
 ## Open reconstruction work
 
-- Resolve the final identity/name of the reclassified pre-Eldsvenn batch.
 - Reconstruct the exact brewday date/timeline from “Eldsvenn V1 Gjenopptas”, including the starter-delay sequence.
 - Keep target values (1.079 / 1.021 / ~7.5%) distinct from observed brewday gravities (1.052 / 1.061 / 1.075).
+- Preserve any conflicting historical Varðeldr/pre-Eldsvenn gravity values as separate evidence until their batch relationship is resolved.
