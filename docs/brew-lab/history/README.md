@@ -38,7 +38,7 @@ A one-batch observation is never promoted to general brewing truth.
 - `sommerglod-v1-v2.md`
 - `vardeldr-m42-vs-m15.md` — **developed from Skumring**, but with a changed recipe/ingredients; concrete test was split M42 vs M15
 - `eldsvenn-history.md` — separates **first Eldsvenn → Skumring** from the **current/later Eldsvenn now fermenting**
-- `eldsvenn-partigyle-2026-08.md` — small beer from the current/later Eldsvenn session, using **1318**
+- `eldsvenn-small-beer-2026-09.md` — small beer from the current/later Eldsvenn session, using **1318**
 - `marzen-suttlevatn.md` — **TinyBeer / Kvernhaug Suttlevatn**, separate low-gravity after-beer from Märzen malt, using harvested **W-34/70**
 - `diamond-fermentation-observation.md` — historical main **Märzen**, with the Diamond fermentation datapoint preserved as one concrete batch observation
 
