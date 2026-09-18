@@ -1,21 +1,20 @@
-# Skumring / Eldsvenn V1 — reconstructed historical record
+# Eldsvenn / Skumring — reconstructed historical record
 
 Reconstruction status: **review required**
 
-## Primary chat source
+This record now keeps three separate histories distinct:
 
-The primary conversation for the real Eldsvenn lineage is:
+1. **First Eldsvenn → Skumring** — the first beer brewed under the Eldsvenn name became too dark and was later renamed Skumring.
+2. **Current/later Eldsvenn** — a separate later Eldsvenn batch, currently fermenting in the brewer's September 2026 context.
+3. **Varðeldr** — a separate small split-batch experiment with M42 vs M15. Its naming/origin story is not safely reconstructed yet and must not be inferred from the Eldsvenn/Skumring lineage.
 
-**“Eldsvenn V1 Gjenopptas”**
+## First Eldsvenn → Skumring
 
-That chat should be treated as the main reconstruction source for Eldsvenn. Older material that used the Eldsvenn name before the recipe identity was corrected must not override it.
+The brewer has now clarified the identity directly:
 
-## Reclassified pre-Eldsvenn batch
+> The first Eldsvenn was too dark, so it was renamed **Skumring**.
 
-An earlier batch was initially discussed under the Eldsvenn name, but the brewer later clarified that it had the **wrong identity to be the intended Eldsvenn**.
-
-Historical values attached to that earlier batch include:
-
+Historical values already attached to that first Eldsvenn batch in prior reconstruction:
 - OG **1.092**
 - ABV **8.8%**
 - IBU **9.9**
@@ -31,63 +30,32 @@ Sensory notes attached to that batch:
 - highly drinkable
 
 ### Identity status
+This batch's later/final name is **Skumring**.
 
-This batch is **not the intended Eldsvenn**.
-
-The brewer explicitly reassigned the dark beer to **Varðeldr** and kept **Eldsvenn** for the lighter, Kinn Gamlegut-inspired beer. That identity decision is a user decision, not an interpretation added during reconstruction.
-
-Historical numeric values attached to the pre-Eldsvenn/Varðeldr lineage are not silently normalized here; any conflicting values from other Varðeldr records must remain visible until their exact batch/timeline relationship is resolved.
+Do **not** connect this batch to Varðeldr unless a primary historical source explicitly establishes that connection; the brewer currently remembers Varðeldr as a separate small batch with two yeasts.
 
 ---
 
-## Eldsvenn V1 → Skumring — corrected identity
+## Current/later Eldsvenn — separate batch now fermenting
 
-The intended Eldsvenn V1 was the **lighter Kinn Gamlegut-inspired stout/strong ale** with smoke in the background rather than the darker imperial-smoked direction that became Varðeldr.
+This is **not Skumring**. It is a later Eldsvenn brew and is the batch currently fermenting in the brewer's September 2026 context.
 
-The brewer later renamed **Eldsvenn V1 to Skumring**. Skumring is therefore **not a separate missing batch** in this reconstruction; it is the later/final name for this same Eldsvenn V1 lineage.
-
-From the “Eldsvenn V1 Gjenopptas” history, the beer later named **Skumring** was a **25 L** strong malt-forward ale.
-
-Recorded target / recipe values:
-- OG **1.079**
-- target FG **1.021**
-- approximately **7.5% ABV**
-
-Recipe identity later described in the same history:
-- Pale Ale malt
-- CaraMalt
-- Amber malt
-- Rauchmalt
-- main mash around **66 °C**
-
-Yeast:
-- **Wyeast 1318**
-- the original starter was slow / appeared inactive, so brewing was postponed rather than pitching a doubtful starter
-- a later propagated starter became active in under 12 hours
-
-### Important process clarification
-
-“Double mash” appeared in the brewday workflow because of the updated program / Brewday Sheet logic. It was **not an Eldsvenn recipe change** in itself.
-
-That distinction is important when reconstructing the recipe lineage.
-
-## Later concrete brew observations in the Eldsvenn V1 / Skumring thread
-
-The conversation also records a concrete Eldsvenn brew process with:
+Concrete brew observations from the Eldsvenn thread include:
 - pre-boil **30 L @ 1.052**
 - after about 60 min boil: **1.061**
 - later gravity reading: **1.075**
 - pitch temperature about **17 °C**
-- 1318 slurry/starter used
+- **Wyeast 1318** slurry/starter used
 - wort transferred through a sieve to remove solids and promote oxygenation
 - approximately **90%** of the yeast slurry pitched
 - notably large early krausen
 - spunding later recorded at **5 psi**
 
-These are batch observations and should remain separate from recipe-target values until the exact brewday timeline is fully source-reconstructed.
+A **small beer / parti-gyle** was made from the same Eldsvenn brewing session and, per the brewer's direct clarification, used the **same yeast** as the main Eldsvenn batch.
+
+These are batch observations and should remain separate from recipe targets until the complete timeline is reconstructed.
 
 ## Open reconstruction work
-
-- Reconstruct the exact brewday date/timeline from “Eldsvenn V1 Gjenopptas”, including the starter-delay sequence and the point at which the beer was renamed Skumring.
-- Keep target values (1.079 / 1.021 / ~7.5%) distinct from observed brewday gravities (1.052 / 1.061 / 1.075).
-- Preserve any conflicting historical Varðeldr/pre-Eldsvenn gravity values as separate evidence until their batch relationship is resolved.
+- Reconstruct the exact date/timeline and recipe-target values for the first Eldsvenn that became Skumring.
+- Reconstruct the exact date/timeline for the current/later Eldsvenn now fermenting.
+- Keep Skumring, current Eldsvenn, and Varðeldr as separate identities unless primary chat evidence explicitly links them.
