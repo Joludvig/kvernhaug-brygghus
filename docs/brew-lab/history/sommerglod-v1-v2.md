@@ -54,8 +54,18 @@ The App recipe plan records **25.0 L**, W-34/70 and a 7% Rauchmalz grist consist
 
 ### Process
 - Smoke malt target recorded as **10%**.
-- Yeast: **W-34/70, 2 packs**.
-- No stirring after mash-in and the upper screen were used; the brewer noted clearer wort.
+- Mash water: **17.0 L**.
+- Mash temperature: **66 °C**.
+- Mashout: **78 °C**.
+- The RAPT/controller accidentally started heating toward boil before sparging.
+- No stirring after mash-in; the upper screen was used and the brewer noted clearer wort.
+- During runoff, a volume reading of **13.5 L** was recorded; the kettle was later stopped below **33 L**, described as the practical maximum.
+- **Saaz** was added during the boil.
+- Yeast: **2 × W-34/70**, rehydrated.
+- Wort was cooled to **15.7 °C** for pitching.
+- Inkbird/thermowell was set to **12 °C**.
+- Approximately **26 L** went to the fermenter.
+- Refractometer OG: **1.052**.
 - One whole Whirlfloc tablet was added at about **15 min** remaining, although roughly half a tablet had been planned.
 - Kegged: **2026-07-25**.
 - W-34/70 slurry harvested: **2026-07-25**.
