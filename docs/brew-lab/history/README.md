@@ -31,9 +31,9 @@ A one-batch observation is never promoted to general brewing truth.
 ## Pass 1 records
 
 - `sommerglod-v1-v2.md`
-- `vardeldr-m42-vs-m15.md`
-- `eldsvenn-history.md` — includes the identity transition **Eldsvenn V1 → Skumring**
-- `eldsvenn-partigyle-2026-08.md`
+- `vardeldr-m42-vs-m15.md` — separate small split-batch; origin/name story still unresolved
+- `eldsvenn-history.md` — separates **first Eldsvenn → Skumring** from the **current/later Eldsvenn now fermenting**
+- `eldsvenn-partigyle-2026-08.md` — small beer from the current/later Eldsvenn session, using the same yeast
 - `diamond-fermentation-observation.md`
 
 More chat archaeology is still pending.
