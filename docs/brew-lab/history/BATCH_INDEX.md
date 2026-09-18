@@ -43,8 +43,8 @@ Purpose: keep **name/lineage**, **recipe identity**, and **physical brewed batch
 
 - exact first-Eldsvenn/Skumring brew date and final source-verified measurement timeline
 - exact Varðeldr recipe evolution from Skumring
-- exact stage for the later Eldsvenn small-beer 1.036–1.037 reading
 - remaining concrete Brew Lab batches not yet represented as bounded records
+- mine App-local history sources where available: current `recipes/_kbhbrew/*.json`, legacy `recipes/_logs/*_logg.json`, older root-level `recipes/*_logg.json`, and saved recipe JSON as plan/snapshot evidence
 - extract-set brew history, if recovered from primary chat evidence
 - fermentation/tasting/next-brew observations for batches still in progress
 
