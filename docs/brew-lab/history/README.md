@@ -32,7 +32,7 @@ A one-batch observation is never promoted to general brewing truth.
 
 - `sommerglod-v1-v2.md`
 - `vardeldr-m42-vs-m15.md`
-- `eldsvenn-history.md`
+- `eldsvenn-history.md` — includes the identity transition **Eldsvenn V1 → Skumring**
 - `eldsvenn-partigyle-2026-08.md`
 - `diamond-fermentation-observation.md`
 
