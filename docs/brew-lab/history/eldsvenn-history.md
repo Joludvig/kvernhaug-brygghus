@@ -59,10 +59,11 @@ Varðeldr later **grew out of Skumring as a development direction**, but it was 
 
 ## Current/later Eldsvenn — separate batch now fermenting
 
-This is **not Skumring**. It is a later Eldsvenn brew and is the batch currently fermenting in the brewer's September 2026 context.
+This is **not Skumring**. It is a later Eldsvenn brew. User-authored chat anchors the brewday to **2026-09-06**.
 
 Concrete brew observations from the Eldsvenn thread include:
 - pre-boil **30 L @ 1.052**
+- the Wyeast 1318 starter had been **cold-crashed for about 48 hours** before brewday
 - after about 60 min boil: **1.061**
 - later gravity reading: **1.075**
 - pitch temperature about **17 °C**
@@ -72,7 +73,7 @@ Concrete brew observations from the Eldsvenn thread include:
 - notably large early krausen
 - spunding later recorded at **5 psi**
 
-A **small beer / parti-gyle** was made from the same Eldsvenn brewing session and, per the brewer's direct clarification, used the **same yeast** as the main Eldsvenn batch.
+A **small beer / parti-gyle** was made from the same Eldsvenn brewing session. User-authored chat records the intended yeast order explicitly: the main Eldsvenn got the **1318 first**, then the **remaining 1318** went to the small beer.
 
 These are batch observations and should remain separate from recipe targets until the complete timeline is reconstructed.
 
@@ -81,5 +82,5 @@ No second Eldsvenn-named local recipe/log was found in the read-only App archaeo
 
 ## Open reconstruction work
 - Reconstruct the detailed brewday/process timeline for the first Eldsvenn that became Skumring; App-local evidence now anchors its log date and actual OG/FG/volume.
-- Reconstruct the exact date/timeline for the current/later Eldsvenn now fermenting.
+- Reconstruct the remaining fermentation/FG/package/tasting timeline for the current/later Eldsvenn; brewday is now anchored to **2026-09-06**.
 - Keep the identities distinct even though the brewer has now directly clarified the lineage **Skumring → Varðeldr**: Varðeldr is a recipe development from Skumring with changed ingredients, not the same batch/recipe.
