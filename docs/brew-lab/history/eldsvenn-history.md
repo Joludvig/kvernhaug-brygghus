@@ -14,12 +14,33 @@ The brewer has now clarified the identity directly:
 
 > The first Eldsvenn was too dark, so it was renamed **Skumring**.
 
-Historical values already attached to that first Eldsvenn batch in prior reconstruction:
-- OG **1.092**
-- ABV **8.8%**
-- IBU **9.9**
-- EBC **29.3**
-- Rauchmalz **18.8%**
+### App-local plan and actual evidence
+
+PLAN — `recipes/eldsvenn_v1.json`:
+- batch **20.0 L**
+- Wyeast **1318**
+- Pilsner 5.0 kg
+- Rauchmalz 1.5 kg
+- pale wheat 0.5 kg
+- flaked oats 0.4 kg
+- Crystal Maple Carapils 0.3 kg
+- chocolate wheat 0.2 kg
+- Carafa Special II 0.1 kg
+- East Kent Goldings 25 g @ 60 min
+- computed OG **1.0918**
+- computed FG **1.02479**
+- computed ABV **8.80%**
+- IBU **9.90**
+- EBC **29.33**
+
+ACTUAL — `recipes/eldsvenn_v1_logg.json`:
+- date **2026-03-28**
+- volume **20.0 L**
+- OG **1.075**
+- FG **1.013**
+- ABV **8.1%**
+
+The App filename remains Eldsvenn V1; the identity transition **first Eldsvenn → Skumring** comes from the brewer's direct clarification. No local file named Skumring was found.
 
 Sensory notes attached to that batch:
 - dark tones
@@ -56,6 +77,6 @@ A **small beer / parti-gyle** was made from the same Eldsvenn brewing session an
 These are batch observations and should remain separate from recipe targets until the complete timeline is reconstructed.
 
 ## Open reconstruction work
-- Reconstruct the exact date/timeline and recipe-target values for the first Eldsvenn that became Skumring.
+- Reconstruct the detailed brewday/process timeline for the first Eldsvenn that became Skumring; App-local evidence now anchors its log date and actual OG/FG/volume.
 - Reconstruct the exact date/timeline for the current/later Eldsvenn now fermenting.
 - Keep the identities distinct even though the brewer has now directly clarified the lineage **Skumring → Varðeldr**: Varðeldr is a recipe development from Skumring with changed ingredients, not the same batch/recipe.
