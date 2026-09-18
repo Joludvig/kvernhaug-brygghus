@@ -84,9 +84,12 @@ merge.
 
 ## Deferred MVP work
 
-- A real `ModelProvider` implementation (local runtime such as a
-  llama.cpp/Ollama backend, or an API-backed provider) — this slice
-  proves the abstraction and ships only the deterministic mock.
+- ~~A real `ModelProvider` implementation~~ — delivered in V2-5B (issue
+  #315): `soti/ollama_provider.OllamaProvider`, a production `ModelProvider`
+  subclass backed by a local Ollama server, plus `soti/cli.py`, the local
+  CLI chat entry point. See `docs/development/SOTI_LOCAL_ASSISTANT_MVP.md`.
+  This slice's own scope (the abstraction + `MockProvider`) is unchanged;
+  this note only corrects what used to be listed as future work.
 - A second Core lookup tool covering `humle`/`gjaer` end-to-end from a
   live provider (the tool itself already supports all three datasets via
   `core/manifest.json`; only malt is exercised in the shipped tests).
