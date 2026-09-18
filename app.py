@@ -27,6 +27,7 @@ from ui.process_panel import render_process_panel
 from ui.water_panel import render_water_panel
 from ui.kbhbrew_panel import render_kbhbrew_export_panel, render_kbhbrew_import_panel
 from ui.abv_calculator_panel import render_abv_calculator_panel
+from ui.bryggeskole_panel import render_bryggeskole_panel
 from ui.i18n import t
 
 # 1. Grunnleggende Streamlit-konfigurering
@@ -128,8 +129,8 @@ st.session_state["_gjeldende_navn_preserved"] = st.session_state.gjeldende_navn
 render_sidebar()
 
 # 5. TABS
-tab_oppskrift, tab_innkjop, tab_bryggdag, tab_verktoy = st.tabs([
-    t("tabs.oppskrift"), t("tabs.innkjop"), t("tabs.bryggdag"), t("tabs.verktoy")
+tab_oppskrift, tab_innkjop, tab_bryggdag, tab_verktoy, tab_bryggeskole = st.tabs([
+    t("tabs.oppskrift"), t("tabs.innkjop"), t("tabs.bryggdag"), t("tabs.verktoy"), t("tabs.bryggeskole")
 ])
 
 # ==================================================
@@ -199,3 +200,9 @@ with tab_verktoy:
     # visuell flytting: samme funksjon, samme render_equipment_panel()-kall,
     # samme egen "st.write('---')" innledningsvis i funksjonen selv.
     render_equipment_panel()
+
+# ==================================================
+# === TAB 5: BRYGGESKOLE ==========================
+# ==================================================
+with tab_bryggeskole:
+    render_bryggeskole_panel()
