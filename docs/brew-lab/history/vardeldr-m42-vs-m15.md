@@ -5,24 +5,31 @@ Reconstruction status: **review required**
 Date: **2026-07-05** (test batch)
 
 ## Experiment design
-- One wort split into approximately **2 × 4 L**.
+- One wort was split between two small fermenters; the brewer described the actual fill as **under 4 L per vessel** rather than a precise 4.0 L each.
+- Same wort in both arms.
 - Yeast arms:
   - Mangrove Jack's **M42**
   - Mangrove Jack's **M15**
 
-## Measurements / fermentation outcome
-Recovered historical notes record:
-- M42 arm finished around **1.022**.
-- M15 arm stopped around **1.037–1.038**.
-- M42 arm was later described as about **10.1% ABV**.
+## Instrument measurements
+- OG measured from the circulation-pump sample: approximately **1.100 @ 20 °C**.
+- M42 FG measured: **1.022**.
+- M15 FG measured: **1.037–1.038**.
+- The hydrometer later read about **0.998 in water**; using that observed offset, the brewer/analysis context treated the corrected estimates as roughly:
+  - M42: about **1.024**, around **10% ABV**
+  - M15: about **1.039–1.040**, around **7.9–8.0% ABV**
 
-These values belong to this specific split-batch only.
+The measured values and the correction estimates are kept separate; the correction is not silently substituted for the original readings.
+
+## Process observations
+- Both arms showed fermentation after roughly **3 hours**.
+- Fermentation temperature was around **17 °C**.
+- After about one day, **M15 appeared the most active/lively**.
+- By **2026-07-16**, M15 was described as less vigorous and as having stopped earlier than M42.
+- M15 ultimately stopped substantially higher than M42 in this batch.
 
 ## Sensory observation
 - **M42 was preferred** over M15 in this batch.
-
-## Process observation
-- M15 was described as having stopped/stalled relative to M42.
 
 ## Interpretation
 - The result increased confidence in M42 for this specific strong dark-beer context and reduced confidence in M15 as a solo choice under the same conditions.
