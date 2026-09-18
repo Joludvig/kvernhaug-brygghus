@@ -1,12 +1,12 @@
-# Kvernhaug Suttlevatn — Märzen-derived after-beer reconstruction
+# TinyBeer / Kvernhaug Suttlevatn — Märzen-derived after-beer reconstruction
 
 Reconstruction status: **review required**
 
-This is a **separate after-beer / small beer derived from the Märzen brew**, not the main Märzen/TinyBeer batch and not the later Eldsvenn small beer.
+This is a **separate after-beer / small beer derived from the Märzen brew**. **TinyBeer and Kvernhaug Suttlevatn are the same beer/branch** in this reconstruction. This is not the historical main Märzen and not the later Eldsvenn small beer.
 
 ## Identity / source
-- Main beer: **Märzen → TinyBeer**
-- After-beer nickname: **Kvernhaug Suttlevatn**
+- Historical main beer: **Märzen**
+- After-beer identity: **TinyBeer / Kvernhaug Suttlevatn**
 - Source material: fully mashed/rinsed **Märzen malt** reused for an additional weak beer.
 
 ## Measurements
@@ -18,15 +18,15 @@ This is a **separate after-beer / small beer derived from the Märzen brew**, no
 ## Yeast
 - **Harvested W-34/70 from Sommerglød**
 
-This is distinct from the main Märzen/TinyBeer fermentation, which used **LalBrew Diamond**.
+This is distinct from the historical main Märzen fermentation, which used **LalBrew Diamond**.
 
 ## Process / hopping
 - Historical discussion associates this after-beer with **Mittelfrüh**.
 
 ## Interpretation
-- This was the very low-gravity/dry “suttlevatn” branch from the Märzen grain, not a renamed Märzen/TinyBeer.
+- This was the very low-gravity/dry **TinyBeer / Suttlevatn** branch from the Märzen grain, not a rename of the historical main Märzen.
 
 ## Guard
 Do not merge this record with:
-- main **Märzen/TinyBeer** (Diamond), or
+- historical main **Märzen** (Diamond), or
 - **Eldsvenn small beer** (1318).
