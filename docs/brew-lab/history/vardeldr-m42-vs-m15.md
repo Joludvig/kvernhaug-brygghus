@@ -5,9 +5,14 @@ Reconstruction status: **review required**
 Date: **2026-07-05** (test batch)
 
 ## Identity / origin
-The brewer currently remembers Varðeldr as a **separate small batch made with two yeast types**.
+The brewer has directly clarified that **Varðeldr developed out of Skumring**.
 
-The exact naming/origin story for Varðeldr is **not yet safely reconstructed**. Do not derive it from Eldsvenn or Skumring without primary chat evidence.
+This was a **recipe development**, not the same beer carried forward unchanged: the recipe was altered and the ingredients were **not the same** as Skumring. The concrete Varðeldr test brew was then made as a **small batch split between two yeast types**, M42 and M15.
+
+Preserve the distinction:
+- lineage / development: **Skumring → Varðeldr**;
+- recipe identity: changed ingredients, therefore not the same recipe;
+- experiment: one Varðeldr wort split into M42 and M15 arms.
 
 ## Experiment design
 - One wort was split between two small fermenters; the brewer described the actual fill as **under 4 L per vessel** rather than a precise 4.0 L each.
