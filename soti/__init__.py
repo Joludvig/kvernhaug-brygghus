@@ -9,6 +9,7 @@ lokal, testbar sesjonstilstand.
 Se docs/development/SOTI_MVP.md for akseptansekriterier, eksakte
 testkommandoer og videreført MVP-arbeid.
 """
+from soti.ollama_provider import OllamaProvider, OllamaProviderFeil
 from soti.providers import ModelProvider, MockProvider, ProviderSvar, ToolKall
 from soti.runtime import SotiRuntime
 from soti.session import SotiSession
@@ -16,6 +17,8 @@ from soti.session import SotiSession
 __all__ = [
     "ModelProvider",
     "MockProvider",
+    "OllamaProvider",
+    "OllamaProviderFeil",
     "ProviderSvar",
     "ToolKall",
     "SotiRuntime",
