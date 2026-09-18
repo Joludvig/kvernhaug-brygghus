@@ -49,3 +49,34 @@ Do **not** convert this into a universal “M42 is better than M15” rule. It i
 
 ## Existing durable cross-reference
 The same one-batch observation is already preserved in the Ragnarok R1–R6 research state as supporting Brew Lab observation, explicitly not general technical truth.
+
+
+## App-local plan evidence
+
+Current 25 L recipe `recipes/vardeldr.json` records:
+- pale ale malt **6.5 kg**
+- Rauchmalz **1.5 kg**
+- flaked oats **0.5 kg**
+- CaraMunich II **0.4 kg**
+- chocolate wheat **0.3 kg**
+- Carafa Special II **0.3 kg**
+- East Kent Goldings **100 g @ 60 min**
+- yeast field **M42**
+- computed OG **1.0875**
+- computed FG **1.01838**
+- computed ABV **9.07%**
+- IBU **38.20**
+- EBC **44.84**
+- style label **Imperial Nordisk Røykstout**
+
+The 8 L recipe is a proportional scaled version and also carries M42 in the recipe field.
+
+An archived 25 L recipe copy records IBU **32.93** and lacks the later style-label field, showing recipe-plan evolution.
+
+## App-local legacy log evidence
+
+`recipes/vardeldr_-_8l_batch_logg.json` contains two entries:
+- **2026-07-06** — 8.0 L, OG **1.100**, FG **1.01837531899**, ABV **10.7%**
+- **2026-08-09** — 8.0 L, OG **1.100**, FG **1.024**, ABV **10.0%**, process `Reiterated mash (dobbel mesk)`
+
+Do **not** assign these App log entries to the M42 and M15 arms. The local App files do not label an M15 arm, and the first App FG is byte-identical to the computed plan FG. The explicit M42/M15 split, arm-specific FG values and sensory preference remain sourced from user-authored chat history.
