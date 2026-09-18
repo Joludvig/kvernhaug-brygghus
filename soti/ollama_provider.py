@@ -20,6 +20,7 @@ import urllib.error
 import urllib.request
 
 from soti.providers import ModelProvider, ProviderSvar, ToolKall
+from soti.tools import hent_verifisert_fagfakta_skjema
 
 STANDARD_BASE_URL = "http://127.0.0.1:11434"
 STANDARD_NUM_CTX = 8192
@@ -42,6 +43,33 @@ _KJENTE_SKJEMA = {
     },
 }
 
+# V2-5C1 (issue #317, Chief-korreksjon runde 2, PR #320): et statisk skjema
+# for hent_verifisert_fagfakta lot modellen se argumentnavnene
+# (id/concept/module), men aldri de faktiske GYLDIGE concept-/module-
+# verdiene -- modellen gjettet derfor selectorer som ikke fantes i
+# registeret, og et spørsmål registeret hadde svar på fikk et
+# (deterministisk korrekt, men unødvendig) "ingen treff". Denne
+# ordboken bygger derfor skjemaet for slike verktøy PÅ NYTT for hvert
+# providerkall, aldri en frosset kopi -- se soti.tools.
+# hent_verifisert_fagfakta_skjema(), som utelukkende via den betrodde
+# read_verified_records()-API-en avleder dagens faktiske
+# concept-/module-vokabular (aldri fra draft/reviewed/deprecated poster)
+# og legger det på som 'enum'. Ingen av de tre argumentene er
+# individuelt påkrevd her (verken eksakt ID-oppslag eller
+# concept/module-filtrering er gyldig alene) -- soti.tools.
+# hent_verifisert_fagfakta selv avviser et argumentobjekt uten minst én
+# anerkjent selector i stedet for å liste opp alt.
+_DYNAMISKE_SKJEMA_BYGGERE = {
+    "hent_verifisert_fagfakta": hent_verifisert_fagfakta_skjema,
+}
+
+
+def _skjema_for_verktoy(tool):
+    bygger = _DYNAMISKE_SKJEMA_BYGGERE.get(tool.navn)
+    if bygger is not None:
+        return bygger()
+    return _KJENTE_SKJEMA.get(tool.navn, {"type": "object"})
+
 
 def _tool_til_ollama_skjema(tool):
     return {
@@ -49,7 +77,7 @@ def _tool_til_ollama_skjema(tool):
         "function": {
             "name": tool.navn,
             "description": tool.beskrivelse,
-            "parameters": _KJENTE_SKJEMA.get(tool.navn, {"type": "object"}),
+            "parameters": _skjema_for_verktoy(tool),
         },
     }
 
