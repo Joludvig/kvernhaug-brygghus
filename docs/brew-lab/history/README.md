@@ -31,7 +31,7 @@ A one-batch observation is never promoted to general brewing truth.
 ## Pass 1 records
 
 - `sommerglod-v1-v2.md`
-- `vardeldr-m42-vs-m15.md` — separate small split-batch; origin/name story still unresolved
+- `vardeldr-m42-vs-m15.md` — **developed from Skumring**, but with a changed recipe/ingredients; concrete test was split M42 vs M15
 - `eldsvenn-history.md` — separates **first Eldsvenn → Skumring** from the **current/later Eldsvenn now fermenting**
 - `eldsvenn-partigyle-2026-08.md` — small beer from the current/later Eldsvenn session, using the same yeast
 - `diamond-fermentation-observation.md`
