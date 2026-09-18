@@ -12,7 +12,7 @@ Purpose: keep **name/lineage**, **recipe identity**, and **physical brewed batch
 |---|---|---|---|---|
 | BL-2026-SOMMERGLOD-V1 | Sommerglød v1 | first Sommerglød | W-34/70 | brewed; smoke faded faster than desired |
 | BL-2026-SOMMERGLOD-V2 | Sommerglød v2 | v2 development | W-34/70 | brewed; separate batch from v1 |
-| BL-2026-SKUMRING | first Eldsvenn batch, later named **Skumring** | **first Eldsvenn → Skumring** | historical record under review | brewed; first Eldsvenn was judged too dark and renamed |
+| BL-2026-SKUMRING | first Eldsvenn batch, later named **Skumring** | **first Eldsvenn → Skumring** | **Wyeast 1318** | brewed; App legacy log anchors 2026-03-28, 20 L, OG 1.075, FG 1.013 |
 | BL-2026-VARDELDR-SPLIT | Varðeldr test batch | **developed from Skumring**, but recipe/ingredients changed | split **M42 vs M15** | brewed small split-batch; not the same recipe/batch as Skumring |
 | BL-2026-MARZEN | historical main **Märzen** | main beer | **LalBrew Diamond** | brewed; OG 1.064 datapoint preserved |
 | BL-2026-TINYBEER | **TinyBeer / Kvernhaug Suttlevatn** | weak after-beer from Märzen malt | harvested **W-34/70 from Sommerglød** | brewed; separate from main Märzen |
@@ -41,11 +41,14 @@ Purpose: keep **name/lineage**, **recipe identity**, and **physical brewed batch
 
 ## Still pending archaeology
 
-- exact first-Eldsvenn/Skumring brew date and final source-verified measurement timeline
+- detailed first-Eldsvenn/Skumring brewday/process timeline; App log now anchors date/OG/FG/volume
 - exact Varðeldr recipe evolution from Skumring
 - remaining concrete Brew Lab batches not yet represented as bounded records
-- mine App-local history sources where available: current `recipes/_kbhbrew/*.json`, legacy `recipes/_logs/*_logg.json`, older root-level `recipes/*_logg.json`, and saved recipe JSON as plan/snapshot evidence
 - extract-set brew history, if recovered from primary chat evidence
 - fermentation/tasting/next-brew observations for batches still in progress
+
+## App records not yet proven as physical brewed batches
+
+- **Gamleguten klone** — local structured `.kbhbrew` record exists (`status: active`, created 2026-09-06, `brewedAt: null`, empty actuals/sensing/learning). This proves an App brew record exists, **not** that physical brewing occurred. Keep outside the brewed-batch table until corroborated.
 
 Ragnarok R1–R6 remains a preserved research snapshot and is not listed here as a completed physical brewed batch unless concrete brew evidence is separately reconstructed.
