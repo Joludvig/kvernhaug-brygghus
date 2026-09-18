@@ -6,7 +6,7 @@ This record now keeps three separate histories distinct:
 
 1. **First Eldsvenn → Skumring** — the first beer brewed under the Eldsvenn name became too dark and was later renamed Skumring.
 2. **Current/later Eldsvenn** — a separate later Eldsvenn batch, currently fermenting in the brewer's September 2026 context.
-3. **Varðeldr** — a separate small split-batch experiment with M42 vs M15. Its naming/origin story is not safely reconstructed yet and must not be inferred from the Eldsvenn/Skumring lineage.
+3. **Varðeldr** — a later **development from Skumring**, but as a new recipe rather than the same beer: ingredients were changed. The concrete Varðeldr brew was a small split-batch experiment with M42 vs M15.
 
 ## First Eldsvenn → Skumring
 
@@ -32,7 +32,7 @@ Sensory notes attached to that batch:
 ### Identity status
 This batch's later/final name is **Skumring**.
 
-Do **not** connect this batch to Varðeldr unless a primary historical source explicitly establishes that connection; the brewer currently remembers Varðeldr as a separate small batch with two yeasts.
+Varðeldr later **grew out of Skumring as a development direction**, but it was not simply Skumring with another yeast or name. The recipe was changed and the ingredients were not the same. Treat the lineage as conceptual/recipe development, while keeping the actual batches distinct.
 
 ---
 
@@ -58,4 +58,4 @@ These are batch observations and should remain separate from recipe targets unti
 ## Open reconstruction work
 - Reconstruct the exact date/timeline and recipe-target values for the first Eldsvenn that became Skumring.
 - Reconstruct the exact date/timeline for the current/later Eldsvenn now fermenting.
-- Keep Skumring, current Eldsvenn, and Varðeldr as separate identities unless primary chat evidence explicitly links them.
+- Keep the identities distinct even though the brewer has now directly clarified the lineage **Skumring → Varðeldr**: Varðeldr is a recipe development from Skumring with changed ingredients, not the same batch/recipe.
