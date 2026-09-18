@@ -4,6 +4,11 @@ Reconstruction status: **review required**
 
 Date: **2026-07-05** (test batch)
 
+## Identity / origin
+The brewer currently remembers Varðeldr as a **separate small batch made with two yeast types**.
+
+The exact naming/origin story for Varðeldr is **not yet safely reconstructed**. Do not derive it from Eldsvenn or Skumring without primary chat evidence.
+
 ## Experiment design
 - One wort was split between two small fermenters; the brewer described the actual fill as **under 4 L per vessel** rather than a precise 4.0 L each.
 - Same wort in both arms.
