@@ -13,6 +13,7 @@ boundary. The Chief review correctly rejected that selection and required
 (a) a durable, per-call tool telemetry record instead of an easily-lost
 boolean, and (b) a rebaseline against current-generation local models
 before any final DEFAULT/FALLBACK choice. Both are done below; this
+revision supersedes every number and conclusion in the first version.*
 
 *Revision note (PR #312 Chief review, round 2): the round-1 revision
 evaluated `qwen3.5:9b` with `think=None` (omitted), which Ollama's
@@ -22,8 +23,7 @@ Llama/Ministral profiles it was compared against. Stage 2.6 below is a
 bounded rerun with explicit `--no-think`, added per that review; it
 materially changes the Qwen3.5 findings (though not the final
 DEFAULT/FALLBACK) and supersedes the round-1 Qwen3.5 characterization
-wherever the two disagree.
-supersedes every number and conclusion in the first version.*
+wherever the two disagree.*
 
 ## Baseline
 
@@ -391,12 +391,14 @@ reflects the corrected Qwen3.5 finding.
   production `ModelProvider` for this hardware class — never inherit a
   model's advertised (up to 256K) default, per the tuning-pass evidence
   above.
-- Qwen-family models (7B and 14B) and `qwen3.5:9b` share a specific
-  failure pattern — copying a user-phrasing suffix into an id-lookup
-  argument instead of extracting the bare id. If a future hardware/VRAM
-  upgrade makes a Qwen-family model attractive again, this is addressable
-  via the tool description or a fuzzier `_finn_i_datasett` match in
-  `soti/tools.py`, not by accepting the current failure.
+- Qwen2.5 7B and Qwen2.5 14B showed a suffix-copying failure pattern in
+  the tested tool path: they could copy user phrasing into an id-lookup
+  argument instead of extracting the bare id. `qwen3.5:9b` initially
+  showed the same pattern only with thinking implicitly enabled; the
+  explicit `--no-think` rerun in Stage 2.6 produced no wrong lookup ids.
+  If the Qwen2.5 family is revisited, improve the tool description or
+  matching behavior and re-evaluate rather than accepting the known
+  failure.
 - Gemma4 12B's redundant-tool-call-without-conclusion pattern is worth
   watching if a future, less VRAM-constrained hardware profile makes a
   12B+ model attractive: it may indicate `MAKS_VERKTOY_RUNDER = 2` is too
