@@ -7,6 +7,9 @@ This is a process observation from a concrete Kvernhaug fermentation, not a gene
 ## Identity
 The brewer has directly clarified that the beer first referred to as **Märzen** was later called **TinyBeer**. These are two names for the same batch/lineage in this reconstruction, not two separate beers.
 
+## Relationship to Suttlevatn
+The main **Märzen/TinyBeer** batch used **LalBrew Diamond**. A separate weak after-beer made from the spent/rinsed Märzen malt was later nicknamed **Kvernhaug Suttlevatn** and used harvested **W-34/70**. Do not merge those yeast records.
+
 ## Measurements / setup
 - OG: **1.064**
 - Yeast: **Diamond**, **3 packs**
