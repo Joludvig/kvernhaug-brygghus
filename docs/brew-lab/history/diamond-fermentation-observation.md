@@ -1,8 +1,11 @@
-# Diamond lager yeast — fermentation observation
+# Märzen → TinyBeer — Diamond fermentation observation
 
 Reconstruction status: **review required**
 
 This is a process observation from a concrete Kvernhaug fermentation, not a general Diamond yeast profile.
+
+## Identity
+The brewer has directly clarified that the beer first referred to as **Märzen** was later called **TinyBeer**. These are two names for the same batch/lineage in this reconstruction, not two separate beers.
 
 ## Measurements / setup
 - OG: **1.064**
