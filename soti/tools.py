@@ -144,9 +144,13 @@ def hent_verifisert_fagfakta(argumenter):
     argumenter: {"id": "<FACT-DOMENE-####>"} for eksakt, deterministisk
     ID-oppslag, ELLER {"concept": "<konsept>", "module": "<modul>"} (én
     eller begge) for et bundet, deterministisk filteroppslag -- ingen
-    fritekst-/semantisk søk, ingen embeddings, ingen RAG. Uten argumenter
-    returneres alle verifiserte poster (i dag nøyaktig de tre produksjons-
-    verifiserte fagfaktaene).
+    fritekst-/semantisk søk, ingen embeddings, ingen RAG. Et argument-
+    objekt UTEN noen av de tre (tomt, eller kun ukjente nøkler) gjør ALDRI
+    oppslag i registeret og "lister ikke alt" -- det gir et bundet
+    ikke-funnet-svar direkte (se Chief-korreksjon PR #320, issue #317):
+    et gjettet/feilformet verktøykall fra modellen for et spørsmål
+    utenfor registeret skal aldri kunne returnere urelaterte verifiserte
+    fakta i stedet for den påkrevde "ingen verifisert treff"-stien.
 
     Returnerer {"funnet": False, "feil": ...} hvis ingen verifisert post
     matcher (en ukjent ID og en ID som finnes men ikke er verifisert er
@@ -155,11 +159,22 @@ def hent_verifisert_fagfakta(argumenter):
     med én eller flere poster, hver med stabil ID, påstand, klassifisering,
     verifiseringstidspunkt og kilder/proveniens intakt. En ugyldig
     registerfil forplanter CourseFactRegistryError uendret -- feiler
-    synlig i stedet for å falle tilbake til rådata eller hukommelse."""
+    synlig i stedet for å falle tilbake til rådata eller hukommelse --
+    men KUN når et faktisk oppslag skjer; et argumentobjekt uten
+    anerkjent selector rører aldri registerfilen."""
     args = argumenter or {}
     fact_id = args.get("id")
     concept = args.get("concept")
     module = args.get("module")
+
+    if not (fact_id or concept or module):
+        return {
+            "funnet": False,
+            "feil": (
+                "Ingen anerkjent søkeparameter oppgitt -- oppgi 'id', "
+                "eller 'concept'/'module' (én eller begge)."
+            ),
+        }
 
     if fact_id:
         record = get_verified_record(_COURSE_FACT_REGISTRY_PATH, str(fact_id))
@@ -196,7 +211,8 @@ def bygg_standard_registry():
             "aldri rå registerdata. Argumenter: {id: '<FACT-...>'} for "
             "eksakt oppslag, eller {concept: ..., module: ...} (én eller "
             "begge) for et bundet filteroppslag. Ingen fritekst-/semantisk "
-            "søk."
+            "søk. Minst én av id/concept/module må oppgis -- uten noen av "
+            "dem gis et bundet 'ingen treff'-svar, aldri en full liste."
         ),
         handler=hent_verifisert_fagfakta,
     ))

@@ -102,13 +102,68 @@ class TestVerktoyetBrukerKunBetroddAPI(unittest.TestCase):
 
 class TestKunProduksjonsverifiserteFaktaErNaabare(unittest.TestCase):
     """Akseptansekriterium 2: nøyaktig de tre produksjonsverifiserte
-    fagfaktaene er nåbare gjennom verktøyet mot den ekte registerfilen."""
+    fagfaktaene er nåbare gjennom verktøyet mot den ekte registerfilen.
 
-    def test_uten_filter_returneres_nettopp_de_tre_verifiserte_faktaene(self):
-        resultat = hent_verifisert_fagfakta({})
+    Bruker et modulfilter som dekker alle tre, ikke et tomt argument-
+    objekt -- siden Chief-korreksjonen (PR #320) gir et tomt/uten-
+    selector-kall et bundet ikke-funnet-svar i stedet for "list alt",
+    se TestIngenAnerkjentSelectorGirBundetIkkeFunnet under."""
+
+    def test_modulfilter_som_dekker_alle_gir_nettopp_de_tre_verifiserte_faktaene(self):
+        resultat = hent_verifisert_fagfakta({"module": "fermentation.fundamentals"})
         self.assertTrue(resultat["funnet"])
         ider = sorted(post["id"] for post in resultat["fakta"])
         self.assertEqual(ider, ["FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003"])
+
+
+class TestIngenAnerkjentSelectorGirBundetIkkeFunnet(unittest.TestCase):
+    """Chief-korreksjon (PR #320, issue #317): et argumentobjekt uten
+    minst én anerkjent selector (id/concept/module) -- tomt, `None`,
+    eller kun ukjente nøkler -- skal aldri stille tolkes som "list alle
+    verifiserte fakta". Det skal gi et bundet ikke-funnet-svar direkte,
+    uten i det hele tatt å slå opp i registeret (så et gjettet/feil-
+    formet verktøykall for et spørsmål utenfor registeret aldri kan
+    returnere urelaterte verifiserte fakta i stedet for den påkrevde
+    kunnskapshull-stien)."""
+
+    def test_tomt_argumentobjekt_gir_ikke_funnet(self):
+        resultat = hent_verifisert_fagfakta({})
+        self.assertFalse(resultat["funnet"])
+        self.assertIn("feil", resultat)
+
+    def test_ingen_argumenter_i_det_hele_tatt_gir_ikke_funnet(self):
+        resultat = hent_verifisert_fagfakta(None)
+        self.assertFalse(resultat["funnet"])
+
+    def test_kun_ukjente_nokler_gir_ikke_funnet(self):
+        resultat = hent_verifisert_fagfakta({"sok": "gjæringstemperatur", "fritekst": "ja"})
+        self.assertFalse(resultat["funnet"])
+
+    def test_tomt_argumentobjekt_slar_aldri_opp_i_registeret(self):
+        with mock.patch("soti.tools.get_verified_record") as fake_get, \
+             mock.patch("soti.tools.find_verified_records") as fake_find:
+            hent_verifisert_fagfakta({})
+        fake_get.assert_not_called()
+        fake_find.assert_not_called()
+
+    def test_tomt_argumentobjekt_er_bundet_selv_med_ugyldig_register(self):
+        # Fail-closed gjelder når et faktisk oppslag forsøkes (se
+        # TestUgyldigRegisterFeilerSynlig) -- et argumentobjekt uten
+        # anerkjent selector gjør ikke noe oppslag i det hele tatt, så et
+        # korrupt register skal ikke kunne krasje denne bundne stien.
+        with _patch_registry_path(_MALFORMED_FIXTURE):
+            resultat = hent_verifisert_fagfakta({})
+        self.assertFalse(resultat["funnet"])
+
+    def test_concept_alene_er_fortsatt_en_gyldig_selector(self):
+        with _patch_registry_path(_MIXED_FIXTURE):
+            resultat = hent_verifisert_fagfakta({"concept": "c.a"})
+        self.assertTrue(resultat["funnet"])
+
+    def test_module_alene_er_fortsatt_en_gyldig_selector(self):
+        with _patch_registry_path(_MIXED_FIXTURE):
+            resultat = hent_verifisert_fagfakta({"module": "m.a"})
+        self.assertTrue(resultat["funnet"])
 
 
 class TestDraftReviewedDeprecatedLekkerAldri(unittest.TestCase):
@@ -123,12 +178,12 @@ class TestDraftReviewedDeprecatedLekkerAldri(unittest.TestCase):
         self.assertNotIn("FACT-TEST-0023", ider)  # draft
         self.assertEqual(ider, ["FACT-TEST-0020"])
 
-    def test_deprecated_og_reviewed_er_uoppnaaelige_selv_uten_filter(self):
+    def test_deprecated_og_reviewed_ider_gir_ikke_funnet_via_eksakt_oppslag(self):
         with _patch_registry_path(_MIXED_FIXTURE):
-            resultat = hent_verifisert_fagfakta({})
-        ider = [post["id"] for post in resultat["fakta"]]
-        self.assertNotIn("FACT-TEST-0025", ider)  # deprecated
-        self.assertNotIn("FACT-TEST-0026", ider)  # reviewed
+            deprecated = hent_verifisert_fagfakta({"id": "FACT-TEST-0025"})
+            reviewed = hent_verifisert_fagfakta({"id": "FACT-TEST-0026"})
+        self.assertFalse(deprecated["funnet"])
+        self.assertFalse(reviewed["funnet"])
 
     def test_eksakt_id_oppslag_pa_en_ikke_verifisert_id_gir_ikke_funnet(self):
         with _patch_registry_path(_MIXED_FIXTURE):
@@ -204,7 +259,7 @@ class TestUgyldigRegisterFeilerSynlig(unittest.TestCase):
     def test_malformet_register_kaster_course_fact_registry_error(self):
         with _patch_registry_path(_MALFORMED_FIXTURE):
             with self.assertRaises(CourseFactRegistryError):
-                hent_verifisert_fagfakta({})
+                hent_verifisert_fagfakta({"concept": "fermentation.temperature"})
 
     def test_malformet_register_kaster_ogsaa_for_id_oppslag(self):
         with _patch_registry_path(_MALFORMED_FIXTURE):

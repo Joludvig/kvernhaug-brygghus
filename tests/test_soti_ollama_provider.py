@@ -142,6 +142,29 @@ class TestMeldingsOgVerktoyOversettelse(unittest.TestCase):
         self.assertIn("datasett", sendt_skjema["properties"])
         self.assertIn("sok", sendt_skjema["properties"])
 
+    def test_hent_verifisert_fagfakta_far_eksplisitt_skjema(self):
+        # Chief-korreksjon (PR #320, issue #317): uten et eksplisitt
+        # skjema her fikk dette verktøyet kun det åpne fallback-skjemaet
+        # under, så Ollama/modellen aldri fikk vite de faktiske bundne
+        # argumentnavnene (id/concept/module).
+        kjent_tool = Tool(navn="hent_verifisert_fagfakta", beskrivelse="test", handler=lambda a: {})
+        raw = {"message": {"role": "assistant", "content": "ok"}}
+        captured = {}
+
+        def fake_urlopen(req, timeout=None):
+            captured["body"] = json.loads(req.data.decode("utf-8"))
+            return _fake_urlopen_response(raw)
+
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            provider = OllamaProvider("llama3.1:8b-instruct-q4_K_M")
+            provider.generate([{"role": "user", "content": "..."}], [kjent_tool])
+
+        sendt_skjema = captured["body"]["tools"][0]["function"]["parameters"]
+        self.assertEqual(sendt_skjema["type"], "object")
+        self.assertEqual(set(sendt_skjema["properties"]), {"id", "concept", "module"})
+        for felt in ("id", "concept", "module"):
+            self.assertEqual(sendt_skjema["properties"][felt], {"type": "string"})
+
     def test_ukjent_verktoynavn_far_apent_skjema_ikke_krasj(self):
         ukjent_tool = Tool(navn="fremtidig_verktoy", beskrivelse="test", handler=lambda a: {})
         raw = {"message": {"role": "assistant", "content": "ok"}}

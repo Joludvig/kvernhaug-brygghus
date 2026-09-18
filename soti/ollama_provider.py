@@ -40,6 +40,22 @@ _KJENTE_SKJEMA = {
         },
         "required": ["datasett", "sok"],
     },
+    # V2-5C1 (issue #317, Chief-korreksjon PR #320): uten dette skjemaet
+    # falt hent_verifisert_fagfakta tilbake til det åpne {"type": "object"}
+    # under, så Ollama fikk aldri vite de faktiske bundne argumentnavnene
+    # (id/concept/module) -- ingen av de tre er individuelt påkrevd (verken
+    # eksakt ID-oppslag eller concept/module-filtrering er gyldig alene),
+    # så det er bevisst ingen "required"-liste her; soti.tools.
+    # hent_verifisert_fagfakta selv avviser et argumentobjekt uten minst én
+    # av dem i stedet for å liste opp alt.
+    "hent_verifisert_fagfakta": {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "concept": {"type": "string"},
+            "module": {"type": "string"},
+        },
+    },
 }
 
 
