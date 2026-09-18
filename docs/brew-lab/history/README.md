@@ -33,7 +33,7 @@ A one-batch observation is never promoted to general brewing truth.
 - `BATCH_INDEX.md` — separates physical batches, renames, recipe development and after-beer branches. Use this before interpreting historical names.
 - `APP_LOCAL_EVIDENCE_2026-09-18.md` — read-only extraction of local App recipes, legacy logs, structured brew records and backups, with PLAN/ACTUAL provenance and conflicts preserved.
 
-## Pass 1 records
+## Durable history records
 
 - `sommerglod-v1-v2.md`
 - `vardeldr-m42-vs-m15.md` — **developed from Skumring**, but with a changed recipe/ingredients; concrete test was split M42 vs M15
@@ -41,5 +41,6 @@ A one-batch observation is never promoted to general brewing truth.
 - `eldsvenn-small-beer-2026-09.md` — small beer from the current/later Eldsvenn session, using **1318**
 - `marzen-suttlevatn.md` — **TinyBeer / Kvernhaug Suttlevatn**, separate low-gravity after-beer from Märzen malt, using harvested **W-34/70**
 - `diamond-fermentation-observation.md` — historical main **Märzen**, with the Diamond fermentation datapoint preserved as one concrete batch observation
+- `extract-stout-set-2026-08-30.md` — sparse extract-set record; OG ~1.045, bucket ~17–18 °C, yeast still unresolved
 
 More chat archaeology is still pending.
