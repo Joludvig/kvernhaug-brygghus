@@ -2,13 +2,19 @@
 
 Reconstruction status: **review required**
 
-Important clarification from the brewer: the first beer that was initially discussed as “Eldsvenn” did **not** remain Eldsvenn. Its ingredient bill was wrong for the intended Eldsvenn recipe, so that batch was reclassified / became a different beer.
+## Primary chat source
 
-It must therefore not be treated as an Eldsvenn version when reconstructing the lineage.
+The primary conversation for the real Eldsvenn lineage is:
+
+**“Eldsvenn V1 Gjenopptas”**
+
+That chat should be treated as the main reconstruction source for Eldsvenn. Older material that used the Eldsvenn name before the recipe identity was corrected must not override it.
 
 ## Reclassified pre-Eldsvenn batch
 
-A prior report associated the following values with an early batch that had initially been discussed under the Eldsvenn name:
+An earlier batch was initially discussed under the Eldsvenn name, but the brewer later clarified that it had the **wrong ingredients to be Eldsvenn** and therefore became/reclassified as another beer.
+
+Historical values attached to that earlier batch include:
 
 - OG **1.092**
 - ABV **8.8%**
@@ -27,43 +33,54 @@ Sensory notes attached to that batch:
 
 This batch is **not Eldsvenn**.
 
-The brewer later clarified that it had the wrong ingredients to be Eldsvenn and therefore became/reclassified as another beer.
-
-The final name/identity of that reclassified beer is not established in this reconstruction pass and must not be guessed.
+Its final beer name/identity has not yet been safely reconstructed in this pass and must not be guessed.
 
 ---
 
-## Corrected Eldsvenn historical candidate
+## Eldsvenn V1 — corrected identity
 
-A later user correction recorded Eldsvenn as:
+From the “Eldsvenn V1 Gjenopptas” history, the intended Eldsvenn V1 was a **25 L** strong malt-forward ale.
 
+Recorded target / recipe values:
 - OG **1.079**
-- FG **1.021**
-- ABV **7.5%**
-- IBU **45**
-- EBC **17**
+- target FG **1.021**
+- approximately **7.5% ABV**
 
-This is the corrected historical Eldsvenn value set from that discussion.
+Recipe identity later described in the same history:
+- Pale Ale malt
+- CaraMalt
+- Amber malt
+- Rauchmalt
+- main mash around **66 °C**
 
-## Later Eldsvenn brew — 2026-08-22/23
+Yeast:
+- **Wyeast 1318**
+- the original starter was slow / appeared inactive, so brewing was postponed rather than pitching a doubtful starter
+- a later propagated starter became active in under 12 hours
 
-### Process
-- Style direction: light stout / Kinn Gamlegut-inspired, with Kvernhaug smoke signature.
-- Batch target discussed as **25 L**.
-- Mash process: **double mash**.
-- Yeast: **Wyeast 1318 slurry**.
-- Wort was transferred into FermZilla through a sieve to remove solids and promote oxygenation.
-- Approximately **90% of the yeast slurry** was pitched.
-- Pitch temperature: about **17 °C**.
-- Fermentation showed a notably large krausen early in the run.
-- Spunding later recorded at **5 psi**.
+### Important process clarification
 
-### Measurements
-- Pre-boil: **30 L @ 1.052**
-- After about 60 min boil: **1.061**
-- Later gravity reading: **1.075**
+“Double mash” appeared in the brewday workflow because of the updated program / Brewday Sheet logic. It was **not an Eldsvenn recipe change** in itself.
 
-## Interpretation / open questions
-- The early 1.092 / 8.8% batch belongs in a separate beer lineage, not under Eldsvenn.
-- Its final beer name still needs source-level reconstruction.
-- The 2026-08 brew remains a separate concrete Eldsvenn batch record.
+That distinction is important when reconstructing the recipe lineage.
+
+## Later concrete brew observations in the same Eldsvenn thread
+
+The conversation also records a concrete Eldsvenn brew process with:
+- pre-boil **30 L @ 1.052**
+- after about 60 min boil: **1.061**
+- later gravity reading: **1.075**
+- pitch temperature about **17 °C**
+- 1318 slurry/starter used
+- wort transferred through a sieve to remove solids and promote oxygenation
+- approximately **90%** of the yeast slurry pitched
+- notably large early krausen
+- spunding later recorded at **5 psi**
+
+These are batch observations and should remain separate from recipe-target values until the exact brewday timeline is fully source-reconstructed.
+
+## Open reconstruction work
+
+- Resolve the final identity/name of the reclassified pre-Eldsvenn batch.
+- Reconstruct the exact brewday date/timeline from “Eldsvenn V1 Gjenopptas”, including the starter-delay sequence.
+- Keep target values (1.079 / 1.021 / ~7.5%) distinct from observed brewday gravities (1.052 / 1.061 / 1.075).
