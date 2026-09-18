@@ -34,6 +34,6 @@ A one-batch observation is never promoted to general brewing truth.
 - `vardeldr-m42-vs-m15.md` — **developed from Skumring**, but with a changed recipe/ingredients; concrete test was split M42 vs M15
 - `eldsvenn-history.md` — separates **first Eldsvenn → Skumring** from the **current/later Eldsvenn now fermenting**
 - `eldsvenn-partigyle-2026-08.md` — small beer from the current/later Eldsvenn session, using the same yeast
-- `diamond-fermentation-observation.md`
+- `diamond-fermentation-observation.md` — **Märzen → TinyBeer**, with the Diamond fermentation datapoint preserved as one concrete batch observation
 
 More chat archaeology is still pending.
