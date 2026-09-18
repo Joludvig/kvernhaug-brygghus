@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "records": [
+    {
+      "id": "FACT-TEST-0030",
+      "claim": "Synthetic verified record whose concept/module are used only to prove the dynamic tool-schema vocabulary derivation includes exactly the verified vocabulary.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "sources": [
+        { "tier": "A", "type": "example standards body technical document", "ref": "https://example.invalid/vocab-0030" }
+      ],
+      "verified_at": "2026-09-01T00:00:00Z",
+      "concepts": ["vocab.verified.concept"],
+      "modules": ["vocab.verified.module"]
+    },
+    {
+      "id": "FACT-TEST-0031",
+      "claim": "Synthetic draft record with a concept/module that never appears on any verified record, used only to prove draft-only vocabulary can never leak into the dynamic tool-schema selector list.",
+      "classification": "documented_fact",
+      "status": "draft",
+      "concepts": ["vocab.draft.only.concept"],
+      "modules": ["vocab.draft.only.module"]
+    },
+    {
+      "id": "FACT-TEST-0032",
+      "claim": "Synthetic deprecated record with a concept/module that never appears on any verified record, used only to prove deprecated-only vocabulary can never leak into the dynamic tool-schema selector list.",
+      "classification": "documented_fact",
+      "status": "deprecated",
+      "concepts": ["vocab.deprecated.only.concept"],
+      "modules": ["vocab.deprecated.only.module"]
+    },
+    {
+      "id": "FACT-TEST-0033",
+      "claim": "Synthetic reviewed-but-not-verified record with a concept/module that never appears on any verified record, used only to prove reviewed-only vocabulary can never leak into the dynamic tool-schema selector list.",
+      "classification": "documented_fact",
+      "status": "reviewed",
+      "concepts": ["vocab.reviewed.only.concept"],
+      "modules": ["vocab.reviewed.only.module"]
+    }
+  ]
+}
