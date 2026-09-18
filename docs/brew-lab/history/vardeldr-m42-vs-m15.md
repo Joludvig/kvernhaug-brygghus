@@ -43,11 +43,15 @@ The measured values and the correction estimates are kept separate; the correcti
 - M15 ultimately stopped substantially higher than M42 in this batch.
 - Both split arms were set to approximately **2 °C cold crash on 2026-07-24**; 2026-07-25 was described as day 2 of that cold-crash period.
 
-## Sensory observation
-- **M42 was preferred** over M15 in this batch.
+## Sensory observations
+- On **2026-08-01**, the brewer tasted the M42 arm and was not yet sure what to make of it, so chose to **let it age** rather than draw an immediate conclusion.
+- On **2026-08-08**, M42 was described as smelling **right**, dark and powerful; taste was somewhat **sweet and round**, possibly with a **sweet-liquorice** association, with **no obvious alcohol taste**. CO₂ was observed to dissipate quickly.
+- In the later direct comparison/reconstruction, **M42 was clearly preferred** over M15 for this particular strong Varðeldr test.
+- No equally detailed direct-user sensory description for the M15 arm is currently recovered; do not invent one.
 
-## Interpretation
+## Interpretation / decision
 - The result increased confidence in M42 for this specific strong dark-beer context and reduced confidence in M15 as a solo choice under the same conditions.
+- The brewer later treated **M42 as the reference for further Varðeldr development** and did not choose M15 for this kind of strong beer.
 
 ## Guard
 Do **not** convert this into a universal “M42 is better than M15” rule. It is one Kvernhaug split batch.
