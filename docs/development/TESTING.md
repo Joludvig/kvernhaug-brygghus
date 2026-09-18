@@ -10,7 +10,9 @@ py -3 -m unittest discover -s tests -b
 
 `-b`/`--buffer` demper stdout/stderr fra hver test (inkl. print()-støy fra enkelte scraper-moduler i `modules/`) for tester som består — output for feilende tester vises fortsatt i sin helhet, uendret. Ingen testlogikk endres av flagget.
 
-Ved siste kjente fulle kjøring (jf. `docs/PROJECT_STATUS_JULI_2026.md`, punkt-i-tid — verifiser alltid faktisk antall ved behov fremfor å stole på et gammelt tall): 581 tester, 0 skipped/errors/failures, fordelt på ~50 testfiler i `tests/`.
+Sist verifisert (issue #99, 2026-09-06, `python3 -m unittest discover -s tests -b` mot daværende master): **2118 tester, 0 failures, 0 errors, 53 skipped**, fordelt på 116 testfiler i `tests/`. `581` (`docs/PROJECT_STATUS_JULI_2026.md`) og `859` (august 2026-snapshotene under `docs/snapshots/`) er tidligere punkt-i-tid-tall, ikke gjeldende — som med all status i denne filen: verifiser alltid faktisk antall ved behov fremfor å stole på et gammelt tall.
+
+To testfiler (`test_deploy_web_guard.py`, `test_deploy_web_verify_retry.py` — til sammen 3 testmetoder) starter en ekte `pwsh`-prosess og er ikke skip-guardet: de kjørte og besto i denne verifiseringen (pwsh + git tilgjengelig i PATH), men vil telle som **errors** (ikke skipped/failed) på en maskin uten en fungerende `pwsh` i PATH — f.eks. en Windows-maskin med kun Windows PowerShell 5.1 og uten PowerShell 7/Core installert. Et slikt miljøs faktiske feilantall er derfor maskinavhengig og skal ikke antas likt tallet over.
 
 ## Full suite vs. avgrenset kjøring
 

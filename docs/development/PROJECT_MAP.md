@@ -2,7 +2,7 @@
 
 *Del av KBDP. Se [../../CLAUDE.md](../../CLAUDE.md) for oversikt over hele dokumentsystemet.*
 
-Formålet med dette dokumentet er at en ny økt raskt skal forstå **hvor ting bor** og **hvorfor**, uten å måtte lese hele kodebasen. For produktnivå (hva appen *kan*) og status, se `docs/ROADMAP.md` og `docs/PROJECT_STATUS_JULI_2026.md` (eller nyeste status-dokument — status-dokumenter er punkt-i-tid og erstattes, ikke overskrives).
+Formålet med dette dokumentet er at en ny økt raskt skal forstå **hvor ting bor** og **hvorfor**, uten å måtte lese hele kodebasen. For produktnivå (hva appen *kan*) og status, se `docs/ROADMAP.md` (historisk «Ferdig»-status; gjeldende nær-tids prioritering er GitHub issue #101, «ROADMAP V2.1 — Stabilization & Prove-It»; issue #78 forblir bredere/nordstjerne-kontekst) og nyeste `docs/PROJECT_STATUS_*.md`-dokument (status-dokumenter er punkt-i-tid og erstattes, ikke overskrives).
 
 ---
 
