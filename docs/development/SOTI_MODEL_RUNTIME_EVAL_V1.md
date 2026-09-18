@@ -6,13 +6,23 @@ V2-5B). It covers only which real local model/runtime combination should
 power Sóti's `ModelProvider` (see `docs/development/SOTI_MVP.md`) — it
 changes no Core/App/Web/Bryggeskole/Brew Lab behavior.*
 
-*Revision note (PR #312 Chief review): the first version of this report
-selected `qwen2.5:7b-instruct-q4_K_M` as DEFAULT despite a real
+*Revision note (PR #312 Chief review, round 1): the first version of this
+report selected `qwen2.5:7b-instruct-q4_K_M` as DEFAULT despite a real
 end-to-end tool-argument-extraction failure in the exact `SotiRuntime`
 boundary. The Chief review correctly rejected that selection and required
 (a) a durable, per-call tool telemetry record instead of an easily-lost
 boolean, and (b) a rebaseline against current-generation local models
 before any final DEFAULT/FALLBACK choice. Both are done below; this
+
+*Revision note (PR #312 Chief review, round 2): the round-1 revision
+evaluated `qwen3.5:9b` with `think=None` (omitted), which Ollama's
+current Qwen3.5 parser defaults to **thinking ON**. That made its
+disqualifying multi-turn result non-equivalent to the non-thinking
+Llama/Ministral profiles it was compared against. Stage 2.6 below is a
+bounded rerun with explicit `--no-think`, added per that review; it
+materially changes the Qwen3.5 findings (though not the final
+DEFAULT/FALLBACK) and supersedes the round-1 Qwen3.5 characterization
+wherever the two disagree.
 supersedes every number and conclusion in the first version.*
 
 ## Baseline
@@ -223,6 +233,90 @@ correct behavior doesn't improve. This confirms 8K as the correct
 practical operating context for this hardware, not the models'
 advertised 128K–256K maximums.
 
+## Stage 2.6 — Qwen3.5 9B explicit no-think correction (Chief review round 2)
+
+Every earlier Qwen3.5 9B result above (Stage 2, Selection) was measured
+with `think=None` — the harness omits the `think` field entirely unless
+`--think`/`--no-think` is passed. Ollama's current Qwen3.5 parser
+defaults **thinking ON** when the field is omitted, which the Chief's
+second PR #312 review correctly flagged: this made Qwen3.5's
+disqualifying result non-equivalent to the explicitly-non-thinking
+Llama/Ministral profiles it was being compared against. Gemma4 12B did
+**not** need a matching rerun — its Ollama parser does not enable
+thinking when `think` is omitted, so its earlier result was already a
+no-think baseline.
+
+**Bounded rerun:** `qwen3.5:9b`, `num_ctx=8192`, explicit `--no-think`,
+`temperature`/`seed` unchanged, 2 repetitions, cases `json` `verktoy`
+`multiturn` (the cases affected by the original defect; `sprak_og_resonnement`
+was not rerun since thinking mode doesn't change identity/language
+adherence and the round-1 result there was already fine).
+
+**Result — the disqualifying defects are gone:**
+
+| Case | Round-1 (`think` omitted → thinking ON) | Round-2 (`--no-think`) |
+|---|---|---|
+| `json_oppskrift_shape` | Clean JSON, no fences | Still clean JSON, no fences |
+| `verktoy_gyldig_oppslag` | Correct (`sok: 'cascade'`) | Still correct |
+| `verktoy_ugyldig_forventning` | Correctly declines, no tool call | Still correctly declines |
+| Multi-turn, turn 1 | **Wrong id** (`'bohemian_pilsner_floor-malt'`, then retries `'Bohemian'`), exhausts `MAKS_VERKTOY_RUNDER`, returns the generic round-cap fallback with **no real answer** | **No tool call at all** — asks a clarifying question ("'Bohemian Pilsner Floor' høres ut som et veldig spesifikt malt, kanskje fra en bryggeri...?") despite the user already having named the malt in that same turn |
+| Multi-turn, turn 2 | Same round-cap failure as turn 1 | **Correct id** (`sok: 'bohemian_pilsner_floor'`), succeeds, answers using the real retrieved data (style recommendations match the actual Core record) |
+| Multi-turn, turn 3 | N/A (turn 1/2 already failed) | No tool call; reasonably asks which yeast is being used rather than guessing |
+
+No wrong tool-lookup id was produced in either no-think run, and neither
+run hit the round-cap-without-an-answer failure — both real, reproducible
+defects from round 1 are resolved. This is a genuine improvement, not a
+wash: **do not** describe Qwen3.5 9B as "still failing" the
+selection-critical test — the failure mode the Chief was worried about
+(wrong tool arguments) did not recur.
+
+Qwen3.5 no-think does, however, still behave differently from the two
+selected finalists on turn 1: instead of immediately looking up the malt
+the user just named (what Llama 3.1 8B and Ministral 3 8B both do), it
+asks a clarifying question first, deferring the actual grounded lookup by
+one turn. This is not a correctness defect — it never invents or
+mis-grounds anything — but it is a real, measured difference in
+immediate usefulness on Sóti's core conversational-grounding path.
+
+**Throughput/resource for this profile:** `ollama ps` confirms
+**100% GPU**, 5.6 GB resident, at `num_ctx=8192` — fully GPU-resident,
+same as the round-1 measurement. Two effects worth recording precisely
+because they're easy to misread:
+
+| Metric | Round 1 (thinking ON, implicit) | Round 2 (`--no-think`) |
+|---|---|---|
+| `eval_count` (json case) | 1788 tokens | **34 tokens** |
+| tok/s (json case) | ~65.9 | ~36–39 |
+| `wall_clock_s` (`verktoy_gyldig_oppslag`) | 2.39 s | 1.24 s |
+| `wall_clock_s` (`verktoy_ugyldig_forventning`) | 5.93 s | 3.49 s |
+
+The raw tokens/s figure is **lower** with thinking off, which looks
+counter-intuitive until the token counts are read alongside it: with
+thinking implicit-on, Ollama's `eval_count` includes ~1700+ hidden
+reasoning tokens for a JSON answer that is itself ~30 tokens — thinking
+mode was making the *decode rate* look faster while making the *actual
+response* dramatically longer and slower to receive in full. Total
+wall-clock latency for a complete answer is **roughly half** with
+thinking off, despite the lower raw tok/s figure. For a chat assistant,
+wall-clock-to-complete-answer is the metric that matters to the user, not
+raw decode rate on a much longer hidden response — a methodological note
+worth keeping for any future comparison involving a thinking-capable
+model.
+
+**Comparison against Llama 3.1 8B at the same 8K profile** (both now
+correctness-clean): Llama 3.1 8B remains **faster in both measures**
+(~78–81 tok/s vs. ~36–39 tok/s decode rate; ~0.36–0.79 s vs. ~1.24–3.49 s
+wall-clock on the matching verktoy cases — roughly 3.5–4.4× faster
+end-to-end) and is **immediately responsive** on turn 1 of the multi-turn
+case rather than deferring to a clarifying question. Per the Chief's
+review, Qwen3.5 9B no-think is promoted into the finalist comparison and
+evaluated on this evidence — but it does not outperform Llama 3.1 8B on
+either speed or immediate usefulness, so a further 16K tuning pass for
+Qwen3.5 was not run (Llama 3.1 8B already wins decisively at 8K; nothing
+in the 8K comparison suggests 16K would change that). **DEFAULT/FALLBACK
+are unchanged by this correction** — see Selection below, which now
+reflects the corrected Qwen3.5 finding.
+
 ## Selection
 
 - **DEFAULT: `llama3.1:8b-instruct-q4_K_M` on Ollama 0.34.1, `num_ctx=8192`.**
@@ -261,12 +355,20 @@ advertised 128K–256K maximums.
   context-sensitivity in tool-argument extraction (correct at 4096,
   wrong at 8192) — an unreliable candidate on two independent axes, plus
   the ~8× speed penalty from partial CPU offload on this 8 GB card.
-- **Not selected: `qwen3.5:9b`.** Fastest of the current-gen batch
-  (~66 tok/s) with clean language/JSON output, but **regresses** on the
-  single most safety-relevant axis versus even the historical Qwen2.5 7B:
-  it not only extracts the wrong tool argument but repeatedly exhausts
-  the round-call budget without ever answering the user on 2 of 3
-  multi-turn turns.
+- **Not selected: `qwen3.5:9b`.** *(Corrected in Stage 2.6 — see there
+  for full evidence.)* Its round-1 result (wrong tool argument,
+  repeated round-cap failures) was measured with `think` omitted, which
+  Ollama defaults to thinking-ON for this model; a bounded `--no-think`
+  rerun resolved both defects — no wrong ids, no round-cap failures, and
+  clean JSON throughout. It was promoted into the finalist comparison on
+  that corrected evidence, but does not beat Llama 3.1 8B at the same 8K,
+  no-think profile: it is ~2× slower in decode rate and ~3.5–4.4× slower
+  in end-to-end wall-clock latency on matching cases, and on turn 1 of
+  the multi-turn case it asks a clarifying question instead of
+  immediately looking up the malt the user already named (Llama 3.1 8B
+  and Ministral 3 8B both act immediately). Not disqualified by a
+  correctness defect this time — genuinely out-performed on speed and
+  immediate usefulness by the selected DEFAULT.
 - **Not selected: `gemma4:12b`.** The single worst tool-use behavior
   observed in this evaluation: it calls the tool twice with **identical,
   correct** arguments — meaning the underlying lookup succeeds both times
@@ -318,9 +420,11 @@ advertised 128K–256K maximums.
 - Thinking-mode on/off for Llama 3.1 8B or Ministral 3 8B — neither
   exposes a thinking capability in this Ollama build, so this axis of the
   Chief's requested tuning pass could not be exercised for the selected
-  finalists (it was available for the non-selected `qwen3.5:9b` and
-  `gemma4:12b`, but running it on already-disqualified candidates would
-  not have changed the selection).
+  finalists. It *was* exercised for `qwen3.5:9b` (Stage 2.6, explicit
+  `--no-think` vs. the implicit-thinking-on round-1 measurement) and
+  `gemma4:12b`'s round-1 result was already confirmed to be a no-think
+  baseline (its Ollama parser doesn't default thinking on) — so
+  `gemma4:12b` did not need a rerun.
 - Long-running (many hours) stability — only 2 short repeated runs per
   candidate per configuration were performed, per the issue's "enough to
   distinguish obvious instability from one-off noise, not a research
@@ -328,11 +432,22 @@ advertised 128K–256K maximums.
 - Quality on real (non-synthetic) owner brew data — intentionally not
   tested, per the issue's guardrail against using private brew data for
   this benchmark.
-- Direct `ollama ps` processor-split capture for Qwen3.5 9B, Ministral 3
-  8B (at 8K), and Gemma4 12B — inferred from throughput rather than
-  directly measured for some rows in the Stage 2 performance table (noted
-  inline); Llama 3.1 8B's split was directly captured at both 8K
-  (100% GPU) and 16K (13%/87% CPU/GPU).
+- Direct `ollama ps` processor-split capture for Ministral 3 8B (at 8K)
+  and Gemma4 12B — inferred from throughput rather than directly measured
+  for these rows in the Stage 2 performance table (noted inline); Llama
+  3.1 8B's split was directly captured at both 8K (100% GPU) and 16K
+  (13%/87% CPU/GPU), and Qwen3.5 9B's was directly captured at 8K
+  no-think (100% GPU, 5.6 GB resident, Stage 2.6).
+- Whether Qwen3.5 9B's turn-1 clarifying-question behavior (Stage 2.6) is
+  specific to this exact phrasing (a malt id embedded inside a longer
+  sentence with a Norwegian "-malt" suffix) or a broader pattern — not
+  further isolated, since it didn't change the DEFAULT/FALLBACK outcome
+  either way.
+- A 16K-context check for Qwen3.5 9B no-think — not run, since it already
+  loses decisively to Llama 3.1 8B at 8K on both speed and immediate
+  usefulness, and the Stage 2.5 finding (16K costs ~half the throughput
+  for no quality gain) makes it very unlikely a 16K run would reverse
+  that.
 
 ## Reproducing this evaluation
 
@@ -351,6 +466,11 @@ py -3 scripts/soti_eval/run_eval.py \
 py -3 scripts/soti_eval/run_eval.py \
   --models llama3.1:8b-instruct-q4_K_M ministral-3:8b \
   --out <path.json> --num-ctx 16384 --runs-per-case 2
+
+# Qwen3.5 9B explicit no-think correction (Chief review round 2):
+py -3 scripts/soti_eval/run_eval.py \
+  --models qwen3.5:9b \
+  --out <path.json> --num-ctx 8192 --no-think --cases json verktoy multiturn --runs-per-case 2
 
 py -3 -m unittest tests.test_soti_eval_harness tests.test_soti_runtime
 ```
