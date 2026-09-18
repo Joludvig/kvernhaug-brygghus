@@ -1,14 +1,19 @@
 """
-Sóti -- lokal CLI-chat (issue #315, V2-5B). Minste praktiske
-eier-vendte inngangspunkt: starter én `SotiSession`, kobler den til den
-ekte `SotiRuntime` via en `OllamaProvider` mot en lokal Ollama-server, og
-tar imot gjentatte brukermeldinger til eksplisitt avslutning. Sesjonen
-lever kun så lenge denne prosessen kjører -- ingen persistens, ingen
-Web/App-overflate, ingen skylagring.
+Sóti -- lokal CLI-chat (issue #315, V2-5B; kombinert skill V2-5C1, issue
+#317). Minste praktiske eier-vendte inngangspunkt: starter én
+`SotiSession`, kobler den til den ekte `SotiRuntime` via en
+`OllamaProvider` mot en lokal Ollama-server, og tar imot gjentatte
+brukermeldinger til eksplisitt avslutning. Sesjonen lever kun så lenge
+denne prosessen kjører -- ingen persistens, ingen Web/App-overflate,
+ingen skylagring.
 
 Modell/profil er overstyrbar via kommandolinjeflagg, ikke hardkodet --
 `SotiRuntime` og `soti.tools`/`soti.skills` er identiske uansett hvilken
-`ModelProvider` som injiseres her.
+`ModelProvider` som injiseres her. CLI-en kobler `SotiRuntime` til
+`soti.skills.SOTI_KOMBINERT_SKILL` (Core-ingrediensoppslag pluss det
+verifiserte Course Fact Registry-oppslaget) -- `SotiRuntime` sin egen
+standardverdi (`BRYGGE_OPPSLAG_SKILL`) er uendret for andre
+brukssteder/tester som ikke oppgir en skill eksplisitt.
 
 Kjøring:
     py -3 -m soti.cli
@@ -17,6 +22,7 @@ Kjøring:
 import argparse
 import sys
 
+from bryggeskole.course_fact_registry import CourseFactRegistryError
 from soti.ollama_provider import (
     STANDARD_BASE_URL,
     STANDARD_NUM_CTX,
@@ -26,6 +32,7 @@ from soti.ollama_provider import (
 )
 from soti.runtime import SotiRuntime
 from soti.session import SotiSession
+from soti.skills import SOTI_KOMBINERT_SKILL
 
 # Valgt V2-5A DEFAULT-profil (issue #311/PR #312) -- overstyrbar via
 # --model for FALLBACK (ministral-3:8b) eller annet, uten kodeendring.
@@ -76,6 +83,12 @@ def kjor_chat(runtime, session, inn=input, ut=print):
             # fail-visible i stedet for en rå traceback, se issue #315 §4.
             ut(f"[Sóti -- ukjent verktøy forespurt av modellen]: {e}")
             continue
+        except CourseFactRegistryError as e:
+            # Course Fact Registry-filen feilet validering (issue #317 §4)
+            # -- fail-visible i stedet for et stille fall tilbake til rå
+            # data eller et oppdiktet svar; samtalen kan fortsette.
+            ut(f"[Sóti -- fagfakta-registeret er ugyldig]: {e}")
+            continue
 
         ut(f"Sóti: {svar}")
 
@@ -99,7 +112,7 @@ def main(argv=None):
             print(f"[Sóti -- kan ikke starte]: {e}", file=sys.stderr)
             return 1
 
-    runtime = SotiRuntime(provider)
+    runtime = SotiRuntime(provider, skill=SOTI_KOMBINERT_SKILL)
     session = SotiSession(session_id="lokal-cli")
     kjor_chat(runtime, session)
     return 0
