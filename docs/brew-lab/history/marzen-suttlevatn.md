@@ -36,6 +36,9 @@ Recovered user-authored chat history records:
 ## Interpretation
 - This was the very low-gravity/dry **TinyBeer / Suttlevatn** branch from the Märzen grain, not a rename of the historical main Märzen.
 
+## App-local search result
+No App recipe/log/_kbhbrew/backup record under TinyBeer/Suttlevatn aliases was found in the read-only local archaeology pass. This record therefore remains grounded in user-authored chat/direct brewer clarification rather than App history.
+
 ## Guard
 Do not merge this record with:
 - historical main **Märzen** (Diamond), or
