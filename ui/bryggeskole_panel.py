@@ -23,6 +23,15 @@ Kun gjæringstemperatur-modulen er aktiv i denne skiven -- alle andre
 prosess-stadier vises kun til orientering (aldri klikkbare/leksjoner),
 per issue #327 sitt "no new course claims / no second module".
 
+Oppsummeringen viser to atskilte ting (Chief human-usability review,
+PR #328): (1) cumulative mastery over tid via den uendrede
+mastery_label()-motoren, og (2) et eget, ikke-numerisk signal for DENNE
+runden (_konsept_runde_status()), utledet fra answered_questions[*]
+.last_correct for akkurat fullført runde. Uten dette skillet viste en
+"Prøv igjen"-runde besvart helt feil nøyaktig samme cumulative label
+("På god vei") som en perfekt runde -- misvisende for en menneskelig
+lærer, selv om selve mastery-motoren fungerte som tiltenkt.
+
 DEMO_MODE-grensen (avgjørelsen issue #327 selv ber om å bli dokumentert):
 en PANEL-NIVÅ vakt her i stedet for en ny modules/bryggeskole_state.py-
 adapter. ui/demo_state.py er dokumentert som avgrenset til fire
@@ -311,16 +320,65 @@ def _render_sporsmal(pilot, sprak):
         )
 
 
+def _konsept_runde_status(tilstand, pilot, konsept_id):
+    """Utleder DENNE rundens signal for et konsept -- aldri den persisterte
+    cumulative masteryen -- fra korrektheten på spørsmålene i akkurat
+    fullført runde som dekker konseptet (Chief-review, PR #328: cumulative
+    mastery og gjeldende runde ble tidligere vist med samme label, slik at
+    en lærer som svarte alt feil på en «Prøv igjen»-runde så nøyaktig samme
+    «På god vei» som ved en perfekt runde).
+
+    `tilstand["answered_questions"][qid]["last_correct"]` er alltid det
+    SISTE forsøket på det spørsmålet (apply_answer() overskriver den ved
+    hvert svar) -- siden oppsummeringsfasen kun nås etter at alle pilotens
+    spørsmål er besvart i inneværende runde (se _neste_sporsmal()), er
+    dette derfor nøyaktig denne rundens resultat, uten å måtte holde noen
+    egen UI-lokal runde-logg.
+
+    Returnerer True (alt riktig denne runden), False (minst ett feil), eller
+    None (spørsmålet mangler i answered_questions -- bør ikke inntreffe i
+    normal flyt, men behandles defensivt som «intet signal ennå»)."""
+    sporsmal_for_konsept = [s for s in pilot["questions"] if konsept_id in s["concepts"]]
+    besvarte = tilstand.get("answered_questions") or {}
+    resultater = []
+    for sporsmal in sporsmal_for_konsept:
+        oppforing = besvarte.get(sporsmal["id"])
+        if oppforing is None:
+            return None
+        resultater.append(oppforing["last_correct"])
+    if not resultater:
+        return None
+    return all(resultater)
+
+
 def _render_oppsummering(pilot, sprak):
     st.write("---")
-    st.subheader(t("bryggeskole.oppsummering.heading"))
     tilstand = _les_tilstand()
     konsepter = sorted({konsept for sporsmal in pilot["questions"] for konsept in sporsmal["concepts"]})
+
+    # Cumulative fremgang (eksisterende mastery_label(), uendret motor) --
+    # men med overskrift/forklaring som gjør eksplisitt at dette IKKE er
+    # denne rundens resultat (Chief review, PR #328).
+    st.subheader(t("bryggeskole.oppsummering.heading"))
+    st.caption(t("bryggeskole.oppsummering.heading_forklaring"))
     for konsept_id in konsepter:
         konsept_tilstand = tilstand["concepts"].get(konsept_id)
         if konsept_tilstand is None:
             continue
         st.markdown(f"- **{_konsept_label(konsept_id, sprak)}:** {mastery_label(konsept_tilstand, sprak)}")
+
+    # Denne rundens signal -- ikke-numerisk, endrer seg synlig ved feil
+    # svar selv når cumulative mastery over ikke gjør det.
+    st.subheader(t("bryggeskole.oppsummering.denne_runden_heading"))
+    for konsept_id in konsepter:
+        runde_status = _konsept_runde_status(tilstand, pilot, konsept_id)
+        if runde_status is None:
+            continue
+        runde_nokkel = (
+            "bryggeskole.oppsummering.runde_ok" if runde_status
+            else "bryggeskole.oppsummering.runde_reprise"
+        )
+        st.markdown(f"- **{_konsept_label(konsept_id, sprak)}:** {t(runde_nokkel)}")
 
     st.button(
         t("bryggeskole.oppsummering.prov_igjen"), key="bs_prov_igjen_btn",

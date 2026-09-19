@@ -309,6 +309,57 @@ class TestIngenRaaTilstandVisesLaereren(_MedIsolertTilstand):
         )
 
 
+# ─── Chief human-usability review (PR #328): cumulative mastery og denne
+# rundens signal må ALDRI vise samme label -- owner-akseptansesekvensen
+# reprodusert eksakt: alt riktig runde 1, «Prøv igjen», alt feil runde 2 ──
+
+class TestOppsummeringSkillerCumulativeFraDenneRunden(_MedIsolertTilstand):
+    def test_alt_feil_runde_2_endrer_runde_signalet_men_ikke_cumulative_labels(self):
+        at = self._ny_apptest()
+        self._velg_miljo_start_modul_og_sporsmal(at)
+
+        # Runde 1 -- alt riktig.
+        self._fullfor_alle_sporsmal(at, 1, _RIKTIG_SVAR)
+        cumulative_1 = " ".join(
+            m.value for m in at.markdown if "Gjæringstemperatur" in m.value or "Smak og aroma" in m.value
+        )
+        self.assertIn("På god vei", cumulative_1)
+        alle_1 = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Riktig denne runden", alle_1)
+        self.assertNotIn("Bør øves på igjen", alle_1)
+
+        # «Prøv igjen» -- cumulative mastery skal IKKE nullstilles.
+        _knapp(at, "bs_prov_igjen_btn").click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved Prøv igjen: {at.exception}")
+
+        # Runde 2 -- alt feil (owner-akseptansesekvensen fra Chief-reviewen).
+        self._fullfor_alle_sporsmal(at, 2, _FEIL_SVAR)
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak i runde 2: {at.exception}")
+
+        tilstand = read_mastery_state()
+        cumulative_mastery_uendret = tilstand["concepts"]["fermentation.temperature"]["mastery"]
+        self.assertGreater(
+            cumulative_mastery_uendret, 0.0,
+            "Cumulative mastery skal IKKE nullstilles av en runde med feil svar.",
+        )
+
+        alle_2 = " ".join(_alle_synlige_tekster(at))
+        # Cumulative label(er) kan forbli uendret -- det er nettopp poenget
+        # med at mastery-motoren aldri senker mastery ved feil svar.
+        self.assertIn("På god vei", alle_2)
+        # Men DENNE rundens signal skal tydelig vise at runden gikk galt,
+        # for begge konsepter spørsmålene dekker -- aldri fortsatt "riktig".
+        self.assertIn("Bør øves på igjen", alle_2)
+        self.assertNotIn("Riktig denne runden", alle_2)
+
+        for ord in _SKJULTE_ORD:
+            self.assertNotIn(ord.lower(), alle_2.lower(), f"Fant forbudt internt ord {ord!r} i oppsummeringen.")
+        self.assertIsNone(
+            _RAAT_TALL_MONSTER.search(alle_2.lower()),
+            "Fant et rått 0.xx-tall i oppsummeringen etter runde 2.",
+        )
+
+
 # ─── 8: NO/EN via appens eksisterende språktilstand ────────────────────────
 
 class TestSprak(_MedIsolertTilstand):
