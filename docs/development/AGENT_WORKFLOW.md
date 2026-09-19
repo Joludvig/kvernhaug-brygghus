@@ -1890,6 +1890,96 @@ between `cr_context` and `cr_branch`, is scoped to
 (never `.github/scripts/changes_requested_context.py checkout-verify`
 directly) and fails closed when the staged file is missing/empty.
 
+## Runtime handoff is branch-independent (V1.9.2, issue #333)
+
+**The bug this fixes.** Issue #331 (above) closed the checkout-verifier
+trust-root gap, but left two adjacent old-branch compatibility gaps, both
+proven on PR #328's exact pre-#329 head
+(`6699b63b039b7cefc086fceb65b01eb48adc3542`):
+
+1. `.agent_bridge_run/chief_review.md` (issue #329) is written while the
+   working tree is still on the current, trusted master checkout, but the
+   `cr_branch` step (above) then switches that same tree to the old
+   feature branch's exact reviewed head. Current master ignores
+   `.agent_bridge_run/` via the tracked `.gitignore` — but a branch old
+   enough to predate that entry does not, so after the switch the runtime
+   handoff is no longer protected by the checked-out branch's own ignore
+   rules at all. The prompt said it was git-ignored and must never be
+   committed, but nothing actually proved that on an old branch.
+2. The prompt pointed Claude at `docs/development/AGENT_WORKFLOW.md`
+   unconditionally. On the current branch that is the current, trusted
+   contract — but after the same old-branch checkout, that path instead
+   resolves to whatever `docs/development/AGENT_WORKFLOW.md` read as
+   *on that old branch*, which can predate sections this very prompt
+   depends on (the #329 handoff contract, the canonical #152 manual-Chief
+   policy). An old branch could therefore silently replace the contract
+   Claude is told to obey with stale repository history.
+
+**The fix, two small additions, both run immediately after the "Checkout"
+step and strictly before any `.agent_bridge_run/` file is written or any
+branch is switched — unconditionally, for both trigger labels (harmless
+common runtime setup: `status:ready` never revisits an old branch, so
+this is a no-op in effect for that path, just proven rather than
+assumed):**
+
+1. **`runtime_ignore` step** — `.github/scripts/runtime_ignore.py install`
+   idempotently adds an anchored `/.agent_bridge_run/` line to **local Git
+   metadata** (`.git/info/exclude`), never the tracked `.gitignore`.
+   `.git/info/exclude` is untracked, per-clone state that `git checkout`/
+   `git switch` never touches, regardless of which branch is checked out
+   afterward — so the protection no longer depends on what any given
+   branch's own `.gitignore` happens to contain. The step then *proves*
+   the protection with `git check-ignore` against a probe path under
+   `.agent_bridge_run/`; a missing/failed proof fails closed (`exit 1`)
+   before Claude ever runs, the same exit-code contract every other gate
+   on this path already uses. Pure decision logic
+   (`beregn_ny_exclude_innhold`, the idempotent line-insertion) is
+   separated from the git proof (`_bevis_ignorert`) so the former is
+   trivially unit-testable without touching git at all.
+2. **`contract_stage` step** — copies the *current*, trusted
+   `docs/development/AGENT_WORKFLOW.md` to
+   `.agent_bridge_run/AGENT_WORKFLOW.md`, the same trust-root pattern
+   `cr_verifier_stage` (issue #331) already uses for the checkout
+   verifier: stage from the checkout that is trusted *now*, before
+   anything switches it. The "Run Claude Code" prompt is updated
+   throughout to point at this staged copy as the one governing
+   contract — never at `docs/development/AGENT_WORKFLOW.md` read from
+   whatever branch happens to be checked out — and explicitly tells
+   Claude that branch's own copy, if present, is historical/project
+   context only, never the governing Bridge contract.
+
+**Preserved unchanged.** Every #329/#331 trust property: exact PR
+identity, exact head SHA, fresh Draft proof, the formal Chief
+`CHANGES_REQUESTED` review gate, the staged checkout-verifier's own path
+and ordering, deterministic existing-branch checkout, branch-scoped push,
+and fail-closed behavior throughout. Neither new step touches
+`--allowedTools` — both run as ordinary workflow job steps (`cp`/a plain
+Python script), exactly like `cr_verifier_stage`'s `cp`, never through
+Claude's Bash allowlist — so no permission is broadened. `status:ready`
+remains behaviorally unchanged in every way that matters: it gains the
+same two harmless steps, but neither one changes what that path does
+(there is no old branch to protect against or replace a contract from —
+`status:ready` creates its branch fresh from this same trusted
+`origin/master`, so the staged contract copy is byte-identical to what
+it would have read directly). Issue #327 / PR #328 are not touched or
+retriggered by this fix.
+
+Regression coverage:
+[`tests/test_agent_bridge_runtime_ignore.py`](../../tests/test_agent_bridge_runtime_ignore.py)
+— pure idempotent-insertion unit tests; a real temporary-git regression
+(a fixture repo/branch with no `.agent_bridge_run/` entry in any tracked
+`.gitignore`, `.git/info/exclude` installed, runtime files created,
+branch switched, a broad `git add -A` run, and the runtime files proven
+to stay unstaged, plus proof the tracked `.gitignore` is never touched
+and the install is idempotent across repeated runs); fail-closed proof
+when the git proof cannot be established; and a static workflow-contract
+suite proving both new steps exist, run in the required order (before
+`cr_context`/`cr_branch`/"Run Claude Code"), are **not** scoped to
+`status:changes-requested`, introduce no `--allowedTools` entry and no
+`git merge`/`gh pr merge`/push/checkout/switch surface, and that the
+prompt points at the staged contract path rather than the unqualified
+`docs/development/AGENT_WORKFLOW.md` reference this fix removes.
+
 ## Round 1 also uses the Draft -> Ready lifecycle (V1, issue #62)
 
 **The problem this fixes:** issue #44 (above) gave `status:changes-requested`
