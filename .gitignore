@@ -59,6 +59,15 @@ data/*.json.backup_*
 *.log
 c:*
 
+# Agent Bridge runtime-handoff (issue #329) -- .github/scripts/
+# changes_requested_context.py skriver den VERIFISERTE Chief-reviewen hit på
+# en status:changes-requested-runde, slik at prompten kan peke Claude på en
+# filsti i stedet for å interpolere menneskeskrevet fritekst gjennom
+# shell-quoting / $GITHUB_OUTPUT / ${{ }}. Ignorert med vilje: dette er
+# per-kjøring runner-state som ALDRI skal kunne havne i en commit, heller
+# ikke via et bredt `git add -A`.
+.agent_bridge_run/
+
 # Store lokale originalfiler (ikke nødvendig for andre brukere)
 Master V1.png
 assets/branding/master_v1_crop.png
