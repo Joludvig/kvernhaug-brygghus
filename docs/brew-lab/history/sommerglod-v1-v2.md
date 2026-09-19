@@ -67,9 +67,11 @@ The App recipe plan records **25.0 L**, W-34/70 and a 7% Rauchmalz grist consist
 - Approximately **26 L** went to the fermenter.
 - Refractometer OG: **1.052**.
 - One whole Whirlfloc tablet was added at about **15 min** remaining, although roughly half a tablet had been planned.
-- Kegged: **2026-07-25**.
-- W-34/70 slurry harvested: **2026-07-25**.
-- Keg/batch recorded as empty: **2026-08-27**.
+- Cold crash was set to about **2 °C** on **2026-07-24**; on **2026-07-25** the beer had reached that temperature.
+- On **2026-07-27** it was still in the FermZilla at about **1.5 °C** and explicitly **not transferred to keg yet**.
+- By **2026-08-01**, the brewer reported the beer was in a **19 L keg**.
+- By **2026-08-27**, harvested **W-34/70 from Sommerglød** was available for reuse.
+- The exact keg-transfer date and exact slurry-harvest date are **not currently recovered from direct user-authored evidence**; do not infer them from the dates above.
 
 ### Sensory observations
 - Later discussion described the smoke in Sommerglød v2 as still too subtle for the stronger Kvernhaug smoke signature desired in darker beers.
