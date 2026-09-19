@@ -4,7 +4,7 @@ Kvernhaug Bryggeskole -- første integrerte lærings-UI (issue #327,
 BRYGGESKOLE V2-3C). Renderes som sin egen topplinje-fane i app.py, ikke
 gjemt under Verktøy.
 
-Ett Bryggeskole -> to visuelle miljøer (Hjemmebrygger / Bryggeri) -> delt
+Én Bryggeskole -> to visuelle miljøer (Hjemmebrygger / Bryggeri) -> delt
 verifisert kunnskap + delt mastery. De to miljøene er bevisst kun
 navigasjon/presentasjon: begge går inn i NØYAKTIG samme
 gjæringstemperatur-pilot og oppdaterer NØYAKTIG samme mastery-tilstand --
@@ -172,6 +172,12 @@ def _start_sporsmal_runde():
 
 def _sjekk_svar(sporsmal, sprak, widget_key, runde):
     valgt_id = st.session_state.get(widget_key)
+    if valgt_id is None:
+        # Forsvarslinje mot Chief-review-blokkeren (PR #328): knappen er
+        # disabled inntil et svar er valgt (se _render_sporsmal), men denne
+        # vaktlinjen sikrer at et uvalgt spørsmål ALDRI kan mutere persistert
+        # mastery selv om noe utenfor normal UI-flyt likevel utløser klikket.
+        return
     resultat = evaluate_answer(sporsmal, valgt_id, sprak)
     tilstand = _les_tilstand()
     nytt_tilstand = apply_answer(tilstand, sporsmal, resultat["correct"], now=_utc_now_iso())
@@ -280,15 +286,22 @@ def _render_sporsmal(pilot, sprak):
         t("bryggeskole.sporsmal.velg_svar"),
         options=[o["id"] for o in alternativer],
         format_func=lambda oid: next(o["text"] for o in alternativer if o["id"] == oid),
+        index=None,
         key=widget_key,
         label_visibility="collapsed",
         disabled=besvart,
     )
 
     if not besvart:
+        # Chief review (PR #328): en fersk spørsmål-radio må ALDRI ha et
+        # forhåndsvalgt alternativ (index=None over), og «Sjekk svar» skal
+        # være disabled inntil læreren faktisk har valgt ett -- ellers kan
+        # et ubesvart spørsmål stille mutere persistert mastery via
+        # Streamlits standard "velg første alternativ"-oppførsel.
         st.button(
             t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_r{runde}_q{idx}",
             width="stretch", on_click=_sjekk_svar, args=(sporsmal, sprak, widget_key, runde),
+            disabled=st.session_state.get(widget_key) is None,
         )
     else:
         (st.success if siste["correct"] else st.error)(siste["feedback"])

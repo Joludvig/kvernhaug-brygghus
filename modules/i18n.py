@@ -54,7 +54,7 @@ TEKSTER = {
         "tabs.verktoy": "🔧 Verktøy",
         "tabs.bryggeskole": "🎓 Bryggeskole",
         "bryggeskole.heading": "🎓 Kvernhaug Bryggeskole",
-        "bryggeskole.tagline": "Ett Bryggeskole, to miljøer — samme verifiserte kunnskap, samme fremgang.",
+        "bryggeskole.tagline": "Én Bryggeskole, to miljøer — samme verifiserte kunnskap, samme fremgang.",
         "bryggeskole.bytt_miljo": "🔁 Velg annet miljø",
         "bryggeskole.velg_miljo_heading": "Velg ditt miljø",
         "bryggeskole.miljo.hjemmebrygger": "🏠 Hjemmebrygger",

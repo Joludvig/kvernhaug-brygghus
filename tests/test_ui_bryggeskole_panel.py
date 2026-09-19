@@ -36,6 +36,7 @@ import unittest
 logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 from streamlit.testing.v1 import AppTest
+from streamlit.testing.v1.errors import AppTestError
 
 from bryggeskole.mastery_store import _STATE_DIR_ENV, read_mastery_state
 
@@ -226,6 +227,68 @@ class TestLaeringsflyt(_MedIsolertTilstand):
         self.assertEqual(
             andre_runde_tilstand["concepts"]["fermentation.temperature"]["attempts"], 2,
             "Attempts skal telle opp over runder -- persistens skal ALDRI nullstilles av «Prøv igjen».",
+        )
+
+
+# ─── Chief-review-blokker (PR #328): ingen forhåndsvalgt svar, og et
+# ubesvart spørsmål kan aldri mutere persistert mastery ────────────────────
+
+class TestFerskSporsmalIngenForhandsvalgOgSubmitVakt(_MedIsolertTilstand):
+    def test_fersk_sporsmal_har_ikke_forhandsvalgt_svar(self):
+        at = self._ny_apptest()
+        self._velg_miljo_start_modul_og_sporsmal(at)
+        radio = at.radio(key="bs_valg_r1_q0")
+        self.assertIsNone(
+            radio.value,
+            "Et ferskt spørsmål skal ALDRI ha et forhåndsvalgt svaralternativ.",
+        )
+
+    def test_sjekk_svar_knapp_er_disabled_uten_valgt_svar(self):
+        at = self._ny_apptest()
+        self._velg_miljo_start_modul_og_sporsmal(at)
+        self.assertTrue(
+            _knapp(at, "bs_svar_btn_r1_q0").disabled,
+            "«Sjekk svar» skal være disabled inntil et svar faktisk er valgt.",
+        )
+        at.radio(key="bs_valg_r1_q0").set_value(_RIKTIG_SVAR[0]).run()
+        self.assertFalse(
+            _knapp(at, "bs_svar_btn_r1_q0").disabled,
+            "«Sjekk svar» skal låses opp så snart et svar er valgt.",
+        )
+
+    def test_disabled_knapp_kan_ikke_klikkes_av_en_lasersimulert_bruker(self):
+        at = self._ny_apptest()
+        self._velg_miljo_start_modul_og_sporsmal(at)
+        # AppTest speiler her faktisk nettleseratferd: den nekter å simulere
+        # et klikk på en disabled widget ("A browser user cannot interact
+        # with a disabled widget") -- selve interaksjonen er altså umulig,
+        # ikke bare visuelt sperret.
+        with self.assertRaises(AppTestError):
+            _knapp(at, "bs_svar_btn_r1_q0").click().run()
+        tilstand = read_mastery_state()
+        self.assertEqual(tilstand["concepts"], {}, "Et forsøk på å svare uten valg skal ikke nå frem til mastery i det hele tatt.")
+
+    def test_sjekk_svar_vakten_mutrerer_aldri_mastery_uten_et_valgt_svar(self):
+        # Unit-dekning av selve callback-vakten i _sjekk_svar() (issue
+        # #327-followup, Chief review PR #328) -- ikke bare UI-lagets
+        # disabled-attributt (dekket over), men den faktiske koden som
+        # hindrer at et ubesvart spørsmål (st.session_state[widget_key] er
+        # None, jf. radioens nye index=None) kan skrive et forsøk til
+        # persistert mastery.
+        from unittest import mock
+
+        from bryggeskole.pilot_fermentation import read_pilot_file
+        from ui.bryggeskole_panel import _sjekk_svar
+
+        pilot = read_pilot_file()
+        sporsmal = pilot["questions"][0]
+        with mock.patch("ui.bryggeskole_panel.st.session_state", {"bs_valg_r1_q0": None}):
+            _sjekk_svar(sporsmal, "no", "bs_valg_r1_q0", 1)
+
+        tilstand = read_mastery_state()
+        self.assertEqual(
+            tilstand["concepts"], {},
+            "_sjekk_svar() skal returnere uten å skrive noe forsøk når intet svar er valgt.",
         )
 
 
