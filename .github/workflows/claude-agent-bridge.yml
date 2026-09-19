@@ -177,6 +177,43 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Chief review-fix (PR #7, blocker 2): lifecycle labels are
+      # EXCLUSIVE. Do not merely add the new one and remove the single
+      # triggering one -- that left e.g. `status:review` + `status:working`
+      # coexisting during the normal review loop. Compute the whole new
+      # label set (all lifecycle labels dropped, exactly one added,
+      # agent:claude/area:* preserved) and PUT it, so the issue can never
+      # carry two contradictory states. Logic + regression tests:
+      # .github/scripts/lifecycle_labels.py, tests/test_agent_bridge_labels.py
+      #
+      # Chief review-fix (issue #333, PR #334): this transition must happen
+      # BEFORE the two runtime-setup steps below (runtime ignore install,
+      # contract staging), not after. Both of those steps can themselves
+      # fail closed, and while they run before this transition the issue
+      # never actually reaches `status:working` on such a failure -- it
+      # stays at whichever `status:ready`/`status:changes-requested` label
+      # triggered the run. The generic failure handlers further down this
+      # workflow unconditionally report "Issue left at `status:working`",
+      # which would then be false, and on a changes-requested retry would
+      # also leave the already-consumed trigger label in place with no
+      # guarantee that re-applying it creates a fresh labeled event. Moving
+      # this transition first keeps the workflow's own state-machine
+      # contract ("the run moves to `status:working` immediately before
+      # execution work begins") true for every later fail-closed path.
+      # Safe to move: this step only reads/writes issue labels via the API
+      # and does not depend on `.agent_bridge_run/` existing or on which
+      # branch is checked out, so it has no ordering dependency on either
+      # step it now precedes.
+      - name: Move to status:working (exclusive lifecycle transition)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        run: |
+          set -euo pipefail
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]' \
+            | python3 .github/scripts/lifecycle_labels.py status:working \
+            | gh api --method PUT "repos/$REPO/issues/$ISSUE/labels" --input -
+          echo "Labels now:"
+          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
+
       # ─── Issue #333: branch-independent runtime ignore for `.agent_bridge_run/` ───
       #
       # Gap this closes: `.agent_bridge_run/chief_review.md` (issue #329) and
@@ -247,24 +284,6 @@ jobs:
           mkdir -p .agent_bridge_run
           cp docs/development/AGENT_WORKFLOW.md .agent_bridge_run/AGENT_WORKFLOW.md
           echo "path=.agent_bridge_run/AGENT_WORKFLOW.md" >> "$GITHUB_OUTPUT"
-
-      # Chief review-fix (PR #7, blocker 2): lifecycle labels are
-      # EXCLUSIVE. Do not merely add the new one and remove the single
-      # triggering one -- that left e.g. `status:review` + `status:working`
-      # coexisting during the normal review loop. Compute the whole new
-      # label set (all lifecycle labels dropped, exactly one added,
-      # agent:claude/area:* preserved) and PUT it, so the issue can never
-      # carry two contradictory states. Logic + regression tests:
-      # .github/scripts/lifecycle_labels.py, tests/test_agent_bridge_labels.py
-      - name: Move to status:working (exclusive lifecycle transition)
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
-        run: |
-          set -euo pipefail
-          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '[.labels[].name]' \
-            | python3 .github/scripts/lifecycle_labels.py status:working \
-            | gh api --method PUT "repos/$REPO/issues/$ISSUE/labels" --input -
-          echo "Labels now:"
-          gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
 
       # V1.2 (issue #12), Chief review fix (PR #13, blockers 1+2): every
       # bridge run for an issue uses ONE fixed, deterministic branch

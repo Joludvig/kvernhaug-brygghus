@@ -307,6 +307,38 @@ class TestWorkflowKobling(unittest.TestCase):
         )
         self.assertLess(i_branch, i_claude)
 
+    def test_d2b_status_working_flyttes_for_runtime_oppsett(self):
+        """Chief-review-fiks (PR #334, issue #333): lifecycle-transisjonen
+        til `status:working` MÅ skje FØR de to runtime-oppsett-stegene
+        (runtime_ignore, contract_stage) -- ellers kan et fail-closed
+        runtime_ignore-/contract_stage-steg feile FØR issuen faktisk er
+        flyttet til `status:working`, mens de generiske feilhåndterings-
+        stegene lenger nede likevel unntaksfritt rapporterer 'Issue left
+        at status:working', og på en changes-requested-runde ville det
+        også latt den allerede konsumerte trigger-etiketten stå igjen.
+        Låser hele rekkefølgen:
+        Checkout -> Move to status:working -> runtime_ignore ->
+        contract_stage -> cr_context -> ..."""
+        i_checkout = self.tekst.index("fetch-depth: 0")
+        i_status_working = self.tekst.index(
+            "Move to status:working (exclusive lifecycle transition)"
+        )
+        i_ignore = self.tekst.index("id: runtime_ignore")
+        i_stage = self.tekst.index("id: contract_stage")
+        i_context = self.tekst.index("id: cr_context")
+        self.assertLess(
+            i_checkout, i_status_working,
+            "den betrodde checkouten MÅ skje FØR lifecycle-transisjonen",
+        )
+        self.assertLess(
+            i_status_working, i_ignore,
+            "status:working MÅ settes FØR runtime_ignore -- ellers kan et "
+            "fail-closed steg feile mens issuen fortsatt henger igjen på "
+            "den utløsende status:ready/status:changes-requested-etiketten",
+        )
+        self.assertLess(i_ignore, i_stage)
+        self.assertLess(i_stage, i_context)
+
     def test_d3_ignoreringen_kaller_den_pure_modulen(self):
         blokk = _steg_blokk(self.tekst, "runtime_ignore")
         self.assertIn("runtime_ignore.py install", blokk)
