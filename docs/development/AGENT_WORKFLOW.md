@@ -200,7 +200,7 @@ exact, argument-free/argument-fixed rules where they don't):
 | Rule | Why |
 |---|---|
 | `Bash(git fetch *)` | Start from current `origin/master`. |
-| `Bash(git checkout *)` | Create/switch to the task's feature branch. |
+| `Bash(git checkout -b <branch> origin/master)` / `Bash(git checkout <branch>)` | Create the task's feature branch (`status:ready`), or re-land on it if something moves `HEAD` mid-run — **exact match, no wildcard** (narrowed from `Bash(git checkout *)` by issue #329, once the wrapper took over branch checkout on the changes-requested path; see "Deterministic changes-requested handoff (V1.9, issue #329)" below). |
 | `Bash(git branch *)` | Inspect/name branches. |
 | `Bash(git status *)` | Sanity-check working tree state (also matches bare `git status`). |
 | `Bash(git diff *)` | Review its own changes before committing. |
@@ -211,7 +211,7 @@ exact, argument-free/argument-fixed rules where they don't):
 | `Bash(gh issue view *)` | Read the task issue. |
 | `Bash(gh issue comment *)` | Post the required `SCOPE CHANGE` / "cannot identify PR" / final-outcome comments. |
 | `Bash(gh pr create *)` | Actually open the PR — the step this bug was named for. |
-| `Bash(gh pr view *)` | Read an existing PR (state, latest Chief review) for `changes-requested`. |
+| `Bash(gh pr view *)` | Read an existing PR's state. (Since issue #329 the changes-requested round no longer uses this to *discover* the PR or the Chief review — both arrive verified; see below.) |
 | `Bash(gh pr edit *)` | Update the PR description/report. |
 | `Bash(gh pr comment *)` | Post the PR-side report. |
 | `Bash(gh pr list *)` | Look up the PR associated with this run's fixed branch. |
@@ -1654,6 +1654,146 @@ a real, controlled re-review E2E on a live issue (acceptance criterion
 honest limit already noted for `workflow_dispatch` and every prior
 Chief-ready signal iteration above. Nothing in this change claims that
 E2E has already passed.
+
+## Deterministic changes-requested handoff (V1.9, issue #329)
+
+**The bug this fixes.** Agent Bridge run `35399093833` (issue #327 / PR
+#328) passed **every** existing gate — the triggering label was
+`status:changes-requested`, `agent:claude` was present both at event time
+and live, the sender was the repo owner, the workflow explicitly reported
+the trigger as authorized, it found the existing PR, captured the correct
+pre-run head `6699b63b039b7cefc086fceb65b01eb48adc3542`, set the PR back
+to Draft and passed the issue #44 Draft verification. The Claude step then
+finished `conclusion: success` with `permission_denials_count: 11`,
+**no new commit**, an unchanged PR head, and the deliverable gate correctly
+reporting `no_new_commits` — so the issue fail-closed at `status:working`.
+
+The trigger was never the defect. **The handoff was.** On this path the
+wrapper handed Claude almost no verified work context and made it
+rediscover everything through `gh`/`git` calls before it could start on
+Chief's actual review:
+
+1. `actions/checkout@v4` on an `issues` event lands on the default ref
+   (run `35399093833` records `head_branch: master`), and the prompt told
+   Claude to fetch and check out the work branch itself — so **branch
+   discovery was Claude's first job** in a round that is supposed to be
+   about fixing a review.
+2. The prompt told Claude to find the PR with `gh pr view` / `gh pr list`,
+   even though the wrapper had already captured its exact number and head
+   two steps earlier and re-verified both.
+3. The prompt told Claude to *"read the latest Chief review on that PR"*.
+   Nothing verified that such a review existed, that it was
+   `CHANGES_REQUESTED`, that its author was the repo owner, or that it
+   applied to the exact head being worked on. **The review object is the
+   entire work order for the round, and it was the one thing never bound
+   into the handoff.**
+4. Every rediscovery call is a permission surface. 11 denials over 50 turns
+   with zero commits is the signature of a run that spent its budget on
+   discovery it should never have had to do.
+
+### The contract
+
+For `status:changes-requested`, **before** "Run Claude Code" is allowed to
+start, the wrapper must prove the whole work context and then prepare the
+branch itself. Four steps, in this order, all after the issue #44 Draft
+verification:
+
+| Step (`id`) | What it does |
+|---|---|
+| `cr_state` | Fetches live state: the open PRs on the deterministic branch, and the PR's reviews **from the GitHub reviews API**. Everything is written straight to files and assembled with `jq --slurpfile`. |
+| `cr_context` | The decision: `.github/scripts/changes_requested_context.py verify` (`bygg_kontekst`). Fail-closed `exit 1` on any unproven condition, which stops the job before Claude. On success it writes the verified review to `.agent_bridge_run/chief_review.md`. |
+| `cr_branch` | Fetches the existing agent branch and `git checkout -B "$BRANCH" "$EXPECTED_HEAD"` — the exact head the verified review applies to. No `reset --hard`, no `clean`, no `rebase`, no `--force`. |
+| `cr_checkout` | The proof: `changes_requested_context.py checkout-verify` (`verifiser_lokalt_hode`) — local `HEAD` must equal the verified pre-run head and local branch must be the deterministic branch. Fail-closed `exit 1`. |
+
+`status:ready` is deliberately untouched: `cr_context` returns a
+non-alarming *"not required"* for any other trigger label (the same pattern
+`verifiser_draft` already uses), and `cr_branch`/`cr_checkout` are gated on
+`needs.guard.outputs.trigger_label == 'status:changes-requested'`.
+
+### Fail-closed conditions
+
+No Claude run may start unless **all** of these are proven. Any one of them
+rejects the round:
+
+- no open PR on the deterministic branch;
+- more than one candidate PR (ambiguous delivery association);
+- an open PR exists but its `base` is not `master` or its `head` is not the
+  deterministic branch;
+- the pre-run PR number/head capture is missing, or the head is not a full
+  40-character SHA;
+- the PR's identity changed between the pre-run capture and the fresh
+  refetch;
+- the PR's fresh head no longer equals the captured pre-run head;
+- there is no review from the authorized Chief identity (repo owner);
+- the owner has no *decision* review at all;
+- the owner's **latest decision** review is not `CHANGES_REQUESTED`;
+- that review's `commit_id` is not the exact current head;
+- that review's body is empty.
+
+**Staleness semantics.** A `CHANGES_REQUESTED` is a valid work order only
+while it is Chief's **most recent decision**. Decision states are
+`APPROVED`, `CHANGES_REQUESTED` and `DISMISSED`; a newer `APPROVED` (Chief
+passed it after all) or a newer `DISMISSED` (the review was withdrawn)
+makes an older `CHANGES_REQUESTED` stale and the round is rejected —
+better no run than a run against a revoked work order. `COMMENTED` and
+`PENDING` are **not** decisions and never make a valid review stale, so an
+ordinary follow-up comment from the owner does not block the round.
+
+**PR comments, comment markers and Claude-generated summaries are never an
+accepted substitute for the review object.** Only the reviews API counts.
+
+### Transporting the review text
+
+A review body is human-written free text: backticks, quotes, `$(...)`,
+YAML-looking lines, arbitrary newlines. It therefore never passes through
+shell quoting, `$GITHUB_OUTPUT` or a `${{ }}` interpolation. Python writes
+it verbatim to `.agent_bridge_run/chief_review.md` (git-ignored, so a broad
+`git add -A` can never commit it), and the prompt points Claude at that
+path. Every `reason=` line the module writes to `$GITHUB_OUTPUT` is
+deliberately a single line containing no review content.
+`tests/test_agent_bridge_changes_requested_context.py` proves this with a
+hostile body containing command substitutions, backticks, a fake `EOF`, a
+fake injected workflow step and a `set-output` payload.
+
+### What Claude is told
+
+On a changes-requested round the prompt now states plainly that the
+workflow has already done the discovery, and gives Claude the verified
+issue number, PR number, branch, exact head, and the on-disk review path.
+The instruction is unambiguous: **the review is Chief's work order** —
+address only its points, do not perform your own re-review, do not expand
+scope, do not touch unrelated code, run the focused tests plus the required
+suite, commit, push the *same* deterministic branch, never merge, never
+deploy, and never commit or edit `.agent_bridge_run/`.
+
+### Permission surface
+
+Because the wrapper now owns branch discovery and checkout,
+`Bash(git checkout *)` — the last remaining git wildcard — is **narrowed**
+to the two exact, branch-scoped strings from
+`.github/scripts/branch_policy.py::tillatte_checkout_kommandoer`, mirroring
+the existing push and switch rules. `status:ready` keeps exactly what it
+needs (branch creation); a changes-requested round already starts on the
+right branch. This only reduces the surface — nothing previously forbidden
+becomes allowed, and no new tool, wildcard or bot allowance is introduced.
+
+### Preserved unchanged
+
+Owner/event authorization, the `agent:claude` requirement, lifecycle
+exclusivity, the Draft handoff, exact branch policy, branch-scoped push,
+absence of `git merge` / `gh pr merge`, `deliverable_guard`, the exact-head
+change requirement, the Draft → Ready mechanism, the Chief-ready wake
+signal, and the owner GO / merge governance all behave exactly as before.
+
+### Honest limit
+
+Everything above is proven by pure unit/regression tests and static
+workflow-contract tests without touching GitHub
+(`tests/test_agent_bridge_changes_requested_context.py`, plus the branch
+policy and permission-config contracts). Whether the repaired route
+actually carries a live round end to end can only be shown by a real
+controlled changes-requested E2E — issue #327 is deliberately reserved as
+that proof case. Nothing here claims that E2E has already passed.
 
 ## Round 1 also uses the Draft -> Ready lifecycle (V1, issue #62)
 

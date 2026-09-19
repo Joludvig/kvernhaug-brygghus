@@ -137,6 +137,52 @@ class TestBranchPolicy(unittest.TestCase):
             tillatt = _BP.tillatte_switch_kommandoer(navn)
             self.assertNotIn("git switch master", tillatt)
 
+    # ─── 4g-4k (V1.9, issue #329): branch-avgrensede checkout-kommandoer ─
+    #
+    # Samme wildcard-frie garanti som push/switch. Dette er en INNSNEVRING
+    # av `Bash(git checkout *)`, som fantes kun fordi Claude selv måtte
+    # finne og checkoute arbeidsbranchen -- en jobb wrapperen eier etter
+    # #329.
+
+    def test_4g_tillatte_checkout_kommandoer_har_noyaktig_forventet_form(self):
+        self.assertEqual(
+            _BP.tillatte_checkout_kommandoer("agent/issue-12"),
+            ("git checkout -b agent/issue-12 origin/master", "git checkout agent/issue-12"),
+        )
+
+    def test_4h_checkout_kan_aldri_bygges_for_master_selv(self):
+        with self.assertRaises(ValueError):
+            _BP.tillatte_checkout_kommandoer("master")
+
+    def test_4i_ingen_master_targeting_forsok_matcher_en_tillatt_checkout_streng(self):
+        tillatt = _BP.tillatte_checkout_kommandoer("agent/issue-12")
+        for forsok in (
+            "git checkout master",
+            "git checkout -b master origin/master",
+            "git checkout -b master",
+            "git checkout -B master",
+        ):
+            self.assertNotIn(forsok, tillatt)
+
+    def test_4j_gjelder_for_flere_ulike_issue_branches_checkout(self):
+        for issue in (1, 42, 9999):
+            navn = _BP.agent_branch_navn(issue)
+            tillatt = _BP.tillatte_checkout_kommandoer(navn)
+            self.assertNotIn("git checkout master", tillatt)
+            for kommando in tillatt:
+                self.assertIn(navn, kommando)
+
+    def test_4k_checkout_speiler_switch_paret_ett_til_ett(self):
+        # De to parene dekker nøyaktig samme to handlinger (opprett fra
+        # origin/master, og bytt til den eksisterende branchen) -- slik at
+        # hverken `git switch`- eller `git checkout`-vanen gir Claude mer
+        # eller mindre enn den andre.
+        navn = _BP.agent_branch_navn(327)
+        self.assertEqual(
+            len(_BP.tillatte_checkout_kommandoer(navn)),
+            len(_BP.tillatte_switch_kommandoer(navn)),
+        )
+
     # ─── 5: CLI-kontrakten workflowen faktisk bruker ────────────────────
 
     def _kjor_cli(self, *argv):

@@ -360,6 +360,129 @@ jobs:
           python3 .github/scripts/pr_draft_handoff.py verify \
             < "$RUNNER_TEMP/pr_draft_verify_state.json" >> "$GITHUB_OUTPUT"
 
+      # ─── Issue #329: deterministic, fail-closed changes-requested handoff ───
+      #
+      # Incident (run 35399093833 on issue #327 / PR #328): every gate above
+      # passed -- authorized trigger, correct deterministic branch, correct
+      # pre-run head, PR converted to Draft, Draft verified -- and the Claude
+      # step still finished `conclusion: success` with
+      # `permission_denials_count: 11`, NO new commit and an unchanged PR head.
+      # The trigger was never the defect; the HANDOFF was. On this path the
+      # wrapper handed Claude almost no verified work context and made it
+      # rediscover the branch, the PR and the Chief review itself through
+      # gh/git calls before it could start on the actual review.
+      #
+      # This step collects the LIVE state the decision needs. Everything is
+      # written straight to files -- `--slurpfile` assembles the state JSON --
+      # so the human-written review body never enters a shell variable, a
+      # command string, `$GITHUB_OUTPUT` or a `${{ }}` interpolation. See
+      # .github/scripts/changes_requested_context.py → "TRANSPORT AV
+      # REVIEW-TEKST". `reviews` comes from the GitHub reviews API only:
+      # PR comments, comment markers and Claude-generated summaries are never
+      # an accepted substitute for the review object.
+      - name: Gather live state for changes-requested review context (issue #329)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: cr_state
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+          BEFORE_PR_NUMBER: ${{ steps.before.outputs.before_pr_number }}
+          BEFORE_HEAD_SHA: ${{ steps.before.outputs.before_head_sha }}
+          # The authorized Chief identity. Same source the trigger guard
+          # already uses for its owner check (.github/scripts/trigger_guard.py)
+          # -- a CHANGES_REQUESTED review from anyone else is not a valid work
+          # order.
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          if [ "$TRIGGER_LABEL" = "status:changes-requested" ]; then
+            gh pr list --repo "$REPO" --head "$BRANCH" --base master --state open \
+              --json number,state,baseRefName,headRefOid,headRefName,isDraft \
+              > "$RUNNER_TEMP/cr_prs.json"
+            if [ -n "${BEFORE_PR_NUMBER:-}" ]; then
+              gh api --paginate "repos/$REPO/pulls/$BEFORE_PR_NUMBER/reviews" --jq '.[]' \
+                | jq -s '[.[] | {id, state, commit_id, body, submitted_at, user: {login: .user.login}}]' \
+                > "$RUNNER_TEMP/cr_reviews.json"
+            else
+              echo '[]' > "$RUNNER_TEMP/cr_reviews.json"
+            fi
+          else
+            echo '[]' > "$RUNNER_TEMP/cr_prs.json"
+            echo '[]' > "$RUNNER_TEMP/cr_reviews.json"
+          fi
+          jq -n --arg trigger_label "$TRIGGER_LABEL" \
+                --arg issue "$ISSUE" \
+                --arg branch "$BRANCH" \
+                --arg before_pr_number "${BEFORE_PR_NUMBER:-}" \
+                --arg before_head_sha "${BEFORE_HEAD_SHA:-}" \
+                --arg repo_owner "$REPO_OWNER" \
+                --slurpfile prs "$RUNNER_TEMP/cr_prs.json" \
+                --slurpfile reviews "$RUNNER_TEMP/cr_reviews.json" \
+                '{trigger_label:$trigger_label, issue:$issue, branch:$branch,
+                  before_pr_number:$before_pr_number, before_head_sha:$before_head_sha,
+                  repo_owner:$repo_owner, prs:$prs[0], reviews:$reviews[0]}' \
+            > "$RUNNER_TEMP/cr_context_state.json"
+
+      # The actual decision -- pure, unit-tested, see
+      # .github/scripts/changes_requested_context.py (`bygg_kontekst`) and
+      # tests/test_agent_bridge_changes_requested_context.py. Fail-closed
+      # exit 1 on a genuine rejection (same exit-code contract as
+      # pr_draft_handoff.py/chief_ready_signal.py/pr_ready_handoff.py) --
+      # which, by GitHub Actions' default step-failure behavior, stops the job
+      # here and skips "Run Claude Code" entirely. No Claude run may start
+      # unless the PR, its exact head, and a Chief CHANGES_REQUESTED review on
+      # that same exact head are all proven. `status:ready` is a
+      # non-alarming "not required" outcome and is not affected at all.
+      #
+      # On success the module writes the VERIFIED review text to
+      # `.agent_bridge_run/chief_review.md` (git-ignored, see .gitignore), and
+      # the prompt below points Claude at that path.
+      - name: Verify Chief changes-requested review context (issue #329)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: cr_context
+        env:
+          CONTEXT_BODY_PATH: .agent_bridge_run/chief_review.md
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/changes_requested_context.py verify \
+            < "$RUNNER_TEMP/cr_context_state.json" >> "$GITHUB_OUTPUT"
+
+      # Root cause #1: `actions/checkout@v4` on an `issues` event lands on the
+      # default ref (run 35399093833 confirms `head_branch: master`), so the
+      # old prompt made branch discovery Claude's FIRST job in a round that is
+      # supposed to be about fixing a review. The wrapper now owns that:
+      # fetch the existing agent branch and check out the EXACT head the
+      # verified review applies to. Only for status:changes-requested --
+      # status:ready has no existing branch to land on and is untouched.
+      - name: Prepare existing agent branch for changes-requested round (issue #329)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && needs.guard.outputs.trigger_label == 'status:changes-requested'
+        id: cr_branch
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+          EXPECTED_HEAD: ${{ steps.cr_context.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          git checkout -B "$BRANCH" "$EXPECTED_HEAD"
+          echo "local_head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "local_branch=$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Proof, not assumption -- pure/testable decision in
+      # .github/scripts/changes_requested_context.py
+      # (`verifiser_lokalt_hode`). Same fail-closed exit-code contract: if the
+      # working tree is not on the deterministic branch at the exact reviewed
+      # head, the job stops here and Claude never runs.
+      - name: Verify local HEAD is the exact reviewed commit (issue #329)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && needs.guard.outputs.trigger_label == 'status:changes-requested'
+        id: cr_checkout
+        env:
+          EXPECTED_HEAD: ${{ steps.cr_context.outputs.head_sha }}
+          LOCAL_HEAD: ${{ steps.cr_branch.outputs.local_head }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+          LOCAL_BRANCH: ${{ steps.cr_branch.outputs.local_branch }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/changes_requested_context.py checkout-verify >> "$GITHUB_OUTPUT"
+
       # V1.2 (issue #12): the first real E2E run (issue #11) finished
       # `conclusion: success` with `permission_denials_count: 14` and
       # produced NO branch, NO PR, NO comment -- because this step gave
@@ -453,6 +576,21 @@ jobs:
       # See "Diagnose missing deliverable" below for the accompanying
       # diagnostics improvement.
       #
+      # V1.9 (issue #329): `Bash(git checkout *)` was the last remaining git
+      # WILDCARD rule, and it existed only because Claude had to find and
+      # check out the work branch itself. The wrapper now owns that on the
+      # changes-requested path (see the "Prepare existing agent branch" /
+      # "Verify local HEAD is the exact reviewed commit" steps above), so the
+      # wildcard is NARROWED to the same two exact, branch-scoped strings the
+      # `git switch` rules already use, via `.github/scripts/branch_policy.py`'s
+      # new `tillatte_checkout_kommandoer`. This REDUCES the permission
+      # surface -- nothing previously forbidden becomes allowed. `status:ready`
+      # keeps exactly what it needs (branch CREATION,
+      # `git checkout -b <branch> origin/master`), and a changes-requested
+      # round now starts already on the right branch, with
+      # `git checkout <branch>` retained only as a cheap re-land if anything
+      # moves HEAD during the run.
+      #
       # V1.8 (PÅ JOBB bot-actor allowlist fix): the PÅ JOBB queue
       # dispatcher (.github/workflows/pa-jobb-queue.yml) starts this
       # workflow via `gh workflow run claude-agent-bridge.yml -f ...`,
@@ -487,7 +625,7 @@ jobs:
             workflows: write
           base_branch: master
           claude_args: |
-            --allowedTools "Bash(git fetch *),Bash(git checkout *),Bash(git switch -c ${{ steps.branch.outputs.name }} origin/master),Bash(git switch ${{ steps.branch.outputs.name }}),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *),Bash(python3 scripts/generate_web_i18n_pages.py),Bash(python3 .github/scripts/ho_router_check.py pointer),Bash(python3 .github/scripts/ho_router_check.py verify),Bash(node --version),Bash(npm --version),Bash(npm install --save-dev @playwright/test),Bash(npm install --ignore-scripts),Bash(npm ci --ignore-scripts),Bash(npx playwright --version),Bash(npx playwright install chromium firefox),Bash(npx playwright install --with-deps chromium firefox),Bash(npx playwright test *)"
+            --allowedTools "Bash(git fetch *),Bash(git checkout -b ${{ steps.branch.outputs.name }} origin/master),Bash(git checkout ${{ steps.branch.outputs.name }}),Bash(git switch -c ${{ steps.branch.outputs.name }} origin/master),Bash(git switch ${{ steps.branch.outputs.name }}),Bash(git branch *),Bash(git status *),Bash(git diff *),Bash(git add *),Bash(git commit *),Bash(git push -u origin ${{ steps.branch.outputs.name }}),Bash(git push origin ${{ steps.branch.outputs.name }}),Bash(git log *),Bash(gh issue view *),Bash(gh issue comment *),Bash(gh pr create *),Bash(gh pr view *),Bash(gh pr edit *),Bash(gh pr comment *),Bash(gh pr list *),Bash(pip install -r requirements.txt),Bash(python3 -m unittest *),Bash(python3 scripts/generate_web_i18n_pages.py),Bash(python3 .github/scripts/ho_router_check.py pointer),Bash(python3 .github/scripts/ho_router_check.py verify),Bash(node --version),Bash(npm --version),Bash(npm install --save-dev @playwright/test),Bash(npm install --ignore-scripts),Bash(npm ci --ignore-scripts),Bash(npx playwright --version),Bash(npx playwright install chromium firefox),Bash(npx playwright install --with-deps chromium firefox),Bash(npx playwright test *)"
             --permission-mode acceptEdits
           prompt: |
             You are running as the automated Claude side of the Kvernhaug
@@ -564,20 +702,57 @@ jobs:
               for review once the deliverable/Chief-ready checks pass
               (issue #62); do not pass any other visibility flag.
             - If `${{ env.TRIGGER_LABEL }}` is `status:changes-requested`:
-              this is a follow-up pass against the SAME branch,
-              `${{ steps.branch.outputs.name }}` — fetch and check it
-              out (`git fetch origin ${{ steps.branch.outputs.name }} && git checkout ${{ steps.branch.outputs.name }}`
-              or `git switch ${{ steps.branch.outputs.name }}` — either is
-              allowed, exactly for this branch name),
-              then use `gh pr view` / `gh pr list --head ${{ steps.branch.outputs.name }}`
-              to find its PR. Read the latest Chief review on that PR
-              and address ONLY the CHANGES REQUESTED points from the
-              most recent review — do not re-address already-resolved
-              points, do not expand scope. Push to this same branch,
-              update the PR description/report accordingly. Do not
-              merge. If the branch or its PR is missing or in an
-              unexpected state, STOP and post a comment on the issue
-              explaining exactly why, rather than guessing.
+              this is a review-fix pass, and the workflow has ALREADY
+              done all the discovery for you (issue #329). Before this
+              step started it proved, fail-closed, that there is exactly
+              one open PR on this issue's deterministic branch against
+              `master`, that its head is an exact 40-char SHA, and that
+              the repository owner's most recent review decision on that
+              PR is a `CHANGES_REQUESTED` whose `commit_id` is that same
+              exact head. It then checked that branch out at that exact
+              commit and verified local HEAD. So:
+
+              * You are ALREADY on branch
+                `${{ steps.branch.outputs.name }}` at commit
+                `${{ steps.cr_context.outputs.head_sha }}`.
+                Do NOT go looking for the branch, and do NOT reset,
+                rebase or re-point it.
+              * The PR is
+                **#${{ steps.cr_context.outputs.pr_number }}** — verified.
+                Do NOT run `gh pr list` / `gh pr view` to find it.
+              * **Chief's review is your work order, and it is already
+                on disk**: read the file
+                `.agent_bridge_run/chief_review.md` (verified review
+                `${{ steps.cr_context.outputs.review_id }}` by
+                `${{ steps.cr_context.outputs.review_author }}`,
+                submitted
+                `${{ steps.cr_context.outputs.review_submitted_at }}`).
+                That file is the authoritative text. Do NOT reconstruct
+                the review from PR comments, comment markers or any
+                earlier summary — those are not the review object and
+                are not authoritative here.
+
+              Then, in this order:
+
+              1. Read `.agent_bridge_run/chief_review.md` in full.
+              2. Address ONLY the points Chief raised in it. Do not
+                 re-address already-resolved points. Do not perform your
+                 own re-review of the PR, and do not fix unrelated code,
+                 style or tests you happen to notice — that is scope
+                 expansion and it is not authorized by this round.
+              3. Run the focused tests for what you touched, plus the
+                 repo's required Python suite
+                 (`python3 -m unittest discover -s tests -b`).
+              4. Commit, and push to this SAME branch with
+                 `git push origin ${{ steps.branch.outputs.name }}`.
+              5. Update the PR description/report to reflect the fix.
+
+              Never merge. Never deploy. `.agent_bridge_run/` is
+              git-ignored runtime state for this handoff — never commit
+              it, and never edit it. If a review point genuinely cannot
+              be addressed within this issue's scope, STOP and post a
+              comment on the issue or PR explaining exactly which point
+              and why, rather than guessing or widening the change.
 
             For BOTH trigger paths, perform the final post-verification
             HO step in AGENT_WORKFLOW.md, section "HO policy — local and

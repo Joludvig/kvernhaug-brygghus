@@ -129,6 +129,17 @@ _SWITCH_REGLER = (
     "Bash(git switch ${{ steps.branch.outputs.name }})",
 )
 
+# V1.9 (issue #329): `Bash(git checkout *)` var den SISTE gjenværende
+# git-wildcarden, og fantes kun fordi Claude selv måtte finne og checkoute
+# arbeidsbranchen. Wrapperen eier den jobben nå på
+# changes-requested-banen, så wildcarden er SNEVRET INN til de to eksakte,
+# branch-avgrensede strengene -- samme mønster som push/switch. Speiler
+# `.github/scripts/branch_policy.py::tillatte_checkout_kommandoer`.
+_CHECKOUT_REGLER = (
+    "Bash(git checkout -b ${{ steps.branch.outputs.name }} origin/master)",
+    "Bash(git checkout ${{ steps.branch.outputs.name }})",
+)
+
 
 def _les_workflow():
     with open(_WORKFLOW, encoding="utf-8") as f:
@@ -486,6 +497,78 @@ class TestPermissionConfig(unittest.TestCase):
             self.assertIn(regel, self.verktoy)
         for regel in _SWITCH_REGLER:
             self.assertIn(regel, self.verktoy)
+
+    # ─── 11 (V1.9, issue #329): branch-avgrensede git checkout-regler ────
+    #
+    # Dette er en INNSNEVRING, ikke en utvidelse: `Bash(git checkout *)` var
+    # den siste git-wildcarden i allowlista, og den fantes utelukkende fordi
+    # Claude selv måtte finne og checkoute arbeidsbranchen. Etter #329 gjør
+    # wrapperen det (se "Prepare existing agent branch"/"Verify local HEAD"
+    # i workflowen), så bare de to eksakte, branch-avgrensede strengene
+    # trengs: branch-OPPRETTING for status:ready, og en billig re-land for
+    # changes-requested.
+
+    def test_11a_begge_checkout_reglene_finnes_eksakt(self):
+        for regel in _CHECKOUT_REGLER:
+            self.assertIn(
+                regel, self.verktoy,
+                f"git checkout-regelen mangler i --allowedTools (issue #329): {regel!r}",
+            )
+
+    def test_11b_hver_checkout_regel_forekommer_noyaktig_en_gang(self):
+        for regel in _CHECKOUT_REGLER:
+            self.assertEqual(
+                self.verktoy.count(regel), 1,
+                f"Regelen skal forekomme nøyaktig én gang -- ingen duplikater: {regel!r}",
+            )
+
+    def test_11c_git_checkout_wildcarden_er_fjernet(self):
+        for forbudt in ("Bash(git checkout *)", "Bash(git checkout)"):
+            self.assertNotIn(
+                forbudt, self.verktoy,
+                "git checkout-wildcarden skal være snevret inn til de to eksakte, "
+                f"branch-avgrensede reglene (issue #329): {forbudt!r}",
+            )
+
+    def test_11d_kun_de_to_forventede_checkout_reglene_totalt(self):
+        checkout_regler = [v for v in self.verktoy if v.startswith("Bash(git checkout")]
+        self.assertEqual(
+            sorted(checkout_regler), sorted(_CHECKOUT_REGLER),
+            "Nøyaktig de to branch-avgrensede checkout-reglene skal finnes -- "
+            "ingen flere, ingen færre.",
+        )
+
+    def test_11e_checkout_reglene_er_ikke_master_targeting(self):
+        for regel in _CHECKOUT_REGLER:
+            self.assertNotIn("checkout master", regel)
+            self.assertNotIn("checkout -b master", regel)
+
+    def test_11f_eksisterende_kontrakt_star_ved_lag_etter_checkout_innsnevringen(self):
+        for regel in _FORVENTEDE_PUSH_REGLER:
+            self.assertIn(regel, self.verktoy)
+        push_regler = [v for v in self.verktoy if v.startswith("Bash(git push")]
+        self.assertEqual(sorted(push_regler), sorted(_FORVENTEDE_PUSH_REGLER))
+        for verktoysnavn in self.verktoy:
+            self.assertFalse(verktoysnavn.startswith("Bash(git merge"))
+            self.assertFalse(verktoysnavn.startswith("Bash(gh pr merge"))
+        self.assertIn("--permission-mode acceptEdits", self.steg)
+        for verktoysnavn in ("Write", "Edit", "MultiEdit"):
+            self.assertNotIn(verktoysnavn, self.verktoy)
+        self.assertIn(_GENERATOR_REGEL, self.verktoy)
+        for regel in _NODE_PLAYWRIGHT_REGLER:
+            self.assertIn(regel, self.verktoy)
+        for regel in _HO_ROUTER_CHECK_REGLER:
+            self.assertIn(regel, self.verktoy)
+        for regel in _SWITCH_REGLER:
+            self.assertIn(regel, self.verktoy)
+        self.assertEqual(_allowed_bots_verdi(self.steg), "github-actions")
+
+    def test_11g_ingen_ny_bred_bash_overflate_introdusert_av_329(self):
+        # #329 skal ALDRI utvide permission-flaten -- verken med et nytt
+        # verktøy eller med en bredere variant av et eksisterende.
+        for forbudt in ("Bash(*)", "Bash", "Bash(git *)", "Bash(gh *)",
+                        "Bash(curl *)", "Bash(wget *)", "Bash(sudo *)"):
+            self.assertNotIn(forbudt, self.verktoy)
 
 
 if __name__ == "__main__":
