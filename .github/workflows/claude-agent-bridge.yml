@@ -446,6 +446,40 @@ jobs:
           python3 .github/scripts/changes_requested_context.py verify \
             < "$RUNNER_TEMP/cr_context_state.json" >> "$GITHUB_OUTPUT"
 
+      # ─── Issue #331: stage the checkout-verifier BEFORE the feature-branch
+      # checkout, anchored to the current trusted master/workflow checkout ───
+      #
+      # Incident: issue #327 / PR #328's owner-authorized status:changes-
+      # requested retry (run after #329/#330 merged) reused PR #328's
+      # pre-#329 head, `6699b63b039b7cefc086fceb65b01eb48adc3542`. Every gate
+      # above this point passed -- authorized trigger, correct PR/head,
+      # verified CHANGES_REQUESTED review -- but the NEXT step ("Prepare
+      # existing agent branch") switches the working tree to that exact old
+      # head, which does not contain `.github/scripts/changes_requested_
+      # context.py` at all (it was only added later, by #329/#330 itself).
+      # The step after that ("Verify local HEAD...") used to run
+      # `python3 .github/scripts/changes_requested_context.py checkout-
+      # verify` from whatever the working tree happened to contain AFTER
+      # that switch -- so the file had simply disappeared, and the job
+      # failed before Claude ever started. This was a trust-root/checkout-
+      # order bug, not a trigger bug: the verifier must be anchored to the
+      # CURRENT trusted checkout, never to whatever the old feature branch's
+      # working tree happens to contain.
+      #
+      # The fix: copy the exact script from THIS trusted master checkout to
+      # a runner-owned temp path (`$RUNNER_TEMP`, never inside the repo
+      # working tree) now, while HEAD is still on master -- i.e. strictly
+      # before the next step switches it. The old feature branch cannot
+      # replace the staged copy merely by changing the repo working tree,
+      # since the staged copy no longer lives there.
+      - name: Stage trusted changes-requested checkout verifier (issue #331)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && needs.guard.outputs.trigger_label == 'status:changes-requested'
+        id: cr_verifier_stage
+        run: |
+          set -euo pipefail
+          cp .github/scripts/changes_requested_context.py "$RUNNER_TEMP/changes_requested_context.py"
+          echo "path=$RUNNER_TEMP/changes_requested_context.py" >> "$GITHUB_OUTPUT"
+
       # Root cause #1: `actions/checkout@v4` on an `issues` event lands on the
       # default ref (run 35399093833 confirms `head_branch: master`), so the
       # old prompt made branch discovery Claude's FIRST job in a round that is
@@ -471,6 +505,14 @@ jobs:
       # (`verifiser_lokalt_hode`). Same fail-closed exit-code contract: if the
       # working tree is not on the deterministic branch at the exact reviewed
       # head, the job stops here and Claude never runs.
+      #
+      # Issue #331: this MUST run the copy staged by "Stage trusted
+      # changes-requested checkout verifier" above, never
+      # `.github/scripts/changes_requested_context.py` read from the repo
+      # working tree -- by this point that tree is checked out at the OLD
+      # feature head (previous step), which is not guaranteed to contain
+      # this file at all. A missing/empty staged copy fails closed before
+      # Claude ever runs, exactly like every other rejection on this path.
       - name: Verify local HEAD is the exact reviewed commit (issue #329)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && needs.guard.outputs.trigger_label == 'status:changes-requested'
         id: cr_checkout
@@ -479,9 +521,15 @@ jobs:
           LOCAL_HEAD: ${{ steps.cr_branch.outputs.local_head }}
           BRANCH: ${{ steps.branch.outputs.name }}
           LOCAL_BRANCH: ${{ steps.cr_branch.outputs.local_branch }}
+          STAGED_VERIFIER: ${{ steps.cr_verifier_stage.outputs.path }}
         run: |
           set -euo pipefail
-          python3 .github/scripts/changes_requested_context.py checkout-verify >> "$GITHUB_OUTPUT"
+          if [ -z "${STAGED_VERIFIER:-}" ] || [ ! -s "$STAGED_VERIFIER" ]; then
+            echo "Staged checkout verifier missing or empty (${STAGED_VERIFIER:-<unset>}) -- refusing to fall back to the checked-out feature branch's own copy (fail-closed, issue #331)." >&2
+            echo "checkout_verified=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          python3 "$STAGED_VERIFIER" checkout-verify >> "$GITHUB_OUTPUT"
 
       # V1.2 (issue #12): the first real E2E run (issue #11) finished
       # `conclusion: success` with `permission_denials_count: 14` and
