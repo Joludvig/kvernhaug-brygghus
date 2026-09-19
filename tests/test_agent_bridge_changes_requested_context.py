@@ -232,8 +232,13 @@ class TestFailClosed(unittest.TestCase):
     # Chief-review-fiks (PR #330, blokkerende funn): Draft må RE-BEVISES her.
     # Issue #44-porten kjører FØR disse #329-stegene, så en PR som blir satt
     # Ready i mellomtiden ville ellers passert og latt Claude kjøre -- og
-    # runden ville mistet Draft -> Ready-vekkesignalet som trigger Chiefs
-    # re-review (pr_ready_handoff.py ville sett `already_ready`).
+    # runden ville mistet hele Draft -> Ready-livssyklusovergangen
+    # (pr_ready_handoff.py ville sett `already_ready` og hoppet over den).
+    #
+    # MERK (kanonisk #152, 2026-09-19): den overgangen er livssyklus-BEVIS og
+    # framtidskompatibel plumbing. Automatisk Chief er deaktivert -- eieren
+    # invokerer Chief review manuelt i chat, og `ready_for_review` utløser
+    # ikke i seg selv noen Chief/ChatGPT-review i dag.
 
     def test_e5_ready_pr_avvises_selv_om_alt_annet_er_gyldig(self):
         ok, kontekst, grunn = _bygg(prs=[_pr(isDraft=False)])
@@ -691,6 +696,59 @@ class TestWorkflowKobling(unittest.TestCase):
             "Read the latest Chief review on that PR", self.tekst,
             "reviewen leveres nå verifisert, den skal ikke gjenoppdages",
         )
+
+    def test_automatisk_chief_beskrives_som_deaktivert(self):
+        # Chief-review-fiks (PR #330, runde 3): kanonisk #152 (2026-09-19)
+        # slår fast at automatisk Chief/ChatGPT-review er DEAKTIVERT og at
+        # Chief review er eier-invokert i chat. Draft -> Ready og
+        # Chief-ready-markørene blir stående som livssyklus-bevis og
+        # framtidskompatibel plumbing, men skal ikke beskrives som noe som
+        # vekker Chief. Denne testen låser den korrigerte formuleringen fast
+        # i akkurat de filene #329 skrev.
+        agent_workflow = os.path.join(
+            _REPO_ROOT, "docs", "development", "AGENT_WORKFLOW.md",
+        )
+        for sti in (_SCRIPT, os.path.abspath(__file__), agent_workflow):
+            with open(sti, encoding="utf-8") as f:
+                lav = f.read().lower()
+            navn = os.path.basename(sti)
+            with self.subTest(fil=navn):
+                self.assertTrue(
+                    ("automatisk chief er deaktivert" in lav)
+                    or ("automatic chief is disabled" in lav),
+                    f"{navn} må slå fast at automatisk Chief er deaktivert.",
+                )
+
+    def test_ingen_pastand_om_at_ready_for_review_vekker_chief(self):
+        # Samme fiks, motsatt vei: de konkrete påstandene som ble trukket
+        # tilbake skal ikke kunne snike seg inn igjen.
+        agent_workflow = os.path.join(
+            _REPO_ROOT, "docs", "development", "AGENT_WORKFLOW.md",
+        )
+        trukne_pastander = (
+            "som utløser chiefs re-review",
+            "chiefs re-review ville uteblitt",
+            "vekkesignalet til chief",
+            "som trigger chiefs re-review",
+            "chief's re-review would never be triggered",
+            "draft → ready wake mechanism",
+            "draft -> ready wake mechanism",
+        )
+        # Denne testfilen skannes bevisst IKKE: den MÅ inneholde strengene
+        # over for å kunne lete etter dem (samme avgrensning som
+        # test_11i i tests/test_agent_bridge_permission_config.py). Dens egen
+        # formulering dekkes i stedet av testen rett over.
+        for sti in (_SCRIPT, agent_workflow, _WORKFLOW):
+            with open(sti, encoding="utf-8") as f:
+                lav = f.read().lower()
+            navn = os.path.basename(sti)
+            for pastand in trukne_pastander:
+                with self.subTest(fil=navn, pastand=pastand):
+                    self.assertNotIn(
+                        pastand, lav,
+                        f"{navn} påstår igjen at Draft -> Ready vekker/utløser "
+                        f"Chief -- automatisk Chief er deaktivert: {pastand!r}",
+                    )
 
     def test_handoff_filen_er_git_ignorert(self):
         with open(_GITIGNORE, encoding="utf-8") as f:

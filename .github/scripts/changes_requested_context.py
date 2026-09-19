@@ -53,14 +53,27 @@ FAIL-CLOSED KONTRAKT (ingen Claude-run skal starte uten alle disse):
   - PR-ens ferske head er EKSAKT det pre-run-hodet (40-tegns SHA);
   - PR-en er FORTSATT Draft ved dette ferske refetchet (Chief-review-fiks,
     PR #330: issue #44-porten kjører FØR disse stegene, så en PR som blir
-    satt Ready i mellomtiden må fanges her, ellers mister runden
-    Draft -> Ready-vekkesignalet som utløser Chiefs re-review);
+    satt Ready i mellomtiden må fanges her, ellers mister runden hele
+    Draft -> Ready-livssyklusovergangen -- se AUTOMATISK CHIEF ER
+    DEAKTIVERT under for hva den overgangen faktisk er i dag);
   - det finnes en CHANGES_REQUESTED-review fra autorisert Chief-identitet
     (repo-eier);
   - den reviewens `commit_id` er EKSAKT samme head;
   - reviewens body er ikke tom;
   - ingen NYERE beslutnings-review fra samme identitet har gjort den
     foreldet (se `_nyeste_beslutning` for den dokumenterte semantikken).
+
+AUTOMATISK CHIEF ER DEAKTIVERT (kanonisk #152, 2026-09-19): Chief/ChatGPT
+kjører IKKE review automatisk. Chief review er eier-invokert i chat (f.eks.
+GREEN eller en eksplisitt review-forespørsel). Claude bot / Agent Bridge er
+den eneste AI-arbeideren som er ment å kjøre automatisk; vanlig CI kjører
+som før. Draft -> Ready-overgangen og Chief-ready-markørene BLIR STÅENDE --
+de er livssyklus-bevis og framtidskompatibel plumbing -- men de er IKKE en
+aktiv, ubemannet Chief-kjørevei, og `ready_for_review` utløser derfor ikke i
+seg selv noen Chief/ChatGPT-review i dag. Draft-kravet under finnes altså
+for å bevare en korrekt, etterprøvbar livssykluskjede (og for at
+`pr_ready_handoff.py` ikke skal se en allerede-Ready PR og hoppe over
+overgangen), ikke fordi overgangen vekker noen.
 
 PR-kommentarer, markør-tekst og Claude-genererte oppsummeringer er ALDRI
 en erstatning for selve review-objektet -- kun `reviews`-API-et teller.
@@ -343,18 +356,24 @@ def bygg_kontekst(
     # beviser IKKE at PR-en fortsatt er Draft. Draft-porten fra issue #44
     # (`pr_draft_handoff.py::verifiser_draft`) kjører FØR disse #329-stegene,
     # så en PR som blir satt Ready i mellomtiden ville passert denne porten
-    # og latt Claude kjøre likevel. Det svekker nøyaktig det Draft -> Ready-
-    # vekkesignalet denne runden er avhengig av: `pr_ready_handoff.py` ville
-    # etterpå sett en allerede-Ready PR (`already_ready`) og aldri sendt noe
-    # `ready_for_review`-event, så Chiefs re-review ville uteblitt. Draft er
-    # derfor en likeverdig forutsetning her, re-bevist på det FERSKE
-    # refetchet -- og `False`/manglende felt avvises likt (fail-closed).
+    # og latt Claude kjøre likevel. Da ville `pr_ready_handoff.py` etterpå
+    # sett en allerede-Ready PR (`already_ready`), hoppet over Draft -> Ready-
+    # overgangen og aldri sendt noe `ready_for_review`-event -- og runden
+    # ville stått igjen uten den livssyklus-overgangen som dokumenterer at
+    # den faktisk ble levert. Draft er derfor en likeverdig forutsetning her,
+    # re-bevist på det FERSKE refetchet -- og `False`/manglende felt avvises
+    # likt (fail-closed).
+    #
+    # MERK (kanonisk #152, 2026-09-19): den overgangen er livssyklus-BEVIS og
+    # framtidskompatibel plumbing, ikke en vekker. Automatisk Chief er
+    # deaktivert; eieren invokerer Chief review manuelt i chat, og
+    # `ready_for_review` utløser ikke i seg selv noen Chief/ChatGPT-review.
     if pr.get("isDraft") is not True:
         return False, None, (
             f"PR #{pr_nummer} er ikke bekreftet Draft ved fersk refetch "
             f"(isDraft={pr.get('isDraft')!r}) -- Draft-forutsetningen for "
             "changes-requested-handoffen (issue #44) holder ikke lenger, og en "
-            "runde herfra ville mistet Draft -> Ready-vekkesignalet til Chief "
+            "runde herfra ville mistet Draft -> Ready-livssyklusovergangen "
             "(fail-closed)."
         )
 

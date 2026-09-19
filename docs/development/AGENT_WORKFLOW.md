@@ -1736,11 +1736,27 @@ rejects the round:
 Draft gate (`pr_draft_handoff.py::verifiser_draft`) runs *before* these #329
 steps. Identity and exact head alone do not prove the PR is still Draft, so
 a PR that flips to Ready in between would pass this gate and Claude would
-run anyway. That would quietly break the Draft → Ready wake mechanism this
-round depends on: `pr_ready_handoff.py` would afterwards see an
-already-Ready PR (`already_ready`), emit no `ready_for_review` event, and
-Chief's re-review would never be triggered. Draft is therefore an equal
-precondition here, re-proved on the fresh refetch.
+run anyway. `pr_ready_handoff.py` would afterwards see an already-Ready PR
+(`already_ready`), skip the Draft → Ready transition and emit no
+`ready_for_review` event — leaving the round without the lifecycle
+transition that records it was actually delivered. Draft is therefore an
+equal precondition here, re-proved on the fresh refetch.
+
+> **Automatic Chief is disabled (canonical #152, 2026-09-19).**
+> Chief/ChatGPT does **not** run review automatically. Chief review is
+> **owner-invoked in chat** (for example GREEN, or an explicit review
+> request). The Claude bot / Agent Bridge is the only AI worker intended to
+> run automatically; normal CI workflows remain automatic as usual.
+>
+> The Draft → Ready transition and the Chief-ready markers **stay** — they
+> are lifecycle evidence and future-compatible plumbing — but they are
+> **not** an active unattended Chief execution path, and `ready_for_review`
+> does **not** by itself trigger a Chief/ChatGPT review today. Read every
+> "wake signal" description elsewhere in this document (issues #32, #40,
+> #44, #62) as describing that retained plumbing, not a currently active
+> automatic reviewer. The Draft requirement above therefore exists to keep
+> the lifecycle chain correct and auditable, not because the transition
+> wakes anyone.
 
 **Staleness semantics.** A `CHANGES_REQUESTED` is a valid work order only
 while it is Chief's **most recent decision**. Decision states are
@@ -1803,8 +1819,11 @@ deliberately retained and are out of scope for issue #329 —
 Owner/event authorization, the `agent:claude` requirement, lifecycle
 exclusivity, the Draft handoff, exact branch policy, branch-scoped push,
 absence of `git merge` / `gh pr merge`, `deliverable_guard`, the exact-head
-change requirement, the Draft → Ready mechanism, the Chief-ready wake
-signal, and the owner GO / merge governance all behave exactly as before.
+change requirement, the Draft → Ready mechanism, the Chief-ready signal
+plumbing, and the owner GO / merge governance all behave exactly as before.
+Issue #329 changes none of that machinery — and, per the note above, the
+Chief-ready/Draft → Ready plumbing is retained as lifecycle evidence, not as
+an automatic reviewer.
 
 ### Honest limit
 
