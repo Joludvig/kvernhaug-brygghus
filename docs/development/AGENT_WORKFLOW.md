@@ -1702,8 +1702,9 @@ verification:
 |---|---|
 | `cr_state` | Fetches live state: the open PRs on the deterministic branch, and the PR's reviews **from the GitHub reviews API**. Everything is written straight to files and assembled with `jq --slurpfile`. |
 | `cr_context` | The decision: `.github/scripts/changes_requested_context.py verify` (`bygg_kontekst`). Fail-closed `exit 1` on any unproven condition, which stops the job before Claude. On success it writes the verified review to `.agent_bridge_run/chief_review.md`. |
+| `cr_verifier_stage` (issue #331) | Copies `.github/scripts/changes_requested_context.py` from the **current, trusted master/workflow checkout** to a runner-owned temp path (`$RUNNER_TEMP`, never inside the repo tree) — while `HEAD` is still on master, strictly before the next step switches it. See "Checkout-verifier trust root (V1.9.1, issue #331)" below. |
 | `cr_branch` | Fetches the existing agent branch and `git checkout -B "$BRANCH" "$EXPECTED_HEAD"` — the exact head the verified review applies to. No `reset --hard`, no `clean`, no `rebase`, no `--force`. |
-| `cr_checkout` | The proof: `changes_requested_context.py checkout-verify` (`verifiser_lokalt_hode`) — local `HEAD` must equal the verified pre-run head and local branch must be the deterministic branch. Fail-closed `exit 1`. |
+| `cr_checkout` | The proof: the **staged** copy from `cr_verifier_stage`, run as `checkout-verify` (`verifiser_lokalt_hode`) — local `HEAD` must equal the verified pre-run head and local branch must be the deterministic branch. Fail-closed `exit 1`, including when the staged copy is missing or empty. |
 
 `status:ready` is deliberately untouched: `cr_context` returns a
 non-alarming *"not required"* for any other trigger label (the same pattern
@@ -1834,6 +1835,60 @@ policy and permission-config contracts). Whether the repaired route
 actually carries a live round end to end can only be shown by a real
 controlled changes-requested E2E — issue #327 is deliberately reserved as
 that proof case. Nothing here claims that E2E has already passed.
+
+## Checkout-verifier trust root (V1.9.1, issue #331)
+
+**The bug this fixes.** The exact E2E retry issue #327's docstring above
+describes as "deliberately reserved as that proof case" was actually
+attempted (owner-authorized retry on PR #328's pre-#329 head,
+`6699b63b039b7cefc086fceb65b01eb48adc3542`) and failed *before* Claude
+started — not because any trigger/PR/review gate was wrong, but because
+`cr_checkout` ran `python3 .github/scripts/changes_requested_context.py
+checkout-verify` **from the repo working tree**, one step *after*
+`cr_branch` had already switched that same tree to the old feature head.
+`.github/scripts/changes_requested_context.py` was only added by #329/#330
+itself, so it simply did not exist on PR #328's older head at that point —
+the file had disappeared from the workspace between `cr_context` (still on
+master) and `cr_checkout` (now on the old head), and the step failed
+closed for the wrong reason: a missing trusted tool, not a real review-gate
+rejection.
+
+**The fix.** A new step, `cr_verifier_stage`, copies
+`.github/scripts/changes_requested_context.py` from the **current, trusted
+master/workflow checkout** to a runner-owned temp path (`$RUNNER_TEMP`,
+outside the repo working tree) immediately after `cr_context` and — this
+ordering is the whole fix — strictly **before** `cr_branch` switches the
+tree to the old feature head. `cr_checkout` then runs that staged copy
+(`steps.cr_verifier_stage.outputs.path`, exposed as `$STAGED_VERIFIER`),
+never the copy sitting in the checked-out feature branch's own
+`.github/scripts/`. The old feature branch cannot substitute a different
+verifier merely by changing what its own working tree contains, because
+the trusted copy no longer lives there by the time it matters. A missing or
+empty staged file is itself a fail-closed rejection (`exit 1` before any
+`checkout-verify` call), matching the exit-code contract every other gate
+on this path already uses.
+
+**What this does not change.** The decision logic inside
+`changes_requested_context.py` (`bygg_kontekst`, `verifiser_lokalt_hode`)
+is untouched — this is purely a trust-root/ordering fix for *which copy of
+the script runs*, not a change to what it decides. `cr_state`/`cr_context`
+(PR/review verification) and `cr_branch` (branch checkout to the exact
+verified head) are unchanged. Every exact-head/Draft/owner-review gate
+described above still applies identically. No `--allowedTools` permission
+was broadened — `cr_verifier_stage`'s `cp` runs inside the workflow's own
+job step, not through Claude's Bash allowlist, and `status:ready` is
+untouched (the new step is scoped to
+`needs.guard.outputs.trigger_label == 'status:changes-requested'`, same as
+`cr_branch`/`cr_checkout`). Issue #327 / PR #328 themselves are not
+touched or retriggered by this fix.
+
+Regression coverage:
+`tests/test_agent_bridge_changes_requested_context.py`'s
+`TestWorkflowKobling` proves `cr_verifier_stage` exists, runs strictly
+between `cr_context` and `cr_branch`, is scoped to
+`status:changes-requested`, and that `cr_checkout` invokes the staged path
+(never `.github/scripts/changes_requested_context.py checkout-verify`
+directly) and fails closed when the staged file is missing/empty.
 
 ## Round 1 also uses the Draft -> Ready lifecycle (V1, issue #62)
 

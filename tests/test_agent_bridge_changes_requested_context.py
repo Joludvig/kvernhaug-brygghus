@@ -606,8 +606,8 @@ class TestWorkflowKobling(unittest.TestCase):
     def setUp(self):
         self.tekst = _les_workflow()
 
-    def test_alle_fire_stegene_finnes(self):
-        for steg_id in ("cr_state", "cr_context", "cr_branch", "cr_checkout"):
+    def test_alle_stegene_finnes(self):
+        for steg_id in ("cr_state", "cr_context", "cr_verifier_stage", "cr_branch", "cr_checkout"):
             with self.subTest(steg_id=steg_id):
                 self.assertIn(f"id: {steg_id}\n", self.tekst)
 
@@ -615,12 +615,14 @@ class TestWorkflowKobling(unittest.TestCase):
         i_draft = self.tekst.index("id: draft_verify")
         i_state = self.tekst.index("id: cr_state")
         i_context = self.tekst.index("id: cr_context")
+        i_stage = self.tekst.index("id: cr_verifier_stage")
         i_branch = self.tekst.index("id: cr_branch")
         i_checkout = self.tekst.index("id: cr_checkout")
         i_claude = self.tekst.index("id: claude")
         self.assertLess(i_draft, i_state)
         self.assertLess(i_state, i_context)
-        self.assertLess(i_context, i_branch)
+        self.assertLess(i_context, i_stage)
+        self.assertLess(i_stage, i_branch, "issue #331: staging MÅ skje FØR checkout til det gamle hodet")
         self.assertLess(i_branch, i_checkout)
         self.assertLess(i_checkout, i_claude, "verifiseringen MÅ stå før Run Claude Code")
 
@@ -629,9 +631,48 @@ class TestWorkflowKobling(unittest.TestCase):
         self.assertIn("changes_requested_context.py verify", blokk)
         self.assertIn('>> "$GITHUB_OUTPUT"', blokk)
 
-    def test_checkout_verifiseringen_kaller_den_pure_modulen(self):
+    # ─── Issue #331: verifier staged BEFORE the feature-branch checkout ───
+
+    def test_verifier_stages_fra_trusted_master_checkout_til_runner_temp(self):
+        blokk = _steg_blokk(self.tekst, "cr_verifier_stage")
+        self.assertIn("cp .github/scripts/changes_requested_context.py", blokk)
+        self.assertIn("$RUNNER_TEMP/changes_requested_context.py", blokk)
+        self.assertIn('echo "path=', blokk)
+        # Ikke gatet inn i et destruktivt/branch-skiftende kommando -- rent
+        # kopi-steg, ingen checkout/reset her.
+        for forbudt in ("git checkout", "git reset", "git switch"):
+            self.assertNotIn(forbudt, blokk, f"{forbudt!r} hører ikke hjemme i stagingsteget")
+
+    def test_verifier_stage_scopet_til_changes_requested(self):
+        blokk = _steg_blokk(self.tekst, "cr_verifier_stage")
+        self.assertIn(
+            "needs.guard.outputs.trigger_label == 'status:changes-requested'",
+            blokk,
+            "status:ready må ikke berøres av stagingen",
+        )
+
+    def test_checkout_verifiseringen_kaller_den_stagede_kopien(self):
+        """Kjernen i issue #331: cr_checkout-steget MÅ kjøre kopien staget
+        FØR arbeidstreet ble byttet til det gamle hodet -- aldri
+        `.github/scripts/changes_requested_context.py` lest fra det
+        utsjekkede (potensielt gamle) repo-treet på dette tidspunktet."""
         blokk = _steg_blokk(self.tekst, "cr_checkout")
-        self.assertIn("changes_requested_context.py checkout-verify", blokk)
+        self.assertIn("steps.cr_verifier_stage.outputs.path", blokk)
+        self.assertIn("STAGED_VERIFIER", blokk)
+        self.assertIn('"$STAGED_VERIFIER" checkout-verify', blokk)
+        self.assertNotIn(
+            ".github/scripts/changes_requested_context.py checkout-verify",
+            blokk,
+            "må IKKE lenger kjøre verifikatoren direkte fra repo-arbeidstreet "
+            "-- det er nøyaktig regresjonen issue #331 fikser",
+        )
+
+    def test_checkout_verifiseringen_feiler_lukket_pa_manglende_staged_fil(self):
+        blokk = _steg_blokk(self.tekst, "cr_checkout")
+        self.assertIn('[ -z "${STAGED_VERIFIER:-}" ]', blokk)
+        self.assertIn('[ ! -s "$STAGED_VERIFIER" ]', blokk)
+        self.assertIn("checkout_verified=false", blokk)
+        self.assertIn("exit 1", blokk)
 
     def test_branch_klargjoringen_checkouter_eksakt_verifisert_head(self):
         blokk = _steg_blokk(self.tekst, "cr_branch")
@@ -643,7 +684,7 @@ class TestWorkflowKobling(unittest.TestCase):
             self.assertNotIn(forbudt, blokk, f"{forbudt!r} hører ikke hjemme her")
 
     def test_branch_stegene_er_scopet_til_changes_requested(self):
-        for steg_id in ("cr_branch", "cr_checkout"):
+        for steg_id in ("cr_verifier_stage", "cr_branch", "cr_checkout"):
             with self.subTest(steg_id=steg_id):
                 blokk = _steg_blokk(self.tekst, steg_id)
                 self.assertIn(
@@ -671,7 +712,7 @@ class TestWorkflowKobling(unittest.TestCase):
         self.assertIn("REPO_OWNER: ${{ github.repository_owner }}", blokk)
 
     def test_ingen_ny_merge_eller_master_push_overflate(self):
-        for steg_id in ("cr_state", "cr_context", "cr_branch", "cr_checkout"):
+        for steg_id in ("cr_state", "cr_context", "cr_verifier_stage", "cr_branch", "cr_checkout"):
             blokk = _steg_blokk(self.tekst, steg_id)
             for forbudt in ("gh pr merge", "git merge", "git push"):
                 self.assertNotIn(forbudt, blokk, f"{forbudt!r} i steg {steg_id}")
