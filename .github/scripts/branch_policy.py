@@ -96,10 +96,10 @@ def tillatte_switch_kommandoer(branch_navn):
 
 
 def tillatte_checkout_kommandoer(branch_navn):
-    """V1.9 (issue #329): `git checkout` var den SISTE gjenværende
-    git-wildcard-regelen i `--allowedTools` (`Bash(git checkout *)`), og den
-    fantes utelukkende fordi Claude selv måtte finne og checkoute
-    arbeidsbranchen. Fra og med #329 eier wrapperen den jobben på
+    """V1.9 (issue #329): den BREDE checkout-wildcarden
+    (`Bash(git checkout *)`) fantes utelukkende fordi Claude selv måtte
+    finne og checkoute arbeidsbranchen. Fra og med #329 eier wrapperen den
+    jobben på
     `status:changes-requested`-banen (den fetcher branchen, checkouter det
     verifiserte pre-run-hodet og beviser lokal HEAD før Claude i det hele
     tatt starter), så wildcarden er ikke lenger nødvendig for noen av de to
@@ -111,7 +111,14 @@ def tillatte_checkout_kommandoer(branch_navn):
     per `agent_branch_navn` aldri kan bli MASTER, kan ingen variant av disse
     to strengene noensinne checkoute/opprette en lokal branch ved navn
     "master". Dette SNEVRER INN permission-flaten -- ingenting som var
-    forbudt før blir tillatt her."""
+    forbudt før blir tillatt her.
+
+    Chief-review-presisering (PR #330): dette fjerner IKKE all
+    git-wildcard-bruk fra allowlista. `--allowedTools` beholder bevisst
+    flere brede, ikke-destruktive git-regler (`git fetch *`, `git branch *`,
+    `git status *`, `git diff *`, `git add *`, `git commit *`, `git log *`)
+    -- de er utenfor scopet til #329. Det denne funksjonen faktisk oppnår
+    er at den BREDE CHECKOUT-WILDCARDEN er borte."""
     if branch_navn == MASTER:
         raise ValueError("branch_navn kan aldri være 'master' -- det ville brutt hele poenget med denne modulen.")
     return (

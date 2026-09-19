@@ -51,6 +51,10 @@ FAIL-CLOSED KONTRAKT (ingen Claude-run skal starte uten alle disse):
   - nøyaktig én åpen PR med `base = master` og `head = <deterministisk branch>`;
   - PR-identiteten er den samme som ble fanget FØR kjøringen startet;
   - PR-ens ferske head er EKSAKT det pre-run-hodet (40-tegns SHA);
+  - PR-en er FORTSATT Draft ved dette ferske refetchet (Chief-review-fiks,
+    PR #330: issue #44-porten kjører FØR disse stegene, så en PR som blir
+    satt Ready i mellomtiden må fanges her, ellers mister runden
+    Draft -> Ready-vekkesignalet som utløser Chiefs re-review);
   - det finnes en CHANGES_REQUESTED-review fra autorisert Chief-identitet
     (repo-eier);
   - den reviewens `commit_id` er EKSAKT samme head;
@@ -333,6 +337,25 @@ def bygg_kontekst(
             f"er nå {fersk_head!r}) mellom pre-run-fangsten og dette ferske "
             "refetchet -- handoffen kan ikke bindes til et hode som allerede har "
             "flyttet seg (fail-closed)."
+        )
+
+    # Chief-review-fiks (PR #330, blokkerende funn): identitet + eksakt hode
+    # beviser IKKE at PR-en fortsatt er Draft. Draft-porten fra issue #44
+    # (`pr_draft_handoff.py::verifiser_draft`) kjører FØR disse #329-stegene,
+    # så en PR som blir satt Ready i mellomtiden ville passert denne porten
+    # og latt Claude kjøre likevel. Det svekker nøyaktig det Draft -> Ready-
+    # vekkesignalet denne runden er avhengig av: `pr_ready_handoff.py` ville
+    # etterpå sett en allerede-Ready PR (`already_ready`) og aldri sendt noe
+    # `ready_for_review`-event, så Chiefs re-review ville uteblitt. Draft er
+    # derfor en likeverdig forutsetning her, re-bevist på det FERSKE
+    # refetchet -- og `False`/manglende felt avvises likt (fail-closed).
+    if pr.get("isDraft") is not True:
+        return False, None, (
+            f"PR #{pr_nummer} er ikke bekreftet Draft ved fersk refetch "
+            f"(isDraft={pr.get('isDraft')!r}) -- Draft-forutsetningen for "
+            "changes-requested-handoffen (issue #44) holder ikke lenger, og en "
+            "runde herfra ville mistet Draft -> Ready-vekkesignalet til Chief "
+            "(fail-closed)."
         )
 
     review, avvisning = velg_review(reviews, repo_owner, fersk_head)

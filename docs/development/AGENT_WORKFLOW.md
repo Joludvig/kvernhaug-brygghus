@@ -1724,11 +1724,23 @@ rejects the round:
 - the PR's identity changed between the pre-run capture and the fresh
   refetch;
 - the PR's fresh head no longer equals the captured pre-run head;
+- the PR is not still `isDraft == true` at this fresh refetch (`false` and a
+  missing field are rejected identically);
 - there is no review from the authorized Chief identity (repo owner);
 - the owner has no *decision* review at all;
 - the owner's **latest decision** review is not `CHANGES_REQUESTED`;
 - that review's `commit_id` is not the exact current head;
 - that review's body is empty.
+
+**Why Draft is re-proved here (Chief review fix, PR #330).** The issue #44
+Draft gate (`pr_draft_handoff.py::verifiser_draft`) runs *before* these #329
+steps. Identity and exact head alone do not prove the PR is still Draft, so
+a PR that flips to Ready in between would pass this gate and Claude would
+run anyway. That would quietly break the Draft → Ready wake mechanism this
+round depends on: `pr_ready_handoff.py` would afterwards see an
+already-Ready PR (`already_ready`), emit no `ready_for_review` event, and
+Chief's re-review would never be triggered. Draft is therefore an equal
+precondition here, re-proved on the fresh refetch.
 
 **Staleness semantics.** A `CHANGES_REQUESTED` is a valid work order only
 while it is Chief's **most recent decision**. Decision states are
@@ -1768,14 +1780,23 @@ deploy, and never commit or edit `.agent_bridge_run/`.
 
 ### Permission surface
 
-Because the wrapper now owns branch discovery and checkout,
-`Bash(git checkout *)` — the last remaining git wildcard — is **narrowed**
-to the two exact, branch-scoped strings from
+Because the wrapper now owns branch discovery and checkout, the **broad
+checkout wildcard** `Bash(git checkout *)` is **narrowed** to the two exact,
+branch-scoped strings from
 `.github/scripts/branch_policy.py::tillatte_checkout_kommandoer`, mirroring
 the existing push and switch rules. `status:ready` keeps exactly what it
 needs (branch creation); a changes-requested round already starts on the
 right branch. This only reduces the surface — nothing previously forbidden
 becomes allowed, and no new tool, wildcard or bot allowance is introduced.
+
+**Scope of that claim (Chief review fix, PR #330).** This removes the broad
+*checkout* wildcard only. It is **not** true that it removes the last git
+wildcard from the allowlist: several broad, non-destructive git rules are
+deliberately retained and are out of scope for issue #329 —
+`Bash(git fetch *)`, `Bash(git branch *)`, `Bash(git status *)`,
+`Bash(git diff *)`, `Bash(git add *)`, `Bash(git commit *)` and
+`Bash(git log *)`. See the allowlist table in "Claude's allowed tools
+(V1.2, issue #12)" above for each one's rationale.
 
 ### Preserved unchanged
 

@@ -21,7 +21,8 @@ Testene dekker akseptansepunktene A-L i issue #329:
   B. ingen PR -> fail closed,
   C. flere/tvetydige PR-er -> fail closed,
   D. feil base/head branch -> fail closed,
-  E. head-SHA mismatch -> fail closed,
+  E. head-SHA mismatch -> fail closed, og (Chief-review-fiks, PR #330) en
+     PR som ikke lenger er Draft ved fersk refetch -> fail closed,
   F. ingen CHANGES_REQUESTED-review -> fail closed,
   G. CHANGES_REQUESTED fra feil author -> fail closed,
   H. repo-owner-review finnes, men commit_id != eksakt head -> fail closed,
@@ -228,6 +229,56 @@ class TestFailClosed(unittest.TestCase):
                 self.assertFalse(ok)
                 self.assertIn("FØR denne kjøringen", grunn)
 
+    # Chief-review-fiks (PR #330, blokkerende funn): Draft må RE-BEVISES her.
+    # Issue #44-porten kjører FØR disse #329-stegene, så en PR som blir satt
+    # Ready i mellomtiden ville ellers passert og latt Claude kjøre -- og
+    # runden ville mistet Draft -> Ready-vekkesignalet som trigger Chiefs
+    # re-review (pr_ready_handoff.py ville sett `already_ready`).
+
+    def test_e5_ready_pr_avvises_selv_om_alt_annet_er_gyldig(self):
+        ok, kontekst, grunn = _bygg(prs=[_pr(isDraft=False)])
+        self.assertFalse(ok, "en Ready PR må avvises fail-closed")
+        self.assertIsNone(kontekst)
+        self.assertIn("ikke bekreftet Draft", grunn)
+
+    def test_e6_manglende_isdraft_felt_avvises_likt_som_false(self):
+        pr = _pr()
+        del pr["isDraft"]
+        ok, kontekst, grunn = _bygg(prs=[pr])
+        self.assertFalse(ok, "manglende isDraft må behandles som ikke-bevist")
+        self.assertIsNone(kontekst)
+        self.assertIn("ikke bekreftet Draft", grunn)
+
+    def test_e7_truthy_men_ikke_true_isdraft_avvises(self):
+        # Kun ekte boolsk True teller -- ingen "true"-strenger eller 1-ere,
+        # slik at en endret API-form ikke stille kan passere porten.
+        for verdi in ("true", "True", 1, [], {}, None):
+            with self.subTest(verdi=verdi):
+                ok, _, grunn = _bygg(prs=[_pr(isDraft=verdi)])
+                self.assertFalse(ok)
+                self.assertIn("ikke bekreftet Draft", grunn)
+
+    def test_e8_draft_avvisning_skrives_aldri_som_verifisert_kontekst(self):
+        # Fail-closed betyr også: ingen handoff-fil, ingen review_body_path.
+        data = {
+            "trigger_label": "status:changes-requested",
+            "issue": "327", "branch": BRANCH,
+            "before_pr_number": "328", "before_head_sha": HEAD,
+            "repo_owner": EIER,
+            "prs": [_pr(isDraft=False)], "reviews": [_review()],
+        }
+        with tempfile.TemporaryDirectory() as td:
+            sti = os.path.join(td, ".agent_bridge_run", "chief_review.md")
+            p = subprocess.run(
+                [sys.executable, _SCRIPT, "verify"],
+                input=json.dumps(data), capture_output=True, text=True,
+                env=dict(os.environ, CONTEXT_BODY_PATH=sti),
+            )
+            self.assertEqual(p.returncode, 1, "Ready PR må gi fail-closed exit 1")
+            self.assertIn("context_verified=false", p.stdout)
+            self.assertNotIn("review_body_path=", p.stdout)
+            self.assertFalse(os.path.exists(sti))
+
     def test_f_ingen_changes_requested_review(self):
         ok, kontekst, grunn = _bygg(reviews=[])
         self.assertFalse(ok)
@@ -327,6 +378,17 @@ class TestStatusReadyUpavirket(unittest.TestCase):
         ok, kontekst, _ = _bygg(trigger_label="", prs=[], reviews=[])
         self.assertTrue(ok)
         self.assertIsNone(kontekst)
+
+    def test_l4_draft_kravet_lekker_ikke_inn_i_status_ready(self):
+        # Chief-review-fiks (PR #330): det nye isDraft-kravet gjelder KUN
+        # changes-requested. En status:ready-runde med en Ready PR i
+        # tilstanden skal fortsatt være et ikke-alarmerende "ikke påkrevd".
+        ok, kontekst, grunn = _bygg(
+            trigger_label="status:ready", prs=[_pr(isDraft=False)], reviews=[],
+        )
+        self.assertTrue(ok, grunn)
+        self.assertIsNone(kontekst)
+        self.assertIn("ikke en forutsetning", grunn)
 
     def test_l3_checkout_verifisering_er_ikke_paakrevd_for_status_ready(self):
         ok, grunn = crc.verifiser_lokalt_hode(

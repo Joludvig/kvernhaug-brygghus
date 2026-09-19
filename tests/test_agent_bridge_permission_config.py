@@ -129,15 +129,35 @@ _SWITCH_REGLER = (
     "Bash(git switch ${{ steps.branch.outputs.name }})",
 )
 
-# V1.9 (issue #329): `Bash(git checkout *)` var den SISTE gjenværende
-# git-wildcarden, og fantes kun fordi Claude selv måtte finne og checkoute
-# arbeidsbranchen. Wrapperen eier den jobben nå på
-# changes-requested-banen, så wildcarden er SNEVRET INN til de to eksakte,
-# branch-avgrensede strengene -- samme mønster som push/switch. Speiler
+# V1.9 (issue #329): den BREDE checkout-wildcarden (`Bash(git checkout *)`)
+# fantes kun fordi Claude selv måtte finne og checkoute arbeidsbranchen.
+# Wrapperen eier den jobben nå på changes-requested-banen, så den er SNEVRET
+# INN til de to eksakte, branch-avgrensede strengene -- samme mønster som
+# push/switch. Speiler
 # `.github/scripts/branch_policy.py::tillatte_checkout_kommandoer`.
+#
+# Chief-review-presisering (PR #330): dette fjerner IKKE all git-wildcard-
+# bruk. Flere brede, ikke-destruktive git-regler beholdes bevisst og er
+# utenfor scopet til #329 -- se `_BEHOLDTE_GIT_WILDCARDS` under, som
+# LÅSER den korrekte påstanden fast i en test.
 _CHECKOUT_REGLER = (
     "Bash(git checkout -b ${{ steps.branch.outputs.name }} origin/master)",
     "Bash(git checkout ${{ steps.branch.outputs.name }})",
+)
+
+# De brede git-wildcardene som BEVISST står igjen etter #329. Dette er ikke
+# en ønskeliste -- det er den faktiske, dokumenterte tilstanden, og den
+# finnes her nettopp for å hindre at en senere runde igjen påstår at "den
+# siste git-wildcarden" er fjernet. Hver av disse har sin egen begrunnelse i
+# AGENT_WORKFLOW.md → "Claude's allowed tools (V1.2, issue #12)".
+_BEHOLDTE_GIT_WILDCARDS = (
+    "Bash(git fetch *)",
+    "Bash(git branch *)",
+    "Bash(git status *)",
+    "Bash(git diff *)",
+    "Bash(git add *)",
+    "Bash(git commit *)",
+    "Bash(git log *)",
 )
 
 
@@ -500,13 +520,16 @@ class TestPermissionConfig(unittest.TestCase):
 
     # ─── 11 (V1.9, issue #329): branch-avgrensede git checkout-regler ────
     #
-    # Dette er en INNSNEVRING, ikke en utvidelse: `Bash(git checkout *)` var
-    # den siste git-wildcarden i allowlista, og den fantes utelukkende fordi
+    # Dette er en INNSNEVRING, ikke en utvidelse: den BREDE
+    # checkout-wildcarden (`Bash(git checkout *)`) fantes utelukkende fordi
     # Claude selv måtte finne og checkoute arbeidsbranchen. Etter #329 gjør
     # wrapperen det (se "Prepare existing agent branch"/"Verify local HEAD"
     # i workflowen), så bare de to eksakte, branch-avgrensede strengene
     # trengs: branch-OPPRETTING for status:ready, og en billig re-land for
     # changes-requested.
+    #
+    # Se `test_11h_...` for den presise, Chief-korrigerte påstanden: #329
+    # fjerner den brede CHECKOUT-wildcarden, ikke alle git-wildcards.
 
     def test_11a_begge_checkout_reglene_finnes_eksakt(self):
         for regel in _CHECKOUT_REGLER:
@@ -562,6 +585,41 @@ class TestPermissionConfig(unittest.TestCase):
         for regel in _SWITCH_REGLER:
             self.assertIn(regel, self.verktoy)
         self.assertEqual(_allowed_bots_verdi(self.steg), "github-actions")
+
+    def test_11h_de_beholdte_git_wildcardene_star_fortsatt(self):
+        # Chief-review-fiks (PR #330): den opprinnelige formuleringen påsto at
+        # `Bash(git checkout *)` var "den siste gjenværende git-wildcarden".
+        # Det var feil. Denne testen låser den FAKTISKE tilstanden fast, slik
+        # at påstanden ikke kan gjeninnføres uten at en test sier fra.
+        for regel in _BEHOLDTE_GIT_WILDCARDS:
+            self.assertIn(
+                regel, self.verktoy,
+                f"Denne brede git-regelen er bevisst beholdt (utenfor #329-scope): {regel!r}",
+            )
+
+    def test_11i_ingen_dokumentasjon_pastar_at_alle_git_wildcards_er_fjernet(self):
+        # Samme Chief-review-fiks, men på selve teksten: verken workflowen
+        # eller AGENT_WORKFLOW.md skal påstå at checkout-innsnevringen fjernet
+        # den siste/eneste git-wildcarden.
+        kilder = [(self.tekst, "claude-agent-bridge.yml")]
+        for relativ in (
+            os.path.join("docs", "development", "AGENT_WORKFLOW.md"),
+            os.path.join(".github", "scripts", "branch_policy.py"),
+            os.path.join(".github", "scripts", "changes_requested_context.py"),
+        ):
+            with open(os.path.join(_REPO_ROOT, relativ), encoding="utf-8") as f:
+                kilder.append((f.read(), relativ))
+        for tekst, navn in kilder:
+            lav = tekst.lower()
+            for pastand in ("last remaining git wildcard",
+                            "last git wildcard",
+                            "siste gjenværende git",
+                            "siste git-wildcard"):
+                self.assertNotIn(
+                    pastand, lav,
+                    f"{navn} påstår igjen at checkout var den siste git-wildcarden "
+                    f"-- det er ikke sant, se _BEHOLDTE_GIT_WILDCARDS: {pastand!r}",
+                )
 
     def test_11g_ingen_ny_bred_bash_overflate_introdusert_av_329(self):
         # #329 skal ALDRI utvide permission-flaten -- verken med et nytt

@@ -576,12 +576,12 @@ jobs:
       # See "Diagnose missing deliverable" below for the accompanying
       # diagnostics improvement.
       #
-      # V1.9 (issue #329): `Bash(git checkout *)` was the last remaining git
-      # WILDCARD rule, and it existed only because Claude had to find and
+      # V1.9 (issue #329): the BROAD CHECKOUT WILDCARD
+      # (`Bash(git checkout *)`) existed only because Claude had to find and
       # check out the work branch itself. The wrapper now owns that on the
       # changes-requested path (see the "Prepare existing agent branch" /
-      # "Verify local HEAD is the exact reviewed commit" steps above), so the
-      # wildcard is NARROWED to the same two exact, branch-scoped strings the
+      # "Verify local HEAD is the exact reviewed commit" steps above), so it
+      # is NARROWED to the same two exact, branch-scoped strings the
       # `git switch` rules already use, via `.github/scripts/branch_policy.py`'s
       # new `tillatte_checkout_kommandoer`. This REDUCES the permission
       # surface -- nothing previously forbidden becomes allowed. `status:ready`
@@ -590,6 +590,14 @@ jobs:
       # round now starts already on the right branch, with
       # `git checkout <branch>` retained only as a cheap re-land if anything
       # moves HEAD during the run.
+      #
+      # Chief review clarification (PR #330): this does NOT remove every git
+      # wildcard from the allowlist. Several broad, non-destructive git rules
+      # are deliberately retained and are out of scope for #329 --
+      # `Bash(git fetch *)`, `Bash(git branch *)`, `Bash(git status *)`,
+      # `Bash(git diff *)`, `Bash(git add *)`, `Bash(git commit *)` and
+      # `Bash(git log *)`. The accurate claim is narrower: the broad
+      # CHECKOUT wildcard is gone.
       #
       # V1.8 (PÅ JOBB bot-actor allowlist fix): the PÅ JOBB queue
       # dispatcher (.github/workflows/pa-jobb-queue.yml) starts this
