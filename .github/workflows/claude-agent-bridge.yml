@@ -185,6 +185,25 @@ jobs:
       # agent:claude/area:* preserved) and PUT it, so the issue can never
       # carry two contradictory states. Logic + regression tests:
       # .github/scripts/lifecycle_labels.py, tests/test_agent_bridge_labels.py
+      #
+      # Chief review-fix (issue #333, PR #334): this transition must happen
+      # BEFORE the two runtime-setup steps below (runtime ignore install,
+      # contract staging), not after. Both of those steps can themselves
+      # fail closed, and while they run before this transition the issue
+      # never actually reaches `status:working` on such a failure -- it
+      # stays at whichever `status:ready`/`status:changes-requested` label
+      # triggered the run. The generic failure handlers further down this
+      # workflow unconditionally report "Issue left at `status:working`",
+      # which would then be false, and on a changes-requested retry would
+      # also leave the already-consumed trigger label in place with no
+      # guarantee that re-applying it creates a fresh labeled event. Moving
+      # this transition first keeps the workflow's own state-machine
+      # contract ("the run moves to `status:working` immediately before
+      # execution work begins") true for every later fail-closed path.
+      # Safe to move: this step only reads/writes issue labels via the API
+      # and does not depend on `.agent_bridge_run/` existing or on which
+      # branch is checked out, so it has no ordering dependency on either
+      # step it now precedes.
       - name: Move to status:working (exclusive lifecycle transition)
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
         run: |
@@ -194,6 +213,77 @@ jobs:
             | gh api --method PUT "repos/$REPO/issues/$ISSUE/labels" --input -
           echo "Labels now:"
           gh issue view "$ISSUE" --repo "$REPO" --json labels -q '.labels[].name'
+
+      # ─── Issue #333: branch-independent runtime ignore for `.agent_bridge_run/` ───
+      #
+      # Gap this closes: `.agent_bridge_run/chief_review.md` (issue #329) and
+      # `.agent_bridge_run/AGENT_WORKFLOW.md` (issue #333, staged below) are
+      # written to the working tree while it is still on THIS trusted master
+      # checkout, but the changes-requested path later switches that same
+      # tree to an old feature branch's exact reviewed head ("Prepare
+      # existing agent branch for changes-requested round", below). A branch
+      # old enough to predate the `.agent_bridge_run/` entry in the tracked
+      # `.gitignore` would leave that runtime handoff unprotected by the
+      # checked-out branch's own ignore rules -- a broad `git add -A` could
+      # then, in principle, stage it by accident.
+      #
+      # The fix: install the ignore rule in LOCAL Git metadata
+      # (`.git/info/exclude`), never the tracked `.gitignore` -- an
+      # untracked, per-clone file `git checkout`/`git switch` never touches,
+      # regardless of which branch is checked out afterward. Idempotent
+      # (only appends the anchored line if it is not already present) and
+      # PROVEN, not assumed: `git check-ignore` must confirm a probe path
+      # under `.agent_bridge_run/` is actually ignored, or the step fails
+      # closed (exit 1) before any `.agent_bridge_run/` file is ever
+      # written or any branch is switched. See
+      # .github/scripts/runtime_ignore.py and
+      # tests/test_agent_bridge_runtime_ignore.py (including a real
+      # temporary-git regression: a fixture branch with NO `.gitignore`
+      # entry, `.git/info/exclude` only, runtime files created, branch
+      # switched, `git add -A` run, files proven to stay unstaged).
+      #
+      # Runs for BOTH trigger labels -- harmless, proven-safe common setup:
+      # `status:ready` has no `.agent_bridge_run/` write to protect yet at
+      # this point either, but installing the same protection unconditionally
+      # keeps this step (and the contract-staging step below) simple and
+      # identical on both paths, per AGENT_WORKFLOW.md's "harmless common
+      # runtime setup if that is deliberately proven safe" allowance.
+      - name: Install runtime-only ignore protection for Agent Bridge handoff (issue #333)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: runtime_ignore
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/runtime_ignore.py install >> "$GITHUB_OUTPUT"
+
+      # ─── Issue #333: stage the current, trusted Agent Workflow contract ───
+      #
+      # Gap this closes: the "Run Claude Code" prompt below used to point
+      # Claude at `docs/development/AGENT_WORKFLOW.md` directly -- but on a
+      # changes-requested round the working tree is later switched to an old
+      # feature branch's exact reviewed head ("Prepare existing agent branch
+      # for changes-requested round", below), and an old branch predating a
+      # contract update (e.g. #329's handoff contract, or the canonical #152
+      # manual-Chief policy) would silently replace what Claude is told to
+      # obey with stale repository history.
+      #
+      # The fix: copy the CURRENT, trusted `docs/development/AGENT_WORKFLOW.md`
+      # into the runtime handoff, staged now while HEAD is still on this
+      # trusted master checkout -- strictly before any branch switch below,
+      # the same trust-root pattern as the checkout-verifier staging fix
+      # (issue #331). The prompt then points Claude at this staged copy as
+      # the ONE governing contract, never at whatever
+      # `docs/development/AGENT_WORKFLOW.md` happens to read on the
+      # checked-out branch (which may be read only as historical/project
+      # context, never as the governing contract). Protected by the
+      # runtime-ignore install above -- never committed, on any branch.
+      - name: Stage current authoritative Agent Workflow contract (issue #333)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: contract_stage
+        run: |
+          set -euo pipefail
+          mkdir -p .agent_bridge_run
+          cp docs/development/AGENT_WORKFLOW.md .agent_bridge_run/AGENT_WORKFLOW.md
+          echo "path=.agent_bridge_run/AGENT_WORKFLOW.md" >> "$GITHUB_OUTPUT"
 
       # V1.2 (issue #12), Chief review fix (PR #13, blockers 1+2): every
       # bridge run for an issue uses ONE fixed, deterministic branch
@@ -685,17 +775,23 @@ jobs:
             --permission-mode acceptEdits
           prompt: |
             You are running as the automated Claude side of the Kvernhaug
-            Agent Bridge (docs/development/AGENT_WORKFLOW.md — read it in
-            full before doing anything else; it is the authoritative
-            behavior contract for this run and takes precedence over any
-            summary here).
+            Agent Bridge. Read `.agent_bridge_run/AGENT_WORKFLOW.md` in
+            full before doing anything else — it is a staged copy of the
+            current, trusted `docs/development/AGENT_WORKFLOW.md`, copied
+            there from the master checkout before any branch switch this
+            run performed (issue #333), and it is the authoritative
+            behavior contract for this run, taking precedence over any
+            summary here. If your checked-out branch carries its own
+            `docs/development/AGENT_WORKFLOW.md`, treat that copy as
+            historical/project context only, never as the governing
+            Bridge contract — only the staged copy above governs this run.
 
             Task specification: GitHub issue #${{ env.ISSUE }} in this
             repository. Treat the issue body as your immutable task
             specification once you begin — do not silently expand scope;
             a material scope change requires posting a "SCOPE CHANGE"
             comment on the issue and stopping for owner input, per
-            AGENT_WORKFLOW.md.
+            `.agent_bridge_run/AGENT_WORKFLOW.md` (staged, see above).
 
             This run was triggered by the label `${{ env.TRIGGER_LABEL }}`.
 
@@ -811,8 +907,9 @@ jobs:
               and why, rather than guessing or widening the change.
 
             For BOTH trigger paths, perform the final post-verification
-            HO step in AGENT_WORKFLOW.md, section "HO policy — local and
-            GitHub jobs", before the final outcome report. Use the same
+            HO step in `.agent_bridge_run/AGENT_WORKFLOW.md` (staged copy,
+            see above), section "HO policy — local and GitHub jobs",
+            before the final outcome report. Use the same
             policy as local Claude: resolve #152's existing router, check
             material change and single-writer ownership, and report
             `HO UPDATED: YES/NO` with its evidence or reason. Do not write
