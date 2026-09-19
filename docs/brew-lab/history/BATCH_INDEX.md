@@ -18,6 +18,7 @@ Purpose: keep **name/lineage**, **recipe identity**, and **physical brewed batch
 | BL-2026-TINYBEER | **TinyBeer / Kvernhaug Suttlevatn** | weak after-beer from Märzen malt | harvested **W-34/70 from Sommerglød** | brewed; separate from main Märzen |
 | BL-2026-ELDSVENN-LATER | later/current **Eldsvenn** | separate later Eldsvenn line | **Wyeast 1318** | brewed; currently fermenting in Sept 2026 context |
 | BL-2026-ELDSVENN-SMALL | Eldsvenn small beer / parti-gyle | after-beer from BL-2026-ELDSVENN-LATER | **Wyeast 1318** | brewed; separate from TinyBeer/Suttlevatn |
+| BL-2026-EXTRACT-STOUT | extract stout set | one of three extract sets | **unknown** | brewed/set 2026-08-30; OG ~1.045; bucket at ~17–18 °C |
 
 ## Lineage map
 
@@ -44,7 +45,7 @@ Purpose: keep **name/lineage**, **recipe identity**, and **physical brewed batch
 - detailed first-Eldsvenn/Skumring brewday/process timeline; App log now anchors date/OG/FG/volume
 - exact Varðeldr recipe evolution from Skumring
 - remaining concrete Brew Lab batches not yet represented as bounded records
-- extract-set brew history, if recovered from primary chat evidence
+- extract-set FG/package/tasting/yeast details; sparse brew identity is now recovered
 - fermentation/tasting/next-brew observations for batches still in progress
 
 ## App records not yet proven as physical brewed batches
