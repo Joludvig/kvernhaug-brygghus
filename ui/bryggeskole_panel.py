@@ -186,11 +186,18 @@ def _init_state():
     st.session_state.setdefault("bs_miljo", None)
     st.session_state.setdefault("bs_aktiv_modul", None)
     st.session_state.setdefault("bs_modul_sesjon", {})
+    _ovd_tidligere_baseline()
 
 
 def _ny_modul_sesjon():
     return {
         "fase": "leksjon",
+        # Læringsbolkene vises ÉN om gangen (issue #338: "overview ->
+        # chunks -> question..."). Posisjonen ligger her, per modul, slik
+        # at en tur til skoleoversikten og tilbake gjenopptar nøyaktig
+        # samme bolk -- og slik at Mesking og Gjæring har helt uavhengig
+        # leksjonsfremdrift i samme økt.
+        "bolk_idx": 0,
         "sporsmal_idx": 0,
         "runde": 0,
         "siste_feedback": None,
@@ -198,6 +205,44 @@ def _ny_modul_sesjon():
         "rekkefolger": {},
         "forrige_korrekt_indeks": {},
     }
+
+
+def _har_persistert_praksis(modul_id, tilstand):
+    """True hvis den PERSISTERTE mastery-tilstanden har minst ett forsøk
+    på et av modulens konsepter."""
+    try:
+        pilot = _MODULER[modul_id]["pilot"].read_pilot_file()
+    except _PILOT_CONTENT_ERRORS:
+        return False
+    konsepter = _konsept_rekkefolge(pilot)
+    return any(
+        (tilstand.get("concepts", {}).get(k) or {}).get("attempts", 0) > 0 for k in konsepter
+    )
+
+
+def _ovd_tidligere_baseline():
+    """«Øvd på tidligere» ØYEBLIKKSBILDE, tatt før denne øktens egen
+    læring rekker å endre noe (Chief review, PR #340).
+
+    Tidligere ble merket utledet direkte fra den LEVENDE persisterte
+    tilstanden. Men apply_answer() skriver til disk med én gang læreren
+    svarer, så det første svaret i økten skapte umiddelbart «Øvd på
+    tidligere» ved siden av «Påbegynt» -- selv for en lærer som aldri
+    hadde vært innom modulen før. Issue #338 skiller eksplisitt
+    PERSISTENT tidligere praksis fra øktens egen status, så baselinen
+    beregnes én gang per Streamlit-økt, ved første render av panelet
+    (_init_state()), altså før noe svar kan ha blitt lagret.
+
+    Ingen endring i mastery-schema eller lagring: dette er kun et
+    session_state-øyeblikksbilde av tall som allerede fantes.
+    """
+    if "bs_ovd_baseline" not in st.session_state:
+        tilstand = _les_tilstand()
+        st.session_state["bs_ovd_baseline"] = {
+            modul_id: _har_persistert_praksis(modul_id, tilstand)
+            for modul_id in _MODUL_REKKEFOLGE
+        }
+    return st.session_state["bs_ovd_baseline"]
 
 
 def _modul_sesjon(modul_id):
@@ -235,6 +280,13 @@ def _apne_modul(modul_id):
 
 def _tilbake_til_oversikt():
     st.session_state["bs_aktiv_modul"] = None
+
+
+def _bla_bolk(modul_id, delta, totalt):
+    """Flytter leksjonsposisjonen én bolk fram/tilbake, klemt innenfor
+    modulens egne bolker."""
+    sesjon = _modul_sesjon(modul_id)
+    sesjon["bolk_idx"] = max(0, min(totalt - 1, sesjon["bolk_idx"] + delta))
 
 
 def _start_sporsmal_runde(modul_id):
@@ -334,23 +386,15 @@ def _injiser_bryggeskole_css():
     )
 
 
-def _modul_status(modul_id, tilstand):
+def _modul_status(modul_id):
     """Returnerer (ovd_tidligere, sesjon) for statusmerkene på et
     modul-kort:
-    - ovd_tidligere: PERSISTERT mastery finnes fra før (attempts > 0 på
-      minst ett av modulens konsepter) -- "Øvd på tidligere".
+    - ovd_tidligere: praksis som fantes FØR denne økten -- lest fra
+      øktens baseline (_ovd_tidligere_baseline()), aldri fra den levende
+      tilstanden, slik at øktens egne svar ikke kan skape merket.
     - sesjon: None hvis aldri åpnet denne økten; ellers selve
       sesjondict-en, som avgjør "Påbegynt" vs. "Gjennomført denne økten"."""
-    try:
-        pilot = _MODULER[modul_id]["pilot"].read_pilot_file()
-    except _PILOT_CONTENT_ERRORS:
-        return False, _les_modul_sesjon(modul_id)
-
-    konsepter = _konsept_rekkefolge(pilot)
-    ovd_tidligere = any(
-        (tilstand.get("concepts", {}).get(k) or {}).get("attempts", 0) > 0 for k in konsepter
-    )
-    return ovd_tidligere, _les_modul_sesjon(modul_id)
+    return _ovd_tidligere_baseline().get(modul_id, False), _les_modul_sesjon(modul_id)
 
 
 def _anbefalt_modul():
@@ -391,7 +435,6 @@ def _render_miljovalg():
 def _render_skoleoversikt(miljo, sprak):
     st.subheader(t(f"bryggeskole.miljo.{miljo}"))
 
-    tilstand = _les_tilstand()
     anbefalt = _anbefalt_modul()
     if anbefalt is not None:
         st.info(t("bryggeskole.anbefalt_neste", modul=t(_MODULER[anbefalt]["tittel_nokkel"])))
@@ -407,7 +450,7 @@ def _render_skoleoversikt(miljo, sprak):
                 continue
 
             st.caption(t("bryggeskole.prosess.aktiv_badge"))
-            ovd_tidligere, sesjon = _modul_status(modul_id, tilstand)
+            ovd_tidligere, sesjon = _modul_status(modul_id)
             merker = []
             if ovd_tidligere:
                 merker.append(t("bryggeskole.status.ovd_tidligere"))
@@ -430,15 +473,48 @@ def _render_skoleoversikt(miljo, sprak):
             )
 
 
-def _render_leksjon(modul_id, pilot, sprak):
+def _render_leksjon(modul_id, sesjon, pilot, sprak):
+    """ÉN læringsbolk om gangen (issue #338 / Chief review PR #340).
+
+    Tidligere ble alle pilotens chunks rendret i én lang skjerm og
+    læreren hoppet rett til spørsmålene. Nå er leksjonen en egen liten
+    reise: bolk 1 -> Neste -> bolk 2 -> ... -> Start spørsmål, med
+    posisjonen lagret per modul, slik at en tur innom skoleoversikten
+    gjenopptar nøyaktig samme bolk."""
     st.write("---")
+    chunks = pilot["chunks"]
+    totalt = len(chunks)
+    # Defensivt klem: innholdet kan i prinsippet ha blitt kortere siden
+    # posisjonen ble lagret (kun mulig ved innholdsendring i dev).
+    idx = max(0, min(sesjon["bolk_idx"], totalt - 1))
+    sesjon["bolk_idx"] = idx
+
+    st.caption(t("bryggeskole.leksjon.bolk_teller", n=idx + 1, totalt=totalt))
     with st.container(key="bs_leksjon_tekst"):
-        for chunk in pilot["chunks"]:
-            st.markdown(_MODULER[modul_id]["pilot"].render_chunk(chunk, sprak)["text"])
-    st.button(
-        t("bryggeskole.leksjon.start_sporsmal"), key="bs_start_sporsmal_btn",
-        width="stretch", on_click=_start_sporsmal_runde, args=(modul_id,),
-    )
+        st.markdown(_MODULER[modul_id]["pilot"].render_chunk(chunks[idx], sprak)["text"])
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.button(
+            t("bryggeskole.leksjon.forrige"), key=f"bs_bolk_forrige_{modul_id}_btn",
+            width="stretch", disabled=idx == 0,
+            on_click=_bla_bolk, args=(modul_id, -1, totalt),
+        )
+    with col2:
+        if idx + 1 < totalt:
+            st.button(
+                t("bryggeskole.leksjon.neste"), key=f"bs_bolk_neste_{modul_id}_btn",
+                width="stretch", type="primary",
+                on_click=_bla_bolk, args=(modul_id, 1, totalt),
+            )
+        else:
+            # «Start spørsmål» finnes KUN på siste bolk -- det er det som
+            # gjør leksjonen til en sekvens og ikke en scroll-skjerm.
+            st.button(
+                t("bryggeskole.leksjon.start_sporsmal"), key=f"bs_start_sporsmal_{modul_id}_btn",
+                width="stretch", type="primary",
+                on_click=_start_sporsmal_runde, args=(modul_id,),
+            )
 
 
 def _render_sporsmal(modul_id, sesjon, pilot, sprak):
@@ -457,7 +533,11 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
     sporsmal = sporsmal_liste[idx]
     rendret = pilot_modul.render_question(sporsmal, sprak)
     runde = sesjon["runde"]
-    widget_key = f"bs_valg_r{runde}_q{idx}"
+    # Widget-nøkkelen MÅ inneholde modul_id (Chief review, PR #340):
+    # begge moduler starter på samme runde-/spørsmålsindeks, så en
+    # modul-agnostisk nøkkel ville latt Streamlit gjenbruke den lagrede
+    # radioverdien fra den ene modulen når den andre åpnes i samme økt.
+    widget_key = f"bs_valg_{modul_id}_r{runde}_q{idx}"
 
     id_rekkefolge = _hent_alternativ_rekkefolge(sesjon, sporsmal)
     rendret_by_id = {o["id"]: o for o in rendret["options"]}
@@ -491,7 +571,7 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
         # et ubesvart spørsmål stille mutere persistert mastery via
         # Streamlits standard "velg første alternativ"-oppførsel.
         st.button(
-            t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_r{runde}_q{idx}",
+            t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_{modul_id}_r{runde}_q{idx}",
             width="stretch", on_click=_sjekk_svar, args=(modul_id, sporsmal, sprak, widget_key, runde),
             disabled=st.session_state.get(widget_key) is None,
         )
@@ -506,7 +586,7 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
             st.caption(f"{t('bryggeskole.svar.riktig_svar')}: {riktig_raw['text'][sprak]}")
         (st.success if siste["correct"] else st.error)(siste["feedback"])
         st.button(
-            t("bryggeskole.sporsmal.fortsett"), key=f"bs_fortsett_btn_r{runde}_q{idx}",
+            t("bryggeskole.sporsmal.fortsett"), key=f"bs_fortsett_btn_{modul_id}_r{runde}_q{idx}",
             width="stretch", on_click=_neste_sporsmal, args=(modul_id, totalt),
         )
 
@@ -547,39 +627,48 @@ def _render_oppsummering(modul_id, pilot, sprak):
     tilstand = _les_tilstand()
     konsepter = _konsept_rekkefolge(pilot)
 
-    # Cumulative fremgang (eksisterende mastery_label(), uendret motor) --
-    # men med overskrift/forklaring som gjør eksplisitt at dette IKKE er
-    # denne rundens resultat (Chief review, PR #328).
+    # ÉTT kort per konsept, med BEGGE signalene samlet (issue #338 /
+    # Chief review PR #340). Tidligere var dette to atskilte lister --
+    # først cumulative mastery for alle konsepter, så denne rundens
+    # status for alle konsepter -- slik at læreren måtte holde to lister
+    # opp mot hverandre for å se hvordan ett enkelt konsept lå an.
+    #
+    # De to linjene er bevisst fortsatt SKILT fra hverandre inne i
+    # kortet (Chief review, PR #328): «Denne runden» endrer seg synlig
+    # ved feil svar selv når «Over tid» ikke gjør det. Rekkefølgen på
+    # kortene er pedagogisk (_konsept_rekkefolge()), ikke alfabetisk.
     st.subheader(t("bryggeskole.oppsummering.heading"))
     st.caption(t("bryggeskole.oppsummering.heading_forklaring"))
     for konsept_id in konsepter:
         konsept_tilstand = tilstand["concepts"].get(konsept_id)
-        if konsept_tilstand is None:
-            continue
-        st.markdown(f"- **{_konsept_label(konsept_id, sprak)}:** {mastery_label(konsept_tilstand, sprak)}")
-
-    # Denne rundens signal -- ikke-numerisk, endrer seg synlig ved feil
-    # svar selv når cumulative mastery over ikke gjør det.
-    st.subheader(t("bryggeskole.oppsummering.denne_runden_heading"))
-    for konsept_id in konsepter:
         runde_status = _konsept_runde_status(tilstand, pilot, konsept_id)
-        if runde_status is None:
+        if konsept_tilstand is None and runde_status is None:
             continue
-        runde_nokkel = (
-            "bryggeskole.oppsummering.runde_ok" if runde_status
-            else "bryggeskole.oppsummering.runde_reprise"
-        )
-        st.markdown(f"- **{_konsept_label(konsept_id, sprak)}:** {t(runde_nokkel)}")
+        with st.container(border=True):
+            st.markdown(f"**{_konsept_label(konsept_id, sprak)}**")
+            if runde_status is not None:
+                runde_nokkel = (
+                    "bryggeskole.oppsummering.runde_ok" if runde_status
+                    else "bryggeskole.oppsummering.runde_reprise"
+                )
+                st.markdown(
+                    f"{t('bryggeskole.oppsummering.denne_runden_label')}: {t(runde_nokkel)}"
+                )
+            if konsept_tilstand is not None:
+                st.markdown(
+                    f"{t('bryggeskole.oppsummering.over_tid_label')}: "
+                    f"{mastery_label(konsept_tilstand, sprak)}"
+                )
 
     col1, col2 = st.columns(2)
     with col1:
         st.button(
-            t("bryggeskole.oppsummering.prov_igjen"), key="bs_prov_igjen_btn",
+            t("bryggeskole.oppsummering.prov_igjen"), key=f"bs_prov_igjen_{modul_id}_btn",
             width="stretch", on_click=_start_sporsmal_runde, args=(modul_id,),
         )
     with col2:
         st.button(
-            t("bryggeskole.tilbake_til_oversikt"), key="bs_oppsummering_tilbake_btn",
+            t("bryggeskole.tilbake_til_oversikt"), key=f"bs_oppsummering_tilbake_{modul_id}_btn",
             width="stretch", on_click=_tilbake_til_oversikt,
         )
 
@@ -591,7 +680,7 @@ def _render_modul(modul_id, miljo, sprak):
     st.caption(
         f"{t('tabs.bryggeskole')} ▸ {t(f'bryggeskole.miljo.{miljo}')} ▸ {t(modul_info['tittel_nokkel'])}"
     )
-    st.button(t("bryggeskole.tilbake_til_oversikt"), key="bs_tilbake_btn", on_click=_tilbake_til_oversikt)
+    st.button(t("bryggeskole.tilbake_til_oversikt"), key=f"bs_tilbake_{modul_id}_btn", on_click=_tilbake_til_oversikt)
     st.subheader(f"{modul_info['ikon']} {t(modul_info['tittel_nokkel'])}")
 
     fase = sesjon["fase"]
@@ -607,7 +696,7 @@ def _render_modul(modul_id, miljo, sprak):
         return
 
     if fase == "leksjon":
-        _render_leksjon(modul_id, pilot, sprak)
+        _render_leksjon(modul_id, sesjon, pilot, sprak)
     elif fase == "sporsmal":
         _render_sporsmal(modul_id, sesjon, pilot, sprak)
     else:
