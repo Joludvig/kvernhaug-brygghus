@@ -1,71 +1,100 @@
 # ui/bryggeskole_panel.py
 """
-Kvernhaug Bryggeskole -- første integrerte lærings-UI (issue #327,
-BRYGGESKOLE V2-3C). Renderes som sin egen topplinje-fane i app.py, ikke
-gjemt under Verktøy.
+Kvernhaug Bryggeskole -- to-modul lærings-UI (issue #338, productionizing
+the owner-accepted two-module Bryggeskole UX direction). Renderes som sin
+egen topplinje-fane i app.py, ikke gjemt under Verktøy.
 
-Én Bryggeskole -> to visuelle miljøer (Hjemmebrygger / Bryggeri) -> delt
-verifisert kunnskap + delt mastery. De to miljøene er bevisst kun
-navigasjon/presentasjon: begge går inn i NØYAKTIG samme
-gjæringstemperatur-pilot og oppdaterer NØYAKTIG samme mastery-tilstand --
-ingen nye kursfakta/påstander oppstår her.
+Én Bryggeskole -> to visuelle miljøer (Hjemmebrygger / Bryggeri) -> én
+skoleoversikt med to reelle, åpne moduler (Mesking / Gjæring), resten av
+brygge-reisen vist som "Kommer senere" -- delt verifisert kunnskap + delt
+mastery på tvers av moduler og miljøer. Miljøvalget er bevisst uendret fra
+issue #327: kun navigasjon/presentasjon, ingen nye kursfakta oppstår her.
 
-Gjenbruker den eksisterende læringsmotoren uendret, per issue #327 sitt
-eksplisitte krav ("Reuse existing learning engine as-is"):
-    bryggeskole.pilot_fermentation.{read_pilot_file, render_chunk,
-        render_question, evaluate_answer}
+Gjenbruker den eksisterende læringsmotoren uendret, per issue #338 sitt
+eksplisitte "Reuse boundaries"-krav -- nå fra TO topic-scopede
+pilotmoduler i stedet for én, hver med nøyaktig samme funksjonsnavn
+(read_pilot_file/render_chunk/render_question/evaluate_answer, per
+bryggeskole/pilot_mashing.py sin egen "topic-scoped copy, never a shared
+engine"-arkitektur):
+    bryggeskole.pilot_mashing / bryggeskole.pilot_fermentation
     bryggeskole.mastery.{apply_answer, mastery_label}
     bryggeskole.mastery_store.{read_mastery_state, write_mastery_state,
         neutral_state_document}
-Ingen av disse fire modulene er endret for denne skiven.
+Ingen av disse er endret for denne skiven. Én NY, rent tilleggsmodul,
+bryggeskole/answer_order.py, dekker det NYE "answer-option order"-kravet
+issue #338 selv innfører (fantes ikke i issue #327s scope) -- se dens egen
+docstring.
 
-Kun gjæringstemperatur-modulen er aktiv i denne skiven -- alle andre
-prosess-stadier vises kun til orientering (aldri klikkbare/leksjoner),
-per issue #327 sitt "no new course claims / no second module".
+Skoleoversikten gjenbruker den eksisterende seks-stadiers prosessgrid fra
+issue #327 (_PROSESS_STADIER) i stedet for å bygge en egen parallell
+modul-kort-grid ved siden av den: to av de seks stadiene (Mesking, Gjæring)
+er nå klikkbare moduler med statusmerker, resten er fortsatt ren
+orientering ("Kommer senere"). Dette er bevisst étt sammenhengende grid,
+ikke to -- det tilfredsstiller "show full brewing learning journey" +
+"compact module cards that scale to 3+ active modules" samtidig, siden et
+fremtidig tredje aktivt stadium bare er én ny _STADIUM_TIL_MODUL-oppføring.
 
-Oppsummeringen viser to atskilte ting (Chief human-usability review,
-PR #328): (1) cumulative mastery over tid via den uendrede
-mastery_label()-motoren, og (2) et eget, ikke-numerisk signal for DENNE
-runden (_konsept_runde_status()), utledet fra answered_questions[*]
-.last_correct for akkurat fullført runde. Uten dette skillet viste en
-"Prøv igjen"-runde besvart helt feil nøyaktig samme cumulative label
-("På god vei") som en perfekt runde -- misvisende for en menneskelig
-lærer, selv om selve mastery-motoren fungerte som tiltenkt.
+Sesjonstilstand er nå PER MODUL (st.session_state["bs_modul_sesjon"][id]),
+ikke global -- "returning to overview does not discard active session
+progress" og "in-session resume per module" krever at hver modul husker
+sin egen fase/runde/spørsmål-indeks uavhengig av at læreren navigerer
+frem og tilbake til skoleoversikten. Ingen ny PERSISTENT
+fullføringskontrakt er lagt til: "Gjennomført denne økten" lever kun i
+st.session_state, aldri på disk/mastery_store.
 
-DEMO_MODE-grensen (avgjørelsen issue #327 selv ber om å bli dokumentert):
-en PANEL-NIVÅ vakt her i stedet for en ny modules/bryggeskole_state.py-
-adapter. ui/demo_state.py er dokumentert som avgrenset til fire
-eksisterende domener (pantry, vannkjemi, utstyr, gammelt humlelager) --
-å utvide DEN modulen for et femte, urelatert domene ville bare utvidet
-dens kontrakt uten noen delt fordel, siden
-bryggeskole/mastery_store.py allerede er sin egen rene, allerede isolerte
-lese/skrive-grense. Denne panelet speiler i stedet SAMME mønster
-(session-scoped overlay i DEMO_MODE, ekte fillesing/-skriving utenfor)
-lokalt, nøyaktig som ui/equipment_panel.py sine egne
-_hent_equipment()/_lagre_equipment() gjør for sitt domene.
+DEMO_MODE-grensen er uendret fra issue #327: en PANEL-NIVÅ vakt her (ikke
+en ny modules/bryggeskole_state.py-adapter), se _les_tilstand()/
+_skriv_tilstand() -- samme begrunnelse som før, ui/demo_state.py er
+avgrenset til fire urelaterte domener og bryggeskole/mastery_store.py
+er allerede sin egen isolerte lese/skrive-grense.
 """
 import datetime
+import random
 
 import streamlit as st
 
 from config import DEMO_MODE
+from bryggeskole.answer_order import finn_korrekt_indeks, velg_alternativ_rekkefolge
 from bryggeskole.mastery import apply_answer, mastery_label
 from bryggeskole.mastery_store import (
     neutral_state_document,
     read_mastery_state,
     write_mastery_state,
 )
-from bryggeskole.pilot_fermentation import (
-    PilotContentError,
-    evaluate_answer,
-    read_pilot_file,
-    render_chunk,
-    render_question,
-)
+from bryggeskole import pilot_fermentation as _pilot_gjaring
+from bryggeskole import pilot_mashing as _pilot_mesking
 from ui.i18n import gjeldende_sprak, t
+
+# Hver pilotmodul definerer sin EGEN PilotContentError-klasse (bevisst
+# topic-scopet kopi, jf. pilot_mashing.py sin docstring -- "never a shared
+# engine") -- de er derfor IKKE samme klasseobjekt og må fanges som et
+# tuppel, aldri bare den ene modulens, ellers ville den andre modulens
+# feil forbli ufanget her.
+_PILOT_CONTENT_ERRORS = (_pilot_mesking.PilotContentError, _pilot_gjaring.PilotContentError)
 
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
 _ENV_BRYGGERI = "bryggeri"
+
+_MODUL_MESKING = "mesking"
+_MODUL_GJARING = "gjaring"
+
+# Rekkefølgen speiler den faktiske brygge-prosessen (mesk før gjæring) --
+# brukt både til "Kommer senere"-plasseringen i prosessgridet og til
+# _anbefalt_modul()s "anbefalt neste"-signal.
+_MODUL_REKKEFOLGE = [_MODUL_MESKING, _MODUL_GJARING]
+
+_MODULER = {
+    _MODUL_MESKING: {
+        "pilot": _pilot_mesking,
+        "tittel_nokkel": "bryggeskole.modul.mesking.tittel",
+        "ikon": "🌾",
+    },
+    _MODUL_GJARING: {
+        "pilot": _pilot_gjaring,
+        "tittel_nokkel": "bryggeskole.modul.gjaring.tittel",
+        "ikon": "🧪",
+    },
+}
 
 # Seks representative prosess-stadier (malt/maling -> mesk -> koking ->
 # kjøling -> gjæring -> pakking) i to miljø-varianter, per issue #327 sitt
@@ -94,18 +123,23 @@ _PROSESS_STADIER = {
     ],
 }
 
-# Samme indeks i begge miljøer -- gjæring er det eneste aktive steget
-# denne omgangen; resten er ren orientering.
-_GJARINGSSTADIUM_INDEKS = 4
+# Samme indekser i begge miljøer -- de to eneste aktive/klikkbare stadiene
+# denne runden; resten er ren orientering ("Kommer senere").
+_STADIUM_TIL_MODUL = {1: _MODUL_MESKING, 4: _MODUL_GJARING}
 
-# Menneskelesbare visningsnavn for pilotens konsept-id-er -- aldri de
-# rå id-strengene selv i oppsummeringen (issue #327: læreren skal aldri
-# se "fermentation.temperature" som tekst).
+# Menneskelesbare visningsnavn for pilotenes konsept-id-er -- aldri de
+# rå id-strengene selv i oppsummeringen (læreren skal aldri se f.eks.
+# "fermentation.temperature" som tekst).
 _KONSEPT_LABELS = {
     "fermentation.temperature": {"no": "Gjæringstemperatur", "en": "Fermentation temperature"},
     "fermentation.yeast_activity": {"no": "Gjæraktivitet", "en": "Yeast activity"},
     "fermentation.flavor": {"no": "Smak og aroma", "en": "Flavor and aroma"},
     "fermentation.yeast_strain": {"no": "Gjærstamme-avhengighet", "en": "Yeast strain dependence"},
+    "mashing.starch_conversion": {"no": "Stivelsesomdanning", "en": "Starch conversion"},
+    "mashing.dextrins": {"no": "Dekstriner", "en": "Dextrins"},
+    "mashing.temperature": {"no": "Mesketemperatur", "en": "Mash temperature"},
+    "mashing.fermentability": {"no": "Gjærbarhet", "en": "Fermentability"},
+    "mashing.process_variables": {"no": "Andre prosessfaktorer", "en": "Other process variables"},
 }
 
 _DEMO_TILSTAND_NOKKEL = "_demo_bryggeskole_mastery_tilstand"
@@ -134,52 +168,116 @@ def _utc_now_iso():
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
+def _konsept_rekkefolge(pilot):
+    """Pedagogisk konsept-rekkefølge -- rekkefølgen konseptene FØRST nevnes
+    av pilotens egne spørsmål (som igjen følger chunk-rekkefølgen
+    innholdet ble undervist i), IKKE alfabetisk id-sortering. Issue #338:
+    "concept presentation order follows pedagogical learning order, not
+    alphabetic concept-id order"."""
+    rekkefolge = []
+    for sporsmal in pilot["questions"]:
+        for konsept_id in sporsmal["concepts"]:
+            if konsept_id not in rekkefolge:
+                rekkefolge.append(konsept_id)
+    return rekkefolge
+
+
 def _init_state():
     st.session_state.setdefault("bs_miljo", None)
-    st.session_state.setdefault("bs_modul_startet", False)
-    st.session_state.setdefault("bs_fase", "leksjon")
-    st.session_state.setdefault("bs_sporsmal_idx", 0)
-    st.session_state.setdefault("bs_runde", 0)
-    st.session_state.setdefault("bs_siste_feedback", None)
+    st.session_state.setdefault("bs_aktiv_modul", None)
+    st.session_state.setdefault("bs_modul_sesjon", {})
+
+
+def _ny_modul_sesjon():
+    return {
+        "fase": "leksjon",
+        "sporsmal_idx": 0,
+        "runde": 0,
+        "siste_feedback": None,
+        "fullfort_denne_okten": False,
+        "rekkefolger": {},
+        "forrige_korrekt_indeks": {},
+    }
+
+
+def _modul_sesjon(modul_id):
+    """Henter (og oppretter ved behov) den PER-MODUL sesjonstilstanden.
+    Selve opprettelsen her er signalet på at læreren har "Påbegynt" modulen
+    denne økten (se _modul_status())."""
+    alle = st.session_state["bs_modul_sesjon"]
+    if modul_id not in alle:
+        alle[modul_id] = _ny_modul_sesjon()
+    return alle[modul_id]
+
+
+def _les_modul_sesjon(modul_id):
+    """Samme oppslag som _modul_sesjon(), men oppretter ALDRI en ny
+    oppføring -- brukt av skoleoversikten, som må kunne vise «ikke
+    påbegynt» uten selv å utløse en "Påbegynt"-tilstand ved bare å se på
+    kortet."""
+    return st.session_state["bs_modul_sesjon"].get(modul_id)
 
 
 def _velg_miljo(miljo):
     st.session_state["bs_miljo"] = miljo
-    st.session_state["bs_modul_startet"] = False
-    st.session_state["bs_fase"] = "leksjon"
-    st.session_state["bs_sporsmal_idx"] = 0
-    st.session_state["bs_siste_feedback"] = None
+    st.session_state["bs_aktiv_modul"] = None
 
 
 def _bytt_miljo():
     st.session_state["bs_miljo"] = None
-    st.session_state["bs_modul_startet"] = False
-    st.session_state["bs_fase"] = "leksjon"
-    st.session_state["bs_sporsmal_idx"] = 0
-    st.session_state["bs_siste_feedback"] = None
+    st.session_state["bs_aktiv_modul"] = None
 
 
-def _start_modul():
-    st.session_state["bs_modul_startet"] = True
-    st.session_state["bs_fase"] = "leksjon"
+def _apne_modul(modul_id):
+    st.session_state["bs_aktiv_modul"] = modul_id
+    _modul_sesjon(modul_id)
 
 
-def _start_sporsmal_runde():
+def _tilbake_til_oversikt():
+    st.session_state["bs_aktiv_modul"] = None
+
+
+def _start_sporsmal_runde(modul_id):
     """Starter (eller re-starter, ved «Prøv igjen») spørsmålsrunden fra
-    første spørsmål. Øker ALLTID bs_runde, slik at hvert
+    første spørsmål. Øker ALLTID sesjon["runde"], slik at hvert
     spørsmål-widget-key blir garantert unikt for denne runden -- uten
     dette ville et gjenbrukt key ha fått Streamlit til å vise en gammel,
-    lagret radioverdi fra en tidligere runde. `apply_answer()`s egen
-    `first_attempt`-logikk leser fortsatt den PERSISTERTE mastery-
-    tilstanden uendret -- «Prøv igjen» resetter aldri selve
-    mastery-tilstanden, kun denne UI-runden."""
-    st.session_state["bs_runde"] += 1
-    st.session_state["bs_fase"] = "sporsmal"
-    st.session_state["bs_sporsmal_idx"] = 0
-    st.session_state["bs_siste_feedback"] = None
+    lagret radioverdi fra en tidligere runde, og alternativ-rekkefølgen
+    (frosset per runde, se _hent_alternativ_rekkefolge()) ville ikke blitt
+    trukket på nytt. `apply_answer()`s egen `first_attempt`-logikk leser
+    fortsatt den PERSISTERTE mastery-tilstanden uendret -- «Prøv igjen»
+    resetter aldri selve mastery-tilstanden, kun denne UI-runden."""
+    sesjon = _modul_sesjon(modul_id)
+    sesjon["runde"] += 1
+    sesjon["fase"] = "sporsmal"
+    sesjon["sporsmal_idx"] = 0
+    sesjon["siste_feedback"] = None
 
 
-def _sjekk_svar(sporsmal, sprak, widget_key, runde):
+def _hent_alternativ_rekkefolge(sesjon, sporsmal):
+    """Henter den frosne visningsrekkefølgen (liste med alternativ-id-er)
+    for dette spørsmålet i denne runden, eller trekker og fryser en ny
+    første gang spørsmålet vises i runden -- uendret gjennom reruns/
+    submit/back-resume, per issue #338s "Answer-option order"-krav.
+    RNG-en er ekte tilfeldig i produksjon (random.Random()); testene
+    injiserer sin egen kontrollerte RNG direkte mot
+    bryggeskole.answer_order, ikke via denne funksjonen."""
+    runde = sesjon["runde"]
+    rekkefolger_for_runde = sesjon["rekkefolger"].setdefault(runde, {})
+    qid = sporsmal["id"]
+    if qid in rekkefolger_for_runde:
+        return rekkefolger_for_runde[qid]
+
+    forrige_indeks = sesjon["forrige_korrekt_indeks"].get(runde)
+    rekkefolge_raw = velg_alternativ_rekkefolge(sporsmal["options"], forrige_indeks, random.Random())
+    id_rekkefolge = [o["id"] for o in rekkefolge_raw]
+    rekkefolger_for_runde[qid] = id_rekkefolge
+    sesjon["forrige_korrekt_indeks"][runde] = finn_korrekt_indeks(rekkefolge_raw)
+    return id_rekkefolge
+
+
+def _sjekk_svar(modul_id, sporsmal, sprak, widget_key, runde):
+    pilot_modul = _MODULER[modul_id]["pilot"]
     valgt_id = st.session_state.get(widget_key)
     if valgt_id is None:
         # Forsvarslinje mot Chief-review-blokkeren (PR #328): knappen er
@@ -187,23 +285,86 @@ def _sjekk_svar(sporsmal, sprak, widget_key, runde):
         # vaktlinjen sikrer at et uvalgt spørsmål ALDRI kan mutere persistert
         # mastery selv om noe utenfor normal UI-flyt likevel utløser klikket.
         return
-    resultat = evaluate_answer(sporsmal, valgt_id, sprak)
+    resultat = pilot_modul.evaluate_answer(sporsmal, valgt_id, sprak)
     tilstand = _les_tilstand()
     nytt_tilstand = apply_answer(tilstand, sporsmal, resultat["correct"], now=_utc_now_iso())
     _skriv_tilstand(nytt_tilstand)
-    st.session_state["bs_siste_feedback"] = {
+    sesjon = _modul_sesjon(modul_id)
+    sesjon["siste_feedback"] = {
         "question_id": resultat["question_id"],
         "runde": runde,
         "correct": resultat["correct"],
+        "valgt_id": valgt_id,
         "feedback": resultat["feedback"],
     }
 
 
-def _neste_sporsmal(totalt):
-    ny_idx = st.session_state["bs_sporsmal_idx"] + 1
-    st.session_state["bs_sporsmal_idx"] = ny_idx
-    st.session_state["bs_siste_feedback"] = None
-    st.session_state["bs_fase"] = "oppsummering" if ny_idx >= totalt else "sporsmal"
+def _neste_sporsmal(modul_id, totalt):
+    sesjon = _modul_sesjon(modul_id)
+    ny_idx = sesjon["sporsmal_idx"] + 1
+    sesjon["sporsmal_idx"] = ny_idx
+    sesjon["siste_feedback"] = None
+    if ny_idx >= totalt:
+        sesjon["fase"] = "oppsummering"
+        sesjon["fullfort_denne_okten"] = True
+    else:
+        sesjon["fase"] = "sporsmal"
+
+
+def _injiser_bryggeskole_css():
+    """Scoped typografi -- KUN for Bryggeskole-panelets egne containere
+    (st.container(key=...) gir Streamlit sin egen "st-key-<key>"-klasse på
+    wrapper-diven), aldri en global theme-endring. "learning text visually
+    dominates controls": leksjon-/spørsmålstekst får større skrift/
+    linjehøyde; ingen annen fane i appen bruker disse nøklene, så CSS-en
+    kan aldri lekke ut av Bryggeskole-fanen."""
+    st.markdown(
+        """
+        <style>
+        .st-key-bs_leksjon_tekst p, .st-key-bs_sporsmal_tekst p {
+            font-size: 1.08rem;
+            line-height: 1.7;
+        }
+        .st-key-bs_sporsmal_tekst p {
+            font-weight: 600;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _modul_status(modul_id, tilstand):
+    """Returnerer (ovd_tidligere, sesjon) for statusmerkene på et
+    modul-kort:
+    - ovd_tidligere: PERSISTERT mastery finnes fra før (attempts > 0 på
+      minst ett av modulens konsepter) -- "Øvd på tidligere".
+    - sesjon: None hvis aldri åpnet denne økten; ellers selve
+      sesjondict-en, som avgjør "Påbegynt" vs. "Gjennomført denne økten"."""
+    try:
+        pilot = _MODULER[modul_id]["pilot"].read_pilot_file()
+    except _PILOT_CONTENT_ERRORS:
+        return False, _les_modul_sesjon(modul_id)
+
+    konsepter = _konsept_rekkefolge(pilot)
+    ovd_tidligere = any(
+        (tilstand.get("concepts", {}).get(k) or {}).get("attempts", 0) > 0 for k in konsepter
+    )
+    return ovd_tidligere, _les_modul_sesjon(modul_id)
+
+
+def _anbefalt_modul():
+    """Ett ikke-blokkerende "anbefalt neste"-signal, basert på
+    prosessrekkefølgen (mesk før gjæring) og gjeldende øktstatus -- den
+    første modulen i _MODUL_REKKEFOLGE som IKKE er "Gjennomført denne
+    økten" ennå. Returnerer None når alle er fullført denne økten (ingen
+    anbefaling å gi). Anbefalingen låser aldri en annen modul -- den er
+    bare en ekstra ledetekst over det samme klikkbare gridet."""
+    for modul_id in _MODUL_REKKEFOLGE:
+        sesjon = _les_modul_sesjon(modul_id)
+        if not (sesjon and sesjon["fullfort_denne_okten"]):
+            return modul_id
+    return None
 
 
 def _render_miljovalg():
@@ -227,70 +388,92 @@ def _render_miljovalg():
             )
 
 
-def _render_prosessoversikt(miljo, sprak):
-    if st.session_state["bs_modul_startet"]:
-        # Kompakt visning mens leksjon/spørsmål/oppsummering pågår -- fullt
-        # skjema er kun nyttig FØR modulen starter (jf. designprinsippet
-        # "clear focus", ikke en tekstvegg samtidig med spørsmålet).
-        st.caption(t("bryggeskole.prosess.kompakt", miljo=t(f"bryggeskole.miljo.{miljo}")))
-        return
-
+def _render_skoleoversikt(miljo, sprak):
     st.subheader(t(f"bryggeskole.miljo.{miljo}"))
+
+    tilstand = _les_tilstand()
+    anbefalt = _anbefalt_modul()
+    if anbefalt is not None:
+        st.info(t("bryggeskole.anbefalt_neste", modul=t(_MODULER[anbefalt]["tittel_nokkel"])))
+
     stadier = _PROSESS_STADIER[miljo]
     cols = st.columns(len(stadier))
     for i, (col, stadium) in enumerate(zip(cols, stadier)):
+        modul_id = _STADIUM_TIL_MODUL.get(i)
         with col, st.container(border=True):
             st.markdown(f"**{stadium[sprak]}**")
-            if i == _GJARINGSSTADIUM_INDEKS:
-                st.caption(t("bryggeskole.prosess.aktiv_badge"))
-            else:
+            if modul_id is None:
                 st.caption(t("bryggeskole.prosess.kommer_badge"))
+                continue
 
-    st.button(
-        t("bryggeskole.start_leksjon"), key="bs_start_modul_btn",
-        width="stretch", on_click=_start_modul,
-    )
+            st.caption(t("bryggeskole.prosess.aktiv_badge"))
+            ovd_tidligere, sesjon = _modul_status(modul_id, tilstand)
+            merker = []
+            if ovd_tidligere:
+                merker.append(t("bryggeskole.status.ovd_tidligere"))
+            if sesjon and sesjon["fullfort_denne_okten"]:
+                merker.append(t("bryggeskole.status.fullfort_okt"))
+            elif sesjon:
+                merker.append(t("bryggeskole.status.pabegynt"))
+            for merke in merker:
+                st.caption(merke)
+
+            if sesjon is None:
+                knapp_tekst = t("bryggeskole.modul.start")
+            elif sesjon["fullfort_denne_okten"]:
+                knapp_tekst = t("bryggeskole.modul.se_resultat")
+            else:
+                knapp_tekst = t("bryggeskole.modul.fortsett")
+            st.button(
+                knapp_tekst, key=f"bs_apne_modul_{modul_id}_btn",
+                width="stretch", on_click=_apne_modul, args=(modul_id,),
+            )
 
 
-def _render_leksjon(pilot, sprak):
+def _render_leksjon(modul_id, pilot, sprak):
     st.write("---")
-    st.subheader(t("bryggeskole.leksjon.heading"))
-    for chunk in pilot["chunks"]:
-        st.markdown(render_chunk(chunk, sprak)["text"])
+    with st.container(key="bs_leksjon_tekst"):
+        for chunk in pilot["chunks"]:
+            st.markdown(_MODULER[modul_id]["pilot"].render_chunk(chunk, sprak)["text"])
     st.button(
         t("bryggeskole.leksjon.start_sporsmal"), key="bs_start_sporsmal_btn",
-        width="stretch", on_click=_start_sporsmal_runde,
+        width="stretch", on_click=_start_sporsmal_runde, args=(modul_id,),
     )
 
 
-def _render_sporsmal(pilot, sprak):
+def _render_sporsmal(modul_id, sesjon, pilot, sprak):
     st.write("---")
+    pilot_modul = _MODULER[modul_id]["pilot"]
     sporsmal_liste = pilot["questions"]
     totalt = len(sporsmal_liste)
-    idx = st.session_state["bs_sporsmal_idx"]
+    idx = sesjon["sporsmal_idx"]
     if idx >= totalt:
         # Forsvarslinje -- normal flyt går alltid via _neste_sporsmal(),
         # som selv setter fasen til "oppsummering" når siste spørsmål er
         # besvart, så dette skal aldri inntreffe i praksis.
-        st.session_state["bs_fase"] = "oppsummering"
+        sesjon["fase"] = "oppsummering"
         return
 
     sporsmal = sporsmal_liste[idx]
-    rendret = render_question(sporsmal, sprak)
-    runde = st.session_state["bs_runde"]
+    rendret = pilot_modul.render_question(sporsmal, sprak)
+    runde = sesjon["runde"]
     widget_key = f"bs_valg_r{runde}_q{idx}"
 
-    siste = st.session_state["bs_siste_feedback"]
+    id_rekkefolge = _hent_alternativ_rekkefolge(sesjon, sporsmal)
+    rendret_by_id = {o["id"]: o for o in rendret["options"]}
+    alternativer = [rendret_by_id[oid] for oid in id_rekkefolge]
+
+    siste = sesjon["siste_feedback"]
     besvart = bool(
         siste
         and siste["question_id"] == sporsmal["id"]
         and siste["runde"] == runde
     )
 
-    st.caption(t("bryggeskole.sporsmal.fremdrift", n=idx + 1, totalt=totalt))
-    st.markdown(f"**{rendret['prompt']}**")
+    st.caption(t("bryggeskole.steg.sporsmal", n=idx + 1, totalt=totalt))
+    with st.container(key="bs_sporsmal_tekst"):
+        st.markdown(rendret["prompt"])
 
-    alternativer = rendret["options"]
     st.radio(
         t("bryggeskole.sporsmal.velg_svar"),
         options=[o["id"] for o in alternativer],
@@ -309,14 +492,22 @@ def _render_sporsmal(pilot, sprak):
         # Streamlits standard "velg første alternativ"-oppførsel.
         st.button(
             t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_r{runde}_q{idx}",
-            width="stretch", on_click=_sjekk_svar, args=(sporsmal, sprak, widget_key, runde),
+            width="stretch", on_click=_sjekk_svar, args=(modul_id, sporsmal, sprak, widget_key, runde),
             disabled=st.session_state.get(widget_key) is None,
         )
     else:
+        # Answer-state UX (issue #338): svarstatusen skal aldri hvile kun
+        # på radioens grå disabled-styling -- lærerens eget svar og (ved
+        # feil) det korrekte svaret vises alltid eksplisitt som tekst.
+        valgt_tekst = next(o["text"] for o in alternativer if o["id"] == siste["valgt_id"])
+        st.caption(f"{t('bryggeskole.svar.ditt_svar')}: {valgt_tekst}")
+        if not siste["correct"]:
+            riktig_raw = next(o for o in sporsmal["options"] if o["correct"] is True)
+            st.caption(f"{t('bryggeskole.svar.riktig_svar')}: {riktig_raw['text'][sprak]}")
         (st.success if siste["correct"] else st.error)(siste["feedback"])
         st.button(
             t("bryggeskole.sporsmal.fortsett"), key=f"bs_fortsett_btn_r{runde}_q{idx}",
-            width="stretch", on_click=_neste_sporsmal, args=(totalt,),
+            width="stretch", on_click=_neste_sporsmal, args=(modul_id, totalt),
         )
 
 
@@ -351,10 +542,10 @@ def _konsept_runde_status(tilstand, pilot, konsept_id):
     return all(resultater)
 
 
-def _render_oppsummering(pilot, sprak):
+def _render_oppsummering(modul_id, pilot, sprak):
     st.write("---")
     tilstand = _les_tilstand()
-    konsepter = sorted({konsept for sporsmal in pilot["questions"] for konsept in sporsmal["concepts"]})
+    konsepter = _konsept_rekkefolge(pilot)
 
     # Cumulative fremgang (eksisterende mastery_label(), uendret motor) --
     # men med overskrift/forklaring som gjør eksplisitt at dette IKKE er
@@ -380,14 +571,52 @@ def _render_oppsummering(pilot, sprak):
         )
         st.markdown(f"- **{_konsept_label(konsept_id, sprak)}:** {t(runde_nokkel)}")
 
-    st.button(
-        t("bryggeskole.oppsummering.prov_igjen"), key="bs_prov_igjen_btn",
-        width="stretch", on_click=_start_sporsmal_runde,
+    col1, col2 = st.columns(2)
+    with col1:
+        st.button(
+            t("bryggeskole.oppsummering.prov_igjen"), key="bs_prov_igjen_btn",
+            width="stretch", on_click=_start_sporsmal_runde, args=(modul_id,),
+        )
+    with col2:
+        st.button(
+            t("bryggeskole.tilbake_til_oversikt"), key="bs_oppsummering_tilbake_btn",
+            width="stretch", on_click=_tilbake_til_oversikt,
+        )
+
+
+def _render_modul(modul_id, miljo, sprak):
+    modul_info = _MODULER[modul_id]
+    sesjon = _modul_sesjon(modul_id)
+
+    st.caption(
+        f"{t('tabs.bryggeskole')} ▸ {t(f'bryggeskole.miljo.{miljo}')} ▸ {t(modul_info['tittel_nokkel'])}"
     )
+    st.button(t("bryggeskole.tilbake_til_oversikt"), key="bs_tilbake_btn", on_click=_tilbake_til_oversikt)
+    st.subheader(f"{modul_info['ikon']} {t(modul_info['tittel_nokkel'])}")
+
+    fase = sesjon["fase"]
+    if fase == "leksjon":
+        st.caption(t("bryggeskole.steg.leksjon"))
+    elif fase == "oppsummering":
+        st.caption(t("bryggeskole.steg.oppsummering"))
+
+    try:
+        pilot = modul_info["pilot"].read_pilot_file()
+    except _PILOT_CONTENT_ERRORS:
+        st.error(t("bryggeskole.feil.innhold_ugyldig"))
+        return
+
+    if fase == "leksjon":
+        _render_leksjon(modul_id, pilot, sprak)
+    elif fase == "sporsmal":
+        _render_sporsmal(modul_id, sesjon, pilot, sprak)
+    else:
+        _render_oppsummering(modul_id, pilot, sprak)
 
 
 def render_bryggeskole_panel():
     _init_state()
+    _injiser_bryggeskole_css()
     sprak = gjeldende_sprak()
 
     st.header(t("bryggeskole.heading"))
@@ -399,21 +628,10 @@ def render_bryggeskole_panel():
         return
 
     st.button(t("bryggeskole.bytt_miljo"), key="bs_bytt_miljo_btn", on_click=_bytt_miljo)
-    _render_prosessoversikt(miljo, sprak)
 
-    if not st.session_state["bs_modul_startet"]:
+    aktiv_modul = st.session_state["bs_aktiv_modul"]
+    if aktiv_modul is None:
+        _render_skoleoversikt(miljo, sprak)
         return
 
-    try:
-        pilot = read_pilot_file()
-    except PilotContentError:
-        st.error(t("bryggeskole.feil.innhold_ugyldig"))
-        return
-
-    fase = st.session_state["bs_fase"]
-    if fase == "leksjon":
-        _render_leksjon(pilot, sprak)
-    elif fase == "sporsmal":
-        _render_sporsmal(pilot, sprak)
-    else:
-        _render_oppsummering(pilot, sprak)
+    _render_modul(aktiv_modul, miljo, sprak)
