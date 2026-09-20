@@ -10,7 +10,9 @@ py -3 -m unittest discover -s tests -b
 
 `-b`/`--buffer` demper stdout/stderr fra hver test (inkl. print()-støy fra enkelte scraper-moduler i `modules/`) for tester som består — output for feilende tester vises fortsatt i sin helhet, uendret. Ingen testlogikk endres av flagget.
 
-Ved siste kjente fulle kjøring (jf. `docs/PROJECT_STATUS_JULI_2026.md`, punkt-i-tid — verifiser alltid faktisk antall ved behov fremfor å stole på et gammelt tall): 581 tester, 0 skipped/errors/failures, fordelt på ~50 testfiler i `tests/`.
+Faktisk antall tester og testfiler endrer seg løpende — les det alltid fra den aktuelle kjøringen (lokalt kommandoutput, eller siste grønne "CI Test Gate"-kjøring for gjeldende `master`/PR), aldri fra et tall skrevet ned i dette dokumentet eller i et gammelt statusdokument.
+
+Noen tester (`tests/test_deploy_web_*.py`, som dekker `scripts/deploy_web.ps1`) starter en ekte `pwsh`-prosess og feiler dersom `pwsh` ikke finnes i PATH i miljøet testen kjøres i — verifiser med `which pwsh` (eller `Get-Command pwsh`) før slike feil tolkes som en reell regresjon.
 
 ## Full suite vs. avgrenset kjøring
 

@@ -28,6 +28,10 @@ Du er teknisk prosjektleder, seniorutvikler, QA-ingeniør og dokumentasjonsansva
 - `.claude/rules/web.md` — web-versjonen (`web/**`)
 - `.claude/rules/testing.md` — testpolicy (alltid gjeldende)
 
+## Nåværende sannhet vs. historikk
+
+GitHub `master` og live Issues/PRs i dette repoet er sannhetskilden for hva som faktisk er implementert og hva som pågår nå — ikke et statisk dokument. Nærtidsprioritering/eksekvering styres av [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101); [#78](https://github.com/Joludvig/kvernhaug-brygghus/issues/78) er bredere nord-stjerne-kontekst for produktretningen. `docs/PROJECT_STATUS_*.md`-filene under er punkt-i-tid-historikk fra skrivetidspunktet, ikke gjeldende sannhet.
+
 ## Dypere dokumentasjon — les kun det oppgaven faktisk krever
 
 Ikke les hele denne listen for enhver oppgave. For en liten, avgrenset endring holder reglene over. For en større/ikke-triviell oppgave, start med WORKFLOW.md:
@@ -44,4 +48,4 @@ Ikke les hele denne listen for enhver oppgave. For en liten, avgrenset endring h
 | [web/README.md](web/README.md) | Web-arkitektur i detalj |
 | [web/CHANGELOG.md](web/CHANGELOG.md) | Historisk runde-for-runde web-utvikling |
 
-Produktdokumentasjon (hva appen *kan*, status, dataflyt): [docs/ROADMAP.md](docs/ROADMAP.md), nyeste `docs/PROJECT_STATUS_*.md` — per nå [docs/PROJECT_STATUS_AUGUST_2026.md](docs/PROJECT_STATUS_AUGUST_2026.md) (aktiv arbeidskopi, web live, Bryggeskole-status, åpne beslutninger) — og [docs/MASTER_DATA_FLOW.md](docs/MASTER_DATA_FLOW.md).
+Produktdokumentasjon (hva appen *kan*, historisk status, dataflyt): [docs/ROADMAP.md](docs/ROADMAP.md) (se toppnotat om nåværende prioriteringskilde), historiske `docs/PROJECT_STATUS_*.md` — nyeste per nå er [docs/PROJECT_STATUS_AUGUST_2026.md](docs/PROJECT_STATUS_AUGUST_2026.md) (punkt-i-tid, ikke gjeldende sannhet — se toppnotatet over) — og [docs/MASTER_DATA_FLOW.md](docs/MASTER_DATA_FLOW.md).
