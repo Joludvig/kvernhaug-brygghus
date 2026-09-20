@@ -2,7 +2,7 @@
 
 *Del av KBDP. Se [../../CLAUDE.md](../../CLAUDE.md) for oversikt over hele dokumentsystemet.*
 
-Formålet med dette dokumentet er at en ny økt raskt skal forstå **hvor ting bor** og **hvorfor**, uten å måtte lese hele kodebasen. For produktnivå (hva appen *kan*) og status, se `docs/ROADMAP.md` og `docs/PROJECT_STATUS_JULI_2026.md` (eller nyeste status-dokument — status-dokumenter er punkt-i-tid og erstattes, ikke overskrives).
+Formålet med dette dokumentet er at en ny økt raskt skal forstå **hvor ting bor** og **hvorfor**, uten å måtte lese hele kodebasen. For nåværende implementasjons-/prioriteringssannhet: GitHub `master` og live Issues/PRs i dette repoet — nærtidsprioritering styres av [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101), mens [#78](https://github.com/Joludvig/kvernhaug-brygghus/issues/78) er bredere nord-stjerne-kontekst. `docs/ROADMAP.md` og `docs/PROJECT_STATUS_*.md`-filene (nyeste per nå: `docs/PROJECT_STATUS_AUGUST_2026.md`) er punkt-i-tid-historikk, ikke gjeldende sannhet.
 
 ---
 

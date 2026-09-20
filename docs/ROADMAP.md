@@ -2,6 +2,8 @@
 
 *Sist oppdatert: 2026-08-14 (Web Runde 14B — engelsk hjelp/bryggehåndbok, full NO/EN-dekning). Se `docs/PROJECT_STATUS_AUGUST_2026.md` for full status, nøkkeltall og kjent teknisk gjeld (`docs/PROJECT_STATUS_JULI_2026.md` beholdes som historikk).*
 
+> **Erstattet som prioriteringskilde:** dette dokumentet styrer ikke lenger nærtidsprioritering. Den aktive kilden for hva som skjer nå er GitHub-issue [#101](https://github.com/Joludvig/kvernhaug-brygghus/issues/101); [#78](https://github.com/Joludvig/kvernhaug-brygghus/issues/78) er bredere nord-stjerne-kontekst for produktretningen. Innholdet under er bevart som historikk over hva som faktisk er bygget og vurdert.
+
 Roadmapen er organisert etter faktisk status, ikke etter en fast versjonsrekkefølge — features flyttes mellom kategoriene etter hvert som virkelig bruk avgjør hva som trengs.
 
 ---
