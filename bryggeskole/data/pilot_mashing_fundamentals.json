@@ -14,8 +14,8 @@
       "id": "CHUNK-MASH-B",
       "source_claims": ["FACT-MASH-0002"],
       "text": {
-        "no": "Mesketemperaturen påvirker hvor gjærbar vørteren blir. I en studie hvor mesketemperaturen ble variert mellom 65 og 80 grader, ga en varmere mesking en mindre gjærbar vørter enn en kaldere mesking; mesketykkelsen påvirket også resultatet. Dette viser en retning fra én konkret studie, ikke en fasit for akkurat hvor mye det utgjør i din egen brygging - og 80 grader er høyere enn det som er vanlig sluttpunkt i en typisk hjemmebryggers mesking.",
-        "en": "Mash temperature affects how fermentable the wort becomes. In a study where mash temperature was varied between 65 and 80 degrees Celsius, a warmer mash produced a less fermentable wort than a cooler mash; mash thickness also affected the outcome. This shows a direction from one specific study, not a fixed answer for exactly how much it matters in your own brewing - and 80 degrees Celsius is higher than a typical homebrewer's usual mashing temperature."
+        "no": "Mesketemperaturen påvirker hvor gjærbar vørteren blir. I en studie hvor mesketemperaturen ble variert mellom 65 og 80 grader, ga en varmere mesking en mindre gjærbar vørter enn en kaldere mesking; mesketykkelsen påvirket også resultatet. Dette viser en retning fra én konkret studie, ikke en fasit for akkurat hvor mye det utgjør i din egen brygging.",
+        "en": "Mash temperature affects how fermentable the wort becomes. In a study where mash temperature was varied between 65 and 80 degrees Celsius, a warmer mash produced a less fermentable wort than a cooler mash; mash thickness also affected the outcome. This shows a direction from one specific study, not a fixed answer for exactly how much it matters in your own brewing."
       }
     },
     {
@@ -35,8 +35,8 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-MASH-0001"],
       "prompt": {
-        "no": "Under mesking blir noe av stivelsen brutt ned til gjærbart sukker, mens resten blir omdannet til dekstriner. Hvilken rolle spiller disse dekstrinene i den ferdige ølen?",
-        "en": "During mashing, some of the starch is broken down into fermentable sugar, while the rest is converted into dextrins. What role do these dextrins play in the finished beer?"
+        "no": "Under mesking blir noe av stivelsen brutt ned til gjærbart sukker, mens en del blir omdannet til dekstriner. Hvilken rolle spiller disse dekstrinene i den ferdige ølen?",
+        "en": "During mashing, some of the starch is broken down into fermentable sugar, while some is converted into dextrins. What role do these dextrins play in the finished beer?"
       },
       "options": [
         {
@@ -80,42 +80,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-MASH-0002"],
       "prompt": {
-        "no": "Du vil at den ferdige ølen skal bli tørrere og mer gjæret ut, med mindre restsødme. En studie som varierte mesketemperaturen mellom 65 og 80 grader fant at en varmere mesking ga en mindre gjærbar vørter - hvilken retning peker dette mot for din egen mesketemperatur, om målet er en tørrere øl?",
-        "en": "You want your finished beer to be drier and more fully fermented, with less residual sweetness. A study that varied mash temperature between 65 and 80 degrees Celsius found that a warmer mash produced a less fermentable wort - which direction does this point toward for your own mash temperature, if the goal is a drier beer?"
+        "no": "En bryggevenn leser om en studie der mesketemperaturen ble variert mellom 65 og 80 grader, og sier: 'Da må vel en varmere mesking gi en mer gjærbar vørter?' Stemmer det, ut fra hva studien fant?",
+        "en": "A brewing friend reads about a study where mash temperature was varied between 65 and 80 degrees Celsius, and says: 'A warmer mash must give a more fermentable wort, right?' Is that correct, based on what the study found?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Meske noe kaldere, siden en kaldere mesking i den studien ga en mer gjærbar vørter.",
-            "en": "Mash somewhat cooler, since a cooler mash produced a more fermentable wort in that study."
+            "no": "Nei - studien fant det motsatte: en varmere mesking ga en mindre gjærbar vørter enn en kaldere mesking.",
+            "en": "No - the study found the opposite: a warmer mash produced a less fermentable wort than a cooler mash."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Meske noe varmere, siden en varmere mesking gir en mer gjærbar vørter.",
-            "en": "Mash somewhat warmer, since a warmer mash produces a more fermentable wort."
+            "no": "Ja - studien viste at en varmere mesking ga en mer gjærbar vørter.",
+            "en": "Yes - the study showed that a warmer mash produced a more fermentable wort."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Mesketemperatur har ingen betydning for gjærbarhet; bare gjæringstemperaturen betyr noe.",
-            "en": "Mash temperature makes no difference to fermentability; only fermentation temperature matters."
+            "no": "Mesketemperatur hadde ingen målbar effekt på gjærbarhet i studien.",
+            "en": "Mash temperature had no measurable effect on fermentability in the study."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Studien mellom 65 og 80 grader fant at en kaldere mesking ga en mer gjærbar vørter, noe som peker mot en tørrere ferdig øl.",
-        "en": "Correct. The study between 65 and 80 degrees Celsius found that a cooler mash produced a more fermentable wort, which points toward a drier finished beer."
+        "no": "Riktig. Studien mellom 65 og 80 grader fant det motsatte: en varmere mesking ga en mindre gjærbar vørter enn en kaldere mesking.",
+        "en": "Correct. The study between 65 and 80 degrees Celsius found the opposite: a warmer mash produced a less fermentable wort than a cooler mash."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Mesketemperatur påvirker faktisk gjærbarheten, og retningen som er dokumentert er motsatt av 'varmere = mer gjærbar': i studien mellom 65 og 80 grader ga en kaldere mesking en mer gjærbar vørter.",
-        "en": "Not quite. Mash temperature does affect fermentability, and the documented direction is the opposite of 'warmer = more fermentable': in the study between 65 and 80 degrees Celsius, a cooler mash produced a more fermentable wort."
+        "no": "Ikke helt. Studien mellom 65 og 80 grader fant at en varmere mesking ga en mindre gjærbar vørter enn en kaldere mesking - altså motsatt av det bryggevennen antok.",
+        "en": "Not quite. The study between 65 and 80 degrees Celsius found that a warmer mash produced a less fermentable wort than a cooler mash - the opposite of what the friend assumed."
       }
     },
     {
