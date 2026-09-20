@@ -71,6 +71,83 @@
       "concepts": ["fermentation.temperature", "fermentation.yeast_strain"],
       "modules": ["fermentation.fundamentals"],
       "notes": "Practical course guidance derived from multiple manufacturer technical sources; the registry classification remains professional_interpretation, separate from verification status."
+    },
+    {
+      "id": "FACT-MASH-0001",
+      "claim": "During mashing, malt enzymes -- primarily alpha- and beta-amylase -- break down starch into fermentable sugars; not all of the starch is converted, and some carbohydrate remains in the finished wort as unfermentable dextrins.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-20T09:23:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical article",
+          "ref": "Briess Technical Services (Bies, D. & Roberts, C., 2013), 'Understanding a Malt Analysis'"
+        },
+        {
+          "tier": "B",
+          "type": "brewing encyclopedia entry",
+          "ref": "The Oxford Companion to Beer (Garrett Oliver, ed., 2011), entry 'alpha amylase'"
+        }
+      ],
+      "concepts": ["mashing.starch_conversion", "mashing.dextrins"],
+      "modules": ["mashing.fundamentals"],
+      "notes": "Alpha- and beta-amylase act together during mashing; their relative activity, not just overall enzyme presence, determines how much starch converts to fermentable sugar versus unfermentable dextrin."
+    },
+    {
+      "id": "FACT-MASH-0002",
+      "claim": "Within the practical mash-temperature range studied, mashing at a warmer temperature can reduce the fermentability of the resulting wort compared to mashing cooler, all else held constant.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-20T09:23:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "peer-reviewed journal article",
+          "ref": "R. Muller (1991), 'The effects of mashing temperature and mash thickness on wort carbohydrate composition', Journal of the Institute of Brewing 97(2):85-92, DOI 10.1002/j.2050-0416.1991.tb01055.x"
+        }
+      ],
+      "concepts": ["mashing.temperature", "mashing.fermentability"],
+      "modules": ["mashing.fundamentals"],
+      "notes": "Only the abstract/metadata of this source were directly verified in this round; the publisher's full text was not accessible (returned HTTP 403). The claim is deliberately scoped to what the abstract itself establishes and should not be read as a broader universal rule beyond the tested practical direction."
+    },
+    {
+      "id": "FACT-MASH-0003",
+      "claim": "The iodine test checks mash or wort for residual starch: a drop of iodine solution turning blue-black indicates starch is still present, while no blue-black color change indicates the starch has been converted.",
+      "classification": "documented_fact",
+      "status": "draft",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "brewing encyclopedia entry",
+          "ref": "The Oxford Companion to Beer (Garrett Oliver, ed., 2011), entry 'iodine'"
+        }
+      ],
+      "concepts": ["mashing.iodine_test", "mashing.starch_conversion"],
+      "modules": ["mashing.fundamentals"],
+      "notes": "Not promoted to 'verified' in this round: issue #337 requires an independent second suitable source for this specific claim before promotion, and only one source (The Oxford Companion to Beer, entry 'iodine') was available/verifiable in this round. Promote only after a second independent source is found and reviewed. Not referenced by the shipped mashing.fundamentals pilot content for this reason."
+    },
+    {
+      "id": "FACT-MASH-0004",
+      "claim": "Mash temperature is only one of several factors -- including mash thickness/water-to-grist ratio and the malt's own enzyme content -- that influence wort fermentability and carbohydrate composition; there is no single mash temperature that is universally correct for every recipe or desired beer outcome.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-20T09:23:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "peer-reviewed journal article",
+          "ref": "R. Muller (1991), 'The effects of mashing temperature and mash thickness on wort carbohydrate composition', Journal of the Institute of Brewing 97(2):85-92, DOI 10.1002/j.2050-0416.1991.tb01055.x"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical article",
+          "ref": "Briess Technical Services (Bies, D. & Roberts, C., 2013), 'Understanding a Malt Analysis'"
+        }
+      ],
+      "concepts": ["mashing.temperature", "mashing.process_variables"],
+      "modules": ["mashing.fundamentals"],
+      "notes": "Practical course guidance synthesized from multiple sources; the registry classification remains professional_interpretation, separate from verification status, mirroring FACT-BREW-0003's precedent."
     }
   ]
 }

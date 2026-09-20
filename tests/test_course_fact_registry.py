@@ -229,6 +229,8 @@ class TestReaderNeverCallsNetwork(unittest.TestCase):
 
 
 _PRODUCTION_VERIFIED_IDS = ["FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003"]
+_MASHING_VERIFIED_IDS = ["FACT-MASH-0001", "FACT-MASH-0002", "FACT-MASH-0004"]
+_ALL_PRODUCTION_VERIFIED_IDS = _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS
 
 
 class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestCase):
@@ -237,24 +239,38 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         self.assertEqual(data["schema_version"], REGISTRY_SCHEMA_VERSION)
         self.assertIsInstance(data["records"], list)
 
-    def test_production_registry_has_exactly_the_v2_2c_verified_records(self):
+    def test_production_registry_has_exactly_the_v2_2c_and_v337_verified_records(self):
         # V2-2C (issue #93): the first source-backed fermentation fact
-        # pack -- exactly these three verified records, no more.
+        # pack. Issue #337 adds the second, mash-fundamentals fact pack.
+        # FACT-MASH-0003 (iodine test) is deliberately NOT among these --
+        # it was left at status `draft`, pending an independent second
+        # source, per issue #337's own weaken-rather-than-force rule.
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
-        self.assertEqual({r["id"] for r in verified}, set(_PRODUCTION_VERIFIED_IDS))
-        self.assertEqual(len(verified), len(_PRODUCTION_VERIFIED_IDS))
+        self.assertEqual({r["id"] for r in verified}, set(_ALL_PRODUCTION_VERIFIED_IDS))
+        self.assertEqual(len(verified), len(_ALL_PRODUCTION_VERIFIED_IDS))
 
-    def test_production_registry_classification_mix_is_exactly_2_documented_1_interpretation(self):
+    def test_fact_mash_0003_exists_as_draft_not_verified(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        record = next(r for r in data["records"] if r["id"] == "FACT-MASH-0003")
+        self.assertEqual(record["status"], "draft")
+
+    def test_production_registry_classification_mix_is_exactly_4_documented_2_interpretation(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
         classifications = [r["classification"] for r in verified]
-        self.assertEqual(classifications.count("documented_fact"), 2)
-        self.assertEqual(classifications.count("professional_interpretation"), 1)
+        self.assertEqual(classifications.count("documented_fact"), 4)
+        self.assertEqual(classifications.count("professional_interpretation"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
         record = next(r for r in data["records"] if r["id"] == "FACT-BREW-0003")
+        self.assertEqual(record["classification"], "professional_interpretation")
+        self.assertEqual(record["status"], "verified")
+
+    def test_fact_mash_0004_is_professional_interpretation_not_documented_fact(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        record = next(r for r in data["records"] if r["id"] == "FACT-MASH-0004")
         self.assertEqual(record["classification"], "professional_interpretation")
         self.assertEqual(record["status"], "verified")
 
@@ -296,10 +312,10 @@ class TestProductionRegistryVerifiedOnlyApi(unittest.TestCase):
     the real production registry, now that it carries its first
     source-backed fermentation fact pack (FACT-BREW-0001..0003)."""
 
-    def test_returns_exactly_the_three_v2_2c_ids_in_canonical_order(self):
+    def test_returns_exactly_the_v2_2c_and_v337_ids_in_canonical_order(self):
         ids = [r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)]
-        self.assertEqual(ids, sorted(_PRODUCTION_VERIFIED_IDS))
-        self.assertEqual(ids, _PRODUCTION_VERIFIED_IDS)
+        self.assertEqual(ids, sorted(_ALL_PRODUCTION_VERIFIED_IDS))
+        self.assertEqual(ids, _ALL_PRODUCTION_VERIFIED_IDS)
 
     def test_ordering_is_deterministic_across_repeated_reads(self):
         first = [r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)]
@@ -331,6 +347,8 @@ class TestProductionRegistryVerifiedOnlyApi(unittest.TestCase):
             },
         }
         for record in read_verified_records(_PRODUCTION_REGISTRY):
+            if record["id"] not in expected_refs:
+                continue  # covered by TestProductionRegistryMashingFactPackVerifiedOnlyApi instead.
             refs = {s["ref"] for s in record["sources"]}
             self.assertEqual(refs, expected_refs[record["id"]])
             self.assertTrue(all(s["tier"] == "A" for s in record["sources"]))
@@ -340,6 +358,56 @@ class TestProductionRegistryVerifiedOnlyApi(unittest.TestCase):
             record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
             self.assertIsNotNone(record)
             self.assertEqual(record["status"], "verified")
+
+
+class TestProductionRegistryMashingFactPackVerifiedOnlyApi(unittest.TestCase):
+    """Issue #337: the second source-backed fact pack, mash fundamentals
+    (FACT-MASH-0001, FACT-MASH-0002, FACT-MASH-0004 -- FACT-MASH-0003
+    stays `draft`, see TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims)."""
+
+    def test_returns_exactly_the_three_mashing_ids(self):
+        ids = {r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"].startswith("FACT-MASH-")}
+        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS))
+
+    def test_concept_filter_mashing_temperature_returns_expected_two(self):
+        ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept="mashing.temperature")}
+        self.assertEqual(ids, {"FACT-MASH-0002", "FACT-MASH-0004"})
+
+    def test_module_filter_mashing_fundamentals_returns_all_three(self):
+        ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, module="mashing.fundamentals")}
+        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS))
+
+    def test_provenance_and_source_refs_survive_trusted_reads(self):
+        expected = {
+            "FACT-MASH-0001": {
+                "Briess Technical Services (Bies, D. & Roberts, C., 2013), 'Understanding a Malt Analysis'": "A",
+                "The Oxford Companion to Beer (Garrett Oliver, ed., 2011), entry 'alpha amylase'": "B",
+            },
+            "FACT-MASH-0002": {
+                "R. Muller (1991), 'The effects of mashing temperature and mash thickness on wort carbohydrate composition', Journal of the Institute of Brewing 97(2):85-92, DOI 10.1002/j.2050-0416.1991.tb01055.x": "A",
+            },
+            "FACT-MASH-0004": {
+                "R. Muller (1991), 'The effects of mashing temperature and mash thickness on wort carbohydrate composition', Journal of the Institute of Brewing 97(2):85-92, DOI 10.1002/j.2050-0416.1991.tb01055.x": "A",
+                "Briess Technical Services (Bies, D. & Roberts, C., 2013), 'Understanding a Malt Analysis'": "A",
+            },
+        }
+        for record in read_verified_records(_PRODUCTION_REGISTRY):
+            if record["id"] not in expected:
+                continue  # covered by TestProductionRegistryVerifiedOnlyApi instead.
+            actual = {s["ref"]: s["tier"] for s in record["sources"]}
+            self.assertEqual(actual, expected[record["id"]])
+
+    def test_get_verified_record_returns_each_of_the_three(self):
+        for fact_id in _MASHING_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            self.assertIsNotNone(record)
+            self.assertEqual(record["status"], "verified")
+
+    def test_get_verified_record_returns_none_for_the_unpromoted_iodine_claim(self):
+        # FACT-MASH-0003 exists in the registry but is still `draft` --
+        # the trusted lookup must never distinguish this from "id does
+        # not exist" and must never leak it as if it were verified.
+        self.assertIsNone(get_verified_record(_PRODUCTION_REGISTRY, "FACT-MASH-0003"))
 
 
 class TestGetVerifiedRecordLookup(unittest.TestCase):

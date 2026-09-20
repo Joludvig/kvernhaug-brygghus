@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-MASHING-FUNDAMENTALS",
+  "chunks": [
+    {
+      "id": "CHUNK-MASH-A",
+      "source_claims": ["FACT-MASH-0001"],
+      "text": {
+        "no": "Under mesking bryter enzymer i malten - først og fremst alfa- og beta-amylase - ned stivelse til sukker som gjæren senere kan bruke. Men ikke all stivelsen blir omdannet: en del av karbohydratet i vørteren blir værende som dekstriner, som gjæren ikke kan gjære. Disse dekstrinene bidrar til kropp og fylde i den ferdige ølen, ikke til alkohol.",
+        "en": "During mashing, enzymes in the malt - mainly alpha- and beta-amylase - break down starch into sugars the yeast can later use. But not all the starch is converted: some of the carbohydrate in the wort remains as dextrins, which the yeast cannot ferment. These dextrins contribute body and fullness to the finished beer, not alcohol."
+      }
+    },
+    {
+      "id": "CHUNK-MASH-B",
+      "source_claims": ["FACT-MASH-0002"],
+      "text": {
+        "no": "Mesketemperaturen påvirker hvor gjærbar vørteren blir. Innenfor det praktiske området som er undersøkt, kan en varmere mesking gi en mindre gjærbar vørter enn en kaldere mesking, alt annet likt. Dette er en generell retning fra det som er dokumentert, ikke en fasit for akkurat hvor mye det utgjør i din egen brygging.",
+        "en": "Mash temperature affects how fermentable the wort becomes. Within the practical range that has been studied, a warmer mash can produce a less fermentable wort than a cooler mash, all else being equal. This is a general direction from what has been documented, not a fixed answer for exactly how much it matters in your own brewing."
+      }
+    },
+    {
+      "id": "CHUNK-MASH-C",
+      "source_claims": ["FACT-MASH-0004"],
+      "text": {
+        "no": "Mesketemperatur er bare én av flere faktorer som påvirker vørterens gjærbarhet og sammensetning - mesketykkelse (forholdet mellom vann og malt) og maltens eget enzyminnhold spiller også inn. Derfor finnes det ingen universell mesketemperatur som er riktig for alle oppskrifter eller alle mål med ølet; temperaturvalget bør ses i sammenheng med disse andre faktorene.",
+        "en": "Mash temperature is only one of several factors that affect the wort's fermentability and composition - mash thickness (the water-to-grist ratio) and the malt's own enzyme content also play a role. That's why there is no single, universal mash temperature that is correct for every recipe or every desired beer outcome; the temperature choice should be considered together with these other factors."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-MASH-001",
+      "type": "concept_check",
+      "concepts": ["mashing.starch_conversion", "mashing.dextrins"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MASH-0001"],
+      "prompt": {
+        "no": "Under mesking omdanner enzymer i malten mye av stivelsen til sukker. Hva skjer med den delen av karbohydratet som IKKE blir omdannet til gjærbart sukker?",
+        "en": "During mashing, malt enzymes convert much of the starch into sugar. What happens to the part of the carbohydrate that is NOT converted into fermentable sugar?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Den blir værende i vørteren som dekstriner, som gjæren ikke kan gjære, og som gir kropp til ølet i stedet for alkohol.",
+            "en": "It remains in the wort as dextrins, which the yeast cannot ferment and which add body to the beer instead of alcohol."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Den forsvinner helt under mesking og har ingen effekt på den ferdige ølen.",
+            "en": "It disappears completely during mashing and has no effect on the finished beer."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Den blir alltid omdannet til gjærbart sukker senere, under selve gjæringen.",
+            "en": "It is always converted into fermentable sugar later, during fermentation itself."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Ikke all stivelse blir gjærbart sukker under mesking - resten blir værende i vørteren som dekstriner, som gir kropp og fylde i stedet for alkohol.",
+        "en": "Correct. Not all starch becomes fermentable sugar during mashing - the remainder stays in the wort as dextrins, which add body and fullness rather than alcohol."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Karbohydratet som ikke blir omdannet forsvinner ikke, og gjæren kan heller ikke gjære det senere - det blir værende i vørteren som dekstriner, som bidrar til kropp i stedet for alkohol.",
+        "en": "Not quite. The unconverted carbohydrate does not vanish, and yeast cannot ferment it later either - it remains in the wort as dextrins, contributing body rather than alcohol."
+      }
+    },
+    {
+      "id": "Q-MASH-002",
+      "type": "scenario",
+      "concepts": ["mashing.temperature", "mashing.fermentability"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-MASH-0002"],
+      "prompt": {
+        "no": "Du vil at den ferdige ølen skal bli tørrere og mer gjæret ut, med mindre restsødme. Innenfor det praktiske temperaturområdet i meskeplanen din - hvilken retning bør du generelt flytte mesketemperaturen for å jobbe mot dette målet?",
+        "en": "You want your finished beer to be drier and more fully fermented, with less residual sweetness. Within your mash schedule's practical temperature range, which direction should you generally move your mash temperature to work toward that goal?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Meske noe kaldere, siden en kaldere mesking (innenfor det praktiske området) har en tendens til å gi en mer gjærbar vørter.",
+            "en": "Mash somewhat cooler, since a cooler mash (within the practical range) tends to produce a more fermentable wort."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Meske noe varmere, siden en varmere mesking alltid gir en mer gjærbar vørter.",
+            "en": "Mash somewhat warmer, since a warmer mash always produces a more fermentable wort."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Mesketemperatur har ingen betydning for gjærbarhet; bare gjæringstemperaturen betyr noe.",
+            "en": "Mash temperature makes no difference to fermentability; only fermentation temperature matters."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Innenfor det praktiske mesketemperaturområdet har en kaldere mesking en tendens til å gi en mer gjærbar vørter, noe som peker mot en tørrere ferdig øl.",
+        "en": "Correct. Within the practical mash-temperature range, mashing cooler tends to produce a more fermentable wort, which points toward a drier finished beer."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Mesketemperatur påvirker faktisk gjærbarheten, og retningen som er dokumentert er motsatt av 'varmere = mer gjærbar': innenfor det praktiske området har en kaldere mesking en tendens til å gi en mer gjærbar vørter.",
+        "en": "Not quite. Mash temperature does affect fermentability, and the direction that has been documented is the opposite of 'warmer = more fermentable': within the practical range, a cooler mash tends to produce a more fermentable wort."
+      }
+    },
+    {
+      "id": "Q-MASH-003",
+      "type": "scenario",
+      "concepts": ["mashing.temperature", "mashing.process_variables"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-MASH-0004"],
+      "prompt": {
+        "no": "En bryggevenn sier: 'Det finnes én riktig mesketemperatur - finner du bare den og alltid bruker den, blir alle oppskrifter riktige.' Basert på det du har lært, hvordan bør du svare?",
+        "en": "A brewing friend says: 'There's one correct mash temperature - if you just find it and always use it, every recipe will turn out right.' Based on what you've learned, how should you respond?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Er enig - når du har funnet riktig mesketemperatur, fungerer den likt for alle oppskrifter.",
+            "en": "Agree - once you find the right mash temperature, it works the same way for every recipe."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Er uenig - mesketemperatur er bare én av flere faktorer (som mesketykkelse og maltens enzyminnhold) som påvirker resultatet, så det finnes ingen universell temperatur som passer alle oppskrifter.",
+            "en": "Disagree - mash temperature is only one of several factors (like mash thickness and the malt's enzyme content) that affect the result, so there's no single universal temperature that fits every recipe."
+          },
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Er uenig - mesketemperatur har ingen reell effekt på ølen, så det spiller ingen rolle hvilken du velger.",
+            "en": "Disagree - mash temperature has no real effect on the beer, so it doesn't matter which one you pick."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Mesketemperatur har betydning, men er bare én av flere faktorer som spiller inn - mesketykkelse og maltens eget enzyminnhold har også betydning. Den kombinasjonen er grunnen til at ingen enkelt mesketemperatur er universelt riktig for alle oppskrifter.",
+        "en": "Correct. Mash temperature matters, but it's only one of several factors at play - mash thickness and the malt's own enzyme content matter too. That combination is why no single mash temperature is universally correct for every recipe."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Mesketemperatur har betydning, men er ikke den eneste faktoren, og heller ikke et fast tall som passer alt - mesketykkelse og maltens enzyminnhold har også betydning, og det er derfor ingen enkelt universell mesketemperatur passer alle oppskrifter.",
+        "en": "Not quite. Mash temperature does matter, but it isn't the only factor, and it also isn't a single fixed number that works for everything - mash thickness and the malt's enzyme content matter too, which is why no single universal mash temperature fits every recipe."
+      }
+    }
+  ]
+}
