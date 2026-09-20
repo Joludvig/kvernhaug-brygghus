@@ -1980,6 +1980,106 @@ suite proving both new steps exist, run in the required order (before
 prompt points at the staged contract path rather than the unqualified
 `docs/development/AGENT_WORKFLOW.md` reference this fix removes.
 
+## Chief review handoff byte-proof (V1.9.3, issue #346)
+
+**The bug this investigates.** Issue #344 / PR #345 (created after V1.9/
+V1.9.1/V1.9.2 above were already merged to master) got THREE
+owner-authorized `status:changes-requested` retries in a row, each of
+which passed every gate documented above — authorized trigger, correct
+PR/exact head, a genuine owner `CHANGES_REQUESTED` review (the third one
+an explicit "DETERMINISTIC NO-OP RECOVERY" review that named one file and
+three literal required edits, and explicitly forbade concluding no change
+was needed) — and each of which finished the Claude step with
+`conclusion: success`, yet produced **zero commits, zero issue comments,
+and zero PR comments**. Not even a "review already satisfied" or
+"cannot address in scope" report, which the prompt explicitly asks for
+when a review point cannot be addressed.
+
+The wrapper's own review-selection logic (`bygg_kontekst`/
+`_nyeste_beslutning`) was re-audited against PR #345's actual three
+review IDs — including two independent `CHANGES_REQUESTED` reviews on
+the exact same head — and found correct; this is now a permanent
+regression (`test_ii_gjenskaper_issue_346s_pr_345_hendelse` in
+`tests/test_agent_bridge_changes_requested_context.py`), so review
+selection itself was **not** the defect. The live GitHub Actions
+transcripts for the three failed runs were not retrievable to identify
+the true root cause directly, so this fix does not claim to have found
+one. What it does close is a real, previously unproven gap: **nothing
+proved that the staged handoff file (`.agent_bridge_run/chief_review.md`,
+written by `cr_context` while the tree was still on master) still
+contained exactly the verified bytes by the time Claude's turn actually
+started**, after `cr_branch` (V1.9) had switched the working tree to the
+old feature branch's exact head. A lost, emptied, or altered handoff file
+at that point would produce **precisely** the same observable
+fingerprint as "Claude read the correct review and chose, on its own, to
+make no changes" — the two failure classes were indistinguishable after
+the fact.
+
+**The fix.** `changes_requested_context.py` gains a third CLI mode,
+`verify-handoff` (`verifiser_review_handoff`), plus a `review_body_sha256`/
+`review_body_bytes` pair of new `verify`-mode outputs (the sha256/length
+of exactly what was written to `chief_review.md`). A new workflow step,
+`cr_handoff_proof`, runs immediately after `cr_checkout` and strictly
+before "Run Claude Code" — using the same trust-root pattern issue #331
+already established (the **staged** copy of the script, never the copy
+sitting in the checked-out feature branch's own `.github/scripts/`): it
+re-hashes the staged handoff file and fails closed, `exit 1`, if the file
+is missing, empty, or its sha256 no longer matches what `cr_context`
+computed when it wrote the file. This turns a possible silent handoff
+loss into a loud, diagnosable rejection instead of an unexplained
+zero-commit, zero-comment success. A dedicated failure-report comment
+(mirroring the existing Draft-verification failure report) explains this
+specific rejection distinctly from the generic failure path.
+
+Separately, the existing "Report missing deliverable" comment (V1.2/V1.7)
+now also carries, for a `status:changes-requested` `no_new_commits`
+round, the exact verified work order this run was proven to have
+received — review id, author, exact head, and the handoff's own sha256 —
+so a human/Chief reading a future no-op report can immediately see which
+review body Claude was proven to have been handed, without reconstructing
+that from the review history by head SHA.
+
+**What this does not change.** The decision logic in `bygg_kontekst`/
+`_nyeste_beslutning`/`velg_review` (review selection, exact-head binding,
+staleness semantics) is untouched and was independently re-verified
+against issue #346's own real incident data as a permanent regression.
+`cr_state`/`cr_context`/`cr_verifier_stage`/`cr_branch`/`cr_checkout`
+(V1.9/V1.9.1) are unchanged. No `--allowedTools` permission is
+broadened — `cr_handoff_proof` runs as an ordinary workflow job step
+(the staged Python script), never through Claude's Bash allowlist, and
+`status:ready` is untouched (`verifiser_review_handoff` returns a
+non-alarming "not required" for any other trigger label, and the new
+step is scoped to `needs.guard.outputs.trigger_label ==
+'status:changes-requested'`, same as `cr_branch`/`cr_checkout`). The
+deliverable guard's own pass/fail decision (`deliverable_guard.py`) is
+untouched.
+
+**Honest limit.** This fix is evidence-based hardening and observability,
+not a confirmed root-cause fix — the exact mechanism by which the three
+PR #345 rounds produced zero output could not be established from source/
+tests alone in this investigation. If a future `status:changes-requested`
+round ever fails this new `cr_handoff_proof` gate, that is now, for the
+first time, positive proof the handoff itself was the cause; if the gate
+keeps passing while a round still produces no commits, that instead
+points at Claude's own turn (its actual conversation/tool-use transcript,
+not obtainable from this repository's tests) as the next place to look —
+a distinction issue #346's incident could not make before this fix. A
+bounded, owner-authorized live retry of #344 (once this fix merges) is
+the next real test of whether the underlying failure recurs.
+
+Regression coverage: `tests/test_agent_bridge_changes_requested_context.py`
+— `TestReviewHandoffVerifisering` (pure unit tests for
+`verifiser_review_handoff`: correct-hash accepted, missing file, empty
+file, content changed between write and read, missing expected hash, and
+`status:ready` non-alarming no-op), CLI contract tests for the new
+`verify-handoff` mode, `test_ii_gjenskaper_issue_346s_pr_345_hendelse`
+(the exact three-review, same-head regression against PR #345's real
+review IDs), and `TestWorkflowKobling` additions proving `cr_handoff_proof`
+exists, runs strictly after `cr_checkout` and before `Run Claude Code`,
+is scoped to `status:changes-requested`, invokes the **staged** verifier
+copy (never the feature branch's own file) in `verify-handoff` mode, and
+fails closed on a missing/empty staged file.
+
 ## Round 1 also uses the Draft -> Ready lifecycle (V1, issue #62)
 
 **The problem this fixes:** issue #44 (above) gave `status:changes-requested`
