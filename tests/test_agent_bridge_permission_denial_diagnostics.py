@@ -290,18 +290,47 @@ class TestCliKontrakt(unittest.TestCase):
 
 
 class TestWorkflowWiring(unittest.TestCase):
-    """Beviser at det nye steget faktisk er koblet inn i workflowen -- kun
-    via workflowens EGET Python-kall mot execution-loggen på disk, ALDRI
-    gjennom Claudes --allowedTools -- og at det er markert best-effort
-    (kan aldri feile/blokkere jobben)."""
+    """Beviser at diagnostikken er koblet inn som trusted/best-effort
+    workflow-observability, uavhengig av den gamle feature-branchen."""
 
     def setUp(self):
         with open(_WORKFLOW, "r", encoding="utf-8") as f:
             self.text = f.read()
 
-    def test_20_steget_finnes_og_kaller_riktig_script(self):
+    def test_20_steget_finnes_og_kaller_staged_script(self):
         self.assertIn("Capture Claude permission-denial diagnostics (issue #348)", self.text)
-        self.assertIn("python3 .github/scripts/permission_denial_diagnostics.py", self.text)
+        self.assertIn(
+            'STAGED_DENIAL_DIAGNOSTIC: ${{ steps.denial_stage.outputs.path }}',
+            self.text,
+        )
+        self.assertIn('python3 "$STAGED_DENIAL_DIAGNOSTIC"', self.text)
+
+    def test_20b_diagnostic_stages_fra_trusted_master_for_branch_switch(self):
+        stage = self.text.index("Stage trusted permission-denial diagnostic (issue #350)")
+        checkout = self.text.index("- name: Prepare existing agent branch for changes-requested round")
+        capture = self.text.index("Capture Claude permission-denial diagnostics (issue #348)")
+        self.assertLess(stage, checkout)
+        self.assertLess(checkout, capture)
+        self.assertIn(
+            'cp .github/scripts/permission_denial_diagnostics.py "$RUNNER_TEMP/permission_denial_diagnostics.py"',
+            self.text,
+        )
+
+    def test_20c_capture_bruker_ikke_branch_local_script(self):
+        capture = self.text.index("Capture Claude permission-denial diagnostics (issue #348)")
+        window = self.text[capture : capture + 1800]
+        self.assertNotIn(
+            "python3 .github/scripts/permission_denial_diagnostics.py",
+            window,
+        )
+        self.assertIn('python3 "$STAGED_DENIAL_DIAGNOSTIC"', window)
+
+    def test_20d_capture_er_best_effort_ved_manglende_eller_feilende_script(self):
+        capture = self.text.index("Capture Claude permission-denial diagnostics (issue #348)")
+        window = self.text[capture : capture + 2200]
+        self.assertIn("available=false", window)
+        self.assertIn("diagnostic unavailable for this run", window)
+        self.assertIn("exit 0", window)
 
     def test_21_steget_bruker_execution_file_output_fra_claude_steget(self):
         self.assertIn("EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}", self.text)
@@ -312,8 +341,6 @@ class TestWorkflowWiring(unittest.TestCase):
         self.assertIn("always()", window)
 
     def test_23_ingen_ny_bash_tillatelse_ble_lagt_til_for_dette(self):
-        # Diagnostikken kjører helt uavhengig av Claudes --allowedTools --
-        # ingen ny Bash(...)-regel skal være nødvendig for selve steget.
         allowed_tools_line = next(
             line for line in self.text.splitlines() if "--allowedTools" in line
         )
@@ -324,10 +351,6 @@ class TestWorkflowWiring(unittest.TestCase):
         self.assertIn("steps.denials.outputs.denial_summary", self.text)
 
     def test_24b_rapport_steg_refererer_available_issue_348_blokker_2(self):
-        # Chief-review (PR #349) blokker 2: "0 denials" og "unavailable"
-        # må være skilt i den repo-synlige diagnostikken, ikke bare i CLI-
-        # utdataet -- begge rapport-stegene må lese `steps.denials.outputs.
-        # available`, ikke bare `denial_count`.
         self.assertEqual(self.text.count("steps.denials.outputs.available"), 2)
 
 

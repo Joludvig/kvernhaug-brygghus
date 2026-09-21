@@ -285,6 +285,20 @@ jobs:
           cp docs/development/AGENT_WORKFLOW.md .agent_bridge_run/AGENT_WORKFLOW.md
           echo "path=.agent_bridge_run/AGENT_WORKFLOW.md" >> "$GITHUB_OUTPUT"
 
+      # Issue #350: the permission-denial diagnostic was added on master
+      # after old feature branches such as agent/issue-344 were created.
+      # A changes-requested round later checks out that old branch, so the
+      # branch-local .github/scripts copy may be missing/stale. Stage the
+      # current trusted master copy in runner-owned temp storage BEFORE any
+      # branch switch, exactly like the trusted checkout verifier (#331).
+      - name: Stage trusted permission-denial diagnostic (issue #350)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true'
+        id: denial_stage
+        run: |
+          set -euo pipefail
+          cp .github/scripts/permission_denial_diagnostics.py "$RUNNER_TEMP/permission_denial_diagnostics.py"
+          echo "path=$RUNNER_TEMP/permission_denial_diagnostics.py" >> "$GITHUB_OUTPUT"
+
       # V1.2 (issue #12), Chief review fix (PR #13, blockers 1+2): every
       # bridge run for an issue uses ONE fixed, deterministic branch
       # name for that issue's entire lifecycle -- status:ready creates
@@ -997,8 +1011,29 @@ jobs:
         id: denials
         env:
           EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+          STAGED_DENIAL_DIAGNOSTIC: ${{ steps.denial_stage.outputs.path }}
         run: |
-          python3 .github/scripts/permission_denial_diagnostics.py >> "$GITHUB_OUTPUT"
+          # Issue #350: this step is observability only. It must remain
+          # best-effort even if staging/script execution itself fails.
+          set +e
+          tmp_outputs="$RUNNER_TEMP/permission_denial_outputs.txt"
+          rm -f "$tmp_outputs"
+          if [ -z "${STAGED_DENIAL_DIAGNOSTIC:-}" ] || [ ! -s "$STAGED_DENIAL_DIAGNOSTIC" ]; then
+            {
+              echo "available=false"
+              echo "denial_count=0"
+              echo "denial_summary=Staged permission-denial diagnostic missing or empty; diagnostic unavailable for this run."
+            } >> "$GITHUB_OUTPUT"
+          elif python3 "$STAGED_DENIAL_DIAGNOSTIC" > "$tmp_outputs"; then
+            cat "$tmp_outputs" >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "available=false"
+              echo "denial_count=0"
+              echo "denial_summary=Permission-denial diagnostic execution failed; diagnostic unavailable for this run."
+            } >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
 
       # V1.2 (issue #12): a `success()` Claude step is NOT proof of a
       # deliverable -- issue #11 proved that directly (conclusion:
