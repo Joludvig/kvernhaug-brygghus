@@ -1,6 +1,6 @@
 # V2.2 Goal 1A — Learn → Plan Mesking: practical guidance + UX contract
 
-Version: 1.1
+Version: 1.2
 Status: Decision/prep document — reviewable, not yet actionable
 Governed by: [#344](https://github.com/Joludvig/kvernhaug-brygghus/issues/344), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 1: Learn → Plan),
@@ -17,6 +17,19 @@ corrects the tab-switching premise in §7 (the installed Streamlit version does 
 programmatic tab control; the expander choice is now justified on complexity/state-preservation
 grounds instead), removes rather than hedges the out-of-scope 63°C and unverified "body"
 claims in §2/§3/§5, and adds an explicit applied-understanding transfer test to §9.
+
+**v1.2 revision note** (addresses Chief's review of the v1.1 head, `fbb1422b84405ee56fb82aa1871a52151ab7a408`,
+review id `5261667541`): §4's "safe practical contract" wording was still over-broad — it quoted
+mid-60s/~70–72°C/time/pH/wider-process guidance that goes beyond what `FACT-MASH-0002`/
+`FACT-MASH-0004` actually verify, and claimed it was assemblable near-verbatim from the existing
+chunks. §4 now states only what those two verified chunks support, with no pH/time/wider-process/
+mid-60s/72°C guidance. §5 point 1's stepped-vs-single-temperature comparison is now removed
+entirely rather than replaced with an equivalent comparative-outcome claim (no "more deliberate
+control" or "trade-off" framing) — the replacement copy contract is neutral/descriptive about
+process structure only. §5 point 2's beta-amylase temperature-purpose wording is likewise removed
+entirely rather than replaced with an equivalent claim (no "favors the beta-amylase-active
+region") — the canonical 63°C `mash_steps` value is unchanged, but the descriptive copy contract
+attaches no biochemical purpose/outcome to it.
 
 ---
 
@@ -200,19 +213,21 @@ unsupported claim from App copy needs no new evidence — only promoting a *stro
 
 ## 4. Recommended fact-registry change(s)
 
-**None, for the Learn → Plan bridge itself.** The safe practical contract sketched in issue
-#344's body —
+**None, for the Learn → Plan bridge itself.** Constrained to the **current, verified** chunks
+only:
 
-> Mash temperature is a directional lever on wort fermentability, not a precise FG/body dial...
-> a target around the mid-60s can favor higher fermentability than a substantially warmer mash
-> around ~70–72°C, but actual results also depend on malt/enzyme properties, mash thickness,
-> time, pH and the wider process.
+- `CHUNK-MASH-B` / `FACT-MASH-0002`: within the studied 65–80°C range, warmer mash temperature
+  produced less-fermentable wort than cooler mash temperature; mash thickness also affected the
+  result. This is a direction from one study, not a universal numeric rule.
+- `CHUNK-MASH-C` / `FACT-MASH-0004`: mash temperature is only one factor; mash thickness and
+  malt enzyme content also matter; there is no universal mash temperature for every recipe or
+  outcome.
 
-— is already assemblable, near-verbatim, from the **existing** `CHUNK-MASH-B` (`FACT-MASH-0002`)
-+ `CHUNK-MASH-C` (`FACT-MASH-0004`) pair, without a new record. The Learn → Plan bridge (§6)
-should point at these two existing verified chunks directly rather than author new teaching
-copy or register a new fact for this task. This satisfies §344's own instruction #7 ("reuse
-existing pilot/registry truth rather than duplicating teaching copy").
+The Learn → Plan bridge (§6) should point at these two existing verified chunks directly rather
+than author new teaching copy or register a new fact for this task. This satisfies §344's own
+instruction #7 ("reuse existing pilot/registry truth rather than duplicating teaching copy").
+No pH, time, wider-process, "mid-60s", or "~70–72°C" guidance is included here — only what
+`FACT-MASH-0002`/`FACT-MASH-0004` actually verify.
 
 A future, separately authorized round *could* register Evans 2005 and/or the 72°C isothermal
 study as new `FACT-MASH-00xx` records to broaden the evidence base for `FACT-MASH-0002`'s
@@ -227,19 +242,23 @@ so it isn't silently forgotten.
 
 `modules/process_profiles.py`, `STANDARDPROFILER["hochkurz"]`:
 
-1. **Remove or hedge the single-infusion comparison** in `forventet_paavirkning`. Replace the
-   unsupported "vanligvis noe tørrere og renere enn en tilsvarende enkel infusjon ved samme
-   gjennomsnittstemperatur" with language that states only what the sources support: that the
-   two rests let the brewer aim more deliberately at a fermentability trade-off than a single
-   temperature choice does — without claiming a predictable outcome relative to any specific
-   single-infusion baseline, and without the "kropp" (body) framing (see point 3 below — that
-   word is removed here too, not just in `beskrivelse`).
-2. **Remove the 63°C-to-outcome pairing from `beskrivelse`** — do not merely hedge it. Replace
-   "en beta-amylase-hvile (mer gjærbart sukker, tørrere øl)" with technique-level language that
-   describes *what a lower-temperature rest step is for* (favoring the beta-amylase-active
-   region of the mash) without asserting a specific verified numeric outcome tied to 63°C, since
-   no registry record covers that temperature (§2.2, §3). `mash_steps`' actual `63` value is
-   **not** touched — this is a copy-only correction (§8 confirms no schema/value change).
+1. **Remove the single-infusion comparison entirely** from `forventet_paavirkning` — do not
+   replace it with any equivalent comparative-outcome claim (e.g. "more deliberate control" over
+   a fermentability "trade-off"), since no cited or registered source compares stepped vs.
+   single-temperature mashing at all (§2.1, §3). Replace "vanligvis noe tørrere og renere enn en
+   tilsvarende enkel infusjon ved samme gjennomsnittstemperatur" with neutral, descriptive
+   language about the two-rest process structure itself (e.g. that the profile applies two
+   separate temperature holds in sequence before mashout) — asserting no comparative or
+   predictable outcome relative to a single-infusion baseline, and without the "kropp" (body)
+   framing (see point 3 below — that word is removed here too, not just in `beskrivelse`).
+2. **Remove the 63°C-to-outcome pairing from `beskrivelse`** — do not merely hedge it, and do
+   not replace it with any equivalent biochemical-purpose claim either (e.g. "favors the
+   beta-amylase-active region of the mash"), since no registry record covers that temperature or
+   attaches that purpose to it (§2.2, §3). Replace "en beta-amylase-hvile (mer gjærbart sukker,
+   tørrere øl)" with plain structural language that names the step as a lower-temperature rest,
+   asserting no enzyme-activity purpose or numeric outcome tied to 63°C. `mash_steps`' actual
+   `63` value is **not** touched — this is a copy-only correction (§8 confirms no schema/value
+   change).
 3. **Remove the word "kropp" (body) from the 70°C alpha-rest claim** in `beskrivelse` — do not
    hedge it either, since no cited or registered source measures body/mouthfeel at all (§2.4,
    §3). **Keep** the fermentability-direction part of that claim ("mer uforgjærbart sukker" /
@@ -251,9 +270,10 @@ so it isn't silently forgotten.
    from boiling a mash portion) is a different topic (decoction technique, not mash
    *temperature*) and is out of this issue's audit scope.
 
-Net effect: after these three edits, `hochkurz`'s copy asserts only (i) the two-rest technique's
-purpose in general terms, (ii) the verified 70°C→reduced-fermentability direction, and (iii)
-nothing else — no exact-temperature outcome pairing outside the verified range, and no
+Net effect: after these three edits, `hochkurz`'s copy asserts only (i) the two-rest process
+structure, described neutrally with no comparative or biochemical-purpose claim, (ii) the
+verified 70°C→reduced-fermentability direction, and (iii) nothing else — no exact-temperature
+outcome pairing outside the verified range, no stepped-vs-single-infusion comparison, and no
 body/mouthfeel claim anywhere. This satisfies Chief review blocker 2, path (a): App copy stays
 strictly inside the verified-knowledge boundary without requiring any registry change.
 
