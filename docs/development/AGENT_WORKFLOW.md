@@ -2080,6 +2080,145 @@ is scoped to `status:changes-requested`, invokes the **staged** verifier
 copy (never the feature branch's own file) in `verify-handoff` mode, and
 fails closed on a missing/empty staged file.
 
+## Permission-denial diagnostics (V1.10, issue #348)
+
+**The bug this investigates.** The V1.9.3 controlled retry described above
+(Agent Bridge run #749, against PR #345's exact pre-run head) finished the
+"Run Claude Code" step with `conclusion: success` — 23 turns, ~290s,
+~$0.535, `is_error: false` — yet PR #345's HEAD still did not move, and the
+run's own process-level record separately showed
+`permission_denials_count: 2`. As with issue #346's incident, this
+repository's tooling could not retrieve the live Actions run's raw
+execution transcript for run #749 to identify exactly which two tool calls
+were denied — the same retrieval limit already documented above ("The live
+GitHub Actions transcripts for the three failed runs were not retrievable
+to identify the true root cause directly"). This investigation therefore
+does **not** claim to have identified run #749's two specific denials; per
+the issue's own acceptance criteria, it instead closes the other half —
+**nothing in this workflow captured that information anywhere
+durable/repo-visible even when it *is* available**, so every prior
+incident of this exact shape (issue #11: 14 denials; issue #200/#201: 2
+denials; issue #257: 1 denial; this one: 2 denials) was diagnosed after the
+fact, by a human opening the raw Actions log by hand, never by the
+workflow itself.
+
+**Audit performed (per the issue's "Required investigation").**
+`.github/workflows/claude-agent-bridge.yml`'s "Run Claude Code" step
+(`id: claude`) never referenced any `steps.claude.outputs.*` value
+anywhere else in the file before this fix — the action's own execution
+data was invoked but never consumed. No project `.claude/settings.json`
+exists in this repository, so `--permission-mode acceptEdits` (V1.3) is
+the only permission control in effect for file writes; nothing in this
+repo could plausibly have denied the one docs-file edit item 5 of the
+issue asks about. Item 4 (a narrowly missing Bash command) could not be
+confirmed or ruled out without the actual denied command strings — this
+fix deliberately does **not** guess and widen `--allowedTools`
+speculatively, per the issue's own "Fix principles" ("prefer exact/narrow
+permission additions only when a specific denied operation proves they are
+required"); any such change is deferred to whenever a live occurrence
+actually proves one is needed.
+
+**The fix.** A new pure, dependency-free module,
+[`.github/scripts/permission_denial_diagnostics.py`](../../.github/scripts/permission_denial_diagnostics.py)
+(`les_meldinger`, `finn_tillatelses_avslag`, `formater_sammendrag`,
+`formater_markdown`), reads `anthropics/claude-code-action`'s
+`execution_file` output (Claude Code's own `tool_use`/`tool_result`
+message format) and extracts **only** each denied tool call's name, a
+short single-line excerpt of that one call's own input, and the denial
+message itself — never any other part of the transcript, cost, session id
+or prompt content. A new workflow step, "Capture Claude permission-denial
+diagnostics (issue #348)" (`id: denials`), runs immediately after "Run
+Claude Code" with `always()` (so it runs on both success and failure,
+whenever the Claude step itself was not skipped) and writes a durable
+report to the run's `$GITHUB_STEP_SUMMARY`, plus two new
+`steps.denials.outputs` (`denial_count`, `denial_summary`) that the
+existing "Report missing deliverable" and "Report failure" comments (V1.2/
+V1.7/V1.9.3) now embed directly in their issue comment when the count is
+non-zero — so the *next* occurrence of this failure shape surfaces its
+denied tool calls in a repo-visible issue comment, not only in the raw
+Actions log.
+
+**Honest limit on the underlying assumption.** This round had no network
+access available to independently re-verify `execution_file`'s exact
+existence/format against `anthropics/claude-code-action`'s own
+documentation — the module's parsing logic is built from the well-known
+Claude Code `tool_use`/`tool_result` message shape (confirmed indirectly,
+in this very investigation, by a live `permission_denial` message
+observed when this session's own web-search/web-fetch tools were denied:
+`"Claude requested permissions to use <Tool>, but you haven't granted it
+yet."` — the same phrasing pattern the module's regex matches), but is
+**deliberately defensive**: a missing `execution_file` output, an empty
+file, or an unexpected format never raises or fails the step — it only
+ever yields a clear `available=false` / "unavailable" report. This can
+never regress branch/push/deliverable/Draft/HO behavior, since the new
+step reads only an already-produced file already on disk via the
+workflow's own Python call (never through Claude's `--allowedTools`, no
+new Bash permission), independent of every other gate. Whether
+`execution_file` actually resolves to a usable log — and whether the
+denial patterns this module looks for match this action's real output —
+is proven or disproven by the *next* real occurrence, exactly like V1.9.3's
+own honest-limit framing above.
+
+**Structured denial source (Chief review 5267215839).** The exact pinned
+action's SDK path exposes `SDKResultMessage.permission_denials[]`, and the
+action itself derives `permission_denials_count` directly from that array.
+Each entry contains `tool_name`, `tool_use_id` and `tool_input`. The
+diagnostic therefore treats this structured array as the **primary and
+authoritative** source whenever the field is present, rendering
+`tool_input` only through the safe/default-deny signature described above.
+The older `tool_use` + textual `tool_result` matching remains only as a
+fallback for execution formats where the structured field is absent. This
+also prevents double-counting when both representations exist.
+
+**What this does not change.** No `--allowedTools` permission is
+broadened; `--permission-mode acceptEdits` is unchanged;
+`deliverable_guard.py`, `branch_setup_diagnosis.py` and the V1.9/V1.9.1/
+V1.9.2/V1.9.3 changes-requested handoff chain are untouched — this is a
+strictly additive observability step, scoped to run alongside them, never
+gating any of their decisions. Per the issue's own instruction, issue #344
+is **not** retried as part of this issue.
+
+**Post-merge #344 retry instructions (per the issue's acceptance
+criterion 5, corrected per Chief review on PR #349 blocker 3).** Live
+issue #344 currently carries only `status:changes-requested` and
+`area:app` — `agent:claude` was intentionally removed when #344 was
+disarmed, so it is **not** already present, and no instruction here may
+claim otherwise. Once this PR is Chief-reviewed and merged to `master`,
+the safe re-arming order for #344 is:
+
+1. Ensure/remove any conflicting lifecycle trigger first, so that adding
+   the agent label by itself cannot trigger a run.
+2. Add `agent:claude` to issue #344.
+3. Only then (re-)apply `status:changes-requested` to issue #344, to
+   retry PR #345 against its then-current head.
+
+If the same failure shape
+recurs, the new "Capture Claude permission-denial diagnostics" step will
+either (a) surface the exact denied tool name(s)/input(s) in the "Report
+missing deliverable"/"Report failure" comment and step summary — turning
+this into a confirmed, actionable root cause for the first time — or (b)
+report `available=false`, which itself is new, durable evidence that
+`execution_file` is not the right signal and the diagnostic mechanism
+needs a different data source, to be investigated in a follow-up issue.
+
+Regression coverage:
+[`tests/test_agent_bridge_permission_denial_diagnostics.py`](../../tests/test_agent_bridge_permission_denial_diagnostics.py)
+— pure unit tests for `les_meldinger` (missing path, missing file, empty
+file, JSON-array and JSONL formats, malformed lines skipped, unexpected
+JSON shapes), `finn_tillatelses_avslag` (denial found with correct
+tool/input, a clean `tool_result` produces no denial, an orphaned
+`tool_use_id` falls back to "ukjent verktøy" rather than crashing, benign
+text never matches), `formater_sammendrag`/`formater_markdown` (always
+single-line for the comment-safe summary, truncation never raises), a CLI
+contract suite proving `available`/`denial_count`/`denial_summary` are
+always emitted and the step never fails regardless of input, and
+`TestWorkflowWiring`, which inspects the workflow's own source text and
+proves: the new step exists and calls the new script; it reads
+`steps.claude.outputs.execution_file`; it runs with `always()`, not just
+`success()`; no new `Bash(...)` rule was added to `--allowedTools` for it;
+and the two report steps reference its `denial_count`/`denial_summary`
+outputs.
+
 ## Round 1 also uses the Draft -> Ready lifecycle (V1, issue #62)
 
 **The problem this fixes:** issue #44 (above) gave `status:changes-requested`
