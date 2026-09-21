@@ -62,6 +62,21 @@ fangst-UI, ikke Brew Lab-tolkning). `sensing.judgment` har en BEVISST
 tredje "ikke satt"-tilstand (tomstreng) utover de tre ekte
 yes/maybe/no-verdiene, slik at et ubesvart brygg aldri fremstår som om
 brukeren aktivt har valgt et av de tre svarene.
+
+V2.2 G2B (issue #355) legger til `learning.hypothesis` -- ETT nytt,
+valgfritt fritekstfelt, plassert BEVISST mellom whatChanged og nextTime
+(evidens-rekkefølgen: evidens -> tolkning -> hypotese -> neste-gang-
+beslutning). Rendres/lagres/tømmes med nøyaktig samme mønster som de tre
+eksisterende learning-feltene over -- ingen egen skrivevei, INGEN
+automatisk utledet/foreslått hypotese (aldri utledet fra et annet brygg,
+f.eks. Sommerglød), og en synlig bildetekst gjør eksplisitt at dette er
+en MULIG forklaring, ikke en fastslått årsak (CORE_KBHBREW_V1.md §5.9).
+Den read-only planlagt-vs-faktisk-sammenligningen (_render_sammenligning)
+er flyttet til å rendres RETT ETTER actuals-skjemaet (i stedet for
+nederst) slik at den faktiske evidensen vises før sensorikk/
+tolkning/hypotese/neste-gang-skjemaet under -- ren rekkefølge-endring,
+ingen ny skrivevei, ingen endring av noen av de to eksisterende
+lagreknappenes omfang.
 """
 import streamlit as st
 
@@ -222,8 +237,9 @@ def _render_sensing_learning_skjema(brew_id, brew):
     lagre-klikk (samme "ingen skriving uten knappetrykk"-garanti som
     _render_actuals_skjema()). Bruker KUN de eksisterende Core V1-feltene
     sensing.judgment/sensing.notes/learning.whatWorked/whatChanged/
-    nextTime, via modules/kbhbrew_storage.py::oppdater_brew_lag() -- ALDRI
-    en ny skrivevei, ALDRI actuals/snapshot/status/brewedAt.
+    hypothesis/nextTime, via modules/kbhbrew_storage.py::
+    oppdater_brew_lag() -- ALDRI en ny skrivevei, ALDRI
+    actuals/snapshot/status/brewedAt.
 
     Returnerer det FERSKESTE kjente brew-objektet, samme mønster som
     _render_actuals_skjema()."""
@@ -258,6 +274,12 @@ def _render_sensing_learning_skjema(brew_id, brew):
         value=learning.get("whatChanged") or "",
         key=f"kbhbrew_hist_learning_changed::{brew_id}",
     )
+    hypothesis_tekst = st.text_area(
+        t("brew_history.learning_hypothesis_label"),
+        value=learning.get("hypothesis") or "",
+        key=f"kbhbrew_hist_learning_hypothesis::{brew_id}",
+    )
+    st.caption(t("brew_history.learning_hypothesis_caption"))
     next_tekst = st.text_area(
         t("brew_history.learning_next_time_label"),
         value=learning.get("nextTime") or "",
@@ -268,7 +290,12 @@ def _render_sensing_learning_skjema(brew_id, brew):
         oppdatert_brew = oppdater_brew_lag(
             brew_id,
             sensing={"judgment": judgment_valgt, "notes": sensing_notat_tekst},
-            learning={"whatWorked": worked_tekst, "whatChanged": changed_tekst, "nextTime": next_tekst},
+            learning={
+                "whatWorked": worked_tekst,
+                "whatChanged": changed_tekst,
+                "hypothesis": hypothesis_tekst,
+                "nextTime": next_tekst,
+            },
         )
         st.success(t("brew_history.sensing_learning_lagret_ok"))
         if oppdatert_brew is not None:
@@ -390,6 +417,6 @@ def render_kbhbrew_history_panel():
     st.write("")
     brew = _render_actuals_skjema(brew_id, brew)
     st.write("")
-    brew = _render_sensing_learning_skjema(brew_id, brew)
-    st.write("")
     _render_sammenligning(brew)
+    st.write("")
+    _render_sensing_learning_skjema(brew_id, brew)

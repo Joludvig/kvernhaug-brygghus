@@ -110,6 +110,7 @@
     "learning": {
       "whatWorked": "Syntetisk testtekst -- hva som fungerte.",
       "whatChanged": "Syntetisk testtekst -- hva som ble endret.",
+      "hypothesis": "Syntetisk testtekst -- mulig forklaring.",
       "nextTime": "Syntetisk testtekst -- neste gang."
     }
   }

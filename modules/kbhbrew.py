@@ -66,7 +66,7 @@ _KJENTE_ENVELOPE_FELT = frozenset({"format", "version", "exportedAt", "generator
 
 _KJENTE_ACTUALS_FELT = frozenset({"og", "fg", "volumeL", "notes"})
 _KJENTE_SENSING_FELT = frozenset({"judgment", "flavorProfile", "notes"})
-_KJENTE_LEARNING_FELT = frozenset({"whatWorked", "whatChanged", "nextTime"})
+_KJENTE_LEARNING_FELT = frozenset({"whatWorked", "whatChanged", "hypothesis", "nextTime"})
 
 _GYLDIGE_JUDGMENT_VERDIER = frozenset({"yes", "maybe", "no"})
 
@@ -425,7 +425,7 @@ def _bygg_sensing_payload(sensing):
 def _bygg_learning_payload(learning):
     learning = learning if isinstance(learning, dict) else {}
     ut = {}
-    for felt in ("whatWorked", "whatChanged", "nextTime"):
+    for felt in ("whatWorked", "whatChanged", "hypothesis", "nextTime"):
         v = _tekst_eller_none(learning.get(felt))
         if v is not None:
             ut[felt] = v
@@ -599,7 +599,7 @@ def normaliser_learning_lag(raw):
     prinsipp, offentlig av samme grunn."""
     raw = raw if isinstance(raw, dict) else {}
     ut = {}
-    for felt in ("whatWorked", "whatChanged", "nextTime"):
+    for felt in ("whatWorked", "whatChanged", "hypothesis", "nextTime"):
         v = _tekst_eller_none(raw.get(felt))
         if v is not None:
             ut[felt] = v
