@@ -2159,6 +2159,17 @@ denial patterns this module looks for match this action's real output —
 is proven or disproven by the *next* real occurrence, exactly like V1.9.3's
 own honest-limit framing above.
 
+**Structured denial source (Chief review 5267215839).** The exact pinned
+action's SDK path exposes `SDKResultMessage.permission_denials[]`, and the
+action itself derives `permission_denials_count` directly from that array.
+Each entry contains `tool_name`, `tool_use_id` and `tool_input`. The
+diagnostic therefore treats this structured array as the **primary and
+authoritative** source whenever the field is present, rendering
+`tool_input` only through the safe/default-deny signature described above.
+The older `tool_use` + textual `tool_result` matching remains only as a
+fallback for execution formats where the structured field is absent. This
+also prevents double-counting when both representations exist.
+
 **What this does not change.** No `--allowedTools` permission is
 broadened; `--permission-mode acceptEdits` is unchanged;
 `deliverable_guard.py`, `branch_setup_diagnosis.py` and the V1.9/V1.9.1/
