@@ -512,5 +512,105 @@ class TestAllowlistSignaturChiefRunde2(unittest.TestCase):
         self.assertNotIn("Hunter2VerySecret", funn[0]["input_excerpt"])
 
 
+class TestStrukturertePermissionDenials(unittest.TestCase):
+    """Chief-review 5267215839: SDK-resultatets permission_denials[] er
+    primærkilden og må fungere uten tekstlige denial-tool_results."""
+
+    def test_41_to_strukturerte_denials_uten_tool_result_gir_eksakt_to(self):
+        rader = [
+            {
+                "type": "result",
+                "subtype": "success",
+                "is_error": False,
+                "permission_denials": [
+                    {
+                        "tool_name": "Bash",
+                        "tool_use_id": "toolu_a",
+                        "tool_input": {
+                            "command": "git push https://alice:ultrahemmelig@example.com/repo.git"
+                        },
+                    },
+                    {
+                        "tool_name": "Edit",
+                        "tool_use_id": "toolu_b",
+                        "tool_input": {
+                            "file_path": "/repo/docs/file.md",
+                            "new_string": "privat-innhold-som-ikke-skal-vises",
+                        },
+                    },
+                ],
+            }
+        ]
+
+        funn = _PDD.finn_tillatelses_avslag(rader)
+
+        self.assertEqual(len(funn), 2)
+        self.assertEqual([f["tool"] for f in funn], ["Bash", "Edit"])
+        self.assertNotIn("ultrahemmelig", funn[0]["input_excerpt"])
+        self.assertIn("git push", funn[0]["input_excerpt"])
+        self.assertEqual(funn[1]["input_excerpt"], "/repo/docs/file.md")
+        self.assertNotIn("privat-innhold", funn[1]["input_excerpt"])
+
+    def test_42_strukturert_og_tekstlig_samme_denial_dobbelttelles_ikke(self):
+        tool_use = {
+            "type": "assistant",
+            "message": {
+                "content": [
+                    {
+                        "type": "tool_use",
+                        "id": "toolu_same",
+                        "name": "Bash",
+                        "input": {"command": "git push origin agent/issue-348"},
+                    }
+                ]
+            },
+        }
+        tool_result = {
+            "type": "user",
+            "message": {
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": "toolu_same",
+                        "is_error": True,
+                        "content": "permission denied",
+                    }
+                ]
+            },
+        }
+        result = {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "permission_denials": [
+                {
+                    "tool_name": "Bash",
+                    "tool_use_id": "toolu_same",
+                    "tool_input": {"command": "git push origin agent/issue-348"},
+                }
+            ],
+        }
+
+        funn = _PDD.finn_tillatelses_avslag([tool_use, tool_result, result])
+
+        self.assertEqual(len(funn), 1)
+        self.assertEqual(funn[0]["tool"], "Bash")
+        self.assertIn("git push", funn[0]["input_excerpt"])
+
+    def test_43_tomt_strukturert_felt_er_autoritativt_og_bruker_ikke_tekstfallback(self):
+        # Når SDK-resultatet eksplisitt sier ingen denials, skal en eldre
+        # tekstheuristikk ikke overstyre den autoritative kilden.
+        result = {
+            "type": "result",
+            "subtype": "success",
+            "is_error": False,
+            "permission_denials": [],
+        }
+        self.assertEqual(
+            _PDD.finn_tillatelses_avslag([_TOOL_USE_MSG, _TOOL_DENIAL_MSG, result]),
+            [],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
