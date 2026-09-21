@@ -82,8 +82,8 @@ STANDARDPROFILER = {
         ),
         "vanskelighetsgrad": MIDDELS,
         "mash_steps": [
-            _steg(63, 40, INFUSJON, "Beta-hvile — gjærbarhet"),
-            _steg(70, 30, INFUSJON, "Alfa-hvile — kropp/dekstriner"),
+            _steg(63, 40, INFUSJON, "Lavere temperaturhvile"),
+            _steg(70, 30, INFUSJON, "Høyere temperaturhvile"),
             _steg(77, 10, MASHOUT,  "Mashout — stopper enzymaktivitet"),
         ],
         "sparge_method": BATCH_SPARGE,
