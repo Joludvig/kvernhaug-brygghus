@@ -1397,6 +1397,7 @@ jobs:
           CR_REVIEW_AUTHOR: ${{ steps.cr_context.outputs.review_author }}
           CR_HEAD_SHA: ${{ steps.cr_context.outputs.head_sha }}
           CR_REVIEW_SHA256: ${{ steps.cr_context.outputs.review_body_sha256 }}
+          DENIAL_AVAILABLE: ${{ steps.denials.outputs.available }}
           DENIAL_COUNT: ${{ steps.denials.outputs.denial_count }}
           DENIAL_SUMMARY: ${{ steps.denials.outputs.denial_summary }}
         run: |
@@ -1406,7 +1407,9 @@ jobs:
             WORK_ORDER=" Verified work order this round (issue #346): Chief review #${CR_REVIEW_ID} by ${CR_REVIEW_AUTHOR} on exact head \`${CR_HEAD_SHA}\`, staged handoff sha256 \`${CR_REVIEW_SHA256}\` -- if this run produced no changes, that is the exact review body it was proven to have received."
           fi
           DENIAL_NOTE=""
-          if [ -n "${DENIAL_COUNT:-}" ] && [ "${DENIAL_COUNT:-0}" != "0" ]; then
+          if [ "${DENIAL_AVAILABLE:-}" = "false" ]; then
+            DENIAL_NOTE=" Permission-denial diagnostics (issue #348): unavailable for this run — ${DENIAL_SUMMARY}"
+          elif [ -n "${DENIAL_COUNT:-}" ] && [ "${DENIAL_COUNT:-0}" != "0" ]; then
             DENIAL_NOTE=" Permission-denial diagnostics (issue #348): ${DENIAL_COUNT} denied tool call(s) detected in this run's execution log — ${DENIAL_SUMMARY}"
           fi
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Diagnosis (issue #259): \`$DIAGNOSIS\` — $DIAGNOSIS_REASON${WORK_ORDER}${DENIAL_NOTE} Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
@@ -1424,11 +1427,14 @@ jobs:
       - name: Report failure — leave at status:working for manual follow-up
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success' && steps.draft_verify.outcome != 'failure' && steps.cr_handoff_proof.outcome != 'failure'
         env:
+          DENIAL_AVAILABLE: ${{ steps.denials.outputs.available }}
           DENIAL_COUNT: ${{ steps.denials.outputs.denial_count }}
           DENIAL_SUMMARY: ${{ steps.denials.outputs.denial_summary }}
         run: |
           DENIAL_NOTE=""
-          if [ -n "${DENIAL_COUNT:-}" ] && [ "${DENIAL_COUNT:-0}" != "0" ]; then
+          if [ "${DENIAL_AVAILABLE:-}" = "false" ]; then
+            DENIAL_NOTE=" Permission-denial diagnostics (issue #348): unavailable for this run — ${DENIAL_SUMMARY}"
+          elif [ -n "${DENIAL_COUNT:-}" ] && [ "${DENIAL_COUNT:-0}" != "0" ]; then
             DENIAL_NOTE=" Permission-denial diagnostics (issue #348): ${DENIAL_COUNT} denied tool call(s) detected in this run's execution log — ${DENIAL_SUMMARY}"
           fi
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted.${DENIAL_NOTE} Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."

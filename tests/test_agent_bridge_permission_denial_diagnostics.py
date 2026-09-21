@@ -79,13 +79,39 @@ class TestLesMeldinger(unittest.TestCase):
         self.assertIsNone(rader)
         self.assertIn("Fant ingen", grunn)
 
-    def test_3_tom_fil_gir_tom_liste_ikke_feil(self):
+    def test_3_tom_fil_gir_utilgjengelig_ikke_stille_null_avslag(self):
+        # Chief-review (PR #349) blokker 2: en tom logg skal ALDRI late som
+        # et gyldig "0 avslag"-resultat -- kun `available=false`, present
+        # av samme grunn som en manglende fil.
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
             path = f.name
         try:
             rader, grunn = _PDD.les_meldinger(path)
-            self.assertEqual(rader, [])
-            self.assertIsNone(grunn)
+            self.assertIsNone(rader)
+            self.assertIn("tom", grunn)
+        finally:
+            os.unlink(path)
+
+    def test_3b_gyldig_tom_json_liste_gir_ogsa_utilgjengelig(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            json.dump([], f)
+            path = f.name
+        try:
+            rader, grunn = _PDD.les_meldinger(path)
+            self.assertIsNone(rader)
+            self.assertIsNotNone(grunn)
+        finally:
+            os.unlink(path)
+
+    def test_3c_jsonl_kun_ugyldige_linjer_gir_utilgjengelig(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False) as f:
+            f.write("dette er ikke json\n")
+            f.write("heller ikke dette\n")
+            path = f.name
+        try:
+            rader, grunn = _PDD.les_meldinger(path)
+            self.assertIsNone(rader)
+            self.assertIsNotNone(grunn)
         finally:
             os.unlink(path)
 
@@ -220,6 +246,18 @@ class TestCliKontrakt(unittest.TestCase):
         finally:
             os.unlink(path)
 
+    def test_17b_cli_tom_execution_fil_gir_available_false(self):
+        # Chief-review (PR #349) blokker 2: dette må aldri stille bli lest
+        # som `denial_count=0`/`available=true`.
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            path = f.name
+        try:
+            res = self._kjor_cli({"EXECUTION_FILE": path})
+            self.assertEqual(res.returncode, 0)
+            self.assertIn("available=false", res.stdout)
+        finally:
+            os.unlink(path)
+
     def test_18_cli_skriver_til_github_step_summary_uten_a_feile(self):
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
             json.dump([_TOOL_USE_MSG, _TOOL_DENIAL_MSG], f)
@@ -278,6 +316,111 @@ class TestWorkflowWiring(unittest.TestCase):
     def test_24_rapport_steg_refererer_denial_count_eller_summary(self):
         self.assertIn("steps.denials.outputs.denial_count", self.text)
         self.assertIn("steps.denials.outputs.denial_summary", self.text)
+
+    def test_24b_rapport_steg_refererer_available_issue_348_blokker_2(self):
+        # Chief-review (PR #349) blokker 2: "0 denials" og "unavailable"
+        # må være skilt i den repo-synlige diagnostikken, ikke bare i CLI-
+        # utdataet -- begge rapport-stegene må lese `steps.denials.outputs.
+        # available`, ikke bare `denial_count`.
+        self.assertEqual(self.text.count("steps.denials.outputs.available"), 2)
+
+
+def _tool_use_med_input(navn, tool_input):
+    return {
+        "type": "assistant",
+        "message": {
+            "content": [{"type": "tool_use", "id": "toolu_x", "name": navn, "input": tool_input}]
+        },
+    }
+
+
+def _avslag_med_tekst(tekst):
+    return {
+        "type": "user",
+        "message": {
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "toolu_x",
+                    "is_error": True,
+                    "content": [{"type": "text", "text": tekst}],
+                }
+            ]
+        },
+    }
+
+
+class TestHemmelighetsRedigering(unittest.TestCase):
+    """Chief-review (PR #349) blokker 1: rå input-verdier/avslagstekst med
+    hemmeligheter skal ALDRI overleve til `input_excerpt`/`denial_excerpt`,
+    som begge publiseres til en repo-synlig issue-kommentar."""
+
+    _AVVIST = "Claude requested permissions to use Bash, but you haven't granted it yet."
+
+    def test_25_github_pat_redigeres_bort_fra_bash_input(self):
+        bruk = _tool_use_med_input(
+            "Bash", {"command": "curl -H 'Authorization: token ghp_1234567890abcdef1234567890abcdef1234' https://api.github.com"}
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertEqual(len(funn), 1)
+        self.assertNotIn("ghp_1234567890abcdef1234567890abcdef1234", funn[0]["input_excerpt"])
+        self.assertIn("[REDIGERT]", funn[0]["input_excerpt"])
+
+    def test_26_github_fine_grained_pat_redigeres_bort(self):
+        hemmelig = "github_pat_11ABCDEFG0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQ"
+        bruk = _tool_use_med_input("Bash", {"command": f"git push https://x-access-token:{hemmelig}@github.com/foo/bar"})
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn(hemmelig, funn[0]["input_excerpt"])
+
+    def test_27_aws_access_key_id_redigeres_bort(self):
+        bruk = _tool_use_med_input("Bash", {"command": "export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE"})
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("AKIAIOSFODNN7EXAMPLE", funn[0]["input_excerpt"])
+
+    def test_28_aws_secret_access_key_tildeling_redigeres_bort(self):
+        bruk = _tool_use_med_input(
+            "Bash", {"command": "aws_secret_access_key=wJalrXUtnFEMIK7MDENGbPxRfiCYEXAMPLEKEY python3 deploy.py"}
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("wJalrXUtnFEMIK7MDENGbPxRfiCYEXAMPLEKEY", funn[0]["input_excerpt"])
+
+    def test_29_anthropic_key_redigeres_bort(self):
+        bruk = _tool_use_med_input("Bash", {"command": "echo sk-ant-api03-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH"})
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("sk-ant-api03-abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH", funn[0]["input_excerpt"])
+
+    def test_30_generisk_token_flagg_redigeres_bort(self):
+        bruk = _tool_use_med_input("Bash", {"command": "curl --token hunter2supersecretvalue https://example.com"})
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("hunter2supersecretvalue", funn[0]["input_excerpt"])
+        self.assertIn("--token", funn[0]["input_excerpt"])
+
+    def test_31_hemmelighet_i_selve_avslagsteksten_redigeres_ogsa(self):
+        bruk = _tool_use_med_input("Bash", {"command": "echo hei"})
+        avslag_med_hemmelighet = _avslag_med_tekst(
+            "permission denied for token ghp_abcdefghijklmnopqrstuvwxyzABCDEFGHIJ"
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, avslag_med_hemmelighet])
+        self.assertNotIn("ghp_abcdefghijklmnopqrstuvwxyzABCDEFGHIJ", funn[0]["denial_excerpt"])
+
+    def test_32_write_content_verdi_vises_aldri_kun_feltnavn(self):
+        # Write/Edit-lignende fritekst-felter (content/new_string/old_string)
+        # skal ALDRI gjengis rått -- kun hvilke feltnavn input hadde.
+        bruk = _tool_use_med_input(
+            "Write",
+            {"content": "API_KEY=sk-ant-api03-should-never-appear-in-a-comment-anywhere"},
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("sk-ant-api03-should-never-appear-in-a-comment-anywhere", funn[0]["input_excerpt"])
+        self.assertIn("content", funn[0]["input_excerpt"])
+
+    def test_33_write_file_path_er_trygt_a_vise(self):
+        bruk = _tool_use_med_input(
+            "Write", {"file_path": "/repo/data/pantry.json", "content": "hemmelig innhold"}
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertEqual(funn[0]["input_excerpt"], "/repo/data/pantry.json")
+        self.assertNotIn("hemmelig innhold", funn[0]["input_excerpt"])
 
 
 if __name__ == "__main__":

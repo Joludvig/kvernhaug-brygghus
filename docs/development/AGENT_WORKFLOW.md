@@ -2168,10 +2168,20 @@ gating any of their decisions. Per the issue's own instruction, issue #344
 is **not** retried as part of this issue.
 
 **Post-merge #344 retry instructions (per the issue's acceptance
-criterion 5).** Once this PR is Chief-reviewed and merged to `master`, the
-owner may re-apply `status:changes-requested` to issue #344 (with
-`agent:claude` already present, per the standard safe-arming order) to
-retry PR #345 against its then-current head. If the same failure shape
+criterion 5, corrected per Chief review on PR #349 blocker 3).** Live
+issue #344 currently carries only `status:changes-requested` and
+`area:app` — `agent:claude` was intentionally removed when #344 was
+disarmed, so it is **not** already present, and no instruction here may
+claim otherwise. Once this PR is Chief-reviewed and merged to `master`,
+the safe re-arming order for #344 is:
+
+1. Ensure/remove any conflicting lifecycle trigger first, so that adding
+   the agent label by itself cannot trigger a run.
+2. Add `agent:claude` to issue #344.
+3. Only then (re-)apply `status:changes-requested` to issue #344, to
+   retry PR #345 against its then-current head.
+
+If the same failure shape
 recurs, the new "Capture Claude permission-denial diagnostics" step will
 either (a) surface the exact denied tool name(s)/input(s) in the "Report
 missing deliverable"/"Report failure" comment and step summary — turning

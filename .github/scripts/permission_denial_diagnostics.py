@@ -26,6 +26,20 @@ leveranse-porten, branch/push-reglene eller noen annen eksisterende
 kontroll. Treffsikkerheten bekreftes/forbedres på neste reelle
 forekomst, ikke gjettet fram nå.
 
+SIKKERHET (Chief-review på PR #349, issue #348): denne modulen publiseres
+til en repo-synlig issue-kommentar, så den kopierer ALDRI et avvist
+verktøykalls rå input-verdier direkte inn i rapporten. For `Bash`-kall
+gjengis kommandolinjen (identifiserer selve den avviste operasjonen), men
+kun etter at kjente hemmelighetsformer (GitHub-/AWS-/Anthropic-lignende
+nøkler, samt `token=`/`password=`/`secret=`/`Authorization: Bearer
+...`-mønstre) er erstattet med `[REDIGERT]`. For andre verktøy (f.eks.
+`Write`/`Edit`) gjengis KUN et kjent trygt felt som `file_path`/`path`, og
+ALDRI fritekst-felter som `content`/`new_string`/`old_string`/`prompt` --
+uten et slikt trygt felt vises kun feltnavnene input hadde, ikke verdiene.
+Samme redigering kjøres på selve avslagsteksten før den kuttes til et
+sammendrag, siden noen handlinger ekko-er deler av det avviste kallet
+tilbake i avslagsmeldingen.
+
 Ren, avhengighetsfri stdlib-Python -- kalt fra
 .github/workflows/claude-agent-bridge.yml (steget "Capture Claude
 permission-denial diagnostics (issue #348)") og enhetstestet i
@@ -43,25 +57,64 @@ _AVSLAG_MONSTER = re.compile(
     re.IGNORECASE,
 )
 
+# Kjente hemmelighetsformer med et gjenkjennelig, faste prefiks/format --
+# trygt å maskere uansett kontekst (issue #348, Chief-review blokker 1).
+_KJENTE_HEMMELIGHETER = re.compile(
+    r"ghp_[A-Za-z0-9]{36,}"  # GitHub personal access token (classic)
+    r"|gh[ousr]_[A-Za-z0-9]{36,}"  # GitHub OAuth/App/user/refresh token
+    r"|github_pat_[A-Za-z0-9_]{20,}"  # GitHub fine-grained PAT
+    r"|(?:AKIA|ASIA)[0-9A-Z]{16}"  # AWS (temp) access key id
+    r"|sk-ant-[A-Za-z0-9_-]{20,}"  # Anthropic API key
+    r"|sk-[A-Za-z0-9]{20,}"  # generic sk-* style API key
+)
+
+# `<label><verdi>`-tildelinger der bare LABELEN er trygg å beholde --
+# f.eks. `--token abc123`, `password=hunter2`, `Authorization: Bearer xyz`,
+# `AWS_SECRET_ACCESS_KEY=...`. Verdien maskeres, ikke labelen.
+_HEMMELIG_TILDELING = re.compile(
+    r"(?i)((?:authorization\s*:\s*bearer"
+    r"|aws_secret_access_key"
+    r"|aws_session_token"
+    r"|--?(?:token|password|passwd|secret|api[-_]?key|access[-_]?key)\S*)"
+    r"[\s:=]+)(\S+)"
+)
+
 _MAKS_EXCERPT = 200
 _MAKS_SAMMENDRAG = 500
+
+
+def _redigert(tekst):
+    """Erstatter kjente hemmelighetsformer/-tildelinger med `[REDIGERT]`."""
+    if not tekst:
+        return tekst
+    tekst = _KJENTE_HEMMELIGHETER.sub("[REDIGERT]", tekst)
+    tekst = _HEMMELIG_TILDELING.sub(lambda m: m.group(1) + "[REDIGERT]", tekst)
+    return tekst
 
 
 def _kort(tekst, maks=_MAKS_EXCERPT):
     if tekst is None:
         return ""
     enlinje = " ".join(str(tekst).split())
+    enlinje = _redigert(enlinje)
     if len(enlinje) <= maks:
         return enlinje
     return enlinje[: maks - 1].rstrip() + "…"
+
+
+_UGYLDIG_JSON = object()  # sentinel: skiller "parsing feilet" fra ekte JSON `null`
 
 
 def les_meldinger(sti):
     """Leser execution-loggfilen på `sti`.
 
     Returnerer (rader, feilmelding). `rader` er `None` hvis loggen ikke er
-    tilgjengelig/lesbar/tolkbar i det hele tatt; ellers en liste med
-    allerede parsede meldings-dict-er (kan være tom).
+    tilgjengelig/lesbar/tolkbar -- eller tolkbar, men uten en eneste
+    meldings-dict -- i det hele tatt; ellers en IKKE-tom liste med allerede
+    parsede meldings-dict-er (Chief-review blokker 2, issue #348: en tom
+    eller kun-søppel-logg skal aldri late som et gyldig "0 avslag"-resultat
+    -- den skal rapporteres `available=false`, samme som en manglende
+    fil).
     """
     if not sti:
         return None, "Ingen execution_file-sti oppgitt for denne kjøringen."
@@ -75,21 +128,25 @@ def les_meldinger(sti):
 
     stripped = raw.strip()
     if not stripped:
-        return [], None
+        return None, "Execution-loggfilen var tom."
 
     try:
         parsed = json.loads(stripped)
     except json.JSONDecodeError:
-        parsed = None
+        parsed = _UGYLDIG_JSON
 
-    if parsed is not None:
+    if parsed is not _UGYLDIG_JSON:
         if isinstance(parsed, list):
-            return [r for r in parsed if isinstance(r, dict)], None
-        if isinstance(parsed, dict) and isinstance(parsed.get("messages"), list):
-            return [r for r in parsed["messages"] if isinstance(r, dict)], None
-        if isinstance(parsed, dict):
-            return [parsed], None
-        return None, "Execution-loggen var gyldig JSON, men i et uventet format."
+            rader = [r for r in parsed if isinstance(r, dict)]
+        elif isinstance(parsed, dict) and isinstance(parsed.get("messages"), list):
+            rader = [r for r in parsed["messages"] if isinstance(r, dict)]
+        elif isinstance(parsed, dict):
+            rader = [parsed]
+        else:
+            return None, "Execution-loggen var gyldig JSON, men i et uventet format."
+        if not rader:
+            return None, "Execution-loggen var gyldig JSON, men inneholdt ingen tolkbare meldinger."
+        return rader, None
 
     # JSONL-fallback: én JSON-melding per linje, hopp stille over uleselige linjer.
     rader = []
@@ -103,6 +160,8 @@ def les_meldinger(sti):
             continue
         if isinstance(obj, dict):
             rader.append(obj)
+    if not rader:
+        return None, "Execution-loggen kunne ikke tolkes som JSON eller JSONL (ingen gyldige meldingslinjer)."
     return rader, None
 
 
@@ -121,15 +180,34 @@ def _tool_result_tekst(blokk):
     return None
 
 
+# Felt det er trygt å gjengi verdien av -- alle er identifiserende
+# stier/URL-er, aldri fritekst-/innholds-felter som kan bære hemmeligheter
+# (f.eks. Write/Edits `content`/`new_string`/`old_string`, eller en
+# `prompt`/`body`/`query`).
+_TRYGGE_INPUT_NOKLER = ("file_path", "path", "notebook_path", "pattern", "url")
+
+
 def _render_input(tool_input):
-    if tool_input is None:
+    """Gjengir et konservativt, trygt SIGNATUR av et avvist kalls input --
+    aldri kallets fritekst-verdier direkte (issue #348, Chief-review
+    blokker 1). For `Bash` gjengis kommandolinjen selv (den avviste
+    operasjonen), siden `_kort`/`_redigert` maskerer kjente
+    hemmelighetsformer i den før den når sammendraget. For andre verktøy
+    gjengis kun et kjent trygt felt (fil-/URL-sti); uten et slikt felt
+    vises bare hvilke feltnavn input hadde -- aldri verdiene.
+    """
+    if not isinstance(tool_input, dict):
         return ""
-    if isinstance(tool_input, dict) and isinstance(tool_input.get("command"), str):
-        return tool_input["command"]
-    try:
-        return json.dumps(tool_input, ensure_ascii=False)
-    except TypeError:
-        return str(tool_input)
+    command = tool_input.get("command")
+    if isinstance(command, str) and command.strip():
+        return command
+    for nokkel in _TRYGGE_INPUT_NOKLER:
+        verdi = tool_input.get(nokkel)
+        if isinstance(verdi, str) and verdi:
+            return verdi
+    if tool_input:
+        return f"(input-felt: {', '.join(sorted(tool_input.keys()))})"
+    return ""
 
 
 def finn_tillatelses_avslag(rader):
@@ -138,8 +216,9 @@ def finn_tillatelses_avslag(rader):
     Returnerer en liste med `{"tool", "input_excerpt", "denial_excerpt"}`,
     i den rekkefølgen de ble funnet. Inkluderer ALDRI noe annet fra
     transkriptet -- kun det avviste kallets eget verktøynavn, en kort
-    (maks 200 tegn) ensrettet gjengivelse av DET kallets input, og selve
-    avslagsteksten (samme lengdebegrensning).
+    (maks 200 tegn), REDIGERT (`_render_input`/`_kort`/`_redigert`) og
+    aldri fritekst-verdi-bærende gjengivelse av DET kallets input, og selve
+    avslagsteksten (samme lengdebegrensning, samme redigering).
     """
     tool_use_by_id = {}
     funn = []
