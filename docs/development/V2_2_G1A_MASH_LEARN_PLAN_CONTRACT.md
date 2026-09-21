@@ -416,8 +416,8 @@ Course Fact Registry record (§4).
      here), but it must not reuse `Q-MASH-002`/`Q-MASH-003`'s wording or numbers.
    - **Response required:** the evaluator states (a) a direction (lower / keep / raise), (b) a
      rationale in their own words that invokes the fermentability-lever concept, and (c) at least
-     one acknowledgment that other factors (malt/enzyme properties, mash thickness, time, pH,
-     wider process) also matter — mirroring `FACT-MASH-0004`'s own hedge. No oral coaching or
+     one acknowledgment that another verified factor (mash thickness/water-to-grist ratio
+     and/or malt enzyme content) also matters — mirroring `FACT-MASH-0004`'s own hedge. No oral coaching or
      hints are given during the response.
    - **Observable PASS criteria (all three required):**
      1. The stated direction is a coherent application of the fermentability-lever concept (grade
