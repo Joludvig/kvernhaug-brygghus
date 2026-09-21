@@ -156,7 +156,13 @@ class TestFinnTillatelsesAvslag(unittest.TestCase):
         funn = _PDD.finn_tillatelses_avslag([_TOOL_USE_MSG, _TOOL_DENIAL_MSG])
         self.assertEqual(len(funn), 1)
         self.assertEqual(funn[0]["tool"], "Bash")
-        self.assertIn("git rev-parse HEAD", funn[0]["input_excerpt"])
+        # Chief-review runde 2 (issue #348): rå kommandolinje vises ALDRI
+        # lenger -- kun en allowlist-basert signatur (programnavn + kjente
+        # trygge ord/flagg-navn), pluss en sha256 for korrelasjon.
+        self.assertIn("git", funn[0]["input_excerpt"])
+        self.assertIn("[REDIGERT]", funn[0]["input_excerpt"])
+        self.assertIn("sha256=", funn[0]["input_excerpt"])
+        self.assertNotIn("rev-parse", funn[0]["input_excerpt"])
         self.assertIn("requested permissions to use Bash", funn[0]["denial_excerpt"])
 
     def test_8_vellykket_tool_result_gir_ingen_avslag(self):
@@ -421,6 +427,89 @@ class TestHemmelighetsRedigering(unittest.TestCase):
         funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
         self.assertEqual(funn[0]["input_excerpt"], "/repo/data/pantry.json")
         self.assertNotIn("hemmelig innhold", funn[0]["input_excerpt"])
+
+
+class TestAllowlistSignaturChiefRunde2(unittest.TestCase):
+    """Chief re-review (PR #349, issue #348): en endelig secret-regex skal
+    ALDRI være den primære sikkerhetsgrensen -- default skal være å SKJULE
+    et posisjonsargument/felt med mindre det står på en fast, liten,
+    kjent-trygg allowlist. Disse testene dekker nettopp det Chief ba om i
+    "Required bounded fix" punkt 4: en ukjent hemmelighet i et Bash-
+    posisjonsargument, URL-legitimasjon/-query, vilkårlig `pattern`-tekst,
+    og at signaturen fortsatt skiller nyttige kommandoklasser."""
+
+    _AVVIST = "Claude requested permissions to use Bash, but you haven't granted it yet."
+
+    def test_34_ukjent_hemmelighet_i_bash_posisjonsargument_overlever_ikke(self):
+        # En hemmelighet uten noe kjent prefiks/mønster i det hele tatt --
+        # ingen regex i _KJENTE_HEMMELIGHETER/_HEMMELIG_TILDELING ville
+        # noensinne fanget denne. Allowlisten må skjule den likevel, fordi
+        # den bare er et vilkårlig posisjonsargument til et program uten
+        # kjent underkommando-vokabular.
+        ukjent_hemmelighet = "xK7qP9mZ2vT4nB8jL1wR6yD3sF0hQ5cV"
+        bruk = _tool_use_med_input("Bash", {"command": f"curl https://internal.example.com --data {ukjent_hemmelighet}"})
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn(ukjent_hemmelighet, funn[0]["input_excerpt"])
+        self.assertIn("[REDIGERT]", funn[0]["input_excerpt"])
+        self.assertIn("curl", funn[0]["input_excerpt"])
+
+    def test_35_url_med_brukernavn_passord_overlever_ikke_i_bash(self):
+        bruk = _tool_use_med_input(
+            "Bash", {"command": "git push https://alice:S3cretPassw0rd@example.com/repo.git"}
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("S3cretPassw0rd", funn[0]["input_excerpt"])
+        self.assertNotIn("alice:S3cretPassw0rd", funn[0]["input_excerpt"])
+
+    def test_36_url_med_query_hemmelighet_overlever_ikke_som_trygt_felt(self):
+        # `url` er bevisst fjernet fra _TRYGGE_INPUT_NOKLER -- en URL kan
+        # bære en query-streng-hemmelighet (f.eks. et signert token) og er
+        # derfor ikke universelt trygg å gjengi rått.
+        bruk = _tool_use_med_input(
+            "WebFetch", {"url": "https://example.com/download?token=hemmelig-signert-verdi"}
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("hemmelig-signert-verdi", funn[0]["input_excerpt"])
+        self.assertNotIn("https://example.com", funn[0]["input_excerpt"])
+
+    def test_37_vilkarlig_pattern_tekst_overlever_ikke_som_trygt_felt(self):
+        # `pattern` er bevisst fjernet fra _TRYGGE_INPUT_NOKLER -- et
+        # søkemønster kan selv inneholde vilkårlig sensitiv fritekst.
+        bruk = _tool_use_med_input(
+            "Grep", {"pattern": "AKIAIOSFODNN7EXAMPLE|super hemmelig intern kundeliste"}
+        )
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("super hemmelig intern kundeliste", funn[0]["input_excerpt"])
+        self.assertNotIn("AKIAIOSFODNN7EXAMPLE", funn[0]["input_excerpt"])
+        self.assertIn("pattern", funn[0]["input_excerpt"])
+
+    def test_38_signaturen_skiller_git_push_fra_gh_pr_edit(self):
+        push = _tool_use_med_input("Bash", {"command": "git push -u origin agent/issue-348"})
+        pr_edit = _tool_use_med_input("Bash", {"command": "gh pr edit 349 --body 'oppdatert rapport'"})
+        funn_push = _PDD.finn_tillatelses_avslag([push, _avslag_med_tekst(self._AVVIST)])
+        funn_edit = _PDD.finn_tillatelses_avslag([pr_edit, _avslag_med_tekst(self._AVVIST)])
+        self.assertIn("git push", funn_push[0]["input_excerpt"])
+        self.assertIn("gh pr edit", funn_edit[0]["input_excerpt"])
+        self.assertNotEqual(funn_push[0]["input_excerpt"], funn_edit[0]["input_excerpt"])
+        self.assertNotIn("oppdatert rapport", funn_edit[0]["input_excerpt"])
+
+    def test_39_signaturen_skiller_python3_m_unittest_fra_git_push(self):
+        unittest_kall = _tool_use_med_input(
+            "Bash", {"command": "python3 -m unittest discover -s tests -b"}
+        )
+        push = _tool_use_med_input("Bash", {"command": "git push origin agent/issue-348"})
+        funn_unittest = _PDD.finn_tillatelses_avslag([unittest_kall, _avslag_med_tekst(self._AVVIST)])
+        funn_push = _PDD.finn_tillatelses_avslag([push, _avslag_med_tekst(self._AVVIST)])
+        self.assertIn("python3 -m unittest", funn_unittest[0]["input_excerpt"])
+        self.assertNotIn("python3 -m unittest", funn_push[0]["input_excerpt"])
+        self.assertNotEqual(funn_unittest[0]["input_excerpt"], funn_push[0]["input_excerpt"])
+
+    def test_40_ukjent_flagg_uten_likhetstegn_skjules_helt(self):
+        # `-pHunter2` (en hemmelighet limt rett inn i et kortflagg uten
+        # `=`) skal ikke overleve som "flagg-navn" -- hele tokenet skjules.
+        bruk = _tool_use_med_input("Bash", {"command": "mysql -pHunter2VerySecret -uadmin"})
+        funn = _PDD.finn_tillatelses_avslag([bruk, _avslag_med_tekst(self._AVVIST)])
+        self.assertNotIn("Hunter2VerySecret", funn[0]["input_excerpt"])
 
 
 if __name__ == "__main__":

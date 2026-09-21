@@ -12,33 +12,46 @@ noen varig, repo-synlig rapport (issue #348s kjerneproblem). Samme mønster
 er dokumentert flere ganger tidligere i AGENT_WORKFLOW.md (issue #11, #200,
 #257) -- alltid oppdaget i etterkant, aldri fanget av kjøringen selv.
 
-MERK (ærlighet om usikkerhet, samme prinsipp som branch_setup_diagnosis.py):
-denne modulen antar at `anthropics/claude-code-action` sitt
+MERK: denne modulen antar at `anthropics/claude-code-action` sitt
 `execution_file`-output peker til en fil med Claude Code sitt vanlige
 `--output-format stream-json`-meldingsformat (Anthropic Messages API sine
 `tool_use`/`tool_result`-blokker) -- enten som en JSON-liste eller som
-JSON-linjer (JSONL). Dette kunne IKKE bekreftes mot handlingens egen
-dokumentasjon i denne runden (ingen nettverkstilgang var tilgjengelig).
-Modulen er derfor bevisst DEFENSIV: en manglende `execution_file`, en tom
-fil, eller et uventet format gir aldri en feil -- kun en tydelig
-"utilgjengelig"-rapport, slik at dette aldri kan blokkere eller endre
-leveranse-porten, branch/push-reglene eller noen annen eksisterende
-kontroll. Treffsikkerheten bekreftes/forbedres på neste reelle
-forekomst, ikke gjettet fram nå.
+JSON-linjer (JSONL). Dette er nå uavhengig bekreftet av Chief (PR #349-
+re-review) mot den eksakte pinnede `anthropics/claude-code-action`-
+revisjonen: `action.yml` eksponerer `execution_file`, og
+`base-action/src/execution-file.ts` skriver `claude-execution-output.json`
+som nettopp denne meldingsformen. Modulen forblir like fullt bevisst
+DEFENSIV -- en manglende `execution_file`, en tom fil, eller et uventet
+format gir aldri en feil -- kun en tydelig "utilgjengelig"-rapport, slik
+at dette aldri kan blokkere eller endre leveranse-porten, branch/push-
+reglene eller noen annen eksisterende kontroll: den pinnede revisjonen
+kan endres i en fremtidig oppdatering uten at denne modulen oppdateres i
+samme slag.
 
-SIKKERHET (Chief-review på PR #349, issue #348): denne modulen publiseres
-til en repo-synlig issue-kommentar, så den kopierer ALDRI et avvist
-verktøykalls rå input-verdier direkte inn i rapporten. For `Bash`-kall
-gjengis kommandolinjen (identifiserer selve den avviste operasjonen), men
-kun etter at kjente hemmelighetsformer (GitHub-/AWS-/Anthropic-lignende
-nøkler, samt `token=`/`password=`/`secret=`/`Authorization: Bearer
-...`-mønstre) er erstattet med `[REDIGERT]`. For andre verktøy (f.eks.
-`Write`/`Edit`) gjengis KUN et kjent trygt felt som `file_path`/`path`, og
-ALDRI fritekst-felter som `content`/`new_string`/`old_string`/`prompt` --
-uten et slikt trygt felt vises kun feltnavnene input hadde, ikke verdiene.
-Samme redigering kjøres på selve avslagsteksten før den kuttes til et
-sammendrag, siden noen handlinger ekko-er deler av det avviste kallet
-tilbake i avslagsmeldingen.
+SIKKERHET (Chief-review på PR #349, issue #348 -- to runder): denne
+modulen publiseres til en repo-synlig issue-kommentar, så den kopierer
+ALDRI et avvist verktøykalls rå input-verdier direkte inn i rapporten.
+Runde 1 maskerte kjente hemmelighetsformer i den rå kommandolinjen med
+regex; Chiefs re-review avviste det som utilstrekkelig ("do not rely on
+a finite secret regex as the primary safety boundary") -- en ukjent
+hemmelighetsform, en vilkårlig URL med passord/query-verdier, eller et
+vilkårlig `pattern`/`content`-felt ville fortsatt sluppet gjennom. Runde
+2 snur modellen til default-deny/allowlist: for `Bash`-kall gjengis en
+konservativ KOMMANDO-SIGNATUR (`_render_bash_signatur`) -- programnavnet,
+pluss kun flagg-NAVN (aldri flaggverdier) og kjente, ufarlige
+underkommando-ord fra en fast, liten vokabular (git/gh/pip/python3/npm/
+npx-underkommandoer dokumentert i AGENT_WORKFLOW.md) -- alt annet
+(posisjonsargumenter, ukjente flagg, flaggverdier) erstattes med
+`[REDIGERT]` og telles, pluss en SHA-256-hash av hele originalkommandoen
+for korrelasjon uten avsløring. For andre verktøy (f.eks. `Write`/`Edit`/
+`Grep`) gjengis KUN et kjent trygt felt (`file_path`/`path`/
+`notebook_path` -- IKKE lenger `pattern`/`url`, som begge kan bære
+vilkårlig sensitivt innhold), og ALDRI fritekst-felter som `content`/
+`new_string`/`old_string`/`prompt`/`query` -- uten et slikt trygt felt
+vises kun feltnavnene input hadde, ikke verdiene. Den opprinnelige kjente-
+hemmelighetsformer-regexen fra runde 1 kjøres fortsatt som ekstra
+forsvarslag oppå denne signaturen (og på selve avslagsteksten), men er
+IKKE lenger den primære sikkerhetsgrensen -- det er allowlisten.
 
 Ren, avhengighetsfri stdlib-Python -- kalt fra
 .github/workflows/claude-agent-bridge.yml (steget "Capture Claude
@@ -46,9 +59,11 @@ permission-denial diagnostics (issue #348)") og enhetstestet i
 tests/test_agent_bridge_permission_denial_diagnostics.py uten å kjøre noe
 mot GitHub eller den ekte actionen.
 """
+import hashlib
 import json
 import os
 import re
+import shlex
 import sys
 
 _AVSLAG_MONSTER = re.compile(
@@ -180,27 +195,116 @@ def _tool_result_tekst(blokk):
     return None
 
 
-# Felt det er trygt å gjengi verdien av -- alle er identifiserende
-# stier/URL-er, aldri fritekst-/innholds-felter som kan bære hemmeligheter
-# (f.eks. Write/Edits `content`/`new_string`/`old_string`, eller en
-# `prompt`/`body`/`query`).
-_TRYGGE_INPUT_NOKLER = ("file_path", "path", "notebook_path", "pattern", "url")
+# Felt det er trygt å gjengi verdien av -- rene fil-/notebook-stier, aldri
+# fritekst-/innholds-felter som kan bære hemmeligheter (f.eks. Write/Edits
+# `content`/`new_string`/`old_string`, eller en `prompt`/`body`/`query`).
+# MERK (Chief-review runde 2, issue #348 blokker): `pattern` (Grep/Glob) og
+# `url` (WebFetch) er bevisst FJERNET herfra -- ingen av dem er universelt
+# trygge, siden en URL kan bære brukernavn/passord/query-hemmeligheter og et
+# søkemønster kan inneholde vilkårlig sensitiv fritekst. Uten et trygt felt
+# vises kun feltnavnene input hadde, aldri verdien.
+_TRYGGE_INPUT_NOKLER = ("file_path", "path", "notebook_path")
+
+# Underkommando-/flaggverdi-ORD det er trygt å gjengi for et gitt
+# kjørbart program -- kun et fast, lite vokabular av kjente, ufarlige
+# ord (aldri sensitive verdier) hentet fra denne workflowens egen
+# dokumenterte `--allowedTools`-listet i AGENT_WORKFLOW.md. Dette er
+# bevisst en ALLOWLIST (default: skjul), ikke en blocklist av kjente
+# hemmelighetsformer (Chief-review runde 2, issue #348) -- et ord som
+# ikke står her blir aldri gjengitt, uansett hvordan det ser ut.
+_BASH_TRYGGE_ORD = {
+    "git": {
+        "fetch", "checkout", "switch", "branch", "status", "diff", "add",
+        "commit", "push", "log", "merge", "reset", "clean", "pull",
+        "remote", "rebase", "stash",
+    },
+    "gh": {
+        "issue", "pr", "view", "comment", "create", "edit", "list",
+        "merge", "close", "reopen", "review",
+    },
+    "pip": {"install", "uninstall", "list", "freeze"},
+    "pip3": {"install", "uninstall", "list", "freeze"},
+    "python": {"-m", "unittest", "pip"},
+    "python3": {"-m", "unittest", "pip"},
+    "npm": {"install", "ci", "test", "run"},
+    "npx": {"playwright", "install", "test"},
+    "node": set(),
+}
+
+# Gyldig, trygt flagg-NAVN (aldri flaggets verdi). To former godtas:
+# et ENKELT kortflagg (`-b`, `-m`, `-u`, `-H` -- nøyaktig én bokstav), eller
+# et langt `--navn`-flagg (bokstaver/tall/bindestrek, fornuftig lengdegrense).
+# Et kortflagg med MER enn én bokstav etter bindestreken blir bevisst IKKE
+# godtatt -- flere CLI-er (f.eks. `mysql -pHemmeligPassord`, `-uadmin`)
+# limer verdien rett inn i et kortflagg uten `=`, så et slikt token kan
+# bære en hemmelighet selv om det består av rene bokstaver/tall og ville
+# bestått en ren tegnklasse-sjekk. Alt som ikke matcher blir `[REDIGERT]`
+# i sin helhet, samme som et vilkårlig posisjonsargument.
+_TRYGT_FLAGG_NAVN = re.compile(r"^(?:-[A-Za-z]|--[A-Za-z][A-Za-z0-9-]{0,40})$")
+
+# Kjørbart programnavn det er trygt å gjengi rått -- korte, vanlige
+# fil-/programnavn-tegn. Et "programnavn" som ikke matcher (for langt,
+# eller uvanlige tegn) blir redigert bort i stedet for antatt trygt --
+# forsvarslag mot en hemmelighet limt inn som selve det første ordet i
+# kommandolinjen (f.eks. `MIN_HEMMELIGHET=... python3 ...` fanges i
+# tillegg av `_HEMMELIG_TILDELING` nedenfor uansett).
+_TRYGT_PROGRAMNAVN = re.compile(r"^[A-Za-z0-9_.-]{1,32}$")
+
+_MAKS_SIGNATUR_TOKENS = 6  # antall tokens etter programnavnet vi i det hele tatt vurderer
+
+
+def _render_bash_signatur(command):
+    """Bygger en konservativ, trygg KOMMANDO-SIGNATUR av en Bash-kommando --
+    aldri kommandolinjen selv (issue #348, Chief-review runde 2). Beholder
+    programnavnet, flagg-NAVN (aldri flaggverdier) og kjente ufarlige
+    underkommando-ord fra en fast liten vokabular (`_BASH_TRYGGE_ORD`);
+    alt annet -- posisjonsargumenter, ukjente flagg, flaggverdier -- blir
+    `[REDIGERT]`, og en SHA-256 av hele originalkommandoen følger med for
+    korrelasjon uten avsløring. Dette er en allowlist (default: skjul),
+    ikke en blocklist av kjente hemmelighetsformer -- se moduldocstring.
+    """
+    try:
+        deler = shlex.split(command, posix=True)
+    except ValueError:
+        deler = command.split()
+    if not deler:
+        return "(tom kommandolinje)"
+
+    rått_program = os.path.basename(deler[0])
+    program = rått_program if _TRYGT_PROGRAMNAVN.match(rått_program) else "[REDIGERT]"
+    trygge_ord = _BASH_TRYGGE_ORD.get(rått_program, set())
+
+    signatur_deler = [program]
+    for token in deler[1 : 1 + _MAKS_SIGNATUR_TOKENS]:
+        if token.startswith("-"):
+            navn = token.split("=", 1)[0]
+            signatur_deler.append(navn if _TRYGT_FLAGG_NAVN.match(navn) else "[REDIGERT]")
+        elif token in trygge_ord:
+            signatur_deler.append(token)
+        else:
+            signatur_deler.append("[REDIGERT]")
+
+    utelatt = max(0, len(deler) - 1 - _MAKS_SIGNATUR_TOKENS)
+    signatur = " ".join(signatur_deler)
+    if utelatt:
+        signatur += f" [+{utelatt} argument(er) utelatt]"
+    signatur += f" (sha256={hashlib.sha256(command.encode('utf-8')).hexdigest()[:16]})"
+    return signatur
 
 
 def _render_input(tool_input):
     """Gjengir et konservativt, trygt SIGNATUR av et avvist kalls input --
-    aldri kallets fritekst-verdier direkte (issue #348, Chief-review
-    blokker 1). For `Bash` gjengis kommandolinjen selv (den avviste
-    operasjonen), siden `_kort`/`_redigert` maskerer kjente
-    hemmelighetsformer i den før den når sammendraget. For andre verktøy
-    gjengis kun et kjent trygt felt (fil-/URL-sti); uten et slikt felt
-    vises bare hvilke feltnavn input hadde -- aldri verdiene.
+    aldri kallets fritekst-verdier direkte (issue #348, Chief-review, to
+    runder). For `Bash` bygges en allowlist-basert kommando-signatur
+    (`_render_bash_signatur`) -- aldri den rå kommandolinjen. For andre
+    verktøy gjengis kun et kjent trygt felt (fil-/notebook-sti); uten et
+    slikt felt vises bare hvilke feltnavn input hadde -- aldri verdiene.
     """
     if not isinstance(tool_input, dict):
         return ""
     command = tool_input.get("command")
     if isinstance(command, str) and command.strip():
-        return command
+        return _render_bash_signatur(command)
     for nokkel in _TRYGGE_INPUT_NOKLER:
         verdi = tool_input.get(nokkel)
         if isinstance(verdi, str) and verdi:
