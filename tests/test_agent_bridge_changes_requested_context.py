@@ -45,6 +45,7 @@ introduseres.
 Ren stdlib-test, ingen GitHub-kall -- kjøres av den vanlige suiten
 (`py -3 -m unittest discover -s tests -b`).
 """
+import hashlib
 import importlib.util
 import json
 import os
@@ -354,6 +355,49 @@ class TestFailClosed(unittest.TestCase):
         self.assertEqual(kontekst["review_id"], "2")
         self.assertEqual(kontekst["review_body"], "nyeste arbeidsordre")
 
+    def test_ii_gjenskaper_issue_346s_pr_345_hendelse(self):
+        """Faktisk hendelse (issue #346): PR #345 (issue #344) fikk TRE
+        eier-reviews -- den første CHANGES_REQUESTED (id 5261571979) på det
+        opprinnelige hodet `df736f2...`, deretter to MER CHANGES_REQUESTED
+        (id 5261608553, deretter en eksplisitt "DETERMINISTIC NO-OP
+        RECOVERY", id 5261667541) på nøyaktig SAMME nyere hode
+        `fbb1422b...` etter at Claude allerede hadde pushet én fiks-runde.
+        Tre eier-autoriserte changes-requested-runder etter dette punktet
+        rapporterte `no_new_commits` uten noen forklarende kommentar.
+
+        Denne testen låser fast at `bygg_kontekst` sin egen utvelgelse
+        ALLEREDE var korrekt for akkurat denne hendelsen -- den nyeste
+        recovery-reviewen (5261667541) vinner over den forrige
+        (5261608553), som igjen aldri kan forveksles med den første på det
+        gamle hodet. Utvelgelsen var med andre ord ALDRI regresjonen --
+        se `verifiser_review_handoff` (issue #346) for hva som faktisk ble
+        lukket."""
+        nytt_hode = "fbb1422b84405ee56fb82aa1871a52151ab7a408"
+        gammelt_hode = "df736f291112c226c1ab2f3fd6d1eb36c50b45ab"
+        reviews = [
+            _review(id=5261571979, commit_id=gammelt_hode,
+                    body="CHIEF REVIEW — CHANGES REQUESTED\n\nTre blockers i kontrakten.",
+                    submitted_at="2026-09-20T19:53:35Z"),
+            _review(id=5261608553, commit_id=nytt_hode,
+                    body="CHIEF RE-REVIEW — CHANGES REQUESTED\n\nEn gjenstående blocker.",
+                    submitted_at="2026-09-20T20:07:12Z"),
+            _review(id=5261667541, commit_id=nytt_hode,
+                    body="CHIEF REVIEW — CHANGES REQUESTED — DETERMINISTIC NO-OP RECOVERY\n\n"
+                         "Fix ONLY this one file.",
+                    submitted_at="2026-09-20T20:33:18Z"),
+        ]
+        ok, kontekst, grunn = _bygg(
+            issue_nummer="344",
+            branch_navn="agent/issue-344",
+            before_pr_number="345",
+            before_head_sha=nytt_hode,
+            prs=[_pr(number=345, headRefOid=nytt_hode, headRefName="agent/issue-344")],
+            reviews=reviews,
+        )
+        self.assertTrue(ok, grunn)
+        self.assertEqual(kontekst["review_id"], "5261667541")
+        self.assertIn("DETERMINISTIC NO-OP RECOVERY", kontekst["review_body"])
+
     def test_tom_review_body_avvises(self):
         ok, _, grunn = _bygg(reviews=[_review(body="   \n  ")])
         self.assertFalse(ok)
@@ -450,6 +494,84 @@ class TestCheckoutVerifisering(unittest.TestCase):
                 self.assertIn("40-tegns", grunn)
 
 
+class TestReviewHandoffVerifisering(unittest.TestCase):
+    """Issue #346 -- beviser at den STAGEDE handoff-filen fortsatt har
+    nøyaktig de samme bytene rett før Claude starter, uavhengig av om
+    utvelgelsen (`bygg_kontekst`) i seg selv var korrekt."""
+
+    def test_riktig_sha256_og_ikke_tom_fil_godkjennes(self):
+        with tempfile.TemporaryDirectory() as td:
+            sti = os.path.join(td, "chief_review.md")
+            with open(sti, "w", encoding="utf-8") as f:
+                f.write("arbeidsordre")
+            digest, storrelse = crc._hash_fil(sti)
+            self.assertGreater(storrelse, 0)
+            ok, grunn = crc.verifiser_review_handoff(
+                trigger_label="status:changes-requested",
+                expected_sha256=digest,
+                sti=sti,
+            )
+            self.assertTrue(ok, grunn)
+            self.assertIn("bevist uendret", grunn)
+
+    def test_manglende_fil_avvises(self):
+        ok, grunn = crc.verifiser_review_handoff(
+            trigger_label="status:changes-requested",
+            expected_sha256="a" * 64,
+            sti="/tmp/dette-finnes-garantert-ikke-346.md",
+        )
+        self.assertFalse(ok)
+        self.assertIn("finnes ikke", grunn)
+
+    def test_tom_fil_avvises_selv_om_den_finnes(self):
+        with tempfile.TemporaryDirectory() as td:
+            sti = os.path.join(td, "chief_review.md")
+            open(sti, "w").close()
+            digest, _ = crc._hash_fil(sti)
+            ok, grunn = crc.verifiser_review_handoff(
+                trigger_label="status:changes-requested",
+                expected_sha256=digest,
+                sti=sti,
+            )
+            self.assertFalse(ok)
+            self.assertIn("er tom", grunn)
+
+    def test_endret_innhold_mellom_skriving_og_lesing_avvises(self):
+        with tempfile.TemporaryDirectory() as td:
+            sti = os.path.join(td, "chief_review.md")
+            with open(sti, "w", encoding="utf-8") as f:
+                f.write("original arbeidsordre")
+            digest_original, _ = crc._hash_fil(sti)
+            # Simulerer at innholdet endret seg (f.eks. tapt/erstattet av en
+            # branch-checkout) mellom cr_context og Claude-start.
+            with open(sti, "w", encoding="utf-8") as f:
+                f.write("noe helt annet")
+            ok, grunn = crc.verifiser_review_handoff(
+                trigger_label="status:changes-requested",
+                expected_sha256=digest_original,
+                sti=sti,
+            )
+            self.assertFalse(ok)
+            self.assertIn("stemmer ikke", grunn)
+
+    def test_manglende_forventet_sha256_avvises(self):
+        with tempfile.TemporaryDirectory() as td:
+            sti = os.path.join(td, "chief_review.md")
+            with open(sti, "w", encoding="utf-8") as f:
+                f.write("arbeidsordre")
+            ok, grunn = crc.verifiser_review_handoff(
+                trigger_label="status:changes-requested", expected_sha256="", sti=sti,
+            )
+            self.assertFalse(ok)
+            self.assertIn("Ingen forventet sha256", grunn)
+
+    def test_status_ready_er_ikke_paakrevd(self):
+        ok, grunn = crc.verifiser_review_handoff(
+            trigger_label="status:ready", expected_sha256="", sti="/finnes-ikke",
+        )
+        self.assertTrue(ok, grunn)
+
+
 class TestReviewTransport(unittest.TestCase):
     """Akseptansepunkt J -- fiendtlig review-body skal transporteres som
     DATA, aldri som shell."""
@@ -506,15 +628,18 @@ class TestReviewTransport(unittest.TestCase):
             self.assertTrue(os.path.exists(sti))
             with open(sti, encoding="utf-8") as f:
                 self.assertIn("$(touch /tmp/pwned_by_review_body)", f.read())
+            with open(sti, "rb") as f:
+                forventet_digest = hashlib.sha256(f.read()).hexdigest()
 
         # Ingen del av review-bodyen -- og ingen ekstra linje overhodet --
         # kommer ut på stdout (som workflowen appender til $GITHUB_OUTPUT).
         for linje in p.stdout.splitlines():
-            self.assertRegex(linje, r"^[a-z_]+=", f"ikke en key=value-linje: {linje!r}")
+            self.assertRegex(linje, r"^[a-z0-9_]+=", f"ikke en key=value-linje: {linje!r}")
             self.assertNotIn("pwned", linje)
             self.assertNotIn("rm -rf", linje)
         self.assertIn(f"head_sha={HEAD}", p.stdout)
         self.assertIn(f"review_body_path={sti}", p.stdout)
+        self.assertIn(f"review_body_sha256={forventet_digest}", p.stdout)
 
         # Sabotasje-bevis: hadde bodyen blitt evaluert som shell, ville
         # disse filene eksistert.
@@ -593,6 +718,31 @@ class TestCliKontrakt(unittest.TestCase):
         self.assertEqual(feil.returncode, 1)
         self.assertIn("checkout_verified=false", feil.stdout)
 
+    def test_verify_handoff_cli_exit_koder(self):
+        with tempfile.TemporaryDirectory() as td:
+            sti = os.path.join(td, "chief_review.md")
+            with open(sti, "w", encoding="utf-8") as f:
+                f.write("arbeidsordre")
+            digest, _ = crc._hash_fil(sti)
+
+            ok = subprocess.run(
+                [sys.executable, _SCRIPT, "verify-handoff"],
+                capture_output=True, text=True,
+                env=dict(os.environ, TRIGGER_LABEL="status:changes-requested",
+                          CONTEXT_BODY_PATH=sti, EXPECTED_SHA256=digest),
+            )
+            self.assertEqual(ok.returncode, 0, ok.stderr)
+            self.assertIn("handoff_verified=true", ok.stdout)
+
+            feil = subprocess.run(
+                [sys.executable, _SCRIPT, "verify-handoff"],
+                capture_output=True, text=True,
+                env=dict(os.environ, TRIGGER_LABEL="status:changes-requested",
+                          CONTEXT_BODY_PATH=sti, EXPECTED_SHA256="f" * 64),
+            )
+            self.assertEqual(feil.returncode, 1)
+            self.assertIn("handoff_verified=false", feil.stdout)
+
     def test_ukjent_modus_avvises(self):
         p = subprocess.run([sys.executable, _SCRIPT, "tull"],
                            capture_output=True, text=True)
@@ -607,7 +757,8 @@ class TestWorkflowKobling(unittest.TestCase):
         self.tekst = _les_workflow()
 
     def test_alle_stegene_finnes(self):
-        for steg_id in ("cr_state", "cr_context", "cr_verifier_stage", "cr_branch", "cr_checkout"):
+        for steg_id in ("cr_state", "cr_context", "cr_verifier_stage", "cr_branch",
+                        "cr_checkout", "cr_handoff_proof"):
             with self.subTest(steg_id=steg_id):
                 self.assertIn(f"id: {steg_id}\n", self.tekst)
 
@@ -618,13 +769,15 @@ class TestWorkflowKobling(unittest.TestCase):
         i_stage = self.tekst.index("id: cr_verifier_stage")
         i_branch = self.tekst.index("id: cr_branch")
         i_checkout = self.tekst.index("id: cr_checkout")
+        i_handoff = self.tekst.index("id: cr_handoff_proof")
         i_claude = self.tekst.index("id: claude")
         self.assertLess(i_draft, i_state)
         self.assertLess(i_state, i_context)
         self.assertLess(i_context, i_stage)
         self.assertLess(i_stage, i_branch, "issue #331: staging MÅ skje FØR checkout til det gamle hodet")
         self.assertLess(i_branch, i_checkout)
-        self.assertLess(i_checkout, i_claude, "verifiseringen MÅ stå før Run Claude Code")
+        self.assertLess(i_checkout, i_handoff, "issue #346: handoff-beviset MÅ kjøre ETTER checkout-verifiseringen")
+        self.assertLess(i_handoff, i_claude, "handoff-beviset MÅ stå før Run Claude Code")
 
     def test_verifiseringen_kaller_den_pure_modulen(self):
         blokk = _steg_blokk(self.tekst, "cr_context")
@@ -674,6 +827,30 @@ class TestWorkflowKobling(unittest.TestCase):
         self.assertIn("checkout_verified=false", blokk)
         self.assertIn("exit 1", blokk)
 
+    def test_handoff_beviset_kaller_den_stagede_kopien_med_verify_handoff(self):
+        """Issue #346: samme trust-root-mønster som issue #331 -- den stagede
+        kopien (ALDRI det utsjekkede feature-branch-treets egen fil) må
+        kjøres, i modus `verify-handoff`, mot den forventede sha256-en
+        `cr_context` beregnet."""
+        blokk = _steg_blokk(self.tekst, "cr_handoff_proof")
+        self.assertIn("steps.cr_context.outputs.review_body_sha256", blokk)
+        self.assertIn("steps.cr_verifier_stage.outputs.path", blokk)
+        self.assertIn("STAGED_VERIFIER", blokk)
+        self.assertIn('"$STAGED_VERIFIER" verify-handoff', blokk)
+        self.assertNotIn(
+            ".github/scripts/changes_requested_context.py verify-handoff",
+            blokk,
+            "må kjøre den stagede kopien, ikke filen fra det utsjekkede "
+            "(potensielt gamle) feature-branch-treet",
+        )
+
+    def test_handoff_beviset_feiler_lukket_pa_manglende_staged_fil(self):
+        blokk = _steg_blokk(self.tekst, "cr_handoff_proof")
+        self.assertIn('[ -z "${STAGED_VERIFIER:-}" ]', blokk)
+        self.assertIn('[ ! -s "$STAGED_VERIFIER" ]', blokk)
+        self.assertIn("handoff_verified=false", blokk)
+        self.assertIn("exit 1", blokk)
+
     def test_branch_klargjoringen_checkouter_eksakt_verifisert_head(self):
         blokk = _steg_blokk(self.tekst, "cr_branch")
         self.assertIn("steps.cr_context.outputs.head_sha", blokk)
@@ -684,7 +861,7 @@ class TestWorkflowKobling(unittest.TestCase):
             self.assertNotIn(forbudt, blokk, f"{forbudt!r} hører ikke hjemme her")
 
     def test_branch_stegene_er_scopet_til_changes_requested(self):
-        for steg_id in ("cr_verifier_stage", "cr_branch", "cr_checkout"):
+        for steg_id in ("cr_verifier_stage", "cr_branch", "cr_checkout", "cr_handoff_proof"):
             with self.subTest(steg_id=steg_id):
                 blokk = _steg_blokk(self.tekst, steg_id)
                 self.assertIn(
@@ -712,7 +889,8 @@ class TestWorkflowKobling(unittest.TestCase):
         self.assertIn("REPO_OWNER: ${{ github.repository_owner }}", blokk)
 
     def test_ingen_ny_merge_eller_master_push_overflate(self):
-        for steg_id in ("cr_state", "cr_context", "cr_verifier_stage", "cr_branch", "cr_checkout"):
+        for steg_id in ("cr_state", "cr_context", "cr_verifier_stage", "cr_branch",
+                        "cr_checkout", "cr_handoff_proof"):
             blokk = _steg_blokk(self.tekst, steg_id)
             for forbudt in ("gh pr merge", "git merge", "git push"):
                 self.assertNotIn(forbudt, blokk, f"{forbudt!r} i steg {steg_id}")

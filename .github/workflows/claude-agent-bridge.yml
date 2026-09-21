@@ -621,6 +621,44 @@ jobs:
           fi
           python3 "$STAGED_VERIFIER" checkout-verify >> "$GITHUB_OUTPUT"
 
+      # Issue #346: three owner-authorized status:changes-requested retries
+      # on PR #345 (issue #344) each finished Claude's own step with
+      # `conclusion: success` -- past every gate above, including this exact
+      # checkout verification -- yet produced ZERO commits AND zero issue/PR
+      # comments, even after an owner review that explicitly forbade
+      # deciding no change was needed. Every gate up to this point proves
+      # the review handoff is CORRECT (right PR, right exact head, right
+      # owner CHANGES_REQUESTED review, newest decision wins -- re-verified
+      # against PR #345's actual review IDs as a permanent regression in
+      # tests/test_agent_bridge_changes_requested_context.py), but nothing
+      # proved the STAGED FILE Claude is told to read (`chief_review.md`,
+      # written by `cr_context` while the tree was still on master) still
+      # contains exactly those verified bytes now that `cr_branch` has
+      # switched the tree to the old feature branch. A lost/emptied/altered
+      # handoff file would produce this EXACT same silent fingerprint as
+      # "Claude read the review and chose not to act" -- the two were
+      # previously indistinguishable after the fact. This step closes that
+      # gap: it re-hashes the staged file and fails closed, before Claude
+      # ever starts, if it is missing, empty, or does not match the sha256
+      # `cr_context` computed when it wrote the file.
+      - name: Prove Chief review handoff survived branch checkout (issue #346)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && needs.guard.outputs.trigger_label == 'status:changes-requested'
+        id: cr_handoff_proof
+        env:
+          TRIGGER_LABEL: ${{ needs.guard.outputs.trigger_label }}
+          EXPECTED_SHA256: ${{ steps.cr_context.outputs.review_body_sha256 }}
+          CONTEXT_BODY_PATH: .agent_bridge_run/chief_review.md
+          STAGED_VERIFIER: ${{ steps.cr_verifier_stage.outputs.path }}
+        run: |
+          set -euo pipefail
+          if [ -z "${STAGED_VERIFIER:-}" ] || [ ! -s "$STAGED_VERIFIER" ]; then
+            echo "Staged checkout verifier missing or empty (${STAGED_VERIFIER:-<unset>}) -- refusing to fall back to the checked-out feature branch's own copy (fail-closed, issue #331 pattern reused for #346)." >&2
+            echo "handoff_verified=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "Pre-Claude handoff proof (issue #346): review #${{ steps.cr_context.outputs.review_id }} by ${{ steps.cr_context.outputs.review_author }} on exact head ${{ steps.cr_context.outputs.head_sha }}, expected sha256 ${EXPECTED_SHA256:-<unset>}."
+          python3 "$STAGED_VERIFIER" verify-handoff >> "$GITHUB_OUTPUT"
+
       # V1.2 (issue #12): the first real E2E run (issue #11) finished
       # `conclusion: success` with `permission_denials_count: 14` and
       # produced NO branch, NO PR, NO comment -- because this step gave
@@ -1288,6 +1326,17 @@ jobs:
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: this \`status:changes-requested\` run could not verify the PR was actually in Draft state before starting Claude, so Claude was NOT run this round (issue #44: Draft is a verified, fail-closed prerequisite, not a best-effort attempt) -- see this workflow run's logs for the exact reason. Issue left at \`status:working\`; check the PR's live state, then either fix and re-trigger manually, or re-apply \`status:changes-requested\` once resolved."
 
+      # Issue #346: dedicated failure report for the new pre-Claude
+      # handoff-proof gate, scoped specifically to
+      # `steps.cr_handoff_proof.outcome == 'failure'` so it is never
+      # misattributed to the generic failure step below. Claude never ran
+      # this round -- the Issue is simply left at `status:working`, same
+      # state it was already in, so there is nothing to roll back.
+      - name: Report Chief review handoff verification failure — Claude did not run this round (issue #346)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.cr_handoff_proof.outcome == 'failure'
+        run: |
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: this \`status:changes-requested\` run could not prove the staged Chief review handoff (\`.agent_bridge_run/chief_review.md\`) survived the branch checkout byte-for-byte, so Claude was NOT run this round (issue #346: the handoff must be proven readable and unchanged, not assumed) -- see this workflow run's logs for the exact reason. Issue left at \`status:working\`; check the PR's live state, then either fix and re-trigger manually, or re-apply \`status:changes-requested\` once resolved."
+
       # V1.2 (issue #12): the case that was missing entirely before this
       # fix -- Claude's own step reported success, but the deliverable
       # gate above says otherwise. Deliberately does NOT invent a new
@@ -1302,14 +1351,32 @@ jobs:
       # `branch_never_pushed`) reads as a distinguishable diagnosis in the
       # report, not folded into the same generic message as every other
       # missing-deliverable cause.
+      # V1.8 (issue #346): when the missing deliverable is a
+      # status:changes-requested `no_new_commits` round, the comment now
+      # also names the EXACT verified work order this run was proven to
+      # have received (review id/author/head, plus the handoff's own
+      # sha256 -- both captured pre-Claude by `cr_context`/`cr_handoff_proof`
+      # above) so a human/Chief reading the report can immediately tell
+      # WHICH review Claude was proven to have been handed, instead of
+      # having to reconstruct that from the review history by head SHA.
+      # Empty for `status:ready` (these outputs are simply unset there).
       - name: Report missing deliverable — leave at status:working for manual follow-up
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && success() && steps.deliverable.outputs.ok != 'true'
         env:
           REASON: ${{ steps.deliverable.outputs.reason }}
           DIAGNOSIS: ${{ steps.diagnose.outputs.diagnosis }}
           DIAGNOSIS_REASON: ${{ steps.diagnose.outputs.reason }}
+          CR_REVIEW_ID: ${{ steps.cr_context.outputs.review_id }}
+          CR_REVIEW_AUTHOR: ${{ steps.cr_context.outputs.review_author }}
+          CR_HEAD_SHA: ${{ steps.cr_context.outputs.head_sha }}
+          CR_REVIEW_SHA256: ${{ steps.cr_context.outputs.review_body_sha256 }}
         run: |
-          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Diagnosis (issue #259): \`$DIAGNOSIS\` — $DIAGNOSIS_REASON Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
+          set -euo pipefail
+          WORK_ORDER=""
+          if [ -n "${CR_REVIEW_ID:-}" ]; then
+            WORK_ORDER=" Verified work order this round (issue #346): Chief review #${CR_REVIEW_ID} by ${CR_REVIEW_AUTHOR} on exact head \`${CR_HEAD_SHA}\`, staged handoff sha256 \`${CR_REVIEW_SHA256}\` -- if this run produced no changes, that is the exact review body it was proven to have received."
+          fi
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Diagnosis (issue #259): \`$DIAGNOSIS\` — $DIAGNOSIS_REASON${WORK_ORDER} Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
 
       # Issue #32: scoped to exclude the case where "Move to
       # status:review" already succeeded -- that case has its own,
@@ -1318,9 +1385,11 @@ jobs:
       # Issue is "left at status:working" would be WRONG once
       # status:review has actually been reached. Issue #44 (PR #45):
       # also excludes `steps.draft_verify.outcome == 'failure'`, which
-      # has its own dedicated, more accurate report step above.
+      # has its own dedicated, more accurate report step above. Issue
+      # #346: also excludes `steps.cr_handoff_proof.outcome == 'failure'`,
+      # same reasoning, same dedicated report step above.
       - name: Report failure — leave at status:working for manual follow-up
-        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success' && steps.draft_verify.outcome != 'failure'
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success' && steps.draft_verify.outcome != 'failure' && steps.cr_handoff_proof.outcome != 'failure'
         run: |
           gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted. Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
 

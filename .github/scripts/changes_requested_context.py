@@ -61,7 +61,10 @@ FAIL-CLOSED KONTRAKT (ingen Claude-run skal starte uten alle disse):
   - den reviewens `commit_id` er EKSAKT samme head;
   - reviewens body er ikke tom;
   - ingen NYERE beslutnings-review fra samme identitet har gjort den
-    foreldet (se `_nyeste_beslutning` for den dokumenterte semantikken).
+    foreldet (se `_nyeste_beslutning` for den dokumenterte semantikken);
+  - (issue #346) den STAGEDE handoff-filen (`chief_review.md`) beviselig
+    fortsatt inneholder nøyaktig de samme bytene RETT FØR Claude starter --
+    se `verifiser_review_handoff` / modus `verify-handoff` under.
 
 AUTOMATISK CHIEF ER DEAKTIVERT (kanonisk #152, 2026-09-19): Chief/ChatGPT
 kjører IKKE review automatisk. Chief review er eier-invokert i chat (f.eks.
@@ -87,6 +90,44 @@ git-ignorert), og prompten peker Claude på den filen. Alle `reason=`-linjer
 denne modulen skriver til `$GITHUB_OUTPUT` er bevisst ÉN linje uten
 review-innhold i seg.
 
+ISSUE #346 -- TILLEGG: NÅR RIKTIG KONTEKST FORTSATT GA NULL COMMITS. Issue
+#344 / PR #345 (etter #329/#330/#331/#333 var slått sammen til master) fikk
+TRE eier-autoriserte `status:changes-requested`-runder på rad rapportere
+`no_new_commits` med UENDRET head `fbb1422b84405ee56fb82aa1871a52151ab7a408`
+-- inkludert etter en bevisst "DETERMINISTIC NO-OP RECOVERY"-review som
+eksplisitt forbød Claude å konkludere at ingen endring trengtes. Ingen av de
+tre rundene etterlot NOE observerbart spor -- ingen commit, ingen issue-
+kommentar, ingen PR-kommentar -- selv om `cr_context` (denne modulen) beviste
+en gyldig arbeidsordre alle tre gangene (etterprøvd her med PR #345s faktiske
+review-IDer som en permanent regresjon, se
+`test_ii_gjenskaper_issue_346s_pr_345_hendelse`). Rot-årsaken kunne ikke
+identifiseres fra kildekode/tester alene (ingen tilgang til de faktiske
+kjøringenes Claude-transkripsjoner i dette miljøet) -- men gapet dette
+avdekket er reelt: INGENTING beviste at den STAGEDE filen
+(`chief_review.md`) faktisk fortsatt inneholdt nøyaktig de verifiserte
+bytene i det øyeblikket Claude sitt steg startet, ETTER at `cr_branch`
+(over) har byttet arbeidstreet til den gamle feature-branchen. En tapt/
+tom/endret handoff-fil ville gitt PRESIS det samme observerbare
+fingeravtrykket som "Claude leste reviewen korrekt og valgte bevisst å
+ikke gjøre noe" -- de to feilklassene var til nå umulige å skille fra
+hverandre i etterkant.
+
+Denne modulen legger derfor til en TREDJE modus, `verify-handoff`
+(`verifiser_review_handoff`), som kjører EFTER `checkout-verify` og RETT
+FØR Claude starter: den leser den stagede filen på nytt fra disk og
+sammenligner en fersk sha256 mot den sha256-en `verify`-modusen selv
+beregnet da den skrev filen (`review_body_sha256`, nytt
+`GITHUB_OUTPUT`-felt fra `verify` under). Stemmer de ikke overens, eller
+filen mangler/er tom, feiler steget lukket FØR Claude kjører -- akkurat
+samme eksit-kode-kontrakt som alle andre porter på denne banen -- og
+konverterer dermed en potensielt STILLE tapt handoff til en HØYLYDT,
+diagnostiserbar avvisning, i stedet for et ubegrunnet null-resultat langt
+senere. Dette endrer INGENTING ved selve utvelgelsen (`bygg_kontekst`,
+`_nyeste_beslutning`) -- den var allerede bevist korrekt, også for flere
+CHANGES_REQUESTED-reviews på samme head (se `test_i3` og den nye #346-
+regresjonen) -- det er utelukkende et bevis for at BYTENE overlever
+reisen fra skriving til lesing.
+
 Ren, avhengighetsfri stdlib-Python, kalt fra
 .github/workflows/claude-agent-bridge.yml og enhetstestet i
 tests/test_agent_bridge_changes_requested_context.py -- hele beslutningen er
@@ -102,13 +143,14 @@ CLI-bruk (det workflowen gjør):
         python3 .github/scripts/changes_requested_context.py verify
 Skriver GITHUB_OUTPUT-linjer (`context_verified`, og ved suksess
 `pr_number`/`head_sha`/`branch`/`review_id`/`review_author`/
-`review_submitted_at`/`review_body_path`, samt `reason`) til stdout og
-begrunnelsen til stderr. Exit 0 hvis konteksten er bevist (eller ikke
-påkrevd for denne trigger-etiketten), exit 1 ved en REELL fail-closed
-avvisning -- samme exit-kode-kontrakt som pr_draft_handoff.py/
-chief_ready_signal.py/pr_ready_handoff.py, slik at det tilhørende
-workflow-steget selv feiler og "Run Claude Code" aldri kjøres (standard
-GitHub Actions-oppførsel: et feilende steg stopper resten av jobben).
+`review_submitted_at`/`review_body_path`/`review_body_sha256`/
+`review_body_bytes`, samt `reason`) til stdout og begrunnelsen til
+stderr. Exit 0 hvis konteksten er bevist (eller ikke påkrevd for denne
+trigger-etiketten), exit 1 ved en REELL fail-closed avvisning -- samme
+exit-kode-kontrakt som pr_draft_handoff.py/chief_ready_signal.py/
+pr_ready_handoff.py, slik at det tilhørende workflow-steget selv feiler
+og "Run Claude Code" aldri kjøres (standard GitHub Actions-oppførsel: et
+feilende steg stopper resten av jobben).
 
     TRIGGER_LABEL=status:changes-requested EXPECTED_HEAD=<sha> \
     LOCAL_HEAD=<sha> BRANCH=agent/issue-327 LOCAL_BRANCH=agent/issue-327 \
@@ -117,7 +159,18 @@ Samme exit-kode-kontrakt, for steget som klargjør den EKSISTERENDE
 arbeidsbranchen før Claude starter (punkt 1 over): beviser at lokal HEAD
 faktisk ER det verifiserte pre-run-hodet, slik at Claude aldri trenger å
 "finne riktig branch" som første arbeidsoppgave.
+
+    TRIGGER_LABEL=status:changes-requested EXPECTED_SHA256=<sha256> \
+    CONTEXT_BODY_PATH=.agent_bridge_run/chief_review.md \
+      python3 .github/scripts/changes_requested_context.py verify-handoff
+Samme exit-kode-kontrakt (issue #346): beviser, RETT FØR Claude starter,
+at den stagede review-handoff-filen fortsatt finnes, ikke er tom, og har
+NØYAKTIG den sha256-en `verify` beregnet da den skrev filen -- se
+"ISSUE #346" over for hvorfor dette lukker et observerbart hull mellom
+"handoffen gikk tapt" og "Claude leste den riktige reviewen og valgte
+bevisst å ikke gjøre noe".
 """
+import hashlib
 import json
 import os
 import sys
@@ -489,6 +542,77 @@ def skriv_review_fil(kontekst, sti):
     return sti
 
 
+def _hash_fil(sti):
+    """(sha256_hex, byte_lengde) for filen på `sti`, lest fra disk (ikke fra
+    minnet) -- brukt både til å bevise hva som faktisk ble skrevet (`verify`)
+    og til å bevise at nøyaktig de samme bytene fortsatt er der senere
+    (`verify-handoff`, issue #346)."""
+    with open(sti, "rb") as f:
+        data = f.read()
+    return hashlib.sha256(data).hexdigest(), len(data)
+
+
+def verifiser_review_handoff(*, trigger_label, expected_sha256, sti):
+    """Returnerer (ok: bool, begrunnelse: str) -- issue #346.
+
+    Beviser, RETT FØR Claude starter (etter `cr_branch` har byttet
+    arbeidstreet til den gamle feature-branchens eksakte hode), at den
+    stagede review-handoff-filen (`chief_review.md`, skrevet av `verify`
+    mens treet fortsatt sto på master) fortsatt finnes, ikke er tom, og har
+    NØYAKTIG samme sha256 som da den ble skrevet. En avvisning her betyr at
+    handoffen gikk tapt/ble endret et sted mellom skriving og lesing --
+    tidligere var det ingenting som skilte den hendelsen fra "Claude leste
+    riktig review og valgte bevisst å ikke gjøre noe" (issue #346s
+    hendelse: PR #345 fikk `no_new_commits` tre ganger på rad med en bevist
+    gyldig arbeidsordre, uten noen forklarende kommentar).
+
+    Ikke-alarmerende for `status:ready`: den runden har ingen handoff-fil
+    som forutsetning i det hele tatt (samme mønster som
+    `verifiser_lokalt_hode`/`bygg_kontekst`).
+    """
+    if trigger_label != TRIGGER_ETIKETT:
+        return True, (
+            f"Trigger-etikett er {trigger_label!r}, ikke {TRIGGER_ETIKETT} -- "
+            "review-handoff-bevis er ikke en forutsetning for denne runden."
+        )
+
+    if not expected_sha256:
+        return False, (
+            "Ingen forventet sha256 for review-handoff-filen ble fanget av "
+            "'verify' -- kan ikke bevise at filen Claude skal lese er uendret "
+            "(fail-closed, issue #346)."
+        )
+
+    if not sti or not os.path.isfile(sti):
+        return False, (
+            f"Den stagede review-handoff-filen {sti!r} finnes ikke rett før "
+            "Claude skal starte -- handoffen kan ikke bevises lesbar "
+            "(fail-closed, issue #346)."
+        )
+
+    faktisk_digest, storrelse = _hash_fil(sti)
+
+    if storrelse == 0:
+        return False, (
+            f"Den stagede review-handoff-filen {sti!r} er tom rett før Claude "
+            "skal starte -- handoffen kan ikke bevises å inneholde noen "
+            "arbeidsordre (fail-closed, issue #346)."
+        )
+
+    if faktisk_digest != expected_sha256:
+        return False, (
+            f"Den stagede review-handoff-filen {sti!r} sin sha256 "
+            f"({faktisk_digest}) stemmer ikke med det 'verify' skrev "
+            f"({expected_sha256}) -- innholdet har endret seg mellom skriving "
+            "og Claude-start (fail-closed, issue #346)."
+        )
+
+    return True, (
+        f"Review-handoff-filen {sti!r} er bevist uendret og lesbar rett før "
+        f"Claude starter ({storrelse} bytes, sha256 {faktisk_digest})."
+    )
+
+
 def _les_stdin_json():
     raa = sys.stdin.read()
     try:
@@ -518,6 +642,7 @@ def _kjor_verify():
     if verifisert and kontekst is not None:
         sti = os.environ.get("CONTEXT_BODY_PATH") or DEFAULT_BODY_PATH
         skriv_review_fil(kontekst, sti)
+        digest, storrelse = _hash_fil(sti)
         print(f"pr_number={kontekst['pr_number']}")
         print(f"head_sha={kontekst['head_sha']}")
         print(f"branch={kontekst['branch']}")
@@ -525,6 +650,8 @@ def _kjor_verify():
         print(f"review_author={kontekst['review_author']}")
         print(f"review_submitted_at={kontekst['review_submitted_at']}")
         print(f"review_body_path={sti}")
+        print(f"review_body_sha256={digest}")
+        print(f"review_body_bytes={storrelse}")
 
     # `reason` er bevisst ÉN linje og inneholder aldri review-body -- se
     # moduldocstringen "TRANSPORT AV REVIEW-TEKST".
@@ -546,14 +673,29 @@ def _kjor_checkout_verify():
     return 0 if ok else 1
 
 
+def _kjor_verify_handoff():
+    ok, begrunnelse = verifiser_review_handoff(
+        trigger_label=os.environ.get("TRIGGER_LABEL", ""),
+        expected_sha256=os.environ.get("EXPECTED_SHA256", ""),
+        sti=os.environ.get("CONTEXT_BODY_PATH") or DEFAULT_BODY_PATH,
+    )
+    print(begrunnelse, file=sys.stderr)
+    print(f"handoff_verified={'true' if ok else 'false'}")
+    print(f"reason={begrunnelse}")
+    return 0 if ok else 1
+
+
 def main():
     modus = sys.argv[1] if len(sys.argv) > 1 else "verify"
     if modus == "checkout-verify":
         return _kjor_checkout_verify()
+    if modus == "verify-handoff":
+        return _kjor_verify_handoff()
     if modus == "verify":
         return _kjor_verify()
     print(
-        f"ukjent modus {modus!r} -- bruk 'verify' eller 'checkout-verify'.",
+        f"ukjent modus {modus!r} -- bruk 'verify', 'checkout-verify' eller "
+        "'verify-handoff'.",
         file=sys.stderr,
     )
     return 2
