@@ -16,12 +16,15 @@ Kjøres med:
 import logging
 import os
 import unittest
+from unittest import mock
 
 logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 from streamlit.testing.v1 import AppTest
 
+from modules.i18n import t as _t
 from modules.process_profiles import hent_standardprofil
+from bryggeskole.pilot_mashing import PilotContentError, read_pilot_file, render_chunk
 
 _APP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_process_panel_app.py")
 
@@ -399,6 +402,76 @@ class TestAutomatiskForfremmelseTilEgendefinert(unittest.TestCase):
         # skal IKKE tilbakestille den forfremmede, redigerte profilen.
         at.checkbox(key="prosess_historisk_autentisitet").set_value(True).run()
         self.assertEqual(_steg(at), [(61.0, 40), (70.0, 30), (77.0, 10)])
+
+
+def _finn_laer_bro(at, sprak="no"):
+    tittel = _t("prosess.laer_bro.tittel", sprak)
+    treff = [e for e in at.expander if e.label == tittel]
+    assert len(treff) == 1, f"Fant ikke akkurat én Learn->Plan-bro med label={tittel!r}: {[e.label for e in at.expander]}"
+    return treff[0]
+
+
+class TestLaerBroMeskingBridge(unittest.TestCase):
+    """V2.2 G1B (issue #352): kontekstuell Learn -> Plan-bro over
+    meskesteg-editoren, som viser CHUNK-MASH-B/C fra den eksisterende,
+    verifiserte Mesking-piloten uendret -- se
+    docs/development/V2_2_G1A_MASH_LEARN_PLAN_CONTRACT.md §7.1/§9.2."""
+
+    def test_broen_finnes_og_er_kollapset_som_standard(self):
+        at = _ny_at()
+        bro = _finn_laer_bro(at)
+        self.assertFalse(bro.proto.expanded)
+
+    def test_broen_ligger_over_meskesteg_editoren(self):
+        at = _ny_at()
+        bro = _finn_laer_bro(at)
+        meskesteg = [e for e in at.expander if "Meskesteg" in (e.label or "")][0]
+        hoved = at.main
+        indekser = [i for i, node in hoved.children.items() if node is bro or node is meskesteg]
+        self.assertEqual(len(indekser), 2)
+        self.assertLess(min(i for i, n in hoved.children.items() if n is bro),
+                         min(i for i, n in hoved.children.items() if n is meskesteg))
+
+    def test_broen_viser_chunk_mash_b_og_c_uendret_paa_norsk(self):
+        at = _ny_at()
+        bro = _finn_laer_bro(at)
+        tekster = [c.value for c in bro.children.values() if type(c).__name__ == "Markdown"]
+        pilot = read_pilot_file()
+        chunker = {c["id"]: c for c in pilot["chunks"]}
+        forventet = [
+            render_chunk(chunker["CHUNK-MASH-B"], "no")["text"],
+            render_chunk(chunker["CHUNK-MASH-C"], "no")["text"],
+        ]
+        self.assertEqual(tekster, forventet)
+
+    def test_broen_viser_chunk_mash_b_og_c_uendret_paa_engelsk(self):
+        at = AppTest.from_file(_APP)
+        at.session_state["sprak"] = "en"
+        at.run()
+        bro = _finn_laer_bro(at, sprak="en")
+        tekster = [c.value for c in bro.children.values() if type(c).__name__ == "Markdown"]
+        pilot = read_pilot_file()
+        chunker = {c["id"]: c for c in pilot["chunks"]}
+        forventet = [
+            render_chunk(chunker["CHUNK-MASH-B"], "en")["text"],
+            render_chunk(chunker["CHUNK-MASH-C"], "en")["text"],
+        ]
+        self.assertEqual(tekster, forventet)
+
+    def test_ugyldig_pilotinnhold_krasjer_ikke_bryggdag_fanen(self):
+        with mock.patch(
+            "ui.process_panel._pilot_mesking.read_pilot_file",
+            side_effect=PilotContentError(["ugyldig innhold"]),
+        ):
+            at = _ny_at()
+        self.assertFalse(at.exception, f"Panelet skal aldri krasje ved ugyldig pilotinnhold: {at.exception}")
+        bro = _finn_laer_bro(at)
+        feilmeldinger = " ".join(e.value for e in at.error)
+        # st.error() trekker ut et innledende emoji som eget `icon`-felt,
+        # så selve teksten i .value er uten "❌ "-prefikset.
+        self.assertIn("Kunne ikke laste leksjonsinnholdet akkurat nå.", feilmeldinger)
+        markdown_barn = [c for c in bro.children.values() if type(c).__name__ == "Markdown"]
+        self.assertEqual(markdown_barn, [], "Ingen chunk-tekst skal rendres når pilotinnholdet er ugyldig.")
 
 
 if __name__ == "__main__":

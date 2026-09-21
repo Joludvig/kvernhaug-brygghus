@@ -76,10 +76,9 @@ STANDARDPROFILER = {
         "process_id": "hochkurz",
         "navn": "Hochkurz (stegmesk)",
         "beskrivelse": (
-            "Klassisk tysk to-trinns stegmesk: en beta-amylase-hvile "
-            "(mer gjærbart sukker, tørrere øl) etterfulgt av en "
-            "alfa-amylase-hvile (mer kropp/uforgjærbart sukker) og mashout. "
-            "Gir en rundere, mer 'tysk' maltkarakter enn enkel infusjon."
+            "Klassisk tysk to-trinns stegmesk: én hvile ved lavere "
+            "temperatur etterfulgt av én hvile ved høyere temperatur "
+            "(mer uforgjærbart sukker), og deretter mashout."
         ),
         "vanskelighetsgrad": MIDDELS,
         "mash_steps": [
@@ -102,10 +101,8 @@ STANDARDPROFILER = {
             "vanskeligere med kun gassbrenner og manuell temperaturstyring."
         ),
         "forventet_paavirkning": (
-            "To separate hviler gir brygger bedre kontroll over "
-            "gjærbarhet/kropp enn én enkelt temperatur — vanligvis noe "
-            "tørrere og renere enn en tilsvarende enkel infusjon ved samme "
-            "gjennomsnittstemperatur."
+            "Profilen bruker to separate temperaturhviler i sekvens, "
+            "etterfulgt av mashout."
         ),
         "ekstra_tid_min": 20,
     },

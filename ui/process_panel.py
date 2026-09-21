@@ -8,6 +8,16 @@ from modules.process_profiles import (
     INFUSJON, MASHOUT, DEKOKSJON_UTTAK, DEKOKSJON_RETUR,
     BATCH_SPARGE, NO_SPARGE, FLY_SPARGE, _SPARGE_NAVN,
 )
+from bryggeskole import pilot_mashing as _pilot_mesking
+from ui.i18n import gjeldende_sprak, t
+
+# De to eksisterende, verifiserte Mesking-læringsbolkene denne Learn ->
+# Plan-broen viser (issue #352) — nøyaktig disse to, i denne
+# rekkefølgen, per V2_2_G1A_MASH_LEARN_PLAN_CONTRACT.md §7.1. Ingen ny
+# undervisningstekst forfattes her; broen gjenbruker
+# bryggeskole.pilot_mashing sin egen read_pilot_file()/render_chunk()
+# uendret, akkurat som ui/bryggeskole_panel.py allerede gjør.
+_LAER_BRO_CHUNK_IDER = ("CHUNK-MASH-B", "CHUNK-MASH-C")
 
 _STEGTYPE_LABELS = {
     INFUSJON: "Infusjon", MASHOUT: "Mashout",
@@ -119,6 +129,25 @@ def _bygg_aktiv_profil(process_id, navn, mal):
     if process_id == "reiterated_mash":
         profil["reiterated_mash"] = {"mesk_1_andel": st.session_state["prosess_mesk1_andel"]}
     return profil
+
+
+def _render_laer_bro(sprak):
+    """Kontekstuell Learn -> Plan-bro (issue #352): en kollapset expander
+    rett over meskesteg-editoren som viser CHUNK-MASH-B/C fra den
+    eksisterende, verifiserte Mesking-piloten — read-only, ingen
+    mastery-kall (evaluate_answer/apply_answer), ingen ny lagringstilstand.
+    Ugyldig pilotinnhold (PilotContentError) skal aldri krasje Bryggdag-
+    fanen, samme mønster som ui/bryggeskole_panel.py."""
+    with st.expander(t("prosess.laer_bro.tittel"), expanded=False):
+        try:
+            pilot = _pilot_mesking.read_pilot_file()
+        except _pilot_mesking.PilotContentError:
+            st.error(t("bryggeskole.feil.innhold_ugyldig"))
+            return
+        chunker = {c["id"]: c for c in pilot["chunks"]}
+        for chunk_id in _LAER_BRO_CHUNK_IDER:
+            st.markdown(_pilot_mesking.render_chunk(chunker[chunk_id], sprak)["text"])
+        st.caption(t("prosess.laer_bro.footer"))
 
 
 def render_process_panel(ctx, malt_database=None, humle_database=None):
@@ -233,6 +262,8 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
         st.caption(f"⚙️ **Utstyr:** {mal['utstyrsbegrensninger']}")
     if mal.get("forventet_paavirkning"):
         st.caption(f"🧬 **Forventet påvirkning på kropp/utgjæring:** {mal['forventet_paavirkning']}")
+
+    _render_laer_bro(gjeldende_sprak())
 
     # ── Redigerbare meskesteg ────────────────────────────────────────────
     # Widgetnøklene bærer revisjonsnummeret (_process_widget_revision) —

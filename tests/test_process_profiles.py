@@ -450,5 +450,44 @@ class TestKontrollscenarioHistoriskWiesnMarzen(unittest.TestCase):
         )
 
 
+class TestHochkurzKopiKorrigering(unittest.TestCase):
+    """V2.2 G1B (issue #352): `beskrivelse`/`forventet_paavirkning` for
+    Hochkurz skal ikke lenger hevde mer enn Course Fact Registry faktisk
+    verifiserer -- se docs/development/V2_2_G1A_MASH_LEARN_PLAN_CONTRACT.md
+    §5/§9.3. `mash_steps` er en ren kopikorreksjon og skal forbli
+    fullstendig uendret."""
+
+    def _kopitekst(self):
+        profil = hent_standardprofil("hochkurz")
+        return f"{profil['beskrivelse']} {profil['forventet_paavirkning']}".lower()
+
+    def test_ingen_sammenligning_mot_enkel_infusjon(self):
+        self.assertNotIn("enkel infusjon", self._kopitekst())
+
+    def test_ingen_63_grader_utfallspar_eller_enzymnavn(self):
+        tekst = self._kopitekst()
+        self.assertNotIn("beta-amylase", tekst)
+        self.assertNotIn("alfa-amylase", tekst)
+        self.assertNotIn("63", tekst)
+
+    def test_ingen_kropp_ordbruk(self):
+        self.assertNotIn("kropp", self._kopitekst())
+
+    def test_mash_steps_fullstendig_uendret(self):
+        profil = hent_standardprofil("hochkurz")
+        steg = [
+            (s["temperatur"], s["varighet"], s["stegtype"], s["kommentar"])
+            for s in profil["mash_steps"]
+        ]
+        self.assertEqual(
+            steg,
+            [
+                (63.0, 40, INFUSJON, "Beta-hvile — gjærbarhet"),
+                (70.0, 30, INFUSJON, "Alfa-hvile — kropp/dekstriner"),
+                (77.0, 10, MASHOUT, "Mashout — stopper enzymaktivitet"),
+            ],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

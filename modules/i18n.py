@@ -192,6 +192,8 @@ TEKSTER = {
         "brew_history.learning_next_time_label": "Neste gang",
         "brew_history.sensing_learning_lagre_btn": "💾 Lagre sensorikk og læring",
         "brew_history.sensing_learning_lagret_ok": "✅ Lagret.",
+        "prosess.laer_bro.tittel": "🎓 Hvorfor påvirker mesketemperatur ølet?",
+        "prosess.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Mesking.",
     },
     "en": {
         "tabs.oppskrift": "🍺 Recipe",
@@ -330,6 +332,8 @@ TEKSTER = {
         "brew_history.learning_next_time_label": "Next time",
         "brew_history.sensing_learning_lagre_btn": "💾 Save sensory and learning",
         "brew_history.sensing_learning_lagret_ok": "✅ Saved.",
+        "prosess.laer_bro.tittel": "🎓 Why does mash temperature affect the beer?",
+        "prosess.laer_bro.footer": "Want to practice more? Open Brew School → Mashing.",
     },
 }
 
