@@ -473,19 +473,38 @@ class TestHochkurzKopiKorrigering(unittest.TestCase):
     def test_ingen_kropp_ordbruk(self):
         self.assertNotIn("kropp", self._kopitekst())
 
-    def test_mash_steps_fullstendig_uendret(self):
+    def test_mash_steps_prosessverdier_uendret_og_kommentarer_noytrale(self):
         profil = hent_standardprofil("hochkurz")
         steg = [
-            (s["temperatur"], s["varighet"], s["stegtype"], s["kommentar"])
+            (s["temperatur"], s["varighet"], s["stegtype"])
             for s in profil["mash_steps"]
         ]
         self.assertEqual(
             steg,
             [
-                (63.0, 40, INFUSJON, "Beta-hvile — gjærbarhet"),
-                (70.0, 30, INFUSJON, "Alfa-hvile — kropp/dekstriner"),
-                (77.0, 10, MASHOUT, "Mashout — stopper enzymaktivitet"),
+                (63.0, 40, INFUSJON),
+                (70.0, 30, INFUSJON),
+                (77.0, 10, MASHOUT),
             ],
+        )
+
+        kommentarer = " ".join(
+            s.get("kommentar", "") for s in profil["mash_steps"][:2]
+        ).lower()
+        for forbudt in (
+            "beta-amylase",
+            "alfa-amylase",
+            "beta-hvile",
+            "alfa-hvile",
+            "gjærbarhet",
+            "kropp",
+            "dekstrin",
+        ):
+            self.assertNotIn(forbudt, kommentarer)
+
+        self.assertEqual(
+            [s["kommentar"] for s in profil["mash_steps"][:2]],
+            ["Lavere temperaturhvile", "Høyere temperaturhvile"],
         )
 
 
