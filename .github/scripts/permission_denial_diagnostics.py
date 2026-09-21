@@ -317,16 +317,77 @@ def _render_input(tool_input):
 def finn_tillatelses_avslag(rader):
     """Finner permission-avslag i allerede parsede meldingsrader.
 
-    Returnerer en liste med `{"tool", "input_excerpt", "denial_excerpt"}`,
-    i den rekkefølgen de ble funnet. Inkluderer ALDRI noe annet fra
-    transkriptet -- kun det avviste kallets eget verktøynavn, en kort
-    (maks 200 tegn), REDIGERT (`_render_input`/`_kort`/`_redigert`) og
-    aldri fritekst-verdi-bærende gjengivelse av DET kallets input, og selve
-    avslagsteksten (samme lengdebegrensning, samme redigering).
+    Primærkilde: Claude Agent SDK sitt strukturerte
+    `result.permission_denials[]`-felt. Den pinnede actionen bruker selv
+    akkurat dette feltet til `permission_denials_count`, så dette er den
+    autoritative kilden når feltet finnes.
+
+    Fallback: eldre/alternative execution-formater uten et strukturert
+    `permission_denials`-felt kan fortsatt rekonstrueres fra
+    `tool_use` + tekstlig `tool_result`. Fallbacken brukes ALDRI når
+    et strukturert denial-felt er til stede, slik at samme denial ikke
+    dobbelttelles.
+
+    Returnerer en liste med `{"tool", "input_excerpt", "denial_excerpt"}`.
+    Rå tool-input publiseres aldri; all input går gjennom den konservative
+    default-deny-signaturen i `_render_input`.
     """
+    rader = rader or []
+
+    # Først: se etter SDKResultMessage.permission_denials. At feltet finnes
+    # (og er en liste, også en tom liste) betyr at SDK-kontrakten er
+    # tilgjengelig og er autoritativ for denne execution-filen.
+    strukturert_felt_funnet = False
+    strukturerte = []
+    sett_ids = set()
+    sett_fallback_nokler = set()
+
+    for rad in rader:
+        if not isinstance(rad, dict) or rad.get("type") != "result":
+            continue
+        if "permission_denials" not in rad:
+            continue
+
+        strukturert_felt_funnet = True
+        denials = rad.get("permission_denials")
+        if not isinstance(denials, list):
+            continue
+
+        for denial in denials:
+            if not isinstance(denial, dict):
+                continue
+            navn = denial.get("tool_name") or "ukjent verktøy"
+            tuid = denial.get("tool_use_id")
+            tool_input = denial.get("tool_input")
+
+            # Dedup i tilfelle execution-filen av en eller annen grunn har
+            # samme denial i mer enn én result-rad. tool_use_id er SDK-ens
+            # stabile identitet når den finnes; ellers bruker vi bare den
+            # trygge, redigerte signaturen som sekundær identitet.
+            input_excerpt = _kort(_render_input(tool_input))
+            if isinstance(tuid, str) and tuid:
+                if tuid in sett_ids:
+                    continue
+                sett_ids.add(tuid)
+            else:
+                nokkel = (navn, input_excerpt)
+                if nokkel in sett_fallback_nokler:
+                    continue
+                sett_fallback_nokler.add(nokkel)
+
+            strukturerte.append({
+                "tool": navn,
+                "input_excerpt": input_excerpt,
+                "denial_excerpt": "strukturert permission_denial fra Claude Agent SDK-resultatet",
+            })
+
+    if strukturert_felt_funnet:
+        return strukturerte
+
+    # Fallback for execution-formater uten SDK-resultatets strukturerte felt.
     tool_use_by_id = {}
     funn = []
-    for rad in rader or []:
+    for rad in rader:
         if not isinstance(rad, dict):
             continue
         melding = rad.get("message") if isinstance(rad.get("message"), dict) else None
