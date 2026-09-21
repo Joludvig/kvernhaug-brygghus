@@ -973,6 +973,33 @@ jobs:
             step completes successfully AND the post-run deliverable
             check passes.
 
+      # Issue #348: run #749 (the controlled retry after #346) finished
+      # `conclusion: success` with `permission_denials_count: 2`, yet
+      # PR #345's HEAD never moved -- and nothing in this workflow captured
+      # WHICH two tool calls were denied anywhere durable/repo-visible; that
+      # number was only readable by opening the raw Actions log by hand.
+      # This step is best-effort and can NEVER fail or block the job: the
+      # exact shape of `anthropics/claude-code-action`'s `execution_file`
+      # output was not independently re-verified against the action's own
+      # docs in this round (no network access was available), so
+      # `.github/scripts/permission_denial_diagnostics.py` is deliberately
+      # defensive -- a missing/empty/unexpected-format log always yields a
+      # clear "unavailable" report, never an error, so it cannot regress
+      # any branch/push/deliverable behavior. It reads ONLY the
+      # already-produced execution log already on disk via the workflow's
+      # own Python call -- never through Claude's `--allowedTools`, and no
+      # new Bash permission is granted for it. It extracts ONLY each denied
+      # tool's name, a short single-line excerpt of that one call's own
+      # input, and the denial message itself -- never any other part of the
+      # transcript, cost, session id or prompt content.
+      - name: Capture Claude permission-denial diagnostics (issue #348)
+        if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && always() && steps.claude.outcome != 'skipped'
+        id: denials
+        env:
+          EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          python3 .github/scripts/permission_denial_diagnostics.py >> "$GITHUB_OUTPUT"
+
       # V1.2 (issue #12): a `success()` Claude step is NOT proof of a
       # deliverable -- issue #11 proved that directly (conclusion:
       # success, permission_denials_count: 14, zero branch/PR/comment
@@ -1370,13 +1397,19 @@ jobs:
           CR_REVIEW_AUTHOR: ${{ steps.cr_context.outputs.review_author }}
           CR_HEAD_SHA: ${{ steps.cr_context.outputs.head_sha }}
           CR_REVIEW_SHA256: ${{ steps.cr_context.outputs.review_body_sha256 }}
+          DENIAL_COUNT: ${{ steps.denials.outputs.denial_count }}
+          DENIAL_SUMMARY: ${{ steps.denials.outputs.denial_summary }}
         run: |
           set -euo pipefail
           WORK_ORDER=""
           if [ -n "${CR_REVIEW_ID:-}" ]; then
             WORK_ORDER=" Verified work order this round (issue #346): Chief review #${CR_REVIEW_ID} by ${CR_REVIEW_AUTHOR} on exact head \`${CR_HEAD_SHA}\`, staged handoff sha256 \`${CR_REVIEW_SHA256}\` -- if this run produced no changes, that is the exact review body it was proven to have received."
           fi
-          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Diagnosis (issue #259): \`$DIAGNOSIS\` — $DIAGNOSIS_REASON${WORK_ORDER} Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
+          DENIAL_NOTE=""
+          if [ -n "${DENIAL_COUNT:-}" ] && [ "${DENIAL_COUNT:-0}" != "0" ]; then
+            DENIAL_NOTE=" Permission-denial diagnostics (issue #348): ${DENIAL_COUNT} denied tool call(s) detected in this run's execution log — ${DENIAL_SUMMARY}"
+          fi
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the Claude run finished without errors, but no verifiable deliverable was found — $REASON Diagnosis (issue #259): \`$DIAGNOSIS\` — $DIAGNOSIS_REASON${WORK_ORDER}${DENIAL_NOTE} Issue left at \`status:working\` (V1.2, issue #12: a green Claude process is necessary but never sufficient by itself). Check the workflow run's logs, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
 
       # Issue #32: scoped to exclude the case where "Move to
       # status:review" already succeeded -- that case has its own,
@@ -1390,8 +1423,15 @@ jobs:
       # same reasoning, same dedicated report step above.
       - name: Report failure — leave at status:working for manual follow-up
         if: needs.guard.outputs.dry_run != 'true' && steps.secretcheck.outputs.missing != 'true' && failure() && steps.promote.outcome != 'success' && steps.draft_verify.outcome != 'failure' && steps.cr_handoff_proof.outcome != 'failure'
+        env:
+          DENIAL_COUNT: ${{ steps.denials.outputs.denial_count }}
+          DENIAL_SUMMARY: ${{ steps.denials.outputs.denial_summary }}
         run: |
-          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted. Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
+          DENIAL_NOTE=""
+          if [ -n "${DENIAL_COUNT:-}" ] && [ "${DENIAL_COUNT:-0}" != "0" ]; then
+            DENIAL_NOTE=" Permission-denial diagnostics (issue #348): ${DENIAL_COUNT} denied tool call(s) detected in this run's execution log — ${DENIAL_SUMMARY}"
+          fi
+          gh issue comment "$ISSUE" --repo "$REPO" --body "⚠️ **Claude Agent Bridge**: the automated run failed or was interrupted.${DENIAL_NOTE} Issue left at \`status:working\` — see the failed workflow run's logs for details, then either fix and re-trigger manually, or move the issue back to \`status:ready\`/\`status:changes-requested\` once ready to retry."
 
   # ── Owner GO/NO-GO notification (issue #66) ─────────────────────────────
   # INDEPENDENT of guard/execute above: fires on a `status:approved` label
