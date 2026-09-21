@@ -307,7 +307,7 @@ class TestWorkflowWiring(unittest.TestCase):
 
     def test_20b_diagnostic_stages_fra_trusted_master_for_branch_switch(self):
         stage = self.text.index("Stage trusted permission-denial diagnostic (issue #350)")
-        checkout = self.text.index("Prepare existing agent branch for changes-requested round")
+        checkout = self.text.index("- name: Prepare existing agent branch for changes-requested round")
         capture = self.text.index("Capture Claude permission-denial diagnostics (issue #348)")
         self.assertLess(stage, checkout)
         self.assertLess(checkout, capture)
