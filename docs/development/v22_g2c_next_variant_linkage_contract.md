@@ -247,13 +247,69 @@ a **new, unsaved draft**, through the same recipe-object construction
 path App already uses for `.kbhrecipe` import (`modules/kbh_import.py`
 — the snapshot's `recipe` is already shaped exactly like an imported
 `.kbhrecipe` payload, per §2.4/§2.8's citation of
-`recipe_to_kbhrecipe_payload`). This is deliberately the **import** path,
-not the "Lagre som ny kopi" path (§2.2) directly, because the source is
-a frozen snapshot object, not live session state — but it ends the same
-way: on save, a fresh `originRecipeId` is minted (existing, unchanged
-`sikre_origin_recipe_id()`/duplication-mint behavior, §2.1), and the
-user is free to rename/edit before saving (e.g. rename to "Sommerglød
-v3", raise Rauchmalz %).
+`recipe_to_kbhrecipe_payload`). This is deliberately the **import**
+construction path, not the "Lagre som ny kopi" path (§2.2) directly,
+because the source is a frozen snapshot object, not live session state.
+
+**Identity boundary correction (Chief review, exact head
+`c976bee04861c3ba6305a74f88d6ca1899c36487`):** an earlier version of
+this section asserted that reusing the import-shaped construction path
+would "end the same way" as "Lagre som ny kopi" — a fresh
+`originRecipeId` minted automatically on save. That claim was checked
+against current source and is **false** for the App's actual save
+semantics:
+- `modules/kbh_import.py:549-551` (`parse_kbhrecipe_payload_til_native()`)
+  explicitly **preserves** an incoming `originRecipeId` unchanged — by
+  design, so that a genuine `.kbhrecipe` import can dedup against an
+  already-known portable identity (§2.1's "one-shot" mint is deliberately
+  the *only* auto-mint path, and import is not it).
+- `ui/recipe_card.py`'s ordinary **"💾 Lagre endringer"** save preserves
+  whatever `origin_recipe_id` is already sitting in
+  `st.session_state["_aktiv_kbh_origin_recipe_id"]` unchanged (explicit
+  in-code comment: "en vanlig redigering/re-lagring av SAMME oppskrift
+  skal ALDRI endre originRecipeId") — it never mints.
+- `sikre_origin_recipe_id()` (`modules/recipe_storage.py:480-521`) only
+  mints for an **already-saved** file that is missing a valid ID, and
+  only on the explicit "📦 Eksporter KBH-oppskrift" click — never on
+  ordinary save, never in the background.
+- The **only** code path that mints a fresh `originRecipeId` at save
+  time is "💾 Lagre som ny kopi" (`ui/recipe_card.py:258`,
+  `origin_recipe_id=str(uuid.uuid4())`), called directly in that
+  button's own handler — not something the import-construction path
+  gets by reuse.
+
+Because `brew.snapshot.recipe.originRecipeId` is frequently **non-empty**
+(§2.4 — it is the source recipe's own portable identity, frozen into
+the snapshot at brew-creation time), seeding the draft through the
+plain import-construction path and then saving via ordinary "Lagre
+endringer" would carry the **source recipe's own `originRecipeId`
+into the new variant unchanged** — the opposite of what a next-variant
+needs, and a real identity collision risk (§2.4/dedup: a later
+`.kbhrecipe` import of either recipe could then falsely match the
+other).
+
+**Corrected rule — the source snapshot's `originRecipeId` must NEVER
+be inherited by the new variant, under any circumstance:**
+1. At the "🌱 Opprett neste variant" seed step itself — before the
+   parsed native recipe ever reaches `_aktiv_kbh_origin_recipe_id`
+   session state — the implementation must explicitly **discard** the
+   snapshot's `originRecipeId` (it must not flow through unchanged, the
+   way ordinary `.kbhrecipe` import correctly preserves it for its own,
+   different, dedup purpose) and **mint a fresh one immediately**, at
+   seed time, by reusing the exact "Lagre som ny kopi" mint semantics
+   (`str(uuid.uuid4())`) — or a narrowly extracted equivalent of that
+   one line — rather than the import path's preserve-unchanged
+   behavior or the ordinary-save path's preserve-current-session-value
+   behavior.
+2. This fresh ID must be seeded into session state (e.g.
+   `_aktiv_kbh_origin_recipe_id`) alongside the rest of the draft, so
+   that the very first "💾 Lagre endringer" on this brand-new draft
+   already carries the fresh, non-colliding ID — not `None` deferred
+   to a later explicit export, and not the source's ID.
+3. The user is free to rename/edit before saving (e.g. rename to
+   "Sommerglød v3", raise Rauchmalz %) exactly as before — only the
+   identity-field handling above changes from the earlier draft of
+   this brief.
 
 ### 4.2 One new, additive Core field: `learning.nextRecipeOriginId`
 
@@ -339,11 +395,15 @@ data created by this brief):**
    `learning.hypothesis` and `learning.nextTime` (already supported,
    #355/#356).
 2. Clicks "🌱 Opprett neste variant" → Oppskrift tab opens with a new,
-   unsaved draft seeded from `snapshot.recipe` (§4.1).
+   unsaved draft seeded from `snapshot.recipe`, **already carrying a
+   fresh, explicitly-minted `originRecipeId` that differs from the
+   source recipe's own** (§4.1's corrected rule — minted at seed time,
+   never inherited from the snapshot).
 3. Brewer renames the draft (e.g. "Sommerglød v3"), raises smoke malt %
-   per their `nextTime` decision, and saves — a new recipe file is
-   created with a fresh `originRecipeId` (existing, unchanged
-   mechanism).
+   per their `nextTime` decision, and saves via ordinary "💾 Lagre
+   endringer" — the fresh `originRecipeId` from step 2 is preserved
+   unchanged by that save (§4.1), exactly like any other ordinary
+   re-save; no additional mint happens at save time.
 4. Back on the same Sommerglød v2 brew record, brewer explicitly
    confirms the link (e.g. a picker over locally saved recipes that
    have an `originRecipeId`) → `learning.nextRecipeOriginId` is written.
@@ -362,7 +422,11 @@ data created by this brief):**
   the explicit link-confirmation control.
 - `ui/recipe_card.py` / `modules/kbh_import.py` — the snapshot-seeded
   "new draft" entry point (§4.1), reusing the existing import-shaped
-  construction path rather than inventing a new one.
+  construction path for everything except identity, where it must
+  explicitly discard the parsed `originRecipeId` and mint a fresh one
+  at seed time instead (§4.1's corrected rule) — never inventing a new
+  construction path, but never silently reusing import's
+  preserve-unchanged identity behavior either.
 - `ui/sidebar.py` / `app.py` — whatever minimal tab-switch/state-seed
   mechanism is needed so "Opprett neste variant" actually lands the
   brewer in Oppskrift with the draft loaded (§2.6 confirms no such
@@ -389,14 +453,42 @@ data created by this brief):**
   through its unknown-field passthrough without loss — the same "prove
   it, don't build a UI for it" check #355 did for `hypothesis`
   (`tests/testing.md` §"tests/ DOES cover web/**").
+- **Identity boundary (§4.1 correction, required by Chief review on
+  exact head `c976bee04861c3ba6305a74f88d6ca1899c36487`):**
+  - After "🌱 Opprett neste variant" on a source recipe/brew whose
+    `snapshot.recipe.originRecipeId` is non-empty, the **source**
+    recipe's saved file's `originRecipeId` is byte-for-byte unchanged
+    on disk (the seed action reads the snapshot, it never writes back
+    to the source file).
+  - The seeded draft's `originRecipeId` (in session state, before any
+    save) is a **freshly minted UUID that differs from the source
+    recipe's `originRecipeId`** — never `None`/absent, never equal to
+    the source's value.
+  - After the brewer saves the draft (ordinary "💾 Lagre endringer",
+    §4.1 step 3), the resulting new recipe file's `originRecipeId`
+    still equals that same fresh, seed-time-minted UUID — proving
+    ordinary save neither re-mints nor silently drops it.
+  - `learning.nextRecipeOriginId`, once the link-confirmation step
+    writes it, equals exactly that fresh target ID — not the source
+    recipe's ID.
+  - Importing the source recipe's `.kbhrecipe` file and the new
+    variant's `.kbhrecipe` file (both, in either order) into a fresh
+    App instance does **not** trigger a false import-dedup match
+    between them (§2.1's dedup check is exact-string-equality on
+    `originRecipeId`) — proving the two IDs are genuinely distinct,
+    not just different-looking in the test fixture.
 
 **Human QA contract:** an owner/Chief manual pass confirming the full
 five-step flow above end-to-end on a real (non-Sommerglød, or an
 explicitly owner-approved Sommerglød) recipe/brew pair, checking that:
-the seeded draft matches the brewed snapshot exactly before any edits;
-saving mints a fresh, non-colliding recipe file; the link survives an
-export/import round trip of the `.kbhbrew` file; and no historical
-brew/recipe data is mutated by any step except the one new field.
+the seeded draft matches the brewed snapshot's recipe content exactly
+before any edits, **except identity** — the draft already carries a
+fresh, non-colliding `originRecipeId` at seed time, distinct from the
+source recipe's own (§4.1); saving via ordinary "Lagre endringer"
+preserves that fresh ID unchanged, producing a non-colliding recipe
+file; the link survives an export/import round trip of the `.kbhbrew`
+file; and no historical brew/recipe data is mutated by any step except
+the one new field.
 
 ---
 
@@ -445,3 +537,22 @@ changed (docs-only diff, consistent with `.claude/rules/testing.md`'s
 web-diff carve-out extended here to a docs-only diff — nothing in
 `tests/` exercises this new file, and no existing test's behavior is
 affected by adding it).
+
+**Review-fix round (Chief review `5275093072`, CHANGES REQUESTED on
+exact head `c976bee04861c3ba6305a74f88d6ca1899c36487`):** Chief flagged
+that §4.1/§6 asserted the import-shaped seed path would automatically
+mint a fresh `originRecipeId` on ordinary save — re-checked directly
+against `modules/kbh_import.py`, `modules/recipe_storage.py`, and
+`ui/recipe_card.py` and confirmed **false**: import preserves an
+incoming `originRecipeId` unchanged, ordinary "Lagre endringer" save
+preserves the current session value unchanged, and only "Lagre som ny
+kopi" and `sikre_origin_recipe_id()` (on explicit export) ever mint —
+neither of which the original §4.1 flow actually invoked. §4.1, the
+§6 acceptance flow, the §6 test matrix, the §6 Human QA contract, and
+the §8-adjacent minimal-files bullet are corrected to require an
+explicit fresh mint **at seed time** (reusing the "Lagre som ny kopi"
+`str(uuid.uuid4())` semantics), never inherited from the snapshot and
+never left to an implicit later step. No other section required
+correction; nothing else in Chief's review was in scope for this
+round. Still docs-only — no product code, recipe, or brew data
+touched; Python test suite not run for the same reason as above.
