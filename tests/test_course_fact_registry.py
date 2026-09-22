@@ -230,7 +230,13 @@ class TestReaderNeverCallsNetwork(unittest.TestCase):
 
 _PRODUCTION_VERIFIED_IDS = ["FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003"]
 _MASHING_VERIFIED_IDS = ["FACT-MASH-0001", "FACT-MASH-0002", "FACT-MASH-0004"]
-_ALL_PRODUCTION_VERIFIED_IDS = _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS
+_BOIL_HOP_VERIFIED_IDS = [
+    "FACT-BOIL-0001", "FACT-BOIL-0002", "FACT-BOIL-0003", "FACT-BOIL-0004",
+    "FACT-HOP-0001", "FACT-HOP-0002", "FACT-HOP-0003",
+]
+_ALL_PRODUCTION_VERIFIED_IDS = sorted(
+    _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
+)
 
 
 class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestCase):
@@ -239,9 +245,11 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         self.assertEqual(data["schema_version"], REGISTRY_SCHEMA_VERSION)
         self.assertIsInstance(data["records"], list)
 
-    def test_production_registry_has_exactly_the_v2_2c_and_v337_verified_records(self):
+    def test_production_registry_has_exactly_the_v2_2c_v337_and_366_verified_records(self):
         # V2-2C (issue #93): the first source-backed fermentation fact
         # pack. Issue #337 adds the second, mash-fundamentals fact pack.
+        # Issue #366 adds the third, boil/hop-fundamentals fact pack
+        # (FACT-BOIL-0001..0004, FACT-HOP-0001..0003).
         # FACT-MASH-0003 (iodine test) is deliberately NOT among these --
         # it was left at status `draft`, pending an independent second
         # source, per issue #337's own weaken-rather-than-force rule.
@@ -255,12 +263,13 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         record = next(r for r in data["records"] if r["id"] == "FACT-MASH-0003")
         self.assertEqual(record["status"], "draft")
 
-    def test_production_registry_classification_mix_is_exactly_4_documented_2_interpretation(self):
+    def test_production_registry_classification_mix_is_exactly_9_documented_3_interpretation_1_practical(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
         classifications = [r["classification"] for r in verified]
-        self.assertEqual(classifications.count("documented_fact"), 4)
-        self.assertEqual(classifications.count("professional_interpretation"), 2)
+        self.assertEqual(classifications.count("documented_fact"), 9)
+        self.assertEqual(classifications.count("professional_interpretation"), 3)
+        self.assertEqual(classifications.count("practical_experience"), 1)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
@@ -408,6 +417,38 @@ class TestProductionRegistryMashingFactPackVerifiedOnlyApi(unittest.TestCase):
         # the trusted lookup must never distinguish this from "id does
         # not exist" and must never leak it as if it were verified.
         self.assertIsNone(get_verified_record(_PRODUCTION_REGISTRY, "FACT-MASH-0003"))
+
+
+class TestProductionRegistryBoilHopFactPackVerifiedOnlyApi(unittest.TestCase):
+    """Issue #366: the third source-backed fact pack, boil/hop fundamentals
+    (FACT-BOIL-0001..0004, FACT-HOP-0001..0003)."""
+
+    def test_returns_exactly_the_seven_boil_hop_ids(self):
+        ids = {
+            r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)
+            if r["id"].startswith("FACT-BOIL-") or r["id"].startswith("FACT-HOP-")
+        }
+        self.assertEqual(ids, set(_BOIL_HOP_VERIFIED_IDS))
+
+    def test_module_filter_boil_hop_fundamentals_returns_all_seven(self):
+        ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, module="boil_hop.fundamentals")}
+        self.assertEqual(ids, set(_BOIL_HOP_VERIFIED_IDS))
+
+    def test_concept_filter_whirlpool_technique_returns_the_two_hop_facts(self):
+        ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept="hop.whirlpool_technique")}
+        self.assertEqual(ids, {"FACT-HOP-0001", "FACT-HOP-0002"})
+
+    def test_get_verified_record_returns_each_of_the_seven(self):
+        for fact_id in _BOIL_HOP_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            self.assertIsNotNone(record)
+            self.assertEqual(record["status"], "verified")
+
+    def test_every_boil_hop_record_carries_a_concrete_source_ref(self):
+        for fact_id in _BOIL_HOP_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            self.assertTrue(record["sources"])
+            self.assertTrue(any(s.get("ref") for s in record["sources"]))
 
 
 class TestGetVerifiedRecordLookup(unittest.TestCase):

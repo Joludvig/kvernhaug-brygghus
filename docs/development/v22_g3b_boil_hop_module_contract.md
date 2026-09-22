@@ -276,7 +276,7 @@ actually verified.
 | Chunk ID | `source_claims` | Teaching intent (one sentence) |
 |---|---|---|
 | `CHUNK-BOILHOP-A` | `FACT-BOIL-0001` | What boiling does: stops mashing, reduces microbial load. |
-| `CHUNK-BOILHOP-B` | `FACT-BOIL-0002`, `FACT-BOIL-0003` | What a vigorous, open boil removes/coagulates (volatile off-flavor precursors; hot break), and what to watch for (folds in `FACT-BOIL-0004`'s foam/boil-over observation as practical context, not a separate chunk). |
+| `CHUNK-BOILHOP-B` | `FACT-BOIL-0002`, `FACT-BOIL-0003` | What a vigorous, open boil removes/coagulates (drives off the volatile off-flavor DMS, formed from a precursor in the malt; coagulates hot break), and what to watch for (folds in `FACT-BOIL-0004`'s foam/boil-over observation as practical context, not a separate chunk). |
 | `CHUNK-BOILHOP-C` | `FACT-HOP-0001` | Why hop timing changes bitterness: isomerization takes boil time. |
 | `CHUNK-BOILHOP-D` | `FACT-HOP-0002` | Why late/whirlpool additions favor aroma over bitterness: volatile oils boil off. |
 | `CHUNK-BOILHOP-E` | `FACT-HOP-0003` | Why brewers combine early and late additions to get both bitterness and aroma. |

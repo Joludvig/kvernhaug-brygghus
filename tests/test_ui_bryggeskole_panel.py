@@ -65,6 +65,7 @@ from bryggeskole.pilot_mashing import read_pilot_file as les_mesking_pilot
 from bryggeskole.pilot_mashing import render_chunk as mesking_render_chunk
 from bryggeskole.pilot_fermentation import read_pilot_file as les_gjaring_pilot
 from bryggeskole.pilot_fermentation import render_chunk as gjaring_render_chunk
+from bryggeskole.pilot_boil_hop import read_pilot_file as les_koking_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -225,13 +226,13 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
         _knapp(at, "bs_velg_hjemmebrygger_btn")
         _knapp(at, "bs_velg_bryggeri_btn")
 
-    def test_kun_to_stadier_er_klikkbare_resten_er_kommer_senere(self):
+    def test_kun_tre_stadier_er_klikkbare_resten_er_kommer_senere(self):
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 2)
-        self.assertEqual(len(kommer_badges), 4)
+        self.assertEqual(len(aktiv_badges), 3)
+        self.assertEqual(len(kommer_badges), 3)
 
     def test_mesking_modulen_rendrer_mesking_pilotinnhold(self):
         at = self._ny_apptest()
@@ -447,7 +448,7 @@ class TestStatusMerker(_MedIsolertTilstand):
         self._fullfor_alle_sporsmal(at, 1, fasit)
         _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
-        self.assertIn("Anbefalt neste: Gjæring", tekster)
+        self.assertIn("Anbefalt neste: Koking", tekster)
 
 
 # ─── Chief-review-blokker (PR #328), videreført: ingen forhåndsvalgt svar,
@@ -1055,6 +1056,101 @@ class TestOppsummeringEttKortPerKonsept(_MedIsolertTilstand):
         for ord in _SKJULTE_ORD:
             self.assertNotIn(ord, tekst)
         self.assertIsNone(_RAAT_TALL_MONSTER.search(tekst))
+
+
+# ─── Koking-modulen (issue #366, V2.2 G3C): tredje aktive modul, samme
+# gjenbrukte motor -- modul-kort/navigasjon, statisk tidslinje, NO/EN,
+# uavhengig mastery-navnerom ────────────────────────────────────────────
+
+class TestKokingModulen(_MedIsolertTilstand):
+    def test_koking_er_klikkbar_modul_i_begge_miljo(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        _knapp(at, "bs_apne_modul_koking_btn")
+
+        at2 = self._ny_apptest()
+        self._velg_miljo(at2, "bs_velg_bryggeri_btn")
+        _knapp(at2, "bs_apne_modul_koking_btn")
+
+    def test_koking_modulen_rendrer_koking_pilotinnhold(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "koking")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("kokingen stopper mesking helt", tekster)
+
+    def test_koking_modulen_viser_statisk_tidslinje(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "koking")
+        # Timelinen rendres via st.markdown(unsafe_allow_html=True) --
+        # AppTest eksponerer den som et markdown-element med selve
+        # SVG-markupet i .value.
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("<svg" in v for v in markdown_verdier))
+        self.assertTrue(any("Whirlpool" in v for v in markdown_verdier))
+
+    def test_koking_far_full_leksjon_sporsmal_oppsummering_flyt(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "koking")
+        pilot = les_koking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Slik ligger du an", tekst)
+        self.assertEqual(len(at.exception), 0)
+
+    def test_koking_mastery_er_uavhengig_av_mesking_og_gjaring(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "koking")
+        pilot = les_koking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+
+        tilstand = read_mastery_state()
+        koking_konsepter = set(_konsept_rekkefolge(pilot))
+        mesking_konsepter = set(_konsept_rekkefolge(les_mesking_pilot()))
+        gjaring_konsepter = set(_konsept_rekkefolge(les_gjaring_pilot()))
+        self.assertTrue(koking_konsepter.isdisjoint(mesking_konsepter))
+        self.assertTrue(koking_konsepter.isdisjoint(gjaring_konsepter))
+        for k in koking_konsepter:
+            self.assertIn(k, tilstand["concepts"])
+        for k in mesking_konsepter | gjaring_konsepter:
+            self.assertNotIn(k, tilstand["concepts"])
+
+    def test_engelsk_koking_modultittel_og_tidslinje_oversettes(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "koking")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Boil", tekster)
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("Boil start" in v for v in markdown_verdier))
+        self.assertTrue(any("Whirlpool" in v for v in markdown_verdier))
+
+    def test_anbefalt_rekkefolge_er_mesking_koking_gjaring(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Mesking", tekster)
+
+        _knapp(at, "bs_apne_modul_mesking_btn").click().run()
+        self._start_sporsmalsrunde(at, "mesking")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_mesking_pilot()), "mesking")
+        _knapp(at, "bs_oppsummering_tilbake_mesking_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Koking", tekster)
+
+        _knapp(at, "bs_apne_modul_koking_btn").click().run()
+        self._start_sporsmalsrunde(at, "koking")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_koking_pilot()), "koking")
+        _knapp(at, "bs_oppsummering_tilbake_koking_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Gjæring", tekster)
+
+    def test_koking_widget_nokler_er_modul_scopede(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "koking")
+        self.assertTrue(any(b.key == "bs_valg_koking_r1_q0" for b in at.radio))
 
 
 if __name__ == "__main__":
