@@ -8,15 +8,11 @@ boil end, with a labeled hot-break/foam observation zone near the start,
 early/late hop-addition timing markers, a visually distinct post-boil
 whirlpool/hop-stand zone extending past the boil-end marker, and two
 opposing qualitative directional cues (bitterness toward the left/
-longer-remaining-boil-time end, aroma/flavor retention toward the
-right/later end) -- no numeric IBU axis or scale anywhere, per the
-contract's explicit "not an IBU math lesson" boundary.
+longer-hot-exposure end, aroma/flavor retention toward the right/later
+end) -- no numeric IBU axis or implied fixed boil-duration scale.
 
-No Streamlit dependency here (.claude/rules/desktop.md: modules/** --
-and this sibling bryggeskole/ package, which follows the same
-pure/no-Streamlit convention as course_fact_registry.py, mastery.py,
-pilot_*.py -- never imports Streamlit); ui/bryggeskole_panel.py renders
-the returned SVG markup via st.markdown(unsafe_allow_html=True).
+No Streamlit dependency here. ui/bryggeskole_panel.py renders the returned
+SVG markup via st.markdown(unsafe_allow_html=True).
 
 Deliberately not interactive: no clickable markers, no JavaScript, no
 per-marker links -- exactly the "first visual is the static timeline
@@ -30,24 +26,24 @@ _LABELS = {
         "boil_start": "Kokestart",
         "boil_end": "Kokeslutt",
         "hot_break": "Hot break / skum",
-        "early_marker": "60 min igjen",
-        "late_marker": "5 min igjen",
+        "early_marker": "Tidlig humletilsetning",
+        "late_marker": "Sen humletilsetning",
         "flameout": "Flameout",
         "whirlpool": "Whirlpool / hop-stand",
-        "bitterness_cue": "Økende bitterhet",
-        "aroma_cue": "Økende aroma",
+        "bitterness_cue": "Mer bitterhetsbidrag",
+        "aroma_cue": "Mer aromabevaring",
         "title": "Koking og humletidspunkt",
     },
     "en": {
         "boil_start": "Boil start",
         "boil_end": "Boil end",
         "hot_break": "Hot break / foam",
-        "early_marker": "60 min remaining",
-        "late_marker": "5 min remaining",
+        "early_marker": "Early hop addition",
+        "late_marker": "Late hop addition",
         "flameout": "Flameout",
         "whirlpool": "Whirlpool / hop-stand",
-        "bitterness_cue": "Increasing bitterness",
-        "aroma_cue": "Increasing aroma retention",
+        "bitterness_cue": "More bitterness contribution",
+        "aroma_cue": "More aroma retention",
         "title": "Boil and hop timing",
     },
 }
@@ -59,10 +55,14 @@ def _require_language(language):
 
 
 def render_boil_timeline_svg(language):
-    """Returns a self-contained, static ``<svg>...</svg>`` markup string
-    for the boil/hop timeline in the given language. Pure string
-    building -- no file I/O, no external assets, no interactivity (no
-    ``<a>``/``onclick``/``<script>`` anywhere in the output)."""
+    """Returns responsive, self-contained static SVG markup for the
+    boil/hop timeline in the requested language.
+
+    The diagram is intentionally qualitative: early/late markers do not
+    encode a fixed 60-minute boil, and the directional cue labels are
+    placed fully inside the viewBox so they cannot be clipped by normal
+    responsive rendering.
+    """
     _require_language(language)
     labels = _LABELS[language]
 
@@ -72,7 +72,9 @@ def render_boil_timeline_svg(language):
     early_x = 220
     late_x = 560
 
-    return f"""<svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
+    return f"""<svg viewBox="0 0 820 220" width="100%" preserveAspectRatio="xMidYMid meet"
+  style="max-width:820px;height:auto;display:block;margin:0 auto;"
+  xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
   <text x="410" y="24" text-anchor="middle" font-size="16" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
@@ -89,10 +91,10 @@ def render_boil_timeline_svg(language):
     </pattern>
   </defs>
 
-  <line x1="{boil_x0}" y1="46" x2="{boil_x0 - 30}" y2="46" stroke="#b23b2e" stroke-width="2" marker-end="url(#arrow-left)"/>
-  <text x="{boil_x0 - 35}" y="42" text-anchor="end" font-size="11" fill="#b23b2e">{labels['bitterness_cue']}</text>
-  <line x1="{whirlpool_x1}" y1="46" x2="{whirlpool_x1 + 30}" y2="46" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrow-right)"/>
-  <text x="{whirlpool_x1 + 35}" y="42" text-anchor="start" font-size="11" fill="#2e7d32">{labels['aroma_cue']}</text>
+  <line x1="330" y1="50" x2="180" y2="50" stroke="#b23b2e" stroke-width="2" marker-end="url(#arrow-left)"/>
+  <text x="255" y="42" text-anchor="middle" font-size="11" fill="#b23b2e">{labels['bitterness_cue']}</text>
+  <line x1="490" y1="50" x2="640" y2="50" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrow-right)"/>
+  <text x="565" y="42" text-anchor="middle" font-size="11" fill="#2e7d32">{labels['aroma_cue']}</text>
 
   <rect x="{boil_x0}" y="90" width="{boil_x1 - boil_x0}" height="40" fill="#f2c14e" stroke="#7a5230"/>
   <rect x="{boil_x0}" y="90" width="{hot_break_x1 - boil_x0}" height="40" fill="#f7a072" stroke="#7a5230"/>
