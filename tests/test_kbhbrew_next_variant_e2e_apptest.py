@@ -149,6 +149,70 @@ class TestNesteVariantE2EAppTest(_MedIsolerteOppskrifter):
         kilde = lagrede["E2E Kildebrygg"]
         self.assertEqual(kilde["originRecipeId"], kilde_origin_id)
 
+    def test_neste_variant_kollisjon_ved_forste_lagring_bevarer_frossen_id_ved_retry(self):
+        """Chief-review 5280874111 (issue #363): et utkast seedet av
+        "🌱 Opprett neste variant" arver kildens navn (§4.1) -- et
+        lagringsforsøk UTEN omdøp kolliderer derfor helt normalt med
+        kildeoppskriften som allerede ligger på disk. Den frosne
+        seed-IDen må overleve akkurat DETTE avviste forsøket uendret,
+        slik at et påfølgende omdøp+retry gjenbruker den, ikke minter
+        en andre, ny UUID."""
+        kilde_origin_id = self._seed_kilde_og_brew()
+
+        at = AppTest.from_file(_APP_PY, default_timeout=30)
+        at.run()
+        self.assertFalse(at.exception)
+
+        at.selectbox(key="kbhbrew_historikk_valgt_id").select(_BREW_ID).run()
+        self.assertFalse(at.exception)
+
+        at.button(key=f"kbhbrew_hist_neste_variant_btn::{_BREW_ID}").click().run()
+        self.assertFalse(at.exception)
+
+        fersk_id = _ss(at, "_aktiv_kbh_origin_recipe_id")
+        self.assertTrue(fersk_id)
+        self.assertNotEqual(fersk_id, kilde_origin_id)
+        self.assertEqual(_ss(at, "_aktiv_kbh_neste_variant_frossen_origin_id"), fersk_id)
+        # Utkastet arver kildens navn ved seeding -- et lagringsforsøk
+        # UTEN omdøp kolliderer derfor med kildeoppskriften på disk.
+        self.assertEqual(_ss(at, "gjeldende_navn"), "E2E Kildebrygg")
+
+        at.button(key="lagre_ny_kopi_btn").click().run()
+        self.assertFalse(at.exception)
+        feilmeldinger = [e.value for e in at.error]
+        self.assertTrue(
+            any("E2E Kildebrygg" in msg and "allerede" in msg for msg in feilmeldinger),
+            feilmeldinger,
+        )
+        # Avvist -- ingen "E2E Kildebrygg"-duplikat er skrevet.
+        lagrede_etter_kollisjon = recipe_storage.hent_alle_oppskrifter()
+        self.assertNotIn("E2E Kildebrygg v2", lagrede_etter_kollisjon)
+
+        # Den frosne seed-IDen skal ha overlevd det avviste forsøket
+        # uendret, klar for et retry -- IKKE konsumert av
+        # `.pop()` før selve lagringen faktisk lyktes.
+        self.assertEqual(_ss(at, "_aktiv_kbh_neste_variant_frossen_origin_id"), fersk_id)
+        self.assertEqual(_ss(at, "_aktiv_kbh_origin_recipe_id"), fersk_id)
+
+        at.text_input(key="gjeldende_navn").set_value("E2E Kildebrygg v2").run()
+        self.assertFalse(at.exception)
+        at.button(key="lagre_ny_kopi_btn").click().run()
+        self.assertFalse(at.exception)
+
+        lagrede = recipe_storage.hent_alle_oppskrifter()
+        self.assertIn("E2E Kildebrygg v2", lagrede)
+        # Kopien har NØYAKTIG den opprinnelige, seed-mintede IDen --
+        # ikke en andre, ny UUID mintet ved retry-forsøket.
+        self.assertEqual(lagrede["E2E Kildebrygg v2"]["originRecipeId"], fersk_id)
+        self.assertNotEqual(lagrede["E2E Kildebrygg v2"]["originRecipeId"], kilde_origin_id)
+
+        # Markøren er nå endelig konsumert, først etter suksess.
+        self.assertIsNone(_ss(at, "_aktiv_kbh_neste_variant_frossen_origin_id"))
+
+        # Kildeoppskriften/snapshotet er fortsatt byte-for-byte uendret.
+        kilde = lagrede["E2E Kildebrygg"]
+        self.assertEqual(kilde["originRecipeId"], kilde_origin_id)
+
     def test_lagre_som_ny_kopi_uten_seed_minter_fortsatt_ny_id_som_for(self):
         kilde_origin_id = self._seed_kilde_og_brew()
 

@@ -269,11 +269,18 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 # aktive origin-ID-en (dvs. ingenting -- et sidebar-load,
                 # en .kbhrecipe-import, en annen lagring -- har rukket å
                 # overskrive den i mellomtiden); ellers mintes det som før.
-                # Konsumeres (fjernes) her uansett utfall av selve
-                # mint-avgjørelsen, slik at et senere, urelatert
-                # "Lagre som ny kopi"-klikk aldri kan gjenbruke en gammel,
+                #
+                # Chief-review 5280874111 (issue #363): må IKKE `.pop()`-es
+                # her -- et første lagringsforsøk kan helt normalt avvises
+                # med OppskriftNavnKollisjon (utkastet arver kildens navn
+                # ved seeding), og et påfølgende omdøp+retry skal da
+                # gjenbruke NØYAKTIG samme frosne ID, ikke minte en ny.
+                # Derfor kun `.get()` her -- selve konsumeringen (fjerning
+                # fra session_state) skjer utelukkende i success-grenen
+                # under, slik at et senere, urelatert "Lagre som ny
+                # kopi"-klikk fortsatt aldri kan gjenbruke en gammel,
                 # frossen id fra en tidligere seed-handling.
-                _frossen_neste_variant_id = st.session_state.pop(NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL, None)
+                _frossen_neste_variant_id = st.session_state.get(NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL)
                 _origin_recipe_id_for_kopi = (
                     _frossen_neste_variant_id
                     if _frossen_neste_variant_id is not None
@@ -290,6 +297,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 except OppskriftNavnKollisjon as e:
                     st.error(f"❌ {e}")
                 else:
+                    st.session_state.pop(NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL, None)
                     st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
         with btn_col2:
             # Arkivering skal ALLTID skje på den FAKTISKE kildefilen
