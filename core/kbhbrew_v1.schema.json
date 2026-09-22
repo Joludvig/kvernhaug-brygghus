@@ -227,6 +227,7 @@
       "properties": {
         "whatWorked": { "type": "string" },
         "whatChanged": { "type": "string" },
+        "hypothesis": { "type": "string", "description": "Optional, brewer-authored possible explanation for the observed outcome -- NOT a measurement, NOT a sensory observation, NOT asserted causal truth (Section 5.9, issue #355)." },
         "nextTime": { "type": "string", "description": "The single most important value in the model -- surfaced before a new brew starts (Section 5.9)." }
       },
       "additionalProperties": true

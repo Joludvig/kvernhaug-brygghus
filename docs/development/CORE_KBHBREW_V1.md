@@ -549,6 +549,20 @@ new brew starts) — a future Core-compliant reader should treat it as
 the field most worth surfacing prominently, though this document does
 not mandate any specific UI.
 
+**`hypothesis` (issue #355):** an optional, brewer-authored free-text
+field, added alongside `whatWorked`/`whatChanged`/`nextTime` without
+changing any of their existing meanings. It captures a *possible*
+explanation for the observed outcome — explicitly **not** a
+measurement (distinct from `actuals`), **not** a sensory observation
+(distinct from `sensing`), and **not** asserted causal truth. It is
+never auto-filled, never AI-generated, and carries no confidence score
+or cause taxonomy — a brewer's own tentative "maybe X caused Y", kept
+separate from the deliberate `nextTime` change it may inform. Same
+additive, same-major-version, unknown-field-preservation-compatible
+rules as every other optional V1 field (Section 5.13): a reader that
+does not recognize it must still preserve it opaquely via passthrough,
+never drop it.
+
 ### 5.10 Status semantics (metadata, not a state machine)
 
 `status ∈ {active, done, discarded}`. Freely reassignable in any

@@ -249,6 +249,7 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001").select("yes").run()
         at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("Fruktig aroma").run()
         at.text_area(key="kbhbrew_hist_learning_worked::brew-seed-0001").set_value("God temperaturkontroll").run()
+        at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001").set_value("Kanskje for varm mesk").run()
         self.assertEqual(len(at.exception), 0, f"Uventet unntak ved typing: {at.exception}")
         brew = kbhbrew_storage.hent_brew("brew-seed-0001")
         self.assertEqual(brew.get("sensing"), {})
@@ -259,12 +260,28 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         selectboks = at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001")
         self.assertEqual(selectboks.value, "")
 
+    def test_15b_hypothesis_felt_er_tomt_uten_autofyll_naar_ingen_verdi_er_lagret(self):
+        at = self._ny_apptest(seed_count=1)
+        felt = at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001")
+        self.assertEqual(felt.value, "")
+
+    def test_15c_hypothesis_felt_forhaandsutfylles_med_lagret_verdi(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001").set_value("Kanskje for varm mesk").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+
+        at.run()
+        felt = at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001")
+        self.assertEqual(felt.value, "Kanskje for varm mesk")
+
     def test_16_lagre_klikk_lagrer_sensing_og_learning_og_ikke_actuals(self):
         at = self._ny_apptest(seed_count=1)
         at.selectbox(key="kbhbrew_hist_sensing_judgment::brew-seed-0001").select("yes").run()
         at.text_area(key="kbhbrew_hist_sensing_notes::brew-seed-0001").set_value("Fruktig aroma").run()
         at.text_area(key="kbhbrew_hist_learning_worked::brew-seed-0001").set_value("God temperaturkontroll").run()
         at.text_area(key="kbhbrew_hist_learning_changed::brew-seed-0001").set_value("Byttet gjærstamme").run()
+        at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001").set_value("Kanskje for varm mesk").run()
         at.text_area(key="kbhbrew_hist_learning_next::brew-seed-0001").set_value("Senk mesketemperatur").run()
 
         knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
@@ -277,6 +294,7 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         self.assertEqual(brew["sensing"]["notes"], "Fruktig aroma")
         self.assertEqual(brew["learning"]["whatWorked"], "God temperaturkontroll")
         self.assertEqual(brew["learning"]["whatChanged"], "Byttet gjærstamme")
+        self.assertEqual(brew["learning"]["hypothesis"], "Kanskje for varm mesk")
         self.assertEqual(brew["learning"]["nextTime"], "Senk mesketemperatur")
         # Denne lagre-knappen rører ALDRI actuals/status/brewedAt.
         self.assertEqual(brew.get("actuals"), {})
@@ -285,6 +303,29 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
 
         suksessmeldinger = [e.value for e in at.success]
         self.assertTrue(suksessmeldinger, "Forventet en synlig lagre-bekreftelse")
+
+    def test_16b_blankt_hypothesis_felt_lagrer_ingen_fabrikert_verdi(self):
+        at = self._ny_apptest(seed_count=1)
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertNotIn("hypothesis", brew.get("learning", {}))
+
+    def test_16c_blankt_hypothesis_felt_toemmer_en_tidligere_lagret_hypotese(self):
+        at = self._ny_apptest(seed_count=1)
+        at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001").set_value("Kanskje for varm mesk").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001")["learning"]["hypothesis"], "Kanskje for varm mesk")
+
+        at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001").set_value("").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertNotIn("hypothesis", brew.get("learning", {}))
 
     def test_17_sensing_learning_lagring_bevarer_identitet_og_frosset_snapshot(self):
         at = self._ny_apptest(seed_count=1)
@@ -317,6 +358,22 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         # Sensing-notatet fra forrige, separate lagre-klikk må overleve
         # uendret -- actuals-lagringen skriver bare til actuals-laget.
         self.assertEqual(brew["sensing"]["notes"], "Fruktig aroma")
+
+    def test_18b_hypothesis_lagring_roerer_aldri_actuals_snapshot_status_brewedat(self):
+        at = self._ny_apptest(seed_count=1)
+        brew_for = kbhbrew_storage.hent_brew("brew-seed-0001")
+
+        at.text_area(key="kbhbrew_hist_learning_hypothesis::brew-seed-0001").set_value("Kanskje for varm mesk").run()
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001"]
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+
+        brew_etter = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew_etter["learning"]["hypothesis"], "Kanskje for varm mesk")
+        self.assertEqual(brew_etter.get("actuals"), brew_for.get("actuals"))
+        self.assertEqual(brew_etter["snapshot"], brew_for["snapshot"])
+        self.assertEqual(brew_etter["status"], brew_for["status"])
+        self.assertEqual(brew_etter.get("brewedAt"), brew_for.get("brewedAt"))
 
     def test_19_blank_sensing_learning_er_gyldig_ingen_fabrikert_innhold(self):
         at = self._ny_apptest(seed_count=1)

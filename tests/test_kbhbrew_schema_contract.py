@@ -192,6 +192,24 @@ class TestUnknownFieldPassthroughIsSchemaCompatible(unittest.TestCase):
         self.validator.validate(doc)
 
 
+class TestLearningHypothesisField(unittest.TestCase):
+    """V2.2 G2B (issue #355) -- `learning.hypothesis` is now a canonical
+    optional V1 field, not merely tolerated via unknown-field passthrough."""
+
+    def setUp(self):
+        self.validator = jsonschema.Draft202012Validator(_load_schema())
+
+    def test_full_v1_fixture_carries_hypothesis_and_validates(self):
+        doc = _load_fixture("full_v1")
+        self.assertIn("hypothesis", doc["brew"]["learning"])
+        self.validator.validate(doc)
+
+    def test_learning_without_hypothesis_still_validates(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        del doc["brew"]["learning"]["hypothesis"]
+        self.validator.validate(doc)
+
+
 class TestEnvelopeRejection(unittest.TestCase):
     def setUp(self):
         self.validator = jsonschema.Draft202012Validator(_load_schema())

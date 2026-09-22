@@ -166,6 +166,23 @@ class TestFreshSessionLearningPersistence(_IsolertRecipeMappeTestCase):
         self._fersk_apptest(seed_count=1)
         self.assertEqual(len(kbhbrew_storage.hent_alle_brews()), 1)
 
+    def test_learning_hypothesis_saved_in_one_session_is_read_from_disk_in_a_fresh_session(self):
+        brew_id = "brew-seed-0001"
+        okt1 = self._fersk_apptest(seed_count=1)
+        okt1.text_area(key=f"kbhbrew_hist_learning_hypothesis::{brew_id}").set_value("Kanskje for varm mesk").run()
+        self._lagre_sensing_learning(okt1, brew_id)
+        self.assertTrue(list(okt1.success), "Forventet en synlig lagre-bekreftelse i første økt")
+
+        okt2 = self._fersk_apptest(seed_count=1)
+        self.assertEqual(
+            okt2.text_area(key=f"kbhbrew_hist_learning_hypothesis::{brew_id}").value,
+            "Kanskje for varm mesk",
+            "Lagret learning.hypothesis må gjenskapes i en helt fersk økt, lest fra disk",
+        )
+
+        brew = kbhbrew_storage.hent_brew(brew_id)
+        self.assertEqual(brew["learning"]["hypothesis"], "Kanskje for varm mesk")
+
 
 class TestFreshSessionStatusPersistence(_IsolertRecipeMappeTestCase):
     def test_status_transition_to_done_survives_fresh_session_reopen(self):

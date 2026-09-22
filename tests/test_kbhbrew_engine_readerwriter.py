@@ -103,7 +103,10 @@ class TestFullValidReadWrite(unittest.TestCase):
         brew = _ny_brew()
         brew["actuals"] = {"og": 1.053, "fg": 1.011, "volumeL": 22.5, "notes": "Kokte over litt."}
         brew["sensing"] = {"judgment": "yes", "flavorProfile": {"Maltfylde": 5.0}, "notes": "Bedre enn ventet."}
-        brew["learning"] = {"whatWorked": "Meskeprofil", "whatChanged": "Mer humle", "nextTime": "Samme oppskrift"}
+        brew["learning"] = {
+            "whatWorked": "Meskeprofil", "whatChanged": "Mer humle",
+            "hypothesis": "Kanskje høyere meskepH ga mer kroppsfylde", "nextTime": "Samme oppskrift",
+        }
         brew["status"] = "done"
         brew["brewedAt"] = "2026-03-01T10:00:00+00:00"
 
@@ -115,6 +118,7 @@ class TestFullValidReadWrite(unittest.TestCase):
         self.assertEqual(payload["actuals"], {"og": 1.053, "fg": 1.011, "volumeL": 22.5, "notes": "Kokte over litt."})
         self.assertEqual(payload["sensing"]["judgment"], "yes")
         self.assertEqual(payload["learning"]["nextTime"], "Samme oppskrift")
+        self.assertEqual(payload["learning"]["hypothesis"], "Kanskje høyere meskepH ga mer kroppsfylde")
         self.assertEqual(payload["snapshot"]["predicted"]["style"], {"stil": "Test IPA", "score": 80})
 
         # Full round trip: re-parse what was just written.
@@ -122,7 +126,54 @@ class TestFullValidReadWrite(unittest.TestCase):
         self.assertEqual(reparsed["actuals"]["og"], 1.053)
         self.assertEqual(reparsed["sensing"]["notes"], "Bedre enn ventet.")
         self.assertEqual(reparsed["learning"]["whatChanged"], "Mer humle")
+        self.assertEqual(reparsed["learning"]["hypothesis"], "Kanskje høyere meskepH ga mer kroppsfylde")
         self.assertEqual(reparsed["status"], "done")
+
+
+class TestLearningHypothesisField(unittest.TestCase):
+    """V2.2 G2B (issue #355) -- `learning.hypothesis` er nå et KJENT V1
+    felt (ikke lenger avhengig av den generiske ukjent-felt-passthrough-
+    en for å overleve), med samme tekst-normaliserings-/tøm-felt-regler
+    som whatWorked/whatChanged/nextTime."""
+
+    def test_hypothesis_is_a_known_field_not_captured_as_passthrough(self):
+        brew = _ny_brew()
+        brew["learning"] = {"hypothesis": "Kanskje for lav gjærtemperatur"}
+        payload = brew_to_kbhbrew_payload(brew)
+        self.assertEqual(payload["learning"], {"hypothesis": "Kanskje for lav gjærtemperatur"})
+
+        reparsed = parse_kbhbrew_json(json.dumps(bygg_kbhbrew_konvolutt(brew, "2026-03-05T00:00:00+00:00")))
+        self.assertEqual(reparsed["learning"]["hypothesis"], "Kanskje for lav gjærtemperatur")
+        self.assertNotIn("_kbh_brew_learning_passthrough", reparsed["learning"])
+
+    def test_blank_hypothesis_is_omitted(self):
+        brew = _ny_brew()
+        brew["learning"] = {"hypothesis": "   ", "nextTime": "Prøv igjen"}
+        payload = brew_to_kbhbrew_payload(brew)
+        self.assertNotIn("hypothesis", payload["learning"])
+        self.assertEqual(payload["learning"]["nextTime"], "Prøv igjen")
+
+    def test_other_learning_fields_and_unknown_passthrough_survive_alongside_hypothesis(self):
+        # Models an incoming .kbhbrew FILE (not an App-native object) that
+        # already carries hypothesis (a known V1 field) plus a genuinely
+        # unknown future field -- the reader-side unknown-field capture
+        # (normaliser_learning_lag) only ever runs on a parsed document,
+        # never on an arbitrary App-native dict handed straight to the
+        # writer (see TestUnknownFieldPassthroughSurvivesRoundTrip above
+        # for the same "parse first, then re-export" pattern).
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["learning"]["equipmentNotes"] = "syntetisk"
+        native = parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(native["learning"]["whatWorked"], doc["brew"]["learning"]["whatWorked"])
+        self.assertEqual(native["learning"]["whatChanged"], doc["brew"]["learning"]["whatChanged"])
+        self.assertEqual(native["learning"]["hypothesis"], doc["brew"]["learning"]["hypothesis"])
+        self.assertEqual(native["learning"]["nextTime"], doc["brew"]["learning"]["nextTime"])
+        self.assertEqual(native["learning"]["_kbh_brew_learning_passthrough"], {"equipmentNotes": "syntetisk"})
+
+        reexported = bygg_kbhbrew_konvolutt(native, "2026-03-06T00:00:00+00:00")["brew"]["learning"]
+        self.assertEqual(reexported["hypothesis"], doc["brew"]["learning"]["hypothesis"])
+        self.assertEqual(reexported["equipmentNotes"], "syntetisk")
+        self.assertNotIn("_kbh_brew_learning_passthrough", reexported)
 
 
 class TestInvalidFormatVersionRejected(unittest.TestCase):

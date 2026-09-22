@@ -184,6 +184,30 @@ kjor('ukjent LEARNING-felt overlever import -> eksport', () => {
   assert.strictEqual(eksportert.brew.learning.nextTime, raa.brew.learning.nextTime);
 });
 
+// ─── issue #355 (V2.2 G2B): App Core V1's new `learning.hypothesis` ───────
+// field round-trips losslessly through Web's EXISTING generic learning-
+// layer unknown-field passthrough (Web does not need its own dedicated
+// `hypothesis` UI for this bounded App-only slice -- it just must not
+// drop the field on import -> export, same guarantee already proven
+// above for any other future learning field).
+
+kjor('learning.hypothesis (App Core V1 felt, ukjent for Web) overlever import -> eksport via passthrough', () => {
+  const ctx = nyContext();
+  const raa = JSON.parse(lastLegacyFixture());
+  raa.brew.learning.hypothesis = 'Kanskje for varm mesk ga mer kroppsfylde';
+  const res = ctx.parseKbhBrewInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  const imp = ctx.importerBrygg(res.brew);
+  assert.strictEqual(imp.brew.learning.hypothesis, undefined, 'ukjent felt skal IKKE ligge som direkte egenskap for Web');
+  assert.strictEqual(imp.brew.learning[BREW_PASSTHROUGH_NOKKEL].hypothesis, 'Kanskje for varm mesk ga mer kroppsfylde');
+
+  const eksportert = ctx.byggKbhBrewInnhold(imp.brew);
+  assert.strictEqual(eksportert.brew.learning.hypothesis, 'Kanskje for varm mesk ga mer kroppsfylde');
+  assert.strictEqual('_kbhBrewUkjenteFelt' in eksportert.brew.learning, false);
+  // kjente learning-felt fortsatt uendret.
+  assert.strictEqual(eksportert.brew.learning.nextTime, raa.brew.learning.nextTime);
+});
+
 // ─── 8: kjent felt redigert av bruker vinner over gammel passthrough-verdi ─
 
 kjor('kjent felt (status) satt via oppdaterBrygg vinner over evt. gammel passthrough-verdi med samme navn', () => {
