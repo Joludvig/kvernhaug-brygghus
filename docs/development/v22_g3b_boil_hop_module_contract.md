@@ -1,7 +1,7 @@
 # V2.2 G3B — Boil/hop verified fact pack + module contract
 
 Version: 1.0
-Status: PREP/decision document — reviewable, not yet actionable
+Status: PREP/decision document — Chief source-verified; ready for bounded module implementation planning
 Governed by: [#362](https://github.com/Joludvig/kvernhaug-brygghus/issues/362), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3), the Goal 3
 gap map [#358](https://github.com/Joludvig/kvernhaug-brygghus/issues/358), and
@@ -88,34 +88,33 @@ future, separately authorized editorial pass to review and (if it concurs) actua
 registry — mirroring how `V2_2_G1A_MASH_LEARN_PLAN_CONTRACT.md` §4 flagged uncommitted candidate
 sources without registering them itself.
 
-**Honesty note on sourcing, stated plainly:** this PREP round has no live network/source-fetch
-access of its own (no browsing tool was available in this run). Chief's review of the first draft
-of this document supplied six concrete, checkable references (§2.2 below cites each one against
-the fact it supports), which this revision attaches to the corresponding source objects — a real
-improvement over a bare `tier`/`type` placeholder. That is still not the same as `verified` per §9
-of the registry contract: `verified` requires a concrete `ref` **and** a review pass that actually
-fetches and confirms the cited material supports the exact claim as worded, which this round still
-cannot perform (no browsing tool here either). So every proposed record remains recommended at
-`status: draft` — attaching a concrete `ref` is necessary but not sufficient for promotion, exactly
-per §7's "legitimate for draft, not sufficient for verified" rule. Promotion to `verified` (setting
-`status` and the required `verified_at` timestamp) is still an explicit future owner/Chief-reviewed
-step that fetches and confirms each citation, not performed here.
+**Source-verification status:** Claude's prep run could not fetch external sources, so the first
+revision correctly kept every candidate at draft. Chief subsequently performed the missing live
+fetch-and-confirm pass on 2026-09-22 before accepting this contract. The checked evidence includes:
+the Brewers Association-hosted VLB/Kunze wort-boiling material (enzyme destruction, wort
+sterilization, protein/polyphenol precipitation and evaporation), Brewers Association DMS guidance,
+John Palmer's *How to Brew* boil-over/hot-break guidance, a peer-reviewed review of hop alpha-acid
+isomerisation/utilisation, BarthHaas technical guidance on early-vs-late kettle hopping, and an
+AHA/Bell's lab-measured whirlpool-bitterness experiment. The claims below were narrowed where
+needed to stay within what those sources actually support. The records are therefore **ready to be
+registered as `verified`** in the separately bounded implementation slice; this prep issue itself
+still does not mutate the Course Fact Registry.
 
 ### 2.1 Candidate records
 
 | Proposed ID | Classification | Recommended status | Claim (summarized) |
 |---|---|---|---|
-| `FACT-BOIL-0001` | `documented_fact` | `draft` | Boiling wort inactivates the mash enzymes and reduces microbial load carried over from mashing/lautering. |
-| `FACT-BOIL-0002` | `documented_fact` | `draft` | A sustained, vigorous, open boil helps drive off DMS (formed from a precursor present in malt), which is itself volatile, before it can carry into the beer. |
-| `FACT-BOIL-0003` | `documented_fact` | `draft` | Boiling coagulates wort proteins and polyphenols ("hot break") so they precipitate out; distinct from chill haze, which forms later, on cooling. |
-| `FACT-BOIL-0004` | `practical_experience` | `draft` | The onset of a rolling boil commonly produces a rising foam that can boil over in a fairly full kettle if unwatched; brewers commonly reduce heat briefly or watch closely during this window. |
-| `FACT-HOP-0001` | `documented_fact` | `draft` | Hop alpha acids require time at boiling temperature to isomerize into soluble, bitter iso-alpha-acids; a longer boil time increases bitterness contribution from a given addition, approaching a practical ceiling rather than increasing without bound. |
-| `FACT-HOP-0002` | `documented_fact` | `draft` | Hop aroma/flavor compounds (volatile essential oils) are lost the longer an addition is boiled; additions made late in the boil, at flameout, or during a post-boil whirlpool/hop-stand generally retain more aroma/flavor and reach lower alpha-acid utilization than a comparable early/full-boil addition — though a hot, long whirlpool/hop-stand can still contribute material bitterness, not zero. |
-| `FACT-HOP-0003` | `professional_interpretation` | `draft` | Because bitterness contribution and aroma/flavor retention move in opposite directions with boil time, brewers commonly combine hop additions at different times (e.g. an early "bittering" addition plus a late/whirlpool "aroma" addition) to target both independently, rather than relying on a single addition. |
+| `FACT-BOIL-0001` | `documented_fact` | `verified` | Boiling wort inactivates the mash enzymes and reduces microbial load carried over from mashing/lautering. |
+| `FACT-BOIL-0002` | `documented_fact` | `verified` | A sustained, vigorous, open boil helps drive off DMS (formed from a precursor present in malt), which is itself volatile, before it can carry into the beer. |
+| `FACT-BOIL-0003` | `documented_fact` | `verified` | Boiling coagulates wort proteins and polyphenols ("hot break") so they precipitate out; distinct from chill haze, which forms later, on cooling. |
+| `FACT-BOIL-0004` | `practical_experience` | `verified` | The onset of a rolling boil commonly produces a rising foam that can boil over in a fairly full kettle if unwatched; brewers commonly reduce heat briefly or watch closely during this window. |
+| `FACT-HOP-0001` | `documented_fact` | `verified` | Hop alpha acids require time at boiling temperature to isomerize into soluble, bitter iso-alpha-acids; a longer boil time increases bitterness contribution from a given addition, approaching a practical ceiling rather than increasing without bound. |
+| `FACT-HOP-0002` | `documented_fact` | `verified` | Hop aroma/flavor compounds (volatile essential oils) are lost the longer an addition is boiled; additions made late in the boil, at flameout, or during a post-boil whirlpool/hop-stand generally retain more aroma/flavor and reach lower alpha-acid utilization than a comparable early/full-boil addition — though a hot, long whirlpool/hop-stand can still contribute material bitterness, not zero. |
+| `FACT-HOP-0003` | `professional_interpretation` | `verified` | Because bitterness contribution and aroma/flavor retention move in opposite directions with boil time, brewers commonly combine hop additions at different times (e.g. an early "bittering" addition plus a late/whirlpool "aroma" addition) to target both independently, rather than relying on a single addition. |
 
 ### 2.2 Full entries
 
-**`FACT-BOIL-0001`** — *documented_fact*, draft
+**`FACT-BOIL-0001`** — *documented_fact*, verified
 - **Claim:** Boiling wort to an active, sustained boil inactivates the malt enzymes that were
   active during mashing (stopping further starch conversion) and reduces the wort's microbial
   load carried over from the mash/lauter.
@@ -126,32 +125,30 @@ step that fetches and confirms each citation, not performed here.
 - **Source:** `{"tier": "B", "type": "established brewing-science technical text (Kunze,
   *Technology Brewing and Malting*, cited in a Brewers Association-hosted VLB presentation)",
   "ref": "https://cdn.brewersassociation.org/wp-content/uploads/2025/03/05100119/North-American-Malting-Barley-Challenges-and-Technical-Solutions_Presentation.pdf"}`
-  — a concrete ref per Chief's review; a full citation check (confirming the exact wording this
-  claim summarizes) is still owed before promotion to `verified`.
+  — live-fetched and confirmed by Chief on 2026-09-22 against the cited wort-boiling functions.
 - **Wording traps to avoid:** do not say "sterilizes" (implies complete, permanent freedom from
   microorganisms); do not attach a specific minute count as a universal rule.
 
-**`FACT-BOIL-0002`** — *documented_fact*, draft
-- **Claim:** Malt contains a precursor (S-methylmethionine, SMM) that converts to dimethyl sulfide
-  (DMS) during wort heating; DMS itself is volatile, and a sustained, vigorous, uncovered boil is
-  one important control that helps drive it off before it carries an off-flavor into the finished
-  beer. The precursor and DMS are two distinct things — the precursor is what malt contains, DMS
-  is the volatile compound formed from it and driven off by boiling — not one and the same.
+**`FACT-BOIL-0002`** — *documented_fact*, verified
+- **Claim:** Barley/malt contains a precursor that can form dimethyl sulfide (DMS) during wort
+  heating; DMS itself is volatile, and a vigorous, sufficiently long boil is one important control
+  that helps prevent DMS off-flavor in finished beer. The precursor and DMS are distinct — this
+  claim deliberately does not require the learner to identify or quantify the precursor.
 - **Scope/limits:** No specific minimum boil duration or malt-type threshold is asserted as
   universal — DMS precursor levels vary by malt (this is more relevant for base malts like
   pilsner malt than for well-modified, kilned malts), which this claim does not quantify. A
   covered or insufficiently vigorous boil is understood to vent DMS less effectively, but this
   claim does not assert a specific covered-vs-open quantitative difference.
 - **Source:** `{"tier": "B", "type": "Brewers Association off-flavor management resource covering
-  DMS", "ref": "https://www.brewersassociation.org/playlist/off-flavor-management/"}` — a concrete
-  ref per Chief's review, which also directly supports the precursor/DMS distinction in this
-  corrected wording; a full citation check is still owed before promotion to `verified`.
+  DMS", "ref": "https://www.brewersassociation.org/playlist/off-flavor-management/"}` — live-fetched
+  and confirmed by Chief on 2026-09-22: the Brewers Association states that DMS originates from a
+  precursor in barley and identifies a vigorous, sufficiently long boil as one control.
 - **Wording traps to avoid:** never call the precursor itself "volatile" or "the thing driven
   off" — DMS is what is volatile and driven off, the precursor is what forms it; do not state a
   fixed "X minutes removes all DMS risk" rule; do not imply every beer style is equally sensitive
   to this compound.
 
-**`FACT-BOIL-0003`** — *documented_fact*, draft
+**`FACT-BOIL-0003`** — *documented_fact*, verified
 - **Claim:** Boiling causes wort proteins and polyphenols to coagulate and precipitate out — the
   "hot break." This claim is narrowed to the coagulation/precipitation phenomenon itself; it does
   not assert a specific haze, off-flavor, or staling benefit from removing that material, since no
@@ -165,13 +162,14 @@ step that fetches and confirms each citation, not performed here.
 - **Source:** `{"tier": "B", "type": "established brewing-science technical text (Kunze,
   *Technology Brewing and Malting*, cited in a Brewers Association-hosted VLB presentation)",
   "ref": "https://cdn.brewersassociation.org/wp-content/uploads/2025/03/05100119/North-American-Malting-Barley-Challenges-and-Technical-Solutions_Presentation.pdf"}`
-  — the same source Chief's review cited for protein-polyphenol precipitation; a full citation
-  check is still owed before promotion to `verified`.
+  — live-fetched and confirmed by Chief on 2026-09-22 for wort-boil protein/polyphenol
+  precipitation. Independent brewing-science literature also distinguishes hot-break formation
+  during boiling from later cold/chill-haze behavior.
 - **Wording traps to avoid:** never conflate "hot break" and "chill haze" as the same phenomenon;
   do not claim removing hot break reduces haze/off-flavor/staling risk without a source that
   directly supports that specific consequence.
 
-**`FACT-BOIL-0004`** — *practical_experience*, draft
+**`FACT-BOIL-0004`** — *practical_experience*, verified
 - **Claim:** In the first minutes after a wort reaches a rolling boil, a rising foam ("hot break"
   foam, distinct from the coagulated hot-break material in `FACT-BOIL-0003` that later
   precipitates) commonly forms and can rise fast enough to boil over the kettle if the kettle is
@@ -181,12 +179,13 @@ step that fetches and confirms each citation, not performed here.
   study result — it does not claim a boil-over always happens, nor quantify a fill-level
   threshold.
 - **Source:** `{"tier": "B", "type": "established homebrewing technical text (John Palmer, *How to
-  Brew*, Chapter 7)", "ref": "https://howtobrew.com/section-1/chapter-7/"}` — a concrete ref per
-  Chief's review; a full citation check is still owed before promotion to `verified`.
+  Brew*, Chapter 7)", "ref": "https://howtobrew.com/section-1/chapter-7/"}` — live-fetched and
+  confirmed by Chief on 2026-09-22: Palmer explicitly describes foam/hot-break boil-over risk and
+  lowering heat/watching the kettle.
 - **Wording traps to avoid:** do not present this as a guaranteed event ("will boil over"); do not
   imply a single fixed fill percentage is safe for every kettle geometry.
 
-**`FACT-HOP-0001`** — *documented_fact*, draft
+**`FACT-HOP-0001`** — *documented_fact*, verified
 - **Claim:** Boiling converts (isomerizes) hop alpha acids into the more soluble iso-alpha-acids
   that are a major source of perceived bitterness in beer. Isomerization is time-dependent: a
   longer boil time for a given addition increases its bitterness contribution (utilization), but
@@ -197,11 +196,11 @@ step that fetches and confirms each citation, not performed here.
   isomerization, and it does not assert or reproduce any specific numeric utilization curve or
   percentage (that remains `modules/calculations.py`'s own implemented Tinseth model, out of
   scope for this teaching claim per §1's explicit non-goal).
-- **Source:** `{"tier": "A", "type": "published hop-utilization model (Glenn Tinseth's own
-  published boil-time/gravity utilization research, already the basis of
-  modules/calculations.py's beregn_total_ibu)", "ref": "https://www.realbeer.com/hops/research.html"}`
-  — a concrete ref per Chief's review; a full citation check is still owed before promotion to
-  `verified`.
+- **Source:** `{"tier": "A", "type": "peer-reviewed experimental review of hop alpha-acid
+  isomerisation/utilisation", "ref": "https://doi.org/10.1016/j.cervis.2010.09.004"}`, with the
+  App's existing Tinseth implementation retained as the product calculation model. Chief
+  live-verified the review on 2026-09-22: it describes thermal isomerisation of alpha acids into
+  bitter iso-alpha-acids and the practical limits/losses in utilisation.
 - **Wording traps to avoid:** do not say alpha acids are "not bitter" or contribute no bitterness
   before isomerization — state the supported mechanism (conversion/isomerization increases
   soluble, bitter iso-alpha-acids) instead of an absolute native-state claim; do not state a
@@ -209,7 +208,7 @@ step that fetches and confirms each citation, not performed here.
   etc.) is the single, universally accepted number — models are established approximations that
   differ numerically from one another.
 
-**`FACT-HOP-0002`** — *documented_fact*, draft
+**`FACT-HOP-0002`** — *documented_fact*, verified
 - **Claim:** Hop aroma and flavor come largely from volatile essential oils, which boil off the
   longer a hop addition remains in an active boil. An addition made late in the boil, at
   flameout, or during a post-boil whirlpool/hop-stand therefore generally retains more of its
@@ -224,19 +223,21 @@ step that fetches and confirms each citation, not performed here.
   assert an exact cutoff, and it does not specify any particular whirlpool temperature/duration as
   optimal (those vary by process and hop variety, and no single source here gives one specific
   number).
-- **Source:** `{"tier": "A", "type": "manufacturer technical primary documentation covering hop
-  essential-oil volatility and late-addition/whirlpool practice", "ref":
-  "https://tools.yakimachief.com/documents/Survivable-Compounds-Handbook-2022.pdf"}`, corroborated
-  by `{"tier": "A", "type": "manufacturer technical datasheet", "ref":
-  "https://www.barthhaas.com/fileadmin/user_upload/hopfen/rohhopfen-pallets-extrakt/bbc-pure-hop-pellets_tm_/barthhaas_bbc_pure_hop_pellets_eng.pdf"}`
-  — two concrete, independent refs per Chief's review; a full citation check is still owed before
-  promotion to `verified`.
+- **Source:** `{"tier": "A", "type": "manufacturer technical datasheet", "ref":
+  "https://www.barthhaas.com/fileadmin/user_upload/hopfen/rohhopfen-pallets-extrakt/bbc-pure-hop-pellets_tm_/barthhaas_bbc_pure_hop_pellets_eng.pdf"}`,
+  corroborated for post-boil bitterness by `{"tier": "B", "type": "AHA technical experiment with
+  Bell's Brewery lab IBU measurements", "ref":
+  "https://www.homebrewersassociation.org/how-to-brew/effect-post-boilwhirlpool-hop-additions-bitterness-beer/"}`.
+  Chief live-verified both on 2026-09-22: BarthHaas explicitly states that late-boil alpha-acid
+  utilisation diminishes as aroma utilisation improves; the AHA/Bell's experiment demonstrates
+  that post-boil/hop-stand additions can still contribute material bitterness and that longer hot
+  stands can increase it.
 - **Wording traps to avoid:** do not say a late/whirlpool addition contributes "zero" or
   "negligible" bitterness — a hot, long whirlpool/hop-stand can still contribute material
   bitterness; do not assert one specific "correct" whirlpool temperature or hold time as a
   universal rule.
 
-**`FACT-HOP-0003`** — *professional_interpretation*, draft
+**`FACT-HOP-0003`** — *professional_interpretation*, verified
 - **Claim:** Because bitterness contribution (favored by longer boil time, `FACT-HOP-0001`) and
   aroma/flavor retention (favored by shorter boil time, `FACT-HOP-0002`) move in opposite
   directions with boil time, brewers commonly use hop additions at more than one point in the
@@ -411,8 +412,9 @@ Restated from the governing issue, since this document's own recommendations mus
 cross them:
 
 - No Bryggeskole module/UI code was written or changed.
-- No Course Fact Registry mutation was made — §2's records are proposals only, all at `draft`,
-  none committed to `bryggeskole/data/course_fact_registry.json`.
+- No Course Fact Registry mutation was made — §2's records are source-verified proposals ready
+  for `verified` registration, but none are committed to
+  `bryggeskole/data/course_fact_registry.json` by this prep issue.
 - No pilot-content file (`bryggeskole/data/pilot_boil_hop*.json` or similar) was created.
 - No Learn→Plan bridge implementation was made (§5 is identification only).
 - No IBU mathematics lesson content was authored (§1's explicit boundary).
@@ -439,24 +441,16 @@ these.)
 
 ---
 
-## 7. Remaining owner/Chief decision
+## 7. Chief decisions completed
 
-1. **Citation confirmation pass on the 7 proposed `draft` facts (§2).** Chief's review supplied
-   six concrete refs (§2.2), now attached to the corresponding source objects for all seven facts.
-   What remains is an actual fetch-and-confirm pass — checking that each cited document/page
-   genuinely supports the exact claim as worded, which this round still cannot perform (no live
-   network/browsing access in this run) — before any promotion to `verified` per the registry
-   contract's own §9 requirement. Until then, none of §3's chunks/questions can actually ship,
-   since the existing pilots' own `source_claims` resolution requires a *verified* record (§18 of
-   the registry contract), not merely a draft one.
-2. **Whether `FACT-BOIL-0004`'s foam/boil-over observation stays folded into `CHUNK-BOILHOP-B`
-   or becomes its own seventh chunk** — this document recommends folding it in to stay within the
-   3–6 chunk range and avoid diluting the core boil/hop-timing narrative, but a future
-   implementation child could reasonably split it out if it proves pedagogically awkward combined.
-3. **Whether the optional clickable-marker enhancement to the §4 timeline is worth its added
-   complexity** for a first usable slice, versus shipping the static diagram alone first — no
-   strong preference is expressed here; this mirrors the same open-ended judgment
-   `V2_2_G1A_MASH_LEARN_PLAN_CONTRACT.md` left to its own implementation child for UI polish.
+The remaining prep decisions are resolved; none require an owner tie-break:
 
-No other genuine product choice in this slice required an owner tie-break beyond Chief's review of
-this contract itself, per the governing issue's "Done when" criterion.
+1. **Source verification: complete.** Chief performed the live fetch-and-confirm pass on
+   2026-09-22. The seven facts in §2 are ready for `verified` registration in the bounded
+   implementation child.
+2. **Boil-over observation stays folded into `CHUNK-BOILHOP-B`.** A seventh chunk would dilute
+   the first-module narrative without adding enough learner value.
+3. **First visual is the static boil/hop timeline only.** Clickable markers are deferred until real
+   learner/product evidence shows they add value.
+
+The contract is therefore implementation-ready once this docs-only prep PR is accepted.
