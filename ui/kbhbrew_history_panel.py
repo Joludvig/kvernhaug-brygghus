@@ -82,6 +82,9 @@ import streamlit as st
 
 from config import DEMO_MODE
 from modules.export_format import fmt_abv, fmt_fg, fmt_og, fmt_vol
+from modules.kbh_import import UgyldigKbhrecipeForImport
+from modules.kbh_import_apply import NESTE_VARIANT_SEED_PENDING_NOKKEL
+from modules.kbhbrew import bygg_neste_variant_seed
 from modules.kbhbrew_history_ui import (
     bygg_planlagt_sammendrag,
     bygg_planlagt_vs_faktisk,
@@ -89,6 +92,7 @@ from modules.kbhbrew_history_ui import (
 )
 from modules.kbhbrew_storage import hent_alle_brews, oppdater_brew_lag
 from modules.kbhbrew_ui import sorter_brews_for_eksport
+from modules.recipe_storage import hent_alle_oppskrifter
 from ui.i18n import t
 from ui.kbhbrew_panel import aktiv_brew_id, sett_aktiv_brew_id
 
@@ -303,6 +307,102 @@ def _render_sensing_learning_skjema(brew_id, brew):
     return brew
 
 
+# Stabil, språknøytral sentinel for "ingen kobling valgt" i
+# neste-variant-lenke-selectboksen -- samme "aldri den oversatte
+# visningsteksten selv"-prinsipp som ui/sidebar.py sin
+# _INGEN_OPPSKRIFT_VALGT.
+_NESTE_VARIANT_INGEN_LENKE = "__ingen_neste_variant_lenke__"
+
+
+def _render_neste_variant_seksjon(brew_id, brew, malt_db, humle_db, gjaer_db):
+    """V2.2 G2D (issue #363) -- de to ATSKILTE, eksplisitte trinnene
+    kontrakten (docs/development/v22_g2c_next_variant_linkage_contract.md
+    §3/§4) krever, ETT eget lagre-klikk hver, samme
+    "rendring/utvalg/typing skriver ingenting"-garanti som resten av
+    dette panelet:
+
+      1. "🌱 Opprett neste variant" seeder et FERSKT, ULAGRET
+         oppskriftutkast i session_state fra brew.snapshot.recipe --
+         ALDRI den mulig avdriftede live-oppskriften (§3 spørsmål 2),
+         ALDRI en automatisk utledet endring fra hypothesis/nextTime.
+         Kun aktivert når `learning.nextTime` faktisk er fylt ut (den
+         beslutningsteksten dette utkastet skal operasjonalisere).
+         Rører KUN session_state -- det lagrede brygget er uendret helt
+         til brukeren selv trykker en lagreknapp i Oppskrift-fanen
+         (ui/recipe_card.py). Ingen automatisk fanebytte finnes i denne
+         App-en (§2.6 -- ingen eksisterende mekanisme for det); brukeren
+         bytter selv til fanen «Oppskrift» for å se/redigere utkastet,
+         nøyaktig samme mønster som en ferdig .kbhrecipe-import
+         (ui/sidebar.py).
+      2. En SEPARAT lenke-bekreftelse skriver
+         `learning.nextRecipeOriginId` til en ALLEREDE lagret
+         oppskrifts `originRecipeId` -- ALDRI auto-koblet på navn eller
+         hvilken fane som er aktiv. En kobling som peker på en
+         oppskrift som senere er omdøpt/slettet lokalt vises tydelig som
+         "ikke funnet", ALDRI en feil/krasj (§3 spørsmål 5)."""
+    learning = brew.get("learning") or {}
+    st.markdown(f"**{t('brew_history.neste_variant_tittel')}**")
+
+    if not (learning.get("nextTime") or "").strip():
+        st.caption(t("brew_history.neste_variant_krever_next_time"))
+    elif st.button(t("brew_history.neste_variant_knapp"), key=f"kbhbrew_hist_neste_variant_btn::{brew_id}"):
+        try:
+            seed = bygg_neste_variant_seed(brew, malt_db, humle_db, gjaer_db)
+        except (ValueError, UgyldigKbhrecipeForImport) as e:
+            st.error(t("brew_history.neste_variant_feil", feil=str(e)))
+        else:
+            # Kan IKKE hydrere session_state direkte her: denne knappen
+            # rendres fra Bryggdag-fanen, som i app.py sin
+            # scriptrekkefølge kjøres ETTER Oppskrift-fanen -- widgeten
+            # `gjeldende_navn` m.fl. er derfor ALLEREDE instansiert denne
+            # kjøringen (StreamlitWidgetAlreadyInstantiatedError). Lagrer
+            # derfor kun det rå seed-resultatet og lar
+            # ui/sidebar.py::render_sidebar() (kjører FØR alle
+            # fane-widgets, hver eneste rerun) konsumere det på neste
+            # kjøring -- se NESTE_VARIANT_SEED_PENDING_NOKKEL sin egen
+            # kommentar (modules/kbh_import_apply.py).
+            st.session_state[NESTE_VARIANT_SEED_PENDING_NOKKEL] = seed["import_resultat"]
+            st.success(t("brew_history.neste_variant_ok"))
+            st.rerun()
+
+    st.markdown(f"**{t('brew_history.neste_variant_lenke_tittel')}**")
+    kandidater = {
+        navn: data.get("originRecipeId")
+        for navn, data in hent_alle_oppskrifter().items()
+        if isinstance(data.get("originRecipeId"), str) and data["originRecipeId"].strip()
+    }
+
+    gjeldende_lenke = learning.get("nextRecipeOriginId")
+    _matchende_navn = next((navn for navn, oid in kandidater.items() if oid == gjeldende_lenke), None)
+    if gjeldende_lenke:
+        if _matchende_navn:
+            st.caption(t("brew_history.neste_variant_lenke_gjeldende", navn=_matchende_navn))
+        else:
+            st.caption(t("brew_history.neste_variant_lenke_ikke_funnet", id=gjeldende_lenke))
+
+    if not kandidater:
+        st.caption(t("brew_history.neste_variant_lenke_ingen_kandidater"))
+        return brew
+
+    valg = [_NESTE_VARIANT_INGEN_LENKE] + sorted(kandidater.keys())
+    _forvalgt = _matchende_navn if _matchende_navn is not None else _NESTE_VARIANT_INGEN_LENKE
+    valgt_navn = st.selectbox(
+        t("brew_history.neste_variant_lenke_velg_label"),
+        options=valg,
+        index=valg.index(_forvalgt),
+        format_func=lambda v: t("brew_history.neste_variant_lenke_ingen") if v == _NESTE_VARIANT_INGEN_LENKE else v,
+        key=f"kbhbrew_hist_neste_variant_lenke::{brew_id}",
+    )
+
+    if st.button(t("brew_history.neste_variant_lenke_knapp"), key=f"kbhbrew_hist_neste_variant_lenke_btn::{brew_id}"):
+        ny_verdi = "" if valgt_navn == _NESTE_VARIANT_INGEN_LENKE else kandidater[valgt_navn]
+        oppdatert_brew = oppdater_brew_lag(brew_id, learning={"nextRecipeOriginId": ny_verdi})
+        st.success(t("brew_history.neste_variant_lenke_lagret_ok"))
+        if oppdatert_brew is not None:
+            return oppdatert_brew
+    return brew
+
+
 def _render_sammenligning(brew):
     sammenligning = bygg_planlagt_vs_faktisk(brew)
     if not sammenligning:
@@ -347,7 +447,7 @@ def _render_sammenligning(brew):
             c2.metric(f"{t('brew_history.rad_abv')} — {t('abv_calc.standard_label')}", fmt_abv(faktisk["standard"]))
 
 
-def render_kbhbrew_history_panel():
+def render_kbhbrew_history_panel(malt_db=None, humle_db=None, gjaer_db=None):
     """Toppnivå-inngangspunkt kalt fra ui/brewday_panel.py. Skjules helt i
     DEMO_MODE (persistent skriving), samme mønster som
     render_kbhbrew_create_panel()/render_kbhbrew_import_panel().
@@ -369,7 +469,14 @@ def render_kbhbrew_history_panel():
          egen verdi (sammenlignet mot forrige kjente verdi -- ALDRI mot
          hva forvalget over nettopp kan ha tvunget den til, som ville
          gitt en falsk "brukervalg"-deteksjon), oppdateres det delte
-         aktive målet til å matche."""
+         aktive målet til å matche.
+
+    `malt_db`/`humle_db`/`gjaer_db` (issue #363, V2.2 G2D) -- de samme
+    master-databasene app.py allerede laster inn og sender videre til
+    ui/brewday_panel.py, brukt UTELUKKENDE av
+    _render_neste_variant_seksjon() sin "🌱 Opprett neste variant"-
+    handling (samme ingrediens-ID-validering en ekte .kbhrecipe-import
+    allerede gjør, se modules/kbhbrew.py::bygg_neste_variant_seed())."""
     if DEMO_MODE:
         st.write("---")
         st.subheader(t("brew_history.tittel"))
@@ -419,4 +526,6 @@ def render_kbhbrew_history_panel():
     st.write("")
     _render_sammenligning(brew)
     st.write("")
-    _render_sensing_learning_skjema(brew_id, brew)
+    brew = _render_sensing_learning_skjema(brew_id, brew)
+    st.write("")
+    _render_neste_variant_seksjon(brew_id, brew, malt_db, humle_db, gjaer_db)

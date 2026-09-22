@@ -563,6 +563,31 @@ rules as every other optional V1 field (Section 5.13): a reader that
 does not recognize it must still preserve it opaquely via passthrough,
 never drop it.
 
+**`nextRecipeOriginId` (issue #363, V2.2 G2D — next-variant linkage):**
+an optional string, extending `learning`'s existing "next brew of the
+same recipe" framing to also cover the next brew of a **new, related**
+recipe. It holds the `originRecipeId`
+(`docs/development/CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md`) of the recipe
+the brewer explicitly created/chose as the next variant embodying this
+brew's own `nextTime` decision — set **only** by an explicit brewer
+confirmation action, never auto-filled, never inferred from
+`hypothesis`/`nextTime` text. Same wire rule as every other
+`learning.*` text field: `string` when present, otherwise **omitted
+entirely** from the wire payload — never serialized as `null`
+(`_tekst_eller_none()` in `modules/kbhbrew.py`, mirroring
+`hypothesis`/`whatWorked`/`whatChanged`/`nextTime` exactly). Like
+`recipeId` (Section 5.4), it is a **weak** reference: resolution may
+fail if the target recipe was later renamed away/deleted locally, or
+never imported on this machine — no calculation may depend on it
+resolving, and a UI that cannot resolve it must say so plainly, never
+error. It does **not** touch `parentBrewId` (Section 5.3, still
+reserved for the unrelated future shared-batch scenario) or any
+recipe-side field — the link is expressed entirely from the `.kbhbrew`
+side, pointing at a recipe's already-existing, portable
+`originRecipeId`. See
+`docs/development/v22_g2c_next_variant_linkage_contract.md` for the
+full decision rationale.
+
 ### 5.10 Status semantics (metadata, not a state machine)
 
 `status ∈ {active, done, discarded}`. Freely reassignable in any

@@ -210,6 +210,30 @@ class TestLearningHypothesisField(unittest.TestCase):
         self.validator.validate(doc)
 
 
+class TestLearningNextRecipeOriginIdField(unittest.TestCase):
+    """V2.2 G2D (issue #363) -- `learning.nextRecipeOriginId` is a
+    canonical optional V1 field (mirrors TestLearningHypothesisField)."""
+
+    def setUp(self):
+        self.validator = jsonschema.Draft202012Validator(_load_schema())
+
+    def test_full_v1_fixture_carries_next_recipe_origin_id_and_validates(self):
+        doc = _load_fixture("full_v1")
+        self.assertIn("nextRecipeOriginId", doc["brew"]["learning"])
+        self.validator.validate(doc)
+
+    def test_learning_without_next_recipe_origin_id_still_validates(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        del doc["brew"]["learning"]["nextRecipeOriginId"]
+        self.validator.validate(doc)
+
+    def test_next_recipe_origin_id_must_be_a_string_never_null(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["learning"]["nextRecipeOriginId"] = None
+        with self.assertRaises(jsonschema.ValidationError):
+            self.validator.validate(doc)
+
+
 class TestEnvelopeRejection(unittest.TestCase):
     def setUp(self):
         self.validator = jsonschema.Draft202012Validator(_load_schema())

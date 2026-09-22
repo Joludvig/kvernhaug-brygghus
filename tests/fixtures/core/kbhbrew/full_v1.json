@@ -111,7 +111,8 @@
       "whatWorked": "Syntetisk testtekst -- hva som fungerte.",
       "whatChanged": "Syntetisk testtekst -- hva som ble endret.",
       "hypothesis": "Syntetisk testtekst -- mulig forklaring.",
-      "nextTime": "Syntetisk testtekst -- neste gang."
+      "nextTime": "Syntetisk testtekst -- neste gang.",
+      "nextRecipeOriginId": "55555555-5555-4555-8555-555555555555"
     }
   }
 }

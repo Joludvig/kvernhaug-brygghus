@@ -69,4 +69,4 @@ if _aktiv_override and not st.session_state.get(_AKTIV_INIT_NOKKEL):
     sett_aktiv_brew_id(_aktiv_override)
     st.session_state[_AKTIV_INIT_NOKKEL] = True
 
-render_kbhbrew_history_panel()
+render_kbhbrew_history_panel(_MALT_DB, _HUMLE_DB, _GJAER_DB)

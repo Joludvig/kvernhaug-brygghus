@@ -26,6 +26,39 @@ import copy
 from modules.process_profiles import normaliser_prosessprofil
 from modules.recipe import resolve_recipe_efficiency
 
+# issue #363 (V2.2 G2D) -- ETT-gangs "denne originRecipeId ble nettopp
+# frossen ved en 'Opprett neste variant'-seed"-markør, KUN konsumert av
+# ui/recipe_card.py sin "Lagre som ny kopi"-knapp (se den filens egen
+# kommentar for hvorfor: den knappen mintet FØR dette ALLTID en ny,
+# egen uuid, som ville brutt kontraktens krav om at ID-en mintet VED
+# seed-tidspunktet skal overleve uendret til første lagring). Delt her
+# (ikke i ui/kbhbrew_history_panel.py, som setter den) slik at BEGGE
+# sidene av denne ett-gangs-avtalen bruker nøyaktig samme streng --
+# samme "én konstant, delt av leser og skriver"-prinsipp som
+# modules/kbhbrew.py sine passthrough-nøkler.
+NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL = "_aktiv_kbh_neste_variant_frossen_origin_id"
+
+# issue #363 (V2.2 G2D) -- ETT-gangs "ventende neste-variant-seed"-
+# markør. `_render_neste_variant_seksjon()` (ui/kbhbrew_history_panel.py)
+# kjøres FRA Bryggdag-fanen, som i app.py sin scriptrekkefølge rendres
+# ETTER Oppskrift-fanen (render_recipe_card()) -- widgeten med
+# `key="gjeldende_navn"` (og valgt_malt/valgt_humle/valgt_gjaer_id/osv.)
+# er derfor ALLEREDE instansiert TIDLIGERE i akkurat DENNE
+# scriptkjøringen når knappen trykkes. Streamlit tillater IKKE å skrive
+# st.session_state[<widget-key>] for en widget som allerede er
+# instansiert samme kjøring (StreamlitWidgetAlreadyInstantiatedError) --
+# nøyaktig samme kjente fallgruve issue #242/#246 allerede løste for
+# selectboks-verdier (se ui/sidebar.py sin
+# _SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER/
+# _nullstill_oppskrift_selector_neste_render). Samme løsning her:
+# knappen lagrer KUN det rå seed-resultatet under denne nøkkelen og
+# kaller st.rerun() -- selve hydreringen (apply_next_variant_seed_to_
+# session_state()) skjer FØRST på NESTE kjøring, konsumert i
+# ui/sidebar.py::render_sidebar() (samme sted/samme prinsipp som en
+# ekte .kbhrecipe-import allerede hydrerer FØR noen fane-widget
+# instansieres -- sidebaren rendres alltid FØR st.tabs(...) i app.py).
+NESTE_VARIANT_SEED_PENDING_NOKKEL = "_neste_variant_seed_pending"
+
 
 def apply_kbhrecipe_import_to_session_state(import_resultat):
     """
@@ -127,3 +160,26 @@ def apply_kbhrecipe_import_to_session_state(import_resultat):
     # as new"). Ren, minimal fiks: INGEN endring i selve panelfilene.
     st.session_state.pop("_prosess_synced_for", None)
     st.session_state.pop("_vann_synced_for", None)
+
+
+def apply_next_variant_seed_to_session_state(import_resultat):
+    """issue #363 (V2.2 G2D) -- hydrerer et "🌱 Opprett neste variant"-
+    seed-resultat (modules/kbhbrew.py::bygg_neste_variant_seed() sin
+    `import_resultat`, som allerede har `recipe["originRecipeId"]`
+    overskrevet med en fersk, kilde-uavhengig uuid FØR denne kalles) inn
+    i session_state, som en HELT NY, ulagret oppskrift.
+
+    Gjenbruker apply_kbhrecipe_import_to_session_state() UENDRET --
+    `import_resultat` har nøyaktig samme form som et ekte
+    .kbhrecipe-import-resultat, så "import as new"-semantikken (bl.a.
+    `_last_loaded_recipe`/`_last_loaded_recipe_file` tømmes) gjelder
+    identisk her. Det ENE tillegget er å sette den delte
+    ett-gangs-markøren (se NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL over)
+    til nøyaktig den samme ferske ID-en utkastet allerede bærer -- slik
+    at ui/recipe_card.py sin "Lagre som ny kopi"-knapp kan bevare den
+    (i stedet for å minte enda en, ny og forskjellig id) ved den ALLER
+    FØRSTE lagringen av dette utkastet, per kontraktens §4.1-krav om at
+    ID-en mintet VED seed-tidspunktet skal overleve uendret til lagring."""
+    apply_kbhrecipe_import_to_session_state(import_resultat)
+    import streamlit as st
+    st.session_state[NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL] = import_resultat["recipe"].get("originRecipeId")

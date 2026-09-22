@@ -30,6 +30,8 @@ logging.getLogger("streamlit").setLevel(logging.ERROR)
 from streamlit.testing.v1 import AppTest
 
 import modules.kbhbrew_storage as kbhbrew_storage
+import modules.recipe_storage as recipe_storage
+from modules.recipe import bygg_recipe_object
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _HARNESS = os.path.join(_REPO_ROOT, "tests", "fixtures", "streamlit_harness", "kbhbrew_history_harness.py")
@@ -492,6 +494,114 @@ class TestKbhbrewHistoryPanelAppTest(unittest.TestCase):
         # Typing/lagre-klikket alene skriver ikke det aktive målet
         # videre utover det ene, forventede valg-drevne skiftet over.
         self.assertEqual(self._ss(at, "_aktiv_kbhbrew_brew_id"), "brew-seed-0002")
+
+    # ─── V2.2 G2D (issue #363): "🌱 Opprett neste variant" + lenke ─────
+
+    def _lagre_kilderecipe_med_origin(self, navn="Lenkbar Kilde"):
+        recipe = bygg_recipe_object(
+            navn, 20.0, 0.75,
+            [{"id": "weyermann_pilsner", "mengde": 5.0}], [],
+            "safale_us_05", 1.050, 1.012, 5.0, 20, 8, {},
+        )
+        filnavn = recipe_storage.lagre_oppskrift(recipe)
+        origin_id = recipe_storage.sikre_origin_recipe_id(filnavn)
+        self.assertTrue(origin_id)
+        return navn, origin_id
+
+    def test_26_neste_variant_knapp_skjult_uten_next_time_viser_kun_hjelpetekst(self):
+        at = self._ny_apptest(seed_count=1)
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_neste_variant_btn::brew-seed-0001"]
+        self.assertEqual(knapper, [])
+        captions = [c.value for c in at.caption]
+        self.assertTrue(any("Neste gang" in c for c in captions))
+
+    def test_27_opprett_neste_variant_seeder_session_state_uten_a_mutere_lagret_brew(self):
+        # Dette smale panel-harnesset inkluderer IKKE ui/sidebar.py --
+        # selve hydreringen (session_state.gjeldende_navn/valgt_malt/
+        # _aktiv_kbh_origin_recipe_id) skjer først når
+        # render_sidebar() konsumerer NESTE_VARIANT_SEED_PENDING_NOKKEL
+        # (se den konstantens egen kommentar i
+        # modules/kbh_import_apply.py for hvorfor) -- dekket ende-til-
+        # ende, via den EKTE app.py, av
+        # tests.test_kbhbrew_next_variant_e2e_apptest. Denne testen
+        # dekker det denne narrow harnessen FAKTISK kan observere: at
+        # knappen bygger et korrekt, ferskt seed-resultat og lar det
+        # ventende flagget stå klart -- uten å skrive noe som helst til
+        # det lagrede brygget eller opprette et nytt.
+        at = self._ny_apptest(seed_count=1)
+        at.text_area(key="kbhbrew_hist_learning_next::brew-seed-0001").set_value("Hev IBU").run()
+        at.button(key="kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001").click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved lagring: {at.exception}")
+
+        brew_for = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew_for["learning"]["nextTime"], "Hev IBU")
+        self.assertIsNone(brew_for["snapshot"]["recipe"].get("originRecipeId"))
+
+        knapper = [b for b in at.button if b.key == "kbhbrew_hist_neste_variant_btn::brew-seed-0001"]
+        self.assertEqual(len(knapper), 1)
+        knapper[0].click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved seed: {at.exception}")
+
+        # Verken det seedete brygget eller antall lagrede brygg endres --
+        # seed-handlingen rører KUN session_state, aldri disken.
+        self.assertEqual(len(kbhbrew_storage.hent_alle_brews()), 1)
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001"), brew_for)
+
+        pending = self._ss(at, "_neste_variant_seed_pending")
+        self.assertIsNotNone(pending)
+        self.assertEqual(pending["recipe"]["name"], "Harness Pilsner")
+        self.assertEqual(pending["recipe"]["malts"], brew_for["snapshot"]["recipe"]["malt"])
+        # Fersk, ikke-tom id -- kilde-snapshotet har ingen originRecipeId
+        # i det hele tatt her, men en fersk id skal likevel ALLTID mintes.
+        self.assertTrue(pending["recipe"]["originRecipeId"])
+
+    def test_28_lenke_bekreftelse_skriver_next_recipe_origin_id_uten_a_roere_andre_learning_felt(self):
+        _navn, origin_id = self._lagre_kilderecipe_med_origin("Lenkbar Kilde 28")
+        at = self._ny_apptest(seed_count=1)
+        at.text_area(key="kbhbrew_hist_learning_worked::brew-seed-0001").set_value("Fin skum").run()
+        at.button(key="kbhbrew_hist_sensing_learning_lagre_btn::brew-seed-0001").click().run()
+
+        valg = at.selectbox(key="kbhbrew_hist_neste_variant_lenke::brew-seed-0001")
+        self.assertIn("Lenkbar Kilde 28", valg.options)
+        valg.select("Lenkbar Kilde 28").run()
+        at.button(key="kbhbrew_hist_neste_variant_lenke_btn::brew-seed-0001").click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved kobling: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertEqual(brew["learning"]["nextRecipeOriginId"], origin_id)
+        # Ingen andre learning-felt påvirket av lenke-bekreftelsen.
+        self.assertEqual(brew["learning"]["whatWorked"], "Fin skum")
+
+        meldinger = [e.value for e in at.success]
+        self.assertTrue(any("Kobling lagret" in m for m in meldinger))
+
+    def test_29_gjeldende_lenke_som_peker_pa_slettet_oppskrift_vises_uten_krasj(self):
+        at = self._ny_apptest(seed_count=1)
+        kbhbrew_storage.oppdater_brew_lag(
+            "brew-seed-0001", learning={"nextTime": "Prøv igjen", "nextRecipeOriginId": "finnes-ikke-lokalt"}
+        )
+        at.run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        captions = [c.value for c in at.caption]
+        self.assertTrue(any("ikke finnes lokalt" in c or "no longer exists locally" in c for c in captions))
+
+    def test_30_lenke_kan_fjernes_via_ingen_kobling_valg(self):
+        _navn, origin_id = self._lagre_kilderecipe_med_origin("Lenkbar Kilde 30")
+        at = self._ny_apptest(seed_count=1)
+        kbhbrew_storage.oppdater_brew_lag(
+            "brew-seed-0001", learning={"nextTime": "Prøv igjen", "nextRecipeOriginId": origin_id}
+        )
+        at.run()
+        self.assertEqual(kbhbrew_storage.hent_brew("brew-seed-0001")["learning"]["nextRecipeOriginId"], origin_id)
+
+        valg = at.selectbox(key="kbhbrew_hist_neste_variant_lenke::brew-seed-0001")
+        ingen_kobling = [v for v in valg.options if v != "Lenkbar Kilde 30"][0]
+        valg.select(ingen_kobling).run()
+        at.button(key="kbhbrew_hist_neste_variant_lenke_btn::brew-seed-0001").click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved fjerning av kobling: {at.exception}")
+
+        brew = kbhbrew_storage.hent_brew("brew-seed-0001")
+        self.assertNotIn("nextRecipeOriginId", brew.get("learning", {}))
 
 
 if __name__ == "__main__":

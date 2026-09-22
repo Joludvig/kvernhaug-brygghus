@@ -33,10 +33,12 @@ Owner-ratifiserte regler denne modulen håndhever (Section 8, issue #22):
   #5 Ingen V1 "actual process used"-felt.
 """
 import copy
+import json
 import re
 import uuid
 
 from modules.kbh_contract import recipe_to_kbhrecipe_payload
+from modules.kbh_import import KBHRECIPE_FORMAT, KBHRECIPE_VERSION, parse_kbhrecipe_json
 
 KBHBREW_FORMAT = "kbhbrew"
 KBHBREW_VERSION = 1
@@ -66,7 +68,7 @@ _KJENTE_ENVELOPE_FELT = frozenset({"format", "version", "exportedAt", "generator
 
 _KJENTE_ACTUALS_FELT = frozenset({"og", "fg", "volumeL", "notes"})
 _KJENTE_SENSING_FELT = frozenset({"judgment", "flavorProfile", "notes"})
-_KJENTE_LEARNING_FELT = frozenset({"whatWorked", "whatChanged", "hypothesis", "nextTime"})
+_KJENTE_LEARNING_FELT = frozenset({"whatWorked", "whatChanged", "hypothesis", "nextTime", "nextRecipeOriginId"})
 
 _GYLDIGE_JUDGMENT_VERDIER = frozenset({"yes", "maybe", "no"})
 
@@ -425,7 +427,7 @@ def _bygg_sensing_payload(sensing):
 def _bygg_learning_payload(learning):
     learning = learning if isinstance(learning, dict) else {}
     ut = {}
-    for felt in ("whatWorked", "whatChanged", "hypothesis", "nextTime"):
+    for felt in ("whatWorked", "whatChanged", "hypothesis", "nextTime", "nextRecipeOriginId"):
         v = _tekst_eller_none(learning.get(felt))
         if v is not None:
             ut[felt] = v
@@ -599,7 +601,7 @@ def normaliser_learning_lag(raw):
     prinsipp, offentlig av samme grunn."""
     raw = raw if isinstance(raw, dict) else {}
     ut = {}
-    for felt in ("whatWorked", "whatChanged", "hypothesis", "nextTime"):
+    for felt in ("whatWorked", "whatChanged", "hypothesis", "nextTime", "nextRecipeOriginId"):
         v = _tekst_eller_none(raw.get(felt))
         if v is not None:
             ut[felt] = v
@@ -706,3 +708,63 @@ def parse_kbhbrew_json(tekst):
         native[_ENVELOPE_PASSTHROUGH_NOKKEL] = envelope_passthrough
 
     return native
+
+
+# ══════════════════════════════════════════════════════════════════════
+# Neste-variant-frø: brew.snapshot.recipe -> fersk, ulagret oppskrift-
+# utkast (issue #363, V2.2 G2D -- docs/development/
+# v22_g2c_next_variant_linkage_contract.md §4.1)
+# ══════════════════════════════════════════════════════════════════════
+
+def bygg_neste_variant_seed(brew, malt_db=None, humle_db=None, gjaer_db=None):
+    """Bygger et fersk, ulagret oppskriftutkast fra et allerede lagret
+    brygg sitt FROSNE `snapshot.recipe` -- ALDRI den mulig avdriftede
+    aktive/live oppskriften (kontraktens §3 spørsmål 2/§4.1: historisk
+    korrekthet krever at "neste variant av det jeg faktisk brygget"
+    starter fra nøyaktig det som ble brygget).
+
+    Gjenbruker BEVISST den eksisterende, allerede validerte
+    .kbhrecipe-import-konstruksjonsveien (modules/kbh_import.py::
+    parse_kbhrecipe_json()) -- snapshotets `recipe` er allerede formet
+    nøyaktig som en importert `.kbhrecipe`-payload (Section 2.4/2.8 i
+    kontraktbrevet, modules/kbh_contract.py::recipe_to_kbhrecipe_payload()).
+    `snapshot["recipe"]` leses kun (json.dumps kopierer, muterer aldri)
+    -- det lagrede brygget/snapshotet røres ALDRI av denne funksjonen.
+
+    Identitetsgrensen (kontraktens §4.1, Chief-korrigert): kildens
+    `originRecipeId` (hvis noen) skal ALDRI arves av den nye varianten.
+    En fersk `originRecipeId` mintes derfor UMIDDELBART her -- FØR
+    utkastet i det hele tatt når en normal redigerbar tilstand -- og
+    overskriver ubetinget det parseren ellers ville ført videre uendret
+    (parse_kbhrecipe_json() bevarer bevisst en importert originRecipeId,
+    siden en ekte import skal kunne dedupe mot den -- det formålet
+    gjelder ikke her).
+
+    Returnerer:
+        {"import_resultat": {...se parse_kbhrecipe_json()...},
+         "fresh_origin_recipe_id": "<fersk uuid4-streng>"}
+
+    Kaster ValueError hvis `brew` mangler et gyldig `snapshot.recipe`,
+    eller UgyldigKbhrecipeForImport (modules/kbh_import.py) hvis
+    snapshotet av en eller annen grunn ikke lenger validerer mot dagens
+    malt-/humle-/gjær-database (f.eks. en ingrediens-ID fjernet fra
+    master-dataene siden brygget ble opprettet) -- kalleren (UI-laget)
+    er ansvarlig for å vise dette som en synlig, ikke-krasjende feil,
+    ALDRI en stille/delvis import."""
+    if not isinstance(brew, dict):
+        raise ValueError("brew må være et objekt (dict).")
+
+    snapshot = brew.get("snapshot")
+    if not isinstance(snapshot, dict) or not isinstance(snapshot.get("recipe"), dict):
+        raise ValueError("Brew mangler et gyldig snapshot.recipe å opprette en neste variant fra.")
+
+    envelope = {
+        "format": KBHRECIPE_FORMAT,
+        "version": KBHRECIPE_VERSION,
+        "recipe": snapshot["recipe"],
+    }
+    import_resultat = parse_kbhrecipe_json(json.dumps(envelope), malt_db, humle_db, gjaer_db)
+
+    fersk_origin_recipe_id = str(uuid.uuid4())
+    import_resultat["recipe"] = {**import_resultat["recipe"], "originRecipeId": fersk_origin_recipe_id}
+    return {"import_resultat": import_resultat, "fresh_origin_recipe_id": fersk_origin_recipe_id}

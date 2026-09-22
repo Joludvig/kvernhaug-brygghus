@@ -101,7 +101,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         st.text_input("Brygger", placeholder="Navn", key="bd_brygger")
 
     render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_database)
-    render_kbhbrew_history_panel()
+    render_kbhbrew_history_panel(malt_database, humle_database, gjaer_database)
 
     # ── SYNKRONISER STEG 4/5-MÅLEFELT MOT AKTIVT BRYGG (App A1, issue #170) ──
     # Når det aktive brygg-målet (ui/kbhbrew_panel.py::aktiv_brew_id() --
