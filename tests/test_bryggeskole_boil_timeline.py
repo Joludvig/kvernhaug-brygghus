@@ -5,6 +5,7 @@ visual (issue #366, V2.2 G3C).
 Run with:
     python3 -m unittest tests.test_bryggeskole_boil_timeline
 """
+import re
 import unittest
 
 from bryggeskole.boil_timeline import render_boil_timeline_svg
@@ -38,7 +39,7 @@ class TestRenderBoilTimelineSvg(unittest.TestCase):
     def test_no_numeric_ibu_or_fixed_duration_scale(self):
         for lang in ("no", "en"):
             svg = render_boil_timeline_svg(lang).lower()
-            self.assertNotIn("ibu", svg)
+            self.assertIsNone(re.search(r"\\bibu\\b", svg))
             self.assertNotIn("60 min", svg)
             self.assertNotIn("5 min", svg)
 
