@@ -1,38 +1,43 @@
 # ui/bryggeskole_panel.py
 """
-Kvernhaug Bryggeskole -- to-modul lærings-UI (issue #338, productionizing
-the owner-accepted two-module Bryggeskole UX direction). Renderes som sin
-egen topplinje-fane i app.py, ikke gjemt under Verktøy.
+Kvernhaug Bryggeskole -- flermodul lærings-UI (issue #338, productionizing
+the owner-accepted multi-module Bryggeskole UX direction; issue #366 adds
+Koking som tredje modul). Renderes som sin egen topplinje-fane i app.py,
+ikke gjemt under Verktøy.
 
 Én Bryggeskole -> to visuelle miljøer (Hjemmebrygger / Bryggeri) -> én
-skoleoversikt med to reelle, åpne moduler (Mesking / Gjæring), resten av
-brygge-reisen vist som "Kommer senere" -- delt verifisert kunnskap + delt
-mastery på tvers av moduler og miljøer. Miljøvalget er bevisst uendret fra
-issue #327: kun navigasjon/presentasjon, ingen nye kursfakta oppstår her.
+skoleoversikt med tre reelle, åpne moduler (Mesking / Koking / Gjæring),
+resten av brygge-reisen vist som "Kommer senere" -- delt verifisert
+kunnskap + delt mastery på tvers av moduler og miljøer. Miljøvalget er
+bevisst uendret fra issue #327: kun navigasjon/presentasjon, ingen nye
+kursfakta oppstår her.
 
 Gjenbruker den eksisterende læringsmotoren uendret, per issue #338 sitt
-eksplisitte "Reuse boundaries"-krav -- nå fra TO topic-scopede
+eksplisitte "Reuse boundaries"-krav -- nå fra TRE topic-scopede
 pilotmoduler i stedet for én, hver med nøyaktig samme funksjonsnavn
 (read_pilot_file/render_chunk/render_question/evaluate_answer, per
 bryggeskole/pilot_mashing.py sin egen "topic-scoped copy, never a shared
 engine"-arkitektur):
     bryggeskole.pilot_mashing / bryggeskole.pilot_fermentation
+        / bryggeskole.pilot_boil_hop
     bryggeskole.mastery.{apply_answer, mastery_label}
     bryggeskole.mastery_store.{read_mastery_state, write_mastery_state,
         neutral_state_document}
 Ingen av disse er endret for denne skiven. Én NY, rent tilleggsmodul,
 bryggeskole/answer_order.py, dekker det NYE "answer-option order"-kravet
 issue #338 selv innfører (fantes ikke i issue #327s scope) -- se dens egen
-docstring.
+docstring. bryggeskole/boil_timeline.py (issue #366) er en egen, ren
+SVG-genererende tilleggsmodul for Koking-modulens eneste visuelle krav --
+se dens docstring.
 
 Skoleoversikten gjenbruker den eksisterende seks-stadiers prosessgrid fra
 issue #327 (_PROSESS_STADIER) i stedet for å bygge en egen parallell
-modul-kort-grid ved siden av den: to av de seks stadiene (Mesking, Gjæring)
-er nå klikkbare moduler med statusmerker, resten er fortsatt ren
+modul-kort-grid ved siden av den: tre av de seks stadiene (Mesking, Koking,
+Gjæring) er nå klikkbare moduler med statusmerker, resten er fortsatt ren
 orientering ("Kommer senere"). Dette er bevisst étt sammenhengende grid,
 ikke to -- det tilfredsstiller "show full brewing learning journey" +
 "compact module cards that scale to 3+ active modules" samtidig, siden et
-fremtidig tredje aktivt stadium bare er én ny _STADIUM_TIL_MODUL-oppføring.
+fremtidig fjerde aktivt stadium bare er én ny _STADIUM_TIL_MODUL-oppføring.
 
 Sesjonstilstand er nå PER MODUL (st.session_state["bs_modul_sesjon"][id]),
 ikke global -- "returning to overview does not discard active session
@@ -55,12 +60,14 @@ import streamlit as st
 
 from config import DEMO_MODE
 from bryggeskole.answer_order import finn_korrekt_indeks, velg_alternativ_rekkefolge
+from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.mastery import apply_answer, mastery_label
 from bryggeskole.mastery_store import (
     neutral_state_document,
     read_mastery_state,
     write_mastery_state,
 )
+from bryggeskole import pilot_boil_hop as _pilot_koking
 from bryggeskole import pilot_fermentation as _pilot_gjaring
 from bryggeskole import pilot_mashing as _pilot_mesking
 from ui.i18n import gjeldende_sprak, t
@@ -70,24 +77,34 @@ from ui.i18n import gjeldende_sprak, t
 # engine") -- de er derfor IKKE samme klasseobjekt og må fanges som et
 # tuppel, aldri bare den ene modulens, ellers ville den andre modulens
 # feil forbli ufanget her.
-_PILOT_CONTENT_ERRORS = (_pilot_mesking.PilotContentError, _pilot_gjaring.PilotContentError)
+_PILOT_CONTENT_ERRORS = (
+    _pilot_mesking.PilotContentError,
+    _pilot_gjaring.PilotContentError,
+    _pilot_koking.PilotContentError,
+)
 
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
 _ENV_BRYGGERI = "bryggeri"
 
 _MODUL_MESKING = "mesking"
+_MODUL_KOKING = "koking"
 _MODUL_GJARING = "gjaring"
 
-# Rekkefølgen speiler den faktiske brygge-prosessen (mesk før gjæring) --
-# brukt både til "Kommer senere"-plasseringen i prosessgridet og til
-# _anbefalt_modul()s "anbefalt neste"-signal.
-_MODUL_REKKEFOLGE = [_MODUL_MESKING, _MODUL_GJARING]
+# Rekkefølgen speiler den faktiske brygge-prosessen (mesk før koking før
+# gjæring) -- brukt både til "Kommer senere"-plasseringen i prosessgridet
+# og til _anbefalt_modul()s "anbefalt neste"-signal.
+_MODUL_REKKEFOLGE = [_MODUL_MESKING, _MODUL_KOKING, _MODUL_GJARING]
 
 _MODULER = {
     _MODUL_MESKING: {
         "pilot": _pilot_mesking,
         "tittel_nokkel": "bryggeskole.modul.mesking.tittel",
         "ikon": "🌾",
+    },
+    _MODUL_KOKING: {
+        "pilot": _pilot_koking,
+        "tittel_nokkel": "bryggeskole.modul.koking.tittel",
+        "ikon": "🔥",
     },
     _MODUL_GJARING: {
         "pilot": _pilot_gjaring,
@@ -123,9 +140,9 @@ _PROSESS_STADIER = {
     ],
 }
 
-# Samme indekser i begge miljøer -- de to eneste aktive/klikkbare stadiene
-# denne runden; resten er ren orientering ("Kommer senere").
-_STADIUM_TIL_MODUL = {1: _MODUL_MESKING, 4: _MODUL_GJARING}
+# Samme indekser i begge miljøer -- de tre eneste aktive/klikkbare
+# stadiene denne runden; resten er ren orientering ("Kommer senere").
+_STADIUM_TIL_MODUL = {1: _MODUL_MESKING, 2: _MODUL_KOKING, 4: _MODUL_GJARING}
 
 # Menneskelesbare visningsnavn for pilotenes konsept-id-er -- aldri de
 # rå id-strengene selv i oppsummeringen (læreren skal aldri se f.eks.
@@ -140,6 +157,14 @@ _KONSEPT_LABELS = {
     "mashing.temperature": {"no": "Mesketemperatur", "en": "Mash temperature"},
     "mashing.fermentability": {"no": "Gjærbarhet", "en": "Fermentability"},
     "mashing.process_variables": {"no": "Andre prosessfaktorer", "en": "Other process variables"},
+    "boil.enzyme_inactivation": {"no": "Enzym-inaktivering", "en": "Enzyme inactivation"},
+    "boil.volatile_removal": {"no": "Fjerning av flyktige stoffer (DMS)", "en": "Volatile removal (DMS)"},
+    "boil.hot_break": {"no": "Hot break", "en": "Hot break"},
+    "boil.observation": {"no": "Kokeobservasjon", "en": "Boil observation"},
+    "hop.isomerization_time": {"no": "Isomerisering og koketid", "en": "Isomerization and boil time"},
+    "hop.aroma_volatility": {"no": "Aroma og flyktighet", "en": "Aroma and volatility"},
+    "hop.addition_strategy": {"no": "Tilsetningsstrategi", "en": "Addition strategy"},
+    "hop.whirlpool_technique": {"no": "Whirlpool-teknikk", "en": "Whirlpool technique"},
 }
 
 _DEMO_TILSTAND_NOKKEL = "_demo_bryggeskole_mastery_tilstand"
@@ -492,6 +517,13 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
     st.caption(t("bryggeskole.leksjon.bolk_teller", n=idx + 1, totalt=totalt))
     with st.container(key="bs_leksjon_tekst"):
         st.markdown(_MODULER[modul_id]["pilot"].render_chunk(chunks[idx], sprak)["text"])
+
+    if modul_id == _MODUL_KOKING:
+        # Koking-modulens eneste visuelle krav (issue #366 kontrakt §4):
+        # ett statisk, ikke-interaktivt tidslinjediagram, synlig gjennom
+        # hele leksjonen (ikke bare første/siste bolk) -- se
+        # bryggeskole/boil_timeline.py sin docstring.
+        st.markdown(render_boil_timeline_svg(sprak), unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
