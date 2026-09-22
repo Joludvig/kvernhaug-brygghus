@@ -16,7 +16,11 @@ from modules.recipe_importer import (
     apply_import_to_session_state,
 )
 from modules.kbh_import import parse_kbhrecipe_json, kbhrecipe_handoff_hint, UgyldigKbhrecipeForImport
-from modules.kbh_import_apply import apply_kbhrecipe_import_to_session_state
+from modules.kbh_import_apply import (
+    NESTE_VARIANT_SEED_PENDING_NOKKEL,
+    apply_kbhrecipe_import_to_session_state,
+    apply_next_variant_seed_to_session_state,
+)
 from ui.i18n import render_sprak_valger, t
 
 # Stabil, språknøytral sentinel for "ingen oppskrift valgt ennå" i
@@ -50,6 +54,36 @@ def _last_master_db(filnavn):
 
 def render_sidebar():
     render_sprak_valger()
+
+    # issue #363 (V2.2 G2D) -- konsumerer et evt. ventende "🌱 Opprett
+    # neste variant"-seed FØR noe som helst annet i denne funksjonen
+    # (og dermed FØR ALLE fane-widgets, som først instansieres langt
+    # senere i app.py sin scriptrekkefølge -- render_sidebar() kalles
+    # alltid FØR st.tabs(...)). Selve hydreringen (session_state.
+    # gjeldende_navn/valgt_malt/valgt_humle/_aktiv_kbh_origin_recipe_id/
+    # osv.) kan IKKE skje inne i selve "Opprett neste variant"-
+    # knappehandleren (ui/kbhbrew_history_panel.py, rendret fra
+    # Bryggdag-fanen) -- den fanen kjøres ETTER Oppskrift-fanen samme
+    # scriptkjøring, og Streamlit forbyr å skrive
+    # st.session_state[<widget-key>] for en widget som allerede er
+    # instansiert denne kjøringen. Se
+    # NESTE_VARIANT_SEED_PENDING_NOKKEL sin egen kommentar
+    # (modules/kbh_import_apply.py) for hele begrunnelsen -- samme
+    # "ett-gangs pending-flagg konsumert her FØR widgetene"-mønster som
+    # #242/#246 sitt _SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER rett under.
+    _pending_neste_variant_seed = st.session_state.pop(NESTE_VARIANT_SEED_PENDING_NOKKEL, None)
+    if _pending_neste_variant_seed is not None:
+        apply_next_variant_seed_to_session_state(_pending_neste_variant_seed)
+        # Samme #242-fallgruve som en ekte .kbhrecipe-import allerede
+        # unngår: uten dette ville selectboksen rett under fortsatt vise
+        # en TIDLIGERE lastet oppskrifts navn, og reload-ved-mismatch-
+        # sjekken lenger ned (nå ryddet _last_loaded_recipe != det gamle
+        # widget-valget) ville feiltolket det som et bevisst nytt valg
+        # -- og stille lastet den gamle oppskriften OVER det nettopp
+        # seedete utkastet, i SAMME scriptkjøring. Satt HER (ikke i
+        # knappehandleren) er trygt fordi #242-flagget rett under
+        # konsumeres FØRST etter dette, samme funksjonskall.
+        st.session_state["_nullstill_oppskrift_selector_neste_render"] = True
 
     # App #242 (A3-1-interaksjonsregresjon) -- et engangs, eksplisitt
     # UI-koordineringsflagg. En vellykket import (tekst ELLER .kbhrecipe,

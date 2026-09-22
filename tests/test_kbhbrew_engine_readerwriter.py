@@ -25,6 +25,7 @@ import os
 import unittest
 
 from modules.recipe import bygg_recipe_object
+from modules.kbh_import import UgyldigKbhrecipeForImport
 from modules.kbhbrew import (
     KATEGORI_INVALID_BREW,
     KATEGORI_INVALID_ENVELOPE,
@@ -33,6 +34,7 @@ from modules.kbhbrew import (
     KATEGORI_UNSUPPORTED_VERSION,
     UgyldigKbhbrewForImport,
     bygg_kbhbrew_konvolutt,
+    bygg_neste_variant_seed,
     bygg_ny_brew,
     brew_to_kbhbrew_payload,
     parse_kbhbrew_json,
@@ -174,6 +176,125 @@ class TestLearningHypothesisField(unittest.TestCase):
         self.assertEqual(reexported["hypothesis"], doc["brew"]["learning"]["hypothesis"])
         self.assertEqual(reexported["equipmentNotes"], "syntetisk")
         self.assertNotIn("_kbh_brew_learning_passthrough", reexported)
+
+
+class TestLearningNextRecipeOriginIdField(unittest.TestCase):
+    """V2.2 G2D (issue #363) -- `learning.nextRecipeOriginId` is a KNOWN
+    V1 field (not passthrough-dependent), same text-normalization/
+    blank-clears-the-field rules as whatWorked/whatChanged/hypothesis/
+    nextTime (mirrors TestLearningHypothesisField above)."""
+
+    def test_next_recipe_origin_id_is_a_known_field_not_captured_as_passthrough(self):
+        brew = _ny_brew()
+        brew["learning"] = {"nextRecipeOriginId": "44444444-4444-4444-8444-444444444444"}
+        payload = brew_to_kbhbrew_payload(brew)
+        self.assertEqual(payload["learning"], {"nextRecipeOriginId": "44444444-4444-4444-8444-444444444444"})
+
+        reparsed = parse_kbhbrew_json(json.dumps(bygg_kbhbrew_konvolutt(brew, "2026-03-05T00:00:00+00:00")))
+        self.assertEqual(reparsed["learning"]["nextRecipeOriginId"], "44444444-4444-4444-8444-444444444444")
+        self.assertNotIn("_kbh_brew_learning_passthrough", reparsed["learning"])
+
+    def test_blank_next_recipe_origin_id_is_omitted_never_null(self):
+        brew = _ny_brew()
+        brew["learning"] = {"nextRecipeOriginId": "   ", "nextTime": "Prøv igjen"}
+        payload = brew_to_kbhbrew_payload(brew)
+        self.assertNotIn("nextRecipeOriginId", payload["learning"])
+        self.assertEqual(payload["learning"]["nextTime"], "Prøv igjen")
+
+    def test_unset_next_recipe_origin_id_is_omitted_not_null(self):
+        brew = _ny_brew()
+        brew["learning"] = {"nextTime": "Prøv igjen"}
+        payload = brew_to_kbhbrew_payload(brew)
+        self.assertNotIn("nextRecipeOriginId", payload["learning"])
+        self.assertNotIn(None, payload["learning"].values())
+
+    def test_other_learning_fields_and_unknown_passthrough_survive_alongside_next_recipe_origin_id(self):
+        doc = copy.deepcopy(_load_fixture("full_v1"))
+        doc["brew"]["learning"]["equipmentNotes"] = "syntetisk"
+        native = parse_kbhbrew_json(json.dumps(doc))
+        self.assertEqual(
+            native["learning"]["nextRecipeOriginId"], doc["brew"]["learning"]["nextRecipeOriginId"]
+        )
+        self.assertEqual(native["learning"]["hypothesis"], doc["brew"]["learning"]["hypothesis"])
+        self.assertEqual(native["learning"]["_kbh_brew_learning_passthrough"], {"equipmentNotes": "syntetisk"})
+
+        reexported = bygg_kbhbrew_konvolutt(native, "2026-03-06T00:00:00+00:00")["brew"]["learning"]
+        self.assertEqual(reexported["nextRecipeOriginId"], doc["brew"]["learning"]["nextRecipeOriginId"])
+        self.assertEqual(reexported["equipmentNotes"], "syntetisk")
+        self.assertNotIn("_kbh_brew_learning_passthrough", reexported)
+
+    def test_parent_brew_id_is_untouched_by_this_field(self):
+        brew = _ny_brew()
+        brew["learning"] = {"nextRecipeOriginId": "44444444-4444-4444-8444-444444444444"}
+        envelope = bygg_kbhbrew_konvolutt(brew, "2026-03-05T00:00:00+00:00")
+        self.assertIsNone(envelope["brew"]["parentBrewId"])
+
+
+class TestNesteVariantSeed(unittest.TestCase):
+    """V2.2 G2D (issue #363) -- modules/kbhbrew.py::bygg_neste_variant_seed()
+    builds a fresh, unsaved recipe draft from a brew's FROZEN
+    snapshot.recipe, deliberately reusing the same .kbhrecipe
+    import-shaped construction path (modules/kbh_import.py::
+    parse_kbhrecipe_json()). See docs/development/
+    v22_g2c_next_variant_linkage_contract.md §4.1/§6 "Identity boundary"
+    for the exact required guarantees this test class proves."""
+
+    def test_seed_never_inherits_source_origin_recipe_id_and_mints_a_distinct_fresh_one(self):
+        brew = _ny_brew()
+        brew["snapshot"]["recipe"]["originRecipeId"] = "11111111-1111-4111-8111-111111111111"
+        malt_db, humle_db, gjaer_db = _dbs()
+
+        seed = bygg_neste_variant_seed(brew, malt_db, humle_db, gjaer_db)
+
+        fresh_id = seed["fresh_origin_recipe_id"]
+        self.assertTrue(fresh_id)
+        self.assertNotEqual(fresh_id, "11111111-1111-4111-8111-111111111111")
+        self.assertEqual(seed["import_resultat"]["recipe"]["originRecipeId"], fresh_id)
+
+    def test_seed_mints_a_fresh_origin_recipe_id_even_when_source_has_none(self):
+        brew = _ny_brew()
+        self.assertIsNone(brew["snapshot"]["recipe"].get("originRecipeId"))
+        malt_db, humle_db, gjaer_db = _dbs()
+
+        seed = bygg_neste_variant_seed(brew, malt_db, humle_db, gjaer_db)
+
+        self.assertTrue(seed["fresh_origin_recipe_id"])
+        self.assertEqual(seed["import_resultat"]["recipe"]["originRecipeId"], seed["fresh_origin_recipe_id"])
+
+    def test_seed_never_mutates_the_frozen_source_snapshot(self):
+        brew = _ny_brew()
+        brew["snapshot"]["recipe"]["originRecipeId"] = "11111111-1111-4111-8111-111111111111"
+        before = copy.deepcopy(brew["snapshot"])
+        malt_db, humle_db, gjaer_db = _dbs()
+
+        bygg_neste_variant_seed(brew, malt_db, humle_db, gjaer_db)
+
+        self.assertEqual(brew["snapshot"], before)
+
+    def test_seed_content_matches_the_snapshot_recipe(self):
+        brew = _ny_brew()
+        malt_db, humle_db, gjaer_db = _dbs()
+
+        seed = bygg_neste_variant_seed(brew, malt_db, humle_db, gjaer_db)
+
+        recipe = seed["import_resultat"]["recipe"]
+        self.assertEqual(recipe["name"], brew["snapshot"]["recipe"]["navn"])
+        self.assertEqual(recipe["batch_size"], brew["snapshot"]["recipe"]["volum"])
+        self.assertEqual(len(recipe["malts"]), len(brew["snapshot"]["recipe"]["malt"]))
+
+    def test_seed_raises_value_error_without_a_valid_snapshot(self):
+        with self.assertRaises(ValueError):
+            bygg_neste_variant_seed({"snapshot": {}})
+        with self.assertRaises(ValueError):
+            bygg_neste_variant_seed({})
+
+    def test_seed_raises_when_snapshot_ingredient_no_longer_exists_in_current_master_db(self):
+        brew = _ny_brew()
+        # An empty malt_db models an ingredient ID that has since been
+        # removed from the current master data -- the same failure mode
+        # a real, drifted .kbhrecipe import would hit.
+        with self.assertRaises(UgyldigKbhrecipeForImport):
+            bygg_neste_variant_seed(brew, malt_db={}, humle_db={}, gjaer_db={})
 
 
 class TestInvalidFormatVersionRejected(unittest.TestCase):

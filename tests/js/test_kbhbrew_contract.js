@@ -208,6 +208,33 @@ kjor('learning.hypothesis (App Core V1 felt, ukjent for Web) overlever import ->
   assert.strictEqual(eksportert.brew.learning.nextTime, raa.brew.learning.nextTime);
 });
 
+// ─── issue #363 (V2.2 G2D): App Core V1's new
+// `learning.nextRecipeOriginId` field round-trips losslessly through
+// Web's EXISTING generic learning-layer unknown-field passthrough
+// (Web does not need its own dedicated next-variant UI for this
+// bounded App-only slice -- it just must not drop the field on
+// import -> export, same guarantee already proven above for
+// `hypothesis`/any other future learning field).
+
+kjor('learning.nextRecipeOriginId (App Core V1 felt, ukjent for Web) overlever import -> eksport via passthrough', () => {
+  const ctx = nyContext();
+  const raa = JSON.parse(lastLegacyFixture());
+  raa.brew.learning.nextRecipeOriginId = '66666666-6666-4666-8666-666666666666';
+  const res = ctx.parseKbhBrewInnhold(JSON.stringify(raa));
+  assert.strictEqual(res.ok, true);
+  const imp = ctx.importerBrygg(res.brew);
+  assert.strictEqual(imp.brew.learning.nextRecipeOriginId, undefined, 'ukjent felt skal IKKE ligge som direkte egenskap for Web');
+  assert.strictEqual(imp.brew.learning[BREW_PASSTHROUGH_NOKKEL].nextRecipeOriginId, '66666666-6666-4666-8666-666666666666');
+
+  const eksportert = ctx.byggKbhBrewInnhold(imp.brew);
+  assert.strictEqual(eksportert.brew.learning.nextRecipeOriginId, '66666666-6666-4666-8666-666666666666');
+  assert.strictEqual('_kbhBrewUkjenteFelt' in eksportert.brew.learning, false);
+  // kjente learning-felt fortsatt uendret.
+  assert.strictEqual(eksportert.brew.learning.nextTime, raa.brew.learning.nextTime);
+  // parentBrewId upåvirket av dette feltet.
+  assert.strictEqual(eksportert.brew.parentBrewId, raa.brew.parentBrewId);
+});
+
 // ─── 8: kjent felt redigert av bruker vinner over gammel passthrough-verdi ─
 
 kjor('kjent felt (status) satt via oppdaterBrygg vinner over evt. gammel passthrough-verdi med samme navn', () => {

@@ -20,6 +20,7 @@ from modules.recipe_storage import (
 from modules.calculations import beregn_abv_standard
 from modules.recipe import bygg_recipe_object
 from modules.kbh_contract import bygg_kbhrecipe_konvolutt, UgyldigOppskriftForEksport
+from modules.kbh_import_apply import NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL
 from modules.kbhbrew_storage import hent_alle_brews
 from modules.kbhbrew_ui import oppskrift_har_kbhbrew
 from modules.card_template import render_card_html, render_a4_html
@@ -255,7 +256,38 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 # det ENE unntaket fra "App minter aldri ved lagring"
                 # (§3.2/§8), siden §3.5 eksplisitt krever mint nettopp ved
                 # denne handlingen.
-                ny_recipe = _bygg_recipe_fra_session(ctx, origin_recipe_id=str(uuid.uuid4()))
+                #
+                # issue #363 (V2.2 G2D) unntak fra unntaket: en oppskrift
+                # seedet av "🌱 Opprett neste variant"
+                # (ui/kbhbrew_history_panel.py) har ALLEREDE fått en
+                # fersk originRecipeId mintet VED seed-tidspunktet
+                # (kontraktens §4.1-krav -- FØR utkastet i det hele tatt
+                # ble redigerbart), og den ID-en må overleve UENDRET til
+                # denne aller første lagringen -- IKKE erstattes av enda
+                # en, ANNEN fersk id her. `_frossen_neste_variant_id`
+                # gjenbrukes KUN når den fortsatt er lik den nåværende
+                # aktive origin-ID-en (dvs. ingenting -- et sidebar-load,
+                # en .kbhrecipe-import, en annen lagring -- har rukket å
+                # overskrive den i mellomtiden); ellers mintes det som før.
+                #
+                # Chief-review 5280874111 (issue #363): må IKKE `.pop()`-es
+                # her -- et første lagringsforsøk kan helt normalt avvises
+                # med OppskriftNavnKollisjon (utkastet arver kildens navn
+                # ved seeding), og et påfølgende omdøp+retry skal da
+                # gjenbruke NØYAKTIG samme frosne ID, ikke minte en ny.
+                # Derfor kun `.get()` her -- selve konsumeringen (fjerning
+                # fra session_state) skjer utelukkende i success-grenen
+                # under, slik at et senere, urelatert "Lagre som ny
+                # kopi"-klikk fortsatt aldri kan gjenbruke en gammel,
+                # frossen id fra en tidligere seed-handling.
+                _frossen_neste_variant_id = st.session_state.get(NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL)
+                _origin_recipe_id_for_kopi = (
+                    _frossen_neste_variant_id
+                    if _frossen_neste_variant_id is not None
+                    and _frossen_neste_variant_id == st.session_state.get("_aktiv_kbh_origin_recipe_id")
+                    else str(uuid.uuid4())
+                )
+                ny_recipe = _bygg_recipe_fra_session(ctx, origin_recipe_id=_origin_recipe_id_for_kopi)
                 try:
                     # kilde_filnavn=None -- en ny kopi har per definisjon
                     # ingen kjent tidligere kildefil.
@@ -265,6 +297,7 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                 except OppskriftNavnKollisjon as e:
                     st.error(f"❌ {e}")
                 else:
+                    st.session_state.pop(NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL, None)
                     st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
         with btn_col2:
             # Arkivering skal ALLTID skje på den FAKTISKE kildefilen
