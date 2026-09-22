@@ -316,7 +316,18 @@ be inherited by the new variant, under any circumstance:**
 Same pattern as `hypothesis` (#355): additive, optional, same-major-
 version, unknown-field-preservation-compatible.
 
-- **Type**: `string` (a recipe's `originRecipeId`), or absent/`null`.
+- **Type**: `string` **when present; otherwise omitted from the wire
+  payload entirely** — never serialized as `null`. This is not a new
+  rule invented for this field: it is the existing, unambiguous
+  `learning.*` pattern already in force for `hypothesis`/`whatWorked`/
+  `whatChanged`/`nextTime` (`core/kbhbrew_v1.schema.json:230`, `"type":
+  "string"`, no `null` in the type union; `modules/kbhbrew.py`'s
+  `_bygg_learning_payload()` and `normaliser_learning_lag()`, both via
+  `_tekst_eller_none()`, omit the key outright for a blank/`None`
+  App-native value rather than writing it as `null`). `nextRecipeOriginId`
+  follows that same writer/normalizer behavior exactly — a deliberate
+  nullable divergence was considered and rejected (Chief review
+  `5275670290`): it would only add reader ambiguity for no benefit.
 - **Meaning**: *"the `originRecipeId` of the recipe the brewer
   explicitly created/chose as the next variant embodying this brew's
   `learning.nextTime` decision."*
@@ -555,4 +566,26 @@ explicit fresh mint **at seed time** (reusing the "Lagre som ny kopi"
 never left to an implicit later step. No other section required
 correction; nothing else in Chief's review was in scope for this
 round. Still docs-only — no product code, recipe, or brew data
+touched; Python test suite not run for the same reason as above.
+
+**Review-fix round (Chief review `5275670290`, CHANGES REQUESTED on
+exact head `8014e229e64b9a6271d4b62d429cd01fc46fdfab`):** the §4.1
+identity-boundary fix above was accepted without further comment.
+Chief flagged one remaining ambiguity: §4.2 described
+`learning.nextRecipeOriginId` as *"string, or absent/`null`"* while
+also claiming it follows the same pattern as `hypothesis` — but
+`hypothesis` (and every other `learning.*` text field) is never
+serialized as `null` at all; `core/kbhbrew_v1.schema.json:230` types
+it `string` with no `null` in the union, and `modules/kbhbrew.py`'s
+`_bygg_learning_payload()`/`normaliser_learning_lag()` both route
+through `_tekst_eller_none()`, which **omits** the key outright for a
+blank/`None` App-native value rather than writing `null`. Re-verified
+directly against both files. §4.2 is corrected to state the single
+canonical wire rule explicitly — `string` when present, otherwise
+omitted, never `null` — and to name the exact schema line and
+normalizer functions this rests on, per Chief's requested correction.
+§6's test matrix already said "Blank/unset is omitted" (no wording
+implying `null` was valid there), so no further §6 change was needed;
+re-checked line by line to confirm. No other section required
+correction. Still docs-only — no product code, recipe, or brew data
 touched; Python test suite not run for the same reason as above.
