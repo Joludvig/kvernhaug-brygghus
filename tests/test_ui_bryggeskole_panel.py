@@ -67,6 +67,7 @@ from bryggeskole.pilot_fermentation import read_pilot_file as les_gjaring_pilot
 from bryggeskole.pilot_fermentation import render_chunk as gjaring_render_chunk
 from bryggeskole.pilot_boil_hop import read_pilot_file as les_koking_pilot
 from bryggeskole.pilot_cool_transfer import read_pilot_file as les_kjoling_pilot
+from bryggeskole.pilot_package import read_pilot_file as les_pakking_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -227,13 +228,13 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
         _knapp(at, "bs_velg_hjemmebrygger_btn")
         _knapp(at, "bs_velg_bryggeri_btn")
 
-    def test_kun_fire_stadier_er_klikkbare_resten_er_kommer_senere(self):
+    def test_kun_fem_stadier_er_klikkbare_resten_er_kommer_senere(self):
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 4)
-        self.assertEqual(len(kommer_badges), 2)
+        self.assertEqual(len(aktiv_badges), 5)
+        self.assertEqual(len(kommer_badges), 1)
 
     def test_mesking_modulen_rendrer_mesking_pilotinnhold(self):
         at = self._ny_apptest()
@@ -1128,7 +1129,7 @@ class TestKokingModulen(_MedIsolertTilstand):
         self.assertTrue(any("Boil start" in v for v in markdown_verdier))
         self.assertTrue(any("Whirlpool" in v for v in markdown_verdier))
 
-    def test_anbefalt_rekkefolge_er_mesking_koking_kjoling_gjaring(self):
+    def test_anbefalt_rekkefolge_er_mesking_koking_kjoling_gjaring_pakking(self):
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         tekster = " ".join(_alle_synlige_tekster(at))
@@ -1154,6 +1155,20 @@ class TestKokingModulen(_MedIsolertTilstand):
         _knapp(at, "bs_oppsummering_tilbake_kjoling_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
         self.assertIn("Anbefalt neste: Gjæring", tekster)
+
+        _knapp(at, "bs_apne_modul_gjaring_btn").click().run()
+        self._start_sporsmalsrunde(at, "gjaring")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_gjaring_pilot()), "gjaring")
+        _knapp(at, "bs_oppsummering_tilbake_gjaring_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Pakking", tekster)
+
+        _knapp(at, "bs_apne_modul_pakking_btn").click().run()
+        self._start_sporsmalsrunde(at, "pakking")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_pakking_pilot()), "pakking")
+        _knapp(at, "bs_oppsummering_tilbake_pakking_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertNotIn("Anbefalt neste", tekster)
 
     def test_koking_widget_nokler_er_modul_scopede(self):
         at = self._ny_apptest()
@@ -1232,6 +1247,129 @@ class TestKjolingModulen(_MedIsolertTilstand):
         at = self._ny_apptest()
         self._apne_modul_og_start_sporsmal(at, "kjoling")
         self.assertTrue(any(b.key == "bs_valg_kjoling_r1_q0" for b in at.radio))
+
+
+# ─── Pakking-modulen (issue #374, V2.2 G3G): femte og siste aktive
+# fysiske prosess-modul, samme gjenbrukte motor -- modul-kort/navigasjon,
+# statisk flytdiagram, NO/EN, delt mastery for de to gjenbrukte konseptene
+# fra Kjøling/overføring (cool.sanitation_boundary, oxygen.post_pitch),
+# uavhengig mastery for de fire nye pakking-konseptene ─────────────────
+
+class TestPakkingModulen(_MedIsolertTilstand):
+    def test_pakking_er_klikkbar_modul_i_begge_miljo(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        _knapp(at, "bs_apne_modul_pakking_btn")
+
+        at2 = self._ny_apptest()
+        self._velg_miljo(at2, "bs_velg_bryggeri_btn")
+        _knapp(at2, "bs_apne_modul_pakking_btn")
+
+    def test_pakking_modulen_rendrer_pakking_pilotinnhold(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "pakking")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Saniteringsgrensen fra kjøling/overføring stopper ikke ved gjæringskaret", tekster)
+
+    def test_pakking_modulen_viser_statisk_flytdiagram(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "pakking")
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("<svg" in v for v in markdown_verdier))
+        self.assertTrue(any("Klar til servering/lagring" in v for v in markdown_verdier))
+
+    def test_pakking_far_full_leksjon_sporsmal_oppsummering_flyt(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "pakking")
+        pilot = les_pakking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Slik ligger du an", tekst)
+        self.assertEqual(len(at.exception), 0)
+
+    def test_pakking_nye_konsepter_er_uavhengige_av_de_andre_modulene(self):
+        # De fire NYE pakking-konseptene (package.priming,
+        # package.force_carbonation, package.pressure_safety,
+        # package.path_choice) må ha sitt eget mastery-navnerom, akkurat
+        # som de fire eksisterende modulene -- men cool.sanitation_boundary
+        # og oxygen.post_pitch er BEVISST gjenbrukte id-er fra Kjøling/
+        # overføring (kontrakt §3.5), så de skal IKKE være disjunkte fra
+        # Kjøling sine konsepter -- se egen test under for det.
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "pakking")
+        pilot = les_pakking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+
+        tilstand = read_mastery_state()
+        pakking_konsepter = set(_konsept_rekkefolge(pilot))
+        nye_pakking_konsepter = pakking_konsepter - {"cool.sanitation_boundary", "oxygen.post_pitch"}
+        andre_konsepter = (
+            set(_konsept_rekkefolge(les_mesking_pilot()))
+            | set(_konsept_rekkefolge(les_gjaring_pilot()))
+            | set(_konsept_rekkefolge(les_koking_pilot()))
+        )
+        self.assertTrue(nye_pakking_konsepter.isdisjoint(andre_konsepter))
+        for k in nye_pakking_konsepter:
+            self.assertIn(k, tilstand["concepts"])
+        for k in andre_konsepter:
+            self.assertNotIn(k, tilstand["concepts"])
+
+    def test_pakking_deler_mastery_med_kjoling_for_gjenbrukte_konsepter(self):
+        # Svarer riktig på Kjøling/overføring sitt spørsmål om
+        # cool.sanitation_boundary FØRST, så åpner Pakking -- den
+        # gjenbrukte konsept-id-en skal bære praksisen med seg over
+        # modulgrensen, siden bryggeskole/mastery.py er nøkkelbasert på
+        # konsept-id, ikke modul-id (den konkrete mekanismen bak "delt
+        # mastery på tvers av moduler", issue #374 kontrakt §0/§3.5).
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "kjoling")
+        kjoling_pilot = les_kjoling_pilot()
+        sanitation_idx = next(
+            i for i, q in enumerate(kjoling_pilot["questions"])
+            if "cool.sanitation_boundary" in q["concepts"]
+        )
+        fasit = _korrekt_svar_ider(kjoling_pilot)
+        # Spørsmålene vises ETT om gangen i rekkefølge -- må svare på (og
+        # bla forbi) alle spørsmål FØR saniterings-spørsmålet for å nå det.
+        if sanitation_idx > 0:
+            prefix = {i: fasit[i] for i in range(sanitation_idx)}
+            self._fullfor_alle_sporsmal(at, 1, prefix, "kjoling")
+        self._besvar_sporsmal(at, sanitation_idx, 1, fasit[sanitation_idx], "kjoling")
+
+        tilstand_etter_kjoling = read_mastery_state()
+        self.assertIn("cool.sanitation_boundary", tilstand_etter_kjoling["concepts"])
+        attempts_etter_kjoling = tilstand_etter_kjoling["concepts"]["cool.sanitation_boundary"]["attempts"]
+
+        at2 = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at2, "pakking")
+        pakking_pilot = les_pakking_pilot()
+        pakking_sanitation_idx = next(
+            i for i, q in enumerate(pakking_pilot["questions"])
+            if "cool.sanitation_boundary" in q["concepts"]
+        )
+        pakking_svar = _korrekt_svar_ider(pakking_pilot)[pakking_sanitation_idx]
+        self._besvar_sporsmal(at2, pakking_sanitation_idx, 1, pakking_svar, "pakking")
+
+        tilstand_etter_pakking = read_mastery_state()
+        attempts_etter_pakking = tilstand_etter_pakking["concepts"]["cool.sanitation_boundary"]["attempts"]
+        self.assertEqual(attempts_etter_pakking, attempts_etter_kjoling + 1)
+
+    def test_engelsk_pakking_modultittel_og_flytdiagram_oversettes(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "pakking")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Packaging", tekster)
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("Ready to serve/store" in v for v in markdown_verdier))
+
+    def test_pakking_widget_nokler_er_modul_scopede(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "pakking")
+        self.assertTrue(any(b.key == "bs_valg_pakking_r1_q0" for b in at.radio))
 
 
 if __name__ == "__main__":

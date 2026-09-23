@@ -351,7 +351,7 @@
         }
       ],
       "concepts": ["cool.sanitation_boundary"],
-      "modules": ["cool_transfer.fundamentals"],
+      "modules": ["cool_transfer.fundamentals", "package.fundamentals"],
       "notes": "Describes the existence and starting point of this handling boundary, not a specific sanitizer product, contact time, or procedure -- those vary by product and are explicitly out of scope (mirrors FACT-BOIL-0004's own 'no single fixed rule' boundary). Wording trap: do not imply one single specific sanitizer or contact time is required; do not imply the boil 'immunizes' downstream equipment or that this boundary is optional."
     },
     {
@@ -410,7 +410,7 @@
         }
       ],
       "concepts": ["oxygen.post_pitch"],
-      "modules": ["cool_transfer.fundamentals"],
+      "modules": ["cool_transfer.fundamentals", "package.fundamentals"],
       "notes": "Describes a risk/quality direction, not an absolute threshold or guaranteed outcome -- does not claim a single stray oxygen exposure inevitably ruins a batch. Wording trap: do not imply any oxygen contact after pitching instantly spoils the beer; do not conflate this with the pre-pitch requirement in FACT-OXY-0001 -- same molecule, opposite-timing effect, not a contradiction."
     },
     {
@@ -456,6 +456,109 @@
       "concepts": ["transfer.method_tradeoffs"],
       "modules": ["cool_transfer.fundamentals"],
       "notes": "Describes the trade-off directions only -- does not claim one method is universally 'correct', does not recommend a specific pump/hose product, and does not assert a numeric contamination-rate difference between methods. Wording trap: do not present gravity or pump transfer as inherently superior; do not imply an open transfer always causes contamination, or that a closed transfer eliminates the risk."
+    },
+    {
+      "id": "FACT-PACK-0001",
+      "claim": "Adding a small, measured amount of fermentable ('priming') sugar to beer immediately before sealing it into bottles triggers a renewed, small-scale fermentation inside each sealed bottle. Because the CO2 produced by that renewed fermentation has no other escape path, it dissolves into the beer under the pressure that builds inside the sealed bottle, carbonating it. The amount of priming sugar needed depends on the specific beer (its existing dissolved CO2, temperature, style) and the carbonation level wanted -- there is no single universal number that applies to every batch.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical guidance (Lallemand Brewing, Best Practices -- Bottle conditioning with CBC-1)",
+          "ref": "https://connect.lallemandbrewing.com/wp-content/uploads/2021/02/LAL-bestpractices-Bottle-conditioning-Digital.pdf"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer brewing calculator documentation (Lallemand Brewing, Bottle conditioning calculator)",
+          "ref": "https://www.lallemandbrewing.com/en/global/resources/brewers-corner/brewing-calculators/bottle-conditioning-calculator/"
+        },
+        {
+          "tier": "B",
+          "type": "AHA technical article on bottle conditioning",
+          "ref": "https://www.homebrewersassociation.org/how-to-brew/mastering-the-art-of-bottle-conditioning/"
+        }
+      ],
+      "concepts": ["package.priming"],
+      "modules": ["package.fundamentals"],
+      "notes": "States the mechanism and the 'no universal number' boundary only -- does not provide or endorse a specific priming-sugar dosage, formula, or table, and does not name a specific priming-sugar type/product. Wording trap: do not state a specific priming-sugar amount/table as correct or required; do not imply any fermentable sugar type works identically; do not imply this is the same mechanism as the original fermentation rather than a distinct, smaller, sealed-container renewal of it."
+    },
+    {
+      "id": "FACT-PACK-0002",
+      "claim": "Beer can also be carbonated in a sealed keg by connecting it to an external CO2 supply under pressure, with no renewed/secondary fermentation involved. The amount of CO2 that ends up dissolved in the beer depends on the pressure applied, the beer's temperature, and the time/contact method used (e.g. a slower 'set and forget' equilibrium approach versus a faster agitation-based approach) -- carbonation level is directly adjustable by the brewer rather than fixed by however much priming sugar was added.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "AHA technical article on kegging homebrew",
+          "ref": "https://homebrewersassociation.org/how-to-brew/an-introduction-to-kegging-homebrew/"
+        },
+        {
+          "tier": "B",
+          "type": "Brewers Association technical resource on draught beer carbonation",
+          "ref": "https://cdn.brewersassociation.org/wp-content/uploads/2021/07/22093927/Facts_About_Draught_Beer_Carbonation.pdf"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical guidance (Lallemand Brewing, Preserving thiols in homebrewing)",
+          "ref": "https://www.lallemandbrewing.com/en/global/resources/whats-new/preserving-thiols-in-homebrewing-a-step-by-step-guide/"
+        }
+      ],
+      "concepts": ["package.force_carbonation"],
+      "modules": ["package.fundamentals"],
+      "notes": "Describes the concept and the governing variables (pressure, temperature, time) only -- does not provide a specific pressure/temperature/time schedule or carbonation-level target, and does not compare or recommend specific CO2 regulator/keg equipment brands or models. Wording trap: do not present one specific pressure/temperature/time combination as 'the' carbonation schedule; do not name or favor a specific keg/regulator brand; do not imply force carbonation is strictly faster or better than bottle conditioning -- it is a different mechanism with different trade-offs, not a superior one (see FACT-PACK-0004)."
+    },
+    {
+      "id": "FACT-PACK-0003",
+      "claim": "Whichever packaging path is used, the beer ends up sealed inside a container that is actively carbonating (bottle conditioning) or being force-carbonated (keg) -- meaning that container holds internal pressure. Using a package, vessel or fitting that is damaged or not intended/rated for the pressure involved creates a risk of over-pressure, leakage or container/equipment failure. Brewers should use pressure-suitable packaging/equipment and respect its rated operating limits.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "Brewers Association educational publication on package over-pressurization",
+          "ref": "https://www.brewersassociation.org/educational-publications/preventing-package-over-pressurization/"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical guidance (Lallemand Brewing, Preserving thiols in homebrewing)",
+          "ref": "https://www.lallemandbrewing.com/en/global/resources/whats-new/preserving-thiols-in-homebrewing-a-step-by-step-guide/"
+        },
+        {
+          "tier": "B",
+          "type": "established homebrewing technical text (John Palmer, How to Brew, Chapter 11)",
+          "ref": "https://howtobrew.com/section-1/chapter-11/"
+        }
+      ],
+      "concepts": ["package.pressure_safety"],
+      "modules": ["package.fundamentals"],
+      "notes": "States the existence of this safety boundary and its general cause (unsuitable container/fitting under pressure), not a specific pressure rating, a specific safe/unsafe product list, or a full pressure-vessel engineering treatment. Wording trap: do not name a specific unsafe or safe product/brand; do not turn this into pressure numbers, burst-pressure ratings, or a design/engineering lesson; do not imply every packaging attempt is dangerous -- the point is container/equipment suitability, not that pressure itself is inherently hazardous when suitable equipment is used correctly."
+    },
+    {
+      "id": "FACT-PACK-0004",
+      "claim": "Bottling and kegging are both legitimate, widely used homebrewing packaging methods -- neither is a marker of a 'better' or more serious brewer, and the appropriate choice for a given brewer depends on practical factors (equipment cost/availability, storage space, how quickly the beer will be served, personal preference), not on any inherent quality difference in the resulting beer. Once the sanitation boundary (FACT-COOL-0003) has been respected and the beer has been properly primed/conditioned or force-carbonated (FACT-PACK-0001/FACT-PACK-0002) and given appropriate time, either path reaches the same natural completion point: a carbonated, conditioned beer ready to serve or store.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "AHA technical article on bottle conditioning",
+          "ref": "https://www.homebrewersassociation.org/how-to-brew/mastering-the-art-of-bottle-conditioning/"
+        },
+        {
+          "tier": "B",
+          "type": "AHA technical article on kegging homebrew",
+          "ref": "https://homebrewersassociation.org/how-to-brew/an-introduction-to-kegging-homebrew/"
+        }
+      ],
+      "concepts": ["package.path_choice"],
+      "modules": ["package.fundamentals"],
+      "notes": "A synthesis/interpretation drawing on FACT-PACK-0001/FACT-PACK-0002/FACT-PACK-0003 and reused FACT-COOL-0003/FACT-OXY-0002, not a new independently measured result. Does not claim every homebrewer's context makes both methods equally convenient in practice -- only that neither is inherently a 'better beer' marker. Wording trap: never present bottling as 'the beginner method' and kegging as 'the real/serious brewer method,' or vice versa; never imply a brewer must eventually 'graduate' from one to the other; keep the 'natural completion point' framing as an end to the process, not a claim that packaging is the end of the brewer's learning journey."
     }
   ]
 }
