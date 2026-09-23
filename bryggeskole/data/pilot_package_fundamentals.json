@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-PACKAGE-FUNDAMENTALS",
+  "chunks": [
+    {
+      "id": "CHUNK-PACK-A",
+      "source_claims": ["FACT-COOL-0003"],
+      "text": {
+        "no": "Saniteringsgrensen fra kjøling/overføring stopper ikke ved gjæringskaret. Alt som skal komme i kontakt med det ferdige ølet fra dette punktet - tappestav/overføringsslange, flasker og kapsler, fat og fat-koblinger/tapp - må være rent og sanitert før bruk, akkurat som kjøleren og overføringsutstyret var det tidligere. Pakking er ikke et unntak fra denne grensen - det er en fortsettelse av den.",
+        "en": "The sanitation boundary from cooling/transfer doesn't stop at the fermenter. Everything that will contact the finished beer from this point on - bottling wand/transfer hose, bottles and caps, keg and its fittings/tap - needs to be clean and sanitized before use, exactly as the chiller and transfer equipment were earlier. Packaging is not an exception to this boundary - it's a continuation of it."
+      }
+    },
+    {
+      "id": "CHUNK-PACK-B",
+      "source_claims": ["FACT-PACK-0001"],
+      "text": {
+        "no": "Flaskekonditionering (flaskegjæring) betyr å tilsette en liten, avmålt mengde gjærbart sukker (primesukker) til ølet rett før du fyller det på flaske og kapsler den. Dette sukkeret starter en ny, liten gjæring inne i den lukkede flasken. Siden CO2-en denne nye gjæringen produserer ikke har noen vei ut, løses den i stedet opp i ølet og karbonerer det. Hvor mye primesukker som trengs, avhenger av ølet og hvor mye karbonering du vil ha - det finnes ikke ett universelt tall som passer alle brygg.",
+        "en": "Bottle conditioning (bottle priming) means adding a small, measured amount of fermentable sugar (priming sugar) to the beer right before filling it into bottles and capping them. That sugar starts a new, small fermentation inside the sealed bottle. Because the CO2 this renewed fermentation produces has nowhere to escape, it instead dissolves into the beer and carbonates it. How much priming sugar is needed depends on the beer and how much carbonation you want - there's no single universal number that fits every batch."
+      }
+    },
+    {
+      "id": "CHUNK-PACK-C",
+      "source_claims": ["FACT-PACK-0002"],
+      "text": {
+        "no": "Øl kan også karboneres uten noen ny gjæring, ved å koble et lukket fat til en ekstern CO2-kilde under trykk (tvangskarbonering). Hvor mye CO2 som til slutt løses i ølet, styres av trykket som brukes, ølets temperatur og hvor lenge/hvordan det får kontakt med CO2-en - ikke av hvor mye primesukker som ble tilsatt, for det tilsettes ingen sukker i det hele tatt. Dette er et eget konsept med egne styrende variabler, ikke bare «flaskekonditionering i et fat».",
+        "en": "Beer can also be carbonated without any renewed fermentation, by connecting a sealed keg to an external CO2 source under pressure (force carbonation). How much CO2 ends up dissolved in the beer is governed by the pressure applied, the beer's temperature, and how long/how it contacts the CO2 - not by how much priming sugar was added, since no sugar is added at all. This is its own concept with its own governing variables, not just \"bottle conditioning in a keg\"."
+      }
+    },
+    {
+      "id": "CHUNK-PACK-D",
+      "source_claims": ["FACT-OXY-0002", "FACT-PACK-0003"],
+      "text": {
+        "no": "To ting gjelder samtidig når du pakker ølet. For det første: gjæringen er allerede godt i gang på dette tidspunktet, så unødvendig oksygeneksponering under overføring til flaske eller fat bør fortsatt minimeres - akkurat som du allerede har lært, ikke en ny regel. For det andre: uansett om du velger flaske eller fat, ender ølet opp i en lukket beholder under trykk (fra konditionering eller tvangskarbonering). En beholder, et fat eller en kobling som er skadet eller ikke beregnet for det trykket, kan svikte, lekke eller føre til overtrykk - bruk derfor trykkegnet utstyr og hold deg innenfor dets angitte grenser.",
+        "en": "Two things apply at the same time when you package the beer. First: fermentation is already well underway by this point, so unnecessary oxygen exposure during transfer to bottle or keg should still be minimized - exactly what you've already learned, not a new rule. Second: whichever you choose, bottle or keg, the beer ends up in a sealed container under pressure (from conditioning or force carbonation). A container, keg or fitting that's damaged or not rated for that pressure can fail, leak or lead to over-pressure - so use pressure-suitable equipment and stay within its rated limits."
+      }
+    },
+    {
+      "id": "CHUNK-PACK-E",
+      "source_claims": ["FACT-PACK-0004"],
+      "text": {
+        "no": "Flasking og tapping på fat er begge vanlige, fullverdige måter å pakke hjemmebrygget øl på. Ingen av dem er «nybegynnermetoden» eller «den seriøse bryggerens metode» - det riktige valget for deg avhenger av utstyr, budsjett, lagringsplass og hvordan du skal servere ølet, ikke av at den ene metoden gir et bedre øl. Når saniteringen er ivaretatt og ølet er ferdig konditionert eller karbonert, har begge veier nådd samme naturlige sluttpunkt: et karbonert, ferdig øl klart til servering eller lagring.",
+        "en": "Bottling and kegging are both common, fully legitimate ways to package homebrewed beer. Neither is \"the beginner method\" or \"the serious brewer's method\" - the right choice for you depends on equipment, budget, storage space and how you'll serve the beer, not on one method producing better beer. Once sanitation has been respected and the beer is properly conditioned or carbonated, both paths have reached the same natural completion point: a carbonated, finished beer ready to serve or store."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-PACK-001",
+      "type": "scenario",
+      "concepts": ["cool.sanitation_boundary"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-COOL-0003"],
+      "prompt": {
+        "no": "Du er klar for å tappe ølet ditt på flaske, og griper en tappestav som har stått ubrukt og uskylt siden forrige bryggedag. Er det trygt å bruke den direkte, basert på det du har lært?",
+        "en": "You're ready to bottle your beer, and reach for a bottling wand that's been sitting unused and unrinsed since your last brew day. Is it safe to use it as-is, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - saniteringsgrensen fra kjøling/overføring gjelder fortsatt: tappestaven må rengjøres og saniteres før den møter ølet, akkurat som alt annet utstyr fra kjøling og utover.",
+            "en": "No - the sanitation boundary from cooling/transfer still applies: the bottling wand needs to be cleaned and sanitized before it touches the beer, just like every other piece of equipment from cooling onward."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - siden ølet allerede er ferdig gjæret, spiller det ingen rolle lenger hva utstyret har vært borti.",
+            "en": "Yes - since the beer is already done fermenting, it no longer matters what the equipment has touched."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei, men bare fordi tappestaven har stått lenge - hadde den blitt brukt sist uke, hadde det vært greit å bruke den uskylt.",
+            "en": "No, but only because the wand has been sitting a long time - if it had been used last week, using it unrinsed would have been fine."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Saniteringsgrensen fra kjøling/overføring stopper ikke ved gjæringskaret - den gjelder like mye for pakkeutstyr som tappestav, flasker/kapsler og fat/koblinger.",
+        "en": "Correct. The sanitation boundary from cooling/transfer doesn't stop at the fermenter - it applies just as much to packaging equipment like a bottling wand, bottles/caps and keg/fittings."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Verken «ølet er ferdig gjæret så det spiller ingen rolle» eller «bare fordi den har stått lenge» er riktig begrunnelse - saniteringsgrensen gjelder alt utstyr som møter ølet fra kjøling og utover, uavhengig av tidspunkt.",
+        "en": "Not quite. Neither \"the beer is already done fermenting so it doesn't matter\" nor \"only because it's been sitting a long time\" is the right reasoning - the sanitation boundary applies to all equipment that touches the beer from cooling onward, regardless of timing."
+      }
+    },
+    {
+      "id": "Q-PACK-002",
+      "type": "concept_check",
+      "concepts": ["package.priming"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-PACK-0001"],
+      "prompt": {
+        "no": "En bryggevenn sier: 'Det spiller ingen rolle hvor mye primesukker jeg bruker - mer sukker betyr bare mer karbonering, uten noen ulempe.' Stemmer det, basert på det du har lært?",
+        "en": "A brewing friend says: 'It doesn't matter how much priming sugar I use - more sugar just means more carbonation, with no downside.' Is that correct, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - mengden primesukker må tilpasses det spesifikke ølet og ønsket karboneringsnivå; det finnes ikke ett universelt tall, og feil mengde er ikke risikofritt.",
+            "en": "No - the amount of priming sugar must be matched to the specific beer and the desired carbonation level; there's no single universal number, and the wrong amount isn't risk-free."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - all øl tåler ubegrenset mengde primesukker uten problemer.",
+            "en": "Yes - all beer can handle an unlimited amount of priming sugar without issue."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei, men bare fordi primesukker aldri fungerer for karbonering i det hele tatt.",
+            "en": "No, but only because priming sugar never works for carbonation at all."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Primesukker starter en ny, liten gjæring i den lukkede flasken, og hvor mye som trengs avhenger av det spesifikke ølet og ønsket karbonering - det finnes ikke ett tall som passer alle brygg.",
+        "en": "Correct. Priming sugar starts a new, small fermentation inside the sealed bottle, and how much is needed depends on the specific beer and the carbonation wanted - there's no single number that fits every batch."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Primesukker fungerer for karbonering, men mengden er ikke likegyldig - den avhenger av ølet og ønsket karboneringsnivå, det finnes ikke ett universelt riktig tall.",
+        "en": "Not quite. Priming sugar does work for carbonation, but the amount isn't arbitrary - it depends on the beer and the desired carbonation level, and there's no single universally correct number."
+      }
+    },
+    {
+      "id": "Q-PACK-003",
+      "type": "concept_check",
+      "concepts": ["package.force_carbonation"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-PACK-0002"],
+      "prompt": {
+        "no": "Hva er hovedforskjellen mellom tvangskarbonering på fat og flaskekonditionering?",
+        "en": "What's the main difference between force carbonation in a keg and bottle conditioning?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Tvangskarbonering bruker ekstern CO2 under trykk og ingen ny gjæring, mens flaskekonditionering karboniserer via en liten, ny gjæring fra tilsatt primesukker.",
+            "en": "Force carbonation uses external CO2 under pressure and no renewed fermentation, while bottle conditioning carbonates via a small, new fermentation from added priming sugar."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "De er egentlig samme mekanisme - bare kalt forskjellige navn avhengig av om ølet er på flaske eller fat.",
+            "en": "They're actually the same mechanism - just called different names depending on whether the beer is bottled or kegged."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Tvangskarbonering bruker primesukker akkurat som flaskekonditionering, men i fat i stedet for flaske.",
+            "en": "Force carbonation uses priming sugar just like bottle conditioning, only in a keg instead of a bottle."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Tvangskarbonering karboniserer ølet direkte med ekstern CO2 under trykk, uten noen ny gjæring, mens flaskekonditionering karboniserer via en liten, sekundær gjæring fra tilsatt primesukker - to forskjellige mekanismer.",
+        "en": "Correct. Force carbonation carbonates the beer directly with external CO2 under pressure, with no renewed fermentation, while bottle conditioning carbonates via a small, secondary fermentation from added priming sugar - two different mechanisms."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. De to metodene er ikke samme mekanisme med forskjellig navn eller emballasje - tvangskarbonering bruker ekstern CO2 uten ny gjæring, mens flaskekonditionering karboniserer via gjæring fra tilsatt primesukker.",
+        "en": "Not quite. The two methods aren't the same mechanism under a different name or packaging - force carbonation uses external CO2 with no renewed fermentation, while bottle conditioning carbonates via fermentation from added priming sugar."
+      }
+    },
+    {
+      "id": "Q-PACK-004",
+      "type": "scenario",
+      "concepts": ["oxygen.post_pitch", "package.pressure_safety"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-OXY-0002", "FACT-PACK-0003"],
+      "prompt": {
+        "no": "Du racker ølet over i en tappebøtte tre uker etter pitching, og lar det sprute litt siden 'gjæringen er jo stort sett ferdig uansett'. Du bruker også den første glassflasken du finner i skapet til flaskekonditionering. Er begge deler greit, basert på det du har lært?",
+        "en": "You're racking the beer into a bottling bucket three weeks after pitching, and let it splash a bit since 'fermentation is basically done anyway.' You also grab the first glass bottle you find in the cupboard for bottle conditioning. Is either of those fine, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei til begge deler - unødvendig oksygeneksponering bør fortsatt minimeres selv sent i gjæringen, og ikke enhver glassflaske er nødvendigvis egnet for trykket flaskekonditionering skaper.",
+            "en": "No to both - unnecessary oxygen exposure should still be minimized even late in fermentation, and not every glass bottle is necessarily suitable for the pressure bottle conditioning creates."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja til begge deler - når gjæringen først er godt i gang, spiller verken sprut eller flasketype noen rolle lenger.",
+            "en": "Yes to both - once fermentation is well underway, neither splashing nor bottle type matters anymore."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Sprut er greit siden gjæringen er ferdig, men flasketypen er farlig fordi alle glassflasker sprekker under karbonering.",
+            "en": "Splashing is fine since fermentation is done, but the bottle type is dangerous because all glass bottles crack under carbonation."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Oksygeneksponering bør fortsatt minimeres etter at gjæringen er aktiv (samme grunn som ved kjøling/overføring), og flaskekonditionering skaper trykk i en lukket beholder - bruk trykkegnet utstyr, ikke en tilfeldig flaske.",
+        "en": "Correct. Oxygen exposure should still be minimized once fermentation is active (same reasoning as cooling/transfer), and bottle conditioning creates pressure inside a sealed container - use pressure-suitable equipment, not a random bottle."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Verken «spiller ingen rolle lenger» eller «alle glassflasker sprekker» er riktig - oksygen bør fortsatt minimeres, og poenget er at utstyret må være egnet/trykkegnet, ikke at trykk alltid er farlig.",
+        "en": "Not quite. Neither \"doesn't matter anymore\" nor \"all glass bottles crack\" is correct - oxygen should still be minimized, and the point is that equipment must be suitable/pressure-rated, not that pressure is always dangerous."
+      }
+    },
+    {
+      "id": "Q-PACK-005",
+      "type": "scenario",
+      "concepts": ["package.path_choice"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-PACK-0004"],
+      "prompt": {
+        "no": "Du har nettopp flasket ditt første brygg vellykket, og lurer på om du bør 'oppgradere' til tapping på fat for å lage bedre øl. Hva er riktig svar, basert på det du har lært?",
+        "en": "You've just successfully bottled your first batch, and wonder whether you should 'upgrade' to kegging to make better beer. What's the correct answer, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Verken flasking eller tapping på fat gir automatisk bedre øl - valget avhenger av utstyr, budsjett, lagringsplass og serveringsbehov, og begge veier når samme naturlige sluttpunkt når de er gjort riktig.",
+            "en": "Neither bottling nor kegging automatically produces better beer - the choice depends on equipment, budget, storage space and serving needs, and both paths reach the same natural completion point when done correctly."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - tapping på fat er alltid det seriøse bryggervalget, og flasking er kun for nybegynnere.",
+            "en": "Yes - kegging is always the serious brewer's choice, and bottling is only for beginners."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei - flasking er alltid bedre enn tapping på fat, og fat bør unngås.",
+            "en": "No - bottling is always better than kegging, and kegging should be avoided."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Flasking og tapping på fat er begge fullverdige metoder - det riktige valget er praktisk (utstyr/budsjett/lagring/servering), ikke et spørsmål om hvilken metode som gir «bedre» øl.",
+        "en": "Correct. Bottling and kegging are both fully legitimate methods - the right choice is practical (equipment/budget/storage/serving), not a question of which method makes \"better\" beer."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Ingen av metodene er universelt «den seriøse» eller «den beste» - valget er et praktisk spørsmål, og begge veier når samme sluttpunkt: et ferdig, klart øl.",
+        "en": "Not quite. Neither method is universally \"the serious one\" or \"the best\" - the choice is a practical question, and both paths reach the same completion point: a finished, ready beer."
+      }
+    }
+  ]
+}
