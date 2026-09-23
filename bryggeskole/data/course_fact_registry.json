@@ -282,6 +282,180 @@
       "concepts": ["hop.addition_strategy"],
       "modules": ["boil_hop.fundamentals"],
       "notes": "A synthesis/interpretation of FACT-HOP-0001/FACT-HOP-0002, not a new independently measured result -- describes a common brewing strategy, not a fixed numeric schedule (does not assert e.g. '60/20/5 minutes' as a required recipe). No independent citation beyond the two underlying facts' own sources is expected, mirroring FACT-MASH-0004's precedent. Wording trap: do not present any specific minute schedule as the correct or only pattern; do not imply single-addition recipes are wrong."
+    },
+    {
+      "id": "FACT-COOL-0001",
+      "claim": "Cooling wort rapidly from boiling temperature down toward the yeast's intended pitching temperature reduces the time the wort spends in a temperature range where unwanted/spoilage microorganisms can grow, and is standard homebrewing practice for reducing infection risk before pitching.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "established homebrewing technical text (John Palmer, How to Brew, Chapter 7)",
+          "ref": "https://howtobrew.com/section-1/chapter-7/"
+        },
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on wort chilling",
+          "ref": "https://byo.com/articles/wort-chilling/"
+        }
+      ],
+      "concepts": ["cool.speed"],
+      "modules": ["cool_transfer.fundamentals"],
+      "notes": "Describes a risk-reduction direction, not a guarantee -- does not claim rapid cooling guarantees zero infection risk, nor that slow cooling always causes infection, and does not assert a specific numeric cooling-rate threshold or fixed 'danger zone' temperature band as a universal rule. Distinct from FACT-BOIL-0001 (boiling reduces microbial load at the time of boiling) -- cooling is a separate, later exposure window, not a continuation of the same protection. Wording trap: do not imply cooling slowly always causes an infection; do not state a specific 'danger zone' temperature range as a universal fixed rule; do not imply this claim extends or repeats FACT-BOIL-0001's own microbial-load scope."
+    },
+    {
+      "id": "FACT-COOL-0002",
+      "claim": "As wort cools from boiling toward pitching temperature, proteins and polyphenols that were still soluble in hot wort coagulate again and precipitate -- 'cold break' -- a temperature-driven phenomenon distinct from the 'hot break' that forms during the boil itself (FACT-BOIL-0003).",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "established homebrewing technical text (John Palmer, How to Brew, Chapter 7)",
+          "ref": "https://howtobrew.com/section-1/chapter-7/"
+        },
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on wort chilling",
+          "ref": "https://byo.com/articles/wort-chilling/"
+        },
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on wort chillers",
+          "ref": "https://byo.com/articles/hows-and-whys-of-the-wort-chiller/"
+        }
+      ],
+      "concepts": ["cool.cold_break"],
+      "modules": ["cool_transfer.fundamentals"],
+      "notes": "Does not assert a specific quantity of cold break, nor a specific benefit or detriment from how much of it is carried into the fermenter -- homebrewers vary in how much they choose to leave behind in the kettle, and this claim does not take a side on that practice. Wording trap: never conflate cold break with hot break as the same phenomenon or the same temperature stage; never conflate cold break with chill haze (chill haze is a colder, later, different-mechanism phenomenon, already excluded from FACT-BOIL-0003's own scope)."
+    },
+    {
+      "id": "FACT-COOL-0003",
+      "claim": "Boiling protects the wort by heat only while it is actively at or near boiling temperature (FACT-BOIL-0001); once cooling begins, any surface that will subsequently contact the wort or beer -- chiller, transfer hose/tubing, fermenter, airlock, and any tool used from this point forward -- is no longer protected by that heat, and needs to be clean and sanitized before and during use to avoid introducing spoilage organisms.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "established homebrewing technical text (John Palmer, How to Brew, Chapter 2)",
+          "ref": "https://howtobrew.com/section-1/chapter-2/"
+        },
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on wort chillers",
+          "ref": "https://byo.com/articles/hows-and-whys-of-the-wort-chiller/"
+        }
+      ],
+      "concepts": ["cool.sanitation_boundary"],
+      "modules": ["cool_transfer.fundamentals"],
+      "notes": "Describes the existence and starting point of this handling boundary, not a specific sanitizer product, contact time, or procedure -- those vary by product and are explicitly out of scope (mirrors FACT-BOIL-0004's own 'no single fixed rule' boundary). Wording trap: do not imply one single specific sanitizer or contact time is required; do not imply the boil 'immunizes' downstream equipment or that this boundary is optional."
+    },
+    {
+      "id": "FACT-OXY-0001",
+      "claim": "Brewing yeast can use oxygen before or around pitching to synthesize sterols and unsaturated fatty acids needed for healthy membrane growth. Whether the brewer needs to deliberately aerate/oxygenate the wort is conditional: it depends on yeast form/state, pitch rate, wort gravity and manufacturer/process guidance. Fresh active dry yeast at normal first-pitch rates is a common explicit case where added wort aeration may be unnecessary, because the dried cells are produced with sterol/UFA reserves.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical guidance (Wyeast, Oxygenation & Aeration)",
+          "ref": "https://wyeastlab.com/resource/home-enthusiast-oxygenation-aeration/"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer knowledge-center FAQ (Fermentis)",
+          "ref": "https://fermentis.com/en/knowledge-center/faq/"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical guidance (Fermentis, best ways to improve fermentation)",
+          "ref": "https://fermentis.com/en/news/fermentation/what-are-the-best-5-ways-to-improve-fermentation/"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical guidance (Lallemand, premium dry yeast)",
+          "ref": "https://www.lallemandbrewing.com/en/asia/resources/lallemand-premium-dry-yeast-for-quality-consistent-fermentations/"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical booklet (Lallemand, Yeast Nutrition)",
+          "ref": "https://connect.lallemandbrewing.com/wp-content/uploads/2022/11/Nutrition-Booklet-ENG-Digital-AB-Vickers.pdf"
+        }
+      ],
+      "concepts": ["oxygen.pre_pitch"],
+      "modules": ["cool_transfer.fundamentals"],
+      "notes": "Describes both the biological role of oxygen and the operator-action exception. Does not prescribe a dissolved-oxygen target, aeration method or duration, and must not be taught as 'all wort must be aerated before pitching.' Wording trap: do not turn 'oxygen can support growth' into 'the brewer must always add oxygen'; do not imply oxygen is wanted throughout fermentation; keep fresh first-pitch dry yeast as an explicit common exception to mandatory aeration."
+    },
+    {
+      "id": "FACT-OXY-0002",
+      "claim": "Once fermentation is actively underway, oxygen exposure to the wort/beer is generally undesirable: it can contribute to oxidative off-flavors (e.g. cardboard/'stale' notes), diminished hop aroma, and reduced shelf stability. Minimizing splashing and unnecessary air contact during any transfer performed after active fermentation has begun is standard homebrewing practice.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on racking and transferring",
+          "ref": "https://byo.com/articles/racking-and-transferring/"
+        },
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on transferring beer",
+          "ref": "https://byo.com/articles/transferring-beer-techniques/"
+        }
+      ],
+      "concepts": ["oxygen.post_pitch"],
+      "modules": ["cool_transfer.fundamentals"],
+      "notes": "Describes a risk/quality direction, not an absolute threshold or guaranteed outcome -- does not claim a single stray oxygen exposure inevitably ruins a batch. Wording trap: do not imply any oxygen contact after pitching instantly spoils the beer; do not conflate this with the pre-pitch requirement in FACT-OXY-0001 -- same molecule, opposite-timing effect, not a contradiction."
+    },
+    {
+      "id": "FACT-OXY-0003",
+      "claim": "Practical oxygen guidance is both timing- and yeast-dependent. Before/at pitching, oxygen availability can be beneficial where the yeast/process requires it, but deliberate aeration is not universally required (fresh active dry yeast at normal first pitch is a common exception). Once fermentation is actively underway, unnecessary oxygen exposure should generally be minimized.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical guidance (Wyeast, Oxygenation & Aeration)",
+          "ref": "https://wyeastlab.com/resource/home-enthusiast-oxygenation-aeration/"
+        },
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on transferring beer",
+          "ref": "https://byo.com/articles/transferring-beer-techniques/"
+        }
+      ],
+      "concepts": ["oxygen.timing_distinction"],
+      "modules": ["cool_transfer.fundamentals"],
+      "notes": "A synthesis/interpretation of FACT-OXY-0001/FACT-OXY-0002, not a new independently measured result -- does not define one universal oxygen target or one exact temporal cutoff for every fermentation. Wording trap: never state this as simply 'oxygen is bad', 'oxygen is always wanted before pitching', or 'always aerate wort'; the teaching point is conditional need before pitch and minimized unnecessary oxygen once active fermentation is underway."
+    },
+    {
+      "id": "FACT-TRANSFER-0001",
+      "claim": "Homebrewers commonly move wort/beer between vessels either by gravity (relying on an elevation difference between vessels, requiring no pump) or with a pump (works regardless of relative vessel height, at the cost of added equipment and cleaning); a closed/sealed transfer path (e.g. a hose run vessel-to-vessel with minimal open-air contact) reduces splashing and airborne contamination/oxygen exposure compared with an open pour or open racking, at the cost of added setup complexity.",
+      "classification": "practical_experience",
+      "status": "verified",
+      "verified_at": "2026-09-23T10:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "Brew Your Own technical article on transferring beer",
+          "ref": "https://byo.com/articles/transferring-beer-techniques/"
+        },
+        {
+          "tier": "B",
+          "type": "established homebrewing technical text (John Palmer, How to Brew, Chapter 9)",
+          "ref": "https://howtobrew.com/section-1/chapter-9/"
+        }
+      ],
+      "concepts": ["transfer.method_tradeoffs"],
+      "modules": ["cool_transfer.fundamentals"],
+      "notes": "Describes the trade-off directions only -- does not claim one method is universally 'correct', does not recommend a specific pump/hose product, and does not assert a numeric contamination-rate difference between methods. Wording trap: do not present gravity or pump transfer as inherently superior; do not imply an open transfer always causes contamination, or that a closed transfer eliminates the risk."
     }
   ]
 }

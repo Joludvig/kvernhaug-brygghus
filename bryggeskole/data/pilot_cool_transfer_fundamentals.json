@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-COOL-TRANSFER-FUNDAMENTALS",
+  "chunks": [
+    {
+      "id": "CHUNK-COOLXFER-A",
+      "source_claims": ["FACT-COOL-0001"],
+      "text": {
+        "no": "Så snart kokingen er ferdig, begynner den neste kritiske fasen: nedkjøling. Vørteren må kjøles raskt fra kokepunktet og ned mot gjærens tiltenkte pitchetemperatur. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde hvor uønskede mikroorganismer kan vokse, før gjæren er tilsatt. Dette er en risikoreduksjon, ikke en garanti - rask nedkjøling garanterer ikke null infeksjonsrisiko, og langsom nedkjøling fører ikke automatisk til infeksjon. Det finnes heller ingen fast, universell «faresone»-temperatur som gjelder for alt utstyr og alle forhold.",
+        "en": "As soon as the boil ends, the next critical phase begins: cooling. The wort must be cooled quickly from boiling temperature down toward the yeast's intended pitching temperature. Rapid cooling reduces the time the wort spends in a temperature range where unwanted microorganisms can grow, before the yeast is added. This is a risk-reduction direction, not a guarantee - rapid cooling doesn't guarantee zero infection risk, and slow cooling doesn't automatically cause infection. There is also no fixed, universal \"danger zone\" temperature that applies to all equipment and conditions."
+      }
+    },
+    {
+      "id": "CHUNK-COOLXFER-B",
+      "source_claims": ["FACT-COOL-0002"],
+      "text": {
+        "no": "Mens vørteren kjøles fra kokepunktet mot pitchetemperatur, skjer det noe nytt: proteiner og polyfenoler som fortsatt var løselige i den varme vørteren, koagulerer på nytt og felles ut. Dette kalles «kjøldis» (cold break), og det er et annet, temperaturdrevet fenomen enn «hot break», som oppstår UNDER selve kokingen. De to må ikke forveksles - de skjer på forskjellige tidspunkt. Hvor mye kjøldis som følger med over i gjæringskaret er noe bryggere håndterer ulikt, og denne teksten tar ikke stilling til hva som er riktig mengde å la bli igjen i kjelen.",
+        "en": "As the wort cools from boiling toward pitching temperature, something new happens: proteins and polyphenols that were still soluble in the hot wort coagulate again and precipitate out. This is called \"cold break,\" and it's a different, temperature-driven phenomenon from \"hot break,\" which forms DURING the boil itself. The two must not be confused - they happen at different points in the process. How much cold break carries over into the fermenter is something brewers handle differently, and this text does not take a position on the \"right\" amount to leave behind in the kettle."
+      }
+    },
+    {
+      "id": "CHUNK-COOLXFER-C",
+      "source_claims": ["FACT-COOL-0003"],
+      "text": {
+        "no": "Kokingen beskytter vørteren med varme bare mens den faktisk er ved eller nær kokepunktet. Så snart nedkjølingen starter, er den beskyttelsen borte - og fra det øyeblikket må alt som kommer i kontakt med vørten eller ølet være rent og sanitert: kjøleren, overføringsslangen, gjæringskaret, lokket/gjæringslåsen og ethvert verktøy du bruker videre. Kokingen «immuniserer» ikke utstyret ditt for resten av bryggedagen, og dette er ikke valgfritt - det er et fast startpunkt for hygienekravet, selv om denne teksten ikke foreskriver ett bestemt saniseringsmiddel eller én kontakttid.",
+        "en": "Boiling protects the wort with heat only while it is actually at or near boiling temperature. As soon as cooling begins, that protection is gone - and from that moment on, everything that will touch the wort or beer must be clean and sanitized: the chiller, the transfer hose, the fermenter, the lid/airlock, and any tool you use from here on. Boiling does not \"immunize\" your equipment for the rest of brew day, and this isn't optional - it's a fixed starting point for the hygiene requirement, even though this text doesn't prescribe one specific sanitizer or contact time."
+      }
+    },
+    {
+      "id": "CHUNK-COOLXFER-D",
+      "source_claims": ["FACT-OXY-0001", "FACT-OXY-0002", "FACT-OXY-0003"],
+      "text": {
+        "no": "Gjær kan bruke oksygen før eller rundt pitching til å bygge steroler og umettede fettsyrer den trenger for sunn cellevekst. Men det betyr IKKE at du alltid må tilsette oksygen bevisst - behovet avhenger av gjærens form/tilstand, pitchemengde, vørtens tetthet og produsentens/prosessens veiledning. Fersk, aktiv tørrgjær ved normal førstegangs-pitching er et vanlig eksempel der ekstra lufting av vørteren ofte ikke trengs, fordi de tørkede cellene allerede er produsert med sterol-/fettsyrereserver. Når gjæringen først er godt i gang, snur bildet: da er unødvendig oksygeneksponering generelt uønsket, og kan bidra til oksidert smak, redusert humlearoma og kortere holdbarhet. Dette er altså et tidspunkt- og behovsspørsmål, ikke en enkel regel om at «oksygen er bra» eller «oksygen er dårlig».",
+        "en": "Yeast can use oxygen before or around pitching to build the sterols and unsaturated fatty acids it needs for healthy cell growth. But that does NOT mean you must always deliberately add oxygen - the need depends on the yeast's form/state, pitch rate, wort gravity, and manufacturer/process guidance. Fresh, active dry yeast at a normal first pitch is a common example where extra wort aeration is often unnecessary, because the dried cells are already produced with sterol/fatty-acid reserves. Once fermentation is well underway, the picture flips: unnecessary oxygen exposure is then generally undesirable, and can contribute to oxidized flavors, diminished hop aroma, and reduced shelf life. So this is a timing-and-need question, not a simple rule that \"oxygen is good\" or \"oxygen is bad\"."
+      }
+    },
+    {
+      "id": "CHUNK-COOLXFER-E",
+      "source_claims": ["FACT-TRANSFER-0001"],
+      "text": {
+        "no": "Når vørten/ølet skal flyttes mellom kar, har du i hovedsak to måter å gjøre det på: tyngdekraft (du trenger en høydeforskjell mellom karene, men ingen pumpe) eller pumpe (fungerer uansett høydeforskjell, men krever mer utstyr og rengjøring). I tillegg kan overføringen være lukket/tett - for eksempel en slange ført kar-til-kar med minimal luftkontakt - som reduserer sprut og luft-/oksygeneksponering sammenlignet med å helle åpent, men koster litt mer i oppsett og kompleksitet. Ingen av disse valgene er universelt «riktig» - det er en praktisk avveining som avhenger av utstyret og situasjonen din.",
+        "en": "When wort/beer needs to move between vessels, you mainly have two ways to do it: gravity (you need an elevation difference between the vessels, but no pump) or a pump (works regardless of height difference, but needs more equipment and cleaning). On top of that, the transfer can be closed/sealed - for example a hose run vessel-to-vessel with minimal air contact - which reduces splashing and air/oxygen exposure compared with an open pour, at the cost of a bit more setup complexity. Neither choice is universally \"correct\" - it's a practical trade-off that depends on your equipment and situation."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-COOLXFER-001",
+      "type": "concept_check",
+      "concepts": ["cool.speed"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-COOL-0001"],
+      "prompt": {
+        "no": "En bryggevenn sier: 'Kokingen har allerede gjort alt sterilt, så jeg trenger ikke bry meg om hvor fort jeg kjøler ned.' Stemmer det, ut fra det du har lært?",
+        "en": "A brewing friend says: 'The boil already made everything sterile, so I don't need to worry about how fast I cool down.' Is that correct, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - rask nedkjøling reduserer tiden vørteren er i et temperaturområde der uønskede mikrober kan vokse; det er en risikoreduksjon, ikke en garanti, og ikke en fortsettelse av kokingens egen beskyttelse.",
+            "en": "No - rapid cooling reduces the time the wort spends in a temperature range where unwanted microbes can grow; it's a risk-reduction direction, not a guarantee, and not a continuation of boiling's own protection."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - siden vørteren allerede er steril fra kokingen, spiller nedkjølingshastigheten ingen rolle.",
+            "en": "Yes - since the wort is already sterile from boiling, cooling speed doesn't matter."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei - men bare fordi nedkjølingshastighet ikke har noen betydning for infeksjonsrisiko i det hele tatt.",
+            "en": "No - but only because cooling speed has no bearing on infection risk at all."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikrober kan vokse - en risikoreduksjon, ikke en garanti mot infeksjon, og en helt egen, senere eksponeringsperiode enn kokingens egen mikrobereduksjon.",
+        "en": "Correct. Rapid cooling reduces the time the wort spends in a temperature range where unwanted microbes can grow - a risk-reduction direction, not a guarantee against infection, and a separate, later exposure window than boiling's own microbial reduction."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Nedkjølingshastighet betyr noe: rask nedkjøling reduserer tiden vørteren er i et risikofylt temperaturområde, men verken garanterer null infeksjon eller er en fortsettelse av kokingens beskyttelse.",
+        "en": "Not quite. Cooling speed does matter: rapid cooling reduces the time the wort spends in a risky temperature range, but it neither guarantees zero infection nor continues boiling's own protection."
+      }
+    },
+    {
+      "id": "Q-COOLXFER-002",
+      "type": "concept_check",
+      "concepts": ["cool.cold_break"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-COOL-0002"],
+      "prompt": {
+        "no": "Er kjøldis (cold break) og hot break det samme fenomenet?",
+        "en": "Are cold break and hot break the same phenomenon?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - hot break oppstår UNDER kokingen, mens kjøldis er et annet fenomen som oppstår SENERE, når vørteren kjøles ned mot pitchetemperatur.",
+            "en": "No - hot break forms DURING boiling, while cold break is a different phenomenon that forms LATER, as the wort cools toward pitching temperature."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - det er nøyaktig samme fenomen, bare med to forskjellige navn.",
+            "en": "Yes - it's exactly the same phenomenon, just with two different names."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei - kjøldis oppstår under kokingen, og hot break oppstår under nedkjøling.",
+            "en": "No - cold break forms during boiling, and hot break forms during cooling."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Hot break dannes under selve kokingen; kjøldis er et eget, temperaturdrevet fenomen som oppstår senere, mens vørteren kjøles mot pitchetemperatur - ikke det samme, og ikke i samme rekkefølge.",
+        "en": "Correct. Hot break forms during the boil itself; cold break is a separate, temperature-driven phenomenon that forms later, as the wort cools toward pitching temperature - not the same thing, and not in the order the wrong answers suggest."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Hot break skjer UNDER kokingen, mens kjøldis er et eget fenomen som oppstår SENERE, under nedkjøling - de to må ikke forveksles eller byttes om.",
+        "en": "Not quite. Hot break happens DURING boiling, while cold break is a separate phenomenon that forms LATER, during cooling - the two should not be confused or swapped."
+      }
+    },
+    {
+      "id": "Q-COOLXFER-003",
+      "type": "scenario",
+      "concepts": ["cool.sanitation_boundary"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-COOL-0003"],
+      "prompt": {
+        "no": "Du er akkurat ferdig med å koke, og griper en slange som ble brukt (uskylt) på en tidligere bryggedag, for å føre vørteren over i gjæringskaret. Er det trygt, basert på det du har lært?",
+        "en": "You've just finished boiling, and you reach for a hose that was used (unrinsed) on a previous brew day, to run the wort into the fermenter. Is that safe, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - kokingens varmebeskyttelse er borte så snart nedkjølingen starter, så slangen (og alt annet som møter vørteren fra nå av) må være rengjort og sanitert først.",
+            "en": "No - boiling's heat protection is gone as soon as cooling begins, so the hose (and everything else that meets the wort from now on) must be cleaned and sanitized first."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - siden vørteren nettopp har kokt, er den fortsatt beskyttet uansett hva slangen har vært borti tidligere.",
+            "en": "Yes - since the wort just boiled, it's still protected regardless of what the hose has touched before."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei, men bare fordi slangen er gammel - hadde den vært ny, hadde det ikke vært noe problem å bruke den uvasket.",
+            "en": "No, but only because the hose is old - if it were new, using it unwashed would not be a problem."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Så snart nedkjølingen starter, er kokingens varmebeskyttelse borte - alt som fra det øyeblikket møter vørten eller ølet, inkludert en tidligere brukt slange, må være rent og sanitert.",
+        "en": "Correct. As soon as cooling begins, boiling's heat protection is gone - everything that touches the wort or beer from that moment on, including a previously used hose, must be clean and sanitized."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Vørteren er ikke lenger varmebeskyttet så snart nedkjølingen starter - det avgjørende er at slangen ikke er sanitert, ikke hvor gammel den er eller hvor nylig kokingen skjedde.",
+        "en": "Not quite. The wort is no longer heat-protected as soon as cooling begins - what matters is that the hose isn't sanitized, not its age or how recently the boil happened."
+      }
+    },
+    {
+      "id": "Q-COOLXFER-004",
+      "type": "scenario",
+      "concepts": ["oxygen.pre_pitch", "oxygen.timing_distinction"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-OXY-0001", "FACT-OXY-0003"],
+      "prompt": {
+        "no": "En bryggevenn spør: 'Bør jeg ALLTID lufte vørteren bevisst rett før jeg pitcher gjæren?' Hva er riktig svar, basert på det du har lært?",
+        "en": "A brewing friend asks: 'Should I ALWAYS deliberately aerate the wort right before pitching yeast?' What's the correct answer, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - behovet er betinget: det avhenger av gjærens form/tilstand og prosessen. Fersk, aktiv tørrgjær ved normal førstegangs-pitching trenger ofte ikke ekstra lufting, mens andre situasjoner kan ha nytte av det.",
+            "en": "No - the need is conditional: it depends on the yeast's form/state and the process. Fresh active dry yeast at a normal first pitch often doesn't need extra aeration, while other situations may benefit from it."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - all vørt må alltid luftes bevisst før pitching, uansett gjærtype eller situasjon.",
+            "en": "Yes - all wort must always be deliberately aerated before pitching, regardless of yeast type or situation."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei - oksygen er alltid skadelig for gjær, så du bør aldri lufte vørteren, uansett tidspunkt.",
+            "en": "No - oxygen is always harmful to yeast, so you should never aerate the wort, at any point."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Pre-pitch oksygenbehov er betinget, ikke universelt: det avhenger av gjær/prosess, og fersk aktiv tørrgjær ved normal pitching er et vanlig eksempel der ekstra lufting ofte er unødvendig - men det betyr ikke at oksygen generelt er skadelig før pitching.",
+        "en": "Correct. Pre-pitch oxygen need is conditional, not universal: it depends on the yeast/process, and fresh active dry yeast at a normal pitch is a common example where extra aeration is often unnecessary - but that doesn't mean oxygen is generally harmful before pitching."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Verken 'alltid lufte' eller 'aldri lufte, oksygen er skadelig' er riktig - behovet for pre-pitch oksygen er betinget av gjærens form/tilstand og prosessen, med fersk tørrgjær som et vanlig unntak fra å trenge ekstra lufting.",
+        "en": "Not quite. Neither 'always aerate' nor 'never aerate, oxygen is harmful' is correct - pre-pitch oxygen need is conditional on the yeast's form/state and the process, with fresh dry yeast as a common exception to needing extra aeration."
+      }
+    },
+    {
+      "id": "Q-COOLXFER-005",
+      "type": "scenario",
+      "concepts": ["oxygen.post_pitch", "oxygen.timing_distinction"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-OXY-0002", "FACT-OXY-0003"],
+      "prompt": {
+        "no": "Det er tre dager inn i en aktiv gjæring, og en bryggevenn foreslår å røre kraftig i gjæringskaret for å «gi gjæren mer oksygen og gjøre den sunnere». Er det et godt råd?",
+        "en": "It's three days into active fermentation, and a brewing friend suggests stirring vigorously in the fermenter to \"give the yeast more oxygen and make it healthier.\" Is that good advice?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - når gjæringen først er aktiv, bør unødvendig oksygeneksponering minimeres; å røre inn luft nå øker risikoen for oksidert smak i stedet for å hjelpe gjæren.",
+            "en": "No - once fermentation is actively underway, unnecessary oxygen exposure should be minimized; stirring in air now increases the risk of oxidized flavor instead of helping the yeast."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - gjær trenger stadig mer oksygen jo lenger gjæringen pågår.",
+            "en": "Yes - yeast needs progressively more oxygen the longer fermentation continues."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Det spiller ingen rolle - oksygen har nøyaktig samme effekt før og etter pitching.",
+            "en": "It doesn't matter - oxygen has exactly the same effect before and after pitching."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Pre-pitch og aktiv gjæring er to forskjellige tidsvinduer: der oksygen før/ved pitching kan være nyttig for gjæren, bør unødvendig oksygeneksponering minimeres når gjæringen først er godt i gang, siden det kan gi oksidert smak og redusert holdbarhet.",
+        "en": "Correct. Pre-pitch and active fermentation are two different time windows: while oxygen before/at pitching can be useful for the yeast, unnecessary oxygen exposure should be minimized once fermentation is well underway, since it can cause oxidized flavor and reduced shelf life."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Oksygenbehovet endrer seg med tidspunktet: nyttig for gjæren før/ved pitching, men generelt uønsket når gjæringen først er aktiv - å tilsette luft nå er ikke et godt råd.",
+        "en": "Not quite. Oxygen need changes with timing: useful for the yeast before/at pitching, but generally undesirable once fermentation is actively underway - adding air now is not good advice."
+      }
+    },
+    {
+      "id": "Q-COOLXFER-006",
+      "type": "concept_check",
+      "concepts": ["transfer.method_tradeoffs"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-TRANSFER-0001"],
+      "prompt": {
+        "no": "Hva er hovedforskjellen mellom tyngdekraft-overføring og pumpe-overføring?",
+        "en": "What's the main difference between gravity transfer and pump transfer?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Tyngdekraft krever en høydeforskjell mellom karene og ingen pumpe, mens en pumpe fungerer uansett høydeforskjell men krever mer utstyr og rengjøring - ingen av dem er universelt riktig.",
+            "en": "Gravity requires an elevation difference between the vessels and no pump, while a pump works regardless of height difference but needs more equipment and cleaning - neither is universally correct."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Tyngdekraft er alltid den beste metoden, og pumpe bør aldri brukes i hjemmebrygging.",
+            "en": "Gravity is always the best method, and a pump should never be used in homebrewing."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Pumpe er alltid den beste metoden, og tyngdekraft fungerer aldri i praksis.",
+            "en": "Pump is always the best method, and gravity never works in practice."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Tyngdekraft og pumpe er en praktisk avveining - høydeforskjell/ingen pumpe versus mer utstyr/rengjøring men fri fra høydekrav - ikke en situasjon der den ene metoden alltid er riktig.",
+        "en": "Correct. Gravity and pump transfer are a practical trade-off - elevation difference/no pump versus more equipment/cleaning but no height requirement - not a case where one method is always correct."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Verken tyngdekraft eller pumpe er universelt best - det er en avveining mellom å trenge en høydeforskjell (tyngdekraft) og å trenge mer utstyr/rengjøring (pumpe), avhengig av oppsettet ditt.",
+        "en": "Not quite. Neither gravity nor pump is universally best - it's a trade-off between needing an elevation difference (gravity) and needing more equipment/cleaning (pump), depending on your setup."
+      }
+    }
+  ]
+}

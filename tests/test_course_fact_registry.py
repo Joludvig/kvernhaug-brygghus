@@ -234,8 +234,14 @@ _BOIL_HOP_VERIFIED_IDS = [
     "FACT-BOIL-0001", "FACT-BOIL-0002", "FACT-BOIL-0003", "FACT-BOIL-0004",
     "FACT-HOP-0001", "FACT-HOP-0002", "FACT-HOP-0003",
 ]
+_COOL_TRANSFER_VERIFIED_IDS = [
+    "FACT-COOL-0001", "FACT-COOL-0002", "FACT-COOL-0003",
+    "FACT-OXY-0001", "FACT-OXY-0002", "FACT-OXY-0003",
+    "FACT-TRANSFER-0001",
+]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
+    + _COOL_TRANSFER_VERIFIED_IDS
 )
 
 
@@ -245,11 +251,13 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         self.assertEqual(data["schema_version"], REGISTRY_SCHEMA_VERSION)
         self.assertIsInstance(data["records"], list)
 
-    def test_production_registry_has_exactly_the_v2_2c_v337_and_366_verified_records(self):
+    def test_production_registry_has_exactly_the_v2_2c_v337_366_and_370_verified_records(self):
         # V2-2C (issue #93): the first source-backed fermentation fact
         # pack. Issue #337 adds the second, mash-fundamentals fact pack.
         # Issue #366 adds the third, boil/hop-fundamentals fact pack
-        # (FACT-BOIL-0001..0004, FACT-HOP-0001..0003).
+        # (FACT-BOIL-0001..0004, FACT-HOP-0001..0003). Issue #370 adds the
+        # fourth, cool/transfer-fundamentals fact pack (FACT-COOL-0001..0003,
+        # FACT-OXY-0001..0003, FACT-TRANSFER-0001).
         # FACT-MASH-0003 (iodine test) is deliberately NOT among these --
         # it was left at status `draft`, pending an independent second
         # source, per issue #337's own weaken-rather-than-force rule.
@@ -263,13 +271,17 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         record = next(r for r in data["records"] if r["id"] == "FACT-MASH-0003")
         self.assertEqual(record["status"], "draft")
 
-    def test_production_registry_classification_mix_is_exactly_9_documented_3_interpretation_1_practical(self):
+    def test_production_registry_classification_mix_is_exactly_14_documented_4_interpretation_2_practical(self):
+        # Issue #370 (V2.2 G3E) adds the fourth fact pack -- cool/transfer
+        # fundamentals (FACT-COOL-0001..0003, FACT-OXY-0001..0003,
+        # FACT-TRANSFER-0001): 5 documented_fact, 1 professional_interpretation
+        # (FACT-OXY-0003), 1 practical_experience (FACT-TRANSFER-0001).
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
         classifications = [r["classification"] for r in verified]
-        self.assertEqual(classifications.count("documented_fact"), 9)
-        self.assertEqual(classifications.count("professional_interpretation"), 3)
-        self.assertEqual(classifications.count("practical_experience"), 1)
+        self.assertEqual(classifications.count("documented_fact"), 14)
+        self.assertEqual(classifications.count("professional_interpretation"), 4)
+        self.assertEqual(classifications.count("practical_experience"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
