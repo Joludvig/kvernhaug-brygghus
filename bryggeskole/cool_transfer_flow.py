@@ -22,9 +22,37 @@ Deliberately not interactive: no clickable markers, no JavaScript, no
 per-marker links -- the contract's own §4 explicitly scopes the first
 visual to static only, mirroring the same Chief decision already made
 for the boil/hop timeline.
+
+The two oxygen-timing labels are long, centered (text-anchor="middle")
+body text placed off-center in the diagram, so their available
+left/right margin before the SVG's own hard clip at the viewBox edge
+is not symmetric. `_wrap_centered_label` below keeps them layout-safe
+in both languages by word-wrapping onto multiple <tspan> lines
+whenever the estimated single-line width would not comfortably fit
+that margin -- deterministic and stdlib-only (textwrap + a
+conservative average-character-width constant), never real
+browser/font measurement (Chief review, issue #370).
 """
 
+import textwrap
+
 LANGUAGES = ("no", "en")
+
+# SVG viewBox width in user units (kept in sync with the literal
+# "0 0 840 260" in the returned markup below -- see
+# test_is_responsive_and_preserves_viewbox).
+_VIEWBOX_WIDTH = 840
+
+# Conservative average character-advance width as a fraction of
+# font-size for a generic sans-serif proportional font. This is
+# deliberately an overestimate (real body text is usually narrower),
+# so wrapping decisions err on the side of an extra line rather than
+# risking a clipped label -- not a real font metric.
+_AVG_CHAR_WIDTH_FACTOR = 0.6
+
+# Vertical spacing between stacked <tspan> lines, as a multiple of
+# font-size.
+_LINE_HEIGHT_FACTOR = 1.2
 
 _LABELS = {
     "no": {
@@ -57,6 +85,49 @@ _LABELS = {
 def _require_language(language):
     if language not in LANGUAGES:
         raise ValueError(f"Unsupported language {language!r}; must be one of {LANGUAGES}.")
+
+
+def _max_chars_for_width(available_width, font_size):
+    """Deterministic, stdlib-only estimate of how many characters of body
+    text fit inside `available_width` px at `font_size`, using
+    `_AVG_CHAR_WIDTH_FACTOR` -- not a real font measurement."""
+    char_width = font_size * _AVG_CHAR_WIDTH_FACTOR
+    if available_width <= 0 or char_width <= 0:
+        return 1
+    return max(1, int(available_width // char_width))
+
+
+def _wrap_centered_label(text, anchor_x, font_size, safety_margin=20, viewbox_width=_VIEWBOX_WIDTH):
+    """Word-wraps `text` into the fewest lines whose estimated rendered
+    width stays comfortably inside the SVG viewBox when centered
+    (text-anchor="middle") at `anchor_x`.
+
+    The usable half-width is the distance from `anchor_x` to the
+    *nearer* viewBox edge (text-anchor="middle" grows equally in both
+    directions), minus `safety_margin`. A short/already-safe label is
+    returned unwrapped as a single line.
+    """
+    half_width_budget = min(anchor_x, viewbox_width - anchor_x) - safety_margin
+    max_chars = _max_chars_for_width(2 * half_width_budget, font_size)
+    lines = textwrap.wrap(text, width=max_chars, break_long_words=False, break_on_hyphens=False)
+    return lines or [text]
+
+
+def _centered_label_markup(text, anchor_x, y, font_size, fill):
+    """Renders `text` as a single centered <text> element, or as a
+    centered multi-line <text> with stacked <tspan> children when
+    `_wrap_centered_label` determines it would not otherwise fit
+    (issue #370 Chief review: long oxygen-timing labels must not be
+    able to overflow past the viewBox edge in either language)."""
+    lines = _wrap_centered_label(text, anchor_x, font_size)
+    if len(lines) == 1:
+        return f'<text x="{anchor_x}" y="{y}" text-anchor="middle" font-size="{font_size}" fill="{fill}">{lines[0]}</text>'
+    line_height = font_size * _LINE_HEIGHT_FACTOR
+    tspans = "".join(
+        f'<tspan x="{anchor_x}" y="{y + i * line_height}">{line}</tspan>'
+        for i, line in enumerate(lines)
+    )
+    return f'<text text-anchor="middle" font-size="{font_size}" fill="{fill}">{tspans}</text>'
 
 
 def render_cool_transfer_flow_svg(language):
@@ -111,6 +182,6 @@ def render_cool_transfer_flow_svg(language):
   <line x1="{cooling_x1 - 5}" y1="120" x2="{transfer_x0 + 5}" y2="120" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
   <line x1="{transfer_x1 - 5}" y1="120" x2="{fermenter_x0 + 5}" y2="120" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
 
-  <text x="{(cooling_x1 + transfer_x0) / 2}" y="205" text-anchor="middle" font-size="10" fill="#1d4a5f">{labels['oxygen_pre']}</text>
-  <text x="{(fermenter_x0 + fermenter_x1) / 2}" y="230" text-anchor="middle" font-size="10" fill="#37235a">{labels['oxygen_post']}</text>
+  {_centered_label_markup(labels['oxygen_pre'], (cooling_x1 + transfer_x0) / 2, 205, 10, "#1d4a5f")}
+  {_centered_label_markup(labels['oxygen_post'], (fermenter_x0 + fermenter_x1) / 2, 230, 10, "#37235a")}
 </svg>"""
