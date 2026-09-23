@@ -66,6 +66,7 @@ from bryggeskole.pilot_mashing import render_chunk as mesking_render_chunk
 from bryggeskole.pilot_fermentation import read_pilot_file as les_gjaring_pilot
 from bryggeskole.pilot_fermentation import render_chunk as gjaring_render_chunk
 from bryggeskole.pilot_boil_hop import read_pilot_file as les_koking_pilot
+from bryggeskole.pilot_cool_transfer import read_pilot_file as les_kjoling_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -226,13 +227,13 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
         _knapp(at, "bs_velg_hjemmebrygger_btn")
         _knapp(at, "bs_velg_bryggeri_btn")
 
-    def test_kun_tre_stadier_er_klikkbare_resten_er_kommer_senere(self):
+    def test_kun_fire_stadier_er_klikkbare_resten_er_kommer_senere(self):
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 3)
-        self.assertEqual(len(kommer_badges), 3)
+        self.assertEqual(len(aktiv_badges), 4)
+        self.assertEqual(len(kommer_badges), 2)
 
     def test_mesking_modulen_rendrer_mesking_pilotinnhold(self):
         at = self._ny_apptest()
@@ -1127,7 +1128,7 @@ class TestKokingModulen(_MedIsolertTilstand):
         self.assertTrue(any("Boil start" in v for v in markdown_verdier))
         self.assertTrue(any("Whirlpool" in v for v in markdown_verdier))
 
-    def test_anbefalt_rekkefolge_er_mesking_koking_gjaring(self):
+    def test_anbefalt_rekkefolge_er_mesking_koking_kjoling_gjaring(self):
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         tekster = " ".join(_alle_synlige_tekster(at))
@@ -1145,12 +1146,92 @@ class TestKokingModulen(_MedIsolertTilstand):
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_koking_pilot()), "koking")
         _knapp(at, "bs_oppsummering_tilbake_koking_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Kjøling/overføring", tekster)
+
+        _knapp(at, "bs_apne_modul_kjoling_btn").click().run()
+        self._start_sporsmalsrunde(at, "kjoling")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_kjoling_pilot()), "kjoling")
+        _knapp(at, "bs_oppsummering_tilbake_kjoling_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
         self.assertIn("Anbefalt neste: Gjæring", tekster)
 
     def test_koking_widget_nokler_er_modul_scopede(self):
         at = self._ny_apptest()
         self._apne_modul_og_start_sporsmal(at, "koking")
         self.assertTrue(any(b.key == "bs_valg_koking_r1_q0" for b in at.radio))
+
+
+# ─── Kjøling/overføring-modulen (issue #370, V2.2 G3E): fjerde aktive
+# modul, samme gjenbrukte motor -- modul-kort/navigasjon, statisk
+# flytdiagram, NO/EN, uavhengig mastery-navnerom ─────────────────────────
+
+class TestKjolingModulen(_MedIsolertTilstand):
+    def test_kjoling_er_klikkbar_modul_i_begge_miljo(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        _knapp(at, "bs_apne_modul_kjoling_btn")
+
+        at2 = self._ny_apptest()
+        self._velg_miljo(at2, "bs_velg_bryggeri_btn")
+        _knapp(at2, "bs_apne_modul_kjoling_btn")
+
+    def test_kjoling_modulen_rendrer_kjoling_pilotinnhold(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "kjoling")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Så snart kokingen er ferdig", tekster)
+
+    def test_kjoling_modulen_viser_statisk_flytdiagram(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "kjoling")
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("<svg" in v for v in markdown_verdier))
+        self.assertTrue(any("Sanitert håndteringssone" in v for v in markdown_verdier))
+
+    def test_kjoling_far_full_leksjon_sporsmal_oppsummering_flyt(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "kjoling")
+        pilot = les_kjoling_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Slik ligger du an", tekst)
+        self.assertEqual(len(at.exception), 0)
+
+    def test_kjoling_mastery_er_uavhengig_av_de_andre_modulene(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "kjoling")
+        pilot = les_kjoling_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+
+        tilstand = read_mastery_state()
+        kjoling_konsepter = set(_konsept_rekkefolge(pilot))
+        andre_konsepter = (
+            set(_konsept_rekkefolge(les_mesking_pilot()))
+            | set(_konsept_rekkefolge(les_gjaring_pilot()))
+            | set(_konsept_rekkefolge(les_koking_pilot()))
+        )
+        self.assertTrue(kjoling_konsepter.isdisjoint(andre_konsepter))
+        for k in kjoling_konsepter:
+            self.assertIn(k, tilstand["concepts"])
+        for k in andre_konsepter:
+            self.assertNotIn(k, tilstand["concepts"])
+
+    def test_engelsk_kjoling_modultittel_og_flytdiagram_oversettes(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "kjoling")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Cooling/transfer", tekster)
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("Sanitized handling zone" in v for v in markdown_verdier))
+
+    def test_kjoling_widget_nokler_er_modul_scopede(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "kjoling")
+        self.assertTrue(any(b.key == "bs_valg_kjoling_r1_q0" for b in at.radio))
 
 
 if __name__ == "__main__":
