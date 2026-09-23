@@ -1,8 +1,8 @@
 # V2.2 G3D — Cool/transfer verified fact pack + module contract
 
-Version: 1.0
-Status: PREP/decision document — draft-sourced, no live fetch access this run; needs Chief
-source-verification before any promotion to `verified`
+Version: 1.1
+Status: PREP/decision document — Chief source-verification completed for the candidate fact pack;
+all proposed records remain `draft` until a separately authorized registry-promotion pass
 Governed by: [#368](https://github.com/Joludvig/kvernhaug-brygghus/issues/368), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3), the Goal 3
 gap map [#358](https://github.com/Joludvig/kvernhaug-brygghus/issues/358), the merged boil/hop
@@ -72,12 +72,14 @@ any specific chiller brand/model or a fixed numeric cooling-rate target:
    elevation difference) versus pump-assisted transfer (works regardless of relative vessel height,
    at the cost of more equipment/cleaning); a closed/sealed transfer path reduces splashing and
    air/oxygen exposure compared with an open pour, at the cost of added setup complexity.
-5. **Where cold-side oxygen exposure is helpful, neutral, or undesirable** — oxygen dissolved into
-   the wort shortly before/at pitching is wanted (yeast needs it to grow healthily); oxygen contact
-   after fermentation is actively underway is generally undesirable (oxidation risk). This is a
-   **timing distinction**, not a blanket "oxygen is bad" or "oxygen is fine" rule, and the learner
-   should be able to say which side of that boundary a given moment (e.g. pitching vs. racking
-   three days later) falls on.
+5. **Where cold-side oxygen exposure can help, and when active aeration is actually needed** —
+   oxygen availability before/at pitching can support yeast sterol/UFA synthesis and healthy
+   growth, but the brewer does **not** always need to add oxygen deliberately. Need depends on yeast
+   form/state, pitch rate, wort gravity and manufacturer/process guidance; fresh active dry yeast
+   at normal first-pitch rates is a common case where added wort aeration may be unnecessary.
+   Once fermentation is actively underway, unnecessary oxygen exposure is generally undesirable
+   (oxidation risk). This is a **timing-and-need distinction**, not a blanket "oxygen is bad" or
+   "always aerate before pitching" rule.
 6. **How immersion-chiller / common homebrew transfer paths fit the process** — at a conceptual
    level only: a chiller cools the wort before transfer, and the transfer step moves it into the
    fermenter; this module does not catalogue chiller types, brands, or equipment features beyond
@@ -101,19 +103,13 @@ registry — mirroring how `v22_g3b_boil_hop_module_contract.md` §2 (and, befor
 `V2_2_G1A_MASH_LEARN_PLAN_CONTRACT.md` §4) flagged uncommitted candidate sources without
 registering them itself.
 
-**Honesty note on sourcing, stated plainly:** this PREP round has no live network/source-fetch
-access (WebFetch/WebSearch were both denied when attempted in this run), so no claim below can be
-marked `verified` per §9 of the registry contract — `verified` requires a concrete, checkable `ref`
-(specific document/edition/URL) plus a review pass confirming it, neither of which this round can
-perform. Every claim below is well-established, textbook-level brewing science/technique (the kind
-already reflected in `web/hjelp/klaring.html`'s and `web/hjelp/index.html`'s own prose, though that
-prose is not itself reused as a source here per the governing issue) — but "well-established to the
-author" is not the same as "sourced per §9," so every proposed record is recommended at
-`status: draft`, `sources` entries with `tier`/`type` filled in but *without* a concrete `ref` yet
-(§7's explicit "legitimate for draft, not sufficient for verified" case), mirroring exactly the
-boil/hop contract's own first revision (`git show 487f0ab:docs/development/v22_g3b_boil_hop_module_contract.md`)
-before Chief's live verification pass. Promotion to `verified` is an explicit future owner/Chief-
-reviewed step requiring an actual citation check, not performed here.
+**Source-verification note:** the Bridge run itself had no live network/source-fetch access, but
+Chief subsequently performed the live citation pass and supplied concrete, checkable references
+from Wyeast, Fermentis, Lallemand, Palmer/How to Brew and Brew Your Own. Those references are now
+attached below. The seven proposed records still remain `status: draft` because this PR is a
+READ/PREP contract only and does not mutate the Course Fact Registry. Promotion to `verified`
+requires its own separately authorized registry/editorial pass; this document now has the evidence
+needed for that later decision.
 
 ### 2.1 Candidate records
 
@@ -122,9 +118,9 @@ reviewed step requiring an actual citation check, not performed here.
 | `FACT-COOL-0001` | `documented_fact` | `draft` | Rapid post-boil cooling toward pitching temperature reduces the time wort spends in a temperature range favorable to unwanted microorganisms before pitching. |
 | `FACT-COOL-0002` | `documented_fact` | `draft` | As wort cools, proteins/polyphenols coagulate again ("cold break"), a temperature-driven phenomenon distinct from hot break (`FACT-BOIL-0003`). |
 | `FACT-COOL-0003` | `documented_fact` | `draft` | Boiling's heat-based protection ends once cooling begins; every surface touching the wort/beer from that point on needs to be clean and sanitized. |
-| `FACT-OXY-0001` | `documented_fact` | `draft` | Yeast needs oxygen dissolved into the wort shortly before/at pitching, to synthesize sterols/unsaturated fatty acids needed for healthy growth. |
-| `FACT-OXY-0002` | `documented_fact` | `draft` | Once fermentation is actively underway, oxygen exposure is generally undesirable — oxidative off-flavors, diminished hop aroma, reduced shelf stability. |
-| `FACT-OXY-0003` | `professional_interpretation` | `draft` | Because oxygen is wanted pre-pitch (`FACT-OXY-0001`) but unwanted once fermentation is active (`FACT-OXY-0002`), the practical rule is timing-dependent, not a blanket "avoid/allow oxygen" statement. |
+| `FACT-OXY-0001` | `documented_fact` | `draft` | Yeast can use oxygen before/at pitching for sterol/UFA synthesis, but deliberate brewer aeration is conditional; fresh active dry yeast at normal first pitch may not need added wort aeration. |
+| `FACT-OXY-0002` | `documented_fact` | `draft` | Once fermentation is actively underway, unnecessary oxygen exposure is generally undesirable — oxidative off-flavors, diminished hop aroma, reduced shelf stability. |
+| `FACT-OXY-0003` | `professional_interpretation` | `draft` | Practical oxygen guidance is timing- and yeast-dependent: pre-pitch oxygen can be beneficial where needed, while unnecessary oxygen after active fermentation begins should be minimized. |
 | `FACT-TRANSFER-0001` | `practical_experience` | `draft` | Gravity vs. pump transfer, and closed/sealed vs. open transfer paths, involve different practical trade-offs (equipment/cleaning vs. splashing/air exposure). |
 
 ### 2.2 Full entries
@@ -140,10 +136,12 @@ reviewed step requiring an actual citation check, not performed here.
   band as a universal rule (equipment and ambient conditions vary). Distinct from `FACT-BOIL-0001`
   (boiling reduces microbial load *at the time of boiling*) — cooling is a separate, later exposure
   window, not a continuation of the same protection.
-- **Source (proposed, tier/type only, no concrete ref yet):** `{"tier": "B", "type": "established
-  homebrewing technical text covering wort cooling"}` — the standard "cool quickly to reduce
-  infection risk" statement appears across established brewing texts (e.g. Palmer, *How to Brew*);
-  an exact edition/chapter citation is owed before promotion to `verified`.
+- **Sources (Chief-verified):**
+  - Palmer, *How to Brew*, Ch. 7 "Cooling the Wort": https://howtobrew.com/section-1/chapter-7/
+  - Palmer, *How to Brew*, Ch. 2: https://howtobrew.com/section-1/chapter-2/
+  - Brew Your Own, "Wort Chilling": https://byo.com/articles/wort-chilling/
+  These support rapid cooling as a risk-reduction practice while still allowing qualified
+  no-chill/slow-chill process language rather than an absolute rule.
 - **Wording traps to avoid:** do not imply cooling slowly always causes an infection; do not state
   a specific "danger zone" temperature range as a universal fixed rule; do not imply this claim
   extends or repeats `FACT-BOIL-0001`'s own microbial-load scope.
@@ -156,8 +154,12 @@ reviewed step requiring an actual citation check, not performed here.
 - **Scope/limits:** Does not assert a specific quantity of cold break, nor a specific benefit or
   detriment from how much of it is carried into the fermenter — homebrewers vary in how much they
   choose to leave behind in the kettle, and this claim does not take a side on that practice.
-- **Source (proposed):** `{"tier": "B", "type": "established brewing-science technical text
-  covering wort clarification / break material"}` — concrete ref owed before promotion.
+- **Sources (Chief-verified):**
+  - Palmer, *How to Brew*, Ch. 7 "Cooling the Wort": https://howtobrew.com/section-1/chapter-7/
+  - Brew Your Own, "Wort Chilling": https://byo.com/articles/wort-chilling/
+  - Brew Your Own, "Hows and Whys of the Wort Chiller":
+    https://byo.com/articles/hows-and-whys-of-the-wort-chiller/
+  These support cold-break formation during cooling and its distinction from hot break.
 - **Wording traps to avoid:** never conflate cold break with hot break as the same phenomenon or
   the same temperature stage; never conflate cold break with chill haze (chill haze is a colder,
   later, different-mechanism phenomenon, already explicitly excluded from `FACT-BOIL-0003`'s own
@@ -172,24 +174,38 @@ reviewed step requiring an actual citation check, not performed here.
 - **Scope/limits:** Describes the existence and starting point of this handling boundary, not a
   specific sanitizer product, contact time, or procedure — those vary by product and are explicitly
   out of scope (mirrors `FACT-BOIL-0004`'s own "no single fixed rule" boundary).
-- **Source (proposed):** `{"tier": "B", "type": "established homebrewing sanitation guidance"}` —
-  e.g. Palmer's *How to Brew* sanitation chapter; concrete ref owed before promotion.
+- **Sources (Chief-verified):**
+  - Palmer, *How to Brew*, Ch. 2: https://howtobrew.com/section-1/chapter-2/
+  - Brew Your Own, "Hows and Whys of the Wort Chiller":
+    https://byo.com/articles/hows-and-whys-of-the-wort-chiller/
+  These support the post-boil sanitation boundary and sanitation of wort-contact cooling/transfer
+  equipment without prescribing one sanitizer product or contact time.
 - **Wording traps to avoid:** do not imply one single specific sanitizer or contact time is
   required; do not imply the boil "immunizes" downstream equipment or that this boundary is optional.
 
 **`FACT-OXY-0001`** — *documented_fact*, draft
-- **Claim:** Brewing yeast needs a supply of oxygen shortly before or at pitching — dissolved into
-  the cooled wort through aeration/oxygenation — to synthesize sterols and unsaturated fatty acids
-  required for healthy cell membrane growth and reproduction during the early growth phase.
-- **Scope/limits:** Describes the general biological need and its timing (pre-pitch/at pitching),
-  not a specific target dissolved-oxygen concentration, aeration method, or duration — those vary
-  by yeast strain, pitch rate, and wort gravity, and are out of scope here.
-- **Source (proposed):** `{"tier": "A", "type": "yeast manufacturer technical article"}` — e.g.
-  Fermentis or White Labs oxygen/aeration guidance (the same class of publisher already cited for
-  `FACT-BREW-0001`/`FACT-BREW-0002`); concrete ref owed before promotion.
-- **Wording traps to avoid:** do not state a specific ppm/ml-per-liter target; do not imply oxygen
-  is needed or wanted throughout fermentation — this is specifically a pre-growth-phase need, see
-  `FACT-OXY-0002` for the opposite-direction claim once that phase has started.
+- **Claim:** Brewing yeast can use oxygen before or around pitching to synthesize sterols and
+  unsaturated fatty acids needed for healthy membrane growth. Whether the brewer needs to
+  deliberately aerate/oxygenate the wort is conditional: it depends on yeast form/state, pitch
+  rate, wort gravity and manufacturer/process guidance. Fresh active dry yeast at normal first-pitch
+  rates is a common explicit case where added wort aeration may be unnecessary because the dried
+  cells are produced with sterol/UFA reserves.
+- **Scope/limits:** Describes both the biological role of oxygen and the operator-action exception.
+  It does not prescribe a dissolved-oxygen target, aeration method or duration, and it must not be
+  taught as "all wort must be aerated before pitching."
+- **Sources (Chief-verified, manufacturer/primary technical guidance):**
+  - Wyeast, "Oxygenation & Aeration":
+    https://wyeastlab.com/resource/home-enthusiast-oxygenation-aeration/
+  - Fermentis FAQ: https://fermentis.com/en/knowledge-center/faq/
+  - Fermentis, "What are the best 5 ways to improve fermentation?":
+    https://fermentis.com/en/news/fermentation/what-are-the-best-5-ways-to-improve-fermentation/
+  - Lallemand, "Premium Dry Yeast for Quality, Consistent Fermentations":
+    https://www.lallemandbrewing.com/en/asia/resources/lallemand-premium-dry-yeast-for-quality-consistent-fermentations/
+  - Lallemand, *Yeast Nutrition* booklet:
+    https://connect.lallemandbrewing.com/wp-content/uploads/2022/11/Nutrition-Booklet-ENG-Digital-AB-Vickers.pdf
+- **Wording traps to avoid:** do not turn "oxygen can support growth" into "the brewer must always
+  add oxygen"; do not imply oxygen is wanted throughout fermentation; keep fresh first-pitch dry
+  yeast as an explicit common exception to mandatory aeration.
 
 **`FACT-OXY-0002`** — *documented_fact*, draft
 - **Claim:** Once fermentation is actively underway, oxygen exposure to the wort/beer is generally
@@ -198,27 +214,30 @@ reviewed step requiring an actual citation check, not performed here.
   any transfer performed after active fermentation has begun is standard homebrewing practice.
 - **Scope/limits:** Does not claim a single stray oxygen exposure inevitably ruins a batch —
   describes a risk/quality direction, not an absolute threshold or guaranteed outcome.
-- **Source (proposed):** `{"tier": "B", "type": "established homebrewing technical text covering
-  post-fermentation oxidation"}` — e.g. Palmer, *How to Brew*; concrete ref owed before promotion.
+- **Sources (Chief-verified):**
+  - Brew Your Own, "Racking and Transferring":
+    https://byo.com/articles/racking-and-transferring/
+  - Brew Your Own, "Transferring Beer":
+    https://byo.com/articles/transferring-beer-techniques/
+  These support minimizing splashing/unnecessary air exposure during post-fermentation transfer.
 - **Wording traps to avoid:** do not imply any oxygen contact after pitching instantly spoils the
   beer; do not conflate this with the pre-pitch requirement in `FACT-OXY-0001` — same molecule,
   opposite-timing effect, not a contradiction.
 
 **`FACT-OXY-0003`** — *professional_interpretation*, draft
-- **Claim:** Because oxygen is desirable in wort shortly before/at pitching (`FACT-OXY-0001`) but
-  undesirable once fermentation is actively underway (`FACT-OXY-0002`), the practical brewing
-  guidance is timing-dependent, not a blanket "avoid all oxygen" or "oxygen is always fine" rule —
-  brewers commonly aerate/oxygenate deliberately before pitching, then deliberately minimize
-  splashing/air contact for every transfer after that point (racking, cold crash, bottling/kegging).
+- **Claim:** Practical oxygen guidance is both timing- and yeast-dependent. Before/at pitching,
+  oxygen availability can be beneficial where the yeast/process requires it, but deliberate
+  aeration is not universally required (fresh active dry yeast at normal first pitch is a common
+  exception). Once fermentation is actively underway, unnecessary oxygen exposure should generally
+  be minimized.
 - **Scope/limits:** A synthesis/interpretation of `FACT-OXY-0001`/`FACT-OXY-0002`, not a new
-  independently measured result; does not assert a specific numeric cutoff for when fermentation
-  counts as "actively underway."
-- **Source (proposed):** `{"tier": "B", "type": "professional interpretation drawing on the same
-  sources underlying FACT-OXY-0001/FACT-OXY-0002"}` — no independent citation beyond those two is
-  expected, mirroring how `FACT-HOP-0003` (also `professional_interpretation`) is sourced in the
-  existing registry.
-- **Wording traps to avoid:** never state this as simply "oxygen is bad" or "oxygen is good" without
-  the timing qualifier; never imply the exact same handling applies before and after pitching.
+  independently measured result; does not define one universal oxygen target or one exact temporal
+  cutoff for every fermentation.
+- **Sources:** same Chief-verified manufacturer sources underlying `FACT-OXY-0001`, combined with
+  the transfer/oxidation sources underlying `FACT-OXY-0002`.
+- **Wording traps to avoid:** never state this as simply "oxygen is bad", "oxygen is always wanted
+  before pitching", or "always aerate wort"; the teaching point is conditional need before pitch
+  and minimized unnecessary oxygen once active fermentation is underway.
 
 **`FACT-TRANSFER-0001`** — *practical_experience*, draft
 - **Claim:** Homebrewers commonly move wort/beer between vessels either by gravity (relying on an
@@ -230,10 +249,14 @@ reviewed step requiring an actual citation check, not performed here.
 - **Scope/limits:** Describes the trade-off directions only — does not claim one method is
   universally "correct," does not recommend a specific pump/hose product, and does not assert a
   numeric contamination-rate difference between methods.
-- **Source (proposed):** `{"tier": "C", "type": "established homebrewing practice/technique
-  guidance"}` — no single primary citation is expected for common transfer-method trade-offs
-  (mirrors `FACT-BOIL-0004`'s own "practical_experience, tier C" precedent); multiple independent
-  homebrewing references describing these trade-offs would support promotion.
+- **Sources (Chief-verified):**
+  - Brew Your Own, "Transferring Beer":
+    https://byo.com/articles/transferring-beer-techniques/
+  - Palmer, *How to Brew*, Ch. 9 "Transferring Your Wort":
+    https://howtobrew.com/section-1/chapter-9/
+  These support gravity/pump transfer mechanics, splash control and sanitation trade-offs. Palmer's
+  historical blanket aeration advice must **not** override the modern yeast-manufacturer guidance
+  in `FACT-OXY-0001`.
 - **Wording traps to avoid:** do not present gravity or pump transfer as inherently superior; do not
   imply an open transfer always causes contamination, or that a closed transfer eliminates the risk.
 
@@ -260,7 +283,7 @@ gets ahead of what the registry has actually verified.
 | `CHUNK-COOLXFER-A` | `FACT-COOL-0001` | Why cooling matters: shrinks the time window where unwanted microorganisms can grow before pitching. |
 | `CHUNK-COOLXFER-B` | `FACT-COOL-0002` | What cold break is, and why it's a different stage/phenomenon from hot break. |
 | `CHUNK-COOLXFER-C` | `FACT-COOL-0003` | The post-boil clean/sanitized handling boundary: heat-based protection ends when cooling starts. |
-| `CHUNK-COOLXFER-D` | `FACT-OXY-0001`, `FACT-OXY-0002`, `FACT-OXY-0003` | Cold-side oxygen: wanted right before/at pitching, unwanted once fermentation is active — a timing distinction, not a blanket rule. |
+| `CHUNK-COOLXFER-D` | `FACT-OXY-0001`, `FACT-OXY-0002`, `FACT-OXY-0003` | Cold-side oxygen: can be beneficial before/at pitching when the yeast/process needs it; deliberate aeration is conditional, while unnecessary oxygen should be minimized once fermentation is active. |
 | `CHUNK-COOLXFER-E` | `FACT-TRANSFER-0001` | Basic transfer choices (gravity vs. pump; closed vs. open path) and their practical trade-offs. |
 
 ### 3.3 Scenarios/questions
@@ -284,10 +307,11 @@ Representative scenario shapes (final wording is implementation-child work, same
 - **Scenario** on `CHUNK-COOLXFER-C`: a learner has just finished the boil and reaches for a hose
   that was used (unrinsed) on a previous brew day, to run wort into the fermenter — tests whether
   the learner recognizes the sanitized-handling boundary starts at cooling, not only at pitching.
-- **Scenario** on `CHUNK-COOLXFER-D`: a learner asks whether splashing/aerating the wort right
-  before pitching yeast is the same thing as splashing during a transfer three days into active
-  fermentation — tests the pre-pitch-wanted vs. post-pitch-unwanted timing distinction, not a
-  blanket "oxygen is bad" answer.
+- **Scenario** on `CHUNK-COOLXFER-D`: a learner asks whether wort should **always** be deliberately
+  aerated before pitching, and whether that is equivalent to splashing during a transfer three days
+  into active fermentation. The correct concept is that pre-pitch oxygen can be beneficial when the
+  yeast/process needs it, fresh active dry yeast may not require added aeration, and unnecessary
+  oxygen after active fermentation begins should be minimized.
 - **Concept check** on `CHUNK-COOLXFER-E`: distinguishing gravity vs. pump transfer trade-offs —
   tests that the learner treats this as a situational trade-off (equipment/cleaning vs. no pump
   needed), not a "one is correct, one is wrong" choice.
@@ -357,11 +381,11 @@ Overføring to Gjæringskar — a clear, visually distinct boundary directly sup
 `CHUNK-COOLXFER-C`'s "heat-based protection ends here" claim, mirroring the visual-boundary shading
 technique `bryggeskole/boil_timeline.py` already used for its own whirlpool/hop-stand zone.
 
-Two small, non-numeric labels/icons mark the oxygen-timing distinction from `CHUNK-COOLXFER-D`:
-one near the Kjøling→Overføring transition ("oksygen ønsket her" / "oxygen wanted here," at/just
-before pitching) and one at the Gjæringskar stage ("unngå oksygen herfra" / "avoid oxygen from
-here"), without any dissolved-oxygen scale or numeric axis, consistent with §1's "no numeric
-oxygen target" boundary.
+Two small, non-numeric labels/icons mark the oxygen-timing/need distinction from
+`CHUNK-COOLXFER-D`: one near the Kjøling→Overføring transition ("oksygenering kan være nyttig før
+pitching — behov avhenger av gjær" / "aeration can help before pitching — need depends on the yeast")
+and one at the Gjæringskar stage ("unngå unødvendig oksygen etter aktiv gjæring" / "avoid unnecessary
+oxygen once fermentation is active"). No dissolved-oxygen scale or numeric axis is introduced.
 
 This is deliberately **not** proposed as fully interactive in V1 — a static, well-labeled diagram
 already carries the process/spatial understanding this topic needs (same reasoning
@@ -435,18 +459,13 @@ these.)
 
 ## 7. Remaining owner/Chief decision
 
-1. **Citation check on the 7 proposed `draft` facts (§2).** This round could not fetch/verify
-   exact source references — WebFetch/WebSearch were both attempted and denied under this Bridge
-   run's permission model, matching the boil/hop contract's own first-revision experience. Every
-   proposed fact needs a human or Chief-led live-fetch pass to attach a concrete, checkable `ref`
-   before any promotion to `verified` per the registry contract's own §9 requirement. Until then,
-   none of §3's chunks/questions can actually ship, since the existing pilots' own `source_claims`
-   resolution requires a *verified* record, not merely a draft one.
-2. **Whether `FACT-OXY-0001..0003`'s three facts stay folded into one `CHUNK-COOLXFER-D` or split
-   into two chunks** (pre-pitch vs. post-pitch) — this document recommends keeping them combined so
-   the timing contrast is taught as one coherent idea rather than two facts a learner might read in
-   isolation, but a future implementation child could reasonably split it if that proves
-   pedagogically awkward combined.
+1. **Citation check is complete.** Chief has attached concrete, checkable references for all seven
+   proposed `draft` facts. They intentionally remain `draft` because this PR is prep-only; a
+   later implementation/editorial child must promote only those records that satisfy the production
+   registry evidence contract.
+2. **Keep `FACT-OXY-0001..0003` folded into one `CHUNK-COOLXFER-D` for the first implementation.**
+   The pedagogical point is precisely the contrast between conditional pre-pitch need and
+   post-fermentation oxygen avoidance; splitting it would make that relationship harder to see.
 3. **Which brew-day UI field anchors the future Learn→Plan bridge (§5)** — the "4. Overføring & OG"
    expander's `bd_pitch_temp`/`bd_transfer_note` fields, or the simpler `"Nedkjøling ferdig"`
-   checklist item — is left for that bridge's own bounded audit to resolve, not decided here.
+   checklist item — remains for that bridge's own bounded audit to resolve, not this prep PR.
