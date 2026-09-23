@@ -1,9 +1,8 @@
 # V2.2 G3F — Package verified fact pack + module contract
 
-Version: 1.0
-Status: PREP/decision document — candidate fact pack proposed, sources are Claude's best-effort
-candidates only (this Bridge run has no live network/source-fetch access — see §2); all proposed
-records remain `draft` until a separately authorized citation-verification + registry-promotion pass
+Version: 1.1
+Status: PREP/decision document — Chief live citation pass completed 2026-09-23; all proposed new
+records remain `draft` until a separately authorized registry-promotion / implementation pass
 Governed by: [#372](https://github.com/Joludvig/kvernhaug-brygghus/issues/372), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3), the Goal 3
 gap map [#358](https://github.com/Joludvig/kvernhaug-brygghus/issues/358), the merged Kjøling/
@@ -96,10 +95,9 @@ specific bottle/keg brand or a universal numeric carbonation schedule:
    already taught in cool/transfer — this is continuity, not a new claim.
 5. **Packaging into a sealed container creates internal pressure, and that has safety implications** —
    whichever path is chosen, the container ends up sealed and carbonated/conditioned, which means it
-   holds pressure; using containers/equipment not actually intended or rated for that pressure (e.g. a
-   non-beer glass bottle, a damaged or already-stressed bottle, an incompatible cap or fitting) risks
-   unsafe overpressure or container failure. The learner should come away knowing *that* this risk
-   exists and *why* container/equipment suitability matters — not a pressure-vessel engineering
+   holds pressure; using a package, vessel or fitting that is damaged or not intended/rated for that
+   pressure can lead to over-pressure, leakage or failure. The learner should come away knowing *that*
+   this risk exists and *why* pressure-suitable equipment matters — not a pressure-vessel engineering
    lesson.
 6. **Packaging method is a practical choice, not a quality hierarchy, and both paths reach the same
    natural completion point** — bottling and kegging are both legitimate, commonly used homebrewing
@@ -126,14 +124,11 @@ registry — mirroring how `v22_g3d_cool_transfer_module_contract.md` §2 (and, 
 `v22_g3b_boil_hop_module_contract.md` §2 and `V2_2_G1A_MASH_LEARN_PLAN_CONTRACT.md` §4) flagged
 uncommitted candidate sources without registering them itself.
 
-**Source-verification note (read before §2.2):** this Bridge run has no live network/source-fetch
-access, so — unlike `v22_g3d_cool_transfer_module_contract.md`'s *final* state (which already
-reflects Chief's subsequent live citation pass) — the source refs below are Claude's best-effort
-candidates only: real organizations and publications, named by type and topic per the governing
-issue's own "Source rules" priority list, but **not** live-verified exact URLs. Where an exact URL is
-given below, it is a plausible candidate only, not a confirmed live source. Every one of these needs
-Chief's separate live citation-verification pass — the same process cool/transfer's own first round
-(#368) went through — before any record could be promoted past `draft`.
+**Source-verification note (read before §2.2):** Chief completed a live citation pass on
+2026-09-23. The concrete URLs in §2.2 were opened/verified against the claims they support before this
+contract was accepted. The four proposed new records still remain `draft`: source verification here
+does **not** itself promote anything into the Course Fact Registry. Promotion remains part of a later,
+separately authorized implementation/editorial pass.
 
 **Reuse-first: two existing verified records already cover part of this scope.** Per the governing
 issue's own instruction ("reuse existing verified Kvernhaug facts/sources where semantically
@@ -162,7 +157,7 @@ be surfaced again by the Package module's own chunks, not duplicated under new i
 |---|---|---|---|
 | `FACT-PACK-0001` | `documented_fact` | `draft` | A measured amount of fermentable priming sugar added to beer before sealing it in bottles restarts a small, renewed fermentation inside the sealed bottle; the resulting CO₂ has no escape path and dissolves into the beer, carbonating it. No single universal priming amount fits every batch. |
 | `FACT-PACK-0002` | `documented_fact` | `draft` | Beer can be carbonated in a sealed keg by connecting it to an external CO₂ source under pressure, with no renewed fermentation involved; the amount of CO₂ that dissolves depends on pressure, beer temperature, and time/contact method. |
-| `FACT-PACK-0003` | `documented_fact` | `draft` | Packaging beer into a sealed, carbonating/conditioning container creates internal pressure; containers/fittings not intended or rated for that pressure (e.g. non-beer glass, damaged bottles, incompatible caps/fittings) risk unsafe overpressure or container failure. |
+| `FACT-PACK-0003` | `documented_fact` | `draft` | Packaging beer into a sealed, carbonating/conditioning container creates internal pressure; a package, vessel or fitting that is damaged or not intended/rated for that pressure can fail or become unsafe. |
 | `FACT-PACK-0004` | `professional_interpretation` | `draft` | Bottling and kegging are both legitimate, commonly used packaging paths, not a quality hierarchy; the appropriate choice depends on equipment/budget/storage/serving context, and either path — once sanitized and properly primed/carbonated — reaches the same natural completion point (conditioned, ready to serve or store). |
 
 ### 2.2 Full entries
@@ -178,13 +173,19 @@ be surfaced again by the Package module's own chunks, not duplicated under new i
 - **Scope/limits:** States the mechanism and the "no universal number" boundary only; does not
   provide or endorse a specific priming-sugar dosage, formula, or table (explicit hard non-goal — "no
   numeric carbonation calculator lesson"). Does not name a specific priming-sugar type/product.
-- **Sources (candidate — Chief verification required, see note above):**
-  - Palmer, *How to Brew* — bottling/priming chapter (organization: howtobrew.com; exact
-    chapter/section path not confirmed by this Bridge run).
-  - An established manufacturer or brewing-science source on bottle conditioning fundamentals (e.g.
-    a Fermentis/Lallemand/White Labs knowledge-base article on conditioning, mirroring the
-    manufacturer-source tier already used for `FACT-BREW-0001..0003`/`FACT-OXY-0001` — exact article
-    not confirmed by this Bridge run).
+- **Sources (Chief live-verified 2026-09-23):**
+  - Lallemand Brewing, *Best Practices — Bottle conditioning with CBC-1*:
+    https://connect.lallemandbrewing.com/wp-content/uploads/2021/02/LAL-bestpractices-Bottle-conditioning-Digital.pdf
+    — priming sugar activates yeast/refermentation and the required amount is determined for the
+    specific beer rather than by one universal dose.
+  - Lallemand Brewing, *Bottle conditioning calculator*:
+    https://www.lallemandbrewing.com/en/global/resources/brewers-corner/brewing-calculators/bottle-conditioning-calculator/
+    — the calculation explicitly varies with beer amount, desired CO₂ saturation, priming-sugar type
+    and liquid temperature.
+  - American Homebrewers Association, *Mastering the Art of Bottle Conditioning*:
+    https://www.homebrewersassociation.org/how-to-brew/mastering-the-art-of-bottle-conditioning/
+    — bottle conditioning depends on yeast, fermentable sugar, temperature and time, with CO₂ produced
+    by yeast providing carbonation.
 - **Wording traps to avoid:** do not state a specific priming-sugar amount/table as correct or
   required; do not imply any fermentable sugar type works identically; do not imply this is the same
   mechanism as the original fermentation rather than a distinct, smaller, sealed-container renewal of
@@ -201,13 +202,18 @@ be surfaced again by the Package module's own chunks, not duplicated under new i
   only; does not provide a specific pressure/temperature/time schedule or carbonation-level target
   (explicit hard non-goal — "no numeric carbonation calculator lesson"), and does not compare or
   recommend specific CO₂ regulator/keg equipment brands or models.
-- **Sources (candidate — Chief verification required, see note above):**
-  - An established homebrewing technical source on kegging/force carbonation (e.g. a Brew Your Own
-    article on kegging or carbonation; exact article not confirmed by this Bridge run).
-  - Reputable, non-brand-specific equipment/gas guidance on the pressure–temperature relationship
-    used for force carbonation (the widely cross-referenced "carbonation chart" concept used across
-    homebrewing technical literature; a specific chart/source is a Chief-verification decision, not
-    asserted here).
+- **Sources (Chief live-verified 2026-09-23):**
+  - American Homebrewers Association, *An Introduction to Kegging Homebrew*:
+    https://homebrewersassociation.org/how-to-brew/an-introduction-to-kegging-homebrew/
+    — describes external CO₂ carbonation, the temperature/pressure relationship, equilibrium, and how
+    agitation changes the time needed to carbonate.
+  - Brewers Association, *Facts About Draught Beer Carbonation*:
+    https://cdn.brewersassociation.org/wp-content/uploads/2021/07/22093927/Facts_About_Draught_Beer_Carbonation.pdf
+    — documents the CO₂ pressure/temperature/carbonation equilibrium relationship.
+  - Lallemand Brewing, *Preserving thiols in homebrewing: a step-by-step guide*:
+    https://www.lallemandbrewing.com/en/global/resources/whats-new/preserving-thiols-in-homebrewing-a-step-by-step-guide/
+    — explicitly describes keg carbonation using external CO₂ and recognizes slow- vs. burst-
+    carbonation approaches without making either a universal schedule.
 - **Wording traps to avoid:** do not present one specific pressure/temperature/time combination as
   "the" carbonation schedule; do not name or favor a specific keg/regulator brand; do not imply force
   carbonation is strictly faster or better than bottle conditioning — it is a different mechanism
@@ -216,24 +222,26 @@ be surfaced again by the Package module's own chunks, not duplicated under new i
 **`FACT-PACK-0003`** — *documented_fact*, draft
 - **Claim:** Whichever packaging path is used, the beer ends up sealed inside a container that is
   actively carbonating (bottle conditioning) or being force-carbonated (keg) — meaning that container
-  holds internal pressure. Using a container or fitting not actually intended or rated for that
-  pressure — a standard non-beer glass bottle, a bottle that is damaged, chipped, or has already been
-  stressed by repeated reuse, or an incompatible cap/fitting — creates a risk of unsafe overpressure
-  or container failure. Brewers should use bottles/kegs and capping/sealing equipment specifically
-  intended for carbonated beer, and follow safe handling practice around any pressurized container.
+  holds internal pressure. Using a package, vessel or fitting that is damaged or not intended/rated
+  for the pressure involved creates a risk of over-pressure, leakage or container/equipment failure.
+  Brewers should use pressure-suitable packaging/equipment and respect its rated operating limits.
 - **Scope/limits:** States the existence of this safety boundary and its general cause (unsuitable
   container/fitting under pressure), not a specific pressure rating, a specific safe/unsafe product
   list, or a full pressure-vessel engineering treatment (explicit hard non-goal — "no pressure-vessel
   engineering course", "no detailed beer-serving system design").
-- **Sources (candidate — Chief verification required, see note above):**
-  - Palmer, *How to Brew* — the widely repeated safety guidance against reusing non-beer glass
-    bottles/reusing damaged bottles for bottle conditioning (organization: howtobrew.com; exact
-    chapter/section path not confirmed by this Bridge run).
-  - Established homebrewing/safety guidance on safe handling of pressurized kegs/CO₂ systems (e.g.
-    an American Homebrewers Association or equivalent established safety resource, or reputable
-    CO₂/gas-supplier safety guidance; exact source not confirmed by this Bridge run, and any resulting
-    citation must stay non-brand-specific per the governing issue's own source-rule for this claim
-    category).
+- **Sources (Chief live-verified 2026-09-23):**
+  - Brewers Association, *Preventing Package Over-Pressurization*:
+    https://www.brewersassociation.org/educational-publications/preventing-package-over-pressurization/
+    — documents that conditioning/refermentation can raise internal package pressure beyond the
+    package rating and cause rupture, and explicitly calls for knowing package pressure limitations.
+  - Lallemand Brewing, *Preserving thiols in homebrewing: a step-by-step guide*:
+    https://www.lallemandbrewing.com/en/global/resources/whats-new/preserving-thiols-in-homebrewing-a-step-by-step-guide/
+    — states that pressure-handled vessels/fittings must be pressure rated and that rated pressure
+    must not be exceeded.
+  - Palmer, *How to Brew*, Chapter 11:
+    https://howtobrew.com/section-1/chapter-11/
+    — established homebrewing guidance that incomplete fermentation/over-carbonation can exceed bottle
+    strength and cause bottle failure.
 - **Wording traps to avoid:** do not name a specific unsafe or safe product/brand; do not turn this
   into pressure numbers, burst-pressure ratings, or a design/engineering lesson; do not imply every
   packaging attempt is dangerous — the point is container/equipment *suitability*, not that pressure
@@ -493,11 +501,10 @@ them:
 
 ## 7. Remaining owner/Chief decision
 
-1. **Citation check is outstanding.** Unlike this document's cool/transfer precedent (which already
-   reflects Chief's completed live citation pass), this Bridge run had no live network/source-fetch
-   access at all — every source ref in §2.2 is a named-candidate-organization-and-topic only, not a
-   verified URL. A live citation pass (mirroring #368's own follow-up) is needed before any of
-   `FACT-PACK-0001..0004` could be promoted past `draft`.
+1. **Citation check: RESOLVED in Version 1.1.** Chief completed the live citation pass on 2026-09-23
+   and replaced the source placeholders with concrete, claim-matched URLs in §2.2. This resolves the
+   prep-document source gate only; `FACT-PACK-0001..0004` remain `draft` until a later authorized
+   registry-promotion / implementation pass.
 2. **Whether/how to add a packaging step to the brew-day plan (`ui/brewday_panel.py`) is unresolved**
    and is a prerequisite for §5's Learn→Plan bridge ever becoming actionable — this is a separate,
    App-side product decision this docs-only prep issue does not make.
