@@ -1,9 +1,9 @@
 # V2.2 G3H — Prepare/metodevalg verified fact pack + module contract
 
-Version: 1.0
-Status: PREP/decision document — draft-sourced, no live fetch access this run (`WebSearch`/
-`WebFetch` were both denied when attempted); needs Chief source-verification before any promotion
-to `verified`
+Version: 1.1
+Status: PREP/decision document — Chief live citation pass completed 2026-09-23; implementation
+decisions below are resolved for the bounded next slice; candidate new records remain `draft` until
+a separately authorized Registry-promotion / implementation pass
 Governed by: [#376](https://github.com/Joludvig/kvernhaug-brygghus/issues/376), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3), the
 accepted Goal 3 gap map [#358](https://github.com/Joludvig/kvernhaug-brygghus/issues/358), the
@@ -137,19 +137,10 @@ registry — mirroring how `v22_g3f_package_module_contract.md` §2 and
 `v22_g3d_cool_transfer_module_contract.md` §2 both flagged uncommitted candidate sources without
 registering them itself.
 
-**Honesty note on sourcing, stated plainly:** this Bridge run has no live network/source-fetch
-access — `WebSearch` and `WebFetch` were both denied when attempted during this prep pass — so no
-claim below can be marked `verified` per §9 of the registry contract, which requires a concrete,
-checkable `ref` plus a review pass confirming it. Every claim below is well-established,
-textbook-level homebrewing technique description (the kind of framing already present, unsourced,
-in `web/hjelp/bryggemetoder.html`'s discovery-aid prose — not itself reused as a source, per §0),
-but "well-established to the author" is not the same as "sourced per §9". Every proposed record is
-therefore recommended at `status: draft`, with `sources` entries carrying `tier`/`type` only and
-**no concrete `ref` yet** — §7's explicit "legitimate for draft, not sufficient for verified" case
-— exactly mirroring `v22_g3d_cool_transfer_module_contract.md`'s own first revision (`git show
-4738c5b:docs/development/v22_g3d_cool_transfer_module_contract.md`) before Chief's later live
-citation pass. Promotion to `verified` is an explicit future owner/Chief-reviewed step, not
-performed here.
+**Source-verification note:** Chief completed a live citation pass on 2026-09-23.
+Concrete claim-matched refs are now attached to each proposed record in §2.2. This resolves the prep
+source gate only; `FACT-METHOD-0001..0005` still remain `draft` until a later authorized
+Registry-promotion / implementation pass.
 
 ### 2.0 Shared process truth (chunk A) — reuse, no new record
 
@@ -194,10 +185,14 @@ the two reused records in §2.0.
   sparge/rinse step (some BIAB brewers do dunk-sparge the bag), and does not assert BIAB is more or
   less efficient than traditional all-grain (no numeric efficiency claim, per the governing issue's
   hard non-goals). Does not name a specific bag material, size or brand.
-- **Source (proposed, tier/type only, no concrete ref yet):** `{"tier": "B", "type": "established
-  homebrewing technique article describing Brew In A Bag (BIAB)"}` — the mash-in-bag /
-  lift-to-separate mechanism is standard, widely documented homebrewing technique description; an
-  exact article/edition citation is owed before promotion to `verified`.
+- **Sources (Chief live-verified 2026-09-23):**
+  - American Homebrewers Association, *Brew in a Bag (BIAB)*:
+    https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf
+    — describes BIAB as all-grain brewing in one kettle, grain contained in a bag and wort/grain
+    separation by lifting/removing the bag; it also notes sparge variants.
+  - American Homebrewers Association, *Homebrew Equipment*:
+    https://www.homebrewersassociation.org/how-to-brew/homebrew-equipment/
+    — independently describes BIAB bags and contrasts them with mash-tun/sparge equipment.
 - **Wording traps to avoid:** never call BIAB "not real all-grain brewing" — the same whole-grain
   mash/conversion chemistry applies (see `FACT-MASH-0001`, reused in §2.0); never imply BIAB
   requires specialized equipment beyond a bag and a kettle; never state BIAB is universally more or
@@ -216,9 +211,17 @@ the two reused records in §2.0.
   favor a specific sparge technique (batch vs. fly sparge remains `web/hjelp/bryggemetoder.html`'s
   own separate, unsourced-here discovery-aid content, explicitly out of this module's beginner
   scope).
-- **Source (proposed):** `{"tier": "B", "type": "established homebrewing technical text describing
-  mash/lauter vessel technique"}` — concrete ref (e.g. an established brewing text's mashing/
-  lautering chapter) owed before promotion.
+- **Sources (Chief live-verified 2026-09-23):**
+  - John Palmer, *How to Brew*, Chapter 19 — Brewing Your First All-Grain Batch:
+    https://howtobrew.com/section-3/chapter-19/
+    — describes the mash/lauter tun, sparge-water pot and separate boil kettle used in a conventional
+    all-grain layout.
+  - John Palmer, *How to Brew*, Chapter 17 — Getting the Wort Out:
+    https://howtobrew.com/section-3/chapter-17/
+    — describes grain-bed lautering/sparging and the lauter-tun role.
+  - American Homebrewers Association, *Homebrew Equipment*:
+    https://www.homebrewersassociation.org/how-to-brew/homebrew-equipment/
+    — describes mash-tun separation, grain-bed recirculation and sparge-water handling at homebrew scale.
 - **Wording traps to avoid:** never imply the mash chemistry itself differs from BIAB's — same
   starch-conversion process (`FACT-MASH-0001`, reused); never present traditional all-grain as the
   "proper" or "real" method relative to the other two.
@@ -236,9 +239,18 @@ the two reused records in §2.0.
   compare a specific all-in-one brand/model (`web/hjelp/utstyr-brewzilla.html`'s brand-specific
   content is explicitly excluded here), and does not assert all-in-one systems are more efficient,
   easier, or otherwise "better" than the other two methods.
-- **Source (proposed):** `{"tier": "B", "type": "homebrewing equipment category overview article
-  describing all-in-one electric brewing systems"}` — a category-level overview (not a single
-  manufacturer's product page), concrete ref owed before promotion.
+- **Sources (Chief live-verified 2026-09-23):**
+  - Grainfather, *G30 Brewing System Showcase*:
+    https://us.grainfather.com/pages/g30-showcase
+    — current manufacturer example of an all-in-one all-grain system combining electric temperature
+    control, mashing/sparging functions and a grain basket in one integrated system.
+  - Grainfather, *Compare the Grainfather Brewing Systems*:
+    https://us.grainfather.com/pages/compare-the-grainfather-brewing-systems
+    — documents all-in-one functionality and perforated grain-basket designs across multiple systems.
+  - American Homebrewers Association, *Team Homebrewing Ups Your Game*:
+    https://www.homebrewersassociation.org/homebrew-community-culture/team-homebrewing-ups-your-game/
+    — independently identifies all-in-one electric systems as a distinct homebrewing equipment
+    approach alongside three-vessel and gravity-fed mash/kettle setups.
 - **Wording traps to avoid:** never name a specific brand/model as defining "all-in-one"; never
   imply built-in recirculation/heating changes the underlying starch-conversion or
   enzyme-inactivation chemistry (`FACT-MASH-0001`/`FACT-BOIL-0001`, reused); never present
@@ -257,11 +269,17 @@ the two reused records in §2.0.
   (explicit hard non-goal: "no numeric water-profile/equipment calculator lesson"), and does not
   claim one method always requires strictly more or less water/time than another as a universal
   rule.
-- **Sources:** the same candidate sources underlying `FACT-METHOD-0001`/`FACT-METHOD-0002`/
-  `FACT-METHOD-0003` above, combined with `{"tier": "B", "type": "established homebrewing technical
-  text covering water volume and equipment dead-space planning"}` — mirrors `FACT-MASH-0004`'s own
-  synthesis-record precedent (drawing on underlying mashing/temperature facts without introducing a
-  new independently measured result).
+- **Sources (Chief live-verified 2026-09-23):**
+  - American Homebrewers Association, *Brew in a Bag (BIAB)*:
+    https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf
+    — shows BIAB strike-water planning depends on grain absorption, target pre-boil volume and the
+    brewer's own boil-off behavior.
+  - MoreBeer, *All Grain Brewing Instructions*:
+    https://morebeer.com/collections/all-grain-brewing-instructions
+    — explicitly distinguishes single-vessel/BIAB water planning from three-vessel mash-tun planning
+    and calls out equipment dead space as a planning input.
+  - The documented method/equipment sources for `FACT-METHOD-0001..0003` above complete the basis
+    for this synthesis; no fixed liters, percentages or universal equipment values are promoted here.
 - **Wording traps to avoid:** never state a specific liter/percentage dead-space number as a fixed
   rule; never imply one method's planning is strictly "harder" or "easier" than another's; never
   turn this into an equipment calculator lesson.
@@ -278,7 +296,16 @@ the two reused records in §2.0.
   independently measured result — mirrors the precedent already set by `FACT-PACK-0004` and
   `FACT-MASH-0004`. Does not claim every homebrewer's context makes all three methods equally
   convenient in practice — only that none is inherently a "better beer" marker.
-- **Sources:** the same candidate sources underlying `FACT-METHOD-0001`–`FACT-METHOD-0004` above.
+- **Sources (Chief live-verified 2026-09-23):**
+  - American Homebrewers Association, *Brew in a Bag (BIAB)*:
+    https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf
+  - John Palmer, *How to Brew*, Chapter 19:
+    https://howtobrew.com/section-3/chapter-19/
+  - Grainfather, *G30 Brewing System Showcase*:
+    https://us.grainfather.com/pages/g30-showcase
+  - This record remains a `professional_interpretation`: the sources establish legitimate
+    functioning method contexts; the “not a quality hierarchy” framing is a bounded product/pedagogy
+    synthesis and does not claim equal convenience, cost or efficiency.
 - **Wording traps to avoid:** never present BIAB as "the beginner method," traditional all-grain as
   "proper brewing," or all-in-one as automatically producing better/worse beer, in any direction;
   never imply a brewer must eventually "graduate" from one method to another; keep "same underlying
@@ -481,14 +508,12 @@ directly than either alternative it lists:
   new verified-fact-backed teaching content would conflict with that already-stated design
   constraint, not extend it cleanly.
 
-Two things this recommendation deliberately does **not** decide, left open in §7: whether the grid
-cell's existing label text (`"Maling av malt"`/`"Mill"`) should be renamed to reflect the broader
-method-orientation content it would now carry, or kept as-is with the module content simply
-covering more than literal milling; and whether the module content is presented as a sixth full
-topic-scoped pilot (per §3) or a lighter-weight orientation card. §3's pedagogy contract assumes the
-former (a full pilot, for consistency with the five existing modules and this issue's own explicit
-"chunks + questions/scenarios" pedagogy-contract requirement), but the final UI presentation weight
-is an implementation-child decision.
+Chief decision for the bounded implementation slice: reuse this existing first grid position, but
+rename its learner-facing stage label so it does not misleadingly say only “Maling av malt/Mill”.
+Use **“Forberedelse/metode” / “Preparation/method”** (with equivalent brewery-context wording if
+needed) and implement the content as the same kind of compact topic-scoped pilot as the five existing
+modules. This preserves the process spine, avoids a navigation rewrite and still satisfies the
+required chunks/questions/mastery contract.
 
 No App-side (non-Bryggeskole) integration surface was found to anchor a future Learn→Plan-style
 bridge onto: unlike Mesking/Boil-hop/Cool-transfer (each anchored to an existing App field), and
@@ -510,16 +535,11 @@ would first need its own new field/decision — not attempted here, and not requ
 | `FACT-METHOD-0004` | Does not exist | New candidate | `method.planning_variables` | `CHUNK-METHOD-E` |
 | `FACT-METHOD-0005` | Does not exist | New candidate | `method.no_hierarchy` | `CHUNK-METHOD-E` |
 
-Note on `method.shared_process`: §3.5 proposes it as an *additional* concept id alongside each
-reused fact's existing concept id (not a replacement) — `FACT-MASH-0001` keeps
-`mashing.starch_conversion` and `FACT-BOIL-0001` keeps `boil.enzyme_inactivation` in the registry
-unchanged; only this future module's own `source_claims`/mastery wiring would additionally track
-`method.shared_process` for the same two records, mirroring how `FACT-COOL-0003` and
-`FACT-OXY-0002` already carry `"modules": ["cool_transfer.fundamentals", "package.fundamentals"]`
-— a record legitimately serving more than one module/concept context. This is a proposal for the
-later implementation/editorial pass; nothing in this document edits either record's actual
-`concepts`/`modules` fields in the registry file itself.
-
+Chief decision on `method.shared_process`: use it as a **module-local mastery concept** for the
+shared-process question/chunk, while keeping the existing Registry `concepts` on
+`FACT-MASH-0001` and `FACT-BOIL-0001` unchanged. The implementation may add the method module to
+those records' `modules` lists to record genuine cross-module reuse, but it must not invent a second
+Registry truth or rewrite their existing concept semantics.
 ---
 
 ## 7. Non-goals
@@ -562,27 +582,21 @@ these.)
 
 ---
 
-## 8. Remaining owner/Chief decisions
+## 8. Chief decisions / implementation-ready state
 
-1. **Citation check: UNRESOLVED.** This Bridge run had no live network/source-fetch access
-   (`WebSearch`/`WebFetch` both denied when attempted), so every source in §2.2 carries `tier`/
-   `type` only, with no concrete `ref`. Chief needs to perform the same live citation pass already
-   completed for `v22_g3d_cool_transfer_module_contract.md` and
-   `v22_g3f_package_module_contract.md` before any `FACT-METHOD-0001..0005` record can be
-   considered for promotion past `draft`.
-2. **Whether the existing grid label text (`"Maling av malt"`/`"Mill"`, `"Mølle"`/`"Mill"`) should
-   be renamed** once it carries method-orientation content broader than literal milling, or kept
-   as-is — a small UI-copy decision for the later implementation pass, not resolved here (§5).
-3. **Full pilot vs. lighter orientation card** — §3 assumes this module is implemented as a sixth
-   full topic-scoped pilot (chunks + questions + mastery, consistent with the five existing
-   modules and the issue's own pedagogy-contract requirement); §5 flags that the final UI
-   presentation weight is still an open implementation-child decision.
-4. **`method.shared_process` as an additional concept id on two existing records** (§6) is this
-   contract's own proposal, not a settled decision — an alternative would introduce a distinct new
-   concept id instead of reusing `mashing.starch_conversion`/`boil.enzyme_inactivation`, at the cost
-   of losing the "shared mastery carries over" property. This contract's own judgment favors the
-   reuse-with-alias approach, but it remains open to Chief's review.
-5. **BIAB bag terminology** (§3.6) — "kornpose" vs. "meskepose" vs. leaving "BIAB" itself untranslated
-   in Norwegian copy — both terms are in real Norwegian homebrewing use; picking one (or explaining
-   both) is left to the later NO/EN authoring pass, mirroring Package's own open terminology
-   decision for "flaskegjæring"/"flaskekonditionering".
+The prep blockers are resolved for the bounded implementation child:
+
+1. **Citation gate — RESOLVED.** Chief completed the live source pass on 2026-09-23; concrete refs
+   are attached in §2.2. New records remain `draft` until the implementation/editorial pass.
+2. **Grid placement/copy — RESOLVED.** Reuse the existing first process-grid position and rename its
+   learner-facing label to **Forberedelse/metode / Preparation/method** rather than presenting the
+   broader module under a misleading “Maling av malt/Mill” label.
+3. **Presentation weight — RESOLVED.** Implement as a compact sixth topic-scoped pilot using the
+   existing chunks/questions/mastery machinery; do not create a new course engine.
+4. **Shared-process mastery — RESOLVED.** `method.shared_process` is module-local mastery wiring;
+   do not add it as a second Registry concept on `FACT-MASH-0001`/`FACT-BOIL-0001`.
+5. **NO terminology — RESOLVED for first implementation.** Use **“meskepose (BIAB)”** on first
+   introduction, then “meskepose”/“BIAB” naturally thereafter.
+
+No owner product decision remains before the bounded implementation slice. Fresh owner GO is still
+required for merging this prep PR, per normal governance.
