@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-METHOD-CONTEXT-FUNDAMENTALS",
+  "chunks": [
+    {
+      "id": "CHUNK-METHOD-A",
+      "source_claims": ["FACT-MASH-0001", "FACT-BOIL-0001"],
+      "text": {
+        "no": "Uansett om du brygger med meskepose (BIAB), et tradisjonelt meskekar eller en alt-i-ett bryggemaskin, gjennomgår ølet ditt nøyaktig de samme grunnleggende trinnene: du mesker malten i vann med kontrollert temperatur slik at enzymer omdanner stivelse til gjærbart sukker, du skiller vørten fra kornresten, du koker vørten, og deretter kjøler, gjærer og pakker du ølet. Utstyret og fremgangsmåten for å gjennomføre disse trinnene varierer mellom metodene - selve prosessen gjør det ikke.",
+        "en": "Whether you brew with a mash bag (BIAB), a traditional mash tun, or an all-in-one brewing machine, your beer goes through exactly the same fundamental steps: you mash the grain in temperature-controlled water so enzymes convert starch into fermentable sugar, you separate the wort from the spent grain, you boil the wort, and then you cool, ferment and package the beer. The equipment and handling used to carry out these steps differ between methods - the underlying process does not."
+      }
+    },
+    {
+      "id": "CHUNK-METHOD-B",
+      "source_claims": ["FACT-METHOD-0001"],
+      "text": {
+        "no": "Ved meskepose (BIAB) mesker du hele kornmengden mens den ligger i en pose direkte i samme kjele du bruker resten av bryggedagen. I stedet for å tappe vørten gjennom et eget lauterkar, skiller du vørt fra korn ved å løfte posen opp av kjelen. Dette kombinerer mesking og utskilling i færre kar enn det tradisjonelle oppsettet - det er fortsatt ordentlig meskebasert alt-korn-brygging, ikke en forenklet erstatning for den.",
+        "en": "With Brew In A Bag (BIAB), you mash the entire grain bill while it's contained in a bag placed directly inside the same kettle you use for the rest of the brew day. Instead of draining the wort through a separate lauter tun, you separate wort from grain by lifting the bag out of the kettle. This combines mashing and separation into fewer vessels than the traditional layout - it's still genuine mash-based all-grain brewing, not a simplified substitute for it."
+      }
+    },
+    {
+      "id": "CHUNK-METHOD-C",
+      "source_claims": ["FACT-METHOD-0002"],
+      "text": {
+        "no": "Ved tradisjonell brygging med separate kar mesker du i et eget meskekar, ofte med en falskbunn eller lignende filter, og tapper vørten over i en egen kokekjele. Kornresten skylles vanligvis med mer varmt vann (skylling) for å hente ut mer sukker. Dette er en annen utstyrsoppsetting enn meskepose - ikke en annen mesk-kjemi.",
+        "en": "Traditional separate-vessel all-grain brewing mashes in a dedicated mash tun, often using a false bottom or similar filter, then drains the wort into a separate brewing kettle. The grain bed is typically rinsed with more hot water (sparging) to recover additional sugar. This is a different equipment layout than BIAB - not a different mash chemistry."
+      }
+    },
+    {
+      "id": "CHUNK-METHOD-D",
+      "source_claims": ["FACT-METHOD-0003"],
+      "text": {
+        "no": "En alt-i-ett bryggemaskin samler mesking og koking - og ofte resirkulering og innebygd temperaturstyring - i ett og samme kar, gjerne med en innvendig kurv eller et malt-rør som holder kornet og gjør det mulig å skille vørt fra korn i samme kar. Du slipper å flytte vørt mellom separate mesk- og kokekar, men det endrer håndteringen, ikke selve mesk- og koke-kjemien.",
+        "en": "An all-in-one brewing system integrates mashing and boiling - and often recirculation and built-in temperature control - into a single vessel, commonly using an internal basket or malt pipe that holds the grain and enables separating wort from grain within that same vessel. You avoid physically moving wort between separate mash and boil vessels, but this changes handling, not the underlying mash/boil chemistry."
+      }
+    },
+    {
+      "id": "CHUNK-METHOD-E",
+      "source_claims": ["FACT-METHOD-0004", "FACT-METHOD-0005"],
+      "text": {
+        "no": "Vannmengder, dødvolum, håndtering av korn og hvordan du resirkulerer eller skyller kan variere en god del mellom meskepose, tradisjonelt oppsett og alt-i-ett, så den praktiske planleggingen din bør ta hensyn til ditt eget utstyr - det finnes ikke ett universelt tall som passer alle tre. Samtidig er meskepose, tradisjonelt alt-korn-oppsett og alt-i-ett-maskiner alle fullverdige, mye brukte metoder: det riktige valget avhenger av utstyr, plass, budsjett og arbeidsflyt du foretrekker - ingen av dem er en «finere» eller mer ekte brygging enn de andre.",
+        "en": "Water volumes, dead space, grain handling and how you recirculate or sparge can differ meaningfully between BIAB, a traditional setup and an all-in-one system, so your practical planning should account for your own equipment - there's no single universal number that fits all three. At the same time, BIAB, traditional separate-vessel all-grain and all-in-one machines are all fully legitimate, widely used methods: the right choice depends on your equipment, space, budget and preferred workflow - none of them is a \"more real\" or superior way to brew than the others."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-METHOD-001",
+      "type": "scenario",
+      "concepts": ["method.shared_process"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MASH-0001", "FACT-BOIL-0001"],
+      "prompt": {
+        "no": "En bryggevenn med meskepose (BIAB) og en annen med tradisjonelt meskekar diskuterer om ølene deres egentlig gjennomgår helt forskjellig brygge-kjemi siden utstyret er så ulikt. Hva er riktig, basert på det du har lært?",
+        "en": "A friend who brews with a mash bag (BIAB) and another who uses a traditional mash tun are debating whether their beers actually go through completely different brewing chemistry, since the equipment looks so different. What's correct, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - begge gjennomgår nøyaktig samme mesking, utskilling, koking, kjøling, gjæring og pakking; kun utstyret og håndteringen er forskjellig.",
+            "en": "No - both go through exactly the same mashing, separation, boiling, cooling, fermentation and packaging; only the equipment and handling differ."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - meskepose bruker en helt annen enzymprosess enn et tradisjonelt meskekar.",
+            "en": "Yes - a mash bag uses a completely different enzyme process than a traditional mash tun."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ja, men bare fordi kokingen ikke inaktiverer enzymene når det brygges med meskepose.",
+            "en": "Yes, but only because boiling doesn't inactivate the enzymes when brewing with a mash bag."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Mesking omdanner stivelse til sukker og koking inaktiverer enzymene uansett hvilket utstyr som ble brukt til å mekse og skille vørten - prosessen er den samme, kun oppsettet er forskjellig.",
+        "en": "Correct. Mashing converts starch to sugar and boiling inactivates the enzymes regardless of which equipment was used to mash and separate the wort - the process is the same, only the setup differs."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Verken enzymprosessen eller enzym-inaktiveringen ved koking avhenger av om du bruker meskepose eller et tradisjonelt meskekar - det er nøyaktig samme underliggende prosess.",
+        "en": "Not quite. Neither the enzyme process nor the enzyme inactivation from boiling depends on whether you use a mash bag or a traditional mash tun - it's exactly the same underlying process."
+      }
+    },
+    {
+      "id": "Q-METHOD-002",
+      "type": "concept_check",
+      "concepts": ["method.biab"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-METHOD-0001"],
+      "prompt": {
+        "no": "En nybegynner sier: «Meskepose (BIAB) er egentlig ikke ordentlig alt-korn-brygging, det er bare en snarvei.» Stemmer det, basert på det du har lært?",
+        "en": "A beginner says: 'BIAB isn't really all-grain brewing, it's just a shortcut.' Is that correct, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Nei - BIAB mesker hele kornmengden og skiller vørt fra korn ved å løfte posen, akkurat som annen alt-korn-brygging, bare i færre kar.",
+            "en": "No - BIAB mashes the entire grain bill and separates wort from grain by lifting the bag, just like other all-grain brewing, only in fewer vessels."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - BIAB bruker malt-ekstrakt i stedet for hele korn.",
+            "en": "Yes - BIAB uses malt extract instead of whole grain."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ja - BIAB krever spesialutstyr som gjør prosessen enklere enn ordentlig mesking.",
+            "en": "Yes - BIAB requires specialized equipment that makes the process easier than real mashing."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. BIAB er ordentlig alt-korn-brygging - hele kornmengden mekses, og posen brukes kun til å skille vørt fra korn, i samme kjele som resten av bryggedagen.",
+        "en": "Correct. BIAB is genuine all-grain brewing - the entire grain bill is mashed, and the bag is only used to separate wort from grain, in the same kettle as the rest of the brew day."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. BIAB bruker verken ekstrakt eller spesialutstyr utover en pose og en kjele - hele kornmengden mekses og skilles akkurat som i annen alt-korn-brygging.",
+        "en": "Not quite. BIAB uses neither extract nor special equipment beyond a bag and a kettle - the entire grain bill is mashed and separated just like in other all-grain brewing."
+      }
+    },
+    {
+      "id": "Q-METHOD-003",
+      "type": "concept_check",
+      "concepts": ["method.traditional_allgrain"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-METHOD-0002"],
+      "prompt": {
+        "no": "Hva kjennetegner tradisjonell brygging med separate kar, sammenlignet med meskepose (BIAB)?",
+        "en": "What characterizes traditional separate-vessel all-grain brewing, compared to BIAB?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Mesking skjer i et eget meskekar med filter/falskbunn, og vørten tappes over i en egen kokekjele, ofte med en separat skylling av kornresten.",
+            "en": "Mashing happens in a dedicated mash tun with a filter/false bottom, and the wort is drained into a separate kettle, often with a separate sparge of the grain bed."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Mesk-kjemien er en helt annen enn ved BIAB, siden separate kar bruker andre enzymer.",
+            "en": "The mash chemistry is completely different from BIAB, since separate vessels use different enzymes."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Det er identisk med BIAB bortsett fra at posen erstattes med en plastbøtte.",
+            "en": "It's identical to BIAB except the bag is replaced with a plastic bucket."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Forskjellen er utstyrsoppsettet - eget meskekar og kokekjele pluss skylling - ikke selve mesk-kjemien, som er lik BIAB.",
+        "en": "Correct. The difference is the equipment layout - a dedicated mash tun and kettle plus sparging - not the mash chemistry itself, which is the same as BIAB."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Verken «andre enzymer» eller «identisk med BIAB bare med bøtte» stemmer - forskjellen er et eget meskekar/kokekjele-oppsett med skylling.",
+        "en": "Not quite. Neither \"different enzymes\" nor \"identical to BIAB with a bucket\" is correct - the difference is a dedicated mash tun/kettle setup with sparging."
+      }
+    },
+    {
+      "id": "Q-METHOD-004",
+      "type": "scenario",
+      "concepts": ["method.all_in_one"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-METHOD-0003"],
+      "prompt": {
+        "no": "Du ser en alt-i-ett bryggemaskin resirkulere vørten gjennom et malt-rør under mesking, og lurer på om det er en annen type brygge-kjemi enn kjele-og-pose. Hva er riktig?",
+        "en": "You watch an all-in-one machine recirculating wort through a malt pipe during mashing, and wonder whether that's a different kind of brewing chemistry than a kettle-and-bag setup. What's correct?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Resirkulering og innebygd temperaturstyring endrer håndteringen, ikke den underliggende mesk- og koke-kjemien.",
+            "en": "Recirculation and built-in temperature control change the handling, not the underlying mash/boil chemistry."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja - resirkulering gjennom malt-røret er en helt egen kjemisk prosess som ikke finnes ved andre metoder.",
+            "en": "Yes - recirculating through the malt pipe is a completely separate chemical process that doesn't exist with other methods."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ja - alt-i-ett-maskiner bruker en annen type enzym enn kjele-og-pose-oppsett.",
+            "en": "Yes - all-in-one machines use a different type of enzyme than a kettle-and-bag setup."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Integrering av mesking og koking i ett kar, med resirkulering/temperaturstyring, endrer håndteringen - den underliggende kjemien er den samme som ved BIAB eller tradisjonelt oppsett.",
+        "en": "Correct. Integrating mashing and boiling into one vessel, with recirculation/temperature control, changes the handling - the underlying chemistry is the same as BIAB or a traditional setup."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Verken resirkulering eller innebygd temperaturstyring innfører en ny kjemisk prosess eller et annet enzym - det er samme underliggende mesk- og koke-kjemi som ved de andre metodene.",
+        "en": "Not quite. Neither recirculation nor built-in temperature control introduces a new chemical process or a different enzyme - it's the same underlying mash/boil chemistry as the other methods."
+      }
+    },
+    {
+      "id": "Q-METHOD-005",
+      "type": "scenario",
+      "concepts": ["method.planning_variables", "method.no_hierarchy"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-METHOD-0004", "FACT-METHOD-0005"],
+      "prompt": {
+        "no": "Du har brygget vellykket med meskepose (BIAB) og lurer på om du bør «oppgradere» til en alt-i-ett-maskin for å lage bedre øl, og om vannmengdene fra BIAB-oppskriften din kan brukes uendret på et tradisjonelt oppsett med separate kar. Hva er riktig, basert på det du har lært?",
+        "en": "You've successfully brewed with BIAB and wonder whether you should 'upgrade' to an all-in-one machine to make better beer, and whether the water volumes from your BIAB recipe carry over unchanged to a traditional separate-vessel setup. What's correct, based on what you've learned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ingen av metodene gir automatisk bedre øl, så det er ikke en «oppgradering» i den forstand - og vannmengder/dødvolum kan variere mellom oppsettene, så tallene bør tilpasses det nye utstyret, ikke overføres uendret.",
+            "en": "Neither method automatically makes better beer, so it isn't an \"upgrade\" in that sense - and water volumes/dead space can differ between setups, so the numbers should be adjusted for the new equipment, not carried over unchanged."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja til begge deler - alt-i-ett er alltid bedre øl, og vannmengder er identiske uansett utstyr.",
+            "en": "Yes to both - all-in-one always makes better beer, and water volumes are identical regardless of equipment."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei til begge deler - BIAB er alltid det beste valget, og vannmengder er irrelevante uansett metode.",
+            "en": "No to both - BIAB is always the best choice, and water volumes are irrelevant regardless of method."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Metode-valg er kontekstuelt, ikke et kvalitetshierarki - men praktiske planleggingsdetaljer som vannmengde og dødvolum kan variere reelt mellom utstyr, så de bør tilpasses, ikke antas like.",
+        "en": "Correct. Method choice is contextual, not a quality hierarchy - but practical planning details like water volume and dead space can genuinely differ by equipment, so they should be adjusted, not assumed identical."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Ingen metode er universelt «best», og vannmengder/dødvolum er ikke identiske på tvers av alt utstyr - begge deler krever en kontekstuell vurdering, ikke en fast regel.",
+        "en": "Not quite. No method is universally \"best,\" and water volumes/dead space aren't identical across all equipment - both points require contextual judgment, not a fixed rule."
+      }
+    }
+  ]
+}

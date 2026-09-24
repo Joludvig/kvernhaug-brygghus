@@ -1,18 +1,19 @@
 """
 Minimal, dedicated Streamlit entrypoint for real *runtime* browser
-regression coverage of the three Bryggeskole static SVG visuals --
-boil/hop timeline (issue #366), cool/transfer flow (issue #370) and
-package flow (issue #374) -- per the Chief review on issue #378/PR #379.
+regression coverage of the four Bryggeskole static SVG visuals --
+boil/hop timeline (issue #366), cool/transfer flow (issue #370),
+package flow (issue #374) and method-context flow (issue #380) -- per
+the Chief review on issue #378/PR #379.
 
 Not part of the production app (`app.py`) navigation. It deliberately
 bypasses the Bryggeskole lesson/chunk/session-state machinery in
 `ui/bryggeskole_panel.py` so a Playwright test can load one stable page
 directly, while still exercising the *exact same* rendering call each
-of the three renderers goes through in production:
+of the four renderers goes through in production:
 
     st.markdown(<svg markup>, unsafe_allow_html=True)
 
-(see `ui/bryggeskole_panel.py` lines ~570/576/582). This is the
+(see `ui/bryggeskole_panel.py`'s `_render_leksjon()`). This is the
 smallest possible real Streamlit runtime surface for these visuals --
 not a general Streamlit E2E framework.
 
@@ -28,6 +29,7 @@ import streamlit as st
 
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
+from bryggeskole.method_context_flow import render_method_context_flow_svg
 from bryggeskole.package_flow import render_package_flow_svg
 
 _sprak = st.query_params.get("lang", "no")
@@ -37,3 +39,4 @@ if _sprak not in ("no", "en"):
 st.markdown(render_boil_timeline_svg(_sprak), unsafe_allow_html=True)
 st.markdown(render_cool_transfer_flow_svg(_sprak), unsafe_allow_html=True)
 st.markdown(render_package_flow_svg(_sprak), unsafe_allow_html=True)
+st.markdown(render_method_context_flow_svg(_sprak), unsafe_allow_html=True)

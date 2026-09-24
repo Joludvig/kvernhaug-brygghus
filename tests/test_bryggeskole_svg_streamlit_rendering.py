@@ -1,9 +1,10 @@
 """
 Regression coverage for the real Streamlit *runtime* rendering path of the
-three Bryggeskole static SVG visuals -- boil/hop timeline (issue #366),
-cool/transfer flow (issue #370) and package flow (issue #374) -- as
-opposed to the pure source-string/viewBox tests each already has in its
-own `tests/test_bryggeskole_*.py` file.
+four Bryggeskole static SVG visuals -- boil/hop timeline (issue #366),
+cool/transfer flow (issue #370), package flow (issue #374) and
+method-context flow (issue #380) -- as opposed to the pure source-string/
+viewBox tests each already has in its own `tests/test_bryggeskole_*.py`
+file.
 
 ## The bug this catches (issue #378)
 
@@ -73,6 +74,7 @@ from markdown_it import MarkdownIt
 
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
+from bryggeskole.method_context_flow import render_method_context_flow_svg
 from bryggeskole.package_flow import render_package_flow_svg
 
 SVG_NS = "{http://www.w3.org/2000/svg}"
@@ -101,6 +103,14 @@ _CASES = [
         {
             "no": ["Gjæringskar (ferdig gjæret)", "Sanitert håndteringssone", "Flaske-sti", "Fat-sti", "Klar til servering/lagring"],
             "en": ["Fermenter (done fermenting)", "Sanitized handling zone", "Bottle path", "Keg path", "Ready to serve/store"],
+        },
+        {"rect", "line", "path"},
+    ),
+    (
+        render_method_context_flow_svg,
+        {
+            "no": ["BIAB", "Tradisjonelt alt-korn", "Alt-i-ett", "Meskekar/lauterkar", "Kjele"],
+            "en": ["BIAB", "Traditional all-grain", "All-in-one", "Mash/lauter vessel", "Kettle"],
         },
         {"rect", "line", "path"},
     ),
