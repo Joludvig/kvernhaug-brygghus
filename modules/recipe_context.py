@@ -36,6 +36,11 @@ def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db
     water_target_profile = st.session_state.get("aktiv_vannmaal_snapshot")
     water_treatment = st.session_state.get("aktiv_vannbehandling")
     water_measurements = st.session_state.get("aktiv_vannmaalinger")
+    # Planlagt gjæringstemperatur (V2.2 G3K, issue #384) — samme
+    # uavhengighet som prosess_profil/water_* over: satt av
+    # ui/yeast_panel.py sin Learn->Plan-bro, påvirker ALDRI
+    # malt/humle/gjær-beregningene.
+    fermentation_temp_target_c = st.session_state.get("gjaering_temp_maal_c")
 
     # Flater ut biblioteker for beregninger
     flatt_malt = {info.get("display_name", k): info for k, info in malt_db.items() if info}
@@ -91,6 +96,7 @@ def bygg_recipe_context(oppskrift_navn, malt_valg, humle_valg, gjaer_id, malt_db
         brygger_stil=brygger_stil, process_profile=prosess_profil,
         water_source_profile=water_source_profile, water_target_profile=water_target_profile,
         water_treatment=water_treatment, water_measurements=water_measurements,
+        fermentation_temp_target_c=fermentation_temp_target_c,
     )
     style_analysis = analyser_stil_og_balanse(recipe_obj)
     conflicts = sjekk_smakskonflikter(recipe_obj)

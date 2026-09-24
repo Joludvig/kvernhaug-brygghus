@@ -1,5 +1,38 @@
 import streamlit as st
 
+from bryggeskole import pilot_fermentation as _pilot_gjaring
+from ui.i18n import gjeldende_sprak, t
+
+# De tre eksisterende, verifiserte Gjæring-læringsbolkene denne Learn ->
+# Plan-broen viser (V2.2 G3K, issue #384) -- nøyaktig disse tre, i denne
+# rekkefølgen, per docs/development/
+# v22_g3j_fermentation_learn_plan_contract.md §3/§4. Ingen ny
+# undervisningstekst forfattes her; broen gjenbruker
+# bryggeskole.pilot_fermentation sin egen read_pilot_file()/render_chunk()
+# uendret, akkurat som ui/process_panel.py allerede gjør for Mesking.
+_LAER_BRO_CHUNK_IDER = ("CHUNK-FERM-A", "CHUNK-FERM-B", "CHUNK-FERM-C")
+
+
+def _render_laer_bro(sprak):
+    """Kontekstuell Learn -> Plan-bro (V2.2 G3K, issue #384): en
+    kollapset expander rett under smak/utgjæring-captionen som viser
+    CHUNK-FERM-A/B/C fra den eksisterende, verifiserte
+    Gjæring-piloten -- read-only, ingen mastery-kall
+    (evaluate_answer/apply_answer), ingen ny lagringstilstand. Ugyldig
+    pilotinnhold (PilotContentError) skal aldri krasje Oppskrift-fanen,
+    samme mønster som ui/process_panel.py/ui/bryggeskole_panel.py."""
+    with st.expander(t("gjaering.laer_bro.tittel"), expanded=False):
+        try:
+            pilot = _pilot_gjaring.read_pilot_file()
+        except _pilot_gjaring.PilotContentError:
+            st.error(t("bryggeskole.feil.innhold_ugyldig"))
+            return
+        chunker = {c["id"]: c for c in pilot["chunks"]}
+        for chunk_id in _LAER_BRO_CHUNK_IDER:
+            st.markdown(_pilot_gjaring.render_chunk(chunker[chunk_id], sprak)["text"])
+        st.caption(t("gjaering.laer_bro.footer"))
+
+
 def render_yeast_panel(gjaer_database):
     st.header("🧫 Gjærstamme")
     with st.expander("ℹ️ Gjærstarter og gjærhelse (kort intro)"):
@@ -50,3 +83,22 @@ def render_yeast_panel(gjaer_database):
             st.caption(f"🧪 *Smak:* {', '.join(smakstags)} · {att_str}")
         else:
             st.caption(f"🧪 {att_str}")
+
+    sprak = gjeldende_sprak()
+    _render_laer_bro(sprak)
+
+    # Planlagt gjæringstemperatur (V2.2 G3K, issue #384) -- widget-bundet
+    # DIREKTE til st.session_state["gjaering_temp_maal_c"] (samme mønster
+    # som "batch_volum_input"/"gjeldende_navn" i ui/recipe_card.py: verdien
+    # settes ALLTID i session_state FØR denne widgeten instansieres --
+    # se app.py/ui/sidebar.py -- så INGEN eksplisitt `value=` gis her).
+    # Bevisst INGEN min_value/max_value: en bryggefaglig grenseverdi ville
+    # kunne leses som Kvernhaug-godkjent gjærveiledning, som §5/§8 i
+    # kontrakten eksplisitt forbyr. Unset (None) rendres da som et tomt
+    # felt, aldri et forhåndsutfylt tall.
+    st.number_input(
+        t("gjaering.temp_maal.label"),
+        step=0.5,
+        key="gjaering_temp_maal_c",
+        help=t("gjaering.temp_maal.hjelp"),
+    )
