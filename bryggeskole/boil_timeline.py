@@ -17,6 +17,13 @@ SVG markup via st.markdown(unsafe_allow_html=True).
 Deliberately not interactive: no clickable markers, no JavaScript, no
 per-marker links -- exactly the "first visual is the static timeline
 only" scope the contract's own Chief decision (§7.3) settled.
+
+The returned markup is flattened onto a single line (`_flatten_svg_markup`)
+before being returned -- a blank line or a tag split across multiple
+source lines both make Streamlit's CommonMark-based frontend markdown
+renderer fragment the <svg>...</svg> block into a stray paragraph plus
+orphaned elements outside any <svg> context, which the browser then
+renders as literal label text with the geometry missing (issue #378).
 """
 
 LANGUAGES = ("no", "en")
@@ -54,6 +61,13 @@ def _require_language(language):
         raise ValueError(f"Unsupported language {language!r}; must be one of {LANGUAGES}.")
 
 
+def _flatten_svg_markup(svg):
+    """Collapses the human-readable, multi-line <svg>...</svg> markup onto
+    a single line (see the module docstring for why this matters at
+    runtime -- issue #378)."""
+    return " ".join(line.strip() for line in svg.strip().splitlines())
+
+
 def render_boil_timeline_svg(language):
     """Returns responsive, self-contained static SVG markup for the
     boil/hop timeline in the requested language.
@@ -72,7 +86,7 @@ def render_boil_timeline_svg(language):
     early_x = 220
     late_x = 560
 
-    return f"""<svg viewBox="0 0 820 220" width="100%" preserveAspectRatio="xMidYMid meet"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 820 220" width="100%" preserveAspectRatio="xMidYMid meet"
   style="max-width:820px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
@@ -110,4 +124,4 @@ def render_boil_timeline_svg(language):
   <text x="{early_x}" y="180" text-anchor="middle" font-size="11" fill="#3a2a1a">{labels['early_marker']}</text>
   <circle cx="{late_x}" cy="110" r="5" fill="#3a2a1a"/>
   <text x="{late_x}" y="180" text-anchor="middle" font-size="11" fill="#3a2a1a">{labels['late_marker']}</text>
-</svg>"""
+</svg>""")

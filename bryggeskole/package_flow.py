@@ -34,6 +34,16 @@ already established (`_wrap_centered_label`), rather than real
 browser/font measurement -- copied here unmodified since both modules
 independently need the same layout-safety property for long NO/EN
 labels near the viewBox edge.
+
+The returned markup is flattened onto a single line (`_flatten_svg_markup`)
+before being returned -- a blank line or a tag split across multiple
+source lines both make Streamlit's CommonMark-based frontend markdown
+renderer fragment the <svg>...</svg> block into a stray paragraph plus
+orphaned elements outside any <svg> context, which the browser then
+renders as literal label text with the geometry missing -- the exact
+owner-PC failure mode reported for Pakking (issue #378), also
+reproduced here for Koking/boil_timeline.py and Kjøling/
+cool_transfer_flow.py, which share this same pattern.
 """
 
 import textwrap
@@ -126,6 +136,13 @@ def _centered_label_markup(text, anchor_x, y, font_size, fill):
     return f'<text text-anchor="middle" font-size="{font_size}" fill="{fill}">{tspans}</text>'
 
 
+def _flatten_svg_markup(svg):
+    """Collapses the human-readable, multi-line <svg>...</svg> markup onto
+    a single line (see the module docstring for why this matters at
+    runtime -- issue #378)."""
+    return " ".join(line.strip() for line in svg.strip().splitlines())
+
+
 def render_package_flow_svg(language):
     """Returns responsive, self-contained static SVG markup for the
     package flow diagram in the requested language: fermenter -> split
@@ -144,7 +161,7 @@ def render_package_flow_svg(language):
     keg_y0, keg_y1 = 190, 280
     serve_y_mid = 165
 
-    return f"""<svg viewBox="0 0 880 330" width="100%" preserveAspectRatio="xMidYMid meet"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 880 330" width="100%" preserveAspectRatio="xMidYMid meet"
   style="max-width:880px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
@@ -187,4 +204,4 @@ def render_package_flow_svg(language):
 
   {_centered_label_markup(labels['oxygen_label'], split_x, 305, 10, "#1d4a5f")}
   {_centered_label_markup(labels['pressure_label'], (path_x0 + serve_x1) / 2, 320, 10, "#37235a")}
-</svg>"""
+</svg>""")

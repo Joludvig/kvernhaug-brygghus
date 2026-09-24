@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "Playwright Critical Browser Gate (issue #200) -- devDependency only, does not affect the dependency-free web/ runtime.",
   "scripts": {
-    "test:browser-gate": "playwright test"
+    "test:browser-gate": "playwright test",
+    "test:bryggeskole-svg-runtime": "playwright test --config=playwright.streamlit.config.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"
