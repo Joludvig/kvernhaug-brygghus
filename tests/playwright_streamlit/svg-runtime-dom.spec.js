@@ -1,5 +1,6 @@
-// Real Streamlit *runtime* browser regression coverage for the three
-// Bryggeskole static SVG visuals (issue #378 Chief review, PR #379).
+// Real Streamlit *runtime* browser regression coverage for the four
+// Bryggeskole static SVG visuals (issue #378 Chief review, PR #379;
+// method-context flow added by issue #380).
 //
 // The bug this catches (owner-PC QA, issue #378): the Pakking SVG
 // diagram rendered as plain linear label text with no visible geometry
@@ -15,7 +16,7 @@
 // and inspects genuine computed layout/DOM properties.
 //
 // Deliberately bounded, not a general Streamlit E2E framework: one
-// harness page, three visuals, two languages, the existing four-project
+// harness page, four visuals, two languages, the existing four-project
 // device matrix already used by the web Browser Gate.
 
 const { test, expect } = require('@playwright/test');
@@ -48,6 +49,22 @@ const VISUALS = [
     labels: {
       no: ['Gjæringskar (ferdig gjæret)', 'Flaske-sti', 'Fat-sti'],
       en: ['Fermenter (done fermenting)', 'Bottle path', 'Keg path'],
+    },
+    shapeSelector: 'rect, line',
+  },
+  {
+    name: 'method_context_flow',
+    ariaLabel: {
+      no: 'Metodevalg: samme prosess, tre utstyrsoppsett',
+      en: 'Method choice: same process, three equipment layouts',
+    },
+    // "BIAB" is used as its own row label (identical text in both
+    // languages) -- unlike the shared Kok/Kjøl/Gjær/Pakk stage labels,
+    // which are deliberately drawn once per row (three times total) and
+    // therefore would NOT satisfy this spec's own exact-count-of-1 check.
+    labels: {
+      no: ['BIAB', 'Tradisjonelt alt-korn', 'Alt-i-ett'],
+      en: ['BIAB', 'Traditional all-grain', 'All-in-one'],
     },
     shapeSelector: 'rect, line',
   },
@@ -130,7 +147,7 @@ for (const lang of LANGUAGES) {
       });
     }
 
-    test('the three visuals are stacked without an oversized blank gap between them', async ({ page }) => {
+    test('the four visuals are stacked without an oversized blank gap between them', async ({ page }) => {
       const boxes = [];
       for (const visual of VISUALS) {
         const svg = page.locator(`svg[aria-label="${visual.ariaLabel[lang]}"]`);
@@ -140,7 +157,7 @@ for (const lang of LANGUAGES) {
         boxes.push(box);
       }
       // Reported bug: "a very large blank vertical region" between
-      // lesson content and the broken text fallback. With three correctly
+      // lesson content and the broken text fallback. With four correctly
       // rendered SVGs back to back, normal Streamlit block spacing is a
       // handful of pixels of margin -- a generous but still bounded cap
       // (well under an order of magnitude smaller than a "very large"

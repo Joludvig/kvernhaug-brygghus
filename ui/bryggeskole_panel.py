@@ -3,25 +3,27 @@
 Kvernhaug Bryggeskole -- flermodul lærings-UI (issue #338, productionizing
 the owner-accepted multi-module Bryggeskole UX direction; issue #366 adds
 Koking som tredje modul; issue #370 adds Kjøling/overføring som fjerde
-modul; issue #374 adds Pakking som femte og siste fysiske prosess-modul).
+modul; issue #374 adds Pakking som femte fysiske prosess-modul; issue
+#380 adds Forberedelse/metode som sjette og siste modul, fylt inn i
+prosessgridets tidligere ubrukte første celle).
 Renderes som sin egen topplinje-fane i app.py, ikke gjemt under Verktøy.
 
 Én Bryggeskole -> to visuelle miljøer (Hjemmebrygger / Bryggeri) -> én
-skoleoversikt med fem reelle, åpne moduler (Mesking / Koking /
-Kjøling-overføring / Gjæring / Pakking), resten av brygge-reisen vist som
-"Kommer senere" -- delt verifisert kunnskap + delt mastery på tvers av
-moduler og miljøer. Miljøvalget er bevisst uendret fra issue #327: kun
-navigasjon/presentasjon, ingen nye kursfakta oppstår her.
+skoleoversikt med seks reelle, åpne moduler (Forberedelse/metode /
+Mesking / Koking / Kjøling-overføring / Gjæring / Pakking) -- delt
+verifisert kunnskap + delt mastery på tvers av moduler og miljøer.
+Miljøvalget er bevisst uendret fra issue #327: kun navigasjon/
+presentasjon, ingen nye kursfakta oppstår her.
 
 Gjenbruker den eksisterende læringsmotoren uendret, per issue #338 sitt
-eksplisitte "Reuse boundaries"-krav -- nå fra FEM topic-scopede
+eksplisitte "Reuse boundaries"-krav -- nå fra SEKS topic-scopede
 pilotmoduler i stedet for én, hver med nøyaktig samme funksjonsnavn
 (read_pilot_file/render_chunk/render_question/evaluate_answer, per
 bryggeskole/pilot_mashing.py sin egen "topic-scoped copy, never a shared
 engine"-arkitektur):
     bryggeskole.pilot_mashing / bryggeskole.pilot_fermentation
         / bryggeskole.pilot_boil_hop / bryggeskole.pilot_cool_transfer
-        / bryggeskole.pilot_package
+        / bryggeskole.pilot_package / bryggeskole.pilot_method_context
     bryggeskole.mastery.{apply_answer, mastery_label}
     bryggeskole.mastery_store.{read_mastery_state, write_mastery_state,
         neutral_state_document}
@@ -29,23 +31,31 @@ Ingen av disse er endret for denne skiven. Én NY, rent tilleggsmodul,
 bryggeskole/answer_order.py, dekker det NYE "answer-option order"-kravet
 issue #338 selv innfører (fantes ikke i issue #327s scope) -- se dens egen
 docstring. bryggeskole/boil_timeline.py (issue #366),
-bryggeskole/cool_transfer_flow.py (issue #370) og
-bryggeskole/package_flow.py (issue #374) er hver sin egen, rene
-SVG-genererende tilleggsmodul for Koking-, Kjøling/overføring- og
-Pakking-modulenes eneste visuelle krav -- se deres egne docstrings.
-Pakking-modulen gjenbruker også to eksisterende verifiserte fakta/
-konsept-id-er fra Kjøling/overføring (cool.sanitation_boundary,
-oxygen.post_pitch) uendret -- se bryggeskole/pilot_package.py sin egen
-docstring -- den konkrete mekanismen bak "delt mastery på tvers av
+bryggeskole/cool_transfer_flow.py (issue #370),
+bryggeskole/package_flow.py (issue #374) og
+bryggeskole/method_context_flow.py (issue #380) er hver sin egen, rene
+SVG-genererende tilleggsmodul for Koking-, Kjøling/overføring-, Pakking-
+og Forberedelse/metode-modulenes eneste visuelle krav -- se deres egne
+docstrings. Pakking-modulen gjenbruker to eksisterende verifiserte
+fakta/konsept-id-er fra Kjøling/overføring (cool.sanitation_boundary,
+oxygen.post_pitch), og Forberedelse/metode-modulen gjenbruker to
+eksisterende verifiserte fakta fra Mesking/Koking (FACT-MASH-0001,
+FACT-BOIL-0001) under sin egen module-lokale
+"method.shared_process"-konsept-id (kontrakt §8: ikke en ny
+Registry-konsept på de gjenbrukte fakta-postene) -- se
+bryggeskole/pilot_package.py og bryggeskole/pilot_method_context.py sine
+egne docstrings -- den konkrete mekanismen bak "delt mastery på tvers av
 moduler" nevnt under.
 
 Skoleoversikten gjenbruker den eksisterende seks-stadiers prosessgrid fra
 issue #327 (_PROSESS_STADIER) i stedet for å bygge en egen parallell
-modul-kort-grid ved siden av den: fem av de seks stadiene (Mesking,
-Koking, Kjøling, Gjæring, Pakking) er nå klikkbare moduler med
-statusmerker -- kun det aller første stadiet (maling av malt) er
-fortsatt ren orientering ("Kommer senere"), siden det ikke finnes noen
-egen læringsmodul for det. Dette er bevisst étt sammenhengende grid, ikke
+modul-kort-grid ved siden av den: alle seks stadiene (Forberedelse/
+metode, Mesking, Koking, Kjøling, Gjæring, Pakking) er nå klikkbare
+moduler med statusmerker -- det første stadiet het tidligere "Maling av
+malt"/"Mølle" og var ren orientering ("Kommer senere"); issue #380 fyller
+denne siste ubrukte cellen med en ekte modul og gir den et
+lærings-dekkende navn (Forberedelse/metode) i stedet for det tidligere
+malings-spesifikke navnet. Dette er bevisst étt sammenhengende grid, ikke
 to -- det tilfredsstiller "show full brewing learning journey" +
 "compact module cards that scale to 3+ active modules" samtidig.
 
@@ -78,11 +88,13 @@ from bryggeskole.mastery_store import (
     read_mastery_state,
     write_mastery_state,
 )
+from bryggeskole.method_context_flow import render_method_context_flow_svg
 from bryggeskole.package_flow import render_package_flow_svg
 from bryggeskole import pilot_boil_hop as _pilot_koking
 from bryggeskole import pilot_cool_transfer as _pilot_kjoling
 from bryggeskole import pilot_fermentation as _pilot_gjaring
 from bryggeskole import pilot_mashing as _pilot_mesking
+from bryggeskole import pilot_method_context as _pilot_metodevalg
 from bryggeskole import pilot_package as _pilot_pakking
 from ui.i18n import gjeldende_sprak, t
 
@@ -97,24 +109,33 @@ _PILOT_CONTENT_ERRORS = (
     _pilot_koking.PilotContentError,
     _pilot_kjoling.PilotContentError,
     _pilot_pakking.PilotContentError,
+    _pilot_metodevalg.PilotContentError,
 )
 
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
 _ENV_BRYGGERI = "bryggeri"
 
+_MODUL_METODEVALG = "metodevalg"
 _MODUL_MESKING = "mesking"
 _MODUL_KOKING = "koking"
 _MODUL_KJOLING = "kjoling"
 _MODUL_GJARING = "gjaring"
 _MODUL_PAKKING = "pakking"
 
-# Rekkefølgen speiler den faktiske brygge-prosessen (mesk før koking før
-# kjøling/overføring før gjæring før pakking) -- brukt både til "Kommer
-# senere"-plasseringen i prosessgridet og til _anbefalt_modul()s
+# Rekkefølgen speiler den faktiske brygge-prosessen (forberedelse/metode
+# før mesk før koking før kjøling/overføring før gjæring før pakking) --
+# brukt både til plasseringen i prosessgridet og til _anbefalt_modul()s
 # "anbefalt neste"-signal.
-_MODUL_REKKEFOLGE = [_MODUL_MESKING, _MODUL_KOKING, _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING]
+_MODUL_REKKEFOLGE = [
+    _MODUL_METODEVALG, _MODUL_MESKING, _MODUL_KOKING, _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING,
+]
 
 _MODULER = {
+    _MODUL_METODEVALG: {
+        "pilot": _pilot_metodevalg,
+        "tittel_nokkel": "bryggeskole.modul.metodevalg.tittel",
+        "ikon": "🧭",
+    },
     _MODUL_MESKING: {
         "pilot": _pilot_mesking,
         "tittel_nokkel": "bryggeskole.modul.mesking.tittel",
@@ -142,17 +163,21 @@ _MODULER = {
     },
 }
 
-# Seks representative prosess-stadier (malt/maling -> mesk -> koking ->
-# kjøling -> gjæring -> pakking) i to miljø-varianter, per issue #327 sitt
-# krav om "malt/milling → mash → boil → cooling → fermentation →
-# packaging". Bevisst lokale bilingual-dicts (samme mønster som
-# bryggeskole/pilot_fermentation.py sitt eget "no"/"en"-format) i stedet
-# for modules/i18n.py-nøkler, for å holde i18n-tillegget der til et
-# minimum -- disse er navigasjons-/presentasjonstekst, ikke lærings-
-# innhold, og teksten er identisk begge steder uansett miljøvalg.
+# Seks representative prosess-stadier (forberedelse/metode -> mesk ->
+# koking -> kjøling -> gjæring -> pakking) i to miljø-varianter, per
+# issue #327 sitt krav om "malt/milling → mash → boil → cooling →
+# fermentation → packaging". Bevisst lokale bilingual-dicts (samme
+# mønster som bryggeskole/pilot_fermentation.py sitt eget "no"/
+# "en"-format) i stedet for modules/i18n.py-nøkler, for å holde
+# i18n-tillegget der til et minimum -- disse er navigasjons-/
+# presentasjonstekst, ikke lærings-innhold, og teksten er identisk begge
+# steder uansett miljøvalg. Det første stadiet het tidligere "Maling av
+# malt"/"Mølle" og var kun orientering; issue #380 gir det navnet
+# Forberedelse/metode i BEGGE miljøer (Chief-avgjørelse i kontrakt §5) nå
+# som det peker til en ekte modul.
 _PROSESS_STADIER = {
     _ENV_HJEMMEBRYGGER: [
-        {"no": "Maling av malt", "en": "Milling the malt"},
+        {"no": "Forberedelse/metode", "en": "Preparation/method"},
         {"no": "Mesking (kjele/BIAB)", "en": "Mashing (kettle/BIAB)"},
         {"no": "Koking", "en": "Boil"},
         {"no": "Kjøling", "en": "Cooling"},
@@ -160,7 +185,7 @@ _PROSESS_STADIER = {
         {"no": "Tapping/flasking", "en": "Kegging/bottling"},
     ],
     _ENV_BRYGGERI: [
-        {"no": "Mølle", "en": "Mill"},
+        {"no": "Forberedelse/metode", "en": "Preparation/method"},
         {"no": "Mesk/lauter", "en": "Mash/lauter"},
         {"no": "Kokekar/whirlpool", "en": "Kettle/whirlpool"},
         {"no": "Varmeveksler", "en": "Heat exchanger"},
@@ -169,12 +194,12 @@ _PROSESS_STADIER = {
     ],
 }
 
-# Samme indekser i begge miljøer -- de fem eneste aktive/klikkbare
-# stadiene denne runden; kun det første (maling) er fortsatt ren
-# orientering ("Kommer senere").
+# Samme indekser i begge miljøer -- nå alle seks stadiene er
+# aktive/klikkbare (issue #380 fyller den tidligere siste "Kommer
+# senere"-cellen, indeks 0).
 _STADIUM_TIL_MODUL = {
-    1: _MODUL_MESKING, 2: _MODUL_KOKING, 3: _MODUL_KJOLING, 4: _MODUL_GJARING,
-    5: _MODUL_PAKKING,
+    0: _MODUL_METODEVALG, 1: _MODUL_MESKING, 2: _MODUL_KOKING, 3: _MODUL_KJOLING,
+    4: _MODUL_GJARING, 5: _MODUL_PAKKING,
 }
 
 # Menneskelesbare visningsnavn for pilotenes konsept-id-er -- aldri de
@@ -209,6 +234,12 @@ _KONSEPT_LABELS = {
     "package.force_carbonation": {"no": "Tvangskarbonering", "en": "Force carbonation"},
     "package.pressure_safety": {"no": "Trykksikkerhet ved pakking", "en": "Packaging pressure safety"},
     "package.path_choice": {"no": "Valg av pakkemetode", "en": "Packaging method choice"},
+    "method.shared_process": {"no": "Delt bryggeprosess", "en": "Shared brewing process"},
+    "method.biab": {"no": "Meskepose (BIAB)", "en": "Mash bag (BIAB)"},
+    "method.traditional_allgrain": {"no": "Tradisjonelt alt-korn-oppsett", "en": "Traditional all-grain setup"},
+    "method.all_in_one": {"no": "Alt-i-ett bryggemaskin", "en": "All-in-one brewing machine"},
+    "method.planning_variables": {"no": "Metodeavhengig planlegging", "en": "Method-dependent planning"},
+    "method.no_hierarchy": {"no": "Ingen metodehierarki", "en": "No method hierarchy"},
 }
 
 _DEMO_TILSTAND_NOKKEL = "_demo_bryggeskole_mastery_tilstand"
@@ -580,6 +611,13 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
         # flytdiagram med to likeverdige pakkestier, synlig gjennom hele
         # leksjonen -- se bryggeskole/package_flow.py sin docstring.
         st.markdown(render_package_flow_svg(sprak), unsafe_allow_html=True)
+    elif modul_id == _MODUL_METODEVALG:
+        # Forberedelse/metode-modulens eneste visuelle krav (issue #380
+        # kontrakt §4): tre likeverdige rader (BIAB/tradisjonelt/
+        # alt-i-ett) som alle munner ut i den identiske
+        # kok->kjøl->gjær->pakk-prosessen, synlig gjennom hele leksjonen --
+        # se bryggeskole/method_context_flow.py sin docstring.
+        st.markdown(render_method_context_flow_svg(sprak), unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:

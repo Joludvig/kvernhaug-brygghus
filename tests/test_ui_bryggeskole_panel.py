@@ -68,6 +68,7 @@ from bryggeskole.pilot_fermentation import render_chunk as gjaring_render_chunk
 from bryggeskole.pilot_boil_hop import read_pilot_file as les_koking_pilot
 from bryggeskole.pilot_cool_transfer import read_pilot_file as les_kjoling_pilot
 from bryggeskole.pilot_package import read_pilot_file as les_pakking_pilot
+from bryggeskole.pilot_method_context import read_pilot_file as les_metodevalg_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -228,13 +229,16 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
         _knapp(at, "bs_velg_hjemmebrygger_btn")
         _knapp(at, "bs_velg_bryggeri_btn")
 
-    def test_kun_fem_stadier_er_klikkbare_resten_er_kommer_senere(self):
+    def test_alle_seks_stadier_er_klikkbare_ingen_kommer_senere(self):
+        # Issue #380 fyller den tidligere siste ubrukte gridcellen
+        # (indeks 0, tidligere "Maling av malt"/"Mølle") med
+        # Forberedelse/metode -- alle seks stadiene er nå aktive moduler.
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 5)
-        self.assertEqual(len(kommer_badges), 1)
+        self.assertEqual(len(aktiv_badges), 6)
+        self.assertEqual(len(kommer_badges), 0)
 
     def test_mesking_modulen_rendrer_mesking_pilotinnhold(self):
         at = self._ny_apptest()
@@ -436,15 +440,24 @@ class TestStatusMerker(_MedIsolertTilstand):
         self.assertNotIn("Påbegynt", tekster)
         self.assertNotIn("Gjennomført denne økten", tekster)
 
-    def test_anbefalt_neste_peker_pa_mesking_forst(self):
+    def test_anbefalt_neste_peker_pa_metodevalg_forst(self):
+        # Issue #380: Forberedelse/metode er nå det aller første stadiet i
+        # prosessgridet, så det er den første anbefalingen -- før Mesking.
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         tekster = " ".join(_alle_synlige_tekster(at))
-        self.assertIn("Anbefalt neste: Mesking", tekster)
+        self.assertIn("Anbefalt neste: Forberedelse/metode", tekster)
 
     def test_anbefaling_endres_etter_mesking_er_fullfort_denne_okten(self):
         at = self._ny_apptest()
-        self._apne_modul_og_start_sporsmal(at, "mesking")
+        self._apne_modul_og_start_sporsmal(at, "metodevalg")
+        metodevalg_pilot = les_metodevalg_pilot()
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(metodevalg_pilot))
+        _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn").click().run()
+
+        _knapp(at, "bs_apne_modul_mesking_btn").click().run()
+        self._aktiv_modul = "mesking"
+        self._start_sporsmalsrunde(at)
         pilot = les_mesking_pilot()
         fasit = _korrekt_svar_ider(pilot)
         self._fullfor_alle_sporsmal(at, 1, fasit)
@@ -1129,9 +1142,16 @@ class TestKokingModulen(_MedIsolertTilstand):
         self.assertTrue(any("Boil start" in v for v in markdown_verdier))
         self.assertTrue(any("Whirlpool" in v for v in markdown_verdier))
 
-    def test_anbefalt_rekkefolge_er_mesking_koking_kjoling_gjaring_pakking(self):
+    def test_anbefalt_rekkefolge_er_metodevalg_mesking_koking_kjoling_gjaring_pakking(self):
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Forberedelse/metode", tekster)
+
+        _knapp(at, "bs_apne_modul_metodevalg_btn").click().run()
+        self._start_sporsmalsrunde(at, "metodevalg")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_metodevalg_pilot()), "metodevalg")
+        _knapp(at, "bs_oppsummering_tilbake_metodevalg_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
         self.assertIn("Anbefalt neste: Mesking", tekster)
 
@@ -1370,6 +1390,99 @@ class TestPakkingModulen(_MedIsolertTilstand):
         at = self._ny_apptest()
         self._apne_modul_og_start_sporsmal(at, "pakking")
         self.assertTrue(any(b.key == "bs_valg_pakking_r1_q0" for b in at.radio))
+
+
+# ─── Forberedelse/metode-modulen (issue #380, V2.2 G3I): sjette og siste
+# modul, fyller inn prosessgridets tidligere ubrukte første celle -- samme
+# gjenbrukte motor -- modul-kort/navigasjon, statisk flytdiagram, NO/EN,
+# egen mastery-navnerom (method.*) selv om to av fem source-facts er
+# gjenbrukte fra Mesking/Koking (FACT-MASH-0001/FACT-BOIL-0001) under en
+# NY, modul-lokal konsept-id (method.shared_process) ────────────────────
+
+class TestMetodevalgModulen(_MedIsolertTilstand):
+    def test_metodevalg_er_klikkbar_modul_i_begge_miljo(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        _knapp(at, "bs_apne_modul_metodevalg_btn")
+
+        at2 = self._ny_apptest()
+        self._velg_miljo(at2, "bs_velg_bryggeri_btn")
+        _knapp(at2, "bs_apne_modul_metodevalg_btn")
+
+    def test_metodevalg_er_forste_stadium_i_prosessgridet(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Forberedelse/metode", tekster)
+        # Det gamle malings-spesifikke navnet skal ikke lenger vises.
+        self.assertNotIn("Maling av malt", tekster)
+        self.assertNotIn("Mølle", tekster)
+
+    def test_metodevalg_modulen_rendrer_metodevalg_pilotinnhold(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "metodevalg")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("gjennomgår ølet ditt nøyaktig de samme grunnleggende trinnene", tekster)
+
+    def test_metodevalg_modulen_viser_statisk_flytdiagram(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "metodevalg")
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("<svg" in v for v in markdown_verdier))
+        self.assertTrue(any("Tradisjonelt alt-korn" in v for v in markdown_verdier))
+
+    def test_metodevalg_far_full_leksjon_sporsmal_oppsummering_flyt(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "metodevalg")
+        pilot = les_metodevalg_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Slik ligger du an", tekst)
+        self.assertEqual(len(at.exception), 0)
+
+    def test_metodevalg_konsepter_er_uavhengige_av_de_andre_modulene(self):
+        # Alle seks method.*-konseptene er nye/modul-lokale, selv om to av
+        # fem underliggende facts (FACT-MASH-0001/FACT-BOIL-0001) er
+        # gjenbrukte fra Mesking/Koking -- den konkrete mekanismen kontrakt
+        # §8 beskriver ("method.shared_process er modul-lokal
+        # mastery-wiring, ikke en ny Registry-konsept på de gjenbrukte
+        # fakta-postene").
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "metodevalg")
+        pilot = les_metodevalg_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+
+        tilstand = read_mastery_state()
+        metodevalg_konsepter = set(_konsept_rekkefolge(pilot))
+        andre_konsepter = (
+            set(_konsept_rekkefolge(les_mesking_pilot()))
+            | set(_konsept_rekkefolge(les_gjaring_pilot()))
+            | set(_konsept_rekkefolge(les_koking_pilot()))
+            | set(_konsept_rekkefolge(les_kjoling_pilot()))
+            | set(_konsept_rekkefolge(les_pakking_pilot()))
+        )
+        self.assertTrue(metodevalg_konsepter.isdisjoint(andre_konsepter))
+        for k in metodevalg_konsepter:
+            self.assertIn(k, tilstand["concepts"])
+        for k in andre_konsepter:
+            self.assertNotIn(k, tilstand["concepts"])
+
+    def test_engelsk_metodevalg_modultittel_og_flytdiagram_oversettes(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "metodevalg")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Preparation/method", tekster)
+        markdown_verdier = [m.value for m in at.markdown]
+        self.assertTrue(any("Traditional all-grain" in v for v in markdown_verdier))
+
+    def test_metodevalg_widget_nokler_er_modul_scopede(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "metodevalg")
+        self.assertTrue(any(b.key == "bs_valg_metodevalg_r1_q0" for b in at.radio))
 
 
 if __name__ == "__main__":

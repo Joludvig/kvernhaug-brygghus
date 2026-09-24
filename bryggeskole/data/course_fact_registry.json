@@ -91,7 +91,7 @@
         }
       ],
       "concepts": ["mashing.starch_conversion", "mashing.dextrins"],
-      "modules": ["mashing.fundamentals"],
+      "modules": ["mashing.fundamentals", "method_context.fundamentals"],
       "notes": "Alpha- and beta-amylase act together during mashing; their relative activity, not just overall enzyme presence, determines how much starch converts to fermentable sugar versus unfermentable dextrin."
     },
     {
@@ -163,7 +163,7 @@
         }
       ],
       "concepts": ["boil.enzyme_inactivation"],
-      "modules": ["boil_hop.fundamentals"],
+      "modules": ["boil_hop.fundamentals", "method_context.fundamentals"],
       "notes": "Scope: 'reduces microbial load at the time of boiling', not a claim that the wort/kettle/equipment remains sterile afterward -- post-boil handling (chilling, transfer, fermenter sanitation) can still introduce contamination. No specific minimum time/temperature threshold is asserted. Wording trap: never say 'sterilizes'; never attach a specific minute count as a universal rule."
     },
     {
@@ -559,6 +559,131 @@
       "concepts": ["package.path_choice"],
       "modules": ["package.fundamentals"],
       "notes": "A synthesis/interpretation drawing on FACT-PACK-0001/FACT-PACK-0002/FACT-PACK-0003 and reused FACT-COOL-0003/FACT-OXY-0002, not a new independently measured result. Does not claim every homebrewer's context makes both methods equally convenient in practice -- only that neither is inherently a 'better beer' marker. Wording trap: never present bottling as 'the beginner method' and kegging as 'the real/serious brewer method,' or vice versa; never imply a brewer must eventually 'graduate' from one to the other; keep the 'natural completion point' framing as an end to the process, not a claim that packaging is the end of the brewer's learning journey."
+    },
+    {
+      "id": "FACT-METHOD-0001",
+      "claim": "In Brew In A Bag (BIAB), the full grain bill is mashed while contained inside a porous bag placed directly in the same kettle/mash vessel used for the rest of the brew day. Instead of draining wort through a separate lauter tun or false bottom, wort/grain separation happens by lifting the bag out of the kettle (commonly allowing it to drain, and sometimes followed by a simple dunk in additional hot water) -- functionally combining the mash and separation steps into fewer vessels than the traditional layout in FACT-METHOD-0002.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-24T12:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "American Homebrewers Association technical guide, Brew in a Bag (BIAB)",
+          "ref": "https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf"
+        },
+        {
+          "tier": "B",
+          "type": "American Homebrewers Association technical article, Homebrew Equipment",
+          "ref": "https://www.homebrewersassociation.org/how-to-brew/homebrew-equipment/"
+        }
+      ],
+      "concepts": ["method.biab"],
+      "modules": ["method_context.fundamentals"],
+      "notes": "Describes the mechanism only -- does not assert BIAB always omits a separate sparge/rinse step (some BIAB brewers do dunk-sparge the bag), and does not assert BIAB is more or less efficient than traditional all-grain (no numeric efficiency claim). Does not name a specific bag material, size or brand. Wording trap: never call BIAB 'not real all-grain brewing' -- the same whole-grain mash/conversion chemistry applies (FACT-MASH-0001); never imply BIAB requires specialized equipment beyond a bag and a kettle; never state BIAB is universally more or less efficient than the other two methods."
+    },
+    {
+      "id": "FACT-METHOD-0002",
+      "claim": "In traditional separate-vessel all-grain brewing, mashing takes place in a dedicated mash/lauter vessel -- often using a false bottom, braided-hose manifold, or similar filter medium to form a 'grain bed' -- and the resulting wort is drained into a separate brewing kettle, typically with an additional sparge step rinsing the grain bed with more hot water to recover further sugar. Using a dedicated mash/lauter vessel is a matter of equipment/process layout, not a separate underlying brewing chemistry from BIAB (FACT-METHOD-0001) or an all-in-one system (FACT-METHOD-0003).",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-24T12:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "American Homebrewers Association technical article, Homebrew Equipment",
+          "ref": "https://www.homebrewersassociation.org/how-to-brew/homebrew-equipment/"
+        },
+        {
+          "tier": "B",
+          "type": "MoreBeer technical guide, All Grain Brewing Instructions",
+          "ref": "https://morebeer.com/collections/all-grain-brewing-instructions"
+        }
+      ],
+      "concepts": ["method.traditional_allgrain"],
+      "modules": ["method_context.fundamentals"],
+      "notes": "Describes the vessel/separation layout only -- does not compare traditional all-grain's efficiency or output quality against the other two methods, and does not describe or favor a specific sparge technique (batch vs. fly sparge is out of this module's beginner scope). Wording trap: never imply the mash chemistry itself differs from BIAB's -- same starch-conversion process (FACT-MASH-0001); never present traditional all-grain as the 'proper' or 'real' method relative to the other two."
+    },
+    {
+      "id": "FACT-METHOD-0003",
+      "claim": "An all-in-one brewing system integrates mashing and boiling -- and often wort recirculation and/or built-in heating/temperature control -- into a single vessel, commonly using an internal perforated basket, malt pipe, or similar filter element to hold the grain bed for mashing and enable wort/grain separation within that same vessel, rather than requiring the brewer to physically move wort between separate mash and boil vessels. Recirculating the wort through the grain bed (where present) and electric heating/temperature control change how a brewer manages the process without changing the underlying mash/boil chemistry already described in FACT-MASH-0001/FACT-BOIL-0001.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-24T12:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "Grainfather manufacturer product page, G30 Brewing System Showcase",
+          "ref": "https://us.grainfather.com/pages/g30-showcase"
+        },
+        {
+          "tier": "B",
+          "type": "Grainfather manufacturer comparison page, Compare the Grainfather Brewing Systems",
+          "ref": "https://us.grainfather.com/pages/compare-the-grainfather-brewing-systems"
+        },
+        {
+          "tier": "B",
+          "type": "American Homebrewers Association community article, Team Homebrewing Ups Your Game",
+          "ref": "https://www.homebrewersassociation.org/homebrew-community-culture/team-homebrewing-ups-your-game/"
+        }
+      ],
+      "concepts": ["method.all_in_one"],
+      "modules": ["method_context.fundamentals"],
+      "notes": "Describes the category-level mechanism only -- does not name, recommend, or compare a specific all-in-one brand/model, and does not assert all-in-one systems are more efficient, easier, or otherwise 'better' than the other two methods. Wording trap: never name a specific brand/model as defining 'all-in-one'; never imply built-in recirculation/heating changes the underlying starch-conversion or enzyme-inactivation chemistry (FACT-MASH-0001/FACT-BOIL-0001); never present all-in-one as the most 'advanced' or objectively best method."
+    },
+    {
+      "id": "FACT-METHOD-0004",
+      "claim": "Regardless of which method context is used, the water volumes, dead space, grain handling, and recirculation/sparging approach a brewer needs to plan for can differ meaningfully by equipment/method -- for example, a bag-based system's absorption/retention characteristics and a false-bottom or malt-pipe system's dead space are not identical -- so a recipe's practical water/time planning should account for the brewer's own equipment rather than assuming one universal set of numbers works identically across BIAB, traditional all-grain, and all-in-one systems.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-24T12:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "American Homebrewers Association technical guide, Brew in a Bag (BIAB)",
+          "ref": "https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf"
+        },
+        {
+          "tier": "B",
+          "type": "MoreBeer technical guide, All Grain Brewing Instructions",
+          "ref": "https://morebeer.com/collections/all-grain-brewing-instructions"
+        }
+      ],
+      "concepts": ["method.planning_variables"],
+      "modules": ["method_context.fundamentals"],
+      "notes": "States the existence and direction of this planning difference only -- does not provide or endorse a specific liter figure, dead-space table, or equipment-specific formula, and does not claim one method always requires strictly more or less water/time than another as a universal rule. Wording trap: never state a specific liter/percentage dead-space number as a fixed rule; never imply one method's planning is strictly 'harder' or 'easier' than another's; never turn this into an equipment calculator lesson."
+    },
+    {
+      "id": "FACT-METHOD-0005",
+      "claim": "BIAB, traditional separate-vessel all-grain, and all-in-one brewing machines are all legitimate, widely used all-grain homebrewing approaches that share the same underlying mash/boil/cool/ferment/package process (FACT-MASH-0001, FACT-BOIL-0001). The appropriate choice for a given brewer depends on contextual factors -- available equipment, space, budget, batch size, and workflow preference -- not on any one method being inherently a 'better,' more advanced, or more 'real' brewing method than the others.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-24T12:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "American Homebrewers Association technical guide, Brew in a Bag (BIAB)",
+          "ref": "https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf"
+        },
+        {
+          "tier": "B",
+          "type": "American Homebrewers Association community article, Team Homebrewing Ups Your Game",
+          "ref": "https://www.homebrewersassociation.org/homebrew-community-culture/team-homebrewing-ups-your-game/"
+        },
+        {
+          "tier": "B",
+          "type": "MoreBeer technical guide, All Grain Brewing Instructions",
+          "ref": "https://morebeer.com/collections/all-grain-brewing-instructions"
+        },
+        {
+          "tier": "B",
+          "type": "Grainfather manufacturer product page, G30 Brewing System Showcase",
+          "ref": "https://us.grainfather.com/pages/g30-showcase"
+        }
+      ],
+      "concepts": ["method.no_hierarchy"],
+      "modules": ["method_context.fundamentals"],
+      "notes": "A synthesis/interpretation drawing on FACT-METHOD-0001/FACT-METHOD-0002/FACT-METHOD-0003/FACT-METHOD-0004 and reused FACT-MASH-0001/FACT-BOIL-0001, not a new independently measured result. Does not claim every homebrewer's context makes all three methods equally convenient in practice -- only that none is inherently a 'better beer' marker. Wording trap: never present BIAB as 'the beginner method,' traditional all-grain as 'proper brewing,' or all-in-one as automatically producing better/worse beer, in any direction; never imply a brewer must eventually 'graduate' from one method to another; keep 'same underlying process' as the framing, never 'same convenience/cost.'"
     }
   ]
 }

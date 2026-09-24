@@ -242,9 +242,12 @@ _COOL_TRANSFER_VERIFIED_IDS = [
 _PACKAGE_VERIFIED_IDS = [
     "FACT-PACK-0001", "FACT-PACK-0002", "FACT-PACK-0003", "FACT-PACK-0004",
 ]
+_METHOD_CONTEXT_VERIFIED_IDS = [
+    "FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0004", "FACT-METHOD-0005",
+]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
-    + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS
+    + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
 )
 
 
@@ -254,7 +257,7 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         self.assertEqual(data["schema_version"], REGISTRY_SCHEMA_VERSION)
         self.assertIsInstance(data["records"], list)
 
-    def test_production_registry_has_exactly_the_v2_2c_v337_366_370_and_374_verified_records(self):
+    def test_production_registry_has_exactly_the_v2_2c_v337_366_370_374_and_380_verified_records(self):
         # V2-2C (issue #93): the first source-backed fermentation fact
         # pack. Issue #337 adds the second, mash-fundamentals fact pack.
         # Issue #366 adds the third, boil/hop-fundamentals fact pack
@@ -262,7 +265,10 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # fourth, cool/transfer-fundamentals fact pack (FACT-COOL-0001..0003,
         # FACT-OXY-0001..0003, FACT-TRANSFER-0001). Issue #374 adds the
         # fifth, package-fundamentals fact pack (FACT-PACK-0001..0004),
-        # per docs/development/v22_g3f_package_module_contract.md.
+        # per docs/development/v22_g3f_package_module_contract.md. Issue
+        # #380 adds the sixth, method-context-fundamentals fact pack
+        # (FACT-METHOD-0001..0005), per
+        # docs/development/v22_g3h_prepare_method_module_contract.md.
         # FACT-MASH-0003 (iodine test) is deliberately NOT among these --
         # it was left at status `draft`, pending an independent second
         # source, per issue #337's own weaken-rather-than-force rule.
@@ -276,7 +282,7 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         record = next(r for r in data["records"] if r["id"] == "FACT-MASH-0003")
         self.assertEqual(record["status"], "draft")
 
-    def test_production_registry_classification_mix_is_exactly_17_documented_5_interpretation_2_practical(self):
+    def test_production_registry_classification_mix_is_exactly_20_documented_7_interpretation_2_practical(self):
         # Issue #370 (V2.2 G3E) added the fourth fact pack -- cool/transfer
         # fundamentals (FACT-COOL-0001..0003, FACT-OXY-0001..0003,
         # FACT-TRANSFER-0001): 5 documented_fact, 1 professional_interpretation
@@ -284,12 +290,15 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # Issue #374 (V2.2 G3G) adds the fifth fact pack -- package
         # fundamentals (FACT-PACK-0001..0004): 3 documented_fact
         # (FACT-PACK-0001..0003), 1 professional_interpretation
-        # (FACT-PACK-0004).
+        # (FACT-PACK-0004). Issue #380 (V2.2 G3I) adds the sixth fact pack
+        # -- method-context fundamentals (FACT-METHOD-0001..0005): 3
+        # documented_fact (FACT-METHOD-0001..0003), 2
+        # professional_interpretation (FACT-METHOD-0004..0005).
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
         classifications = [r["classification"] for r in verified]
-        self.assertEqual(classifications.count("documented_fact"), 17)
-        self.assertEqual(classifications.count("professional_interpretation"), 5)
+        self.assertEqual(classifications.count("documented_fact"), 20)
+        self.assertEqual(classifications.count("professional_interpretation"), 7)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
