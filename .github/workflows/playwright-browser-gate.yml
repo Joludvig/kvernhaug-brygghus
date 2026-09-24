@@ -75,6 +75,12 @@ jobs:
       - name: Run Playwright Critical Browser Gate
         run: npx playwright test
 
+      - name: Install Python dependencies for Streamlit runtime visual gate
+        run: pip install -r requirements.txt
+
+      - name: Run Bryggeskole Streamlit SVG runtime gate
+        run: npm run test:bryggeskole-svg-runtime
+
       - name: Upload Playwright report (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
