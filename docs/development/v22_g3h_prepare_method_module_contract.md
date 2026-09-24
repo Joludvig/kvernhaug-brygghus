@@ -1,7 +1,7 @@
 # V2.2 G3H — Prepare/metodevalg verified fact pack + module contract
 
-Version: 1.1
-Status: PREP/decision document — Chief live citation pass completed 2026-09-23; implementation
+Version: 1.2
+Status: PREP/decision document — Chief live citation pass completed 2026-09-24; implementation
 decisions below are resolved for the bounded next slice; candidate new records remain `draft` until
 a separately authorized Registry-promotion / implementation pass
 Governed by: [#376](https://github.com/Joludvig/kvernhaug-brygghus/issues/376), bounded child of
@@ -137,7 +137,7 @@ registry — mirroring how `v22_g3f_package_module_contract.md` §2 and
 `v22_g3d_cool_transfer_module_contract.md` §2 both flagged uncommitted candidate sources without
 registering them itself.
 
-**Source-verification note:** Chief completed a live citation pass on 2026-09-23.
+**Source-verification note:** Chief completed a live citation pass on 2026-09-24.
 Concrete claim-matched refs are now attached to each proposed record in §2.2. This resolves the prep
 source gate only; `FACT-METHOD-0001..0005` still remain `draft` until a later authorized
 Registry-promotion / implementation pass.
@@ -211,17 +211,15 @@ the two reused records in §2.0.
   favor a specific sparge technique (batch vs. fly sparge remains `web/hjelp/bryggemetoder.html`'s
   own separate, unsourced-here discovery-aid content, explicitly out of this module's beginner
   scope).
-- **Sources (Chief live-verified 2026-09-23):**
-  - John Palmer, *How to Brew*, Chapter 19 — Brewing Your First All-Grain Batch:
-    https://howtobrew.com/section-3/chapter-19/
-    — describes the mash/lauter tun, sparge-water pot and separate boil kettle used in a conventional
-    all-grain layout.
-  - John Palmer, *How to Brew*, Chapter 17 — Getting the Wort Out:
-    https://howtobrew.com/section-3/chapter-17/
-    — describes grain-bed lautering/sparging and the lauter-tun role.
+- **Sources (Chief live-verified 2026-09-24):**
   - American Homebrewers Association, *Homebrew Equipment*:
     https://www.homebrewersassociation.org/how-to-brew/homebrew-equipment/
-    — describes mash-tun separation, grain-bed recirculation and sparge-water handling at homebrew scale.
+    — describes the mash tun as the vessel that holds the mash and separates wort from grain, plus
+    separate sparge-water handling and grain-bed recirculation/vorlauf.
+  - MoreBeer, *All Grain Brewing Instructions*:
+    https://morebeer.com/collections/all-grain-brewing-instructions
+    — explicitly contrasts BIAB/single-vessel brewing with a three-vessel mash-tun setup and
+    describes the designated mash-tun / false-bottom workflow.
 - **Wording traps to avoid:** never imply the mash chemistry itself differs from BIAB's — same
   starch-conversion process (`FACT-MASH-0001`, reused); never present traditional all-grain as the
   "proper" or "real" method relative to the other two.
@@ -296,16 +294,24 @@ the two reused records in §2.0.
   independently measured result — mirrors the precedent already set by `FACT-PACK-0004` and
   `FACT-MASH-0004`. Does not claim every homebrewer's context makes all three methods equally
   convenient in practice — only that none is inherently a "better beer" marker.
-- **Sources (Chief live-verified 2026-09-23):**
+- **Sources (Chief live-verified 2026-09-24):**
   - American Homebrewers Association, *Brew in a Bag (BIAB)*:
     https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf
-  - John Palmer, *How to Brew*, Chapter 19:
-    https://howtobrew.com/section-3/chapter-19/
+    — establishes BIAB as a legitimate all-grain method using the same downstream boil/post-boil
+    process.
+  - American Homebrewers Association, *Team Homebrewing Ups Your Game*:
+    https://www.homebrewersassociation.org/homebrew-community-culture/team-homebrewing-ups-your-game/
+    — documents three-vessel, all-in-one electric and gravity-fed mash/kettle approaches being used
+    side by side in real homebrewing practice.
+  - MoreBeer, *All Grain Brewing Instructions*:
+    https://morebeer.com/collections/all-grain-brewing-instructions
+    — states that BIAB/single-vessel and three-vessel methods are similar in underlying theory and
+    can be adapted across all-in-one systems.
   - Grainfather, *G30 Brewing System Showcase*:
     https://us.grainfather.com/pages/g30-showcase
-  - This record remains a `professional_interpretation`: the sources establish legitimate
-    functioning method contexts; the “not a quality hierarchy” framing is a bounded product/pedagogy
-    synthesis and does not claim equal convenience, cost or efficiency.
+    — establishes an integrated all-in-one all-grain method context.
+  - This record remains a `professional_interpretation`: “not a quality hierarchy” is a bounded
+    pedagogy/product synthesis and does not claim equal convenience, cost or efficiency.
 - **Wording traps to avoid:** never present BIAB as "the beginner method," traditional all-grain as
   "proper brewing," or all-in-one as automatically producing better/worse beer, in any direction;
   never imply a brewer must eventually "graduate" from one method to another; keep "same underlying
@@ -586,7 +592,7 @@ these.)
 
 The prep blockers are resolved for the bounded implementation child:
 
-1. **Citation gate — RESOLVED.** Chief completed the live source pass on 2026-09-23; concrete refs
+1. **Citation gate — RESOLVED.** Chief completed the live source pass on 2026-09-24; concrete refs
    are attached in §2.2. New records remain `draft` until the implementation/editorial pass.
 2. **Grid placement/copy — RESOLVED.** Reuse the existing first process-grid position and rename its
    learner-facing label to **Forberedelse/metode / Preparation/method** rather than presenting the
