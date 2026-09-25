@@ -105,6 +105,18 @@ class TestGjaeringTempMaalGjennomEktApp(unittest.TestCase):
         self.assertFalse(at.exception, f"app.py kastet exception ved oppstart: {at.exception}")
         return at
 
+    def test_0_ny_ulagret_oppskrift_bevarer_maal_gjennom_normal_rerun(self):
+        # Chief review #385: plassholderen er normaltilstanden for et
+        # nytt/ulagret utkast. Å sette temperaturfeltet trigger en full
+        # Streamlit-rerun; verdien må overleve den rerunen i stedet for
+        # å bli nullstilt av sidebaren.
+        at = self._at()
+        self.assertIsNone(at.session_state["gjaering_temp_maal_c"])
+        at.number_input(key="gjaering_temp_maal_c").set_value(18.5).run()
+        self.assertFalse(at.exception, f"Normal rerun feilet: {at.exception}")
+        self.assertEqual(at.session_state["gjaering_temp_maal_c"], 18.5)
+        self.assertEqual(at.number_input(key="gjaering_temp_maal_c").value, 18.5)
+
     def test_a_gammel_oppskrift_uten_felt_apner_tomt(self):
         at = self._at()
         at.sidebar.selectbox(key="sidebar_recipe_selector").select("GTM Recipe B eldre").run()
