@@ -221,6 +221,19 @@ TEKSTER = {
             "den valgte gjærstammen — følg gjeldende veiledning for akkurat denne "
             "stammen/produsenten, ikke en generell «ale varmt / lager kaldt»-regel."
         ),
+        "koking.laer_bro.tittel": "🎓 Hvorfor påvirker humle-tidspunkt ølet?",
+        "koking.laer_bro.guardrail": (
+            "⚠️ Dette gjelder tilsetninger som faktisk er i aktiv koking: en "
+            "kortere positiv koketid flytter planen i retning senere/aroma og gir "
+            "generelt lavere — ikke null — utnyttelse enn en lengre koketid, uten "
+            "at én bestemt smaksopplevelse er garantert. «Tid (Min)»-feltet, "
+            "IBU/gram-kalkulatoren og bryggedagsplanen modellerer kun aktiv "
+            "koketid i minutter — de representerer ikke flameout/whirlpool/"
+            "hop-stand som en egen teknikk. Ikke kod en ekte whirlpool ved å "
+            "skrive inn et vilkårlig lavt minuttall og deretter behandle den "
+            "resulterende IBU-en/bryggedagsplanen som whirlpool-bevisst."
+        ),
+        "koking.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Koking.",
     },
     "en": {
         "tabs.oppskrift": "🍺 Recipe",
@@ -388,6 +401,19 @@ TEKSTER = {
             "the selected yeast strain — follow current guidance for that exact "
             "strain/manufacturer, not a general 'ales warm / lagers cold' rule."
         ),
+        "koking.laer_bro.tittel": "🎓 Why does hop timing affect the beer?",
+        "koking.laer_bro.guardrail": (
+            "⚠️ This applies to additions that are actually in the active boil: a "
+            "shorter positive boil time moves the plan toward the later/aroma "
+            "direction and generally gives lower — not zero — utilization than a "
+            "longer boil time, without guaranteeing one fixed flavor outcome. The "
+            "'Tid (Min)' field, the IBU/gram calculator and the brewday plan model "
+            "active-boil minutes only — they do not represent flameout/whirlpool/"
+            "hop-stand as a separate technique. Do not encode a true whirlpool by "
+            "entering an arbitrary low minute value and then treat the resulting "
+            "IBU/brewday timing as whirlpool-aware."
+        ),
+        "koking.laer_bro.footer": "Want to practice more? Open Brew School → Boil.",
     },
 }
 
