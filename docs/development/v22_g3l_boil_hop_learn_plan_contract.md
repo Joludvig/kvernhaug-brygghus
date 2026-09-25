@@ -1,6 +1,6 @@
 # V2.2 Goal 3L — Koking/humle Learn → Plan bridge contract
 
-Version: 1.0
+Version: 1.1
 Status: Decision/prep document — reviewable, not yet actionable
 Governed by: [#386](https://github.com/Joludvig/kvernhaug-brygghus/issues/386), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3),
@@ -207,23 +207,31 @@ no widget-bound value that must survive a rerun before its own widget exists (§
 
 ---
 
+
 ## 2. Exact selected user task
 
 While editing a recipe's hop rows in `ui/hop_panel.py`, the learner can open one small, collapsed
 "why does hop timing matter" bridge showing the existing, verified Koking/humle timing content
-(`CHUNK-BOILHOP-C/D/E/F`, unchanged) — and, independently of whether they open it, they continue
-making their actual planning decision exactly as before: typing a minute value into each row's
-existing "Tid (Min)" field. No new field, selectbox, or category is added. The bridge's own text
-makes explicit what the existing numeric field already lets the learner do: choosing a *high*
-`tid` value is the "early/bittering" direction, choosing a *low* `tid` value (including a true
-whirlpool/hop-stand addition) is the "late/aroma" direction — and a short, separate guardrail
-statement discloses that Kvernhaug's IBU/gram calculation cannot distinguish a true whirlpool
-addition from an in-boil addition at the same minute count (§8).
+(`CHUNK-BOILHOP-C/D/E/F`, unchanged) — and, independently of whether they open it, continue
+making one concrete planning decision already represented correctly by the App: choosing the
+**boil duration for an in-boil hop addition** in the existing "Tid (Min)" field.
 
-This is deliberately the cheapest possible instance of Learn → Plan, mirroring both precedents:
-it does not gate, validate, auto-set, or add any new persisted state — the mechanism of "type a
-number into the existing field" is completely unchanged; the bridge only adds an optional,
-in-context "why" and an explicit, honest disclosure of what the number does and does not capture.
+No new field, selectbox, or category is added. For additions that are actually in the active
+boil, a higher `tid` value represents an earlier/longer-boiled addition and a lower positive
+`tid` value represents a later/shorter-boiled addition. That is the bounded Learn → Plan task.
+
+**A true flameout/whirlpool/hop-stand addition is explicitly NOT represented by this field in the
+current App.** The planner has no technique/phase dimension: a positive `tid` is consumed by the
+Tinseth calculation and brewday timing as active-boil minutes, while `tid == 0` is currently
+treated as zero boil utilization and the UI labels it as dry hop. The bridge must therefore
+never tell the learner to encode a true whirlpool by "just entering a low minute value."
+`CHUNK-BOILHOP-F` is reused specifically to teach that whirlpool is a distinct technique and
+to disclose that the current recipe planner cannot represent it faithfully yet.
+
+This is deliberately the cheapest safe instance of Learn → Plan: it does not gate, validate,
+auto-set, or add new persisted state. The existing numeric field remains the planning mechanism
+for **in-boil timing only**; the bridge adds an in-context "why" plus an explicit boundary around
+techniques the current data model does not represent.
 
 ---
 
@@ -234,7 +242,7 @@ in-context "why" and an explicit, honest disclosure of what the number does and 
 | "Why does boil time change bitterness?" (higher `tid` → more bitterness, up to a ceiling) | `CHUNK-BOILHOP-C` / `FACT-HOP-0001`, unchanged |
 | "Why does a later/whirlpool addition taste/smell different?" (lower `tid` → more aroma, lower — not zero — bitterness) | `CHUNK-BOILHOP-D` / `FACT-HOP-0002`, unchanged |
 | "Why brewers use more than one addition" (early bittering + late/whirlpool aroma) | `CHUNK-BOILHOP-E` / `FACT-HOP-0003`, unchanged |
-| "Whirlpool is a distinct technique, not just a very-late boil addition" — direct source of the guardrail in §8 | `CHUNK-BOILHOP-F` / `FACT-HOP-0001`+`FACT-HOP-0002`, unchanged |
+| "Whirlpool is a distinct technique, not just a very-late boil addition" — direct source for the boundary that the current numeric boil-time field must **not** be used as a fake whirlpool representation | `CHUNK-BOILHOP-F` / `FACT-HOP-0001`+`FACT-HOP-0002`, unchanged |
 
 `CHUNK-BOILHOP-A`/`B` (general boil chemistry/safety — enzyme inactivation, DMS, hot break,
 boil-over) are **not reused** — they answer "why do we boil at all," not "why does *when* I add
@@ -296,19 +304,25 @@ Gjæring contract ruled for `yeast_panel.py`'s starter/health intro and selectbo
 
 ---
 
+
 ## 5. Whether a persistent-data change is needed
 
-**No.** No new Recipe Object field, no new hop-row key, no new selectbox/category widget. §1.6's
-audit conclusion is the load-bearing fact here: hop timing is already, end to end, a single
-numeric `tid` value, and `FACT-HOP-0001`/`FACT-HOP-0002`/`FACT-HOP-0003` together describe a
-*continuous direction* (more minutes → more bitterness/less aroma, fewer minutes → less
-bitterness/more aroma), not a small fixed set of discrete categories that would need their own
-field to be "chosen." The existing field is already the exact mechanism for the "deliberate
-hop-timing role/direction choice" the issue asks this document to find — introducing a parallel
-categorical field (e.g. an explicit "early/late/whirlpool" enum) would be precisely the kind of
-recipe/Core schema extension the issue's guardrails say must not be assumed necessary, and the
-audit does not find it necessary: everything this bridge needs to teach and disclose is
-expressible as copy attached to the field that already exists.
+**No persistent-data change is needed for the bounded task selected in §2: choosing earlier vs.
+later timing for additions that are actually in the active boil.** The existing `tid` field
+already persists exactly that quantity through local recipe storage, `.kbhrecipe`, `.kbhbrew`,
+IBU calculation and brewday reporting.
+
+The audit does, however, prove a separate product gap: **flameout/whirlpool/hop-stand cannot be
+represented faithfully by the current three-field hop row**. Adding a technique/phase field
+would be a real recipe/Core design decision because calculation and brewday semantics would also
+need to understand it; merely adding a cosmetic enum while leaving downstream consumers
+`tid`-only would create contradictory state. That broader change is not required to ship this
+small Learn → Plan bridge and is therefore deferred rather than smuggled into this slice.
+
+Accordingly, the implementation child must not add a role/category field and must not teach the
+learner to encode whirlpool using a low `tid` value. The bridge may explain the early↔late
+**in-boil** direction and must clearly state that true post-boil whirlpool/hop-stand planning is
+not yet represented by this App surface.
 
 ---
 
@@ -338,7 +352,7 @@ convention already established by `prosess.laer_bro.*`/`gjaering.laer_bro.*`:
 | Key | Constraint |
 |---|---|
 | `koking.laer_bro.tittel` | Short, inviting, collapsed-by-default label — same tone as `prosess.laer_bro.tittel`/`gjaering.laer_bro.tittel`, adapted to hop timing (e.g. "🎓 Hvorfor påvirker humle-tidspunkt ølet?" / "🎓 Why does hop timing affect the beer?"). |
-| `koking.laer_bro.guardrail` | Must state, in both languages: (a) a lower "Tid (Min)" value generally retains more aroma and reaches lower — **not zero** — bitterness utilization than a higher value (mirroring `CHUNK-BOILHOP-D`'s own "not zero" hedge exactly, never softened into "no bitterness"); (b) Kvernhaug's IBU/gram calculation computes utilization purely from the entered minute value and does not know whether an addition is a true in-boil addition or a lower-temperature post-boil whirlpool/hop-stand, so an addition intended as a whirlpool addition is scored identically to an in-boil addition at the same minute count, which can overstate the true bitterness of a whirlpool addition. Must not imply the calculator "understands" whirlpool as a separate case, and must not state a specific corrective minute offset or temperature (no invented compensation formula — that would be exactly the "automatic recipe optimization"/"IBU math lesson" the guardrails forbid). |
+| `koking.laer_bro.guardrail` | Must state, in both languages: (a) for **in-boil additions**, a shorter positive boil time generally moves the plan toward the late/aroma direction and lower — **not zero** — utilization than a longer boil time, without promising a fixed sensory outcome; (b) the current "Tid (Min)" field, IBU/gram calculator and brewday timing model active-boil minutes only and do **not** represent flameout/whirlpool/hop-stand as a separate technique; (c) therefore the learner must not encode a true whirlpool simply by entering an arbitrary low minute value and treating the resulting IBU/brewday timing as whirlpool-aware. Do not invent a corrective minute offset, temperature, utilization percentage or compensation formula. |
 | `koking.laer_bro.footer` | Plain-text pointer to the Bryggeskole Koking module — same "Want to practice more? Open Brew School → X" shape as the two precedent footers, not a working navigation control (§4). |
 
 `bryggeskole.feil.innhold_ugyldig` (the existing shared invalid-pilot-content error key, already
@@ -347,59 +361,49 @@ unchanged — no new error string is minted for this bridge.
 
 ---
 
+
 ## 8. Fail-closed behavior
 
 - **Invalid pilot content:** identical to both precedents — a caught `PilotContentError` renders
   the existing shared error string and returns early, never raising past `render_hop_panel()`
-  into a crashed `tab_oppskrift` (§4, point 1).
-- **The calculator's whirlpool blind spot is disclosed, not silently left implicit, and not
-  "fixed."** This task does not, and per its non-goals (§11) must not, change
-  `modules/calculations.py`'s Tinseth implementation, `modules/brewday_calc.py`'s derived
-  reporting, or add any whirlpool-aware branch to either. The `koking.laer_bro.guardrail` string
-  (§7) is the entire mechanism by which this known limitation becomes visible to the learner —
-  this is the direct analog of the Gjæring contract's "Kvernhaug does not store a verified
-  temperature range for your strain" disclosure: a plain statement of what the tool does *not*
-  know, sitting next to the field where that gap matters, rather than a guessed correction.
+  into a crashed `tab_oppskrift`.
+- **The planner's whirlpool blind spot is disclosed, not silently left implicit, and not
+  "fixed."** This task does not change `modules/calculations.py`'s Tinseth implementation,
+  `modules/brewday_calc.py`'s derived reporting, or add a whirlpool-aware branch to either.
+  The `koking.laer_bro.guardrail` string must state that the current field is an
+  active-boil-time planner and that a true flameout/whirlpool/hop-stand is **not representable
+  here yet**. This is safer than accepting a fake numeric encoding and merely warning that its
+  IBU may be wrong.
 - **No new failure mode is introduced.** The bridge is read-only display; it never writes to
-  `valgt_humle`, any hop-row widget key, or any persisted field, so there is no new invalid-state
-  transition for this task to fail closed against beyond the pilot-content case above.
+  `valgt_humle`, any hop-row widget key, or any persisted field.
 
 ---
+
 
 ## 9. Transfer/application acceptance scenario
 
 Mirroring both precedents' §9 — a human acceptance step, separate from and in addition to the
 automated tests in §10:
 
-- **Setup:** the evaluator is given one already-planned recipe with a single hop addition at
-  `tid = 60` (bittering-only), targeting a beer style where high hop aroma is also desired (the
-  exact style/numbers are authored by the implementation child, not fixed here, to avoid
-  pre-baking pilot content — but must differ from `Q-BOILHOP-005`/`Q-BOILHOP-007`'s existing
-  wording/numbers).
-- **Task:** after reading the bridge's four chunks in the running app, the evaluator proposes a
-  concrete change to the hop plan and states, in their own words, (a) what they would change
-  (e.g. add a second, low-`tid` or whirlpool addition, or lower the existing one), (b) a
-  rationale invoking the bitterness/aroma trade-off (`FACT-HOP-0001`/`FACT-HOP-0002`) and/or the
-  combined-strategy concept (`FACT-HOP-0003`), and (c) an explicit acknowledgment — unprompted —
-  that if they plan a true whirlpool addition, the app's IBU number for it will not reflect the
-  lower-temperature/whirlpool effect (`FACT-HOP-0002`/`CHUNK-BOILHOP-F`, the guardrail from §8).
+- **Setup:** the evaluator is given a recipe with one hop addition boiled for a long duration and
+  a goal that also calls for more late-hop aroma character. The exact style and numbers must be
+  different from the authored Koking/humle questions.
+- **Task:** after reading the bridge's four chunks, the evaluator proposes a concrete **in-boil**
+  timing change (for example adding a second shorter-boiled addition while retaining an early
+  bittering addition) and explains, in their own words, (a) why the shorter-boiled addition moves
+  in the late/aroma direction, (b) why it can still contribute bitterness rather than "zero,"
+  and (c) that a true flameout/whirlpool/hop-stand is a different technique which this current
+  `Tid (Min)` planning field cannot represent faithfully.
 - **Observable PASS criteria (all three required):** (1) the proposed change is a coherent
-  application of the bitterness/aroma trade-off (there is no single "correct" schedule — grade
-  the reasoning, per `FACT-HOP-0003`'s own "not a fixed numeric schedule" framing); (2) the
-  rationale references the direction/utilization relationship in the evaluator's own words, not
-  a copied chunk sentence; (3) the whirlpool-calculator-limitation acknowledgment is stated
-  unprompted.
-- **Observable FAIL criteria (any one):** a whirlpool addition is asserted to contribute "zero"
-  or "negligible" bitterness; the app's displayed IBU number for a whirlpool addition is treated
-  as an exact, calculator-verified value; or no rationale beyond "the app told me" can be
-  produced.
-- **Method and scope:** a human acceptance step (owner or QA reviewer) run once at the
-  implementation child's final checkpoint, using the shipped app — no new schema, no new
-  authored pilot/registry content, no scoring UI or mastery-store change (consistent with §11's
-  non-goals).
-- Per this project's existing governance, this is representative acceptance evidence — it does
-  not gate roadmap progress on the owner personally acting as a mandatory learner (mirrors both
-  precedents' own framing).
+  application of the bitterness/aroma trade-off without claiming one fixed correct schedule;
+  (2) the rationale uses the verified time/utilization/aroma direction in the evaluator's own
+  words; (3) the evaluator does **not** fake a whirlpool by entering an arbitrary low boil-time
+  number and explicitly recognizes the current planner boundary.
+- **Observable FAIL criteria (any one):** the learner claims late/whirlpool means zero bitterness;
+  treats a low `Tid (Min)` value as a faithful whirlpool representation; treats the resulting
+  IBU as whirlpool-aware; or gives no rationale beyond "the app told me."
+- **Method and scope:** representative human acceptance evidence only; no owner-as-student gate,
+  no new schema, no new authored pilot/registry content, no scoring UI or mastery-store change.
 
 ---
 
@@ -415,7 +419,8 @@ automated tests in §10:
      `pilot_boil_hop.render_chunk(..., "no")`/`"en"` output exactly, and does **not** render
      `CHUNK-BOILHOP-A`/`B`;
    - the `koking.laer_bro.guardrail` string renders inside the same expander, visually
-     distinguished from the chunk text, for both `no` and `en`;
+     distinguished from the chunk text, for both `no` and `en`, and explicitly says the
+     current field models active-boil timing rather than whirlpool/flameout/hop-stand;
    - an invalid pilot file (mocked `PilotContentError`) shows the shared error string and never
      crashes `tab_oppskrift`;
    - existing row behavior is unchanged: the hop-row dict shape remains exactly
@@ -485,30 +490,32 @@ these.)
 
 ---
 
+
 ## 12. One bounded implementation recommendation
 
-A single implementation child should: add the `st.expander` bridge described in §4 to
+A single implementation child should add the `st.expander` bridge described in §4 to
 `ui/hop_panel.py::render_hop_panel()`, importing `bryggeskole.pilot_boil_hop` and `ui.i18n`
 exactly as `ui/process_panel.py`/`ui/yeast_panel.py` already do for their own bridges; add the
 three `koking.laer_bro.*` i18n keys (§7) to `modules/i18n.py`'s NO/EN blocks; add no new
-persisted field, session-state key, or calculation change; and cover it with the test plan in
-§10. This is strictly smaller in surface area than either shipped precedent (no new Recipe
-Object field, no new backward-compatibility/reset-transition contract, no new export/import
-whitelist entry) — the entire change is one read-only educational panel addition plus one
-disclosure string.
+persisted field, session-state key, or calculation change; explicitly scope the existing
+`Tid (Min)` control to **in-boil additions** and disclose that true
+flameout/whirlpool/hop-stand is not representable by that field; and cover it with the test plan
+in §10. No calculation, brewday, schema or hop-row-shape change belongs in this child.
 
 ---
 
+
 ## 13. Remaining owner/Chief decisions
 
-None identified. Every question in issue #386's "Required decision" and "Audit first" sections
-was resolvable from existing, already-established repo precedent: the verified-only Course Fact
-Registry boundary (§1.1–§1.2), the already-shipped Mesking/Gjæring Learn→Plan bridge mechanics
-(§4), and a direct audit proving hop timing is already, end to end, a single numeric field whose
-existing continuous range already *is* the "early/late/whirlpool" direction this task needed to
-surface (§1.6/§5) — so no new schema, no new UI control type, and no owner-level product
-trade-off remained to resolve. The one genuinely new piece of content this document introduces —
-the exact NO/EN wording of the calculator-limitation guardrail — is constrained tightly enough
-by §7/§8 that Claude may write concise copy within that constraint without a separate owner
-tie-break, exactly as the Gjæring precedent's §12 point 2 already established for its own
-guardrail wording.
+None identified for this bounded implementation. The existing numeric field is sufficient for
+the selected **early↔late in-boil** timing decision, while the audit also proves that
+whirlpool/flameout/hop-stand is a distinct unsupported planning dimension. That unsupported
+dimension is explicitly deferred rather than misrepresented, so this slice needs no schema
+change or owner tie-break.
+
+A future product round may decide whether explicit post-boil hop techniques deserve a
+recipe/Core representation that is understood consistently by planning, IBU estimation and
+brewday reporting. That future decision is not a prerequisite for this bridge.
+
+---
+
