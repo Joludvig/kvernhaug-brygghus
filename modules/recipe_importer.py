@@ -254,6 +254,11 @@ def apply_import_to_session_state(import_result):
     # app_a3_state_orientation_preflight.md Section 8, funn A3-1.
     st.session_state.pop("_last_loaded_recipe", None)
     st.session_state.pop("_last_loaded_recipe_file", None)
+    # V2.2 G3K Chief-fiks (issue #384): tekstimport oppretter en ny
+    # oppskriftskontekst og kan ikke bære det App-interne
+    # fermentation_temp_target_c-feltet. En tidligere oppskrifts verdi
+    # må derfor aldri lekke inn i det importerte utkastet.
+    st.session_state["gjaering_temp_maal_c"] = None
 
     matched = import_result["matched"]
 
