@@ -76,8 +76,13 @@ class TestHumletidOverKoketidIEktApp(unittest.TestCase):
         self.assertEqual(at.session_state["valgt_humle"][0]["tid"], 90)
 
         # === Bryggemåte-panelet: varsel om umulig humletid ===
+        # NB: matcher den spesifikke umulig-humletid-varselfrasen, ikke bare
+        # ordet "koketid" alene -- V2.2 G3M (issue #388) la til en egen,
+        # urelatert Learn->Plan-guardrail i ui/hop_panel.py som også
+        # (korrekt) bruker ordet "koketid", så et bredt substreng-søk på
+        # "koketid" alene ville ikke lenger vært unikt for DENNE varselen.
         varsel_tekster = " ".join(w.value for w in at.warning)
-        self.assertIn("koketid", varsel_tekster.lower())
+        self.assertIn("har lengre egen koketid enn", varsel_tekster.lower())
         self.assertIn("Magnum", varsel_tekster)
 
         # === Bryggedag-panelet: eksportknappen er låst ===
@@ -109,8 +114,12 @@ class TestHumletidOverKoketidIEktApp(unittest.TestCase):
         at.sidebar.selectbox(key="sidebar_recipe_selector").select("E2E Humletid OK").run()
         self.assertFalse(at.exception)
 
+        # Samme presisering som over: sjekk den spesifikke umulig-
+        # humletid-frasen, ikke bare ordet "koketid" (som nå også
+        # forekommer, korrekt, i hop_panel.py sin urelaterte Learn->Plan-
+        # guardrail, se kommentaren i testen over).
         varsel_tekster = " ".join(w.value for w in at.warning)
-        self.assertNotIn("koketid", varsel_tekster.lower())
+        self.assertNotIn("har lengre egen koketid enn", varsel_tekster.lower())
 
         eksport_knapp = at.button(key="brewday_print_btn")
         self.assertFalse(eksport_knapp.disabled)

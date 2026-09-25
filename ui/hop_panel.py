@@ -1,13 +1,63 @@
 import streamlit as st
 from modules.calculations import beregn_gram_fra_ibu
 
+from bryggeskole import pilot_boil_hop as _pilot_koking
+from ui.i18n import gjeldende_sprak, t
+
 FORETRUKKET_HUMLE_OPPRINNELSE = [
     "Norsk", "Britisk", "Tysk", "Tsjekkisk", "Belgisk",
     "Australsk", "Newzealandsk",
 ]
 
+# De fire eksisterende, verifiserte Koking/humle-læringsbolkene denne
+# Learn -> Plan-broen viser (V2.2 G3M, issue #388) -- nøyaktig disse
+# fire, i denne rekkefølgen, per docs/development/
+# v22_g3l_boil_hop_learn_plan_contract.md §3/§4. CHUNK-BOILHOP-A/B
+# (generell kokekjemi) gjenbrukes bevisst IKKE her -- de svarer på
+# "hvorfor koker vi i det hele tatt", ikke "hvorfor betyr NÅR jeg
+# tilsetter humle noe". Ingen ny undervisningstekst forfattes her; broen
+# gjenbruker bryggeskole.pilot_boil_hop sin egen
+# read_pilot_file()/render_chunk() uendret, akkurat som
+# ui/process_panel.py/ui/yeast_panel.py allerede gjør for sine broer.
+_LAER_BRO_CHUNK_IDER = (
+    "CHUNK-BOILHOP-C", "CHUNK-BOILHOP-D", "CHUNK-BOILHOP-E", "CHUNK-BOILHOP-F",
+)
+
+
+def _render_laer_bro(sprak):
+    """Kontekstuell Learn -> Plan-bro (V2.2 G3M, issue #388): en
+    kollapset expander rett under humle-panelets header som viser
+    CHUNK-BOILHOP-C/D/E/F fra den eksisterende, verifiserte
+    Koking/humle-piloten -- read-only, ingen mastery-kall
+    (evaluate_answer/apply_answer), ingen ny lagringstilstand, ingen
+    Registry-/pilot-mutasjon. Rendres nøyaktig én gang uansett antall
+    humlerader (ikke per rad). Ugyldig pilotinnhold (PilotContentError)
+    skal aldri krasje Oppskrift-fanen, samme mønster som
+    ui/process_panel.py/ui/yeast_panel.py/ui/bryggeskole_panel.py.
+
+    Guardrailen etter chunkene disloserer, uten å reparere, at det
+    eksisterende "Tid (Min)"-feltet, IBU/gram-kalkulatoren og
+    bryggedagsplanen kun modellerer aktiv koketid i minutter -- en
+    ekte flameout/whirlpool/hop-stand er ikke representert av dette
+    feltet i dagens App (kontrakten §5/§8), og læreren skal derfor
+    aldri late som om et vilkårlig lavt minuttall er en trofast
+    whirlpool-koding."""
+    with st.expander(t("koking.laer_bro.tittel"), expanded=False):
+        try:
+            pilot = _pilot_koking.read_pilot_file()
+        except _pilot_koking.PilotContentError:
+            st.error(t("bryggeskole.feil.innhold_ugyldig"))
+            return
+        chunker = {c["id"]: c for c in pilot["chunks"]}
+        for chunk_id in _LAER_BRO_CHUNK_IDER:
+            st.markdown(_pilot_koking.render_chunk(chunker[chunk_id], sprak)["text"])
+        st.warning(t("koking.laer_bro.guardrail"))
+        st.caption(t("koking.laer_bro.footer"))
+
+
 def render_hop_panel(humle_database):
     st.header("🌿 Humle-tilsetninger")
+    _render_laer_bro(gjeldende_sprak())
 
     _default_h_id = next(
         (hid for hid in humle_database if "east_kent" in hid),
