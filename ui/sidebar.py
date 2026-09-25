@@ -247,15 +247,17 @@ def render_sidebar():
             st.sidebar.success(t("sidebar.lastet_ok", navn=valgt_lagret_navn))
             st.rerun()
         elif valgt_lagret_navn == _INGEN_OPPSKRIFT_VALGT:
+            # V2.2 G3K Chief-fiks (issue #384): plassholderen er også
+            # normaltilstanden for en helt ny/ulagret oppskrift. Derfor
+            # skal temperaturmålet KUN ryddes når vi faktisk går FRA en
+            # tidligere lastet, lagret oppskrift TIL blank state -- ikke
+            # på hver ordinære Streamlit-rerun mens brukeren redigerer et
+            # nytt utkast.
+            _hadde_lastet_oppskrift = st.session_state.get("_last_loaded_recipe") is not None
             st.session_state.pop("_last_loaded_recipe", None)
             st.session_state.pop("_last_loaded_recipe_file", None)
-            # V2.2 G3K (issue #384) -- tilbake til plassholderen skal
-            # ALDRI la forrige oppskrifts planlagte gjæringstemperatur
-            # henge igjen. Direkte tildeling er trygt her av samme grunn
-            # som over: denne grenen kjører FØR yeast-widgeten
-            # instansieres, og har ingen egen st.rerun() som ville gjort
-            # en "pending"-nøkkel nødvendig.
-            st.session_state["gjaering_temp_maal_c"] = None
+            if _hadde_lastet_oppskrift:
+                st.session_state["gjaering_temp_maal_c"] = None
     else:
         st.sidebar.info(t("sidebar.ingen_lagret"))
 
