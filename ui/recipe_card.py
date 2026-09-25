@@ -165,6 +165,11 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
             water_target_profile=st.session_state.get("aktiv_vannmaal_snapshot"),
             water_treatment=st.session_state.get("aktiv_vannbehandling"),
             water_measurements=st.session_state.get("aktiv_vannmaalinger"),
+            # V2.2 G3K (issue #384) -- planlagt gjæringstemperatur, satt
+            # av ui/yeast_panel.py sin Learn->Plan-bro. Samme "les
+            # direkte fra session_state ved HVER rebygging"-mønster som
+            # process_profile/water_* over.
+            fermentation_temp_target_c=st.session_state.get("gjaering_temp_maal_c"),
             # PRI 2C2 (KBHR-011/KBHR-014) -- ikke-beregningspåvirkende
             # metadata bevart opakt fra en tidligere .kbhrecipe-import
             # (hydrert av ui/sidebar.py ved load, se
@@ -349,6 +354,18 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                                 # oppskrift skal ikke arve den nettopp
                                 # arkiverte oppskriftens originRecipeId.
                                 st.session_state["_aktiv_kbh_origin_recipe_id"] = None
+                                # V2.2 G3K (issue #384) -- en ny, blank oppskrift
+                                # skal ikke arve den nettopp arkiverte
+                                # oppskriftens planlagte gjæringstemperatur.
+                                # "gjaering_temp_maal_c" er widget-bundet
+                                # (ui/yeast_panel.py sitt number_input, rendret
+                                # TIDLIGERE i denne samme kjøringen -- se
+                                # app.py) -- kan derfor IKKE settes direkte
+                                # her, samme fallgruve/mønster som
+                                # "_pending_gjeldende_navn" rett under. Løses
+                                # opp av app.py FØR render_yeast_panel()
+                                # instansierer widgeten på neste kjøring.
+                                st.session_state["_pending_gjaering_temp_maal_c"] = None
                                 # "gjeldende_navn" er bundet til Bryggnavn-widgeten
                                 # (instansiert lenger opp i DENNE samme renderingen)
                                 # -- kan derfor ikke settes direkte her (Streamlit

@@ -24,7 +24,7 @@ oppskrifts identitet -- en import skal aldri gjøre det).
 import copy
 
 from modules.process_profiles import normaliser_prosessprofil
-from modules.recipe import resolve_recipe_efficiency
+from modules.recipe import resolve_recipe_efficiency, resolve_fermentation_temp_target_c
 
 # issue #363 (V2.2 G2D) -- ETT-gangs "denne originRecipeId ble nettopp
 # frossen ved en 'Opprett neste variant'-seed"-markør, KUN konsumert av
@@ -120,6 +120,17 @@ def apply_kbhrecipe_import_to_session_state(import_resultat):
     st.session_state["_lastet_water_target_profile"] = r.get("water_target_profile")
     st.session_state["_lastet_water_treatment"] = r.get("water_treatment")
     st.session_state["_lastet_water_measurements"] = r.get("water_measurements")
+    # V2.2 G3K (issue #384) -- .kbhrecipe/neste-variant-import bærer
+    # IKKE dette feltet i denne runden (se docs/development/
+    # v22_g3j_fermentation_learn_plan_contract.md §6/§7 punkt 6/7 --
+    # portabilitet er eksplisitt utsatt), så r.get(...) er i praksis
+    # alltid None her. Settes UBETINGET likevel, akkurat som
+    # _aktiv_recipe_efficiency/_aktiv_kbh_passthrough over -- ellers
+    # kunne en tidligere aktiv oppskrifts planlagte gjæringstemperatur
+    # bli hengende igjen i session_state etter en import.
+    st.session_state["gjaering_temp_maal_c"] = resolve_fermentation_temp_target_c(
+        r.get("fermentation_temp_target_c")
+    )
     st.session_state["_original_batch_size"] = r["batch_size"]
     # Tvinger malt-/humleradenes widget-nøkler til å bli friske (se
     # ui/malt_panel.py/ui/hop_panel.py sin `_v = import_versjon`-bruk)

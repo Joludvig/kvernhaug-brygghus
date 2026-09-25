@@ -29,7 +29,11 @@ logging.getLogger("streamlit").setLevel(logging.ERROR)
 import streamlit as st
 
 from modules.kbh_import import parse_kbhrecipe_json
-from modules.kbh_import_apply import apply_kbhrecipe_import_to_session_state
+from modules.kbh_import_apply import (
+    apply_kbhrecipe_import_to_session_state,
+    apply_next_variant_seed_to_session_state,
+)
+from modules.recipe_importer import apply_import_to_session_state
 from modules.process_profiles import hent_standardprofil, bygg_egendefinert_profil
 
 
@@ -261,6 +265,24 @@ class TestApplyKbhrecipeImportTilSessionState(unittest.TestCase):
         self.assertIsNone(st.session_state["_lastet_water_source_profile"])
         self.assertNotIn("_last_loaded_recipe", st.session_state)
         self.assertNotIn("_last_loaded_recipe_file", st.session_state)
+
+    # ─── G3K: nytt oppskriftskontekst må rydde gjæringstemp ───────────
+
+    def test_13b_tekstimport_rydder_stale_gjaeringstemperatur(self):
+        st.session_state["gjaering_temp_maal_c"] = 19.5
+        apply_import_to_session_state({
+            "matched": {"malt": [], "humle": [], "gjaer": None},
+            "metadata": {},
+        })
+        self.assertIsNone(st.session_state["gjaering_temp_maal_c"])
+
+    def test_13c_neste_variant_seed_arver_ikke_stale_sessionverdi_implisitt(self):
+        st.session_state["gjaering_temp_maal_c"] = 19.5
+        resultat = _import_resultat(
+            originRecipeId="55555555-5555-4555-8555-555555555555"
+        )
+        apply_next_variant_seed_to_session_state(resultat)
+        self.assertIsNone(st.session_state["gjaering_temp_maal_c"])
 
     # ─── 14: full integrasjon -- parser -> apply ───────────────────────
 

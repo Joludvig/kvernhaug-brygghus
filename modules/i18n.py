@@ -213,6 +213,14 @@ TEKSTER = {
         "brew_history.neste_variant_lenke_ingen_kandidater": "Ingen lagrede oppskrifter med portabel identitet (originRecipeId) funnet ennå.",
         "prosess.laer_bro.tittel": "🎓 Hvorfor påvirker mesketemperatur ølet?",
         "prosess.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Mesking.",
+        "gjaering.laer_bro.tittel": "🎓 Hvorfor påvirker gjæringstemperatur ølet?",
+        "gjaering.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Gjæring.",
+        "gjaering.temp_maal.label": "Planlagt gjæringstemperatur (°C)",
+        "gjaering.temp_maal.hjelp": (
+            "Valgfritt. Kvernhaug lagrer ikke et verifisert temperaturområde for "
+            "den valgte gjærstammen — følg gjeldende veiledning for akkurat denne "
+            "stammen/produsenten, ikke en generell «ale varmt / lager kaldt»-regel."
+        ),
     },
     "en": {
         "tabs.oppskrift": "🍺 Recipe",
@@ -372,6 +380,14 @@ TEKSTER = {
         "brew_history.neste_variant_lenke_ingen_kandidater": "No saved recipes with a portable identity (originRecipeId) found yet.",
         "prosess.laer_bro.tittel": "🎓 Why does mash temperature affect the beer?",
         "prosess.laer_bro.footer": "Want to practice more? Open Brew School → Mashing.",
+        "gjaering.laer_bro.tittel": "🎓 Why does fermentation temperature affect the beer?",
+        "gjaering.laer_bro.footer": "Want to practice more? Open Brew School → Fermentation.",
+        "gjaering.temp_maal.label": "Planned fermentation temperature (°C)",
+        "gjaering.temp_maal.hjelp": (
+            "Optional. Kvernhaug does not store a verified temperature range for "
+            "the selected yeast strain — follow current guidance for that exact "
+            "strain/manufacturer, not a general 'ales warm / lagers cold' rule."
+        ),
     },
 }
 

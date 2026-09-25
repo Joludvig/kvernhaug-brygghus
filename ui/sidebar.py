@@ -9,7 +9,7 @@ from modules.recipe_storage import (
     finnes_oppskrift_med_origin,
 )
 from modules.process_profiles import normaliser_prosessprofil
-from modules.recipe import resolve_recipe_efficiency
+from modules.recipe import resolve_recipe_efficiency, resolve_fermentation_temp_target_c
 from modules.recipe_importer import (
     parse_recipe_text,
     match_imported_ingredients,
@@ -220,6 +220,19 @@ def render_sidebar():
             st.session_state["_lastet_water_target_profile"] = r_data.get("water_target_profile")
             st.session_state["_lastet_water_treatment"] = r_data.get("water_treatment")
             st.session_state["_lastet_water_measurements"] = r_data.get("water_measurements")
+            # V2.2 G3K (issue #384) -- planlagt gjæringstemperatur, satt
+            # UBETINGET på HVERT load, akkurat som
+            # _aktiv_recipe_efficiency/_aktiv_kbh_passthrough over: en
+            # eldre oppskrift uten feltet, eller en ugyldig lagret verdi,
+            # gir bevisst None -- ALDRI gjettet fra gjaertype/kategori/
+            # smakstags. Widgetnøkkelen ("gjaering_temp_maal_c") kan
+            # settes direkte her fordi render_sidebar() alltid kjører
+            # FØR ui/yeast_panel.py sitt number_input instansieres samme
+            # scriptkjøring (og denne grenen avslutter uansett med
+            # st.rerun() rett under).
+            st.session_state["gjaering_temp_maal_c"] = resolve_fermentation_temp_target_c(
+                r_data.get("fermentation_temp_target_c")
+            )
             st.session_state.import_versjon = st.session_state.get("import_versjon", 0) + 1
             st.session_state["_last_loaded_recipe"] = valgt_lagret_navn
             # Den FAKTISKE kildefilen (ikke bare navnet) -- se
@@ -234,8 +247,17 @@ def render_sidebar():
             st.sidebar.success(t("sidebar.lastet_ok", navn=valgt_lagret_navn))
             st.rerun()
         elif valgt_lagret_navn == _INGEN_OPPSKRIFT_VALGT:
+            # V2.2 G3K Chief-fiks (issue #384): plassholderen er også
+            # normaltilstanden for en helt ny/ulagret oppskrift. Derfor
+            # skal temperaturmålet KUN ryddes når vi faktisk går FRA en
+            # tidligere lastet, lagret oppskrift TIL blank state -- ikke
+            # på hver ordinære Streamlit-rerun mens brukeren redigerer et
+            # nytt utkast.
+            _hadde_lastet_oppskrift = st.session_state.get("_last_loaded_recipe") is not None
             st.session_state.pop("_last_loaded_recipe", None)
             st.session_state.pop("_last_loaded_recipe_file", None)
+            if _hadde_lastet_oppskrift:
+                st.session_state["gjaering_temp_maal_c"] = None
     else:
         st.sidebar.info(t("sidebar.ingen_lagret"))
 

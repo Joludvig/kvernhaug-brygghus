@@ -34,10 +34,38 @@ def resolve_recipe_efficiency(recipe_efficiency):
     return recipe_efficiency
 
 
+# V2.2 G3K (issue #384) -- samme "kun type/finitthet, ingen brewing-
+# semantikk"-policy som resolve_recipe_efficiency() over, gjenbrukt for
+# det nye, valgfrie planlagte gjæringstemperatur-målet. Forskjellen fra
+# efficiency: ingen positiv-sjekk her (en gyldig Celsius-verdi kan i
+# prinsippet være negativ) -- KUN bool/ikke-numerisk/NaN/±uendelig
+# avvises. Ingen bryggefaglig min/max håndheves her eller noe annet
+# sted i denne funksjonen (se docs/development/
+# v22_g3j_fermentation_learn_plan_contract.md §5) -- det er bevisst
+# utenfor denne rundens scope.
+def resolve_fermentation_temp_target_c(value):
+    """
+    Returnerer `value` som `float` hvis den er et ekte, endelig tall
+    (ikke bool, ikke NaN, ikke ±uendelig) -- ellers None, som betyr
+    "intet planlagt mål valgt ennå". Ingen bryggefaglig gyldighets-
+    sjekk (min/max) gjøres her -- kun type-/finitthetshygiene.
+    """
+    if isinstance(value, bool):
+        return None
+    if not isinstance(value, (int, float)):
+        return None
+    if value != value:  # NaN (uten å importere math)
+        return None
+    if value in (float("inf"), float("-inf")):
+        return None
+    return float(value)
+
+
 def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg, abv, ibu, ebc, flavor_profile,
                         brygger_stil="", process_profile=None,
                         water_source_profile=None, water_target_profile=None,
                         water_treatment=None, water_measurements=None,
+                        fermentation_temp_target_c=None,
                         kbh_passthrough=None, origin_recipe_id=None):
     """
     `process_profile` (se modules/process_profiles.py) er bevisst et helt
@@ -67,6 +95,17 @@ def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg,
     i det lagrede recipe-objektet) — en tom/manglende verdi betyr "ingen
     bevart import-metadata for denne oppskriften", og feltet utelates da
     helt, i stedet for å skrive en tom/None-verdi.
+
+    `fermentation_temp_target_c` (V2.2 G3K, issue #384, docs/development/
+    v22_g3j_fermentation_learn_plan_contract.md §5) -- et helt separat,
+    valgfritt App-internt planleggingsfelt: læreren sitt bevisst valgte
+    planlagte gjæringsmål i °C for DENNE oppskriften, ALDRI utledet fra
+    gjaertype/kategori/smakstags. `None` betyr "intet mål valgt ennå",
+    og er standard for enhver ny/blank oppskrift og enhver eldre
+    oppskrift lagret før feltet fantes. Lagres ubetinget (samme mønster
+    som water_*-feltene over) -- ALDRI et .kbhrecipe/.kbhbrew Core-felt
+    i denne runden (se modules/kbh_contract.py sin eksplisitte feltliste,
+    som denne funksjonen ikke er en del av).
 
     `origin_recipe_id` (issue #283, docs/development/
     CORE_KBHRECIPE_ORIGIN_IDENTITY_V1.md §3.2) — det portable,
@@ -99,6 +138,7 @@ def bygg_recipe_object(navn, batch_size, efficiency, malts, hops, yeast, og, fg,
         "water_target_profile": water_target_profile,
         "water_treatment": water_treatment,
         "water_measurements": water_measurements,
+        "fermentation_temp_target_c": fermentation_temp_target_c,
     }
     if isinstance(kbh_passthrough, dict) and kbh_passthrough:
         recipe["_kbh_passthrough"] = copy.deepcopy(kbh_passthrough)

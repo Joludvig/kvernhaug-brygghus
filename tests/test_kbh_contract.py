@@ -134,6 +134,25 @@ class TestRecipeToKbhrecipePayload(unittest.TestCase):
         payload = recipe_to_kbhrecipe_payload(recipe)
         self.assertNotIn("fremtidig_ukjent_felt", payload)
 
+    def test_fermentation_temp_target_c_eksporteres_aldri(self):
+        # V2.2 G3K (issue #384) -- §6 i docs/development/
+        # v22_g3j_fermentation_learn_plan_contract.md: .kbhrecipe/Core-
+        # portabilitet for det planlagte gjæringsmålet er eksplisitt
+        # utsatt i denne runden. Feltet er en ordinær, ubetinget satt
+        # nøkkel på Recipe Object-dicten (se modules/recipe.py sin
+        # bygg_recipe_object()) -- denne testen beviser at den likevel
+        # IKKE lekker inn i .kbhrecipe-payloaden, verken under sitt eget
+        # navn eller på annen måte, via hviteliste-mekanismen i
+        # modules/kbh_contract.py (guard mot en fremtidig, ubevisst
+        # passthrough-/dict-spread-regresjon).
+        recipe = _minimal_oppskrift()
+        recipe["fermentation_temp_target_c"] = 18.5
+        payload = recipe_to_kbhrecipe_payload(recipe)
+        self.assertNotIn("fermentation_temp_target_c", payload)
+        payload_json = json.dumps(payload)
+        self.assertNotIn("fermentation_temp_target_c", payload_json)
+        self.assertNotIn("18.5", payload_json)
+
     # ── 4. Ingrediens-ID ─────────────────────────────────────────────────
     def test_ingrediens_id_beholdes_uendret(self):
         payload = recipe_to_kbhrecipe_payload(_full_oppskrift())

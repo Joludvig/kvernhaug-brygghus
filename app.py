@@ -107,6 +107,14 @@ if "_aktiv_kbh_origin_recipe_id" not in st.session_state:
     # widget-bundet, kan settes direkte her og i ui/recipe_card.py sin
     # arkiver-/blank-flyt, samme mønster som _aktiv_kbh_passthrough over.
     st.session_state["_aktiv_kbh_origin_recipe_id"] = None
+if "gjaering_temp_maal_c" not in st.session_state:
+    # V2.2 G3K (issue #384) -- None = "intet planlagt gjæringsmål valgt
+    # ennå" for en helt ny/blank økt, akkurat som
+    # _aktiv_recipe_efficiency/_aktiv_kbh_passthrough over. Widget-bundet
+    # (ui/yeast_panel.py sitt number_input bruker denne EKSAKTE nøkkelen
+    # som key=) -- kan derfor kun settes direkte her, FØR
+    # render_yeast_panel() i det hele tatt kalles.
+    st.session_state["gjaering_temp_maal_c"] = None
 
 # Løs opp pending batch-volum fra skalering (må skje før widgeten instansieres)
 if "_pending_batch_volum" in st.session_state:
@@ -119,6 +127,14 @@ if "_pending_import_versjon_bump" in st.session_state:
 if "_pending_brygger_stil_reset" in st.session_state:
     st.session_state.pop("_pending_brygger_stil_reset")
     st.session_state.brygger_stil = ""
+if "_pending_gjaering_temp_maal_c" in st.session_state:
+    # V2.2 G3K (issue #384) -- membership-sjekk (`in`), IKKE sannhets-
+    # sjekk: den ventende verdien er ofte nettopp None selv (arkiver-
+    # suksess-flyten i ui/recipe_card.py), og `if st.session_state.get(...)`
+    # ville da aldri kunnet oppdage en genuint ventende None-verdi.
+    # Konsumeres FØR render_yeast_panel() (lenger ned) instansierer
+    # widgeten på denne kjøringen.
+    st.session_state["gjaering_temp_maal_c"] = st.session_state.pop("_pending_gjaering_temp_maal_c")
 
 # Keep shadow keys in sync before any panel can call st.rerun().
 # These keys are not widget-bound so Streamlit never clears them.
