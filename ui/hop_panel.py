@@ -56,14 +56,20 @@ def _render_laer_bro(sprak):
 
 
 def render_hop_panel(humle_database):
-    st.header("🌿 Humle-tilsetninger")
+    # issue #400, rotårsak A -- disse to var ALDRI koblet til i18n-laget
+    # (ren manglende dekning, ikke et rerun-/koherensproblem), mens
+    # _render_laer_bro() rett under allerede var det -- derav den
+    # rapporterte blandede NO/EN-tilstanden. Bevisst AVGRENSET til
+    # akkurat disse to strengene (se issue #400 sitt eksplisitte
+    # non-goal om ikke å oversette resten av panelet nå).
+    st.header(t("koking.humle_panel.header"))
     _render_laer_bro(gjeldende_sprak())
 
     _default_h_id = next(
         (hid for hid in humle_database if "east_kent" in hid),
         next(iter(humle_database), "citra"),
     )
-    if st.button("➕ Legg til humle", key="add_hop_btn"):
+    if st.button(t("koking.humle_panel.legg_til_knapp"), key="add_hop_btn"):
         st.session_state.valgt_humle.append({"id": _default_h_id, "gram": 20, "tid": 5})
         st.rerun()
 

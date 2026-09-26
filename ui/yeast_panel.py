@@ -34,7 +34,10 @@ def _render_laer_bro(sprak):
 
 
 def render_yeast_panel(gjaer_database):
-    st.header("🧫 Gjærstamme")
+    # issue #400, rotårsak A -- samme avgrensede fiks som
+    # ui/hop_panel.py sin header/knapp: disse to var ALDRI koblet til
+    # i18n-laget, mens _render_laer_bro() lenger ned allerede var det.
+    st.header(t("gjaering.gjaer_panel.header"))
     with st.expander("ℹ️ Gjærstarter og gjærhelse (kort intro)"):
         st.markdown(
             "- **Gjærstarter** — en liten mengde steril vørter du tilsetter gjær i på "
@@ -65,7 +68,7 @@ def render_yeast_panel(gjaer_database):
             break
             
     g_indeks = gjaer_meny_valg.index(gjeldende_g_visning) if gjeldende_g_visning in gjaer_meny_valg else 0
-    valgt_gjaer_visning = st.selectbox("Velg gjær:", gjaer_meny_valg, index=g_indeks)
+    valgt_gjaer_visning = st.selectbox(t("gjaering.gjaer_panel.velg_label"), gjaer_meny_valg, index=g_indeks)
 
     # FIKSET: Sjekker at vi faktisk har en gyldig verdi i kartet før vi lagrer til session state
     if valgt_gjaer_visning and valgt_gjaer_visning in gjaer_id_kart:
