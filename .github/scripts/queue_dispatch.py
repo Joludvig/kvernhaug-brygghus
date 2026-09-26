@@ -26,17 +26,9 @@ MODELL: to nye, additive etiketter (ikke en del av den eksklusive
 
 Et køelements TILSTAND leses av dets EKSISTERENDE `status:*`-etikett
 (lifecycle_labels.py sitt eksklusive sett -- aldri en egen kø-tilstand):
-  - ingen status:*-etikett              -> "ikke_startet" (venter i køen)
-  - status:ready ELLER status:working   -> "aktiv"
-  - status:changes-requested            -> "aktiv" (samme element venter
-                                            på en NY Claude-runde --
-                                            issue #260s "proposed queue
-                                            model" er eksplisitt: køen
-                                            skal PAUSE her, ikke gå
-                                            videre til neste element)
-  - status:review ELLER status:approved -> "ferdig" (Chief-review-løpet
-                                            overtar herfra; blokkerer
-                                            ALDRI neste køelement)
+  - ingen status:*-etikett -> "ikke_startet" (venter i køen)
+  - ENHVER status:*-etikett (ready/working/changes-requested/review/
+    approved) -> "aktiv"
 
 status:ready telles bevisst som "aktiv", ikke "ikke_startet": det er
 akkurat det dispatcheren selv setter idet den bevæpner et element (se
@@ -46,13 +38,32 @@ skulle feile ETTER at etiketten er satt, skal et duplikat-event ALDRI
 bevæpne et nytt element eller dispatche på nytt for samme element --
 fail-closed, ikke fail-open (issue #260, akseptansetest 7).
 
+ENDRING (issue #405, "full conveyor"): status:review og status:approved
+telte TIDLIGERE som "ferdig" -- de blokkerte ALDRI neste køelement, ut
+fra tanken om at "Chief-review-løpet overtar herfra". I praksis betyr
+det at neste implementasjonsjobb kunne starte FØR forrige PR faktisk var
+owner-GO'et og merget -- to samtidige "main write lane"-forsøk, stikk i
+strid med den nye én-skriver-om-gangen-samlebåndsmodellen (issue #405,
+seksjon 5: "Det passer ikke den nye én-main-write-lane
+samlebåndsmodellen"). ALLE fem status:*-etikettene teller derfor nå som
+"aktiv" -- et element slutter først å blokkere køen når det er faktisk
+LUKKET (issue closed, typisk via GitHubs egen "Closes #N"-merge-
+autolukking, se pa-jobb-queue.yml) og dermed forsvinner helt fra
+`gh issue list --label queue:pa-jobb --state open`-snapshotten
+`velg_neste()` under mottar -- se `_ko`-filtreringen der. Det finnes
+derfor ikke lenger noe eget "ferdig"-bøtte: et køelement er enten
+"ikke_startet" (ingen status:*-etikett, fortsatt åpent) eller "aktiv"
+(en status:*-etikett, fortsatt åpent) -- eller det er rett og slett ikke
+lenger med i snapshotten (lukket).
+
 VALG: et NYTT element velges KUN når INGEN køelement er "aktiv". Om ett
 er "aktiv" stopper hele køen der, uansett hvor mange andre
 "ikke_startet"-elementer som venter -- det er nettopp "maks én aktiv
-Bridge-kjøring om gangen"-kravet (issue #260, akseptansetest 3/4).
-Når det IKKE finnes noe "aktivt" element, kan et nytt starte -- det
-dekker både "forrige nådde status:review" (akseptansetest 5) og en helt
-tom/fersk kø (akseptansetest 2).
+Bridge-kjøring om gangen"-kravet (issue #260, akseptansetest 3/4; issue
+#405, "main WIP = 1 gjennom review/approved/merge"). Når det IKKE finnes
+noe "aktivt" element blant de ÅPNE køelementene, kan et nytt starte --
+det dekker både "forrige lukket/fullført" (issue #405, minstekrav 6) og
+en helt tom/fersk kø (akseptansetest 2).
 
 Ren, avhengighetsfri stdlib-Python (samme mønster som resten av
 .github/scripts/ -- ingen skript krysser-importerer et annet) -- selve
@@ -131,8 +142,11 @@ LIVSSYKLUS_ETIKETTER = (
     "status:changes-requested",
     "status:approved",
 )
-AKTIVE_LIVSSYKLUS_ETIKETTER = ("status:ready", "status:working", "status:changes-requested")
-FERDIGE_LIVSSYKLUS_ETIKETTER = ("status:review", "status:approved")
+# Issue #405: ALLE fem livssyklus-etikettene teller nå som "aktiv" -- se
+# moduldoc "ENDRING (issue #405, ...)". Duplisert (ikke aliasert til
+# LIVSSYKLUS_ETIKETTER) for et eksplisitt, lesbart navn på akkurat denne
+# betydningen på kall-stedet i elementets_tilstand().
+AKTIVE_LIVSSYKLUS_ETIKETTER = LIVSSYKLUS_ETIKETTER
 
 # GitHub Actions' egen, FULLFØRTE kjøre-"status"-verdi -- uansett hvilken
 # "conclusion" kjøringen endte med (success/failure/cancelled/... er
@@ -169,13 +183,16 @@ def gjeldende_livssyklus(labels):
 
 
 def elementets_tilstand(labels):
-    """"ikke_startet" | "aktiv" | "ferdig" -- se moduldoc for tabellen."""
+    """"ikke_startet" | "aktiv" -- se moduldoc for begrunnelsen. Issue
+    #405: det finnes ikke lenger noe eget "ferdig"-utfall her -- et
+    element som faktisk er ferdig er LUKKET, og forsvinner dermed helt
+    fra `velg_neste()`s input før denne funksjonen noensinne kalles på
+    det (se `_ko`-filtreringen der)."""
     livssyklus = gjeldende_livssyklus(labels)
     if livssyklus is None:
         return "ikke_startet"
-    if livssyklus in AKTIVE_LIVSSYKLUS_ETIKETTER:
-        return "aktiv"
-    return "ferdig"
+    assert livssyklus in AKTIVE_LIVSSYKLUS_ETIKETTER  # alle fem, se moduldoc
+    return "aktiv"
 
 
 def har_aktiv_bro_kjoring(kjoringer):

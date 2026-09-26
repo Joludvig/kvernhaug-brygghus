@@ -641,8 +641,21 @@ uses, and classifies it into exactly one of three buckets
 | `status:ready` | `aktiv` | Just armed by the dispatcher (see below) and about to be, or already, picked up by `claude-agent-bridge.yml`. |
 | `status:working` | `aktiv` | A Bridge run is genuinely executing — **or** a prior run's deliverable gate rejected it and left it here (fail-closed by design, "What this fixes" in "Deliverable verification gate" above) — either way, the queue cannot tell the two apart from the label alone, and must not advance past it. |
 | `status:changes-requested` | `aktiv` | This item needs *another* Claude round before it can be considered done — the issue's own "Proposed queue model" is explicit that this state pauses the queue, not just `status:working`. |
-| `status:review` | `ferdig` | Chief review is now in charge of this item; never blocks the next queue item. |
-| `status:approved` | `ferdig` | Same — awaiting the owner's manual merge; never blocks the next queue item. |
+| `status:review` | `aktiv` (issue #405 — was `ferdig` under issue #260) | Chief review is now in charge of this item, but it has **not** merged yet — it still occupies the one main write lane. |
+| `status:approved` | `aktiv` (issue #405 — was `ferdig` under issue #260) | Chief PASS is recorded, but the item is still awaiting the owner's manual GO + merge — it still occupies the one main write lane. |
+
+**Issue #405 correction:** issue #260's original model treated
+`status:review`/`status:approved` as `ferdig` — they never blocked the
+next queue item. In practice that let a second implementation lane
+start before the first PR was even owner-reviewed, let alone merged —
+two concurrent "main write lane" attempts, which is exactly what this
+queue exists to prevent. Every `status:*` label now counts as `aktiv`;
+there is no `ferdig` bucket left at all. An item stops blocking the
+queue only once it is actually **closed** (see "Auto-resume after
+merge/close" below), at which point it disappears entirely from the
+live `gh issue list --state open` snapshot the dispatcher already
+re-fetches on every run — not because it carries any particular
+`status:*` label.
 
 **One queued item "aktiv" pauses the whole queue**, regardless of how
 many other `ikke_startet` items are waiting — this is the literal
@@ -658,7 +671,7 @@ next trigger.
 ### Dispatcher workflow
 
 [`pa-jobb-queue.yml`](../../.github/workflows/pa-jobb-queue.yml) fires
-on three triggers:
+on five triggers:
 
 - `issues: labeled` scoped to exactly the `queue:pa-jobb` label —
   covers "owner arms a fresh item while the queue is idle." This is a
@@ -673,6 +686,12 @@ on three triggers:
   specifically *because* it does not depend on which token performed
   the upstream label change — it fires on the run's completion event
   itself, independent of guard 3 above.
+- `issues: closed` and `pull_request: closed` (issue #405) — covers
+  "the previously active item is now actually done." Now that
+  `status:review`/`status:approved` themselves block the queue (see
+  above), the queue must be woken again once the owner's merge actually
+  closes the issue, or it would otherwise sit idle indefinitely. See
+  "Auto-resume after merge/close (issue #405)" below.
 - `workflow_dispatch` — manual resume, e.g. after the owner fixes or
   removes a stuck item, or reorders the queue with `queue:priority`.
 
@@ -830,13 +849,92 @@ or any merge/deploy path (still none).
 - **Pause / resume**: pausing is implicit and automatic — any `aktiv`
   queue item pauses everything behind it, as described above; nothing
   is deleted or forgotten while paused. Resuming is likewise automatic
-  once the active item reaches `status:review`/`status:approved` (the
-  next `workflow_run` completion trigger picks the next item up) — or
-  can be forced immediately with a manual `workflow_dispatch` run of
+  once the active item is actually **closed** (issue #405 — the
+  `issues: closed`/`pull_request: closed` triggers pick the next item
+  up; see "Auto-resume after merge/close" below) — or can be forced
+  immediately with a manual `workflow_dispatch` run of
   `pa-jobb-queue.yml` once the blocking condition is actually resolved
   (e.g. after the owner removes a stuck item's `queue:pa-jobb` label,
-  or after `status:changes-requested` work completes and the issue
-  reaches `status:review` again).
+  or after `status:changes-requested` work completes and a fresh round
+  reaches `status:review` again — which, since issue #405, still
+  blocks the *next* item, but no longer blocks Chief review of *this*
+  one).
+
+### Full conveyor: automatic Chief handoff + auto-resume after merge (issue #405)
+
+**Problem this closes:** in real use, the owner still had to manually
+prompt Chief with "Green" to make Chief review happen, and prompt again
+("next") to arm the next already-authorized lane — breaking the
+intended conveyor-belt flow of `queued issue → Claude → PR ready →
+automatic Chief review → owner GO → merge → next queued issue starts
+automatically`.
+
+**What issue #405 changes, repo-side:**
+
+1. **Queue hold through review/approved** — see "How a queue item's
+   state is read" above: `status:review`/`status:approved` now block
+   the queue exactly like `status:working`/`status:changes-requested`
+   do, so a second implementation lane can never start while the first
+   is still awaiting Chief review, owner GO, or merge.
+2. **Auto-resume after merge/close** — `pa-jobb-queue.yml` now also
+   fires on `issues: closed` and `pull_request: closed`, so the
+   dispatcher re-evaluates the live queue immediately after the
+   previously-active item's issue actually closes (normally via the
+   owner's merge — the PR body's own "Closes #N"/"Fixes #N" causes
+   GitHub to auto-close the linked issue natively; no repo code is
+   involved in that specific step). No polling is introduced. The
+   existing `pa-jobb-queue` concurrency group and `status:ready`-counts-
+   as-`aktiv` behavior (see "Safety / idempotency" above) already make
+   this race-safe: whichever of `pull_request: closed` / `issues:
+   closed` fires first (or both, moments apart) results in exactly one
+   arming of the next eligible item, because the dispatcher always
+   re-fetches live state rather than trusting either event's payload,
+   and the second run's job is queued strictly behind the first's by
+   the shared concurrency group. See `queue_dispatch.py`'s
+   `test_9b_review_blokkerer_helt_til_faktisk_lukket_issue_405` /
+   `test_9c_merge_close_wake_gir_nokyaktig_en_dispatch_issue_405` for
+   the regression coverage.
+
+**What issue #405 deliberately does *not* change:** the existing
+exact-head Chief-review/handoff mechanism is reused verbatim, not
+rebuilt —
+[`chief_ready_signal.py`](../../.github/scripts/chief_ready_signal.py)
+(issue #32) already posts the reserved `KBH_CHIEF_REVIEW_READY_V1
+issue=<n> head=<40-lowercase-hex>` marker once an issue reaches
+`status:review`, purely as a wake hint, never an authority — the
+consuming task always refetches live issue/PR/head state before
+reviewing anything;
+[`pr_draft_handoff.py`](../../.github/scripts/pr_draft_handoff.py) /
+[`pr_ready_handoff.py`](../../.github/scripts/pr_ready_handoff.py)
+(issue #44) already perform the verified Draft → Ready transition (the
+real `ready_for_review` event) for both the first round and every
+`status:changes-requested` re-review round; and
+[`go_notify_signal.py`](../../.github/scripts/go_notify_signal.py)
+(issue #66) already posts the owner GO/NO-GO notification once
+`status:approved` is confirmed with a matching `APPROVED` review on the
+exact live head. None of these three modules, or their tests, are
+touched by issue #405.
+
+**External, non-repo fact this relies on (cannot be verified from code
+alone):** the "Kvernhaug Chief Event Review" Work-side task (see
+"Work-side Chief task (V1, issue #31)" above) is a standalone,
+externally-configured ChatGPT Work automation — it was reportedly
+disabled and has now been re-enabled by the owner/Chief outside this
+repository. Its event contract (PR `ready_for_review` or a new
+top-level PR comment → refetch live GitHub → validate the exact marker
+→ Chief review → `status:approved`/`status:changes-requested`, never
+auto-merge) is unchanged and is exactly what the repo-side mechanisms
+above already produce; whether that external task is actually enabled
+at any given moment is not something this repository's code can
+observe, configure, or prove — the existing hourly `Kvernhaug Approval
+Watch` fallback remains the recovery path if it is ever off or misses
+an event.
+
+**Still unchanged, per this issue's own non-goals:** no automatic
+merge, no automatic deploy, no weakening of exact-head review, no
+removal of the owner-PC QA gate, and no generic parallel multi-agent
+scheduler — merge remains the owner's separate, manual action (see
+"Owner merge gate" below), exactly as before issue #405.
 
 ### Acceptance test coverage (issue #260)
 
@@ -845,15 +943,48 @@ GitHub-free unit tests in `tests/test_agent_bridge_queue_dispatch.py`
 (numbered to match): (1) empty queue → no dispatch; (2) one eligible
 item → exactly one selection; (3) multiple items → only the first;
 (4)/(6) an active/`status:working`/`status:changes-requested` item →
-the queue pauses, the second item does not start; (5) the first item
-reaching `status:review`/`status:approved` → the next may start; (7) a
-duplicate evaluation of the same live snapshot → no duplicate
-selection (the armed item shows as `status:ready`, i.e. `aktiv`); (8) a
-non-queued issue (missing `queue:pa-jobb` or missing `agent:claude`) →
-ignored; (10) the dispatch path is driven entirely by live
-`gh issue list` state on every run, never a cached/webhook snapshot.
-Acceptance test 9 ("no merge/deploy path exists") is an absence-of-code
-proof rather than a unit test — see "Safety / idempotency" above.
+the queue pauses, the second item does not start; (5) **superseded by
+issue #405** — see below; (7) a duplicate evaluation of the same live
+snapshot → no duplicate selection (the armed item shows as
+`status:ready`, i.e. `aktiv`); (8) a non-queued issue (missing
+`queue:pa-jobb` or missing `agent:claude`) → ignored; (10) the dispatch
+path is driven entirely by live `gh issue list` state on every run,
+never a cached/webhook snapshot. Acceptance test 9 ("no merge/deploy
+path exists") is an absence-of-code proof rather than a unit test — see
+"Safety / idempotency" above.
+
+### Acceptance test coverage (issue #405)
+
+Issue #405's own numbered minimum requirements are covered as follows
+(same test file, `tests/test_agent_bridge_queue_dispatch.py`, unless
+noted): (1)–(5) every `status:*` label blocks the next queue item —
+`TestElementetsTilstand.test_review_er_aktiv`/`test_approved_er_aktiv`
+plus `TestVelgNeste.test_5_review_blokkerer_neste_issue_405`/
+`test_5b_approved_blokkerer_neste_issue_405` (new/changed by #405) and
+the pre-existing `test_4`/`test_6`/`test_10` (working/
+changes-requested/ready, unchanged); (6) a closed/completed previous
+item makes the next eligible —
+`test_9b_review_blokkerer_helt_til_faktisk_lukket_issue_405` (the same
+issue, three snapshots: review → approved → actually closed); (7)/(8) a
+merge/close wake — including a duplicate one — gives exactly one
+dispatch — `test_9c_merge_close_wake_gir_nokyaktig_en_dispatch_issue_405`
+at the pure-function level, backed by `pa-jobb-queue.yml`'s existing
+shared `concurrency` group at the workflow level (see "Auto-resume
+after merge/close" above); (9) an active, non-queued Bridge run still
+blocks the queue — pre-existing `test_11_...`; (10) unknown/missing
+runtime evidence still fails closed — pre-existing `test_13_...`; (11)
+an empty queue does nothing — pre-existing `test_1_...`; (12)
+unauthorized/non-queue issues are ignored — pre-existing `test_8_...`/
+`test_8b_...`; (13) no merge/deploy path exists — unchanged
+absence-of-code proof (this PR adds no `contents: write`, no `gh pr
+merge`/`git merge`, no deploy step to `pa-jobb-queue.yml`); (14) the
+existing Chief-ready/Draft→Ready regressions remain green —
+`tests/test_agent_bridge_chief_ready_signal.py`,
+`tests/test_agent_bridge_pr_draft_handoff.py`,
+`tests/test_agent_bridge_pr_ready_handoff.py`,
+`tests/test_agent_bridge_go_notify_signal.py` and
+`tests/test_agent_bridge_approved_notify_guard.py` are all untouched by
+this issue and were re-run unchanged as part of its full-suite proof.
 
 ### First real queue candidates
 
