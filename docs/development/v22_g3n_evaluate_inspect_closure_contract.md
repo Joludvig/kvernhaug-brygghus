@@ -35,8 +35,9 @@ saved** groups:
 - `_render_planlagt_sammendrag()` (line 131) — read-only frozen plan summary from
   `snapshot.predicted`/`snapshot.recipe` (never `actuals`/live data).
 - `_render_actuals_skjema()` (line 148) — **instrument measurement**: `actuals.{og, fg,
-  volumeL}` plus `actuals.notes` (measurement-adjacent free text) and `status`/`brewedAt`, its own
-  "💾 Lagre målte verdier" save action.
+  volumeL}`, plus `actuals.notes` (measurement/process-adjacent free text), with `status` and
+  `brewedAt` stored in the same explicit "💾 Lagre målte verdier" action. `brewedAt` is the brew
+  date, not itself a process observation.
 - `_render_sammenligning()` (line 406) — read-only plan-vs-actual for `og`/`fg`/`volum`/`abv`
   only; **no `sensing.flavorProfile` comparison exists** (confirmed: `flavorProfile` is
   normalized/round-tripped by `modules/kbhbrew.py` — lines 70, 278–280, 417–419, 581–589 — but
@@ -127,16 +128,23 @@ it directly at §5.8) — it is a **product-governance statement about domain ow
 brewing-chemistry claim, and therefore does not need Course Fact Registry sourcing to be taught
 (§1.7 below draws the exact line between the two).
 
-### 1.6 Immutable-history boundary already proven end-to-end by Goal 2 owner-PC acceptance
+### 1.6 Immutable-history boundary already proven by shipped contract/tests, with owner-PC product acceptance on the real flow
 
-Per this issue's own "Owner-PC acceptance" list and `v22_g2c_next_variant_linkage_contract.md`
-§6/§9's acceptance flow (issue #363, PR #365, owner-verified): a finished brew's
-`snapshot.recipe`/`snapshot.predicted` stay byte-for-byte frozen; `learning.nextTime`/`hypothesis`
-are freely editable at any later time; "🌱 Opprett neste variant" seeds a fresh draft with a
-newly-minted `originRecipeId` that never collides with or mutates the source recipe's own ID; the
-link survives an export/import round trip. **This is already-proven, already-shipped behavior**,
-not something this contract needs to design or re-verify — it is cited here only as the "preserve
-immutable historical source snapshot" evidence the issue's audit asks for.
+The immutable-history guarantee itself comes from the shipped Core/implementation contract and its
+automated regression coverage: updates to an existing brew may change editable layers, but must not
+mutate `snapshot.recipe`/`snapshot.predicted`; next-variant creation also mints a fresh
+`originRecipeId` rather than reusing the historical source identity.
+
+Owner-PC QA of #363 proved the real product path at a different layer: the owner created a next
+variant from Brew History, edited/renamed/saved it, explicitly linked it back, fully restarted the
+App, reopened the same brew, confirmed that the link still resolved, and confirmed that the
+historical source brew still appeared unchanged. That QA did **not** perform a byte-for-byte
+snapshot comparison and did **not** perform an export/import round trip, so this document does not
+attribute those stronger guarantees to the owner session.
+
+Together, shipped invariants/tests plus real owner-PC product acceptance are sufficient evidence
+for this contract's only dependency here: the evaluate/inspect teaching layer must preserve the
+already-established immutable historical-source boundary rather than invent a new write path.
 
 ### 1.7 Course Fact Registry — zero records relevant to "how to evaluate a finished beer," and this is correct, not a gap
 
@@ -221,13 +229,14 @@ While looking at one selected finished brew in Brew History (`ui/kbhbrew_history
 filling in or editing the actuals/sensing/learning forms, the brewer can open one small, collapsed
 "how to read this brew's evidence" bridge that:
 
-1. Names the six already-existing, already-separate fields on this exact screen — measured values
-   (`actuals.og/fg/volumeL`), process notes (`actuals.notes`/`brewedAt`), sensory observation
-   (`sensing.judgment`/`sensing.notes`), interpretation (`learning.whatWorked`/`whatChanged`),
-   hypothesis (`learning.hypothesis`), and decision/next brew (`learning.nextTime` +
-   "🌱 Opprett neste variant" / `nextRecipeOriginId`) — and explains, in the product's own already-
-   ratified terms (§1.5), why keeping them apart matters: a measurement is not your interpretation
-   of it, and a hypothesis is not a decision.
+1. Names the six already-existing, already-separate categories on this exact screen — measured
+   values (`actuals.og/fg/volumeL`), process/deviation notes (`actuals.notes`), sensory
+   observation (`sensing.judgment`/`sensing.notes`), interpretation
+   (`learning.whatWorked`/`whatChanged`), hypothesis (`learning.hypothesis`), and decision/next
+   brew (`learning.nextTime` + "🌱 Opprett neste variant" / `nextRecipeOriginId`) — while
+   `brewedAt` remains simply the recorded brew date. The bridge explains, in the product's own
+   already-ratified terms (§1.5), why keeping these categories apart matters: a measurement is not
+   your interpretation of it, and a hypothesis is not a decision.
 2. Explicitly states that leaving any of these boxes blank, or writing that you don't yet know
    which of two explanations is right, is a valid, expected outcome — never a thing to be papered
    over with a fabricated single conclusion — directly informed by the real Sommerglød v2
