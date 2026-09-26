@@ -220,6 +220,27 @@ TEKSTER = {
         "brew_history.neste_variant_lenke_gjeldende": "Nåværende kobling: **{navn}**",
         "brew_history.neste_variant_lenke_ikke_funnet": "Nåværende kobling peker på en oppskrift som ikke finnes lokalt (id: `{id}`).",
         "brew_history.neste_variant_lenke_ingen_kandidater": "Ingen lagrede oppskrifter med portabel identitet (originRecipeId) funnet ennå.",
+        "brew_history.laer_bro.tittel": "🎓 Hvordan lese dette bryggets bevis?",
+        "brew_history.laer_bro.forklaring": (
+            "Dette bryggets bevis er delt i seks atskilte bokser, med vilje: en målt "
+            "verdi (OG/FG/volum), en prosess-/avviksnotis, en sanseopplevelse "
+            "(lukt/smak), en tolkning av det du observerte, en mulig forklaring, og "
+            "en beslutning for neste brygg. Grunnen er at en målt verdi ikke er det "
+            "samme som din tolkning av den, og at en mulig forklaring ikke er det "
+            "samme som en beslutning — å blande dem sammen gjør det vanskeligere å "
+            "se hva du faktisk vet, og hva du bare tror."
+        ),
+        "brew_history.laer_bro.usikkerhet_hint": (
+            "Det er helt greit å la et felt stå tomt, eller å skrive at du ennå "
+            "ikke vet hvilken forklaring som er riktig — det er et gyldig, "
+            "forventet svar, ikke noe som skal tvinges frem til én bestemt "
+            "konklusjon."
+        ),
+        "brew_history.laer_bro.neste_tid_hint": (
+            "Planen over ligger fast og kan aldri endres i etterkant — det du "
+            "skriver under «Neste gang» er likevel det aller mest nyttige du kan "
+            "fylle inn før neste brygg."
+        ),
         "prosess.laer_bro.tittel": "🎓 Hvorfor påvirker mesketemperatur ølet?",
         "prosess.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Mesking.",
         "gjaering.laer_bro.tittel": "🎓 Hvorfor påvirker gjæringstemperatur ølet?",
@@ -401,6 +422,27 @@ TEKSTER = {
         "brew_history.neste_variant_lenke_gjeldende": "Current link: **{navn}**",
         "brew_history.neste_variant_lenke_ikke_funnet": "Current link points to a recipe that no longer exists locally (id: `{id}`).",
         "brew_history.neste_variant_lenke_ingen_kandidater": "No saved recipes with a portable identity (originRecipeId) found yet.",
+        "brew_history.laer_bro.tittel": "🎓 How to read this brew's evidence?",
+        "brew_history.laer_bro.forklaring": (
+            "This brew's evidence is deliberately split into six separate boxes: a "
+            "measured value (OG/FG/volume), a process/deviation note, a sensory "
+            "impression (smell/taste), an interpretation of what you observed, a "
+            "possible explanation, and a decision for the next brew. The reason is "
+            "that a measured value is not the same as your interpretation of it, "
+            "and a possible explanation is not the same as a decision — blending "
+            "them together makes it harder to see what you actually know, versus "
+            "what you only think."
+        ),
+        "brew_history.laer_bro.usikkerhet_hint": (
+            "It's completely fine to leave a box blank, or to write that you still "
+            "don't know which explanation is right — that is a valid, expected "
+            "answer, not something to force into one single conclusion."
+        ),
+        "brew_history.laer_bro.neste_tid_hint": (
+            "The plan above is frozen and can never be changed afterward — what "
+            "you write under «Next time» is still the single most useful thing you "
+            "can fill in before the next brew."
+        ),
         "prosess.laer_bro.tittel": "🎓 Why does mash temperature affect the beer?",
         "prosess.laer_bro.footer": "Want to practice more? Open Brew School → Mashing.",
         "gjaering.laer_bro.tittel": "🎓 Why does fermentation temperature affect the beer?",

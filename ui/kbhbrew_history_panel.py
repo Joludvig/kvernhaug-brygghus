@@ -77,6 +77,17 @@ nederst) slik at den faktiske evidensen vises før sensorikk/
 tolkning/hypotese/neste-gang-skjemaet under -- ren rekkefølge-endring,
 ingen ny skrivevei, ingen endring av noen av de to eksisterende
 lagreknappenes omfang.
+
+V2.2 G3O (issue #395) legger til ÉN kollapset Learn -> Reflect-bro
+(_render_laer_bro()), rendret ETTER _render_planlagt_sammendrag() og
+FØR _render_actuals_skjema(), per
+docs/development/v22_g3n_evaluate_inspect_closure_contract.md §3/§4.
+Rent read-only statisk i18n-tekst -- INGEN bryggeskole-pilot leses (i
+motsetning til de eksisterende Learn -> Plan-broene i
+ui/process_panel.py/ui/yeast_panel.py/ui/hop_panel.py), INGEN ny
+persistert/session-state-nøkkel utover expanderens egen kosmetiske
+åpen/lukket-tilstand, og INGEN endring av noen av de tre eksisterende
+lagrehandlingene (actuals/sensing+learning/neste-variant).
 """
 import streamlit as st
 
@@ -143,6 +154,28 @@ def _render_planlagt_sammendrag(brew):
         linje += f"  ·  {t('brew_history.brygget')}: {sammendrag['brygget_dato']}"
     linje += f"  ·  {t('brew_history.status_label')}: **{t(status_nokkel)}**"
     st.caption(linje)
+
+
+def _render_laer_bro():
+    """V2.2 G3O (issue #395): kollapset Learn -> Reflect-bro mellom det
+    frosne planlagte sammendraget og actuals-skjemaet (kontraktens §3/§4:
+    "teach the why-six-boxes framing immediately before the brewer
+    starts filling any of them in"). I MOTSETNING TIL de eksisterende
+    Learn -> Plan-broene (ui/process_panel.py/ui/yeast_panel.py/
+    ui/hop_panel.py) leser denne INGEN bryggeskole-pilot -- ingen
+    read_pilot_file()/render_chunk(), og derfor INGEN
+    PilotContentError-fangst (kontraktens §4.2/§8: dette er ren, statisk
+    i18n-tekst, ingen pilotinnhold kan noensinne være ugyldig her).
+    Teksten gjentar KUN allerede ratifisert produktprinsipp
+    (CORE_KBHBREW_V1.md §5.5/§5.8/§5.9, KBH_CORE_CONTRACT.md §1/§6) --
+    ingen ny bryggevitenskapelig påstand, ingen AI-tolkning, ingen
+    sikkerhets-/prosentvurdering. Rent read-only: rører ALDRI
+    actuals/sensing/learning/snapshot eller noen widget-nøkkel utover
+    expanderens egen kosmetiske åpen/lukket-tilstand."""
+    with st.expander(t("brew_history.laer_bro.tittel"), expanded=False):
+        st.markdown(t("brew_history.laer_bro.forklaring"))
+        st.caption(t("brew_history.laer_bro.usikkerhet_hint"))
+        st.caption(t("brew_history.laer_bro.neste_tid_hint"))
 
 
 def _render_actuals_skjema(brew_id, brew):
@@ -521,6 +554,7 @@ def render_kbhbrew_history_panel(malt_db=None, humle_db=None, gjaer_db=None):
 
     st.caption(t("brew_history.planlagt_tittel"))
     _render_planlagt_sammendrag(brew)
+    _render_laer_bro()
     st.write("")
     brew = _render_actuals_skjema(brew_id, brew)
     st.write("")
