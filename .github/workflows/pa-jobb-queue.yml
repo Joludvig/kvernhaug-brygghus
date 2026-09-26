@@ -54,21 +54,80 @@ name: PÅ JOBB Queue Dispatcher
 #     `workflow_run` is the correct, standard cross-workflow wake-up
 #     here, independent of which token performed the upstream label
 #     change).
+#   - `issues: closed` / `pull_request: closed` (issue #405, "full
+#     conveyor: automatic Chief review + auto-resume next queued
+#     lane") -- covers "the previously active item is now actually
+#     done", now that status:review/status:approved themselves BLOCK
+#     the queue (see "Chief hold through review/approved (issue #405)"
+#     below) -- the queue would otherwise sit idle forever after a
+#     merge unless someone manually re-triggers it. Both PR merge
+#     (`pull_request: closed` fires for every close, merged or not) and
+#     GitHub's own native "Closes #N"/"Fixes #N" merge-commit
+#     auto-close of the linked issue (`issues: closed`) are wired, since
+#     either one alone is not guaranteed to be the event that actually
+#     fires first/at all for a given merge -- see "Chief hold through
+#     review/approved (issue #405)" below for why relying on either one
+#     ALONE would still be safe (the dispatcher never trusts which
+#     event fired, only its own live re-fetch), and why listening to
+#     BOTH is nonetheless the more robust, fail-safe choice. Neither
+#     trigger is filtered further here (e.g. by `merged == true`, or by
+#     which issue closed) -- the job condition below already only lets
+#     an `issues` event with an unrelated action/label through when it
+#     is a genuine `closed` action, and a repo-wide `pull_request:
+#     closed` re-evaluation that finds nothing new to dispatch is a
+#     harmless, side-effect-free no-op (same as an `issues: closed` on
+#     an issue that was never a queue item at all).
 #   - `workflow_dispatch` -- manual resume/start, e.g. after fixing a
 #     stuck item or reordering the queue.
 #
 # Idempotency / anti-loop: a single global `concurrency` group (not
 # per-issue -- the queue itself is one shared sequential resource)
 # ensures at most one dispatcher run evaluates/arms the queue at a
-# time, so two near-simultaneous triggers can never both see "no
-# active item" and both arm a winner. The selection function itself
-# additionally treats `status:ready` (the state the dispatcher's own
-# arming step produces) as "active", so even a run that starts a few
-# seconds after another already armed an item will find that item
-# active and pause -- fail-closed, not fail-open.
+# time, so two near-simultaneous triggers (e.g. a merge's
+# `pull_request: closed` and the resulting issue's `issues: closed`
+# firing moments apart) can never both see "no active item" and both
+# arm a winner -- the second run's own live `gh issue list` re-fetch
+# always happens strictly after the first run's arming steps have
+# already completed (GitHub Actions concurrency literally queues the
+# second job behind the first here), so it will see the first run's own
+# `status:ready` PUT. The selection function itself additionally treats
+# `status:ready` (the state the dispatcher's own arming step produces)
+# as "active", so even a run that starts a few seconds after another
+# already armed an item will find that item active and pause --
+# fail-closed, not fail-open.
+#
+# Chief hold through review/approved (issue #405): issue #260's original
+# model treated `status:review`/`status:approved` as "done" for queue
+# purposes, so a second implementation lane could start before the
+# first PR was even owner-reviewed, let alone merged -- two concurrent
+# "main write lane" attempts. `queue_dispatch.py`'s `elementets_tilstand`
+# now treats EVERY `status:*` label (ready/working/changes-requested/
+# review/approved) as "aktiv" -- an item stops blocking the queue only
+# once it is actually CLOSED (normally via the owner's GO + `gh pr
+# merge`/GitHub UI merge, with the PR body's own "Closes #N" causing
+# GitHub to auto-close the issue), which is exactly when it disappears
+# from the live `gh issue list --state open` snapshot this workflow
+# already re-fetches on every run (see queue_dispatch.py's `_ko`
+# filtering in `velg_neste`). This workflow itself still never merges,
+# deploys, or decides GO/NO-GO -- it only decides *when to start the
+# next already-authorized item*, exactly as before.
+#
+# Chief review/approval automation itself is UNCHANGED and reused as-is
+# (issue #405 explicitly does not rebuild it): `claude-agent-bridge.yml`
+# already posts the reserved `KBH_CHIEF_REVIEW_READY_V1 issue=<n>
+# head=<40-hex>` marker (`chief_ready_signal.py`, issue #32) and
+# performs the Draft -> Ready transition (`pr_ready_handoff.py`, issue
+# #44) that wakes the external "Kvernhaug Chief Event Review" Work task
+# on `ready_for_review`/a new top-level PR comment; it already posts the
+# GO/NO-GO owner notification on `status:approved`
+# (`go_notify_signal.py`, issue #66). None of that is touched here --
+# see docs/development/AGENT_WORKFLOW.md, "Full conveyor: automatic
+# Chief handoff + auto-resume after merge (issue #405)".
 "on":
   issues:
-    types: [labeled]
+    types: [labeled, closed]
+  pull_request:
+    types: [closed]
   workflow_run:
     workflows: ["Claude Agent Bridge"]
     types: [completed]
@@ -92,8 +151,18 @@ jobs:
     # Skip entirely for any `issues: labeled` event whose label isn't
     # the one this workflow cares about -- GitHub already fires
     # `issues: labeled` for every label addition, not just this one.
+    # `issues: closed` (issue #405) is always let through here -- a
+    # closed issue that was never a queue item is a harmless, no-op
+    # re-evaluation (queue_dispatch.py simply won't find it in the live
+    # `queue:pa-jobb` snapshot), and the whole point is to re-check the
+    # queue after ANY issue closes, not just ones already known to be
+    # queue items. `pull_request` events are unaffected by this
+    # condition at all (`github.event_name != 'issues'` is already true
+    # for them).
     if: >-
-      github.event_name != 'issues' || github.event.label.name == 'queue:pa-jobb'
+      github.event_name != 'issues' ||
+      github.event.action == 'closed' ||
+      github.event.label.name == 'queue:pa-jobb'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
