@@ -203,6 +203,15 @@ TEKSTER = {
         "brew_history.neste_variant_knapp": "🌱 Opprett neste variant",
         "brew_history.neste_variant_feil": "❌ Kunne ikke opprette neste variant: {feil}",
         "brew_history.neste_variant_ok": "✅ Nytt utkast opprettet i økten — bytt til fanen «Oppskrift» for å redigere og lagre det.",
+        # issue #391 -- den PERSISTENTE bekreftelsen (rendret i sidebaren av
+        # ui/sidebar.py, ETTER at seedet faktisk er hydrert inn i
+        # session_state) som skal overleve reruns, i motsetning til
+        # neste_variant_ok over (rendret av selve knappehandleren rett før
+        # dens egen st.rerun(), og derfor ALDRI synlig for brukeren i
+        # praksis). Ordlyden følger issue #391 sin eksplisitte
+        # "NO wording direction" ordrett, kun med samme "✅ "-prefiks som
+        # denne seksjonens øvrige suksessmeldinger.
+        "brew_history.neste_variant_seed_bekreftelse": "✅ Neste variant er opprettet som et ulagret utkast. Gå til Oppskrift-fanen, gi den et nytt navn og lagre som ny kopi.",
         "brew_history.neste_variant_lenke_tittel": "🔗 Koble til lagret neste variant",
         "brew_history.neste_variant_lenke_velg_label": "Velg lagret oppskrift å koble til",
         "brew_history.neste_variant_lenke_ingen": "— Ingen kobling —",
@@ -383,6 +392,7 @@ TEKSTER = {
         "brew_history.neste_variant_knapp": "🌱 Create next variant",
         "brew_history.neste_variant_feil": "❌ Could not create next variant: {feil}",
         "brew_history.neste_variant_ok": "✅ New draft created in this session — switch to the «Recipe» tab to edit and save it.",
+        "brew_history.neste_variant_seed_bekreftelse": "✅ The next variant has been created as an unsaved draft. Go to the Recipe tab, give it a new name and save it as a new copy.",
         "brew_history.neste_variant_lenke_tittel": "🔗 Link to saved next variant",
         "brew_history.neste_variant_lenke_velg_label": "Select saved recipe to link",
         "brew_history.neste_variant_lenke_ingen": "— No link —",

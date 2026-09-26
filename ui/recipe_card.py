@@ -132,6 +132,35 @@ def _render_brewday_result_panel(ctx):
                     st.caption(entry["note"])
 
 def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
+    # issue #391 -- et utkast seedet av "🌱 Opprett neste variant"
+    # (ui/kbhbrew_history_panel.py) er ellers visuelt umulig å skille fra
+    # en hvilken som helst annen ulagret oppskrift her: det arver
+    # kildens navn uendret (§4.1), og «Lagre endringer» er allerede
+    # skjult (_last_loaded_recipe er None -- "import as new"). Dette
+    # banneret gjenbruker NØYAKTIG samme "er den frosne seed-IDen
+    # fortsatt den aktive origin-IDen"-sjekk som "💾 Lagre som ny
+    # kopi"-knappen under allerede bruker (samme betingelse, ingen ny
+    # tilstand, ingen ny skrivevei) -- det er derfor alltid i synk med
+    # nøyaktig hvilken oppskrift som faktisk vil arve den frosne IDen
+    # ved lagring. Forsvinner av seg selv i det øyeblikket utkastet
+    # enten lagres (knappen popper markøren ved suksess) eller en annen
+    # oppskrift/import overtar den aktive origin-IDen -- ingen egen
+    # dismiss-handling nødvendig. Ikke i18n-styrt: denne filen har i
+    # dag ingen ui.i18n-bruk i det hele tatt (utelukkende hardkodet
+    # norsk), så et enkelt nytt banner her følger den samme,
+    # eksisterende konvensjonen i stedet for å innføre en isolert
+    # engelsk oversettelse midt i en ellers norsk-only fil.
+    _frossen_neste_variant_banner_id = st.session_state.get(NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL)
+    if (
+        _frossen_neste_variant_banner_id is not None
+        and _frossen_neste_variant_banner_id == st.session_state.get("_aktiv_kbh_origin_recipe_id")
+    ):
+        st.info(
+            "🌱 Dette er et nylig opprettet **neste variant**-utkast, ennå "
+            "ikke lagret. Gi det et nytt navn og trykk «💾 Lagre som ny "
+            "kopi» under for å beholde det."
+        )
+
     # Bryggnavn, batchvolum og bryggerstil
     navn_col, vol_col = st.columns([3, 1.5])
     with navn_col:

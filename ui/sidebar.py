@@ -84,6 +84,22 @@ def render_sidebar():
         # knappehandleren) er trygt fordi #242-flagget rett under
         # konsumeres FØRST etter dette, samme funksjonskall.
         st.session_state["_nullstill_oppskrift_selector_neste_render"] = True
+        # issue #391 -- den EKTE, persistente bekreftelsen. Knappe-
+        # handlerens egen st.success() (ui/kbhbrew_history_panel.py) rendres
+        # rett før dens st.rerun() og er derfor ALDRI faktisk synlig for
+        # brukeren -- reruns tegner et helt nytt scripttre, ingen tidligere
+        # rendret element overlever. Denne linja rendres i STEDET her, i
+        # render_sidebar(), som kjøres på HVER rerun uansett hvilken fane
+        # som er aktiv (App har ingen mekanisme for å tvinge et fanebytte,
+        # se _render_neste_variant_seksjon sin egen kommentar), og derfor
+        # er det eneste stedet som garantert vises uansett hvor brukeren
+        # befinner seg når rerunen faktisk skjer. Ett-gangs av natur, uten
+        # noen ny session_state-nøkkel: denne if-blokka kjører KUN den ene
+        # rerunen som følger rett etter selve seed-handlingen (styrt av
+        # `.pop()` over -- nøyaktig samme "konsumert her, forsvinner av seg
+        # selv"-garanti som resten av denne funksjonens øvrige
+        # ett-gangs-flagg), så meldingen kan aldri henge igjen for alltid.
+        st.sidebar.success(t("brew_history.neste_variant_seed_bekreftelse"))
 
     # App #242 (A3-1-interaksjonsregresjon) -- et engangs, eksplisitt
     # UI-koordineringsflagg. En vellykket import (tekst ELLER .kbhrecipe,
