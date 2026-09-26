@@ -99,7 +99,20 @@ def render_sidebar():
         # `.pop()` over -- nøyaktig samme "konsumert her, forsvinner av seg
         # selv"-garanti som resten av denne funksjonens øvrige
         # ett-gangs-flagg), så meldingen kan aldri henge igjen for alltid.
-        st.sidebar.success(t("brew_history.neste_variant_seed_bekreftelse"))
+        #
+        # Chief-korreksjon (PR #396, issue #391): BEVISST `st.success()`
+        # her, IKKE `st.sidebar.success()` -- App tvinger aldri sidebaren
+        # åpen, så en sidebar-only-bekreftelse forblir usynlig for en
+        # bruker med sammenslått sidebar, akkurat det opprinnelige
+        # problemet på nytt. `render_sidebar()` er ikke selv pakket i
+        # `with st.sidebar:` (kun de individuelle `st.sidebar.*`-kallene
+        # under er det) og kalles i app.py FØR `st.tabs(...)` (se
+        # app.py sin scriptrekkefølge) -- et vanlig `st.success()`-kall
+        # herfra rendres derfor på HOVEDSIDEN, over selve fanene, synlig
+        # uansett sidebar-tilstand og uansett hvilken fane som senere er
+        # aktiv. Oppskrift-fane-banneret (ui/recipe_card.py) forblir
+        # uendret som det sekundære, vedvarende signalet.
+        st.success(t("brew_history.neste_variant_seed_bekreftelse"))
 
     # App #242 (A3-1-interaksjonsregresjon) -- et engangs, eksplisitt
     # UI-koordineringsflagg. En vellykket import (tekst ELLER .kbhrecipe,

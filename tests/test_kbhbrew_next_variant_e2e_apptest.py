@@ -255,8 +255,17 @@ _BEKREFTELSE_NO = "et ulagret utkast"
 _BEKREFTELSE_EN = "an unsaved draft"
 
 
-def _sidebar_success_tekster(at):
-    return [e.value for e in at.sidebar.success]
+def _hovedside_success_tekster(at):
+    """Chief-korreksjon (PR #396, issue #391): `at.success` (uskopert) i
+    stedet for `at.sidebar.success` -- bekreftelsen rendres nå med et
+    vanlig `st.success()` fra render_sidebar(), FØR st.tabs(...) i
+    app.py sin scriptrekkefølge (se ui/sidebar.py sin egen kommentar),
+    altså på HOVEDSIDEN, ikke inni selve sidebar-containeren. `at.success`
+    fanger opp suksesselementer uansett hvor i tre-et de er rendret, så
+    denne funksjonen beviser meldingen finnes -- den påfølgende
+    `at.sidebar.success`-sjekken i testen under beviser i tillegg at den
+    IKKE lenger er sidebar-scopet."""
+    return [e.value for e in at.success]
 
 
 def _info_tekster(at):
@@ -282,10 +291,18 @@ class TestNesteVariantSeedBekreftelseE2E(_MedIsolerteOppskrifter):
         at.button(key=f"kbhbrew_hist_neste_variant_btn::{_BREW_ID}").click().run()
         self.assertFalse(at.exception)
 
-        meldinger = _sidebar_success_tekster(at)
+        meldinger = _hovedside_success_tekster(at)
         self.assertTrue(
             any(_BEKREFTELSE_NO in m for m in meldinger),
-            f"forventet en sidebar-bekreftelse om ulagret utkast, fikk: {meldinger}",
+            f"forventet en bekreftelse på hovedsiden om ulagret utkast, fikk: {meldinger}",
+        )
+        # Chief-korreksjon (issue #391): en sammenslått sidebar må ALDRI
+        # kunne skjule denne -- beviser eksplisitt at den IKKE (lenger)
+        # kun finnes inni selve sidebar-containeren.
+        sidebar_meldinger = [e.value for e in at.sidebar.success]
+        self.assertFalse(
+            any(_BEKREFTELSE_NO in m for m in sidebar_meldinger),
+            "bekreftelsen skal rendres på hovedsiden, ikke (kun) i sidebaren",
         )
 
     def test_bekreftelse_nokkelen_har_faktisk_ulik_no_og_en_tekst(self):
@@ -319,7 +336,7 @@ class TestNesteVariantSeedBekreftelseE2E(_MedIsolerteOppskrifter):
         at.run()
         at.selectbox(key="kbhbrew_historikk_valgt_id").select(_BREW_ID).run()
         at.button(key=f"kbhbrew_hist_neste_variant_btn::{_BREW_ID}").click().run()
-        self.assertTrue(any(_BEKREFTELSE_NO in m for m in _sidebar_success_tekster(at)))
+        self.assertTrue(any(_BEKREFTELSE_NO in m for m in _hovedside_success_tekster(at)))
 
         # En helt urelatert widget-interaksjon (omdøping av utkastet) --
         # ny rerun, INGEN ny seed-handling. Bekreftelsen skal IKKE dukke
@@ -328,7 +345,7 @@ class TestNesteVariantSeedBekreftelseE2E(_MedIsolerteOppskrifter):
         at.text_input(key="gjeldende_navn").set_value("E2E Kildebrygg v2").run()
         self.assertFalse(at.exception)
         self.assertFalse(
-            any(_BEKREFTELSE_NO in m for m in _sidebar_success_tekster(at)),
+            any(_BEKREFTELSE_NO in m for m in _hovedside_success_tekster(at)),
             "bekreftelsen skal ikke overleve en senere, urelatert rerun",
         )
 
