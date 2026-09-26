@@ -243,6 +243,15 @@ TEKSTER = {
         ),
         "prosess.laer_bro.tittel": "🎓 Hvorfor påvirker mesketemperatur ølet?",
         "prosess.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Mesking.",
+        # issue #400, rotårsak A -- disse to satt her ved siden av
+        # gjaering.laer_bro.* over/under, som ALLEREDE var i18n-aktivert:
+        # ui/yeast_panel.py sin header og "Velg gjær:"-label sto fortsatt
+        # hardkodet på norsk, uendret av språkvalget, mens Learn->Plan-
+        # broen rett under dem allerede skiftet korrekt. Bevisst
+        # AVGRENSET til akkurat disse to (ingen bredere oversettelse av
+        # resten av panelet -- se issue #400 sitt eksplisitte non-goal).
+        "gjaering.gjaer_panel.header": "🧫 Gjærstamme",
+        "gjaering.gjaer_panel.velg_label": "Velg gjær:",
         "gjaering.laer_bro.tittel": "🎓 Hvorfor påvirker gjæringstemperatur ølet?",
         "gjaering.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Gjæring.",
         "gjaering.temp_maal.label": "Planlagt gjæringstemperatur (°C)",
@@ -251,6 +260,11 @@ TEKSTER = {
             "den valgte gjærstammen — følg gjeldende veiledning for akkurat denne "
             "stammen/produsenten, ikke en generell «ale varmt / lager kaldt»-regel."
         ),
+        # issue #400, rotårsak A -- samme avgrensede fiks som
+        # gjaering.gjaer_panel.* over: kun disse to, ikke resten av
+        # ui/hop_panel.py.
+        "koking.humle_panel.header": "🌿 Humle-tilsetninger",
+        "koking.humle_panel.legg_til_knapp": "➕ Legg til humle",
         "koking.laer_bro.tittel": "🎓 Hvorfor påvirker humle-tidspunkt ølet?",
         "koking.laer_bro.guardrail": (
             "⚠️ Dette gjelder tilsetninger som faktisk er i aktiv koking: en "
@@ -445,6 +459,8 @@ TEKSTER = {
         ),
         "prosess.laer_bro.tittel": "🎓 Why does mash temperature affect the beer?",
         "prosess.laer_bro.footer": "Want to practice more? Open Brew School → Mashing.",
+        "gjaering.gjaer_panel.header": "🧫 Yeast strain",
+        "gjaering.gjaer_panel.velg_label": "Select yeast:",
         "gjaering.laer_bro.tittel": "🎓 Why does fermentation temperature affect the beer?",
         "gjaering.laer_bro.footer": "Want to practice more? Open Brew School → Fermentation.",
         "gjaering.temp_maal.label": "Planned fermentation temperature (°C)",
@@ -453,6 +469,8 @@ TEKSTER = {
             "the selected yeast strain — follow current guidance for that exact "
             "strain/manufacturer, not a general 'ales warm / lagers cold' rule."
         ),
+        "koking.humle_panel.header": "🌿 Hop additions",
+        "koking.humle_panel.legg_til_knapp": "➕ Add hop",
         "koking.laer_bro.tittel": "🎓 Why does hop timing affect the beer?",
         "koking.laer_bro.guardrail": (
             "⚠️ This applies to additions that are actually in the active boil: a "

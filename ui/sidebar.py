@@ -175,12 +175,49 @@ def render_sidebar():
 
     if lagrede_brygg:
         oppskrift_valg = [_INGEN_OPPSKRIFT_VALGT] + list(lagrede_brygg.keys())
+        # issue #400, rotårsak B -- `format_func` MÅ være en ren funksjon
+        # av SIN EGEN, allerede-frosne tekst her, ALDRI et live `t(...)`-
+        # kall inni selve lambdaen. `t()` leser st.session_state["sprak"]
+        # på kallstidspunktet, ikke på definisjonstidspunktet -- og
+        # Streamlit/AppTest sin egen widget-state-rekonsiliering kan
+        # re-invokere en TIDLIGERE lagret format_func-lambda på et
+        # tidspunkt der "sprak" allerede er endret til det NYE språket,
+        # mens selectboksens faktisk RENDREDE options-liste for DENNE
+        # rendringen fortsatt reflekterer det GAMLE språket. Resultatet
+        # er en formatert streng som ikke finnes i options-lista --
+        # reprodusert direkte (uten denne fiksen) som
+        # `ValueError: '-- Velg oppskrift --' is not in list` inni
+        # Streamlit sitt eget widget-state-maskineri, som til slutt viser
+        # seg for brukeren som `KeyError: '-- Velg oppskrift --'` her.
+        # Ved å beregne `_plassholder_tekst` ÉN gang, her, FØR selve
+        # selectbox-kallet (altså alltid i takt med DENNE rendringens
+        # egen, ferske språkverdi), og binde den inn som et vanlig
+        # default-argument, blir lambdaen en RVEN, tidspunktuavhengig
+        # funksjon av sin egen fangede verdi -- uansett når/hvor mange
+        # ganger Streamlit senere måtte kalle den, kan den aldri
+        # produsere noe annet enn akkurat den strengen options-lista for
+        # DENNE rendringen faktisk ble bygget med.
+        _plassholder_tekst = t("sidebar.velg_placeholder")
         valgt_lagret_navn = st.sidebar.selectbox(
             t("sidebar.velg_brygg_label"),
             oppskrift_valg,
-            format_func=lambda v: t("sidebar.velg_placeholder") if v == _INGEN_OPPSKRIFT_VALGT else v,
+            format_func=lambda v, _tekst=_plassholder_tekst: _tekst if v == _INGEN_OPPSKRIFT_VALGT else v,
             key="sidebar_recipe_selector",
         )
+        # issue #400, rotårsak B (forsvar i dybden) -- selv om fiksen
+        # over fjerner selve KILDEN til det motstridende formaterte
+        # resultatet, normaliserer denne sjekken enhver GJENVÆRENDE
+        # uventet/stale verdi trygt til "ingen oppskrift valgt" i stedet
+        # for å anta at den er et ekte oppskriftsnavn: `oppskrift_valg`
+        # (options-lista over) inneholder PER KONSTRUKSJON kun sentinelen
+        # og faktiske nøkler i `lagrede_brygg`, så enhver ANNEN verdi
+        # (f.eks. en gjenværende oversatt plassholder-streng fra en
+        # tidligere, uventet widget-state-rekonsiliering) er per
+        # definisjon ALDRI en gyldig oppskrift -- aldri en falsk positiv
+        # for en oppskrift som faktisk het akkurat den strengen, siden en
+        # ekte lagret oppskrift alltid vil finnes i `lagrede_brygg`.
+        if valgt_lagret_navn != _INGEN_OPPSKRIFT_VALGT and valgt_lagret_navn not in lagrede_brygg:
+            valgt_lagret_navn = _INGEN_OPPSKRIFT_VALGT
         if (valgt_lagret_navn != _INGEN_OPPSKRIFT_VALGT
                 and valgt_lagret_navn != st.session_state.get("_last_loaded_recipe")):
             r_data = lagrede_brygg[valgt_lagret_navn]
