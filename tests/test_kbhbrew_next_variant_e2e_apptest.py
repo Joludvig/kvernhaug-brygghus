@@ -240,5 +240,185 @@ class TestNesteVariantE2EAppTest(_MedIsolerteOppskrifter):
         self.assertNotEqual(kopi_id, kilde_origin_id)
 
 
+# ─── issue #391 -- persistent bekreftelse + Oppskrift-fanens utkast-banner ──
+#
+# Reported bug: the seed succeeds, Streamlit reruns, the transient
+# `st.success()` in ui/kbhbrew_history_panel.py's button handler (rendered
+# right before its own st.rerun()) never actually reaches the user --
+# reruns tear down and redraw the whole script tree, so nothing rendered
+# just before a forced rerun can ever be seen. These tests prove the two
+# NEW, persistent signals added in ui/sidebar.py and ui/recipe_card.py
+# instead -- both of which are visible on the SAME rerun that follows the
+# button click (the exact rerun the reported bug made look like "nothing
+# happened"), not the doomed pre-rerun render.
+_BEKREFTELSE_NO = "et ulagret utkast"
+_BEKREFTELSE_EN = "an unsaved draft"
+
+
+def _hovedside_success_tekster(at):
+    """Chief-korreksjon (PR #396, issue #391): `at.success` (uskopert) i
+    stedet for `at.sidebar.success` -- bekreftelsen rendres nå med et
+    vanlig `st.success()` fra render_sidebar(), FØR st.tabs(...) i
+    app.py sin scriptrekkefølge (se ui/sidebar.py sin egen kommentar),
+    altså på HOVEDSIDEN, ikke inni selve sidebar-containeren. `at.success`
+    fanger opp suksesselementer uansett hvor i tre-et de er rendret, så
+    denne funksjonen beviser meldingen finnes -- den påfølgende
+    `at.sidebar.success`-sjekken i testen under beviser i tillegg at den
+    IKKE lenger er sidebar-scopet."""
+    return [e.value for e in at.success]
+
+
+def _info_tekster(at):
+    return [e.value for e in at.info]
+
+
+class TestNesteVariantSeedBekreftelseE2E(_MedIsolerteOppskrifter):
+
+    def test_bekreftelse_vises_i_sidebar_paa_rerunen_etter_seed(self):
+        self._seed_kilde_og_brew()
+
+        at = AppTest.from_file(_APP_PY, default_timeout=30)
+        at.run()
+        self.assertFalse(at.exception)
+
+        at.selectbox(key="kbhbrew_historikk_valgt_id").select(_BREW_ID).run()
+        self.assertFalse(at.exception)
+
+        # Ett eneste .click().run() dekker BEGGE reruns (knappens egen
+        # st.rerun(), pluss AppTest sin automatiske gjennomkjøring av den)
+        # -- se de tre eksisterende testene over, som allerede leser
+        # ferdig hydrert session_state rett etter nøyaktig dette kallet.
+        at.button(key=f"kbhbrew_hist_neste_variant_btn::{_BREW_ID}").click().run()
+        self.assertFalse(at.exception)
+
+        meldinger = _hovedside_success_tekster(at)
+        self.assertTrue(
+            any(_BEKREFTELSE_NO in m for m in meldinger),
+            f"forventet en bekreftelse på hovedsiden om ulagret utkast, fikk: {meldinger}",
+        )
+        # Chief-korreksjon (issue #391): en sammenslått sidebar må ALDRI
+        # kunne skjule denne -- beviser eksplisitt at den IKKE (lenger)
+        # kun finnes inni selve sidebar-containeren.
+        sidebar_meldinger = [e.value for e in at.sidebar.success]
+        self.assertFalse(
+            any(_BEKREFTELSE_NO in m for m in sidebar_meldinger),
+            "bekreftelsen skal rendres på hovedsiden, ikke (kun) i sidebaren",
+        )
+
+    def test_bekreftelse_nokkelen_har_faktisk_ulik_no_og_en_tekst(self):
+        """Beviser at EN-teksten finnes og faktisk skiller seg fra NO --
+        på selve i18n-laget (samme mønster som
+        tests/test_kbhbrew_terminology_apptest.py sin ren_t()-bruk),
+        IKKE via en full AppTest-språkbytte gjennom
+        kbhbrew_historikk_valgt_id/actuals-statusselectboksen: den
+        kombinasjonen har en EKSISTERENDE, urelatert AppTest-
+        widget-state-krasj ("'Aktiv' is not in list") når språk settes
+        til "en" FØR første at.run() og en brygg-status-selectbox
+        (kbhbrew_hist_status::{brew_id}, en helt annen, uendret widget)
+        deretter rekomputeres -- reprodusert også UTEN denne
+        korreksjonens egne endringer, altså ikke noe issue #391 skal
+        fikse. Den FAKTISKE UI-koblingen (riktig nøkkel rendres på
+        riktig sted) er allerede bevist på norsk over; her bevises kun
+        at selve teksten er reell, tospråklig og ulik."""
+        from modules.i18n import t as ren_t
+
+        no_tekst = ren_t("brew_history.neste_variant_seed_bekreftelse", "no")
+        en_tekst = ren_t("brew_history.neste_variant_seed_bekreftelse", "en")
+        self.assertIn(_BEKREFTELSE_NO, no_tekst)
+        self.assertIn(_BEKREFTELSE_EN, en_tekst)
+        self.assertNotEqual(no_tekst, en_tekst)
+
+    def test_bekreftelse_er_ett_gangs_og_forsvinner_paa_neste_urelaterte_rerun(self):
+        """Test requirement 4: må ikke henge igjen for alltid."""
+        self._seed_kilde_og_brew()
+
+        at = AppTest.from_file(_APP_PY, default_timeout=30)
+        at.run()
+        at.selectbox(key="kbhbrew_historikk_valgt_id").select(_BREW_ID).run()
+        at.button(key=f"kbhbrew_hist_neste_variant_btn::{_BREW_ID}").click().run()
+        self.assertTrue(any(_BEKREFTELSE_NO in m for m in _hovedside_success_tekster(at)))
+
+        # En helt urelatert widget-interaksjon (omdøping av utkastet) --
+        # ny rerun, INGEN ny seed-handling. Bekreftelsen skal IKKE dukke
+        # opp igjen (den er konsumert av .pop() på NESTE_VARIANT_SEED_
+        # PENDING_NOKKEL, akkurat som selve hydreringen den er koblet til).
+        at.text_input(key="gjeldende_navn").set_value("E2E Kildebrygg v2").run()
+        self.assertFalse(at.exception)
+        self.assertFalse(
+            any(_BEKREFTELSE_NO in m for m in _hovedside_success_tekster(at)),
+            "bekreftelsen skal ikke overleve en senere, urelatert rerun",
+        )
+
+    def test_oppskrift_fanen_viser_utkast_banner_mens_uendret(self):
+        """Recipe-tab-banneret er valgfritt per issue #391, men når det
+        implementeres skal det faktisk vises mens utkastet står ulagret."""
+        self._seed_kilde_og_brew()
+
+        at = AppTest.from_file(_APP_PY, default_timeout=30)
+        at.run()
+        at.selectbox(key="kbhbrew_historikk_valgt_id").select(_BREW_ID).run()
+        at.button(key=f"kbhbrew_hist_neste_variant_btn::{_BREW_ID}").click().run()
+        self.assertFalse(at.exception)
+
+        infoer = _info_tekster(at)
+        self.assertTrue(
+            any("neste variant" in m and "utkast" in m for m in infoer),
+            f"forventet et Oppskrift-fane-banner om det ferske utkastet, fikk: {infoer}",
+        )
+
+    def test_oppskrift_fanen_banner_forsvinner_etter_vellykket_lagring(self):
+        self._seed_kilde_og_brew()
+
+        at = AppTest.from_file(_APP_PY, default_timeout=30)
+        at.run()
+        at.selectbox(key="kbhbrew_historikk_valgt_id").select(_BREW_ID).run()
+        at.button(key=f"kbhbrew_hist_neste_variant_btn::{_BREW_ID}").click().run()
+        self.assertFalse(at.exception)
+        self.assertTrue(any("utkast" in m for m in _info_tekster(at)))
+
+        at.text_input(key="gjeldende_navn").set_value("E2E Kildebrygg v2").run()
+        at.button(key="lagre_ny_kopi_btn").click().run()
+        self.assertFalse(at.exception)
+        # Selve lagre-klikket popper markøren i session_state med det
+        # samme (samme "success"-gren som allerede beviser dette i
+        # TestNesteVariantE2EAppTest), men "Lagre som ny kopi" kaller
+        # ALDRI sin egen st.rerun() (i motsetning til "Lagre endringer"
+        # ved navneendring) -- render_recipe_card() sitt banner øverst i
+        # funksjonen rekker derfor allerede å bli bygget FØR knappens
+        # egen suksess-gren popper markøren, SAMME scriptkjøring. Ett
+        # helt vanlig, påfølgende rerun (her: ingen ny widget-hendelse i
+        # det hele tatt) er derfor nødvendig for at den ALLEREDE
+        # oppdaterte session_state-verdien skal reflekteres i den
+        # rendrede sida -- ikke en ny bug denne saken introduserer, men
+        # samme generelle "trenger én rerun for å bli synlig"-mønster
+        # som selve saken handler om.
+        at.run()
+        self.assertFalse(at.exception)
+
+        infoer_etter = _info_tekster(at)
+        self.assertFalse(
+            any("neste variant" in m and "utkast" in m for m in infoer_etter),
+            f"banneret skal forsvinne etter vellykket lagring, fikk: {infoer_etter}",
+        )
+
+    def test_oppskrift_fanen_viser_ikke_banner_for_en_vanlig_oppskrift(self):
+        """Regresjonsvakt: banneret skal ALDRI vises for en oppskrift som
+        ikke stammer fra en "Opprett neste variant"-seed."""
+        self._seed_kilde_og_brew()
+
+        at = AppTest.from_file(_APP_PY, default_timeout=30)
+        at.run()
+        self.assertFalse(at.exception)
+
+        at.selectbox(key="sidebar_recipe_selector").select("E2E Kildebrygg").run()
+        self.assertFalse(at.exception)
+
+        infoer = _info_tekster(at)
+        self.assertFalse(
+            any("neste variant" in m and "utkast" in m for m in infoer),
+            f"banneret skal ikke vises for en ordinær, ikke-seedet oppskrift, fikk: {infoer}",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
