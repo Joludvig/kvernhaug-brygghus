@@ -1672,12 +1672,15 @@ class TestQuizTypografiIssue401(unittest.TestCase):
 # disabled etter svar), som denne klassen også dekker for å bevise at
 # kontrast-fiksen ikke svekket selve låsingen.
 #
-# CSS-en skriver alfaen som prosent (`85%`), ikke desimal (`0.85`): siden
-# st.markdown() rendrer denne CSS-strengen inn i sidens tekst, fanget
-# _RAAT_TALL_MONSTER-vakten (lenger ned i denne filen) opp en bokstavelig
-# "0.85" som et mulig lekket rått mastery-/confidence-tall under selve
-# utviklingen av denne fiksen -- se assertions under som beviser at
-# prosentformen faktisk unngår dette.
+# Chief review (theme-safety-oppfølging): en tidligere versjon av denne
+# fiksen brukte hardkodede rgba(...)-verdier valgt via
+# @media (prefers-color-scheme: dark) -- men Streamlit sitt eget tema kan
+# settes UAVHENGIG av OS/browser sin prefers-color-scheme, så den grenen
+# kunne velge feil farge og gi lav kontrast igjen (samme bugklasse på
+# nytt). Samme DOM-inspeksjon som avdekket selve disabled-fargen viste at
+# foreldre-labelen ALLEREDE har appens faktiske, korrekte temafarge --
+# løsningen er derfor `color: inherit`, ingen egen fargeverdi og ingen
+# @media-gren i det hele tatt.
 
 class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
     def setUp(self):
@@ -1689,46 +1692,60 @@ class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
         # Selve selektoren MÅ være under .st-key-bs_svaralternativ (aldri en
         # global [data-testid="stRadioOption"]-regel) -- ellers ville fiksen
         # lekket til andre radio-widgets i appen (f.eks. språkvelgeren).
+        #
+        # Selektoren treffer den DIREKTE barne-diven til selve
+        # stRadioOption-labelen (`> div`), ikke `<p>` direkte: en ekte
+        # Playwright DOM-sporing (getComputedStyle langs hele forelder-
+        # kjeden) viste at BaseWebs `color: rgba(..., 0.4)` faktisk settes
+        # på denne diven, ikke på `<p>`-en selv (som ikke har noen egen
+        # color-regel -- den arver kun fra sin nærmeste forelder). Et
+        # første forsøk med `color: inherit` direkte på `p` var derfor
+        # virkningsløst, siden `p` sin nærmeste forelder allerede var
+        # dempet -- se modulens egen docstring for full sporing.
         self.assertIn(
-            '.st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] p',
+            '.st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] > div',
             self.kildekode,
         )
 
-    def test_disabled_kontrast_hevet_til_85_prosent_begge_fargemoduser(self):
-        # De to fargemodus-grenene (lys direkte, mørk under
-        # @media (prefers-color-scheme: dark)) skal begge bruke 85%-alfa
-        # -- den lave 0.4-alfaen fra Streamlits egen disabled-styling
-        # (bekreftet lav-kontrast per eier-QA) skal ikke lenger forekomme
-        # i VÅR EGEN CSS-override.
-        self.assertIn("rgba(49, 51, 63, 85%)", self.kildekode)
-        self.assertIn("rgba(250, 250, 250, 85%)", self.kildekode)
-        self.assertIn("@media (prefers-color-scheme: dark)", self.kildekode)
-        # Vår egen override-regel skal aldri selv gjeninnføre 0.4-alfaen.
+    def test_disabled_kontrast_bruker_inherit_ikke_egen_fargeverdi(self):
+        # Theme-safe løsning: la den dempede diven arve labelens allerede
+        # korrekte temafarge i stedet for å style en egen rgba(...)-verdi
+        # -- virker uansett hvilket tema (lyst/mørkt/egendefinert) som
+        # faktisk er aktivt, uavhengig av OS/browser sin
+        # prefers-color-scheme.
         override_idx = self.kildekode.index(
-            '[data-testid="stRadioOption"][data-disabled="true"] p'
-        )
-        override_block = self.kildekode[override_idx:override_idx + 400]
-        self.assertNotIn("0.4)", override_block)
-
-    def test_css_alfa_er_prosentform_ikke_desimal(self):
-        # Selve grunnen til prosentform: st.markdown() rendrer CSS-en som
-        # en del av sidens tekst, og _RAAT_TALL_MONSTER-vakten under fanger
-        # ethvert "0.xx"-mønster som et mulig lekket rått mastery-tall.
-        # Denne testen beviser direkte at den faktiske CSS-regelen (ikke
-        # bare dokumentasjonen om den) unngår desimalformen.
-        override_idx = self.kildekode.index(
-            '[data-testid="stRadioOption"][data-disabled="true"] p {\n            color:'
+            '[data-testid="stRadioOption"][data-disabled="true"] > div {\n            color:'
         )
         override_block = self.kildekode[override_idx:override_idx + 120]
-        self.assertNotRegex(override_block, r"\b0\.\d+\b")
-        self.assertIn("85%", override_block)
+        self.assertIn("color: inherit", override_block)
+        # Ingen hardkodet rgba(...)-fargeverdi skal være igjen i selve
+        # override-regelen (0.4 var den opprinnelige lav-kontrast-bugen;
+        # 85%/0.85 var en tidligere, ikke lenger theme-safe mellomfiks).
+        self.assertNotIn("rgba(", override_block)
+
+    def test_ingen_prefers_color_scheme_gren_i_denne_fiksen(self):
+        # @media (prefers-color-scheme: dark) er feil signal å style mot
+        # her: Streamlit sitt eget tema kan velges uavhengig av OS/browser
+        # sin fargemodus, så en gren basert på prefers-color-scheme kan
+        # velge feil farge for en bruker med mismatch mellom OS-tema og
+        # Streamlit-tema. `color: inherit` trenger ingen slik gren.
+        #
+        # NB: sjekker kun selve den RENDREDE CSS-en (<style>...</style>-
+        # blokken i st.markdown()-kallet), ikke hele kildefilen -- modulens
+        # egen docstring nevner (med vilje) det tidligere navnet
+        # `prefers-color-scheme` som forklaring på HVORFOR det ble fjernet,
+        # noe som er dokumentasjon, ikke rendret CSS.
+        style_start = self.kildekode.index("<style>")
+        style_end = self.kildekode.index("</style>")
+        css_blokk = self.kildekode[style_start:style_end]
+        self.assertNotIn("prefers-color-scheme", css_blokk)
 
     def test_far_svar_css_bruker_important_for_a_slaa_ut_baseweb(self):
         # Uten !important taper vår regel mot BaseWebs egen
         # emotion-genererte disabled-farge (samme spesifisitetsnivå, men
         # BaseWebs regel injiseres senere i dokumentet).
         override_idx = self.kildekode.index(
-            '[data-testid="stRadioOption"][data-disabled="true"] p'
+            '[data-testid="stRadioOption"][data-disabled="true"] > div'
         )
         override_block = self.kildekode[override_idx:override_idx + 400]
         self.assertIn("!important", override_block)
