@@ -40,7 +40,7 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_package_flow_svg("en")
-        self.assertIn('viewBox="0 0 1145 360"', svg)
+        self.assertIn('viewBox="0 0 1145 400"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
         self.assertIn("max-width:1145px", svg)
@@ -50,12 +50,13 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
         # sizing, and the diagram must carry its own explicit opaque
         # background so the light-backdrop-tuned palette has guaranteed
         # contrast regardless of Streamlit's active theme. Owner-QA
-        # follow-up: only the background rect HEIGHT shrank (bulkiness
-        # fix); width and font floor are unchanged from #397.
+        # follow-up: only the background rect HEIGHT changed (bulkiness
+        # fix, then the final owner-QA top/bottom spacing fix); width and
+        # font floor are unchanged from #397.
         svg = render_package_flow_svg("en")
         for font_size in re.findall(r'font-size="([\d.]+)"', svg):
             self.assertGreaterEqual(float(font_size), 13)
-        self.assertIn('<rect x="0" y="0" width="1145" height="360"', svg)
+        self.assertIn('<rect x="0" y="0" width="1145" height="400"', svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -166,7 +167,7 @@ def _leaf_text_nodes(svg):
 
 class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
     VIEWBOX_WIDTH = 1145
-    VIEWBOX_HEIGHT = 360
+    VIEWBOX_HEIGHT = 400
 
     def test_every_text_lines_estimated_width_fits_inside_viewbox(self):
         for lang in ("no", "en"):
@@ -258,6 +259,67 @@ class TestBoxLabelsNeverClipTheirOwnBox(unittest.TestCase):
         bottle_bottom = int(bottle_rect.group(1)) + int(bottle_rect.group(2))
         keg_top = int(keg_rect.group(1))
         self.assertGreater(keg_top, bottle_bottom, "bottle and keg rows must not touch/overlap")
+
+
+# ─── Final owner-PC visual QA (issue #397 second follow-up): the previous
+# correction fixed clipping/bulkiness but left the title crowded against
+# the sanitized-zone rect/label at the top, and the two bottom guidance
+# labels too close to the card's bottom border. Both are pure vertical-
+# layout regressions to lock in -- box widths/heights, font sizes and all
+# process semantics are unchanged. ──────────────────────────────────────
+
+
+class TestTopAndBottomLabelSpacingIssue397Final(unittest.TestCase):
+    VIEWBOX_HEIGHT = 400
+    MIN_BOTTOM_BORDER_MARGIN = 30
+
+    def _node_at(self, nodes, x, font_size):
+        matches = [n for n in nodes if round(n[0], 1) == x and n[3] == font_size]
+        self.assertEqual(
+            len(matches), 1,
+            f"expected exactly one text node at x={x}, font-size={font_size}, found {matches}",
+        )
+        return matches[0]
+
+    def test_title_and_sanitized_zone_label_have_clear_vertical_separation(self):
+        for lang in ("no", "en"):
+            svg = render_package_flow_svg(lang)
+            nodes = _leaf_text_nodes(svg)
+            title_y = self._node_at(nodes, 573, 20)[1]
+            zone_label_y = self._node_at(nodes, 740, 14)[1]
+            self.assertGreaterEqual(
+                zone_label_y - title_y, 30,
+                f"{lang}: title (y={title_y}) and sanitized-zone label (y={zone_label_y}) "
+                "are still crowded together",
+            )
+
+    def test_top_labels_remain_inside_viewbox(self):
+        for lang in ("no", "en"):
+            svg = render_package_flow_svg(lang)
+            nodes = _leaf_text_nodes(svg)
+            title_y = self._node_at(nodes, 573, 20)[1]
+            zone_label_y = self._node_at(nodes, 740, 14)[1]
+            self.assertGreaterEqual(title_y, 0)
+            self.assertLessEqual(title_y, self.VIEWBOX_HEIGHT)
+            self.assertGreaterEqual(zone_label_y, 0)
+            self.assertLessEqual(zone_label_y, self.VIEWBOX_HEIGHT)
+
+    def test_bottom_guidance_labels_clear_the_bottom_card_border(self):
+        for lang in ("no", "en"):
+            svg = render_package_flow_svg(lang)
+            nodes = _leaf_text_nodes(svg)
+            oxygen_y = self._node_at(nodes, 340, 13)[1]
+            pressure_y = self._node_at(nodes, 740, 13)[1]
+            self.assertLessEqual(
+                oxygen_y, self.VIEWBOX_HEIGHT - self.MIN_BOTTOM_BORDER_MARGIN,
+                f"{lang}: oxygen_label (y={oxygen_y}) is within "
+                f"{self.MIN_BOTTOM_BORDER_MARGIN}px of the bottom card border",
+            )
+            self.assertLessEqual(
+                pressure_y, self.VIEWBOX_HEIGHT - self.MIN_BOTTOM_BORDER_MARGIN,
+                f"{lang}: pressure_label (y={pressure_y}) is within "
+                f"{self.MIN_BOTTOM_BORDER_MARGIN}px of the bottom card border",
+            )
 
 
 if __name__ == "__main__":
