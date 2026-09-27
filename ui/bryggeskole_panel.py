@@ -115,6 +115,13 @@ _PILOT_CONTENT_ERRORS = (
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
 _ENV_BRYGGERI = "bryggeri"
 
+# Issue #398 follow-up: two narrow, adjacent columns for a compact
+# button pair, plus one wide trailing spacer column that absorbs the
+# rest of the row so the pair doesn't spread across the whole width.
+# Used everywhere two related Bryggeskole nav/action buttons render side
+# by side (lesson Forrige/Neste, summary Prøv igjen/Tilbake).
+_KNAPP_GRUPPE_KOLONNER = (1, 1, 6)
+
 _MODUL_METODEVALG = "metodevalg"
 _MODUL_MESKING = "mesking"
 _MODUL_KOKING = "koking"
@@ -637,8 +644,20 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
     # klikkbarhet -- se ui/bryggeskole_panel.py sin bruk samme sted i
     # _render_sporsmal() og _render_oppsummering() for de to andre
     # forekomstene av dette samme mønsteret.
+    #
+    # Owner-QA correction (issue #398 follow-up): width="content" alone
+    # fixed the SIZE, but col1/col2 = st.columns(2) still gives each
+    # button its own half-width column, so the two compact buttons ended
+    # up far apart with a big empty gap between them. _KNAPP_GRUPPE_KOLONNER
+    # (1, 1, N) puts both buttons in two narrow, ADJACENT columns
+    # followed by one wide empty spacer column that absorbs the rest of
+    # the row -- a plain Streamlit-layout fix (no CSS) for "grouped
+    # side-by-side buttons, not spread across the whole width". Below the
+    # narrow/mobile breakpoint Streamlit stacks all three columns
+    # full-width regardless of ratio, so this is a no-op there (the third
+    # column just renders as empty, harmless whitespace).
     with st.container(key="bs_nav_actions"):
-        col1, col2 = st.columns(2)
+        col1, col2, _spacer = st.columns(_KNAPP_GRUPPE_KOLONNER)
         with col1:
             st.button(
                 t("bryggeskole.leksjon.forrige"), key=f"bs_bolk_forrige_{modul_id}_btn",
@@ -808,8 +827,10 @@ def _render_oppsummering(modul_id, pilot, sprak):
                     f"{mastery_label(konsept_tilstand, sprak)}"
                 )
 
+    # Issue #398 follow-up: same compact side-by-side grouping as the
+    # lesson Forrige/Neste row -- see that call site's comment.
     with st.container(key="bs_nav_actions"):
-        col1, col2 = st.columns(2)
+        col1, col2, _spacer = st.columns(_KNAPP_GRUPPE_KOLONNER)
         with col1:
             st.button(
                 t("bryggeskole.oppsummering.prov_igjen"), key=f"bs_prov_igjen_{modul_id}_btn",

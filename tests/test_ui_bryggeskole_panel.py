@@ -1292,11 +1292,16 @@ class TestPakkingModulen(_MedIsolertTilstand):
         self.assertIn("Saniteringsgrensen fra kjøling/overføring stopper ikke ved gjæringskaret", tekster)
 
     def test_pakking_modulen_viser_statisk_flytdiagram(self):
+        # Owner-QA correction (issue #397 follow-up): "Klar til
+        # servering/lagring" now renders as two <tspan> lines
+        # (bryggeskole/package_flow.py's box-width-aware wrapping), so it
+        # no longer appears as one contiguous substring in the raw
+        # markdown/SVG source -- check both halves instead.
         at = self._ny_apptest()
         self._apne_modul(at, "pakking")
         markdown_verdier = [m.value for m in at.markdown]
         self.assertTrue(any("<svg" in v for v in markdown_verdier))
-        self.assertTrue(any("Klar til servering/lagring" in v for v in markdown_verdier))
+        self.assertTrue(any("Klar til" in v and "servering/lagring" in v for v in markdown_verdier))
 
     def test_pakking_far_full_leksjon_sporsmal_oppsummering_flyt(self):
         at = self._ny_apptest()
@@ -1583,6 +1588,39 @@ class TestNavigasjonsknapperErKompakteIssue398(unittest.TestCase):
         _knapp(at, "bs_apne_modul_mesking_btn").click().run()
         forrige = _knapp(at, "bs_bolk_forrige_mesking_btn")
         self.assertTrue(forrige.disabled, "«Forrige» skal fortsatt være disabled på første bolk")
+
+    def test_knappene_grupperes_side_om_side_ikke_i_to_brede_kolonner(self):
+        # Owner-QA korreksjon (issue #398 oppfølging): width="content"
+        # alene fikset STØRRELSEN, men col1, col2 = st.columns(2) ga
+        # fortsatt hver knapp sin egen halv-brede kolonne -- de to
+        # kompakte knappene endte langt fra hverandre. Fiksen bruker
+        # _KNAPP_GRUPPE_KOLONNER (to smale, TILSTØTENDE kolonner + én bred
+        # tom "spacer"-kolonne) for lesjon- og oppsummeringsradene -- de to
+        # eneste stedene hvor to knapper faktisk vises SAMTIDIG side om
+        # side (spørsmål-raden viser alltid bare én av "Sjekk svar"/
+        # "Fortsett" om gangen, se test_delt_nav_actions_container_..., og
+        # trenger derfor ikke denne grupperingen).
+        # NB: st.columns(2) still legitimately appears once elsewhere in
+        # this file (_render_miljovalg()'s Hjemmebrygger/Bryggeri
+        # environment-choice CARDS -- a different UI element, out of
+        # #398's nav/action-button scope), so this only asserts the new
+        # pattern's presence at the two nav-button call sites, not a
+        # file-wide absence of the old one.
+        import ui.bryggeskole_panel as panel_module
+        self.assertEqual(self.kildekode.count("st.columns(_KNAPP_GRUPPE_KOLONNER)"), 2)
+
+        kolonner = panel_module._KNAPP_GRUPPE_KOLONNER
+        self.assertEqual(len(kolonner), 3, "to knappekolonner + én spacer-kolonne")
+        knapp_bredde_1, knapp_bredde_2, spacer_bredde = kolonner
+        self.assertEqual(
+            knapp_bredde_1, knapp_bredde_2,
+            "de to knappekolonnene skal ha lik bredde -- ingen skal virke dominerende",
+        )
+        self.assertGreater(
+            spacer_bredde, knapp_bredde_1,
+            "spacer-kolonnen skal være bredere enn knappekolonnene, slik at knappene "
+            "faktisk grupperes sammen i stedet for å spres over hele bredden",
+        )
 
 
 # ─── #401: quiz-typografi ───────────────────────────────────────────────────
