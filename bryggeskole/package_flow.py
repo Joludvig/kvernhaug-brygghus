@@ -74,6 +74,25 @@ content needed, which read as "bulky"/"boxes too big for the text
 inside". Only vertical (y/height) values changed here -- every x
 position, box width and the overall viewBox width are unchanged from
 the #397 legibility pass, per the narrow scope of this correction.
+
+Final owner-QA visual fix (issue #397 second follow-up): the composition
+correction above still left the title ("Pakking") and the sanitized-zone
+rect/label crowded at the top -- the zone rect's top edge (`bottle_y0 -
+20`) sat literally 2px ABOVE the title's own baseline, so the title text
+visually intersected the zone rect, and the zone label directly below it
+sat only 10px further down. At the bottom, `oxygen_label`/`pressure_label`
+were positioned close enough to the card's bottom border (36-39px on the
+size estimate alone) that real font-metric variance left too little
+margin, reading as "too low against/through the diagram boundary". Fix:
+every box below the title was shifted down by a fixed offset to open up
+a real gap under the title, and the two bottom guidance labels were
+pushed further down from the (now-lower) sanitized-zone rect with an
+explicit minimum bottom-border margin -- the card/viewBox height grew
+from 360 to 400 to hold the extra vertical space this required. Every x
+position and every box width/height is unchanged from the previous
+correction; only y-values (title, zone rect/label, bottle/keg/serve
+boxes, oxygen_label, pressure_label) and the overall card height moved,
+per this fix's own "adjust y positions/padding narrowly" scope.
 """
 
 import textwrap
@@ -81,7 +100,7 @@ import textwrap
 LANGUAGES = ("no", "en")
 
 # SVG viewBox width in user units (kept in sync with the literal
-# "0 0 1145 430" in the returned markup below).
+# "0 0 1145 400" in the returned markup below).
 _VIEWBOX_WIDTH = 1145
 
 # Explicit opaque card background (issue #397) -- guarantees the
@@ -254,11 +273,14 @@ def render_package_flow_svg(language):
     # previous 120px/91px box heights were sized for the pre-#397 font and
     # left each box far taller than 1-2 lines of the now-larger text
     # needed, reading as "bulky". See the module docstring.
-    bottle_y0, bottle_y1 = 50, 134
-    keg_y0, keg_y1 = 189, 273
-    serve_y_mid = 162
+    # Final owner-QA visual fix (issue #397 second follow-up): shifted
+    # down as one block from the previous correction's 50/189/162 to open
+    # up a real gap under the title -- see the module docstring.
+    bottle_y0, bottle_y1 = 78, 162
+    keg_y0, keg_y1 = 217, 301
+    serve_y_mid = 190
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 1145 360" width="100%" preserveAspectRatio="xMidYMid meet"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 1145 400" width="100%" preserveAspectRatio="xMidYMid meet"
   style="max-width:1145px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
@@ -269,8 +291,8 @@ def render_package_flow_svg(language):
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="1145" height="360" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
-  <text x="573" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
+  <rect x="0" y="0" width="1145" height="400" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <text x="573" y="28" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
   <rect x="{path_x0 - 13}" y="{bottle_y0 - 20}" width="{serve_x1 - (path_x0 - 13)}" height="{keg_y1 - bottle_y0 + 40}" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
   <text x="{(path_x0 + serve_x1) / 2}" y="{bottle_y0 - 8}" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['sanitized_zone']}</text>
@@ -301,6 +323,6 @@ def render_package_flow_svg(language):
   <rect x="{serve_x0}" y="{serve_y_mid - 38}" width="{serve_x1 - serve_x0}" height="76" fill="#f2c14e" stroke="#7a5230"/>
   {_box_label_markup(labels['serve_store'], (serve_x0 + serve_x1) / 2, serve_y_mid, 13, "#5a2d0c", serve_x1 - serve_x0)}
 
-  {_centered_label_markup(labels['oxygen_label'], split_x, 301, 13, "#1d4a5f")}
-  {_centered_label_markup(labels['pressure_label'], (path_x0 + serve_x1) / 2, 321, 13, "#37235a")}
+  {_centered_label_markup(labels['oxygen_label'], split_x, 343, 13, "#1d4a5f")}
+  {_centered_label_markup(labels['pressure_label'], (path_x0 + serve_x1) / 2, 365, 13, "#37235a")}
 </svg>""")
