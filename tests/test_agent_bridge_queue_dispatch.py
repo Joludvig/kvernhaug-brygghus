@@ -1,13 +1,15 @@
 """
 Kvernhaug Agent Bridge -- regresjonstester for PÅ JOBB-køens
-utvelgelseslogikk (.github/scripts/queue_dispatch.py, issue #260).
+utvelgelseslogikk (.github/scripts/queue_dispatch.py, issue #260, issue
+#405).
 
 Dekker issue #260s ti akseptansetester direkte (se test-navnene under):
   1. tom kø -> ingen handling
   2. ett kvalifisert element -> nøyaktig én dispatch
   3. flere elementer -> kun det første starter
   4. et aktivt/working-element -> nummer to starter ikke
-  5. det første når status:review -> neste kan starte
+  5. SUPERSEDERT av issue #405, se under -- opprinnelig "det første når
+     status:review -> neste kan starte", nå det motsatte.
   6. failed/no-deliverable/owner-decision-tilstand -> køen pauser
   7. duplikat-event -> ingen duplikat Claude-kjøring
   8. en ikke-kø-issue ignoreres
@@ -17,6 +19,29 @@ Dekker issue #260s ti akseptansetester direkte (se test-navnene under):
 dekket av at denne modulen aldri kaller gh/git i det hele tatt, se
 tests/test_agent_bridge_permission_config.py for tilsvarende
 fravær-bevis på selve broen.)
+
+Issue #405 ("full conveyor: automatic Chief review + auto-resume next
+queued lane") retter et bug i #260s opprinnelige modell: status:review
+og status:approved talte som "ferdig" og blokkerte ALDRI neste
+køelement, selv om PR-en enda ikke var owner-GO'et eller merget -- det
+brøt den nye "main WIP = 1 gjennom review/approved/merge"-modellen.
+`TestElementetsTilstand.test_review_er_aktiv`/`test_approved_er_aktiv`
+og `TestVelgNeste.test_5_review_blokkerer_neste_issue_405`/
+`test_5b_approved_blokkerer_neste_issue_405` dekker selve fiksen direkte
+(issue #405s minstekrav 1-5, sammen med de allerede eksisterende
+test_4/test_6/test_10 for working/changes-requested/ready).
+`test_9b_review_blokkerer_helt_til_faktisk_lukket_issue_405` dekker
+minstekrav 6 ("lukket/completed forrige item gjør neste eligible") --
+det finnes ikke lenger noen status:*-etikett som alene frigjør køen; kun
+at issuen faktisk lukkes (forsvinner fra `state=OPEN`-snapshotten) gjør
+det. `test_9c_merge_close_wake_gir_nokyaktig_en_dispatch_issue_405`
+dekker minstekrav 7/8 (nøyaktig én dispatch per faktisk tilgjengelig
+element, selv ved et duplikat merge/close-wake-event) på den rene
+funksjonens nivå -- selve wake-mekanismen (nye `issues: closed`/
+`pull_request: closed`-triggere) legges til i pa-jobb-queue.yml, som
+allerede deler denne modulens fail-closed/idempotente egenskaper via sin
+eksisterende `concurrency: group: pa-jobb-queue`
+(cancel-in-progress: false) -- se docs/development/AGENT_WORKFLOW.md.
 
 `TestHarAktivBroKjoring`/`TestVelgNeste`s `test_11_*`/`test_12_*` og
 `TestCliKontrakt`s `test_cli_aktiv_bro_kjoring_*` dekker Chief-reviewens
@@ -89,11 +114,15 @@ class TestElementetsTilstand(unittest.TestCase):
     def test_changes_requested_er_aktiv(self):
         self.assertEqual(_QD.elementets_tilstand(["status:changes-requested"]), "aktiv")
 
-    def test_review_er_ferdig(self):
-        self.assertEqual(_QD.elementets_tilstand(["status:review"]), "ferdig")
+    def test_review_er_aktiv(self):
+        # Issue #405: status:review blokkerer nå køen (var "ferdig" under
+        # issue #260 -- se queue_dispatch.py moduldoc "ENDRING (issue #405, ...)").
+        self.assertEqual(_QD.elementets_tilstand(["status:review"]), "aktiv")
 
-    def test_approved_er_ferdig(self):
-        self.assertEqual(_QD.elementets_tilstand(["status:approved"]), "ferdig")
+    def test_approved_er_aktiv(self):
+        # Issue #405: samme endring for status:approved -- venter fortsatt
+        # på owner GO + faktisk merge, ikke ferdig før issuen er lukket.
+        self.assertEqual(_QD.elementets_tilstand(["status:approved"]), "aktiv")
 
 
 class TestErKoElement(unittest.TestCase):
@@ -159,13 +188,26 @@ class TestVelgNeste(unittest.TestCase):
         self.assertIn("#101", begrunnelse)
         self.assertIn("pause", begrunnelse)
 
-    def test_5_forste_ferdig_lar_neste_starte(self):
-        nummer, _ = _QD.velg_neste([_ko(101, status="status:review"), _ko(102)])
-        self.assertEqual(nummer, 102)
+    def test_5_review_blokkerer_neste_issue_405(self):
+        # SUPERSEDER issue #260s opprinnelige akseptansetest 5
+        # ("first item reaching status:review -> next may start"): issue
+        # #405 retter nettopp denne oppførselen, fordi den lot en ny
+        # implementasjonsjobb starte FØR forrige PR var owner-GO'et og
+        # merget -- to samtidige "main write lane"-forsøk. status:review
+        # blokkerer nå køen helt til issuen faktisk er lukket (se
+        # test_9_lukket_issue_telles_ikke, som dekker den *faktiske*
+        # "forrige ferdig"-veien: issuen forsvinner fra state=OPEN-
+        # snapshotten, ikke at den bærer en spesifikk status:*-etikett).
+        nummer, begrunnelse = _QD.velg_neste([_ko(101, status="status:review"), _ko(102)])
+        self.assertIsNone(nummer)
+        self.assertIn("#101", begrunnelse)
 
-    def test_5b_approved_lar_neste_starte(self):
-        nummer, _ = _QD.velg_neste([_ko(101, status="status:approved"), _ko(102)])
-        self.assertEqual(nummer, 102)
+    def test_5b_approved_blokkerer_neste_issue_405(self):
+        # Samme fiks (issue #405) for status:approved: venter fortsatt på
+        # owner GO + faktisk merge, blokkerer nettopp DERFOR fortsatt.
+        nummer, begrunnelse = _QD.velg_neste([_ko(101, status="status:approved"), _ko(102)])
+        self.assertIsNone(nummer)
+        self.assertIn("#101", begrunnelse)
 
     def test_6_changes_requested_pauser_koen_default(self):
         # "Proposed queue model": changes-requested er en
@@ -210,6 +252,39 @@ class TestVelgNeste(unittest.TestCase):
     def test_9_lukket_issue_telles_ikke(self):
         nummer, _ = _QD.velg_neste([_ko(101, state="CLOSED"), _ko(102)])
         self.assertEqual(nummer, 102)
+
+    def test_9b_review_blokkerer_helt_til_faktisk_lukket_issue_405(self):
+        # Issue #405, minstekrav 6: "lukket/completed forrige item gjør
+        # neste eligible" -- ikke at det bare NÅR en bestemt status:*-
+        # etikett. Samme issue #101, tre snapshotter av samme livssyklus:
+        # fortsatt review (blokkerer), fortsatt approved (blokkerer),
+        # faktisk lukket (etter owner GO + merge -- fri).
+        nummer_review, _ = _QD.velg_neste([_ko(101, status="status:review"), _ko(102)])
+        self.assertIsNone(nummer_review)
+        nummer_approved, _ = _QD.velg_neste([_ko(101, status="status:approved"), _ko(102)])
+        self.assertIsNone(nummer_approved)
+        nummer_lukket, _ = _QD.velg_neste([_ko(101, status="status:approved", state="CLOSED"), _ko(102)])
+        self.assertEqual(nummer_lukket, 102)
+
+    def test_9c_merge_close_wake_gir_nokyaktig_en_dispatch_issue_405(self):
+        # Issue #405, minstekrav 7/8: et merge/close-event (og et evt.
+        # duplikat derav -- issue auto-close OG PR closed kan begge fyre)
+        # skal gi NØYAKTIG ÉN dispatch av det nye eligible elementet, ikke
+        # flere. pa-jobb-queue.yml sin delte `concurrency: group:
+        # pa-jobb-queue` (cancel-in-progress: false) serialiserer to slike
+        # nesten-samtidige workflow-kjøringer, så den andre kjøringens
+        # egen ferske gh-issue-list-spørring vil alltid se den FØRSTE
+        # kjøringens bevæpning (status:ready) -- simulert her ved å kalle
+        # velg_neste() to ganger på snapshotter som viser akkurat det
+        # forløpet, uten noen mellomliggende tilstand denne rene
+        # funksjonen ikke allerede får se.
+        forste_snapshot = [_ko(101, status="status:approved", state="CLOSED"), _ko(102)]
+        nummer1, _ = _QD.velg_neste(forste_snapshot)
+        self.assertEqual(nummer1, 102)
+        andre_snapshot = [_ko(101, status="status:approved", state="CLOSED"), _ko(102, status="status:ready")]
+        nummer2, begrunnelse2 = _QD.velg_neste(andre_snapshot)
+        self.assertIsNone(nummer2)
+        self.assertIn("#102", begrunnelse2)
 
     def test_10_status_ready_teller_som_aktiv_ikke_ikke_startet(self):
         self.assertEqual(_QD.elementets_tilstand(["status:ready"]), "aktiv")
