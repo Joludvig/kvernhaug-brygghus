@@ -187,14 +187,28 @@ def _box_label_markup(text, cx, cy, font_size, fill, box_width, padding=_BOX_LAB
     follow-up, issue #397): a label can have plenty of viewBox margin
     left while still overflowing its own box.
 
-    Each non-final line keeps a trailing space in its own <tspan> (rather
-    than the bare word-wrapped text `_centered_label_markup` uses): a
-    browser's aggregated textContent for a multi-<tspan> <text> element
-    concatenates the tspans directly with no inserted whitespace, so
-    without it a wrapped label like "Fermenter (done"+"fermenting)" would
-    read back as "Fermenter (donefermenting)" -- silently breaking any
-    exact-text lookup (e.g. tests/playwright_streamlit/svg-runtime-dom.spec.js's
-    `getByText(label, { exact: true })` for this same fermenter label)."""
+    A single literal space is joined BETWEEN each pair of <tspan>
+    elements (a whitespace-only XML text node -- a tspan's `.tail` in
+    ElementTree terms -- not appended inside either tspan's own text).
+    This is the one placement that reads correctly through both
+    consumers this markup has to satisfy, which otherwise disagree:
+
+    - A real browser's aggregated textContent for a <text> element
+      concatenates ALL of its descendant text nodes directly, including
+      a bare whitespace text node between two <tspan> siblings -- so
+      this placement reads as "Fermenter (done fermenting)" there (see
+      tests/playwright_streamlit/svg-runtime-dom.spec.js's exact-text
+      `getByText` check on this same fermenter label).
+    - tests/test_bryggeskole_svg_streamlit_rendering.py's own
+      `_all_text_content()` helper reads ONLY each node's `.text` (never
+      `.tail`) and already joins every node's `.text` with its OWN space
+      separator -- so a space living in a tspan's `.tail` is invisible
+      to it, and its own separator alone supplies exactly one space.
+      Putting the space inside a tspan's `.text` instead (a prior
+      version of this function did) double-counts: that helper's own
+      separator PLUS the embedded space produced "done  fermenting"
+      (two spaces) there, even though the same markup read correctly as
+      a real DOM textContent -- issue #397 CI follow-up."""
     max_text_width = max(1, box_width - 2 * padding)
     lines = textwrap.wrap(
         text, width=_max_chars_for_width(max_text_width, font_size),
@@ -205,9 +219,8 @@ def _box_label_markup(text, cx, cy, font_size, fill, box_width, padding=_BOX_LAB
         y = cy + font_size * 0.35
         return f'<text x="{cx}" y="{y}" text-anchor="middle" font-size="{font_size}" fill="{fill}">{lines[0]}</text>'
     start_y = cy - (len(lines) - 1) * line_height / 2 + font_size * 0.35
-    last = len(lines) - 1
-    tspans = "".join(
-        f'<tspan x="{cx}" y="{start_y + i * line_height}">{line}{"" if i == last else " "}</tspan>'
+    tspans = " ".join(
+        f'<tspan x="{cx}" y="{start_y + i * line_height}">{line}</tspan>'
         for i, line in enumerate(lines)
     )
     return f'<text text-anchor="middle" font-size="{font_size}" fill="{fill}">{tspans}</text>'
