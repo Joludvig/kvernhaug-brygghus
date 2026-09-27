@@ -2,6 +2,14 @@
 Tests for bryggeskole/package_flow.py -- the static package flow visual
 (issue #374, V2.2 G3G).
 
+Owner-QA correction (issue #397 follow-up, see the module's own
+docstring): several labels now conditionally wrap onto multiple <tspan>
+lines via the new box-width-aware `_box_label_markup` (fermenter,
+bottle_transfer, bottle_step, keg_transfer, keg_step, serve_store) --
+`_visible_text()` below reconstructs a whitespace-joined blob of every
+text/tspan node's content so label-presence assertions keep matching a
+label regardless of whether it happened to wrap for a given language.
+
 Run with:
     python3 -m unittest tests.test_bryggeskole_package_flow
 """
@@ -9,6 +17,15 @@ import re
 import unittest
 
 from bryggeskole.package_flow import render_package_flow_svg
+
+
+def _visible_text(svg):
+    parts = []
+    for match in re.finditer(r"<text[^>]*>(.*?)</text>", svg, re.DOTALL):
+        body = match.group(1)
+        tspans = re.findall(r"<tspan[^>]*>([^<]*)</tspan>", body)
+        parts.append(" ".join(tspans) if tspans else body)
+    return re.sub(r"\s+", " ", " ".join(parts))
 
 
 class TestRenderPackageFlowSvg(unittest.TestCase):
@@ -23,7 +40,7 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_package_flow_svg("en")
-        self.assertIn('viewBox="0 0 1145 430"', svg)
+        self.assertIn('viewBox="0 0 1145 360"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
         self.assertIn("max-width:1145px", svg)
@@ -32,11 +49,13 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
         # Issue #397: labels must not regress back to the pre-fix 9-11px
         # sizing, and the diagram must carry its own explicit opaque
         # background so the light-backdrop-tuned palette has guaranteed
-        # contrast regardless of Streamlit's active theme.
+        # contrast regardless of Streamlit's active theme. Owner-QA
+        # follow-up: only the background rect HEIGHT shrank (bulkiness
+        # fix); width and font floor are unchanged from #397.
         svg = render_package_flow_svg("en")
         for font_size in re.findall(r'font-size="([\d.]+)"', svg):
             self.assertGreaterEqual(float(font_size), 13)
-        self.assertIn('<rect x="0" y="0" width="1145" height="430"', svg)
+        self.assertIn('<rect x="0" y="0" width="1145" height="360"', svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -55,30 +74,37 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
             self.assertNotRegex(svg, r"\bpsi\b")
 
     def test_norwegian_labels_present(self):
+        # Reconstructed via _visible_text(): some of these now
+        # conditionally wrap onto multiple <tspan> lines
+        # (_box_label_markup, issue #397 follow-up), so a raw substring
+        # check on the SVG source is no longer reliable for all of them.
         svg = render_package_flow_svg("no")
+        tekst = _visible_text(svg)
         for expected in (
             "Gjæringskar (ferdig gjæret)", "Sanitert håndteringssone",
             "Flaske-sti", "Fat-sti", "Tappestav / overføring",
             "Flaske + primesukker", "Fat + ekstern CO2",
         ):
-            self.assertIn(expected, svg)
+            self.assertIn(expected, tekst)
 
     def test_english_labels_present(self):
         svg = render_package_flow_svg("en")
+        tekst = _visible_text(svg)
         for expected in (
             "Fermenter (done fermenting)", "Sanitized handling zone",
             "Bottle path", "Keg path", "Bottling wand / transfer",
             "Bottle + priming sugar", "Keg + external CO2",
         ):
-            self.assertIn(expected, svg)
+            self.assertIn(expected, tekst)
 
     def test_both_paths_reconverge_at_shared_serve_store_node(self):
         for lang, expected in (("no", "Klar til servering/lagring"), ("en", "Ready to serve/store")):
             svg = render_package_flow_svg(lang)
-            self.assertIn(expected, svg)
+            tekst = _visible_text(svg)
+            self.assertIn(expected, tekst)
             # Exactly one serve/store node -- both paths reconverge at the
             # SAME shared end point, not two separate end states.
-            self.assertEqual(svg.count(expected), 1)
+            self.assertEqual(tekst.count(expected), 1)
 
     def test_sanitized_zone_is_visually_distinct_shaded_region(self):
         svg = render_package_flow_svg("en")
@@ -140,7 +166,7 @@ def _leaf_text_nodes(svg):
 
 class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
     VIEWBOX_WIDTH = 1145
-    VIEWBOX_HEIGHT = 430
+    VIEWBOX_HEIGHT = 360
 
     def test_every_text_lines_estimated_width_fits_inside_viewbox(self):
         for lang in ("no", "en"):
@@ -171,6 +197,67 @@ class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
         for value in matches:
             self.assertGreaterEqual(float(value), 0)
             self.assertLessEqual(float(value), 1145)
+
+
+# ─── Owner-QA correction (issue #397 follow-up): every box-contained
+# label's estimated rendered width must stay inside its OWN box, not just
+# somewhere inside the overall viewBox -- this is the actual defect an
+# owner-PC screenshot reported ("noe tekst er skjult/klippet/obscured").
+# `TestLongLabelLayoutStaysInsideViewbox` above only ever proved the much
+# weaker "fits somewhere in the whole diagram" property. ──────────────────
+
+# (x0, x1) for every box a label is drawn inside, matching the geometry
+# render_package_flow_svg() itself computes (path_x0=390, box_w=195,
+# gap=52, fermenter/serve widths unchanged from #397).
+_BOX_X_RANGES = {
+    "fermenter": (50, 285),
+    "bottle_transfer": (390, 585),
+    "bottle_step": (637, 832),
+    "keg_transfer": (390, 585),
+    "keg_step": (637, 832),
+    "serve_store": (885, 1090),
+}
+
+
+class TestBoxLabelsNeverClipTheirOwnBox(unittest.TestCase):
+    def test_every_box_label_line_fits_inside_its_own_box(self):
+        for lang in ("no", "en"):
+            svg = render_package_flow_svg(lang)
+            nodes = _leaf_text_nodes(svg)
+            by_x = {}
+            for x, y, text, font_size in nodes:
+                by_x.setdefault(round(x, 1), []).append((y, text.strip(), font_size))
+            for label_name, (box_x0, box_x1) in _BOX_X_RANGES.items():
+                box_cx = round((box_x0 + box_x1) / 2, 1)
+                matches = by_x.get(box_cx)
+                self.assertTrue(
+                    matches, f"{lang}: expected a text node centered at x={box_cx} for {label_name!r}",
+                )
+                for y, text, font_size in matches:
+                    if not text:
+                        continue
+                    estimated_half_width = (len(text) * font_size * _CHAR_WIDTH_FACTOR) / 2
+                    self.assertGreaterEqual(
+                        box_cx - estimated_half_width, box_x0,
+                        f"{lang}: {label_name} line {text!r} would spill past its own box's LEFT edge "
+                        f"(box=[{box_x0},{box_x1}])",
+                    )
+                    self.assertLessEqual(
+                        box_cx + estimated_half_width, box_x1,
+                        f"{lang}: {label_name} line {text!r} would spill past its own box's RIGHT edge "
+                        f"(box=[{box_x0},{box_x1}])",
+                    )
+
+    def test_bottle_and_keg_rows_remain_clearly_separate_vertically(self):
+        # #397 owner-QA requirement: "bottle/flaske- og fat-sti skal
+        # fortsatt være tydelig separate" -- the two rows' boxes must not
+        # touch or overlap after the height reduction.
+        svg = render_package_flow_svg("en")
+        bottle_rect = re.search(r'<rect x="390" y="(\d+)" width="195" height="(\d+)" fill="#f7d9a0"', svg)
+        keg_rect = re.search(r'<rect x="390" y="(\d+)" width="195" height="(\d+)" fill="#f7d9a0"', svg[bottle_rect.end():])
+        bottle_bottom = int(bottle_rect.group(1)) + int(bottle_rect.group(2))
+        keg_top = int(keg_rect.group(1))
+        self.assertGreater(keg_top, bottle_bottom, "bottle and keg rows must not touch/overlap")
 
 
 if __name__ == "__main__":

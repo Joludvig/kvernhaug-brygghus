@@ -51,6 +51,29 @@ canvas, since this palette's dark warm text colors were tuned for a light
 backdrop and had weak contrast directly on Streamlit's dark theme page
 background. Geometry and font sizes are scaled up from the original #374
 draft for comfortable reading without zoom.
+
+Owner-QA composition correction (issue #397 follow-up): the legibility
+pass above fixed size/contrast but left two real defects. First, the
+four process-box labels (`bottle_transfer`/`bottle_step`/`keg_transfer`/
+`keg_step`) were plain single-line <text> elements with no wrapping at
+all -- at the larger font sizes the longest of these (e.g. "Bottling
+wand / transfer") could render wider than its own 195px-wide box, i.e.
+genuinely clipped/overlapping text, exactly the "text skjult/klippet"
+owner-PC finding. Second, `_wrap_centered_label`'s wrap decision was
+based on distance to the *viewBox* edges, not to the much narrower box
+each label actually sits inside -- so even the labels that DID use it
+(`serve_store`) could still overflow their own box while the helper
+still judged them "safe" (plenty of viewBox margin left). `_box_label_markup`
+below fixes both: it wraps against the label's OWN box width (with a
+fixed inner padding), not the diagram's outer edges, and is now used for
+every label that sits inside a discrete box. The box heights themselves
+were also reduced (120px/91px down to a snugger fit for 1-2 lines of
+text) -- the previous heights were sized for the pre-#397 font before
+that pass enlarged the text, leaving each box far taller than its
+content needed, which read as "bulky"/"boxes too big for the text
+inside". Only vertical (y/height) values changed here -- every x
+position, box width and the overall viewBox width are unchanged from
+the #397 legibility pass, per the narrow scope of this correction.
 """
 
 import textwrap
@@ -149,6 +172,60 @@ def _centered_label_markup(text, anchor_x, y, font_size, fill):
     return f'<text text-anchor="middle" font-size="{font_size}" fill="{fill}">{tspans}</text>'
 
 
+_BOX_LABEL_PADDING = 16
+
+
+def _box_label_markup(text, cx, cy, font_size, fill, box_width, padding=_BOX_LABEL_PADDING):
+    """Renders `text` centered (both axes) inside a box of `box_width`,
+    wrapping onto stacked <tspan> lines whenever the estimated width of a
+    single line would exceed `box_width - 2 * padding`.
+
+    Unlike `_centered_label_markup`/`_wrap_centered_label` (which judge
+    wrap-safety against the whole SVG viewBox), this judges it against
+    the label's OWN box -- the correct constraint for text that is drawn
+    inside a much narrower shape than the full diagram (owner-QA
+    follow-up, issue #397): a label can have plenty of viewBox margin
+    left while still overflowing its own box.
+
+    A single literal space is joined BETWEEN each pair of <tspan>
+    elements (a whitespace-only XML text node -- a tspan's `.tail` in
+    ElementTree terms -- not appended inside either tspan's own text).
+    This is the one placement that reads correctly through both
+    consumers this markup has to satisfy, which otherwise disagree:
+
+    - A real browser's aggregated textContent for a <text> element
+      concatenates ALL of its descendant text nodes directly, including
+      a bare whitespace text node between two <tspan> siblings -- so
+      this placement reads as "Fermenter (done fermenting)" there (see
+      tests/playwright_streamlit/svg-runtime-dom.spec.js's exact-text
+      `getByText` check on this same fermenter label).
+    - tests/test_bryggeskole_svg_streamlit_rendering.py's own
+      `_all_text_content()` helper reads ONLY each node's `.text` (never
+      `.tail`) and already joins every node's `.text` with its OWN space
+      separator -- so a space living in a tspan's `.tail` is invisible
+      to it, and its own separator alone supplies exactly one space.
+      Putting the space inside a tspan's `.text` instead (a prior
+      version of this function did) double-counts: that helper's own
+      separator PLUS the embedded space produced "done  fermenting"
+      (two spaces) there, even though the same markup read correctly as
+      a real DOM textContent -- issue #397 CI follow-up."""
+    max_text_width = max(1, box_width - 2 * padding)
+    lines = textwrap.wrap(
+        text, width=_max_chars_for_width(max_text_width, font_size),
+        break_long_words=False, break_on_hyphens=False,
+    ) or [text]
+    line_height = font_size * _LINE_HEIGHT_FACTOR
+    if len(lines) == 1:
+        y = cy + font_size * 0.35
+        return f'<text x="{cx}" y="{y}" text-anchor="middle" font-size="{font_size}" fill="{fill}">{lines[0]}</text>'
+    start_y = cy - (len(lines) - 1) * line_height / 2 + font_size * 0.35
+    tspans = " ".join(
+        f'<tspan x="{cx}" y="{start_y + i * line_height}">{line}</tspan>'
+        for i, line in enumerate(lines)
+    )
+    return f'<text text-anchor="middle" font-size="{font_size}" fill="{fill}">{tspans}</text>'
+
+
 def _flatten_svg_markup(svg):
     """Collapses the human-readable, multi-line <svg>...</svg> markup onto
     a single line (see the module docstring for why this matters at
@@ -169,12 +246,19 @@ def render_package_flow_svg(language):
     split_x = 340
     path_x0, path_x1 = 390, 805
     serve_x0, serve_x1 = 885, 1090
+    box_w = 195
 
-    bottle_y0, bottle_y1 = 50, 170
-    keg_y0, keg_y1 = 245, 365
-    serve_y_mid = 215
+    # Owner-QA correction (issue #397 follow-up): only box HEIGHTS and the
+    # vertical layout derived from them changed here -- every x position
+    # and box WIDTH above is identical to the #397 legibility pass. The
+    # previous 120px/91px box heights were sized for the pre-#397 font and
+    # left each box far taller than 1-2 lines of the now-larger text
+    # needed, reading as "bulky". See the module docstring.
+    bottle_y0, bottle_y1 = 50, 134
+    keg_y0, keg_y1 = 189, 273
+    serve_y_mid = 162
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 1145 430" width="100%" preserveAspectRatio="xMidYMid meet"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 1145 360" width="100%" preserveAspectRatio="xMidYMid meet"
   style="max-width:1145px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
@@ -185,38 +269,38 @@ def render_package_flow_svg(language):
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="1145" height="430" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <rect x="0" y="0" width="1145" height="360" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
   <text x="573" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
-  <rect x="{path_x0 - 13}" y="{bottle_y0 - 26}" width="{serve_x1 - (path_x0 - 13)}" height="{keg_y1 - bottle_y0 + 52}" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
-  <text x="{(path_x0 + serve_x1) / 2}" y="{bottle_y0 - 10}" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['sanitized_zone']}</text>
+  <rect x="{path_x0 - 13}" y="{bottle_y0 - 20}" width="{serve_x1 - (path_x0 - 13)}" height="{keg_y1 - bottle_y0 + 40}" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
+  <text x="{(path_x0 + serve_x1) / 2}" y="{bottle_y0 - 8}" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['sanitized_zone']}</text>
 
-  <rect x="{fermenter_x0}" y="{serve_y_mid - 46}" width="{fermenter_x1 - fermenter_x0}" height="91" fill="#c9b7e0" stroke="#5c3d84"/>
-  <text x="{(fermenter_x0 + fermenter_x1) / 2}" y="{serve_y_mid + 7}" text-anchor="middle" font-size="14" fill="#37235a">{labels['fermenter']}</text>
+  <rect x="{fermenter_x0}" y="{serve_y_mid - 38}" width="{fermenter_x1 - fermenter_x0}" height="76" fill="#c9b7e0" stroke="#5c3d84"/>
+  {_box_label_markup(labels['fermenter'], (fermenter_x0 + fermenter_x1) / 2, serve_y_mid, 14, "#37235a", fermenter_x1 - fermenter_x0)}
 
   <line x1="{fermenter_x1}" y1="{serve_y_mid}" x2="{split_x}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2"/>
   <line x1="{split_x}" y1="{serve_y_mid}" x2="{path_x0}" y2="{(bottle_y0 + bottle_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
   <line x1="{split_x}" y1="{serve_y_mid}" x2="{path_x0}" y2="{(keg_y0 + keg_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
 
   <text x="{(path_x0 + path_x1) / 2}" y="{bottle_y0 - 8}" text-anchor="middle" font-size="14" font-weight="700" fill="#5a3d10">{labels['bottle_path']}</text>
-  <rect x="{path_x0}" y="{bottle_y0}" width="195" height="{bottle_y1 - bottle_y0}" fill="#f7d9a0" stroke="#a6742f"/>
-  <text x="{path_x0 + 97}" y="{bottle_y0 + 33}" text-anchor="middle" font-size="13" fill="#5a3d10">{labels['bottle_transfer']}</text>
-  <line x1="{path_x0 + 195}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{path_x0 + 247}" y2="{(bottle_y0 + bottle_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
-  <rect x="{path_x0 + 247}" y="{bottle_y0}" width="195" height="{bottle_y1 - bottle_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
-  <text x="{path_x0 + 344}" y="{bottle_y0 + 33}" text-anchor="middle" font-size="13" fill="#1d4a5f">{labels['bottle_step']}</text>
-  <line x1="{path_x0 + 442}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <rect x="{path_x0}" y="{bottle_y0}" width="{box_w}" height="{bottle_y1 - bottle_y0}" fill="#f7d9a0" stroke="#a6742f"/>
+  {_box_label_markup(labels['bottle_transfer'], path_x0 + box_w / 2, (bottle_y0 + bottle_y1) / 2, 13, "#5a3d10", box_w)}
+  <line x1="{path_x0 + box_w}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{path_x0 + box_w + 52}" y2="{(bottle_y0 + bottle_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <rect x="{path_x0 + box_w + 52}" y="{bottle_y0}" width="{box_w}" height="{bottle_y1 - bottle_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
+  {_box_label_markup(labels['bottle_step'], path_x0 + box_w + 52 + box_w / 2, (bottle_y0 + bottle_y1) / 2, 13, "#1d4a5f", box_w)}
+  <line x1="{path_x0 + 2 * box_w + 52}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
 
   <text x="{(path_x0 + path_x1) / 2}" y="{keg_y0 - 8}" text-anchor="middle" font-size="14" font-weight="700" fill="#5a3d10">{labels['keg_path']}</text>
-  <rect x="{path_x0}" y="{keg_y0}" width="195" height="{keg_y1 - keg_y0}" fill="#f7d9a0" stroke="#a6742f"/>
-  <text x="{path_x0 + 97}" y="{keg_y0 + 33}" text-anchor="middle" font-size="13" fill="#5a3d10">{labels['keg_transfer']}</text>
-  <line x1="{path_x0 + 195}" y1="{(keg_y0 + keg_y1) / 2}" x2="{path_x0 + 247}" y2="{(keg_y0 + keg_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
-  <rect x="{path_x0 + 247}" y="{keg_y0}" width="195" height="{keg_y1 - keg_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
-  <text x="{path_x0 + 344}" y="{keg_y0 + 33}" text-anchor="middle" font-size="13" fill="#1d4a5f">{labels['keg_step']}</text>
-  <line x1="{path_x0 + 442}" y1="{(keg_y0 + keg_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <rect x="{path_x0}" y="{keg_y0}" width="{box_w}" height="{keg_y1 - keg_y0}" fill="#f7d9a0" stroke="#a6742f"/>
+  {_box_label_markup(labels['keg_transfer'], path_x0 + box_w / 2, (keg_y0 + keg_y1) / 2, 13, "#5a3d10", box_w)}
+  <line x1="{path_x0 + box_w}" y1="{(keg_y0 + keg_y1) / 2}" x2="{path_x0 + box_w + 52}" y2="{(keg_y0 + keg_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <rect x="{path_x0 + box_w + 52}" y="{keg_y0}" width="{box_w}" height="{keg_y1 - keg_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
+  {_box_label_markup(labels['keg_step'], path_x0 + box_w + 52 + box_w / 2, (keg_y0 + keg_y1) / 2, 13, "#1d4a5f", box_w)}
+  <line x1="{path_x0 + 2 * box_w + 52}" y1="{(keg_y0 + keg_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
 
-  <rect x="{serve_x0}" y="{serve_y_mid - 46}" width="{serve_x1 - serve_x0}" height="91" fill="#f2c14e" stroke="#7a5230"/>
-  {_centered_label_markup(labels['serve_store'], (serve_x0 + serve_x1) / 2, serve_y_mid + 7, 13, "#5a2d0c")}
+  <rect x="{serve_x0}" y="{serve_y_mid - 38}" width="{serve_x1 - serve_x0}" height="76" fill="#f2c14e" stroke="#7a5230"/>
+  {_box_label_markup(labels['serve_store'], (serve_x0 + serve_x1) / 2, serve_y_mid, 13, "#5a2d0c", serve_x1 - serve_x0)}
 
-  {_centered_label_markup(labels['oxygen_label'], split_x, 397, 13, "#1d4a5f")}
-  {_centered_label_markup(labels['pressure_label'], (path_x0 + serve_x1) / 2, 417, 13, "#37235a")}
+  {_centered_label_markup(labels['oxygen_label'], split_x, 301, 13, "#1d4a5f")}
+  {_centered_label_markup(labels['pressure_label'], (path_x0 + serve_x1) / 2, 321, 13, "#37235a")}
 </svg>""")
