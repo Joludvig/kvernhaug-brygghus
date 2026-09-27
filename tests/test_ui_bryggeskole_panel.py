@@ -1656,5 +1656,132 @@ class TestQuizTypografiIssue401(unittest.TestCase):
         self.assertTrue(tilstand["concepts"], "mastery skal fortsatt oppdateres helt normalt")
 
 
+# ─── #401 (oppfølging): kontrast på LÅSTE svaralternativer ─────────────────
+#
+# Owner-PC QA fant at FØR "Sjekk svar" var spørsmål/svar-teksten lesbar
+# (dekket av TestQuizTypografiIssue401 over), men ETTER "Sjekk svar" --
+# når st.radio(..., disabled=True) låser interaksjonen -- toner Streamlits/
+# BaseWebs egen disabled-styling ned selve svarteksten til lav-kontrast grå
+# (verifisert med en ekte kjørende Playwright-instans, lys og mørk
+# fargemodus: en alfa på 0.4 på selve <p>-en inni
+# `[data-testid="stRadioOption"]`). AppTest gjengir ikke ekte CSS/DOM, så
+# selve kontrastverdien kan kun verifiseres på kildenivå her (samme mønster
+# som TestNavigasjonsknapperErKompakteIssue398 bruker for width=) --
+# ekte-nettleser-bekreftelsen er den manuelle Playwright-sjekken i PR-en.
+# Det AppTest KAN verifisere er selve låse-atferden (radioen er fortsatt
+# disabled etter svar), som denne klassen også dekker for å bevise at
+# kontrast-fiksen ikke svekket selve låsingen.
+#
+# Chief review (theme-safety-oppfølging): en tidligere versjon av denne
+# fiksen brukte hardkodede rgba(...)-verdier valgt via
+# @media (prefers-color-scheme: dark) -- men Streamlit sitt eget tema kan
+# settes UAVHENGIG av OS/browser sin prefers-color-scheme, så den grenen
+# kunne velge feil farge og gi lav kontrast igjen (samme bugklasse på
+# nytt). Samme DOM-inspeksjon som avdekket selve disabled-fargen viste at
+# foreldre-labelen ALLEREDE har appens faktiske, korrekte temafarge --
+# løsningen er derfor `color: inherit`, ingen egen fargeverdi og ingen
+# @media-gren i det hele tatt.
+
+class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
+    def setUp(self):
+        import ui.bryggeskole_panel as panel_module
+        with open(panel_module.__file__, encoding="utf-8") as fh:
+            self.kildekode = fh.read()
+
+    def test_disabled_svaralternativ_css_er_skopet_til_bs_svaralternativ(self):
+        # Selve selektoren MÅ være under .st-key-bs_svaralternativ (aldri en
+        # global [data-testid="stRadioOption"]-regel) -- ellers ville fiksen
+        # lekket til andre radio-widgets i appen (f.eks. språkvelgeren).
+        #
+        # Selektoren treffer den DIREKTE barne-diven til selve
+        # stRadioOption-labelen (`> div`), ikke `<p>` direkte: en ekte
+        # Playwright DOM-sporing (getComputedStyle langs hele forelder-
+        # kjeden) viste at BaseWebs `color: rgba(..., 0.4)` faktisk settes
+        # på denne diven, ikke på `<p>`-en selv (som ikke har noen egen
+        # color-regel -- den arver kun fra sin nærmeste forelder). Et
+        # første forsøk med `color: inherit` direkte på `p` var derfor
+        # virkningsløst, siden `p` sin nærmeste forelder allerede var
+        # dempet -- se modulens egen docstring for full sporing.
+        self.assertIn(
+            '.st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] > div',
+            self.kildekode,
+        )
+
+    def test_disabled_kontrast_bruker_inherit_ikke_egen_fargeverdi(self):
+        # Theme-safe løsning: la den dempede diven arve labelens allerede
+        # korrekte temafarge i stedet for å style en egen rgba(...)-verdi
+        # -- virker uansett hvilket tema (lyst/mørkt/egendefinert) som
+        # faktisk er aktivt, uavhengig av OS/browser sin
+        # prefers-color-scheme.
+        override_idx = self.kildekode.index(
+            '[data-testid="stRadioOption"][data-disabled="true"] > div {\n            color:'
+        )
+        override_block = self.kildekode[override_idx:override_idx + 120]
+        self.assertIn("color: inherit", override_block)
+        # Ingen hardkodet rgba(...)-fargeverdi skal være igjen i selve
+        # override-regelen (0.4 var den opprinnelige lav-kontrast-bugen;
+        # 85%/0.85 var en tidligere, ikke lenger theme-safe mellomfiks).
+        self.assertNotIn("rgba(", override_block)
+
+    def test_ingen_prefers_color_scheme_gren_i_denne_fiksen(self):
+        # @media (prefers-color-scheme: dark) er feil signal å style mot
+        # her: Streamlit sitt eget tema kan velges uavhengig av OS/browser
+        # sin fargemodus, så en gren basert på prefers-color-scheme kan
+        # velge feil farge for en bruker med mismatch mellom OS-tema og
+        # Streamlit-tema. `color: inherit` trenger ingen slik gren.
+        #
+        # NB: sjekker kun selve den RENDREDE CSS-en (<style>...</style>-
+        # blokken i st.markdown()-kallet), ikke hele kildefilen -- modulens
+        # egen docstring nevner (med vilje) det tidligere navnet
+        # `prefers-color-scheme` som forklaring på HVORFOR det ble fjernet,
+        # noe som er dokumentasjon, ikke rendret CSS.
+        style_start = self.kildekode.index("<style>")
+        style_end = self.kildekode.index("</style>")
+        css_blokk = self.kildekode[style_start:style_end]
+        self.assertNotIn("prefers-color-scheme", css_blokk)
+
+    def test_far_svar_css_bruker_important_for_a_slaa_ut_baseweb(self):
+        # Uten !important taper vår regel mot BaseWebs egen
+        # emotion-genererte disabled-farge (samme spesifisitetsnivå, men
+        # BaseWebs regel injiseres senere i dokumentet).
+        override_idx = self.kildekode.index(
+            '[data-testid="stRadioOption"][data-disabled="true"] > div'
+        )
+        override_block = self.kildekode[override_idx:override_idx + 400]
+        self.assertIn("!important", override_block)
+
+    def test_for_svar_typografi_css_uendret_av_kontrast_fiksen(self):
+        # Selve FØR-svar-stylingen fra TestQuizTypografiIssue401 skal
+        # fortsatt være der, uendret -- denne fiksen legger KUN til en ny
+        # regel for den låste/disabled tilstanden.
+        self.assertIn(
+            ".st-key-bs_svaralternativ label p {\n            font-size: 1.1rem;\n            line-height: 1.6;",
+            self.kildekode,
+        )
+
+    def test_radio_forblir_disabled_etter_svar_med_kontrast_fiksen(self):
+        # Selve låsingen (ikke bare kontrasten) skal fortsatt virke --
+        # kontrast-fiksen endrer aldri disabled=besvart-logikken selv.
+        at = AppTest.from_file(_HARNESS)
+        at.run()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        _knapp(at, "bs_apne_modul_mesking_btn").click().run()
+        while [b for b in at.button if b.key == "bs_bolk_neste_mesking_btn"]:
+            _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
+        _knapp(at, "bs_start_sporsmal_mesking_btn").click().run()
+
+        pilot = les_mesking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        widget_key = "bs_valg_mesking_r1_q0"
+        radio_for = at.radio(key=widget_key)
+        self.assertFalse(radio_for.disabled, "radioen skal være aktiv FØR svar")
+
+        radio_for.set_value(fasit[0]).run()
+        _knapp(at, "bs_svar_btn_mesking_r1_q0").click().run()
+
+        radio_etter = at.radio(key=widget_key)
+        self.assertTrue(radio_etter.disabled, "radioen skal fortsatt være låst ETTER svar")
+
+
 if __name__ == "__main__":
     unittest.main()

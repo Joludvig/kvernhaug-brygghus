@@ -482,7 +482,55 @@ def _injiser_bryggeskole_css():
     eier-QA -- og utvidet til også å dekke selve svaralternativ-teksten
     (radio-labelene), som tidligere ikke var stylet i det hele tatt (kun
     spørsmålsteksten i sin egen container var det). `.st-key-bs_svaralternativ`
-    er wrapperen rundt selve st.radio()-kallet i _render_sporsmal()."""
+    er wrapperen rundt selve st.radio()-kallet i _render_sporsmal().
+
+    Issue #401 (oppfølging): dette dekket kun FØR-svar-tilstanden. Etter
+    «Sjekk svar» settes radioen `disabled=True` (linje ~729), og
+    Streamlits/BaseWebs egen disabled-styling toner svaralternativ-teksten
+    ned til `color: rgba(<tekstfarge>, 0.4)` -- verifisert i en ekte
+    kjørende instans (Playwright, lys og mørk fargemodus) at attributtet
+    `data-disabled="true"` på `stRadioOption`-labelen (satt av React Aria
+    når `st.radio(..., disabled=True)`) er det stabile signalet å style
+    mot -- ikke Streamlits auto-genererte `st-emotion-cache-*`-hash-
+    klasser, som ikke er ment å refereres fra egen CSS og kan endre seg
+    mellom versjoner. 0.4 gir på mørk bakgrunn (rgb(14,17,23)) en
+    effektiv tekstfarge på ca. rgb(108,110,114) -- under WCAG AA-kontrast
+    og i praksis nesten uleselig, per eier-QA. Låst/deaktivert interaksjon
+    skal IKKE bety uleselig tekst: selve svarstatusen (riktig/feil/valgt
+    alternativ) vises uansett eksplisitt som egen tekst (se
+    _render_sporsmal, "Answer-state UX issue #338"), så radioens egen
+    disabled-fading har ingen semantisk jobb å gjøre utover at den er
+    låst -- kun kontrasten var for aggressiv.
+
+    Chief review (theme-safety-oppfølging): en tidligere versjon av denne
+    fiksen brukte hardkodede lys/mørk-RGB-verdier valgt via
+    `@media (prefers-color-scheme: dark)`. Det er FEIL signal å style
+    mot her -- Streamlit sitt eget tema kan settes eksplisitt (via
+    `.streamlit/config.toml` eller brukerens egen temavelger i "Settings"
+    -menyen) UAVHENGIG av OS/browser sin `prefers-color-scheme`, så en
+    bruker med f.eks. lyst OS-tema men mørkt Streamlit-tema (eller omvendt)
+    ville fått CSS-en til å velge feil gren og dermed lav kontrast igjen
+    -- nøyaktig samme bug klassen som denne fiksen skulle løse (bekreftet
+    med en ekte instans startet med `--theme.base dark` men lastet i en
+    nettleser satt til `colorScheme: light`).
+
+    En egen DOM-sporing (Playwright, `getComputedStyle` langs hele
+    forelder-kjeden til teksten) viste PRESIST hvor `color: rgba(..., 0.4)`
+    faktisk settes: IKKE på selve `<p>`-en (som ikke har noen egen
+    color-regel -- den arver bare fra sin nærmeste forelder), men på DEN
+    DIREKTE BARNE-DIVEN til selve `stRadioOption`-labelen (den ene diven
+    som pakker inn både indikator-prikken og tekst-markdown-containeren).
+    `label`-elementet selv har appens fulle, korrekte temafarge. Et første
+    forsøk med `color: inherit` direkte på `p` var derfor virkningsløst
+    (arver kun fra sin allerede-dempede nærmeste forelder, ikke tvers
+    gjennom flere nivåer) -- selektoren treffer i stedet den DIREKTE
+    barne-diven (`> div`) med `color: inherit`, som lar HELE det dempede
+    delteet arve labelens fulle temafarge på nytt, `<p>` inkludert, uten
+    å trenge noen egen fargeverdi. Verifisert med Playwright at dette gir
+    FULL kontrast i lys, mørk OG mismatch-scenarioet over, identisk med
+    FØR-svar-fargen. Fjerner samtidig hele
+    `@media (prefers-color-scheme: dark)`-grenen og alle hardkodede
+    rgba(...)-verdier, som ikke lenger trengs."""
     st.markdown(
         """
         <style>
@@ -496,6 +544,9 @@ def _injiser_bryggeskole_css():
         .st-key-bs_svaralternativ label p {
             font-size: 1.1rem;
             line-height: 1.6;
+        }
+        .st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] > div {
+            color: inherit !important;
         }
         </style>
         """,
