@@ -24,9 +24,26 @@ source lines both make Streamlit's CommonMark-based frontend markdown
 renderer fragment the <svg>...</svg> block into a stray paragraph plus
 orphaned elements outside any <svg> context, which the browser then
 renders as literal label text with the geometry missing (issue #378).
+
+Legibility pass (issue #397): the diagram carries its own explicit opaque
+background rect (`_CARD_BACKGROUND_FILL`) instead of a transparent
+canvas. The original palette's text colors (dark warm browns/blues) were
+designed for a light backdrop; without their own guaranteed background
+they sat directly on Streamlit's page background, which is very low
+contrast in dark theme. Geometry and font sizes are scaled up from the
+original #366 draft (font sizes esp. -- 10-11px body labels were the core
+"too small to read comfortably" complaint) so the diagram both reads
+clearly and uses more of the available width on a normal desktop "wide"
+layout, without changing the underlying qualitative layout/semantics.
 """
 
 LANGUAGES = ("no", "en")
+
+# Explicit opaque card background (issue #397) -- guarantees the
+# original light-backdrop-tuned palette keeps correct contrast
+# regardless of Streamlit's active app theme (light or dark).
+_CARD_BACKGROUND_FILL = "#fbf3e3"
+_CARD_BORDER_STROKE = "#d8c39a"
 
 _LABELS = {
     "no": {
@@ -80,17 +97,16 @@ def render_boil_timeline_svg(language):
     _require_language(language)
     labels = _LABELS[language]
 
-    boil_x0, boil_x1 = 60, 620
-    whirlpool_x1 = 760
-    hot_break_x1 = 160
-    early_x = 220
-    late_x = 560
+    boil_x0, boil_x1 = 80, 805
+    whirlpool_x1 = 990
+    hot_break_x1 = 210
+    early_x = 285
+    late_x = 730
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 820 220" width="100%" preserveAspectRatio="xMidYMid meet"
-  style="max-width:820px;height:auto;display:block;margin:0 auto;"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 1065 285" width="100%" preserveAspectRatio="xMidYMid meet"
+  style="max-width:1065px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
-  <text x="410" y="24" text-anchor="middle" font-size="16" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
   <defs>
     <marker id="arrow-left" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
@@ -105,23 +121,26 @@ def render_boil_timeline_svg(language):
     </pattern>
   </defs>
 
-  <line x1="330" y1="50" x2="180" y2="50" stroke="#b23b2e" stroke-width="2" marker-end="url(#arrow-left)"/>
-  <text x="255" y="42" text-anchor="middle" font-size="11" fill="#b23b2e">{labels['bitterness_cue']}</text>
-  <line x1="490" y1="50" x2="640" y2="50" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrow-right)"/>
-  <text x="565" y="42" text-anchor="middle" font-size="11" fill="#2e7d32">{labels['aroma_cue']}</text>
+  <rect x="0" y="0" width="1065" height="285" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <text x="533" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
-  <rect x="{boil_x0}" y="90" width="{boil_x1 - boil_x0}" height="40" fill="#f2c14e" stroke="#7a5230"/>
-  <rect x="{boil_x0}" y="90" width="{hot_break_x1 - boil_x0}" height="40" fill="#f7a072" stroke="#7a5230"/>
-  <text x="{(boil_x0 + hot_break_x1) / 2}" y="115" text-anchor="middle" font-size="10" fill="#5a2d0c">{labels['hot_break']}</text>
+  <line x1="430" y1="65" x2="235" y2="65" stroke="#b23b2e" stroke-width="2" marker-end="url(#arrow-left)"/>
+  <text x="332" y="55" text-anchor="middle" font-size="14" fill="#b23b2e">{labels['bitterness_cue']}</text>
+  <line x1="638" y1="65" x2="832" y2="65" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrow-right)"/>
+  <text x="735" y="55" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['aroma_cue']}</text>
 
-  <rect x="{boil_x1}" y="90" width="{whirlpool_x1 - boil_x1}" height="40" fill="url(#whirlpool-hatch)" stroke="#7a5230" stroke-dasharray="4,3"/>
-  <text x="{(boil_x1 + whirlpool_x1) / 2}" y="150" text-anchor="middle" font-size="11" fill="#5a2d0c">{labels['whirlpool']}</text>
+  <rect x="{boil_x0}" y="117" width="{boil_x1 - boil_x0}" height="52" fill="#f2c14e" stroke="#7a5230"/>
+  <rect x="{boil_x0}" y="117" width="{hot_break_x1 - boil_x0}" height="52" fill="#f7a072" stroke="#7a5230"/>
+  <text x="{(boil_x0 + hot_break_x1) / 2}" y="150" text-anchor="middle" font-size="13" fill="#5a2d0c">{labels['hot_break']}</text>
 
-  <text x="{boil_x0}" y="150" text-anchor="middle" font-size="11" fill="#3a2a1a">{labels['boil_start']}</text>
-  <text x="{boil_x1}" y="150" text-anchor="middle" font-size="11" fill="#3a2a1a">{labels['boil_end']} / {labels['flameout']}</text>
+  <rect x="{boil_x1}" y="117" width="{whirlpool_x1 - boil_x1}" height="52" fill="url(#whirlpool-hatch)" stroke="#7a5230" stroke-dasharray="4,3"/>
+  <text x="{(boil_x1 + whirlpool_x1) / 2}" y="195" text-anchor="middle" font-size="14" fill="#5a2d0c">{labels['whirlpool']}</text>
 
-  <circle cx="{early_x}" cy="110" r="5" fill="#3a2a1a"/>
-  <text x="{early_x}" y="180" text-anchor="middle" font-size="11" fill="#3a2a1a">{labels['early_marker']}</text>
-  <circle cx="{late_x}" cy="110" r="5" fill="#3a2a1a"/>
-  <text x="{late_x}" y="180" text-anchor="middle" font-size="11" fill="#3a2a1a">{labels['late_marker']}</text>
+  <text x="{boil_x0}" y="195" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['boil_start']}</text>
+  <text x="{boil_x1}" y="195" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['boil_end']} / {labels['flameout']}</text>
+
+  <circle cx="{early_x}" cy="143" r="6.5" fill="#3a2a1a"/>
+  <text x="{early_x}" y="234" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['early_marker']}</text>
+  <circle cx="{late_x}" cy="143" r="6.5" fill="#3a2a1a"/>
+  <text x="{late_x}" y="234" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['late_marker']}</text>
 </svg>""")

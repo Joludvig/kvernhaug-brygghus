@@ -44,6 +44,13 @@ renders as literal label text with the geometry missing -- the exact
 owner-PC failure mode reported for Pakking (issue #378), also
 reproduced here for Koking/boil_timeline.py and Kjøling/
 cool_transfer_flow.py, which share this same pattern.
+
+Legibility pass (issue #397): the diagram carries its own explicit opaque
+background rect (`_CARD_BACKGROUND_FILL`) instead of a transparent
+canvas, since this palette's dark warm text colors were tuned for a light
+backdrop and had weak contrast directly on Streamlit's dark theme page
+background. Geometry and font sizes are scaled up from the original #374
+draft for comfortable reading without zoom.
 """
 
 import textwrap
@@ -51,8 +58,14 @@ import textwrap
 LANGUAGES = ("no", "en")
 
 # SVG viewBox width in user units (kept in sync with the literal
-# "0 0 880 330" in the returned markup below).
-_VIEWBOX_WIDTH = 880
+# "0 0 1145 430" in the returned markup below).
+_VIEWBOX_WIDTH = 1145
+
+# Explicit opaque card background (issue #397) -- guarantees the
+# original light-backdrop-tuned palette keeps correct contrast
+# regardless of Streamlit's active app theme (light or dark).
+_CARD_BACKGROUND_FILL = "#fbf3e3"
+_CARD_BORDER_STROKE = "#d8c39a"
 
 # Conservative average character-advance width as a fraction of
 # font-size for a generic sans-serif proportional font. Deliberately an
@@ -152,20 +165,19 @@ def render_package_flow_svg(language):
     _require_language(language)
     labels = _LABELS[language]
 
-    fermenter_x0, fermenter_x1 = 40, 220
-    split_x = 260
-    path_x0, path_x1 = 300, 620
-    serve_x0, serve_x1 = 680, 840
+    fermenter_x0, fermenter_x1 = 50, 285
+    split_x = 340
+    path_x0, path_x1 = 390, 805
+    serve_x0, serve_x1 = 885, 1090
 
-    bottle_y0, bottle_y1 = 40, 130
-    keg_y0, keg_y1 = 190, 280
-    serve_y_mid = 165
+    bottle_y0, bottle_y1 = 50, 170
+    keg_y0, keg_y1 = 245, 365
+    serve_y_mid = 215
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 880 330" width="100%" preserveAspectRatio="xMidYMid meet"
-  style="max-width:880px;height:auto;display:block;margin:0 auto;"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 1145 430" width="100%" preserveAspectRatio="xMidYMid meet"
+  style="max-width:1145px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
-  <text x="440" y="22" text-anchor="middle" font-size="16" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
   <defs>
     <marker id="pkf-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
@@ -173,35 +185,38 @@ def render_package_flow_svg(language):
     </marker>
   </defs>
 
-  <rect x="{path_x0 - 10}" y="{bottle_y0 - 20}" width="{serve_x1 - (path_x0 - 10)}" height="{keg_y1 - bottle_y0 + 40}" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
-  <text x="{(path_x0 + serve_x1) / 2}" y="{bottle_y0 - 26}" text-anchor="middle" font-size="11" fill="#2e7d32">{labels['sanitized_zone']}</text>
+  <rect x="0" y="0" width="1145" height="430" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <text x="573" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
-  <rect x="{fermenter_x0}" y="{serve_y_mid - 35}" width="{fermenter_x1 - fermenter_x0}" height="70" fill="#c9b7e0" stroke="#5c3d84"/>
-  <text x="{(fermenter_x0 + fermenter_x1) / 2}" y="{serve_y_mid + 5}" text-anchor="middle" font-size="11" fill="#37235a">{labels['fermenter']}</text>
+  <rect x="{path_x0 - 13}" y="{bottle_y0 - 26}" width="{serve_x1 - (path_x0 - 13)}" height="{keg_y1 - bottle_y0 + 52}" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
+  <text x="{(path_x0 + serve_x1) / 2}" y="{bottle_y0 - 10}" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['sanitized_zone']}</text>
+
+  <rect x="{fermenter_x0}" y="{serve_y_mid - 46}" width="{fermenter_x1 - fermenter_x0}" height="91" fill="#c9b7e0" stroke="#5c3d84"/>
+  <text x="{(fermenter_x0 + fermenter_x1) / 2}" y="{serve_y_mid + 7}" text-anchor="middle" font-size="14" fill="#37235a">{labels['fermenter']}</text>
 
   <line x1="{fermenter_x1}" y1="{serve_y_mid}" x2="{split_x}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2"/>
   <line x1="{split_x}" y1="{serve_y_mid}" x2="{path_x0}" y2="{(bottle_y0 + bottle_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
   <line x1="{split_x}" y1="{serve_y_mid}" x2="{path_x0}" y2="{(keg_y0 + keg_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
 
-  <text x="{(path_x0 + path_x1) / 2}" y="{bottle_y0 - 6}" text-anchor="middle" font-size="11" font-weight="700" fill="#5a3d10">{labels['bottle_path']}</text>
-  <rect x="{path_x0}" y="{bottle_y0}" width="150" height="{bottle_y1 - bottle_y0}" fill="#f7d9a0" stroke="#a6742f"/>
-  <text x="{path_x0 + 75}" y="{bottle_y0 + 25}" text-anchor="middle" font-size="10" fill="#5a3d10">{labels['bottle_transfer']}</text>
-  <line x1="{path_x0 + 150}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{path_x0 + 190}" y2="{(bottle_y0 + bottle_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
-  <rect x="{path_x0 + 190}" y="{bottle_y0}" width="150" height="{bottle_y1 - bottle_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
-  <text x="{path_x0 + 265}" y="{bottle_y0 + 25}" text-anchor="middle" font-size="10" fill="#1d4a5f">{labels['bottle_step']}</text>
-  <line x1="{path_x0 + 340}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <text x="{(path_x0 + path_x1) / 2}" y="{bottle_y0 - 8}" text-anchor="middle" font-size="14" font-weight="700" fill="#5a3d10">{labels['bottle_path']}</text>
+  <rect x="{path_x0}" y="{bottle_y0}" width="195" height="{bottle_y1 - bottle_y0}" fill="#f7d9a0" stroke="#a6742f"/>
+  <text x="{path_x0 + 97}" y="{bottle_y0 + 33}" text-anchor="middle" font-size="13" fill="#5a3d10">{labels['bottle_transfer']}</text>
+  <line x1="{path_x0 + 195}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{path_x0 + 247}" y2="{(bottle_y0 + bottle_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <rect x="{path_x0 + 247}" y="{bottle_y0}" width="195" height="{bottle_y1 - bottle_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
+  <text x="{path_x0 + 344}" y="{bottle_y0 + 33}" text-anchor="middle" font-size="13" fill="#1d4a5f">{labels['bottle_step']}</text>
+  <line x1="{path_x0 + 442}" y1="{(bottle_y0 + bottle_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
 
-  <text x="{(path_x0 + path_x1) / 2}" y="{keg_y0 - 6}" text-anchor="middle" font-size="11" font-weight="700" fill="#5a3d10">{labels['keg_path']}</text>
-  <rect x="{path_x0}" y="{keg_y0}" width="150" height="{keg_y1 - keg_y0}" fill="#f7d9a0" stroke="#a6742f"/>
-  <text x="{path_x0 + 75}" y="{keg_y0 + 25}" text-anchor="middle" font-size="10" fill="#5a3d10">{labels['keg_transfer']}</text>
-  <line x1="{path_x0 + 150}" y1="{(keg_y0 + keg_y1) / 2}" x2="{path_x0 + 190}" y2="{(keg_y0 + keg_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
-  <rect x="{path_x0 + 190}" y="{keg_y0}" width="150" height="{keg_y1 - keg_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
-  <text x="{path_x0 + 265}" y="{keg_y0 + 25}" text-anchor="middle" font-size="10" fill="#1d4a5f">{labels['keg_step']}</text>
-  <line x1="{path_x0 + 340}" y1="{(keg_y0 + keg_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <text x="{(path_x0 + path_x1) / 2}" y="{keg_y0 - 8}" text-anchor="middle" font-size="14" font-weight="700" fill="#5a3d10">{labels['keg_path']}</text>
+  <rect x="{path_x0}" y="{keg_y0}" width="195" height="{keg_y1 - keg_y0}" fill="#f7d9a0" stroke="#a6742f"/>
+  <text x="{path_x0 + 97}" y="{keg_y0 + 33}" text-anchor="middle" font-size="13" fill="#5a3d10">{labels['keg_transfer']}</text>
+  <line x1="{path_x0 + 195}" y1="{(keg_y0 + keg_y1) / 2}" x2="{path_x0 + 247}" y2="{(keg_y0 + keg_y1) / 2}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
+  <rect x="{path_x0 + 247}" y="{keg_y0}" width="195" height="{keg_y1 - keg_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
+  <text x="{path_x0 + 344}" y="{keg_y0 + 33}" text-anchor="middle" font-size="13" fill="#1d4a5f">{labels['keg_step']}</text>
+  <line x1="{path_x0 + 442}" y1="{(keg_y0 + keg_y1) / 2}" x2="{serve_x0}" y2="{serve_y_mid}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#pkf-arrow)"/>
 
-  <rect x="{serve_x0}" y="{serve_y_mid - 35}" width="{serve_x1 - serve_x0}" height="70" fill="#f2c14e" stroke="#7a5230"/>
-  {_centered_label_markup(labels['serve_store'], (serve_x0 + serve_x1) / 2, serve_y_mid + 5, 10, "#5a2d0c")}
+  <rect x="{serve_x0}" y="{serve_y_mid - 46}" width="{serve_x1 - serve_x0}" height="91" fill="#f2c14e" stroke="#7a5230"/>
+  {_centered_label_markup(labels['serve_store'], (serve_x0 + serve_x1) / 2, serve_y_mid + 7, 13, "#5a2d0c")}
 
-  {_centered_label_markup(labels['oxygen_label'], split_x, 305, 10, "#1d4a5f")}
-  {_centered_label_markup(labels['pressure_label'], (path_x0 + serve_x1) / 2, 320, 10, "#37235a")}
+  {_centered_label_markup(labels['oxygen_label'], split_x, 397, 13, "#1d4a5f")}
+  {_centered_label_markup(labels['pressure_label'], (path_x0 + serve_x1) / 2, 417, 13, "#37235a")}
 </svg>""")

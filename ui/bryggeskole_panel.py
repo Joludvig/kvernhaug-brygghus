@@ -182,7 +182,7 @@ _PROSESS_STADIER = {
         {"no": "Koking", "en": "Boil"},
         {"no": "Kjøling", "en": "Cooling"},
         {"no": "Gjæring (bøtte/FermZilla)", "en": "Fermentation (bucket/FermZilla)"},
-        {"no": "Tapping/flasking", "en": "Kegging/bottling"},
+        {"no": "Pakking", "en": "Packaging"},
     ],
     _ENV_BRYGGERI: [
         {"no": "Forberedelse/metode", "en": "Preparation/method"},
@@ -469,16 +469,26 @@ def _injiser_bryggeskole_css():
     wrapper-diven), aldri en global theme-endring. "learning text visually
     dominates controls": leksjon-/spørsmålstekst får større skrift/
     linjehøyde; ingen annen fane i appen bruker disse nøklene, så CSS-en
-    kan aldri lekke ut av Bryggeskole-fanen."""
+    kan aldri lekke ut av Bryggeskole-fanen.
+
+    Issue #401: økt fra 1.08rem -- fortsatt for lite for svakere syn per
+    eier-QA -- og utvidet til også å dekke selve svaralternativ-teksten
+    (radio-labelene), som tidligere ikke var stylet i det hele tatt (kun
+    spørsmålsteksten i sin egen container var det). `.st-key-bs_svaralternativ`
+    er wrapperen rundt selve st.radio()-kallet i _render_sporsmal()."""
     st.markdown(
         """
         <style>
         .st-key-bs_leksjon_tekst p, .st-key-bs_sporsmal_tekst p {
-            font-size: 1.08rem;
+            font-size: 1.15rem;
             line-height: 1.7;
         }
         .st-key-bs_sporsmal_tekst p {
             font-weight: 600;
+        }
+        .st-key-bs_svaralternativ label p {
+            font-size: 1.1rem;
+            line-height: 1.6;
         }
         </style>
         """,
@@ -619,28 +629,37 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
         # se bryggeskole/method_context_flow.py sin docstring.
         st.markdown(render_method_context_flow_svg(sprak), unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.button(
-            t("bryggeskole.leksjon.forrige"), key=f"bs_bolk_forrige_{modul_id}_btn",
-            width="stretch", disabled=idx == 0,
-            on_click=_bla_bolk, args=(modul_id, -1, totalt),
-        )
-    with col2:
-        if idx + 1 < totalt:
+    # Issue #398: navigasjonsknappene brukte tidligere width="stretch",
+    # som strekker hver knapp til å fylle HELE sin halv-brede kolonne --
+    # på normal desktop ble det enorme, dominerende knapper. width="content"
+    # (Streamlit sin egen default) gir kompakte, tekst-tilpassede knapper i
+    # stedet, uten å endre knapperekkefølge, disabled-semantikk eller
+    # klikkbarhet -- se ui/bryggeskole_panel.py sin bruk samme sted i
+    # _render_sporsmal() og _render_oppsummering() for de to andre
+    # forekomstene av dette samme mønsteret.
+    with st.container(key="bs_nav_actions"):
+        col1, col2 = st.columns(2)
+        with col1:
             st.button(
-                t("bryggeskole.leksjon.neste"), key=f"bs_bolk_neste_{modul_id}_btn",
-                width="stretch", type="primary",
-                on_click=_bla_bolk, args=(modul_id, 1, totalt),
+                t("bryggeskole.leksjon.forrige"), key=f"bs_bolk_forrige_{modul_id}_btn",
+                width="content", disabled=idx == 0,
+                on_click=_bla_bolk, args=(modul_id, -1, totalt),
             )
-        else:
-            # «Start spørsmål» finnes KUN på siste bolk -- det er det som
-            # gjør leksjonen til en sekvens og ikke en scroll-skjerm.
-            st.button(
-                t("bryggeskole.leksjon.start_sporsmal"), key=f"bs_start_sporsmal_{modul_id}_btn",
-                width="stretch", type="primary",
-                on_click=_start_sporsmal_runde, args=(modul_id,),
-            )
+        with col2:
+            if idx + 1 < totalt:
+                st.button(
+                    t("bryggeskole.leksjon.neste"), key=f"bs_bolk_neste_{modul_id}_btn",
+                    width="content", type="primary",
+                    on_click=_bla_bolk, args=(modul_id, 1, totalt),
+                )
+            else:
+                # «Start spørsmål» finnes KUN på siste bolk -- det er det som
+                # gjør leksjonen til en sekvens og ikke en scroll-skjerm.
+                st.button(
+                    t("bryggeskole.leksjon.start_sporsmal"), key=f"bs_start_sporsmal_{modul_id}_btn",
+                    width="content", type="primary",
+                    on_click=_start_sporsmal_runde, args=(modul_id,),
+                )
 
 
 def _render_sporsmal(modul_id, sesjon, pilot, sprak):
@@ -680,15 +699,16 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
     with st.container(key="bs_sporsmal_tekst"):
         st.markdown(rendret["prompt"])
 
-    st.radio(
-        t("bryggeskole.sporsmal.velg_svar"),
-        options=[o["id"] for o in alternativer],
-        format_func=lambda oid: next(o["text"] for o in alternativer if o["id"] == oid),
-        index=None,
-        key=widget_key,
-        label_visibility="collapsed",
-        disabled=besvart,
-    )
+    with st.container(key="bs_svaralternativ"):
+        st.radio(
+            t("bryggeskole.sporsmal.velg_svar"),
+            options=[o["id"] for o in alternativer],
+            format_func=lambda oid: next(o["text"] for o in alternativer if o["id"] == oid),
+            index=None,
+            key=widget_key,
+            label_visibility="collapsed",
+            disabled=besvart,
+        )
 
     if not besvart:
         # Chief review (PR #328): en fersk spørsmål-radio må ALDRI ha et
@@ -696,11 +716,12 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
         # være disabled inntil læreren faktisk har valgt ett -- ellers kan
         # et ubesvart spørsmål stille mutere persistert mastery via
         # Streamlits standard "velg første alternativ"-oppførsel.
-        st.button(
-            t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_{modul_id}_r{runde}_q{idx}",
-            width="stretch", on_click=_sjekk_svar, args=(modul_id, sporsmal, sprak, widget_key, runde),
-            disabled=st.session_state.get(widget_key) is None,
-        )
+        with st.container(key="bs_nav_actions"):
+            st.button(
+                t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_{modul_id}_r{runde}_q{idx}",
+                width="content", on_click=_sjekk_svar, args=(modul_id, sporsmal, sprak, widget_key, runde),
+                disabled=st.session_state.get(widget_key) is None,
+            )
     else:
         # Answer-state UX (issue #338): svarstatusen skal aldri hvile kun
         # på radioens grå disabled-styling -- lærerens eget svar og (ved
@@ -711,10 +732,11 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
             riktig_raw = next(o for o in sporsmal["options"] if o["correct"] is True)
             st.caption(f"{t('bryggeskole.svar.riktig_svar')}: {riktig_raw['text'][sprak]}")
         (st.success if siste["correct"] else st.error)(siste["feedback"])
-        st.button(
-            t("bryggeskole.sporsmal.fortsett"), key=f"bs_fortsett_btn_{modul_id}_r{runde}_q{idx}",
-            width="stretch", on_click=_neste_sporsmal, args=(modul_id, totalt),
-        )
+        with st.container(key="bs_nav_actions"):
+            st.button(
+                t("bryggeskole.sporsmal.fortsett"), key=f"bs_fortsett_btn_{modul_id}_r{runde}_q{idx}",
+                width="content", on_click=_neste_sporsmal, args=(modul_id, totalt),
+            )
 
 
 def _konsept_runde_status(tilstand, pilot, konsept_id):
@@ -786,17 +808,18 @@ def _render_oppsummering(modul_id, pilot, sprak):
                     f"{mastery_label(konsept_tilstand, sprak)}"
                 )
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.button(
-            t("bryggeskole.oppsummering.prov_igjen"), key=f"bs_prov_igjen_{modul_id}_btn",
-            width="stretch", on_click=_start_sporsmal_runde, args=(modul_id,),
-        )
-    with col2:
-        st.button(
-            t("bryggeskole.tilbake_til_oversikt"), key=f"bs_oppsummering_tilbake_{modul_id}_btn",
-            width="stretch", on_click=_tilbake_til_oversikt,
-        )
+    with st.container(key="bs_nav_actions"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.button(
+                t("bryggeskole.oppsummering.prov_igjen"), key=f"bs_prov_igjen_{modul_id}_btn",
+                width="content", on_click=_start_sporsmal_runde, args=(modul_id,),
+            )
+        with col2:
+            st.button(
+                t("bryggeskole.tilbake_til_oversikt"), key=f"bs_oppsummering_tilbake_{modul_id}_btn",
+                width="content", on_click=_tilbake_til_oversikt,
+            )
 
 
 def _render_modul(modul_id, miljo, sprak):

@@ -23,10 +23,20 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_cool_transfer_flow_svg("en")
-        self.assertIn('viewBox="0 0 840 260"', svg)
+        self.assertIn('viewBox="0 0 1090 340"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
-        self.assertIn("max-width:840px", svg)
+        self.assertIn("max-width:1090px", svg)
+
+    def test_minimum_legible_font_size_and_contrast_background(self):
+        # Issue #397: labels must not regress back to the pre-fix 9-11px
+        # sizing, and the diagram must carry its own explicit opaque
+        # background so the light-backdrop-tuned palette has guaranteed
+        # contrast regardless of Streamlit's active theme.
+        svg = render_cool_transfer_flow_svg("en")
+        for font_size in re.findall(r'font-size="([\d.]+)"', svg):
+            self.assertGreaterEqual(float(font_size), 12)
+        self.assertIn('<rect x="0" y="0" width="1090" height="340"', svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -92,7 +102,7 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
         matches = re.findall(r'x="(-?\d+(?:\.\d+)?)"', svg)
         for value in matches:
             self.assertGreaterEqual(float(value), 0)
-            self.assertLessEqual(float(value), 840)
+            self.assertLessEqual(float(value), 1090)
 
     def test_no_streamlit_import(self):
         import bryggeskole.cool_transfer_flow as module
@@ -155,8 +165,8 @@ def _last_text_block(svg):
 
 
 class TestLongOxygenLabelLayoutStaysInsideViewbox(unittest.TestCase):
-    VIEWBOX_WIDTH = 840
-    VIEWBOX_HEIGHT = 260
+    VIEWBOX_WIDTH = 1090
+    VIEWBOX_HEIGHT = 340
 
     def test_every_text_lines_estimated_width_fits_inside_viewbox(self):
         for lang in ("no", "en"):

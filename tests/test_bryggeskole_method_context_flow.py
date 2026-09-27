@@ -23,10 +23,20 @@ class TestRenderMethodContextFlowSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_method_context_flow_svg("en")
-        self.assertIn('viewBox="0 0 1000 430"', svg)
+        self.assertIn('viewBox="0 0 1300 560"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
-        self.assertIn("max-width:1000px", svg)
+        self.assertIn("max-width:1300px", svg)
+
+    def test_minimum_legible_font_size_and_contrast_background(self):
+        # Issue #397: labels must not regress back to the pre-fix 10-12px
+        # sizing, and the diagram must carry its own explicit opaque
+        # background so the light-backdrop-tuned palette has guaranteed
+        # contrast regardless of Streamlit's active theme.
+        svg = render_method_context_flow_svg("en")
+        for font_size in re.findall(r'font-size="([\d.]+)"', svg):
+            self.assertGreaterEqual(float(font_size), 13)
+        self.assertIn('<rect x="0" y="0" width="1300" height="560"', svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -79,8 +89,8 @@ class TestRenderMethodContextFlowSvg(unittest.TestCase):
         # half that width each -- both add up to the identical total zone
         # width, so the shared downstream boxes line up across all rows.
         svg = render_method_context_flow_svg("en")
-        self.assertEqual(svg.count('width="280"'), 2, "expected exactly two full-zone (BIAB + all-in-one) boxes")
-        self.assertGreaterEqual(svg.count('width="130"'), 2 + 3 * 4, "traditional's two boxes plus 4 stage boxes x 3 rows")
+        self.assertEqual(svg.count('width="365"'), 2, "expected exactly two full-zone (BIAB + all-in-one) boxes")
+        self.assertGreaterEqual(svg.count('width="170"'), 2 + 3 * 4, "traditional's two boxes plus 4 stage boxes x 3 rows")
 
     def test_no_hierarchy_caption_present(self):
         for lang, expected in (
@@ -135,8 +145,8 @@ def _leaf_text_nodes(svg):
 
 
 class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
-    VIEWBOX_WIDTH = 1000
-    VIEWBOX_HEIGHT = 430
+    VIEWBOX_WIDTH = 1300
+    VIEWBOX_HEIGHT = 560
 
     def test_every_text_lines_estimated_width_fits_inside_viewbox(self):
         for lang in ("no", "en"):
@@ -166,7 +176,7 @@ class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
         matches = re.findall(r'x="(-?\d+(?:\.\d+)?)"', svg)
         for value in matches:
             self.assertGreaterEqual(float(value), 0)
-            self.assertLessEqual(float(value), 1000)
+            self.assertLessEqual(float(value), 1300)
 
 
 if __name__ == "__main__":
