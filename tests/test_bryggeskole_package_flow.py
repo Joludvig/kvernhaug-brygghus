@@ -23,10 +23,20 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_package_flow_svg("en")
-        self.assertIn('viewBox="0 0 880 330"', svg)
+        self.assertIn('viewBox="0 0 1145 430"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
-        self.assertIn("max-width:880px", svg)
+        self.assertIn("max-width:1145px", svg)
+
+    def test_minimum_legible_font_size_and_contrast_background(self):
+        # Issue #397: labels must not regress back to the pre-fix 9-11px
+        # sizing, and the diagram must carry its own explicit opaque
+        # background so the light-backdrop-tuned palette has guaranteed
+        # contrast regardless of Streamlit's active theme.
+        svg = render_package_flow_svg("en")
+        for font_size in re.findall(r'font-size="([\d.]+)"', svg):
+            self.assertGreaterEqual(float(font_size), 13)
+        self.assertIn('<rect x="0" y="0" width="1145" height="430"', svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -129,8 +139,8 @@ def _leaf_text_nodes(svg):
 
 
 class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
-    VIEWBOX_WIDTH = 880
-    VIEWBOX_HEIGHT = 330
+    VIEWBOX_WIDTH = 1145
+    VIEWBOX_HEIGHT = 430
 
     def test_every_text_lines_estimated_width_fits_inside_viewbox(self):
         for lang in ("no", "en"):
@@ -160,7 +170,7 @@ class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
         matches = re.findall(r'x="(-?\d+(?:\.\d+)?)"', svg)
         for value in matches:
             self.assertGreaterEqual(float(value), 0)
-            self.assertLessEqual(float(value), 880)
+            self.assertLessEqual(float(value), 1145)
 
 
 if __name__ == "__main__":

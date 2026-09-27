@@ -39,6 +39,13 @@ source lines both make Streamlit's CommonMark-based frontend markdown
 renderer fragment the <svg>...</svg> block into a stray paragraph plus
 orphaned elements outside any <svg> context, which the browser then
 renders as literal label text with the geometry missing (issue #378).
+
+Legibility pass (issue #397): the diagram carries its own explicit opaque
+background rect (`_CARD_BACKGROUND_FILL`) instead of a transparent
+canvas, since this palette's dark warm text colors were tuned for a light
+backdrop and had weak contrast directly on Streamlit's dark theme page
+background. Geometry and font sizes are scaled up from the original #370
+draft for comfortable reading without zoom.
 """
 
 import textwrap
@@ -46,9 +53,15 @@ import textwrap
 LANGUAGES = ("no", "en")
 
 # SVG viewBox width in user units (kept in sync with the literal
-# "0 0 840 260" in the returned markup below -- see
+# "0 0 1090 340" in the returned markup below -- see
 # test_is_responsive_and_preserves_viewbox).
-_VIEWBOX_WIDTH = 840
+_VIEWBOX_WIDTH = 1090
+
+# Explicit opaque card background (issue #397) -- guarantees the
+# original light-backdrop-tuned palette keeps correct contrast
+# regardless of Streamlit's active app theme (light or dark).
+_CARD_BACKGROUND_FILL = "#fbf3e3"
+_CARD_BORDER_STROKE = "#d8c39a"
 
 # Conservative average character-advance width as a fraction of
 # font-size for a generic sans-serif proportional font. This is
@@ -156,16 +169,15 @@ def render_cool_transfer_flow_svg(language):
     _require_language(language)
     labels = _LABELS[language]
 
-    kettle_x0, kettle_x1 = 40, 200
-    cooling_x0, cooling_x1 = 200, 420
-    transfer_x0, transfer_x1 = 420, 640
-    fermenter_x0, fermenter_x1 = 640, 800
+    kettle_x0, kettle_x1 = 50, 260
+    cooling_x0, cooling_x1 = 260, 545
+    transfer_x0, transfer_x1 = 545, 830
+    fermenter_x0, fermenter_x1 = 830, 1040
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 840 260" width="100%" preserveAspectRatio="xMidYMid meet"
-  style="max-width:840px;height:auto;display:block;margin:0 auto;"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 1090 340" width="100%" preserveAspectRatio="xMidYMid meet"
+  style="max-width:1090px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
-  <text x="420" y="24" text-anchor="middle" font-size="16" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
   <defs>
     <marker id="ctf-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
@@ -173,29 +185,32 @@ def render_cool_transfer_flow_svg(language):
     </marker>
   </defs>
 
-  <rect x="{cooling_x0}" y="70" width="{fermenter_x1 - cooling_x0}" height="110" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
-  <text x="{(cooling_x0 + fermenter_x1) / 2}" y="62" text-anchor="middle" font-size="11" fill="#2e7d32">{labels['sanitized_zone']}</text>
+  <rect x="0" y="0" width="1090" height="340" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <text x="545" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
-  <rect x="{kettle_x0}" y="90" width="{kettle_x1 - kettle_x0}" height="60" fill="#f2c14e" stroke="#7a5230"/>
-  <text x="{(kettle_x0 + kettle_x1) / 2}" y="125" text-anchor="middle" font-size="11" fill="#5a2d0c">{labels['kettle']}</text>
+  <rect x="{cooling_x0}" y="91" width="{fermenter_x1 - cooling_x0}" height="143" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
+  <text x="{(cooling_x0 + fermenter_x1) / 2}" y="81" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['sanitized_zone']}</text>
 
-  <rect x="{cooling_x0 + 10}" y="90" width="{cooling_x1 - cooling_x0 - 20}" height="60" fill="#aee1f2" stroke="#2c6e8e"/>
-  <text x="{(cooling_x0 + cooling_x1) / 2}" y="125" text-anchor="middle" font-size="11" fill="#1d4a5f">{labels['cooling']}</text>
+  <rect x="{kettle_x0}" y="117" width="{kettle_x1 - kettle_x0}" height="78" fill="#f2c14e" stroke="#7a5230"/>
+  <text x="{(kettle_x0 + kettle_x1) / 2}" y="163" text-anchor="middle" font-size="14" fill="#5a2d0c">{labels['kettle']}</text>
 
-  <rect x="{transfer_x0 + 10}" y="90" width="{transfer_x1 - transfer_x0 - 20}" height="60" fill="#f7d9a0" stroke="#a6742f"/>
-  <text x="{(transfer_x0 + transfer_x1) / 2}" y="112" text-anchor="middle" font-size="11" fill="#5a3d10">{labels['transfer']}</text>
-  <line x1="{transfer_x0 + 25}" y1="128" x2="{transfer_x1 - 55}" y2="120" stroke="#5a3d10" stroke-width="2" marker-end="url(#ctf-arrow)"/>
-  <text x="{transfer_x0 + 15}" y="145" font-size="9" fill="#5a3d10">{labels['gravity_path']}</text>
-  <line x1="{transfer_x0 + 25}" y1="138" x2="{transfer_x1 - 55}" y2="140" stroke="#5a3d10" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#ctf-arrow)"/>
-  <text x="{transfer_x1 - 60}" y="155" font-size="9" fill="#5a3d10">{labels['pump_path']}</text>
+  <rect x="{cooling_x0 + 13}" y="117" width="{cooling_x1 - cooling_x0 - 26}" height="78" fill="#aee1f2" stroke="#2c6e8e"/>
+  <text x="{(cooling_x0 + cooling_x1) / 2}" y="163" text-anchor="middle" font-size="14" fill="#1d4a5f">{labels['cooling']}</text>
 
-  <rect x="{fermenter_x0 + 10}" y="90" width="{fermenter_x1 - fermenter_x0 - 20}" height="60" fill="#c9b7e0" stroke="#5c3d84"/>
-  <text x="{(fermenter_x0 + fermenter_x1) / 2}" y="125" text-anchor="middle" font-size="11" fill="#37235a">{labels['fermenter']}</text>
+  <rect x="{transfer_x0 + 13}" y="117" width="{transfer_x1 - transfer_x0 - 26}" height="78" fill="#f7d9a0" stroke="#a6742f"/>
+  <text x="{(transfer_x0 + transfer_x1) / 2}" y="146" text-anchor="middle" font-size="14" fill="#5a3d10">{labels['transfer']}</text>
+  <line x1="{transfer_x0 + 33}" y1="166" x2="{transfer_x1 - 72}" y2="156" stroke="#5a3d10" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <text x="{transfer_x0 + 20}" y="189" font-size="12" fill="#5a3d10">{labels['gravity_path']}</text>
+  <line x1="{transfer_x0 + 33}" y1="179" x2="{transfer_x1 - 72}" y2="182" stroke="#5a3d10" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#ctf-arrow)"/>
+  <text x="{transfer_x1 - 78}" y="202" font-size="12" fill="#5a3d10">{labels['pump_path']}</text>
 
-  <line x1="{kettle_x1}" y1="120" x2="{cooling_x0 + 5}" y2="120" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
-  <line x1="{cooling_x1 - 5}" y1="120" x2="{transfer_x0 + 5}" y2="120" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
-  <line x1="{transfer_x1 - 5}" y1="120" x2="{fermenter_x0 + 5}" y2="120" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <rect x="{fermenter_x0 + 13}" y="117" width="{fermenter_x1 - fermenter_x0 - 26}" height="78" fill="#c9b7e0" stroke="#5c3d84"/>
+  <text x="{(fermenter_x0 + fermenter_x1) / 2}" y="163" text-anchor="middle" font-size="14" fill="#37235a">{labels['fermenter']}</text>
 
-  {_centered_label_markup(labels['oxygen_pre'], (cooling_x1 + transfer_x0) / 2, 205, 10, "#1d4a5f")}
-  {_centered_label_markup(labels['oxygen_post'], (fermenter_x0 + fermenter_x1) / 2, 230, 10, "#37235a")}
+  <line x1="{kettle_x1}" y1="156" x2="{cooling_x0 + 6}" y2="156" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <line x1="{cooling_x1 - 6}" y1="156" x2="{transfer_x0 + 6}" y2="156" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <line x1="{transfer_x1 - 6}" y1="156" x2="{fermenter_x0 + 6}" y2="156" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+
+  {_centered_label_markup(labels['oxygen_pre'], (cooling_x1 + transfer_x0) / 2, 267, 13, "#1d4a5f")}
+  {_centered_label_markup(labels['oxygen_post'], (fermenter_x0 + fermenter_x1) / 2, 299, 13, "#37235a")}
 </svg>""")

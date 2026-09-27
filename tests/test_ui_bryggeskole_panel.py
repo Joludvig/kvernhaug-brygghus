@@ -1485,5 +1485,138 @@ class TestMetodevalgModulen(_MedIsolertTilstand):
         self.assertTrue(any(b.key == "bs_valg_metodevalg_r1_q0" for b in at.radio))
 
 
+# ─── #403: konsekvent "Pakking"/"Packaging" learner-facing navn ────────────
+#
+# Før fiksen het skoleoversikt-kortet "Tapping/flasking"/"Kegging/bottling",
+# mens modulheader/navigasjon/roadmap-terminologien allerede het
+# "Pakking"/"Packaging" -- eieren gjenkjente ikke kortet som Pakking-modulen
+# i det hele tatt (issue #403). Fiksen er en ren display-copy-rename i
+# _PROSESS_STADIER (ui/bryggeskole_panel.py) -- modul-id-en "pakking",
+# widget-nøkler, progress-/mastery-nøkler (package.*) er urørt.
+
+class TestPakkingNavnKonsistensIssue403(_MedIsolertTilstand):
+    def test_skoleoversikt_kortet_heter_pakking_ikke_tapping_flasking_no(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Pakking", tekster)
+        self.assertNotIn("Tapping/flasking", tekster)
+
+    def test_skoleoversikt_kortet_heter_packaging_ikke_kegging_bottling_en(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Packaging", tekster)
+        self.assertNotIn("Kegging/bottling", tekster)
+
+    def test_overview_kort_og_modulheader_bruker_samme_navn(self):
+        # Kortet OG modulen (header/breadcrumb) skal nå faktisk stemme
+        # overens -- det er selve poenget med #403 (eieren gjenkjente ikke
+        # kortet som samme modul som "Pakking" i roadmap-terminologien).
+        at = self._ny_apptest()
+        self._apne_modul(at, "pakking")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Pakking", tekster)
+
+    def test_bryggeri_miljoet_er_uendret_pakking_cip(self):
+        # Bryggeri-miljøets "Pakking/CIP"-stadium het allerede riktig --
+        # #403 gjaldt kun hjemmebrygger-miljøets "Tapping/flasking"-kort.
+        at = self._ny_apptest()
+        self._velg_miljo(at, "bs_velg_bryggeri_btn")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Pakking/CIP", tekster)
+
+    def test_modul_id_og_widget_nokler_uendret(self):
+        # Renaming av display-copy skal ALDRI røre modul-identiteten --
+        # samme "pakking"-modul-id/knapp-nøkkel som før #403.
+        at = self._ny_apptest()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        _knapp(at, "bs_apne_modul_pakking_btn")
+
+
+# ─── #398: kompakte navigasjons-/handlingsknapper ──────────────────────────
+#
+# AppTest sin Button-wrapper eksponerer ikke selve width-egenskapen (kun
+# label/key/disabled/click/value), så dette sjekkes på kildenivå -- samme
+# mønster som test_no_streamlit_import() i
+# tests/test_bryggeskole_*.py-familien bruker for en ikke-atferdsmessig
+# egenskap. Før fiksen brukte disse knappene width="stretch", som strekker
+# hver knapp til å fylle HELE sin halv-brede kolonne -- på normal desktop
+# ble "← Forrige"/"Neste →"/"➡️ Fortsett" enorme, dominerende knapper.
+
+class TestNavigasjonsknapperErKompakteIssue398(unittest.TestCase):
+    def setUp(self):
+        import ui.bryggeskole_panel as panel_module
+        with open(panel_module.__file__, encoding="utf-8") as fh:
+            self.kildekode = fh.read()
+
+    def test_delt_nav_actions_container_brukes_for_alle_forekomster(self):
+        # Leksjon (Forrige/Neste/Start spørsmål), spørsmål (Sjekk svar --
+        # og, i et eget if/else-gren, Fortsett) og oppsummering (Prøv
+        # igjen/Tilbake) er det samme gjentatte navigasjons-/handlings-
+        # knappmønsteret -- alle fire kildeforekomstene skal dele samme
+        # kompakte layout-fiks, ikke bare den ene issue #398 selv navnga.
+        self.assertEqual(self.kildekode.count('st.container(key="bs_nav_actions")'), 4)
+
+    def test_ingen_width_stretch_igjen_pa_nav_actions_knappene(self):
+        # De konkrete knappe-nøklene issue #398/#260 sin flyt bruker.
+        for btn_key_prefix in (
+            "bs_bolk_forrige_", "bs_bolk_neste_", "bs_start_sporsmal_",
+            "bs_svar_btn_", "bs_fortsett_btn_",
+            "bs_prov_igjen_", "bs_oppsummering_tilbake_",
+        ):
+            # Knappekallet selv er flerlinjet i kilden -- sjekk width= på
+            # linjen RETT ETTER key=f"{prefix}...".
+            idx = self.kildekode.index(f'key=f"{btn_key_prefix}')
+            snutt = self.kildekode[idx:idx + 200]
+            self.assertIn('width="content"', snutt, f"{btn_key_prefix}: forventet width=\"content\", fikk: {snutt!r}")
+            self.assertNotIn('width="stretch"', snutt, f"{btn_key_prefix}: skal ikke lenger bruke width=\"stretch\"")
+
+    def test_disabled_forrige_pa_forste_steg_er_uendret_semantikk(self):
+        # #398 krever at disabled-semantikken på FØRSTE steg ikke endres av
+        # den kompakte layout-fiksen.
+        at = AppTest.from_file(_HARNESS)
+        at.run()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        _knapp(at, "bs_apne_modul_mesking_btn").click().run()
+        forrige = _knapp(at, "bs_bolk_forrige_mesking_btn")
+        self.assertTrue(forrige.disabled, "«Forrige» skal fortsatt være disabled på første bolk")
+
+
+# ─── #401: quiz-typografi ───────────────────────────────────────────────────
+
+class TestQuizTypografiIssue401(unittest.TestCase):
+    def test_svaralternativ_wrapper_og_css_finnes(self):
+        import ui.bryggeskole_panel as panel_module
+        with open(panel_module.__file__, encoding="utf-8") as fh:
+            kildekode = fh.read()
+        self.assertIn('st.container(key="bs_svaralternativ")', kildekode)
+        self.assertIn(".st-key-bs_svaralternativ label p", kildekode)
+        self.assertIn(".st-key-bs_sporsmal_tekst p", kildekode)
+
+    def test_svarrekkefolge_innhold_og_mastery_uendret(self):
+        # #401 er en ren typografi-endring -- spørsmål, svar, riktig svar,
+        # feedback og mastery skal oppføre seg helt uendret.
+        at = AppTest.from_file(_HARNESS)
+        at.run()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        _knapp(at, "bs_apne_modul_mesking_btn").click().run()
+        while [b for b in at.button if b.key == "bs_bolk_neste_mesking_btn"]:
+            _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
+        _knapp(at, "bs_start_sporsmal_mesking_btn").click().run()
+
+        pilot = les_mesking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        widget_key = "bs_valg_mesking_r1_q0"
+        at.radio(key=widget_key).set_value(fasit[0]).run()
+        _knapp(at, "bs_svar_btn_mesking_r1_q0").click().run()
+        self.assertEqual(len(at.exception), 0)
+
+        tilstand = read_mastery_state()
+        self.assertTrue(tilstand["concepts"], "mastery skal fortsatt oppdateres helt normalt")
+
+
 if __name__ == "__main__":
     unittest.main()

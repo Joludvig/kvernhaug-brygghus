@@ -23,10 +23,10 @@ class TestRenderBoilTimelineSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_boil_timeline_svg("en")
-        self.assertIn('viewBox="0 0 820 220"', svg)
+        self.assertIn('viewBox="0 0 1065 285"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
-        self.assertIn("max-width:820px", svg)
+        self.assertIn("max-width:1065px", svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -72,14 +72,24 @@ class TestRenderBoilTimelineSvg(unittest.TestCase):
 
     def test_directional_cues_stay_inside_viewbox(self):
         # The two teaching cues must be visible, not merely present as
-        # clipped strings outside the 0..820 viewBox.
+        # clipped strings outside the 0..1065 viewBox.
         svg = render_boil_timeline_svg("en")
-        self.assertIn('x1="330" y1="50" x2="180" y2="50"', svg)
-        self.assertIn('x="255" y="42" text-anchor="middle"', svg)
-        self.assertIn('x1="490" y1="50" x2="640" y2="50"', svg)
-        self.assertIn('x="565" y="42" text-anchor="middle"', svg)
+        self.assertIn('x1="430" y1="65" x2="235" y2="65"', svg)
+        self.assertIn('x="332" y="55" text-anchor="middle"', svg)
+        self.assertIn('x1="638" y1="65" x2="832" y2="65"', svg)
+        self.assertIn('x="735" y="55" text-anchor="middle"', svg)
         self.assertIn("arrow-left", svg)
         self.assertIn("arrow-right", svg)
+
+    def test_minimum_legible_font_size_and_contrast_background(self):
+        # Issue #397: labels must not regress back to the pre-fix
+        # 9-11px sizing, and the diagram must carry its own explicit
+        # opaque background so the light-backdrop-tuned palette has
+        # guaranteed contrast regardless of Streamlit's active theme.
+        svg = render_boil_timeline_svg("en")
+        for font_size in re.findall(r'font-size="([\d.]+)"', svg):
+            self.assertGreaterEqual(float(font_size), 13)
+        self.assertIn('<rect x="0" y="0" width="1065" height="285"', svg)
 
     def test_no_streamlit_import(self):
         import bryggeskole.boil_timeline as module

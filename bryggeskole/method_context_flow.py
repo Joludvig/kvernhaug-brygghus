@@ -47,6 +47,13 @@ renderer fragment the <svg>...</svg> block into a stray paragraph plus
 orphaned elements outside any <svg> context (issue #378) -- see
 bryggeskole/package_flow.py's own docstring for the full failure-mode
 explanation this pattern avoids.
+
+Legibility pass (issue #397): the diagram carries its own explicit opaque
+background rect (`_CARD_BACKGROUND_FILL`) instead of a transparent
+canvas, since this palette's dark warm text colors were tuned for a light
+backdrop and had weak contrast directly on Streamlit's dark theme page
+background. Geometry and font sizes are scaled up from the original #380
+draft for comfortable reading without zoom.
 """
 
 import textwrap
@@ -54,8 +61,14 @@ import textwrap
 LANGUAGES = ("no", "en")
 
 # SVG viewBox width in user units (kept in sync with the literal
-# "0 0 1000 430" in the returned markup below).
-_VIEWBOX_WIDTH = 1000
+# "0 0 1300 560" in the returned markup below).
+_VIEWBOX_WIDTH = 1300
+
+# Explicit opaque card background (issue #397) -- guarantees the
+# original light-backdrop-tuned palette keeps correct contrast
+# regardless of Streamlit's active app theme (light or dark).
+_CARD_BACKGROUND_FILL = "#fbf3e3"
+_CARD_BORDER_STROKE = "#d8c39a"
 
 # Conservative average character-advance width as a fraction of
 # font-size for a generic sans-serif proportional font. Deliberately an
@@ -153,7 +166,7 @@ def _stage_box(x, y0, y1, width, label, fill, stroke, text_fill):
     cy = (y0 + y1) / 2
     return (
         f'<rect x="{x}" y="{y0}" width="{width}" height="{y1 - y0}" fill="{fill}" stroke="{stroke}"/>'
-        f'{_centered_label_markup(label, cx, cy + 4, 10, text_fill)}'
+        f'{_centered_label_markup(label, cx, cy + 5, 13, text_fill)}'
     )
 
 
@@ -174,16 +187,16 @@ def render_method_context_flow_svg(language):
     _require_language(language)
     labels = _LABELS[language]
 
-    zone_x0 = 60
-    zone_width = 280
+    zone_x0 = 80
+    zone_width = 365
     zone_x1 = zone_x0 + zone_width
-    downstream_x0 = zone_x1 + 30
-    stage_width = 130
-    stage_gap = 20
+    downstream_x0 = zone_x1 + 39
+    stage_width = 170
+    stage_gap = 26
     stage_xs = [downstream_x0 + i * (stage_width + stage_gap) for i in range(4)]
-    box_height = 60
+    box_height = 78
 
-    row_centers = {"biab": 90, "traditional": 220, "all_in_one": 350}
+    row_centers = {"biab": 117, "traditional": 286, "all_in_one": 455}
 
     def row(center):
         return center - box_height / 2, center + box_height / 2
@@ -202,11 +215,10 @@ def render_method_context_flow_svg(language):
                 parts.append(_arrow(x + stage_width, (y0 + y1) / 2, stage_xs[i + 1]))
         return "".join(parts)
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 1000 430" width="100%" preserveAspectRatio="xMidYMid meet"
-  style="max-width:1000px;height:auto;display:block;margin:0 auto;"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 1300 560" width="100%" preserveAspectRatio="xMidYMid meet"
+  style="max-width:1300px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
-  <text x="500" y="22" text-anchor="middle" font-size="16" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
   <defs>
     <marker id="mcf-arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
@@ -214,26 +226,29 @@ def render_method_context_flow_svg(language):
     </marker>
   </defs>
 
-  <text x="{zone_x0 + zone_width / 2}" y="{biab_y0 - 12}" text-anchor="middle" font-size="12" font-weight="700" fill="#5a3d10">{labels['row_biab']}</text>
+  <rect x="0" y="0" width="1300" height="560" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <text x="650" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
+
+  <text x="{zone_x0 + zone_width / 2}" y="{biab_y0 - 16}" text-anchor="middle" font-size="15" font-weight="700" fill="#5a3d10">{labels['row_biab']}</text>
   <rect x="{zone_x0}" y="{biab_y0}" width="{zone_width}" height="{biab_y1 - biab_y0}" fill="#f7d9a0" stroke="#a6742f"/>
-  {_centered_label_markup(labels['biab_combined'], zone_x0 + zone_width / 2, (biab_y0 + biab_y1) / 2 + 4, 10, "#5a3d10")}
+  {_centered_label_markup(labels['biab_combined'], zone_x0 + zone_width / 2, (biab_y0 + biab_y1) / 2 + 5, 13, "#5a3d10")}
   {_arrow(zone_x1, (biab_y0 + biab_y1) / 2, downstream_x0)}
   {downstream_markup(biab_y0, biab_y1)}
 
-  <text x="{zone_x0 + zone_width / 2}" y="{trad_y0 - 12}" text-anchor="middle" font-size="12" font-weight="700" fill="#5a3d10">{labels['row_traditional']}</text>
+  <text x="{zone_x0 + zone_width / 2}" y="{trad_y0 - 16}" text-anchor="middle" font-size="15" font-weight="700" fill="#5a3d10">{labels['row_traditional']}</text>
   <rect x="{zone_x0}" y="{trad_y0}" width="{stage_width}" height="{trad_y1 - trad_y0}" fill="#f7d9a0" stroke="#a6742f"/>
-  {_centered_label_markup(labels['traditional_mash'], zone_x0 + stage_width / 2, (trad_y0 + trad_y1) / 2 + 4, 10, "#5a3d10")}
+  {_centered_label_markup(labels['traditional_mash'], zone_x0 + stage_width / 2, (trad_y0 + trad_y1) / 2 + 5, 13, "#5a3d10")}
   {_arrow(zone_x0 + stage_width, (trad_y0 + trad_y1) / 2, zone_x0 + stage_width + stage_gap)}
   <rect x="{zone_x0 + stage_width + stage_gap}" y="{trad_y0}" width="{stage_width}" height="{trad_y1 - trad_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
-  {_centered_label_markup(labels['traditional_kettle'], zone_x0 + stage_width + stage_gap + stage_width / 2, (trad_y0 + trad_y1) / 2 + 4, 10, "#1d4a5f")}
+  {_centered_label_markup(labels['traditional_kettle'], zone_x0 + stage_width + stage_gap + stage_width / 2, (trad_y0 + trad_y1) / 2 + 5, 13, "#1d4a5f")}
   {_arrow(zone_x1, (trad_y0 + trad_y1) / 2, downstream_x0)}
   {downstream_markup(trad_y0, trad_y1)}
 
-  <text x="{zone_x0 + zone_width / 2}" y="{aio_y0 - 12}" text-anchor="middle" font-size="12" font-weight="700" fill="#5a3d10">{labels['row_all_in_one']}</text>
+  <text x="{zone_x0 + zone_width / 2}" y="{aio_y0 - 16}" text-anchor="middle" font-size="15" font-weight="700" fill="#5a3d10">{labels['row_all_in_one']}</text>
   <rect x="{zone_x0}" y="{aio_y0}" width="{zone_width}" height="{aio_y1 - aio_y0}" fill="#c9b7e0" stroke="#5c3d84"/>
-  {_centered_label_markup(labels['all_in_one_combined'], zone_x0 + zone_width / 2, (aio_y0 + aio_y1) / 2 + 4, 10, "#37235a")}
+  {_centered_label_markup(labels['all_in_one_combined'], zone_x0 + zone_width / 2, (aio_y0 + aio_y1) / 2 + 5, 13, "#37235a")}
   {_arrow(zone_x1, (aio_y0 + aio_y1) / 2, downstream_x0)}
   {downstream_markup(aio_y0, aio_y1)}
 
-  {_centered_label_markup(labels['no_hierarchy_caption'], 500, 410, 11, "#3a2a1a")}
+  {_centered_label_markup(labels['no_hierarchy_caption'], 650, 533, 14, "#3a2a1a")}
 </svg>""")
