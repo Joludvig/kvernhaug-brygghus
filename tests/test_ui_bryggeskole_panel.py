@@ -1656,5 +1656,115 @@ class TestQuizTypografiIssue401(unittest.TestCase):
         self.assertTrue(tilstand["concepts"], "mastery skal fortsatt oppdateres helt normalt")
 
 
+# ─── #401 (oppfølging): kontrast på LÅSTE svaralternativer ─────────────────
+#
+# Owner-PC QA fant at FØR "Sjekk svar" var spørsmål/svar-teksten lesbar
+# (dekket av TestQuizTypografiIssue401 over), men ETTER "Sjekk svar" --
+# når st.radio(..., disabled=True) låser interaksjonen -- toner Streamlits/
+# BaseWebs egen disabled-styling ned selve svarteksten til lav-kontrast grå
+# (verifisert med en ekte kjørende Playwright-instans, lys og mørk
+# fargemodus: en alfa på 0.4 på selve <p>-en inni
+# `[data-testid="stRadioOption"]`). AppTest gjengir ikke ekte CSS/DOM, så
+# selve kontrastverdien kan kun verifiseres på kildenivå her (samme mønster
+# som TestNavigasjonsknapperErKompakteIssue398 bruker for width=) --
+# ekte-nettleser-bekreftelsen er den manuelle Playwright-sjekken i PR-en.
+# Det AppTest KAN verifisere er selve låse-atferden (radioen er fortsatt
+# disabled etter svar), som denne klassen også dekker for å bevise at
+# kontrast-fiksen ikke svekket selve låsingen.
+#
+# CSS-en skriver alfaen som prosent (`85%`), ikke desimal (`0.85`): siden
+# st.markdown() rendrer denne CSS-strengen inn i sidens tekst, fanget
+# _RAAT_TALL_MONSTER-vakten (lenger ned i denne filen) opp en bokstavelig
+# "0.85" som et mulig lekket rått mastery-/confidence-tall under selve
+# utviklingen av denne fiksen -- se assertions under som beviser at
+# prosentformen faktisk unngår dette.
+
+class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
+    def setUp(self):
+        import ui.bryggeskole_panel as panel_module
+        with open(panel_module.__file__, encoding="utf-8") as fh:
+            self.kildekode = fh.read()
+
+    def test_disabled_svaralternativ_css_er_skopet_til_bs_svaralternativ(self):
+        # Selve selektoren MÅ være under .st-key-bs_svaralternativ (aldri en
+        # global [data-testid="stRadioOption"]-regel) -- ellers ville fiksen
+        # lekket til andre radio-widgets i appen (f.eks. språkvelgeren).
+        self.assertIn(
+            '.st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] p',
+            self.kildekode,
+        )
+
+    def test_disabled_kontrast_hevet_til_85_prosent_begge_fargemoduser(self):
+        # De to fargemodus-grenene (lys direkte, mørk under
+        # @media (prefers-color-scheme: dark)) skal begge bruke 85%-alfa
+        # -- den lave 0.4-alfaen fra Streamlits egen disabled-styling
+        # (bekreftet lav-kontrast per eier-QA) skal ikke lenger forekomme
+        # i VÅR EGEN CSS-override.
+        self.assertIn("rgba(49, 51, 63, 85%)", self.kildekode)
+        self.assertIn("rgba(250, 250, 250, 85%)", self.kildekode)
+        self.assertIn("@media (prefers-color-scheme: dark)", self.kildekode)
+        # Vår egen override-regel skal aldri selv gjeninnføre 0.4-alfaen.
+        override_idx = self.kildekode.index(
+            '[data-testid="stRadioOption"][data-disabled="true"] p'
+        )
+        override_block = self.kildekode[override_idx:override_idx + 400]
+        self.assertNotIn("0.4)", override_block)
+
+    def test_css_alfa_er_prosentform_ikke_desimal(self):
+        # Selve grunnen til prosentform: st.markdown() rendrer CSS-en som
+        # en del av sidens tekst, og _RAAT_TALL_MONSTER-vakten under fanger
+        # ethvert "0.xx"-mønster som et mulig lekket rått mastery-tall.
+        # Denne testen beviser direkte at den faktiske CSS-regelen (ikke
+        # bare dokumentasjonen om den) unngår desimalformen.
+        override_idx = self.kildekode.index(
+            '[data-testid="stRadioOption"][data-disabled="true"] p {\n            color:'
+        )
+        override_block = self.kildekode[override_idx:override_idx + 120]
+        self.assertNotRegex(override_block, r"\b0\.\d+\b")
+        self.assertIn("85%", override_block)
+
+    def test_far_svar_css_bruker_important_for_a_slaa_ut_baseweb(self):
+        # Uten !important taper vår regel mot BaseWebs egen
+        # emotion-genererte disabled-farge (samme spesifisitetsnivå, men
+        # BaseWebs regel injiseres senere i dokumentet).
+        override_idx = self.kildekode.index(
+            '[data-testid="stRadioOption"][data-disabled="true"] p'
+        )
+        override_block = self.kildekode[override_idx:override_idx + 400]
+        self.assertIn("!important", override_block)
+
+    def test_for_svar_typografi_css_uendret_av_kontrast_fiksen(self):
+        # Selve FØR-svar-stylingen fra TestQuizTypografiIssue401 skal
+        # fortsatt være der, uendret -- denne fiksen legger KUN til en ny
+        # regel for den låste/disabled tilstanden.
+        self.assertIn(
+            ".st-key-bs_svaralternativ label p {\n            font-size: 1.1rem;\n            line-height: 1.6;",
+            self.kildekode,
+        )
+
+    def test_radio_forblir_disabled_etter_svar_med_kontrast_fiksen(self):
+        # Selve låsingen (ikke bare kontrasten) skal fortsatt virke --
+        # kontrast-fiksen endrer aldri disabled=besvart-logikken selv.
+        at = AppTest.from_file(_HARNESS)
+        at.run()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        _knapp(at, "bs_apne_modul_mesking_btn").click().run()
+        while [b for b in at.button if b.key == "bs_bolk_neste_mesking_btn"]:
+            _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
+        _knapp(at, "bs_start_sporsmal_mesking_btn").click().run()
+
+        pilot = les_mesking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        widget_key = "bs_valg_mesking_r1_q0"
+        radio_for = at.radio(key=widget_key)
+        self.assertFalse(radio_for.disabled, "radioen skal være aktiv FØR svar")
+
+        radio_for.set_value(fasit[0]).run()
+        _knapp(at, "bs_svar_btn_mesking_r1_q0").click().run()
+
+        radio_etter = at.radio(key=widget_key)
+        self.assertTrue(radio_etter.disabled, "radioen skal fortsatt være låst ETTER svar")
+
+
 if __name__ == "__main__":
     unittest.main()

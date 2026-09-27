@@ -482,7 +482,45 @@ def _injiser_bryggeskole_css():
     eier-QA -- og utvidet til også å dekke selve svaralternativ-teksten
     (radio-labelene), som tidligere ikke var stylet i det hele tatt (kun
     spørsmålsteksten i sin egen container var det). `.st-key-bs_svaralternativ`
-    er wrapperen rundt selve st.radio()-kallet i _render_sporsmal()."""
+    er wrapperen rundt selve st.radio()-kallet i _render_sporsmal().
+
+    Issue #401 (oppfølging): dette dekket kun FØR-svar-tilstanden. Etter
+    «Sjekk svar» settes radioen `disabled=True` (linje ~729), og
+    Streamlits/BaseWebs egen disabled-styling toner svaralternativ-teksten
+    ned til `color: rgba(<tekstfarge>, 0.4)` -- verifisert i en ekte
+    kjørende instans (Playwright, lys og mørk fargemodus) at dette treffer
+    selve `<p>`-en inni `[data-testid="stRadioOption"]`, IKKE selve
+    `label`-elementet (som beholder full kontrast), og at attributtet
+    `data-disabled="true"` på `stRadioOption`-labelen (satt av React Aria
+    når `st.radio(..., disabled=True)`) er det stabile signalet -- ikke
+    Streamlits auto-genererte `st-emotion-cache-*`-hash-klasser, som ikke
+    er ment å refereres fra egen CSS og kan endre seg mellom versjoner.
+    0.4 gir på mørk bakgrunn (rgb(14,17,23)) en effektiv tekstfarge på
+    ca. rgb(108,110,114) -- under WCAG AA-kontrast og i praksis nesten
+    uleselig, per eier-QA. Låst/deaktivert interaksjon skal IKKE bety
+    uleselig tekst: selve svarstatusen (riktig/feil/valgt alternativ)
+    vises uansett eksplisitt som egen tekst (se _render_sporsmal,
+    "Answer-state UX issue #338"), så radioens egen disabled-fading har
+    ingen semantisk jobb å gjøre utover at den er låst -- kun kontrasten
+    var for aggressiv. Fikser dette ved å heve alfa til 0.85 (fortsatt
+    synlig dempet/låst sammenlignet med et aktivt, ubesvart spørsmål, men
+    komfortabelt lesbar), skalert til hver fargemodus sin egen
+    tekstfarge slik BaseWeb selv gjør det (Streamlit har ingen
+    `prefers-color-scheme`-uavhengige CSS-variabler å style mot her, og
+    appen har ingen egen .streamlit/config.toml-theme -- kun BaseWebs
+    innebygde standardfarger lys/mørk, samme rgb-verdier som er verifisert
+    over). Skopet er identisk smalt som resten av funksjonen: kun
+    `.st-key-bs_svaralternativ [data-testid="stRadioOption"]`, ingen
+    global radio-endring.
+
+    Alfaen skrives som CSS4-prosent (`85%`), ikke desimal (`0.85`):
+    st.markdown() rendrer denne CSS-strengen som en del av sidens tekst,
+    og TestIngenRaaTilstandVisesLaereren/TestOppsummeringEttKortPerKonsept
+    sin `_RAAT_TALL_MONSTER`-vakt (`\\b0\\.\\d+\\b`) fanger opp ethvert
+    "0.xx"-mønster i lærervendt tekst som et mulig lekket rått mastery-/
+    confidence-tall -- verifisert at desimalformen faktisk trigget denne
+    (helt urelaterte, men korrekt mistenksomme) vakten før dette ble
+    rettet. Prosentform er semantisk identisk og unngår kollisjonen."""
     st.markdown(
         """
         <style>
@@ -496,6 +534,14 @@ def _injiser_bryggeskole_css():
         .st-key-bs_svaralternativ label p {
             font-size: 1.1rem;
             line-height: 1.6;
+        }
+        .st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] p {
+            color: rgba(49, 51, 63, 85%) !important;
+        }
+        @media (prefers-color-scheme: dark) {
+            .st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] p {
+                color: rgba(250, 250, 250, 85%) !important;
+            }
         }
         </style>
         """,
