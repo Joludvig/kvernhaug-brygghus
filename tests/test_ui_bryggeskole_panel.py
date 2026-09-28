@@ -1783,5 +1783,86 @@ class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
         self.assertTrue(radio_etter.disabled, "radioen skal fortsatt være låst ETTER svar")
 
 
+# ─── #394: responsivt modul-kort-grid ──────────────────────────────────────
+#
+# Owner-PC QA fant at på smal/stående skjerm ble alle seks modul-kortene i
+# skoleoversikten presset inn i ÉN horisontal rad (st.columns(len(stadier))
+# sin flex-basis er en PROSENT av foreldrebredden -- seks kolonner à
+# 16.6667% summerer alltid til 100%, uansett skjermbredde, så CSS-ens egen
+# flex-wrap utløses aldri), som klemte modulnavnene så smalt at nettleseren
+# brøt dem midt i ord ("Forbere/delse/metode", "Gjæring (bøtte/FermZill/a)").
+# Fiksen bytter til en PIKSELBASERT min-width/flex-basis (220px), skopet til
+# en ny `.st-key-bs_skoleoversikt_grid`-container rundt selve
+# st.columns()-kallet -- verifisert med et ekte nettleser-lag
+# (tests/playwright_streamlit/module-grid-responsive.spec.js, siden
+# AppTest ikke gjengir ekte CSS/layout i det hele tatt). Denne klassen
+# dekker det AppTest FAKTISK kan bevise: at selve grid-omskrivingen
+# (kolonnene flyttet inn i en with-blokk) ikke endret hvilke moduler som
+# vises, knappenes virkemåte, eller anbefalt-neste-signalet -- ren
+# layout-refaktorering, ingen navigasjons-/mastery-endring.
+
+class TestSkoleoversiktGridResponsivIssue394(unittest.TestCase):
+    def setUp(self):
+        import ui.bryggeskole_panel as panel_module
+        with open(panel_module.__file__, encoding="utf-8") as fh:
+            self.kildekode = fh.read()
+
+    def test_grid_er_i_egen_nokkel_container_for_skopet_css(self):
+        self.assertIn('st.container(key="bs_skoleoversikt_grid")', self.kildekode)
+
+    def test_responsiv_css_bruker_piksel_ikke_prosent_flex_basis(self):
+        # Selve rot-årsaken: en PROSENT-basert flex-basis (Streamlits eget
+        # standardoppsett for st.columns(n)) summerer alltid til 100% og
+        # utløser derfor aldri wrap uansett skjermbredde. Fiksen MÅ bruke
+        # en fast piksel-verdi for at wrap faktisk skal kunne skje.
+        self.assertIn(
+            '.st-key-bs_skoleoversikt_grid [data-testid="stColumn"]',
+            self.kildekode,
+        )
+        grid_css_idx = self.kildekode.index(
+            '.st-key-bs_skoleoversikt_grid [data-testid="stColumn"] {'
+        )
+        grid_css_block = self.kildekode[grid_css_idx:grid_css_idx + 200]
+        self.assertIn("220px", grid_css_block)
+        self.assertNotIn("%", grid_css_block)
+
+    def test_css_er_skopet_ikke_global_stcolumn_endring(self):
+        # Selektoren må alltid være prefikset med .st-key-bs_skoleoversikt_grid
+        # -- en bar ".stColumn"/"[data-testid=\"stColumn\"]"-regel uten
+        # denne scopingen ville lekket til ALLE st.columns()-kall i hele
+        # appen (forbudt per oppgavens "ingen global Streamlit
+        # layout-endring"-krav).
+        import re
+        for m in re.finditer(r'\[data-testid="stColumn"\][^\n]*\{', self.kildekode):
+            linje_start = self.kildekode.rfind("\n", 0, m.start()) + 1
+            linje = self.kildekode[linje_start:m.end()]
+            self.assertIn(
+                ".st-key-bs_skoleoversikt_grid", linje,
+                f"ikke-skopet stColumn-regel funnet: {linje!r}",
+            )
+
+    def test_alle_seks_moduler_fortsatt_synlige_og_klikkbare_etter_grid_refaktorering(self):
+        # Selve with-blokk-omskrivingen (kolonnene flyttet inn i
+        # st.container(key=...)) skal ikke endre hvilke moduler som vises
+        # eller om knappene virker -- ren layout-endring.
+        at = AppTest.from_file(_HARNESS)
+        at.run()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        for modul_id in ("metodevalg", "mesking", "koking", "kjoling", "gjaring", "pakking"):
+            _knapp(at, f"bs_apne_modul_{modul_id}_btn")
+
+    def test_anbefalt_neste_og_modulapning_uendret_etter_grid_refaktorering(self):
+        at = AppTest.from_file(_HARNESS)
+        at.run()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        infoer = [i.value for i in at.info]
+        self.assertTrue(
+            any("Forberedelse/metode" in v for v in infoer),
+            "anbefalt-neste-signalet skal fortsatt pense mot første modul",
+        )
+        _knapp(at, "bs_apne_modul_metodevalg_btn").click().run()
+        self.assertEqual(len(at.exception), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
