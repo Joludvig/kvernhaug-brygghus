@@ -25,7 +25,7 @@ from modules.kbhbrew_storage import hent_alle_brews
 from modules.kbhbrew_ui import oppskrift_har_kbhbrew
 from modules.card_template import render_card_html, render_a4_html
 from ui.branding import _logo_base64
-from ui.sidebar import _SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER
+from ui.sidebar import _SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER, _LAGRE_SOM_KOPI_SUCCESS_PENDING_NOKKEL
 
 _LOGO_PATH = os.path.join("assets", "branding", "kbh_emblem_master.png")
 
@@ -332,7 +332,23 @@ def render_recipe_card(ctx, malt_database, humle_database, gjaer_database):
                     st.error(f"❌ {e}")
                 else:
                     st.session_state.pop(NESTE_VARIANT_FROSSEN_ORIGIN_ID_NOKKEL, None)
-                    st.toast(f"Lagret: {ny_recipe['name']}", icon="💾")
+                    # issue #399 -- ui/sidebar.py::render_sidebar() (som
+                    # kjøres FØR alle fane-widgets på HVER rerun, se
+                    # app.py sin scriptrekkefølge) laster oppskrift-lista
+                    # fra disk ved hvert kall -- men det skjedde FØR denne
+                    # handleren i inneværende kjøring, så en fersk kopi
+                    # lagret her forblir usynlig i sidebaren helt til
+                    # neste, urelaterte rerun uten et eksplisitt
+                    # st.rerun() her. Samme "sett flagg -> rerun -> vis
+                    # st.success() ETTER rerunen i render_sidebar()"-
+                    # mønster som NESTE_VARIANT_SEED_PENDING_NOKKEL/issue
+                    # #391 (se _LAGRE_SOM_KOPI_SUCCESS_PENDING_NOKKEL sin
+                    # egen kommentar i ui/sidebar.py) -- bevisst INGEN
+                    # st.toast()/st.success() her: et element rendret i
+                    # SAMME kjøring som et st.rerun()-kall rekker aldri å
+                    # bli synlig for brukeren.
+                    st.session_state[_LAGRE_SOM_KOPI_SUCCESS_PENDING_NOKKEL] = ny_recipe["name"]
+                    st.rerun()
         with btn_col2:
             # Arkivering skal ALLTID skje på den FAKTISKE kildefilen
             # oppskriften ble lastet fra (_last_loaded_recipe_file, satt

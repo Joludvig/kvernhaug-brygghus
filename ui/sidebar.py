@@ -45,6 +45,22 @@ _INGEN_OPPSKRIFT_VALGT = "__ingen_oppskrift_valgt__"
 # selectboksen instansieres, akkurat som #242-flagget.
 _SETT_OPPSKRIFT_SELECTOR_NESTE_RENDER = "_sett_oppskrift_selector_neste_render"
 
+# issue #399 -- samme ett-gangs "sett flagg -> st.rerun() -> konsumer HER,
+# FØR alt annet i render_sidebar()"-mønster som NESTE_VARIANT_SEED_PENDING_
+# NOKKEL (modules/kbh_import_apply.py) og issue #391 sin Chief-korreksjon
+# (se selve konsumeringen lenger ned): ui/recipe_card.py sin "💾 Lagre som
+# ny kopi"-handler lagrer FØRST (kilde_filnavn=None, kollisjonssperre på --
+# uendret), setter DERETTER dette flagget til det nylagrede navnet, og
+# kaller til slutt st.rerun() -- ALDRI omvendt, og ALDRI en st.toast()/
+# st.success() rett før selve rerun-kallet (samme fallgruve #391 allerede
+# rettet: et element rendret i SAMME kjøring som et st.rerun()-kall
+# rekker aldri å bli synlig for brukeren, siden en rerun tegner et helt
+# nytt scripttre). Selve `hent_alle_oppskrifter()`-kallet rett under i
+# denne funksjonen laster automatisk den nettopp lagrede filen fra disk
+# på DENNE rerunen -- ingen egen "legg til i lista"-logikk trengs, kun
+# selve suksess-bekreftelsen som forble usynlig før denne fiksen.
+_LAGRE_SOM_KOPI_SUCCESS_PENDING_NOKKEL = "_lagre_som_kopi_success_pending"
+
 def _last_master_db(filnavn):
     try:
         with open(f"data/{filnavn}", encoding="utf-8") as f:
@@ -113,6 +129,22 @@ def render_sidebar():
         # aktiv. Oppskrift-fane-banneret (ui/recipe_card.py) forblir
         # uendret som det sekundære, vedvarende signalet.
         st.success(t("brew_history.neste_variant_seed_bekreftelse"))
+
+    # issue #399 -- samme "genuint synlig, ett-gangs bekreftelse"-mønster
+    # som NESTE_VARIANT-blokka rett over (samme Chief-korreksjon, #391):
+    # ui/recipe_card.py sin "💾 Lagre som ny kopi"-handler lagrer, setter
+    # DETTE flagget til det nylagrede navnet, og kaller st.rerun() -- uten
+    # å selv rendre noen st.toast()/st.success() (som ville forblitt
+    # usynlig, rendret i samme kjøring som selve rerun-kallet). Selve
+    # oppskrift-lista rett under (`hent_alle_oppskrifter()`) laster
+    # automatisk den nye filen fra disk på DENNE rerunen -- ingen egen
+    # "legg til i selector"-logikk trengs (se konstantens egen kommentar
+    # for hvorfor selectoren bevisst IKKE tvinges til den nye kopien:
+    # brukerens eksisterende valg er fortsatt gyldig etter en kopi, ulikt
+    # en omdøping/import som kan ugyldiggjøre det).
+    _pending_lagre_kopi_navn = st.session_state.pop(_LAGRE_SOM_KOPI_SUCCESS_PENDING_NOKKEL, None)
+    if _pending_lagre_kopi_navn is not None:
+        st.success(f"Lagret: {_pending_lagre_kopi_navn}")
 
     # App #242 (A3-1-interaksjonsregresjon) -- et engangs, eksplisitt
     # UI-koordineringsflagg. En vellykket import (tekst ELLER .kbhrecipe,
