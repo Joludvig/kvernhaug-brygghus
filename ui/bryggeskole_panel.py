@@ -530,7 +530,30 @@ def _injiser_bryggeskole_css():
     FULL kontrast i lys, mørk OG mismatch-scenarioet over, identisk med
     FØR-svar-fargen. Fjerner samtidig hele
     `@media (prefers-color-scheme: dark)`-grenen og alle hardkodede
-    rgba(...)-verdier, som ikke lenger trengs."""
+    rgba(...)-verdier, som ikke lenger trengs.
+
+    Issue #394: skoleoversiktens modul-grid (`_render_skoleoversikt()`)
+    bruker `st.columns(len(stadier))` -- alltid seks like brede kolonner,
+    uansett skjermbredde. En DOM-sporing (Playwright, `getComputedStyle`)
+    viste at Streamlit selv ALLEREDE setter `flex-wrap: wrap` på
+    `[data-testid="stHorizontalBlock"]`-raden, men hver
+    `[data-testid="stColumn"]` sin `flex-basis` er en PROSENT av
+    foreldrebredden (`calc(16.6667% - 16px)` for seks kolonner) -- seks
+    kolonner à 16.6667% summerer alltid til 100% uansett hvor smal
+    skjermen er, så wrap utløses aldri i praksis; kolonnene bare krymper
+    (`flex-shrink: 1`) til de blir for smale til å vise modulnavnet uten
+    at nettleserens `overflow-wrap`-fallback bryter midt i ord (de
+    observerte "Forbere / delse / metode"/"Gjæring (bøtte/ FermZill
+    a)"-tilfellene). Fiksen bytter til en PIKSELBASERT minstebredde
+    (`flex-basis`/`min-width: 220px`) i stedet for prosent, skopet til
+    den nye `.st-key-bs_skoleoversikt_grid`-containeren (wrapperen rundt
+    selve `st.columns()`-kallet, se der) -- da blir seks 220px-kort for
+    brede til å dele en rad når containeren er smalere enn ca. 6*220px+
+    mellomrom, og de resterende kortene wrapper naturlig til påfølgende
+    rader helt ned til én kolonne på svært smale skjermer, uten en eneste
+    `@media`-brytningspunkt å vedlikeholde. Ingen global
+    `.stColumn`/`.stHorizontalBlock`-endring -- selektoren er skopet
+    nøyaktig som resten av denne funksjonen."""
     st.markdown(
         """
         <style>
@@ -547,6 +570,10 @@ def _injiser_bryggeskole_css():
         }
         .st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] > div {
             color: inherit !important;
+        }
+        .st-key-bs_skoleoversikt_grid [data-testid="stColumn"] {
+            flex: 1 1 220px !important;
+            min-width: 220px !important;
         }
         </style>
         """,
@@ -608,37 +635,42 @@ def _render_skoleoversikt(miljo, sprak):
         st.info(t("bryggeskole.anbefalt_neste", modul=t(_MODULER[anbefalt]["tittel_nokkel"])))
 
     stadier = _PROSESS_STADIER[miljo]
-    cols = st.columns(len(stadier))
-    for i, (col, stadium) in enumerate(zip(cols, stadier)):
-        modul_id = _STADIUM_TIL_MODUL.get(i)
-        with col, st.container(border=True):
-            st.markdown(f"**{stadium[sprak]}**")
-            if modul_id is None:
-                st.caption(t("bryggeskole.prosess.kommer_badge"))
-                continue
+    # Issue #394: wrappes i en nøkkelbasert container KUN for at
+    # _injiser_bryggeskole_css() skal kunne skope den responsive
+    # grid-fiksen (se der) til nettopp dette gridet -- ingen egen
+    # betydning for selve layout-logikken under.
+    with st.container(key="bs_skoleoversikt_grid"):
+        cols = st.columns(len(stadier))
+        for i, (col, stadium) in enumerate(zip(cols, stadier)):
+            modul_id = _STADIUM_TIL_MODUL.get(i)
+            with col, st.container(border=True):
+                st.markdown(f"**{stadium[sprak]}**")
+                if modul_id is None:
+                    st.caption(t("bryggeskole.prosess.kommer_badge"))
+                    continue
 
-            st.caption(t("bryggeskole.prosess.aktiv_badge"))
-            ovd_tidligere, sesjon = _modul_status(modul_id)
-            merker = []
-            if ovd_tidligere:
-                merker.append(t("bryggeskole.status.ovd_tidligere"))
-            if sesjon and sesjon["fullfort_denne_okten"]:
-                merker.append(t("bryggeskole.status.fullfort_okt"))
-            elif sesjon:
-                merker.append(t("bryggeskole.status.pabegynt"))
-            for merke in merker:
-                st.caption(merke)
+                st.caption(t("bryggeskole.prosess.aktiv_badge"))
+                ovd_tidligere, sesjon = _modul_status(modul_id)
+                merker = []
+                if ovd_tidligere:
+                    merker.append(t("bryggeskole.status.ovd_tidligere"))
+                if sesjon and sesjon["fullfort_denne_okten"]:
+                    merker.append(t("bryggeskole.status.fullfort_okt"))
+                elif sesjon:
+                    merker.append(t("bryggeskole.status.pabegynt"))
+                for merke in merker:
+                    st.caption(merke)
 
-            if sesjon is None:
-                knapp_tekst = t("bryggeskole.modul.start")
-            elif sesjon["fullfort_denne_okten"]:
-                knapp_tekst = t("bryggeskole.modul.se_resultat")
-            else:
-                knapp_tekst = t("bryggeskole.modul.fortsett")
-            st.button(
-                knapp_tekst, key=f"bs_apne_modul_{modul_id}_btn",
-                width="stretch", on_click=_apne_modul, args=(modul_id,),
-            )
+                if sesjon is None:
+                    knapp_tekst = t("bryggeskole.modul.start")
+                elif sesjon["fullfort_denne_okten"]:
+                    knapp_tekst = t("bryggeskole.modul.se_resultat")
+                else:
+                    knapp_tekst = t("bryggeskole.modul.fortsett")
+                st.button(
+                    knapp_tekst, key=f"bs_apne_modul_{modul_id}_btn",
+                    width="stretch", on_click=_apne_modul, args=(modul_id,),
+                )
 
 
 def _render_leksjon(modul_id, sesjon, pilot, sprak):

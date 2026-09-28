@@ -81,6 +81,9 @@ jobs:
       - name: Run Bryggeskole Streamlit SVG runtime gate
         run: npm run test:bryggeskole-svg-runtime
 
+      - name: Run Bryggeskole module-grid responsive runtime gate
+        run: npm run test:bryggeskole-grid-runtime
+
       - name: Upload Playwright report (on failure)
         if: failure()
         uses: actions/upload-artifact@v4

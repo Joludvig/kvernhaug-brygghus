@@ -44,6 +44,12 @@ function resolveServerPythonCommand() {
 
 module.exports = defineConfig({
   testDir: './tests/playwright_streamlit',
+  // Issue #394 added a second spec (module-grid-responsive.spec.js) to
+  // this same directory, targeting a different harness/webServer via its
+  // own playwright.bryggeskole-grid.config.js -- pin this config to only
+  // its own spec so the two configs' webServers never collide (each spec
+  // file is only ever run against the one harness it actually needs).
+  testMatch: '**/svg-runtime-dom.spec.js',
   fullyParallel: true,
   workers: process.env.CI ? undefined : 1,
   forbidOnly: !!process.env.CI,
