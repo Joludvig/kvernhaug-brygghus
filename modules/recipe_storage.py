@@ -697,8 +697,10 @@ def _skann_oppskriftsfiler(mappe):
     Nye bryggelogger skrives uansett til en egen undermappe (se
     _logg_filsti()/_logs_mappe()) og havner derfor aldri her i det hele
     tatt. En eventuell GAMMEL, legacy-loggfil som fortsatt ligger i
-    mappe-roten (et JSON-array, ikke et objekt) blir naturlig hoppet
-    over av "name"-sjekken under uansett, uten noe eget filnavn-filter."""
+    mappe-roten (et JSON-array av objekter) hoppes stille over uten
+    advarsel, uten noe eget filnavn-filter. Andre uventede former
+    (ugyldig JSON, objekt uten "name", array med ikke-objekter) logges
+    fortsatt som advarsel og hoppes over."""
     filer = [f for f in os.listdir(mappe) if f.endswith(".json")]
     resultat = []
     for f in filer:
@@ -706,6 +708,9 @@ def _skann_oppskriftsfiler(mappe):
         try:
             with open(filsti, "r", encoding="utf-8") as file_content:
                 data = json.load(file_content)
+            if isinstance(data, list) and all(isinstance(e, dict) for e in data):
+                # Gyldig legacy-loggarray: hoppes stille over (ikke migrert/flyttet).
+                continue
             if not isinstance(data, dict) or "name" not in data:
                 raise KeyError("name")
             resultat.append((f, data))
