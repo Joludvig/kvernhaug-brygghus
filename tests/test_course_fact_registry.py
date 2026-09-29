@@ -245,9 +245,11 @@ _PACKAGE_VERIFIED_IDS = [
 _METHOD_CONTEXT_VERIFIED_IDS = [
     "FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0004", "FACT-METHOD-0005",
 ]
+_MALT_CORE_VERIFIED_IDS = ["FACT-MALT-0001", "FACT-MALT-0002", "FACT-MALT-0003", "FACT-MALT-0004"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
+    + _MALT_CORE_VERIFIED_IDS
 )
 
 
@@ -282,7 +284,7 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         record = next(r for r in data["records"] if r["id"] == "FACT-MASH-0003")
         self.assertEqual(record["status"], "draft")
 
-    def test_production_registry_classification_mix_is_exactly_20_documented_7_interpretation_2_practical(self):
+    def test_production_registry_classification_mix_is_exactly_23_documented_8_interpretation_2_practical(self):
         # Issue #370 (V2.2 G3E) added the fourth fact pack -- cool/transfer
         # fundamentals (FACT-COOL-0001..0003, FACT-OXY-0001..0003,
         # FACT-TRANSFER-0001): 5 documented_fact, 1 professional_interpretation
@@ -293,12 +295,15 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # (FACT-PACK-0004). Issue #380 (V2.2 G3I) adds the sixth fact pack
         # -- method-context fundamentals (FACT-METHOD-0001..0005): 3
         # documented_fact (FACT-METHOD-0001..0003), 2
-        # professional_interpretation (FACT-METHOD-0004..0005).
+        # professional_interpretation (FACT-METHOD-0004..0005). Issue #426
+        # (V2.2 G3P-1) adds the malt-core pack (FACT-MALT-0001..0004): 3
+        # documented_fact (FACT-MALT-0001..0003), 1
+        # professional_interpretation (FACT-MALT-0004).
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
         classifications = [r["classification"] for r in verified]
-        self.assertEqual(classifications.count("documented_fact"), 20)
-        self.assertEqual(classifications.count("professional_interpretation"), 7)
+        self.assertEqual(classifications.count("documented_fact"), 23)
+        self.assertEqual(classifications.count("professional_interpretation"), 8)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
@@ -479,6 +484,83 @@ class TestProductionRegistryBoilHopFactPackVerifiedOnlyApi(unittest.TestCase):
             record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
             self.assertTrue(record["sources"])
             self.assertTrue(any(s.get("ref") for s in record["sources"]))
+
+
+class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
+    """Issue #426 (V2.2 G3P-1): the Raavarer P1 malt-core fact pack
+    (FACT-MALT-0001..0004). Extract/enzyme relationships are reused from
+    FACT-MASH-0001/FACT-MASH-0004, never duplicated."""
+
+    _CONCEPTS = {
+        "FACT-MALT-0001": "malt.what_is_malt",
+        "FACT-MALT-0002": "malt.base_vs_specialty",
+        "FACT-MALT-0003": "malt.colour_flavour",
+        "FACT-MALT-0004": "malt.grist_percentage",
+    }
+
+    def _malt_records(self):
+        return {r["id"]: r for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"].startswith("FACT-MALT-")}
+
+    def test_returns_exactly_the_four_malt_ids(self):
+        self.assertEqual(set(self._malt_records()), set(_MALT_CORE_VERIFIED_IDS))
+
+    def test_each_concept_maps_to_exactly_one_record(self):
+        for fact_id, concept in self._CONCEPTS.items():
+            with self.subTest(concept=concept):
+                ids = [r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept=concept)]
+                self.assertEqual(ids, [fact_id])
+
+    def test_no_duplicate_extract_or_enzyme_concept_records(self):
+        # malt.extract_fermentability is covered by reuse of FACT-MASH-0001/0004.
+        self.assertEqual(find_verified_records(_PRODUCTION_REGISTRY, concept="malt.extract_fermentability"), [])
+        for record in self._malt_records().values():
+            self.assertNotIn("mashing.starch_conversion", record["concepts"])
+            self.assertNotIn("mashing.dextrins", record["concepts"])
+
+    def test_sources_are_external_tier_a_and_never_chief_or_ai(self):
+        expected_urls = {
+            "FACT-MALT-0001": ["brewingwithbriess.com/malting-101/malting-process/", "10.1111/1541-4337.12806"],
+            "FACT-MALT-0002": ["brewingwithbriess.com/malting-101/malting-process/"],
+            "FACT-MALT-0003": [
+                "brewingwithbriess.com/malting-101/malting-process/",
+                "brewingwithbriess.com/blog/understanding-a-malt-analysis/",
+                "10.1111/1541-4337.12806",
+            ],
+            "FACT-MALT-0004": ["brewingwithbriess.com/blog/hot-steep-as-a-tool-for-specialty-malt-formulation-in-beer/"],
+        }
+        for fact_id, record in self._malt_records().items():
+            refs = [s["ref"] for s in record["sources"]]
+            self.assertEqual(len(refs), len(expected_urls[fact_id]))
+            for fragment in expected_urls[fact_id]:
+                self.assertTrue(any(fragment in ref for ref in refs), (fact_id, fragment))
+            for source in record["sources"]:
+                self.assertEqual(source["tier"], "A")
+                self.assertNotIn("chief", (source["ref"] + source["type"]).lower())
+
+    def test_grist_percentage_uses_narrowed_directional_wording(self):
+        record = self._malt_records()["FACT-MALT-0004"]
+        self.assertEqual(record["classification"], "professional_interpretation")
+        self.assertIn("relative proportion of each malt in the grist", record["claim"])
+        self.assertNotIn("not one malt", record["claim"])
+        self.assertIn("not a universal quantitative model", record["notes"])
+
+    def test_base_vs_specialty_says_many_and_avoids_absolutes(self):
+        record = self._malt_records()["FACT-MALT-0002"]
+        self.assertIn("many specialty malts", record["claim"])
+        self.assertNotIn("never converts", record["claim"])
+        self.assertNotIn("no enzymes", record["claim"])
+        self.assertIn("never 'all'", record["notes"])
+
+    def test_colour_flavour_has_no_numeric_colour_ranges_and_no_one_to_one_claim(self):
+        record = self._malt_records()["FACT-MALT-0003"]
+        self.assertIn("not a direct one-to-one predictor", record["claim"])
+        for record in self._malt_records().values():
+            for unit in ("EBC ", "SRM ", "°L", "Lovibond "):
+                self.assertNotIn(unit, record["claim"])
+
+    def test_every_record_documents_scope_and_wording_trap(self):
+        for record in self._malt_records().values():
+            self.assertIn("Wording trap", record["notes"])
 
 
 class TestGetVerifiedRecordLookup(unittest.TestCase):
