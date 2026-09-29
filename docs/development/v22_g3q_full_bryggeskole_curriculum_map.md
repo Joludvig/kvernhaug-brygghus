@@ -597,7 +597,7 @@ course can then truthfully say, extending #65's own sentence:
 
 Properties required of this finish point:
 
-- It is **complete for the goal**. No Level 3 or Level 4 topic is a prerequisite, and nothing is presented as "the rest
+- It is **complete for the goal**. Neither Bryggemester nor Bryggeri/profesjonell content is a prerequisite, and nothing is presented as "the rest
   of the course".
 - It is **method-inclusive**. It works for BIAB, traditional kettle all-grain and all-in-one (#65 §6) through the
   existing method-context framing.
