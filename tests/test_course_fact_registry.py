@@ -567,6 +567,42 @@ class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
             self.assertIn("Wording trap", record["notes"])
 
 
+class TestProductionRegistryWaterFoundationSourceGap(unittest.TestCase):
+    """Issue #430 (V2.2 G3P-3): the Water foundation concepts are recorded
+    as draft, source-gap records because no source could be opened in the
+    run. They must never leak through the verified-only API."""
+
+    _IDS = ["FACT-WATER-0001", "FACT-WATER-0002", "FACT-WATER-0003"]
+
+    def _water_records(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        return {r["id"]: r for r in data["records"] if r["id"].startswith("FACT-WATER-")}
+
+    def test_exactly_three_water_records_all_draft_without_sources(self):
+        records = self._water_records()
+        self.assertEqual(sorted(records), self._IDS)
+        for record in records.values():
+            self.assertEqual(record["status"], "draft")
+            self.assertEqual(record["sources"], [])
+            self.assertNotIn("verified_at", record)
+
+    def test_water_records_are_not_exposed_as_verified(self):
+        self.assertEqual([r for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"].startswith("FACT-WATER-")], [])
+        for concept in ("water.majority_ingredient", "water.chlorine_chloramine", "water.source_awareness"):
+            self.assertEqual(find_verified_records(_PRODUCTION_REGISTRY, concept=concept), [])
+
+    def test_chlorine_record_preserves_red_flags(self):
+        record = self._water_records()["FACT-WATER-0002"]
+        for phrase in ("boiling or standing", "not established", "no dosing"):
+            self.assertIn(phrase, record["notes"])
+        self.assertNotIn("common in Norway", record["claim"])
+
+    def test_every_record_documents_source_gate_and_wording_trap(self):
+        for record in self._water_records().values():
+            self.assertIn("Wording trap", record["notes"])
+            self.assertIn("Source gate: NOT verified", record["notes"])
+
+
 class TestProductionRegistryYeastCoreFactPackVerifiedOnlyApi(unittest.TestCase):
     """Issue #428 (V2.2 G3P-2): the Raavarer P2 yeast-core fact pack
     (FACT-YEAST-0001..0005). Temperature/oxygen context is reused from

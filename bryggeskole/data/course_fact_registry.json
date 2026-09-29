@@ -868,6 +868,33 @@
       ],
       "concepts": ["yeast.choice_principle"],
       "notes": "White Labs: strain specifications list attenuation, temperature, profile and suitable styles. Fermentis: attenuation, flocculation and temperature tolerance are selection factors; consult each product's technical data sheet. The Fermentis source is lager-specific, so it supports the general method of selection only. Wording trap: producer style recommendations are guidance, not hard compatibility rules; no strain encyclopaedia, catalogue or brand ranking. Source gate: sources were opened/read live by Chief (issue #428 comment, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
+    },
+    {
+      "id": "FACT-WATER-0001",
+      "claim": "Water is the majority ingredient in beer, so the brewing liquor materially affects the finished beer.",
+      "classification": "documented_fact",
+      "status": "draft",
+      "sources": [],
+      "concepts": ["water.majority_ingredient"],
+      "notes": "Candidate claim only; keep qualitative. Preferred source direction: a strong brewing-specific technical source. Wording trap: no ion, pH, salt or target-profile content; no percentages; existing App/Web water text is not a source. Source gate: NOT verified. The Bridge run for issue #430 could not open any source (WebFetch/WebSearch denied) and AI is never the source, so no source is cited and the record stays draft. Promote to verified only after sources are opened/read and tiered."
+    },
+    {
+      "id": "FACT-WATER-0002",
+      "claim": "Chlorine and chloramine in brewing water can be a flavour and process concern, and they are distinct disinfectants that must not be treated as interchangeable.",
+      "classification": "documented_fact",
+      "status": "draft",
+      "sources": [],
+      "concepts": ["water.chlorine_chloramine"],
+      "notes": "Candidate claim only. Preferred source direction: brewing-specific technical material for why they matter to flavour/process, plus Mattilsynet/Norsk Vann only for what they say about disinfection in Norwegian public water. Wording traps: do NOT teach boiling or standing as a universal fix; no dosing or contact times; no carbon-filter claims without source-specific caveats; do NOT claim chloramine is common in Norway -- prevalence is not established, and official sources listing chloramine as a recognised treatment option are not evidence of prevalence. Removal method is deliberately left out of Foundation unless a Tier A brewing source supports home-scale removal safely. Source gate: NOT verified. The Bridge run for issue #430 could not open any source (WebFetch/WebSearch denied) and AI is never the source, so no source is cited and the record stays draft."
+    },
+    {
+      "id": "FACT-WATER-0003",
+      "claim": "Before brewing, find out what your source water is by checking information from the local waterworks or municipality.",
+      "classification": "professional_interpretation",
+      "status": "draft",
+      "sources": [],
+      "concepts": ["water.source_awareness"],
+      "notes": "Candidate claim only; awareness only. Preferred source direction: local waterworks / municipal water-quality pages, Norsk Vann, Mattilsynet, and a brewing-specific source on what a brewer should check. Any Norway-specific statement must be supported by an opened Norwegian source and not generalised beyond it. Wording trap: no target profiles, no ions/residual alkalinity/salt additions, no calculator logic. Source gate: NOT verified. The Bridge run for issue #430 could not open any source (WebFetch/WebSearch denied) and AI is never the source, so no source is cited and the record stays draft."
     }
   ]
 }
