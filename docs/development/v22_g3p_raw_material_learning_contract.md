@@ -167,9 +167,9 @@ Pass condition: all four sections answered correctly on a first read-through by 
 | # | Slice | Type | Depends on |
 |---|---|---|---|
 | 1 | **P1 Malt fact pack**: open sources, add verified malt records, no UI | Registry + tests | this contract |
-| 2 | **P4 Hops delta fact pack** | Registry + tests | 1 (pattern only) |
-| 3 | **P2 Yeast core fact pack** | Registry + tests | — |
-| 4 | **P3 Water foundation fact pack** | Registry + tests | — |
+| 2 | **P2 Yeast core fact pack** | Registry + tests | 1 (pattern only) |
+| 3 | **P3 Water foundation fact pack** | Registry + tests | — |
+| 4 | **P4 Hops delta fact pack** | Registry + tests | — |
 | 5 | Råvarer module skeleton with only the sections whose packs are verified; questions, NO/EN, mastery, module registration | Module + tests | 1–4 (each section may ship when its pack is done) |
 | 6 | Malt roles strip visual | UI | 5 |
 | 7 | Learn→Plan bridges (malt/water; extend hop/yeast if needed) | UI | 5 |
