@@ -684,6 +684,85 @@
       "concepts": ["method.no_hierarchy"],
       "modules": ["method_context.fundamentals"],
       "notes": "A synthesis/interpretation drawing on FACT-METHOD-0001/FACT-METHOD-0002/FACT-METHOD-0003/FACT-METHOD-0004 and reused FACT-MASH-0001/FACT-BOIL-0001, not a new independently measured result. Does not claim every homebrewer's context makes all three methods equally convenient in practice -- only that none is inherently a 'better beer' marker. Wording trap: never present BIAB as 'the beginner method,' traditional all-grain as 'proper brewing,' or all-in-one as automatically producing better/worse beer, in any direction; never imply a brewer must eventually 'graduate' from one method to another; keep 'same underlying process' as the framing, never 'same convenience/cost.'"
+    },
+    {
+      "id": "FACT-MALT-0001",
+      "claim": "Malt is malted barley, a basic brewing ingredient that supplies the carbohydrates/sugars for fermentation as well as colour and flavour. Barley is well suited to malting because of its husk, its starch reserve and its enzyme system. Malting is a sequence of steeping, germination and drying: germination opens up the grain's starch reserves, and drying halts growth so that the starch remains available to the brewer.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "Briess, 'The Malting Process' (Brewing with Briess, Malting 101), https://brewingwithbriess.com/malting-101/malting-process/"
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed research review (independent background support)",
+          "ref": "Prado, R., Gastl, M. & Becker, T. (2021), 'Aroma and color development during the production of specialty malts: A review', Comprehensive Reviews in Food Science and Food Safety, DOI 10.1111/1541-4337.12806, https://doi.org/10.1111/1541-4337.12806"
+        }
+      ],
+      "concepts": ["malt.what_is_malt"],
+      "notes": "Beginner-level description of what malt is and why barley is malted; primary support is the Briess page, the Prado et al. review is independent background only. Scope: source-reviewed claims only. Wording trap: no temperature, time or moisture numbers for steeping/germination/drying; do not claim malt is the only source of fermentable sugar in every beer, and add no general-knowledge detail about barley varieties or malting-plant practice. Extract and enzyme-conversion detail is deliberately NOT restated here -- reuse FACT-MASH-0001/FACT-MASH-0004."
+    },
+    {
+      "id": "FACT-MALT-0002",
+      "claim": "Brewing malts are commonly divided into base (standard/brewers) malts and specialty malts. Base malts contain high enzyme levels together with the carbohydrates/sugars needed for fermentation. Specialty malts are produced by altering the malting/drying conditions to develop flavour, colour or other function; more intense heating reduces the enzymes available, and many specialty malts are designed to be used at smaller inclusion levels.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "Briess, 'The Malting Process' (Brewing with Briess, Malting 101), https://brewingwithbriess.com/malting-101/malting-process/"
+        }
+      ],
+      "concepts": ["malt.base_vs_specialty"],
+      "notes": "Single-source (Briess) producer technical claim, Tier A. Wording trap: say 'many specialty malts', never 'all'; never state that specialty malt has no enzymes or can never self-convert, and never state that base malt is always the largest part of a grist; no temperature/time numbers, no named malt products or catalogue recommendations. Enzyme role in mashing stays with FACT-MASH-0001/FACT-MASH-0004."
+    },
+    {
+      "id": "FACT-MALT-0003",
+      "claim": "The conditions used when specialty malts are dried, kilned or roasted develop different colour and flavour characteristics, and malt colour materially affects the colour of the finished beer, so a recipe may need adjusting to hit a colour target. Thermal processing of specialty malt involves non-enzymatic browning (caramelisation, pyrolysis and Maillard reactions) that contributes aroma compounds, and time, temperature and moisture during that processing materially influence flavour development. The relation between malt colour and aroma/flavour is complex, so colour is not a direct one-to-one predictor of flavour.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "Briess, 'The Malting Process' (Brewing with Briess, Malting 101), https://brewingwithbriess.com/malting-101/malting-process/"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "Briess Technical Services, 'Understanding a Malt Analysis', https://brewingwithbriess.com/blog/understanding-a-malt-analysis/"
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed research review",
+          "ref": "Prado, R., Gastl, M. & Becker, T. (2021), 'Aroma and color development during the production of specialty malts: A review', Comprehensive Reviews in Food Science and Food Safety, DOI 10.1111/1541-4337.12806, https://doi.org/10.1111/1541-4337.12806"
+        }
+      ],
+      "concepts": ["malt.colour_flavour"],
+      "notes": "Sources: Briess 'The Malting Process' (kilning/roasting conditions develop colour and flavour), Briess 'Understanding a Malt Analysis' (colour affects finished beer colour; Wort Analysis -> Color section), Prado et al. 2021 (browning chemistry; publisher/PubMed metadata level). Wording trap: no numeric EBC/SRM/degrees-Lovibond ranges or colour targets; never teach colour as a one-to-one flavour predictor; no Congress mash, DP or FG/CG arithmetic; no temperature/time figures."
+    },
+    {
+      "id": "FACT-MALT-0004",
+      "claim": "The relative proportion of each malt in the grist affects how strongly that malt contributes to the recipe's overall malt character.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical material (narrow scope, formulation example)",
+          "ref": "Briess Technical Services, 'Hot Steep as a Tool for Specialty Malt Formulation in Beer', https://brewingwithbriess.com/blog/hot-steep-as-a-tool-for-specialty-malt-formulation-in-beer/"
+        }
+      ],
+      "concepts": ["malt.grist_percentage"],
+      "notes": "Deliberately narrow, directional wording: Briess uses each malt's percentage of the grain bill in recipe formulation and demonstrates that changing the relative inclusion of specialty malts (pale, caramel and chocolate malts) changes the sensory balance. Strongest for specialty-malt balance; not a universal quantitative model. Wording trap: do NOT generalise to 'the mix, not one malt, sets the beer' as a universal law; no percentages or example grists from the article; no catalogue-specific malt recommendations. Extract/fermentability relationship stays with FACT-MASH-0001/FACT-MASH-0004."
     }
   ]
 }
