@@ -246,10 +246,11 @@ _METHOD_CONTEXT_VERIFIED_IDS = [
     "FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0004", "FACT-METHOD-0005",
 ]
 _MALT_CORE_VERIFIED_IDS = ["FACT-MALT-0001", "FACT-MALT-0002", "FACT-MALT-0003", "FACT-MALT-0004"]
+_YEAST_CORE_VERIFIED_IDS = [f"FACT-YEAST-000{n}" for n in range(1, 6)]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
-    + _MALT_CORE_VERIFIED_IDS
+    + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS
 )
 
 
@@ -298,12 +299,15 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # professional_interpretation (FACT-METHOD-0004..0005). Issue #426
         # (V2.2 G3P-1) adds the malt-core pack (FACT-MALT-0001..0004): 3
         # documented_fact (FACT-MALT-0001..0003), 1
-        # professional_interpretation (FACT-MALT-0004).
+        # professional_interpretation (FACT-MALT-0004). Issue #428 (V2.2
+        # G3P-2) adds the yeast-core pack (FACT-YEAST-0001..0005): 3
+        # documented_fact (0001..0003), 2 professional_interpretation
+        # (0004..0005).
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
         classifications = [r["classification"] for r in verified]
-        self.assertEqual(classifications.count("documented_fact"), 23)
-        self.assertEqual(classifications.count("professional_interpretation"), 8)
+        self.assertEqual(classifications.count("documented_fact"), 26)
+        self.assertEqual(classifications.count("professional_interpretation"), 10)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
@@ -560,6 +564,59 @@ class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
 
     def test_every_record_documents_scope_and_wording_trap(self):
         for record in self._malt_records().values():
+            self.assertIn("Wording trap", record["notes"])
+
+
+class TestProductionRegistryYeastCoreFactPackVerifiedOnlyApi(unittest.TestCase):
+    """Issue #428 (V2.2 G3P-2): the Raavarer P2 yeast-core fact pack
+    (FACT-YEAST-0001..0005). Temperature/oxygen context is reused from
+    FACT-BREW-0001..0003 and FACT-OXY-0001, never duplicated."""
+
+    _CONCEPTS = {
+        "FACT-YEAST-0001": "yeast.organism_role",
+        "FACT-YEAST-0002": "yeast.attenuation",
+        "FACT-YEAST-0003": "yeast.ale_vs_lager",
+        "FACT-YEAST-0004": "yeast.pitch_principle",
+        "FACT-YEAST-0005": "yeast.choice_principle",
+    }
+
+    def _yeast_records(self):
+        return {r["id"]: r for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"].startswith("FACT-YEAST-")}
+
+    def test_returns_exactly_the_five_yeast_ids(self):
+        self.assertEqual(set(self._yeast_records()), set(_YEAST_CORE_VERIFIED_IDS))
+
+    def test_each_concept_maps_to_exactly_one_record(self):
+        for fact_id, concept in self._CONCEPTS.items():
+            with self.subTest(concept=concept):
+                ids = [r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept=concept)]
+                self.assertEqual(ids, [fact_id])
+
+    def test_no_duplicate_temperature_concept_record(self):
+        self.assertEqual(find_verified_records(_PRODUCTION_REGISTRY, concept="yeast.temperature_link"), [])
+
+    def test_sources_are_external_tier_a_and_never_chief_or_ai(self):
+        for record in self._yeast_records().values():
+            self.assertGreaterEqual(len(record["sources"]), 2)
+            for source in record["sources"]:
+                self.assertEqual(source["tier"], "A")
+                self.assertIn("https://", source["ref"])
+                self.assertNotIn("chief", (source["ref"] + source["type"]).lower())
+
+    def test_pitch_and_attenuation_have_no_numeric_rules(self):
+        for fact_id in ("FACT-YEAST-0002", "FACT-YEAST-0004"):
+            claim = self._yeast_records()[fact_id]["claim"]
+            for token in ("%", "cells/mL", "°P", "million"):
+                self.assertNotIn(token, claim)
+        self.assertIn("rather than on one universal cell-count rule", self._yeast_records()["FACT-YEAST-0004"]["claim"])
+
+    def test_ale_vs_lager_is_hedged(self):
+        claim = self._yeast_records()["FACT-YEAST-0003"]["claim"]
+        self.assertIn("typically", claim)
+        self.assertIn("rather than a universal rule", claim)
+
+    def test_every_record_documents_scope_and_wording_trap(self):
+        for record in self._yeast_records().values():
             self.assertIn("Wording trap", record["notes"])
 
 

@@ -763,6 +763,111 @@
       ],
       "concepts": ["malt.grist_percentage"],
       "notes": "Deliberately narrow, directional wording: Briess uses each malt's percentage of the grain bill in recipe formulation and demonstrates that changing the relative inclusion of specialty malts (pale, caramel and chocolate malts) changes the sensory balance. Strongest for specialty-malt balance; not a universal quantitative model. Wording trap: do NOT generalise to 'the mix, not one malt, sets the beer' as a universal law; no percentages or example grists from the article; no catalogue-specific malt recommendations. Extract/fermentability relationship stays with FACT-MASH-0001/FACT-MASH-0004."
+    },
+    {
+      "id": "FACT-YEAST-0001",
+      "claim": "During beer fermentation, brewer's yeast consumes fermentable sugars and produces alcohol and carbon dioxide; yeast metabolism also contributes flavour and aroma compounds.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:17:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical/educational material",
+          "ref": "White Labs, Beer Glossary, https://www.whitelabs.com/glossary"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical/educational material",
+          "ref": "Lallemand Brewing, Biotransformation Resources Center, https://www.lallemandbrewing.com/en/asia/biotransformation-resources-center/"
+        }
+      ],
+      "concepts": ["yeast.organism_role"],
+      "notes": "Two independent producer sources, Tier A. Wording trap: do not claim that every sugar in wort is fermentable by every strain; no sugar-spectrum, metabolic-pathway or mass-balance detail. Source gate: sources were opened/read live by Chief (issue #428 comment, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
+    },
+    {
+      "id": "FACT-YEAST-0002",
+      "claim": "Attenuation describes the proportion of wort sugars consumed by yeast during fermentation. Higher attenuation generally leaves less residual sugar and can produce a drier beer, but actual attenuation depends on the yeast as well as on fermentation and wort conditions.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:17:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical/educational material",
+          "ref": "White Labs, Beer Glossary, https://www.whitelabs.com/glossary"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "White Labs, dry yeast / WLP001 technical material, https://go.whitelabs.com/dryyeast"
+        }
+      ],
+      "concepts": ["yeast.attenuation"],
+      "notes": "Glossary gives the definition and that actual attenuation varies with process factors; White Labs technical material gives that higher attenuation can lead to a drier beer. Wording trap: no numeric attenuation bands, no strain rankings, no universal ABV formula; never imply yeast alone determines attenuation. Source gate: sources were opened/read live by Chief (issue #428 comment, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
+    },
+    {
+      "id": "FACT-YEAST-0003",
+      "claim": "Ale and lager yeasts are commonly distinguished by yeast type, fermentation behaviour and usual working-temperature range. Ale strains are typically associated with warmer fermentation and lager strains with cooler fermentation, but this is a useful beginner pattern rather than a universal rule.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:17:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical/educational material",
+          "ref": "White Labs, Beer Glossary, https://www.whitelabs.com/glossary"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "Lallemand Brewing, ESSENTIAL Series Ale and Lager Technical Data Sheet, https://connect.lallemandbrewing.com/wp-content/uploads/2024/09/Lallemand_-_Essential_Series_-_Tech_Data_Sheet_-_01_-_Ale_and_Lager.pdf"
+        }
+      ],
+      "concepts": ["yeast.ale_vs_lager"],
+      "notes": "Glossary: ale typically S. cerevisiae, used warmer; lager usually S. pastorianus, typically cooler; product-level support from the Lallemand data sheet. Wording trap: use 'typically/usually'; no universal temperature numbers; do not claim every beer labelled ale or lager uses only one species or range; no taxonomy. Temperature/oxygen context is reused from FACT-BREW-0001..0003 and FACT-OXY-0001, not restated. Source gate: sources were opened/read live by Chief (issue #428 comment, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
+    },
+    {
+      "id": "FACT-YEAST-0004",
+      "claim": "Pitch enough healthy yeast and follow the producer's guidance for the selected yeast. Appropriate pitching depends on the yeast product and the fermentation conditions rather than on one universal cell-count rule.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:17:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical/educational material",
+          "ref": "White Labs, Beer Glossary, https://www.whitelabs.com/glossary"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "Lallemand Brewing, ESSENTIAL Series Ale and Lager Technical Data Sheet, https://connect.lallemandbrewing.com/wp-content/uploads/2024/09/Lallemand_-_Essential_Series_-_Tech_Data_Sheet_-_01_-_Ale_and_Lager.pdf"
+        }
+      ],
+      "concepts": ["yeast.pitch_principle"],
+      "notes": "Glossary: appropriate pitch varies with style/beverage. Data sheet: pitching rate depends on beer style, original gravity and fermentation temperature; follow producer-specific instructions; calculators built for another yeast format can be inappropriate. Wording trap: no cells/mL/degree-Plato arithmetic, no numeric pitch-rate ranges, no universal gram rate, no liquid-vs-dry depth, no starter or viability maths. Source gate: sources were opened/read live by Chief (issue #428 comment, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
+    },
+    {
+      "id": "FACT-YEAST-0005",
+      "claim": "Choose yeast against the intended beer and process, using producer information such as suitable styles, flavour profile, attenuation and fermentation-temperature guidance.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:17:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical material",
+          "ref": "White Labs, dry yeast / WLP001 technical material, https://go.whitelabs.com/dryyeast"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical/educational material",
+          "ref": "Fermentis, Yeast for lager beers, https://fermentis.com/en/news/fermentation/beer-brewing/yeast-for-lager-beers/"
+        }
+      ],
+      "concepts": ["yeast.choice_principle"],
+      "notes": "White Labs: strain specifications list attenuation, temperature, profile and suitable styles. Fermentis: attenuation, flocculation and temperature tolerance are selection factors; consult each product's technical data sheet. The Fermentis source is lager-specific, so it supports the general method of selection only. Wording trap: producer style recommendations are guidance, not hard compatibility rules; no strain encyclopaedia, catalogue or brand ranking. Source gate: sources were opened/read live by Chief (issue #428 comment, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
     }
   ]
 }
