@@ -687,10 +687,10 @@
     },
     {
       "id": "FACT-MALT-0001",
-      "claim": "Malt is malted barley, a basic brewing ingredient that supplies the carbohydrates/sugars for fermentation as well as colour and flavour. Barley is well suited to malting because of its husk, its starch reserve and its enzyme system. Malting is a sequence of steeping, germination and drying: germination opens up the grain's starch reserves, and drying halts growth so that the starch remains available to the brewer.",
+      "claim": "Malted barley is a basic brewing ingredient that supplies the carbohydrates/sugars for fermentation as well as colour and flavour. Barley is well suited to malting because of its husk, its starch reserve and its enzyme system. Malting is a sequence of steeping, germination and drying: germination opens up the grain's starch reserves, and drying halts growth so that the starch remains available to the brewer.",
       "classification": "documented_fact",
       "status": "verified",
-      "verified_at": "2026-09-29T19:00:00Z",
+      "verified_at": "2026-09-29T18:34:00Z",
       "sources": [
         {
           "tier": "A",
@@ -711,7 +711,7 @@
       "claim": "Brewing malts are commonly divided into base (standard/brewers) malts and specialty malts. Base malts contain high enzyme levels together with the carbohydrates/sugars needed for fermentation. Specialty malts are produced by altering the malting/drying conditions to develop flavour, colour or other function; more intense heating reduces the enzymes available, and many specialty malts are designed to be used at smaller inclusion levels.",
       "classification": "documented_fact",
       "status": "verified",
-      "verified_at": "2026-09-29T19:00:00Z",
+      "verified_at": "2026-09-29T18:34:00Z",
       "sources": [
         {
           "tier": "A",
@@ -727,7 +727,7 @@
       "claim": "The conditions used when specialty malts are dried, kilned or roasted develop different colour and flavour characteristics, and malt colour materially affects the colour of the finished beer, so a recipe may need adjusting to hit a colour target. Thermal processing of specialty malt involves non-enzymatic browning (caramelisation, pyrolysis and Maillard reactions) that contributes aroma compounds, and time, temperature and moisture during that processing materially influence flavour development. The relation between malt colour and aroma/flavour is complex, so colour is not a direct one-to-one predictor of flavour.",
       "classification": "documented_fact",
       "status": "verified",
-      "verified_at": "2026-09-29T19:00:00Z",
+      "verified_at": "2026-09-29T18:34:00Z",
       "sources": [
         {
           "tier": "A",
@@ -753,7 +753,7 @@
       "claim": "The relative proportion of each malt in the grist affects how strongly that malt contributes to the recipe's overall malt character.",
       "classification": "professional_interpretation",
       "status": "verified",
-      "verified_at": "2026-09-29T19:00:00Z",
+      "verified_at": "2026-09-29T18:34:00Z",
       "sources": [
         {
           "tier": "A",
