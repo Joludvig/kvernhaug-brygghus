@@ -871,30 +871,71 @@
     },
     {
       "id": "FACT-WATER-0001",
-      "claim": "Water is the majority ingredient in beer, so the brewing liquor materially affects the finished beer.",
+      "claim": "Water makes up most of beer, so water quality can matter to the finished beer.",
       "classification": "documented_fact",
-      "status": "draft",
-      "sources": [],
+      "status": "verified",
+      "verified_at": "2026-09-29T19:50:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "educational brewing source",
+          "ref": "Brewers Association, Water Chemistry for Consistent Brewing, https://www.brewersassociation.org/webinar/water-chemistry-for-consistent-brewing/"
+        },
+        {
+          "tier": "B",
+          "type": "educational brewing article",
+          "ref": "Craft Beer & Brewing, Water: The Stuff of Life (and Beer), https://www.beerandbrewing.com/water-the-stuff-of-life-and-beer"
+        }
+      ],
       "concepts": ["water.majority_ingredient"],
-      "notes": "Candidate claim only; keep qualitative. Preferred source direction: a strong brewing-specific technical source. Wording trap: no ion, pH, salt or target-profile content; no percentages; existing App/Web water text is not a source. Source gate: NOT verified. The Bridge run for issue #430 could not open any source (WebFetch/WebSearch denied) and AI is never the source, so no source is cited and the record stays draft. Promote to verified only after sources are opened/read and tiered."
+      "notes": "Qualitative only. Tier B educational brewing sources; no Tier A source was found for this simple majority claim, so the record is kept to the plain qualitative scope. Wording trap: no percentages, do not call water the 'key' ingredient; no ion, pH, salt or target-profile content; existing App/Web water text is not a source. Source gate: sources were read by local research and spot-checked live by Chief (issue #430 handoff, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claim."
     },
     {
       "id": "FACT-WATER-0002",
-      "claim": "Chlorine and chloramine in brewing water can be a flavour and process concern, and they are distinct disinfectants that must not be treated as interchangeable.",
+      "claim": "Chlorine and chloramine are different disinfectants, and either can create unwanted medicinal flavour in beer; some Norwegian waterworks use chloramine, but how common that is is not established.",
       "classification": "documented_fact",
-      "status": "draft",
-      "sources": [],
+      "status": "verified",
+      "verified_at": "2026-09-29T19:50:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "educational brewing article",
+          "ref": "Craft Beer & Brewing, Water: The Stuff of Life (and Beer), https://www.beerandbrewing.com/water-the-stuff-of-life-and-beer (chlorine/chloramine can react in brewing to give medicinal/plasticky chlorophenol character)"
+        },
+        {
+          "tier": "B",
+          "type": "established brewing text",
+          "ref": "Palmer, How to Brew, water chapter (chloramine is more persistent and harder to remove than chlorine)"
+        },
+        {
+          "tier": "A",
+          "type": "public health authority",
+          "ref": "Folkehelseinstituttet (FHI), Kjemikalier i drikkevann, https://www.fhi.no/sm/drikkevann/handbok-innhold-i-drikkevann/innhold-i-drikkevann/kjemikalier-i-drikkevann/ (some water-treatment plants add ammonium to form chloramine, which disinfects)"
+        }
+      ],
       "concepts": ["water.chlorine_chloramine"],
-      "notes": "Candidate claim only. Preferred source direction: brewing-specific technical material for why they matter to flavour/process, plus Mattilsynet/Norsk Vann only for what they say about disinfection in Norwegian public water. Wording traps: do NOT teach boiling or standing as a universal fix; no dosing or contact times; no carbon-filter claims without source-specific caveats; do NOT claim chloramine is common in Norway -- prevalence is not established, and official sources listing chloramine as a recognised treatment option are not evidence of prevalence. Removal method is deliberately left out of Foundation unless a Tier A brewing source supports home-scale removal safely. Source gate: NOT verified. The Bridge run for issue #430 could not open any source (WebFetch/WebSearch denied) and AI is never the source, so no source is cited and the record stays draft."
+      "notes": "Norway scope is strictly 'some': FHI directly supports only that some Norwegian water-treatment plants form/use chloramine. Explicit unresolved SOURCE GAP: how common chloramine use is in Norway is not established; older FHI Vannrapport 121 and VA-Miljo guidance corroborate existence/use but not prevalence. Never say common/many/most and give no count or share. Beginner wording: check your own water supplier. Wording traps: no 'boil it' or 'leave it overnight' as a universal fix; no Campden/carbon/ascorbic-acid dosing; no ppm, contact-time or removal percentages; no treatment methods in Foundation. Source gate: sources were read by local research and FHI was spot-checked live by Chief (issue #430 handoff, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
     },
     {
       "id": "FACT-WATER-0003",
-      "claim": "Before brewing, find out what your source water is by checking information from the local waterworks or municipality.",
+      "claim": "Find out which waterworks supplies you and read what it publishes about the water; municipal water suppliers such as Bergen kommune publish water-quality information.",
       "classification": "professional_interpretation",
-      "status": "draft",
-      "sources": [],
+      "status": "verified",
+      "verified_at": "2026-09-29T19:50:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "municipal water supplier publication",
+          "ref": "Bergen kommune, Drikkevannskvalitet, https://www.bergen.kommune.no/innbyggerhjelpen/vann-vei-og-trafikk/vann-og-avlop/vann-og-vannforsyning/drikkevannskvalitet"
+        },
+        {
+          "tier": "A",
+          "type": "municipal water supplier publication",
+          "ref": "Bergen kommune, Bruk av klor ved arbeid paa vannledningsnettet, https://www.bergen.kommune.no/hvaskjer/tema/meldinger-fra-vaktsentralen/driftsrutiner/bruk-av-klor-ved-arbeid-pa-vannledningsnettet"
+        }
+      ],
       "concepts": ["water.source_awareness"],
-      "notes": "Candidate claim only; awareness only. Preferred source direction: local waterworks / municipal water-quality pages, Norsk Vann, Mattilsynet, and a brewing-specific source on what a brewer should check. Any Norway-specific statement must be supported by an opened Norwegian source and not generalised beyond it. Wording trap: no target profiles, no ions/residual alkalinity/salt additions, no calculator logic. Source gate: NOT verified. The Bridge run for issue #430 could not open any source (WebFetch/WebSearch denied) and AI is never the source, so no source is cited and the record stays draft."
+      "notes": "Awareness / check-your-own-waterworks framing only. Bergen kommune is an example that a municipal supplier publishes water-quality and treatment information; do NOT generalise Bergen's treatment practice to Norway as a whole. Wording trap: no target profiles, no ions/residual alkalinity/salt additions, no calculator logic. Source gate: Bergen pages were spot-checked live by Chief (issue #430 handoff, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claim."
     }
   ]
 }
