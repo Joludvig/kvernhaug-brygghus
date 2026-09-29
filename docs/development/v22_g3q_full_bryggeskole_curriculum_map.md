@@ -493,7 +493,7 @@ Only where interaction **materially improves understanding** (#343 Goal 3). Ever
 
 ## 15. Recommended module architecture
 
-Principle: **extend the six existing process modules and add four new ones.** The result is 10 modules at homebrewer
+Principle: **extend the six existing process modules and add five new ones.** The result is 11 modules at homebrewer
 completion, with no per-topic module explosion. Optional L3 tracks are separate and visibly optional.
 
 ```
