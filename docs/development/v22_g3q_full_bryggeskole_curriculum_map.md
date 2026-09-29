@@ -28,8 +28,8 @@ existing Kvernhaug source hierarchy (#65: Tier A/B/C/D) and Course Fact Registry
 6. [Raw-material gap and the #418 relationship](#6-raw-material-gap-and-the-418-relationship)
 7. [Level 1 — Homebrewer Foundation](#7-level-1--homebrewer-foundation)
 8. [Level 2 — Competent Homebrewer](#8-level-2--competent-homebrewer)
-9. [Level 3 — Advanced Homebrewer (optional)](#9-level-3--advanced-homebrewer-optional)
-10. [Level 4 — Professional / Brewery (optional later track)](#10-level-4--professional--brewery-optional-later-track)
+9. [Bryggemester (optional)](#9-level-3--advanced-homebrewer-optional)
+10. [Bryggeri / profesjonell (optional later track)](#10-level-4--professional--brewery-optional-later-track)
 11. [Safety curriculum](#11-safety-curriculum)
 12. [Science-foundation curriculum](#12-science-foundation-curriculum)
 13. [Visual / interactive opportunities](#13-visual--interactive-opportunities)
@@ -291,8 +291,8 @@ All domains classified **absent**, grouped by where they belong. Only the first 
 |---|---|---|---|
 | **Blocks Level 1** (safe first brew) | D01 malt basics, D04 water basics, D52 chlorine, D33 chemical handling, D38 temperature measurement; plus the partial D31 cleaning vs sanitation, D34 heat, D35 CO₂/pressure | A learner cannot brew safely or understand the ingredients without them | Råvarer (#418) + Rengjøring & sikkerhet (§18) + Måling |
 | **Blocks Level 2** (deliberate improvement) | D07 gravity, D08 attenuation, D09 alcohol, D10 colour, D12 balance, D13 styles, D14 recipe formulation, D16 milling, D18 lautering, D19 wort collection, D27 conditioning, D28 clarification, D39 gravity measurement, D40 volume, D43 calibration, D45 pitching, D48 fermentation completion, D51 mash pH, D55 sensory basics, D61 yeast metabolism, D64 Maillard, D66 efficiency; plus D05 adjuncts (short concept) | Without these a learner can follow a recipe but cannot formulate, measure, judge or improve one | Recipe, Measurement & records, Mesking/Gjæring expansion, Sensory |
-| **Optional Level 3** | D06 malting, D41 pH measurement, D42 pressure measurement, D49 yeast reuse, D50 pressure fermentation, D53 water chemistry, D57 foam, D67 special methods, D71 agronomy/evaluation | Deeper control for motivated learners | Optional tracks |
-| **Level 4 / context** | D68–D70, D72–D83 | Professional or background | Park |
+| **Bryggemester / frivillig fordypning** | D06 malting, D41 pH measurement, D42 pressure measurement, D49 yeast reuse, D50 pressure fermentation, D53 water chemistry, D57 foam, D67 special methods, D71 agronomy/evaluation | Deeper control for motivated learners | Optional tracks |
+| **Bryggeri / profesjonell / context** | D68–D70, D72–D83 | Professional or background | Park |
 
 **Book-derived domains that the #419 checklist did not name:** malting process (D06), brewhouse yield and losses (D66),
 flavour stability/shelf life (D58), special methods (D67), beer and health (D68), history (D69), pub/microbrewing (D70)
@@ -323,7 +323,38 @@ affect homebrewer completion.
 
 ---
 
-## 7. Level 1 — Homebrewer Foundation
+## 6.1 Locked course progression model
+
+Owner decision, 2026-09-29:
+
+The course should use a **progressive three-track model** with a deliberately low first threshold:
+
+1. **Hjemmebrygger**
+   - contains both the Foundation and Competent stages;
+   - the first threshold must be easy enough that a beginner can get moving without facing the whole brewing discipline at once;
+   - learning should build step by step from safe first-brew understanding toward independent recipe, measurement, evaluation and improvement skills;
+   - completion of the Competent stage is the natural, satisfying homebrewer finish point.
+
+2. **Bryggemester**
+   - voluntary advanced-homebrewer depth after Hjemmebrygger completion;
+   - for learners who want tighter process control, deeper science and more advanced methods;
+   - not required to feel that the course is complete.
+
+3. **Bryggeri / profesjonell**
+   - separate later track for industrial/professional depth;
+   - never required for homebrewer or Bryggemester completion.
+
+The product principle is:
+
+> **Low first threshold, gradual mastery, unlimited depth by choice.**
+
+A learner should never be forced to absorb the entire subject before getting the satisfaction of successful progress, while a motivated learner must be able to continue all the way into advanced and professional depth.
+
+"Bryggemester" is a **Kvernhaug curriculum track name**, not a claim of formal certification, professional licence or protected qualification.
+
+---
+
+## 7. Hjemmebrygger — Trinn 1: Foundation
 
 **Goal:** brew a first all-grain batch **safely** on the learner's own method (BIAB, traditional kettle, or all-in-one)
 and understand *what is happening* at each stage.
@@ -339,7 +370,7 @@ and understand *what is happening* at each stage.
 **Level 1 finish line:** the learner can brew, ferment and package one batch safely and explain in plain words what each
 stage does. This is a checkpoint, not the homebrewer completion point (§17).
 
-## 8. Level 2 — Competent Homebrewer
+## 8. Hjemmebrygger — Trinn 2: Kompetent hjemmebrygger
 
 **Goal (#419):** formulate a sensible recipe, execute the process, measure, evaluate, and deliberately improve the next brew.
 
@@ -355,7 +386,7 @@ stage does. This is a checkpoint, not the homebrewer completion point (§17).
 
 **Level 2 finish line = homebrewer completion (§17).**
 
-## 9. Level 3 — Advanced Homebrewer (optional)
+## 9. Bryggemester — frivillig fordypning
 
 Offered as **voluntary tracks**, each finishable on its own. None is required to complete the course:
 
@@ -368,7 +399,7 @@ Offered as **voluntary tracks**, each finishable on its own. None is required to
 - **Make your own malt:** home malting (D06; Kunze 8.3 has a small-scale treatment).
 - **Structured experimentation:** extends the Goal 2 loop. This is not a statistics platform (D83; PARKed in #343).
 
-## 10. Level 4 — Professional / Brewery (optional later track)
+## 10. Bryggeri / profesjonell — senere spor
 
 Clearly optional. PARKed per #343 ("broad professional Bryggeskole curriculum"):
 D70 pub/microbrewing, D72 process engineering, D73 filtration/stabilisation, D74 commercial packaging, D75 CIP,
@@ -510,8 +541,8 @@ Level 1–2 core course (homebrewer completion)
  9  Oppskriftsforståelse       NEW   gravity · attenuation · alcohol · colour · bitterness · balance · style context → recipe editor
 10  Smak og evaluering         NEW-ish  sensory basics · beginner faults · evaluate → next change (builds on G3N / Brew History)
 
-Optional tracks (Level 3): Vannkjemi · Gjærhåndtering · Trykk og fat · Avansert mesking · Oksygen og holdbarhet · Spesialøl · Egen malt
-Later (Level 4): Bryggeri/profesjonelt spor — parked
+Bryggemester (frivillig fordypning): Vannkjemi · Gjærhåndtering · Trykk og fat · Avansert mesking · Oksygen og holdbarhet · Spesialøl · Egen malt
+Bryggeri / profesjonell (senere spor): parked
 ```
 
 Design notes:
@@ -549,8 +580,8 @@ contract/fact pack, as in the existing G3 pattern (contract → facts → module
 | 10 | Smak og evaluering (sensory, beginner faults, evaluate → next change) building on G3N | Contract + facts + module | 6, 7 | — |
 | 11 | Pakking small extension (clarification concept, shelf life) | Facts + module | 7 | — |
 | — | **Checkpoint: Level 2 = homebrewer completion** (acceptance with one real brew through the loop) | Acceptance | 4–11 | — |
-| 12+ | Level 3 optional tracks, on demonstrated demand only | — | Level 2 | — |
-| — | Level 4 professional track | PARKED (#343) | — | — |
+| 12+ | Bryggemester-tracks, on demonstrated demand only | — | Level 2 | — |
+| — | Bryggeri/profesjonell track | PARKED (#343) | — | — |
 
 WIP rule (#343): one implementation lane, up to two prep lanes. Slices 1 and 2 are both prep, so they may run together.
 
@@ -558,7 +589,7 @@ WIP rule (#343): one implementation lane, up to two prep lanes. Slices 1 and 2 a
 
 ## 17. Natural homebrewer completion point
 
-**Completion = Level 2.** It is reached when the learner has completed modules 0–10 and used them on one real brew. The
+**Hjemmebrygger completion = the Competent stage (former Level 2).** It is reached when the learner has completed modules 0–10 and used them on one real brew. The
 course can then truthfully say, extending #65's own sentence:
 
 > You can now plan, brew, ferment, package and evaluate a good all-grain homebrew safely and understandably — and
@@ -571,8 +602,8 @@ Properties required of this finish point:
 - It is **method-inclusive**. It works for BIAB, traditional kettle all-grain and all-in-one (#65 §6) through the
   existing method-context framing.
 - It is **evidence-based**, not a score. Mastery stays hidden, with no grades or rankings (#65 §3, #419).
-- Level 3 tracks are shown **after** completion as optional choices. They are never shown as unfinished items.
-- Level 1 is a recognised intermediate checkpoint ("you can brew safely"). It is not a completion claim.
+- **Bryggemester** is shown **after** Hjemmebrygger completion as an optional next track. It is never shown as unfinished mandatory work.
+- The Foundation stage is a deliberately low first threshold and recognised intermediate checkpoint ("you can brew safely"). It is not the final homebrewer completion claim.
 
 ---
 
