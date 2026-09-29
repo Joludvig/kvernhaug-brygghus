@@ -769,7 +769,7 @@
       "claim": "During beer fermentation, brewer's yeast consumes fermentable sugars and produces alcohol and carbon dioxide; yeast metabolism also contributes flavour and aroma compounds.",
       "classification": "documented_fact",
       "status": "verified",
-      "verified_at": "2026-09-29T20:00:00Z",
+      "verified_at": "2026-09-29T19:17:00Z",
       "sources": [
         {
           "tier": "A",
@@ -790,7 +790,7 @@
       "claim": "Attenuation describes the proportion of wort sugars consumed by yeast during fermentation. Higher attenuation generally leaves less residual sugar and can produce a drier beer, but actual attenuation depends on the yeast as well as on fermentation and wort conditions.",
       "classification": "documented_fact",
       "status": "verified",
-      "verified_at": "2026-09-29T20:00:00Z",
+      "verified_at": "2026-09-29T19:17:00Z",
       "sources": [
         {
           "tier": "A",
@@ -811,7 +811,7 @@
       "claim": "Ale and lager yeasts are commonly distinguished by yeast type, fermentation behaviour and usual working-temperature range. Ale strains are typically associated with warmer fermentation and lager strains with cooler fermentation, but this is a useful beginner pattern rather than a universal rule.",
       "classification": "documented_fact",
       "status": "verified",
-      "verified_at": "2026-09-29T20:00:00Z",
+      "verified_at": "2026-09-29T19:17:00Z",
       "sources": [
         {
           "tier": "A",
@@ -832,7 +832,7 @@
       "claim": "Pitch enough healthy yeast and follow the producer's guidance for the selected yeast. Appropriate pitching depends on the yeast product and the fermentation conditions rather than on one universal cell-count rule.",
       "classification": "professional_interpretation",
       "status": "verified",
-      "verified_at": "2026-09-29T20:00:00Z",
+      "verified_at": "2026-09-29T19:17:00Z",
       "sources": [
         {
           "tier": "A",
@@ -853,7 +853,7 @@
       "claim": "Choose yeast against the intended beer and process, using producer information such as suitable styles, flavour profile, attenuation and fermentation-temperature guidance.",
       "classification": "professional_interpretation",
       "status": "verified",
-      "verified_at": "2026-09-29T20:00:00Z",
+      "verified_at": "2026-09-29T19:17:00Z",
       "sources": [
         {
           "tier": "A",
