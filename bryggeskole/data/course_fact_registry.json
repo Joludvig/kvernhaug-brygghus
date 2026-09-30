@@ -1055,6 +1055,37 @@
       ],
       "concepts": ["recipe.specialty_fermentability"],
       "notes": "Recipe-side R-1 only: ingredient-side tendency that caramel/crystal malt extract is generally less fermentable than base-malt extract and can leave more residual extract. Terminology: 'caramel/crystal malt' is a practical family term, NOT claimed as a universal synonym in every malting tradition; NOT all specialty malt is less fermentable; NOT all caramel/crystal malt is completely unfermentable. Learner may be told only that overall wort fermentability still depends on the mash and other ingredients/process. Does NOT duplicate FACT-MALT-0002 (base vs specialty), FACT-MALT-0003 (thermal processing/colour/flavour), FACT-MALT-0004 (grist proportion), FACT-MASH-0001/0004 (enzymatic dextrins/mash-side fermentability) or FACT-YEAST-0002 (attenuation depends on yeast + wort/process). Deliberately NOT claimed: sweetness (residual extract != perceived sweetness), body/mouthfeel, magnitude (no usage percentages, FG changes, fermentability percentages, sugar spectra; 'ordinary usage' not stable across sources), colour rule (darker crystal is not always less fermentable/sweeter/heavier), mash mechanism (no dextrin chemistry, Congress arithmetic, FG formulas or Castro enzyme-loss mechanism). Sweetness/body belong to R-4 / professional interpretation. Wording traps: never 'crystal malt is unfermentable', 'makes beer sweeter', 'adds body', 'more crystal always means higher FG', 'all specialty malt is less fermentable', 'darker crystal is always less fermentable', 'ordinary use only has a small effect', 'high FG means sticky/sweet beer', 'the engine models specialty-malt fermentability'. SOURCE LIMITATIONS: no homebrew-typical-usage FG experiment; Castro is one 20% Crystal 60L pilot with lower OG in the crystal wort; magnitude rests heavily on producer claims and producer material has commercial interest; Oxford entries are one reference family; Prado et al. 2021 intentionally NOT cited (does not support this claim on accessible evidence). SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch denied), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and source set fixed on issue #442 and needs a Chief live spot-check at review. Briess/Crisp URLs, Palmer edition/date/access details and Oxford entry access are not recorded here and must be added at the Chief spot-check. Engine boundary: the recipe engine does not model specialty-malt fermentability (FG derives from OG + yeast attenuation; no malt-specific fermentability field); the Course teaches the tendency and adds no second calculator."
+    },
+    {
+      "id": "FACT-RECIPE-0003",
+      "claim": "Balance describes how strongly the different parts of a beer are perceived relative to one another. It is judged against the beer the brewer intends, not by one universal number or ratio, and it is not a quality score: a beer can deliberately emphasise one part.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-30T20:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "reference encyclopedia entries (The Oxford Companion to Beer; one Tier B source family) -- synthesis only, not a numeric balance law",
+          "ref": "The Oxford Companion to Beer, entries 'flavor' and 'bitterness'"
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed method paper (Gastl, Hanke & Back, BrewingScience 60(3/4), 48-54, 2007) -- narrow support for interacting perception / matrix effects and analytical-vs-sensory discrepancy only; does not define balance",
+          "ref": "https://doi.org/10.23763/BRSC07-01GASTL"
+        },
+        {
+          "tier": "B",
+          "type": "style guidelines (BJCP 2021 Beer Style Guidelines) -- context only, NOT sensory-science provenance",
+          "ref": "BJCP 2021 Beer Style Guidelines, 'overall balance and impression' (contextual/style interpretation)"
+        },
+        {
+          "tier": "C",
+          "type": "trade article (Josh Weikert, 'Balancing Act', Craft Beer & Brewing, 2017) -- trade support for balance as brewer intent and intentional imbalance only",
+          "ref": "Josh Weikert, 'Balancing Act', Craft Beer & Brewing (2017)"
+        }
+      ],
+      "concepts": ["recipe.balance"],
+      "notes": "Recipe-side R-4 only: a relational, interpretive lens on how the parts of a beer are perceived relative to each other, judged against the beer the brewer intends. It is NOT chemistry truth, a measurement, a quality score, a numeric target or a style score. Generic wording only ('the different parts of a beer'); NOT a component list. Balance is not quality: never teach balanced = better or unbalanced = flawed; intentional dominance can be valid. Style is optional context only: never inside BJCP range = balanced or outside range = unbalanced; BJCP is context, not sensory science. BU:GU is an App/Master-view heuristic only -- NOT a Course Fact, learning objective, quiz target, sensory measurement or universal balance score; no BU:GU thresholds or bands appear here; same BU:GU may correspond to different perceived balance. NO directional component claims for alcohol, residual sugar/FG, roast, water minerals, carbonation, pH, temperature, hop aroma/flavour or acidity (no 'more sweetness requires more IBU', 'more alcohol requires more IBU', 'high FG needs more hops', 'roast needs X bitterness'). Does NOT duplicate FACT-RECIPE-0001 (R-2: IBU is a standard index, calculated IBU is an estimate, perceived bitterness not determined by IBU alone) or FACT-RECIPE-0002 (R-1: caramel/crystal extract generally less fermentable); rejected R-1 claims (residual extract = sweetness, crystal malt adds body) are not smuggled in. Wording traps: never 'balance means malt and hops are equal', 'balanced beer is better beer', 'BU:GU X is balanced', 'same BU:GU means same balance', 'the engine measures balance', 'harmonisk / veldig balansert' as scientific truth. SOURCE LIMITATIONS: no Tier A source defines 'balance' as a term of art (acceptable for professional_interpretation); no stand-alone scientific definition of balance; no Tier A beer study validates numeric balance; BU:GU has no peer-reviewed validation found; Daniels origin attribution is trade-only; sweetness/body causation remains unresolved from R-1; Palmer numeric examples are examples, not universal rules and Palmer is not cited here. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the Chief live spot-check recorded on issue #443 (Oxford 'flavor'/'bitterness', Gastl DOI 10.23763/BRSC07-01GASTL, BJCP 2021, Weikert 2017). Oxford edition/entry access details are not recorded here. App/Web wording concerns ('Harmonisk balansert / veldig balansert' from BU:GU banding, 'Maltdominert ... restsodmen ...', 'Fare for tung sodme', unsourced BU:GU thresholds 0.38 / 0.85) are separate and unchanged; the Course requires no engine change to teach R-4."
     }
   ]
 }
