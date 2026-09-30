@@ -53,7 +53,8 @@ After Smak og evaluering, a homebrewer can, in their own words and without numbe
 3. compare the finished beer with the beer they intended, describing the difference in words and not with a grade;
 4. recognise a **small** set of common faults (§9) and say, for each, what it may point to without claiming it is proven;
 5. say that a descriptor becomes a "fault" only relative to what they intended, how strong it is and the context;
-6. recognise **green (immature) beer** character and understand, qualitatively, that time with healthy yeast changes it;
+6. use diacetyl as the worked example of how maturation and yeast contact can change a beer's character, qualitatively and with no numbers, and recognise
+   the acetaldehyde (green-apple) and sulphur characters as things they can observe, without concluding a cause;
 7. say the difference between intended sourness and unwanted microbial contamination or spoilage, and that taste alone does not establish which;
 8. use a few practical tasting habits (§18) and know that expectations can influence perception (§19);
 9. record the result in the existing Brew History fields (§20) and choose **one deliberate next change** as a hypothesis test, not as proof.
@@ -76,13 +77,14 @@ Concept ids equal the registry concept ids that question `concepts[]` will carry
 | Kompetent MUST | Oxidation / stale character | `sensory.oxidation_recognition` | Future S-4 descriptor; process = FACT-OXY-0002 |
 | Kompetent MUST | Sourness versus unwanted microbial contamination / spoilage | `sensory.sourness_intent_vs_spoilage` | Future S-2 |
 | Kompetent SHOULD | Light-struck | `sensory.lightstruck` | Future S-3 |
-| Kompetent SHOULD | Acetaldehyde / green-beer character | `sensory.green_beer` | Future S-1 and S-4 (no standalone fact) |
-| Kompetent SHOULD | Temporary / strain-dependent sulphur | `sensory.green_beer` | No standalone fact |
+| Kompetent SHOULD | Acetaldehyde (green-apple descriptor recognition only) | `sensory.acetaldehyde_recognition` | Future S-4 descriptor vocabulary only; no maturation or cause claim; no standalone fact |
+| Kompetent SHOULD | Sulphur (cautious observation example only) | `sensory.sulphur_observation` | No standalone fact; interpretation uncertain |
 | Kompetent SHOULD | Tasting habits | `sensory.tasting_habits` | Methodology |
 | Kompetent SHOULD | Expectation and comparison note | `sensory.expectation_note` | Methodology |
 | Kompetent SHOULD | Typical descriptors as vocabulary | `sensory.typical_descriptors` | Future S-4 |
 | LATER / examples only | Phenolic, astringency, metallic, fusel/solvent, ester faults, the wider off-flavour-wheel catalogue | — | Not in the beginner set |
 | LATER | Detailed staling, time and warmth, shelf life | — | Pakking / D58 |
+| LATER | Acetaldehyde or sulphur causes, maturation behaviour and process guidance | — | Only via a later, separately source-backed fact (§31) |
 | LATER | Formal panels, scoresheets, thresholds, statistics, lab analysis | — | Non-goals (§33) |
 
 Deviation from the #419 map: D54 is MUST L2 with five example faults. Here the fault set is **narrowed and deepened** (§9) and taught as "recognise and
@@ -133,10 +135,10 @@ Association evidence in hand; it is **not** carried into this contract or any fu
 
 - DMS: sweetcorn / cooked-vegetable family;
 - oxidation / stale: cardboard / paper family, possibly sherry-like in an appropriate aged-beer context;
-- acetaldehyde: green-apple family;
+- acetaldehyde: green-apple family (**descriptor vocabulary only**; the record carries no maturation, immaturity, cause or process claim for it);
 - light-struck: skunky family.
 
-Critical rule: **descriptor ≠ diagnosis.** The record must not restate the BOIL-0002 or OXY-0002 mechanisms.
+**S-1 is the only record in the current fact plan that carries a maturation / yeast-contact claim.** Critical rule: **descriptor ≠ diagnosis.** The record must not restate the BOIL-0002 or OXY-0002 mechanisms.
 
 **S-2 — `sensory.sourness_intent_vs_spoilage` — `documented_fact`.** Direction: acidity can be intentional in sour beer; unexpected sourness in a beer
 not intended to be sour can be associated with microbial spoilage; taste alone does not establish cause. Quality and sensory scope only.
@@ -198,8 +200,8 @@ The existing Web page's five steps (see, smell, taste, mouthfeel, aftertaste) ar
 | Kompetent MUST | 3. Oxidation / stale character | recognise (S-4 descriptor) + link to FACT-OXY-0002 |
 | Kompetent MUST | 4. Sourness vs unwanted microbial contamination / spoilage | recognise + limits (future S-2) |
 | Kompetent SHOULD | 5. Light-struck | recognise + cause only (future S-3) |
-| Kompetent SHOULD | 6. Acetaldehyde / green-beer character | inside the green-beer concept (S-1/S-4) |
-| Kompetent SHOULD | 7. Temporary / strain-dependent sulphur | short note inside the green-beer concept |
+| Kompetent SHOULD | 6. Acetaldehyde | recognition vocabulary only (green-apple family, S-4); no cause, maturation or process claim |
+| Kompetent SHOULD | 7. Sulphur | cautious observation example only; interpretation uncertain; no standalone fact; deeper teaching LATER |
 
 **Phenolic, astringency, metallic, fusel/solvent, ester faults and the larger off-flavour-wheel catalogue stay LATER or examples only.** Phenolic and
 ester character may appear as examples inside §16 without a fact and without being taught as faults. Astringency must never be taught as bitterness.
@@ -257,18 +259,24 @@ For each item the module teaches "recognise, and hold several possible causes op
   teaching fact. FACT-COOL-0001 and FACT-COOL-0003 are quality/spoilage-organism facts and are not health claims either.
 - Any precautionary wording, if ever wanted, is a separate owner decision and never a Course Fact.
 
-## 15. Acetaldehyde / sulphur green-beer concept
+## 15. Acetaldehyde and sulphur: recognition and observation only
 
-One simple **green (immature) beer** concept covers three things that time with healthy yeast can change, taught qualitatively:
+The current four-fact plan (S-1, S-4, S-2, S-3) supports a maturation / yeast-contact teaching claim for **diacetyl only** (S-1). Acetaldehyde and
+sulphur are therefore **not** presented as a verified maturation or "green beer" family, and the three items are **not** presented as one verified
+maturation family. No new fact is added.
 
-- **Diacetyl** (butter / butterscotch), via S-1.
-- **Acetaldehyde** (green-apple family, via S-4), as a **SHOULD** inside this concept. **No standalone fact.** Do not teach "green apple definitely
-  means it just needs more time": other causes exist.
-- **Temporary / strain-dependent sulphur** (rotten-egg family) as a short note. **No standalone fact.** Some sulphur character can be normal in some
-  fermentations and may fade. **Never** "sulphur = infection."
+- **Diacetyl** (butter / butterscotch), via S-1, is the **sourced maturation example**: healthy yeast can reduce it during maturation or contact;
+  guidance stays cautious and qualitative.
+- **Acetaldehyde** stays a **SHOULD recognition** item, **descriptor vocabulary only** (green-apple family, via S-4). Under the current fact plan the
+  contract does **not** teach that acetaldehyde means immature beer, that the beer needs more time, that healthy yeast will remove it, that early
+  packaging caused it, or that maturation will fix it. It is not presented as evidence that the beer is unfinished. Those may be candidates for a
+  later, separately source-backed fact.
+- **Sulphur** stays a **SHOULD cautious observation / example**: a character the brewer can notice and describe. Its interpretation remains
+  **uncertain**, no standalone fact exists, and deeper sulphur teaching is **LATER**. The contract does **not** claim that sulphur is temporary,
+  strain-dependent, part of a maturation family, or that it fades with time on yeast, because no existing verified Course Fact carries those claims and
+  they must not be inferred from the general yeast or temperature facts. **Never** "sulphur = infection."
 
-The maturation idea is shown qualitatively (a visual, §28), with no numbers. Kunze's green-beer / mature-beer grouping (p. 376) is structural
-support only.
+The maturation visual (§28) and chunk 3 (§27) are limited accordingly.
 
 ## 16. Fault vs intentional-character governance
 
@@ -278,8 +286,8 @@ Teach:
 
 Do **not** over-relativise.
 
-Can be intended or normal in some contexts (examples only): acidity in a sour beer; sulphur in some fermentations; phenolic character in some yeast
-styles; low diacetyl in some contexts.
+Can be intended or normal in some contexts (examples only): acidity in a sour beer; phenolic character in some yeast
+styles; low diacetyl in some contexts. (A sulphur character the brewer observes may or may not be intended; its interpretation stays uncertain, §15.)
 
 But:
 
@@ -441,7 +449,6 @@ recognised, not memorised.
 | skunk / lyspåvirket (lightstruck) | skunky / light-struck | Descriptor first |
 | syrlig / sur | sour / acidic | Intended vs unexpected |
 | uønsket mikrobiell forurensning / bedervelse | unwanted microbial contamination / spoilage | Preferred over "infeksjon" |
-| umoden / «grønn» øl | green / immature beer | The green-beer concept |
 | tørr / snerpende | dry / puckering | Plain description in FEEL; not bitterness |
 
 Terms not to use in teaching: "feil" as a blanket verdict; "diagnose" as something the App does; "score" or "poeng" for sensory notes. No vocabulary
@@ -452,7 +459,7 @@ memorisation of compound names.
 Mastery ids equal the registry concept ids carried by question `concepts[]` in `bryggeskole/data/pilot_*.json` (existing convention; no new mastery
 system). Proposed ids: `sensory.tasting_sequence`, `sensory.observation_vs_interpretation`, `sensory.evaluate_against_intent`,
 `sensory.fault_vs_character`, `sensory.diacetyl`, `sensory.dms_recognition`, `sensory.oxidation_recognition`, `sensory.sourness_intent_vs_spoilage`,
-`sensory.lightstruck`, `sensory.green_beer`, `sensory.tasting_habits`, `sensory.expectation_note`, `sensory.typical_descriptors`.
+`sensory.lightstruck`, `sensory.acetaldehyde_recognition`, `sensory.sulphur_observation`, `sensory.tasting_habits`, `sensory.expectation_note`, `sensory.typical_descriptors`.
 
 Existing ids reused in questions: `boil.volatile_removal`, `oxygen.post_pitch`, `oxygen.pre_pitch`, `oxygen.timing_distinction`, `yeast.organism_role`,
 `fermentation.temperature`, `fermentation.flavor`, `fermentation.yeast_strain`, `cool.speed`, `cool.sanitation_boundary`, `hop.aroma_volatility`,
@@ -465,7 +472,7 @@ Module 10, after Oppskriftsforståelse. About seven Kompetent chunks:
 
 1. **Taste on purpose** — LOOK · SMELL · TASTE · FEEL · NOTE; practical habits; a short bias note.
 2. **Describe, don't diagnose** — observation, interpretation, hypothesis, decision; "still uncertain".
-3. **Green beer** — diacetyl, acetaldehyde, temporary sulphur; maturation, qualitatively.
+3. **Diacetyl and maturation** — diacetyl as the sourced maturation example, qualitatively; acetaldehyde as green-apple vocabulary and sulphur as a cautious observation, with no cause or maturation claim for either.
 4. **Cooked corn and cardboard** — DMS and oxidation, reusing the process facts.
 5. **Light, sour and spoilage** — light-struck; intended versus unwanted sourness; no health claim.
 6. **Fault or character?** — intent, intensity, context; phenol and ester examples only.
@@ -481,7 +488,7 @@ Specified only; **none is implemented here.**
 - A **LOOK · SMELL · TASTE · FEEL · NOTE guided card** that helps write `sensing.notes`. No sliders, no scores.
 - **Sort the statements** into observation / interpretation / hypothesis / decision, with "not sure yet" as an allowed answer.
 - **Same smell, several possible causes:** cards showing one perception with several possible explanations and no single right answer.
-- A **qualitative green-beer maturation visual:** immature-beer character easing while beer stays with healthy yeast, with no numbers.
+- A **qualitative diacetyl maturation visual:** butter character easing while beer stays with healthy yeast, with no numbers. It is not extended to acetaldehyde or sulphur.
 - **Intended versus observed**, side by side, from the recipe and the notes, without numbers or scores.
 - A **simple blind-swap checklist** for the bias habit (another person pours; no statistics).
 
@@ -514,7 +521,7 @@ Each slice is a separate child issue after Chief review; none is part of #438.
 4. **Fact pack S-2** (`sensory.sourness_intent_vs_spoilage`), quality scope only.
 5. **Fact pack S-3** (`sensory.lightstruck`), reusable by Pakking later.
 6. **Module chunks 1, 2, 6 and 7** on methodology alone.
-7. **Chunks 3 and 4** as S-1 and S-4 land (chunk 4 also reuses FACT-BOIL-0002 and FACT-OXY-0002).
+7. **Chunks 3 and 4** as S-1 and S-4 land (chunk 3's maturation content is diacetyl only) (chunk 4 also reuses FACT-BOIL-0002 and FACT-OXY-0002).
 8. **Chunk 5** after S-2 and S-3.
 9. **Brew History guidance** only as copy that points at the existing fields; no schema change.
 
@@ -531,6 +538,8 @@ Do not build UI before this contract is reviewed.
 - **Spoilage wording:** no health claim; any precautionary wording would be a separate owner decision and never a sourced fact.
 - **Registry id assignment** for `FACT-SENSORY-000n` at implementation time.
 - **Pakking / D58:** deeper staling, time, warmth and shelf life; light-struck may be reused there.
+- **Later source-backed facts (not planned, not added here):** any teaching that acetaldehyde or sulphur relates to maturation, immaturity, cause or process
+  needs its own separately sourced fact and a new Chief decision; it must not be inferred from S-1, S-4 or the yeast/temperature facts.
 - **Web sensorikk reconciliation gate:** §32.
 
 ## 32. Existing Web sensorikk reconciliation gate
