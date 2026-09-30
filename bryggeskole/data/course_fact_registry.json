@@ -1086,6 +1086,89 @@
       ],
       "concepts": ["recipe.balance"],
       "notes": "Recipe-side R-4 only: a relational, interpretive lens on how the parts of a beer are perceived relative to each other, judged against the beer the brewer intends. It is NOT chemistry truth, a measurement, a quality score, a numeric target or a style score. Generic wording only ('the different parts of a beer'); NOT a component list. Balance is not quality: never teach balanced = better or unbalanced = flawed; intentional dominance can be valid. Style is optional context only: never inside BJCP range = balanced or outside range = unbalanced; BJCP is context, not sensory science. BU:GU is an App/Master-view heuristic only -- NOT a Course Fact, learning objective, quiz target, sensory measurement or universal balance score; no BU:GU thresholds or bands appear here; same BU:GU may correspond to different perceived balance. NO directional component claims for alcohol, residual sugar/FG, roast, water minerals, carbonation, pH, temperature, hop aroma/flavour or acidity (no 'more sweetness requires more IBU', 'more alcohol requires more IBU', 'high FG needs more hops', 'roast needs X bitterness'). Does NOT duplicate FACT-RECIPE-0001 (R-2: IBU is a standard index, calculated IBU is an estimate, perceived bitterness not determined by IBU alone) or FACT-RECIPE-0002 (R-1: caramel/crystal extract generally less fermentable); rejected R-1 claims (residual extract = sweetness, crystal malt adds body) are not smuggled in. Wording traps: never 'balance means malt and hops are equal', 'balanced beer is better beer', 'BU:GU X is balanced', 'same BU:GU means same balance', 'the engine measures balance', 'harmonisk / veldig balansert' as scientific truth. SOURCE LIMITATIONS: no Tier A source defines 'balance' as a term of art (acceptable for professional_interpretation); no stand-alone scientific definition of balance; no Tier A beer study validates numeric balance; BU:GU has no peer-reviewed validation found; Daniels origin attribution is trade-only; sweetness/body causation remains unresolved from R-1; Palmer numeric examples are examples, not universal rules and Palmer is not cited here. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the Chief live spot-check recorded on issue #443 (Oxford 'flavor'/'bitterness', Gastl DOI 10.23763/BRSC07-01GASTL, BJCP 2021, Weikert 2017). Oxford edition/entry access details are not recorded here. App/Web wording concerns ('Harmonisk balansert / veldig balansert' from BU:GU banding, 'Maltdominert ... restsodmen ...', 'Fare for tung sodme', unsourced BU:GU thresholds 0.38 / 0.85) are separate and unchanged; the Course requires no engine change to teach R-4."
+    },
+    {
+      "id": "FACT-MEAS-0001",
+      "claim": "Gravity (also called specific gravity, formally relative density) is the density of wort or beer relative to water, compared at stated reference temperatures. Dissolved sugar raises it, and it generally falls during fermentation as yeast turns sugar into alcohol. Original gravity (OG) is the gravity measured before fermentation begins, and final gravity (FG) is the gravity measured when fermentation has finished.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T21:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical note (MISCO) -- refractometer manufacturer, commercial interest, not a brewing-hydrometer maker",
+          "ref": "MISCO, How to Use a Refractometer to Brew Beer, REV140407-1 (2014)"
+        },
+        {
+          "tier": "B",
+          "type": "trade/association guidance (American Homebrewers Association)",
+          "ref": "AHA, How to Take an Accurate Hydrometer Reading (13 May 2014)"
+        },
+        {
+          "tier": "B",
+          "type": "trade magazine article (Brew Your Own, Dave Green)",
+          "ref": "BYO, Dave Green, Hydrometers and Refractometers (8 Dec 2023, modified 9 Jul 2025)"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical source (Wyeast) -- commercial interest, narrow support for OG/FG timing only",
+          "ref": "Wyeast, Yeast Fermentation (29 Jul 2025)"
+        }
+      ],
+      "concepts": ["measurement.gravity"],
+      "notes": "Measurement-side M1 only: what gravity, OG and FG mean as MEASURED values. Measured OG/FG are kept distinct from recipe TARGET/predicted OG/FG (the App's calculated values are estimates; target vs actual stays methodology per #435, not a Course Fact). FG is NOT 'the lowest gravity possible'. Deliberately NOT claimed: that gravity directly measures 'how much sugar is in the beer' after fermentation (alcohol makes finished-beer hydrometer readings apparent values -- later Kompetent depth, not Foundation); no ABV, attenuation, Plato or Brix formulas or bands (attenuation is owned by FACT-YEAST-0002). Wording traps: never 'gravity = sugar content of the finished beer', 'FG is the lowest possible gravity', 'FG is the number the recipe predicts'. SOURCE LIMITATIONS: MISCO is a refractometer manufacturer with commercial interest; Wyeast cited narrowly for OG/FG timing; ASTM E100 terminology is NOT cited (official store confirms title/scope but the key definition text was only readable in a third-party preview, so this claim does not depend on it); no ASBC/EBC gravity-definition source opened; Kunze p.404 not cited (Kompetent apparent-reading depth). SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the Local Claude source gate (PASS, 2026-09-30) recorded on issue #444, and needs a Chief live spot-check at review. URLs and access dates are not recorded here and must be added at the Chief spot-check."
+    },
+    {
+      "id": "FACT-MEAS-0002",
+      "claim": "Gravity readings that stop changing across repeated measurements taken some time apart indicate that fermentation has plausibly finished. Airlock activity is not a reliable indicator of fermentation progress.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T21:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical note (MISCO) -- refractometer manufacturer, commercial interest",
+          "ref": "MISCO, How to Use a Refractometer to Brew Beer, REV140407-1 (2014)"
+        },
+        {
+          "tier": "B",
+          "type": "trade/association guidance (American Homebrewers Association)",
+          "ref": "AHA, How to Take an Accurate Hydrometer Reading (13 May 2014)"
+        },
+        {
+          "tier": "A",
+          "type": "producer FAQ (Wyeast) -- commercial interest, airlock half only",
+          "ref": "Wyeast FAQ on airlock activity"
+        }
+      ],
+      "concepts": ["measurement.fermentation_complete"],
+      "notes": "Measurement-side M2 only. 'Plausibly finished', not certainly/proven finished. Deliberately NOT claimed: any universal number of readings; any universal hours/days interval (one reading is not enough; 'next day' is example practice only); that stable gravity proves the beer is not stalled (professional-interpretation caution: no source read states this in those words -- a stalled fermentation can also read stable); that stable gravity must equal predicted FG; that stable gravity by itself means 'package immediately'; that airlock bubbling is proof either way -- the airlock is at most a rough hint. Lallemand CBC-1 bottle-conditioning numeric interval is intentionally OMITTED (one narrow sheet; must not become a rule); Kunze pp.404-405 industrial attenuation-limit procedure and the White Labs Forced Fermentation Test are intentionally not cited (context for predicted-vs-real FG only). Existing FACT-YEAST-0002 owns attenuation; FACT-MEAS-0001 owns what gravity/FG mean. SOURCE LIMITATIONS: the stable-readings half is strongly supported by MISCO/AHA, both of which carry commercial or trade framing; the airlock half is kept to 'not a reliable indicator / rough hint' because the Wyeast material is nuanced; no source read states airlock bubbling after fermentation is complete (not needed). SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the Local Claude source gate (PASS, conditional/narrow for M2, 2026-09-30) recorded on issue #444, and needs a Chief live spot-check at review. URLs and access dates are not recorded here and must be added at the Chief spot-check."
+    },
+    {
+      "id": "FACT-MEAS-0003",
+      "claim": "A hydrometer is made to read correctly at one reference temperature, stated on the instrument or in its instructions, and different hydrometers can have different reference temperatures. A sample at a different temperature can give a different reading, so the sample's temperature should be measured and noted.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T21:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical note (MISCO) -- refractometer manufacturer, commercial interest, not a brewing-hydrometer maker",
+          "ref": "MISCO, How to Use a Refractometer to Brew Beer, REV140407-1 (2014)"
+        },
+        {
+          "tier": "B",
+          "type": "trade/association guidance (American Homebrewers Association)",
+          "ref": "AHA, How to Take an Accurate Hydrometer Reading (13 May 2014)"
+        },
+        {
+          "tier": "B",
+          "type": "trade magazine article (Brew Your Own, Dave Green)",
+          "ref": "BYO, Dave Green, Hydrometers and Refractometers (8 Dec 2023, modified 9 Jul 2025)"
+        }
+      ],
+      "concepts": ["measurement.hydrometer_temperature"],
+      "notes": "Measurement-side M4 only. 'Reference temperature' is the primary wording; 'calibration temperature' may be used only as a learner gloss. Deliberately NOT claimed: any universal or numeric reference/calibration temperature; any temperature-correction formula or table (deferred beyond Foundation); any statement about hydrometer-glass or sample-container temperature effects (no explicit source statement was found -- source gap, out of scope); that the reference temperature is necessarily printed on every hydrometer. ASTM E100 is NOT cited: official store confirms title/scope, but the key definition text was only readable in a third-party preview, so this claim does not depend on it. SOURCE LIMITATIONS: MISCO is a refractometer manufacturer, not a brewing-hydrometer maker; AHA and BYO are Tier B trade sources. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the Local Claude source gate (PASS, 2026-09-30) recorded on issue #444, and needs a Chief live spot-check at review. URLs and access dates are not recorded here and must be added at the Chief spot-check."
     }
   ]
 }

@@ -251,11 +251,12 @@ _YEAST_CORE_VERIFIED_IDS = [f"FACT-YEAST-000{n}" for n in range(1, 6)]
 _WATER_FOUNDATION_VERIFIED_IDS = ["FACT-WATER-0001", "FACT-WATER-0002", "FACT-WATER-0003"]
 _HOP_CORE_VERIFIED_IDS = ["FACT-HOP-0004", "FACT-HOP-0005"]
 _RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-0003"]
+_MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
     + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
-    + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS
+    + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS + _MEASUREMENT_VERIFIED_IDS
 )
 
 
@@ -322,7 +323,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # documented_fact.
         # Issue #443 (V2.2 Goal 3 R-4) adds FACT-RECIPE-0003: 1
         # professional_interpretation.
-        self.assertEqual(classifications.count("documented_fact"), 32)
+        # Issue #444 (V2.2 Goal 3 Maaling M1/M2/M4) adds FACT-MEAS-0001..0003:
+        # 3 documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 35)
         self.assertEqual(classifications.count("professional_interpretation"), 12)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -714,6 +717,78 @@ class TestProductionRegistryRecipeBalance(unittest.TestCase):
             ("FACT-RECIPE-0002", "recipe.specialty_fermentability"),
         ):
             self.assertEqual(get_verified_record(_PRODUCTION_REGISTRY, fact_id)["concepts"], [concept])
+
+
+class TestProductionRegistryMeasurementFoundation(unittest.TestCase):
+    """Issue #444 (V2.2 Goal 3 Maaling Foundation): FACT-MEAS-0001..0003
+    (M1 gravity, M2 fermentation complete, M4 hydrometer temperature).
+    Documented facts only; no numbers, formulas or waiting rules."""
+
+    _CONCEPTS = {
+        "FACT-MEAS-0001": "measurement.gravity",
+        "FACT-MEAS-0002": "measurement.fermentation_complete",
+        "FACT-MEAS-0003": "measurement.hydrometer_temperature",
+    }
+
+    def test_exactly_three_meas_records(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-MEAS-")]
+        self.assertEqual(ids, _MEASUREMENT_VERIFIED_IDS)
+
+    def test_each_concept_maps_to_exactly_one_record(self):
+        for fact_id, concept in self._CONCEPTS.items():
+            with self.subTest(concept=concept):
+                found = find_verified_records(_PRODUCTION_REGISTRY, concept=concept)
+                self.assertEqual([r["id"] for r in found], [fact_id])
+
+    def test_documented_facts_without_modules(self):
+        for fact_id in _MEASUREMENT_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            self.assertEqual(record["classification"], "documented_fact", fact_id)
+            self.assertNotIn("modules", record, fact_id)
+
+    def test_claims_contain_no_numbers_or_formulas(self):
+        for fact_id in _MEASUREMENT_VERIFIED_IDS:
+            claim = get_verified_record(_PRODUCTION_REGISTRY, fact_id)["claim"]
+            self.assertFalse(any(ch.isdigit() for ch in claim), fact_id)
+            for forbidden in ("formula", "plato", "brix", "abv", "attenuation", "°"):
+                self.assertNotIn(forbidden, claim.lower(), fact_id)
+
+    def test_gravity_claim_boundaries(self):
+        claim = get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0001")["claim"]
+        self.assertIn("relative to water", claim)
+        self.assertIn("stated reference temperatures", claim)
+        self.assertIn("measured before fermentation", claim)
+        self.assertIn("measured when fermentation has finished", claim)
+        self.assertNotIn("lowest", claim)
+
+    def test_fermentation_complete_claim_is_hedged_and_has_no_rule(self):
+        claim = get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0002")["claim"]
+        self.assertIn("plausibly finished", claim)
+        self.assertIn("repeated measurements", claim)
+        self.assertIn("Airlock activity is not a reliable indicator", claim)
+        for forbidden in ("certainly", "proves", "package", "hours", "days"):
+            self.assertNotIn(forbidden, claim.lower())
+
+    def test_hydrometer_claim_uses_reference_temperature_without_values(self):
+        claim = get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0003")["claim"]
+        self.assertIn("reference temperature", claim)
+        self.assertIn("stated on the instrument or in its instructions", claim)
+        self.assertIn("measured and noted", claim)
+
+    def test_sources_and_limitations_are_explicit(self):
+        for fact_id in _MEASUREMENT_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            refs = " ".join(s["ref"] for s in record["sources"])
+            self.assertIn("MISCO", refs, fact_id)
+            self.assertIn("AHA", refs, fact_id)
+            self.assertNotIn("ASTM", refs, fact_id)
+            self.assertIn("SOURCE LIMITATIONS", record["notes"], fact_id)
+            self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"], fact_id)
+        airlock_refs = " ".join(
+            s["ref"] for s in get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0002")["sources"]
+        )
+        self.assertIn("Wyeast", airlock_refs)
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
