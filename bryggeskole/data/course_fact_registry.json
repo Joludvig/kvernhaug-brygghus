@@ -1169,6 +1169,70 @@
       ],
       "concepts": ["measurement.hydrometer_temperature"],
       "notes": "Measurement-side M4 only. 'Reference temperature' is the primary wording; 'calibration temperature' may be used only as a learner gloss. Deliberately NOT claimed: any universal or numeric reference/calibration temperature; any temperature-correction formula or table (deferred beyond Foundation); any statement about hydrometer-glass or sample-container temperature effects (no explicit source statement was found -- source gap, out of scope); that the reference temperature is necessarily printed on every hydrometer. ASTM E100 is NOT cited: official store confirms title/scope, but the key definition text was only readable in a third-party preview, so this claim does not depend on it. SOURCE LIMITATIONS: MISCO is a refractometer manufacturer, not a brewing-hydrometer maker; AHA and BYO are Tier B trade sources. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the Local Claude source gate (PASS, 2026-09-30) recorded on issue #444, and needs a Chief live spot-check at review. URLs and access dates are not recorded here and must be added at the Chief spot-check."
+    },
+    {
+      "id": "FACT-MEAS-0004",
+      "claim": "A refractometer measures the refractive index of a sample, often displayed as Brix, rather than density. On unfermented wort its reading can be used to estimate gravity, but once alcohol is present the raw reading no longer gives gravity directly; after fermentation has started, gravity is measured with a hydrometer or estimated with an appropriate refractometer correction that also uses the original pre-fermentation reading.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T17:45:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "manufacturer technical note (MISCO) -- refractometer manufacturer, commercial interest",
+          "ref": "MISCO, How to Use a Refractometer to Brew Beer, REV140407-1 -- https://www.misco.com/wp-content/uploads/2012/11/MISCO-TB-BEER-1.pdf",
+          "note": "Chief live spot-check on issue #445 (2026-09-30): refractometer SG-style interpretation becomes problematic once fermentation/alcohol is present; post-fermentation use requires a correction/calculation."
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer application guidance (MISCO) -- refractometer manufacturer, commercial interest",
+          "ref": "MISCO, beer refractometer application guidance -- https://www.misco.com/refractometer-applications/food-beverage-refractometer/delete/",
+          "note": "Chief live spot-check on issue #445 (2026-09-30): during/after fermentation the raw refractometer SG scale is not directly usable because water/sugar/ethanol interfere; a pre-fermentation reading plus the current reading can be used in a correction."
+        },
+        {
+          "tier": "B",
+          "type": "trade magazine article (Brew Your Own, Brad Smith)",
+          "ref": "BYO, Brad Smith, Understanding & Using Refractometer -- https://byo.com/articles/refractometer/",
+          "note": "Chief live spot-check on issue #445 (2026-09-30): direct pre-fermentation use; correction needed once alcohol is present."
+        },
+        {
+          "tier": "B",
+          "type": "trade magazine article (Brew Your Own, Dave Green)",
+          "ref": "BYO, Dave Green, Hydrometers and Refractometers -- https://byo.com/articles/hydrometers-and-refractometers/",
+          "note": "Chief live spot-check on issue #445 (2026-09-30): instrument distinction -- hydrometer uses density, refractometer uses refractive index."
+        }
+      ],
+      "concepts": ["measurement.instrument_choice"],
+      "notes": "Measurement-side M3 only (Kompetent / L2): the instrument-choice and alcohol boundary. Deliberately NOT claimed: any correction equation; any Brix-to-SG equation; any Wort Correction Factor maths; any numeric worked example; any brand ranking; that a hydrometer is always more accurate; that hydrometer and refractometer readings should always agree; that ATC (automatic temperature compensation) fixes alcohol interference -- ATC and alcohol are separate issues. 'Can be used to estimate gravity' on unfermented wort is deliberately an estimate, not an exact conversion. FACT-MEAS-0001 owns what gravity/OG/FG mean; FACT-MEAS-0003 owns hydrometer reference temperature. Product wording follow-ups noted on issue #445 (defRefraktometerBrix 'without issue' wording is too strong) are NOT changed here. SOURCE LIMITATIONS: MISCO is a refractometer manufacturer with commercial interest; no independent readable instrument-maker source beyond MISCO was found; BYO sources are Tier B trade corroboration. Kunze printed p.770 is NOT cited (not visually verified in this round and not required per the Chief source gate). SOURCE-ACCESS LIMITATIONS: this local implementation round did not independently reopen the sources; the record encodes the Chief-scoped claim and the Chief live source spot-check recorded on issue #445 (2026-09-30), whose URLs are carried in the source refs."
+    },
+    {
+      "id": "FACT-MEAS-0005",
+      "claim": "The same wort occupies more volume when hot than after it has cooled, so hot and cooled wort volumes are not interchangeable measurements. Evaporation and process losses can also change volume independently of temperature.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T17:45:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "trade magazine article (Brew Your Own, Dave Green)",
+          "ref": "BYO, Dave Green, Hit Your Post-Boil Volume -- https://byo.com/articles/hit-post-boil-volume/",
+          "note": "Chief live spot-check on issue #445 (2026-09-30): boil-off, thermal contraction and transfer/process loss treated as separate contributors to volume change; hot wort contracts on cooling."
+        },
+        {
+          "tier": "B",
+          "type": "trade magazine article (Brew Your Own)",
+          "ref": "BYO, Boiling & Cooling -- https://byo.com/articles/boiling-cooling-boiling-cooling/",
+          "note": "Chief live spot-check on issue #445 (2026-09-30): wort expands when heated and shrinks on cooling; evaporation separated as an independent volume-reduction mechanism."
+        },
+        {
+          "tier": "A",
+          "type": "government science reference (USGS Water Science School) -- supporting physics only, not wort-specific",
+          "ref": "USGS, Water Density -- https://www.usgs.gov/water-science-school/science/water-density",
+          "note": "Chief live spot-check on issue #445 (2026-09-30): liquid-water density changes with temperature. Supporting physics only."
+        }
+      ],
+      "concepts": ["measurement.volume_stages"],
+      "notes": "Measurement-side M6 only (Kompetent / L2): hot-vs-cooled volume physics plus the independence of evaporation/process losses. Deliberately NOT claimed: any shrinkage/contraction percentage; any numeric temperature; any loss or boil-off percentage; any system-specific (e.g. BrewZilla) guidance; any efficiency or yield maths. 'Record which stage a volume belongs to' remains methodology per #435, NOT part of this fact. FACT-METHOD-0004 continues to own method-dependent planning/loss variables; this record does not duplicate it. SOURCE LIMITATIONS: no clean wort-specific Tier A expansion source without numbers was found; the claim rests on Tier B BYO trade sources, with USGS as Tier A supporting physics for water only (not wort-specific proof). Kunze printed p.329 section 3.5.1.3 is NOT cited (not visually verified in this round and not required per the Chief source gate). SOURCE-ACCESS LIMITATIONS: this local implementation round did not independently reopen the sources; the record encodes the Chief-scoped claim and the Chief live source spot-check recorded on issue #445 (2026-09-30), whose URLs are carried in the source refs."
     }
   ]
 }
