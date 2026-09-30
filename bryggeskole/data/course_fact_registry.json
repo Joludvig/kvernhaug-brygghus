@@ -1019,6 +1019,42 @@
       ],
       "concepts": ["recipe.ibu_vs_perceived_bitterness"],
       "notes": "Recipe-side R-2 only: IBU is a standard bitterness index; recipe-calculated IBU is an estimate; perceived bitterness is not determined by IBU alone; similar IBU can be perceived differently. Learner-facing wording says only that the rest of the beer also affects perceived bitterness -- NO directional claim for alcohol, residual sugar/FG, roast, water minerals, carbonation, pH, temperature or hop aroma/flavour (those belong to future R-4 balance, if at all). Does NOT duplicate FACT-HOP-0005 (alpha % is a hop property, alpha % != IBU, amount/use affects IBU). Wording traps: never 'IBU tells you how bitter a beer tastes', 'IBU = perceived bitterness', 'same IBU = same bitterness', 'higher IBU always means more bitter'; no IBU formula, Tinseth/Rager maths, utilisation percentages or IBU bands; no BU:GU as sensory truth; the App's IBU is not exact. Do not read 'equi-bitter' in the Oladokun studies as identical IBU (full text not verified). SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch denied), so the sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and source set fixed on issue #441 (R-2 reconnaissance) and needs a Chief live spot-check at review. Oladokun 2016/2017 were accessible only as abstracts in reconnaissance, so they support only the narrow abstract-level perception finding; the perception part rests additionally on Gastl's method paper/literature framing and the Oxford Companion synthesis. Gastl's exact volume/page were not recorded. Palmer edition/date/access details to be recorded at Chief spot-check. BarthHaas BBC Pure Hop Pellet 2018 datasheet intentionally not cited (not recoverable live, cf. FACT-HOP-0005). Engine boundary: existing engine wording (e.g. 'exact bitterness') is implementation truth, not teaching provenance, and is unchanged here."
+    },
+    {
+      "id": "FACT-RECIPE-0002",
+      "claim": "The extract of caramel/crystal malts is generally less fermentable than the extract of base malt, so more of it can remain unfermented as residual extract in the finished beer. How much depends on the malt type and the amount used.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "producer technical source (Briess Technical Services, Caramel Malt User's Manual) -- commercial interest",
+          "ref": "Briess Technical Services, Introducing Crystal Red(R) and a Caramel Malt User's Manual"
+        },
+        {
+          "tier": "A",
+          "type": "producer technical source (Crisp Malt, Dark Crystal Malt / Crystal 400) -- commercial interest, narrow support",
+          "ref": "Crisp Malt, Dark Crystal Malt / Crystal 400"
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed pilot study (Castro, Affonso & Lehman, Fermentation, 2021) -- directional corroboration only",
+          "ref": "https://doi.org/10.3390/fermentation7030137"
+        },
+        {
+          "tier": "B",
+          "type": "reference encyclopedia entries (The Oxford Companion to Beer; one Tier B source family)",
+          "ref": "The Oxford Companion to Beer, entries 'caramel malts', 'Crystal malt', 'dextrins' and 'fermentability'"
+        },
+        {
+          "tier": "B",
+          "type": "brewing textbook, web edition (John Palmer, How to Brew, ch. 21)",
+          "ref": "John Palmer, How to Brew, chapter 21 (howtobrew.com)"
+        }
+      ],
+      "concepts": ["recipe.specialty_fermentability"],
+      "notes": "Recipe-side R-1 only: ingredient-side tendency that caramel/crystal malt extract is generally less fermentable than base-malt extract and can leave more residual extract. Terminology: 'caramel/crystal malt' is a practical family term, NOT claimed as a universal synonym in every malting tradition; NOT all specialty malt is less fermentable; NOT all caramel/crystal malt is completely unfermentable. Learner may be told only that overall wort fermentability still depends on the mash and other ingredients/process. Does NOT duplicate FACT-MALT-0002 (base vs specialty), FACT-MALT-0003 (thermal processing/colour/flavour), FACT-MALT-0004 (grist proportion), FACT-MASH-0001/0004 (enzymatic dextrins/mash-side fermentability) or FACT-YEAST-0002 (attenuation depends on yeast + wort/process). Deliberately NOT claimed: sweetness (residual extract != perceived sweetness), body/mouthfeel, magnitude (no usage percentages, FG changes, fermentability percentages, sugar spectra; 'ordinary usage' not stable across sources), colour rule (darker crystal is not always less fermentable/sweeter/heavier), mash mechanism (no dextrin chemistry, Congress arithmetic, FG formulas or Castro enzyme-loss mechanism). Sweetness/body belong to R-4 / professional interpretation. Wording traps: never 'crystal malt is unfermentable', 'makes beer sweeter', 'adds body', 'more crystal always means higher FG', 'all specialty malt is less fermentable', 'darker crystal is always less fermentable', 'ordinary use only has a small effect', 'high FG means sticky/sweet beer', 'the engine models specialty-malt fermentability'. SOURCE LIMITATIONS: no homebrew-typical-usage FG experiment; Castro is one 20% Crystal 60L pilot with lower OG in the crystal wort; magnitude rests heavily on producer claims and producer material has commercial interest; Oxford entries are one reference family; Prado et al. 2021 intentionally NOT cited (does not support this claim on accessible evidence). SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch denied), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and source set fixed on issue #442 and needs a Chief live spot-check at review. Briess/Crisp URLs, Palmer edition/date/access details and Oxford entry access are not recorded here and must be added at the Chief spot-check. Engine boundary: the recipe engine does not model specialty-malt fermentability (FG derives from OG + yeast attenuation; no malt-specific fermentability field); the Course teaches the tendency and adds no second calculator."
     }
   ]
 }
