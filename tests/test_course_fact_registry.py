@@ -250,11 +250,12 @@ _MALT_CORE_VERIFIED_IDS = ["FACT-MALT-0001", "FACT-MALT-0002", "FACT-MALT-0003",
 _YEAST_CORE_VERIFIED_IDS = [f"FACT-YEAST-000{n}" for n in range(1, 6)]
 _WATER_FOUNDATION_VERIFIED_IDS = ["FACT-WATER-0001", "FACT-WATER-0002", "FACT-WATER-0003"]
 _HOP_CORE_VERIFIED_IDS = ["FACT-HOP-0004", "FACT-HOP-0005"]
+_RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
     + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
-    + _HOP_CORE_VERIFIED_IDS
+    + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS
 )
 
 
@@ -315,7 +316,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # professional_interpretation (0003).
         # Issue #440 (V2.2 G3P-4) adds the hops-core pack (FACT-HOP-0004,
         # FACT-HOP-0005): 2 documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 30)
+        # Issue #441 (V2.2 Goal 3 R-2) adds FACT-RECIPE-0001: 1
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 31)
         self.assertEqual(classifications.count("professional_interpretation"), 11)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -564,6 +567,54 @@ class TestProductionRegistryHopCoreFactPackVerifiedOnlyApi(unittest.TestCase):
         }
         for fact_id, concepts in expected.items():
             self.assertEqual(get_verified_record(_PRODUCTION_REGISTRY, fact_id)["concepts"], concepts)
+
+
+class TestProductionRegistryRecipeIbuVsPerceivedBitterness(unittest.TestCase):
+    """Issue #441 (V2.2 Goal 3 R-2): exactly one FACT-RECIPE record.
+    FACT-HOP-0005 owns alpha % vs IBU; R-4 (balance) is not started."""
+
+    def _record(self):
+        return get_verified_record(_PRODUCTION_REGISTRY, "FACT-RECIPE-0001")
+
+    def test_exactly_one_recipe_record_and_concept_maps_to_it(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-RECIPE-")]
+        self.assertEqual(ids, ["FACT-RECIPE-0001"])
+        found = find_verified_records(_PRODUCTION_REGISTRY, concept="recipe.ibu_vs_perceived_bitterness")
+        self.assertEqual([r["id"] for r in found], ["FACT-RECIPE-0001"])
+
+    def test_documented_fact_without_modules(self):
+        record = self._record()
+        self.assertEqual(record["classification"], "documented_fact")
+        self.assertNotIn("modules", record)
+
+    def test_claim_is_conservative_and_makes_no_directional_claims(self):
+        claim = self._record()["claim"]
+        self.assertIn("standard bitterness index", claim)
+        self.assertIn("is an estimate", claim)
+        self.assertIn("beers with similar IBU can be perceived as differently bitter", claim)
+        lowered = claim.lower()
+        for forbidden in (
+            "alcohol", "sweet", "sugar", "roast", "mineral", "hardness", "carbonation", "ph ",
+            "temperature", "aroma", "alpha", "tinseth", "rager", "utilisation", "utilization",
+            "bu:gu", "same ibu", "always",
+        ):
+            self.assertNotIn(forbidden, lowered)
+
+    def test_sources_and_limitations_are_explicit(self):
+        record = self._record()
+        refs = " ".join(s["ref"] for s in record["sources"])
+        self.assertIn("10.1016/j.foodres.2016.05.018", refs)
+        self.assertIn("10.1016/j.foodchem.2017.03.031", refs)
+        self.assertIn("Gastl", refs)
+        self.assertIn("howtobrew.com/section-1/chapter-5", refs)
+        self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"])
+        self.assertIn("abstracts", record["notes"])
+
+    def test_hop_0005_is_unchanged_and_not_duplicated(self):
+        hop = get_verified_record(_PRODUCTION_REGISTRY, "FACT-HOP-0005")
+        self.assertEqual(hop["concepts"], ["hop.alpha_vs_ibu"])
+        self.assertNotIn("estimate", hop["claim"])
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):

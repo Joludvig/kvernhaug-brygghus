@@ -983,6 +983,42 @@
       ],
       "concepts": ["water.source_awareness"],
       "notes": "Awareness / check-your-own-waterworks framing only. Bergen kommune is an example that a municipal supplier publishes water-quality and treatment information; do NOT generalise Bergen's treatment practice to Norway as a whole. Wording trap: no target profiles, no ions/residual alkalinity/salt additions, no calculator logic. Source gate: Bergen pages were spot-checked live by Chief (issue #430 handoff, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claim."
+    },
+    {
+      "id": "FACT-RECIPE-0001",
+      "claim": "IBU is a standard bitterness index for beer. A recipe's calculated IBU is an estimate rather than a guarantee of what the finished beer will measure, and perceived bitterness also depends on the rest of the beer, so beers with similar IBU can be perceived as differently bitter.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T18:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "peer-reviewed method paper (Gastl, Hanke & Back, BrewingScience, 2007) -- narrow method-development scope; matrix statements are partly literature framing",
+          "ref": "Gastl M., Hanke S., Back W., BrewingScience 2007 (bitterness taste-sensor method development)"
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed human sensory beer study (Oladokun et al., Food Research International, 2016) -- abstract-level support only",
+          "ref": "https://doi.org/10.1016/j.foodres.2016.05.018"
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed human sensory beer study (Oladokun et al., Food Chemistry, 2017) -- abstract-level support only",
+          "ref": "https://doi.org/10.1016/j.foodchem.2017.03.031"
+        },
+        {
+          "tier": "B",
+          "type": "reference encyclopedia entries (The Oxford Companion to Beer, 'International Bitterness Units (IBUs)' and 'bitterness'; one Tier B source family, overlapping authorship)",
+          "ref": "The Oxford Companion to Beer, entries 'International Bitterness Units (IBUs)' and 'bitterness'"
+        },
+        {
+          "tier": "B",
+          "type": "brewing textbook, web edition (John Palmer, How to Brew, ch. 5 Hops)",
+          "ref": "https://howtobrew.com/section-1/chapter-5/"
+        }
+      ],
+      "concepts": ["recipe.ibu_vs_perceived_bitterness"],
+      "notes": "Recipe-side R-2 only: IBU is a standard bitterness index; recipe-calculated IBU is an estimate; perceived bitterness is not determined by IBU alone; similar IBU can be perceived differently. Learner-facing wording says only that the rest of the beer also affects perceived bitterness -- NO directional claim for alcohol, residual sugar/FG, roast, water minerals, carbonation, pH, temperature or hop aroma/flavour (those belong to future R-4 balance, if at all). Does NOT duplicate FACT-HOP-0005 (alpha % is a hop property, alpha % != IBU, amount/use affects IBU). Wording traps: never 'IBU tells you how bitter a beer tastes', 'IBU = perceived bitterness', 'same IBU = same bitterness', 'higher IBU always means more bitter'; no IBU formula, Tinseth/Rager maths, utilisation percentages or IBU bands; no BU:GU as sensory truth; the App's IBU is not exact. Do not read 'equi-bitter' in the Oladokun studies as identical IBU (full text not verified). SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch denied), so the sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and source set fixed on issue #441 (R-2 reconnaissance) and needs a Chief live spot-check at review. Oladokun 2016/2017 were accessible only as abstracts in reconnaissance, so they support only the narrow abstract-level perception finding; the perception part rests additionally on Gastl's method paper/literature framing and the Oxford Companion synthesis. Gastl's exact volume/page were not recorded. Palmer edition/date/access details to be recorded at Chief spot-check. BarthHaas BBC Pure Hop Pellet 2018 datasheet intentionally not cited (not recoverable live, cf. FACT-HOP-0005). Engine boundary: existing engine wording (e.g. 'exact bitterness') is implementation truth, not teaching provenance, and is unchanged here."
     }
   ]
 }
