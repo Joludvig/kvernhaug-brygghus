@@ -12,6 +12,7 @@ synthetic, see valid_verified_full.json).
 Run with:
     python3 -m unittest tests.test_course_fact_registry
 """
+import datetime
 import io
 import json
 import os
@@ -247,10 +248,11 @@ _METHOD_CONTEXT_VERIFIED_IDS = [
 ]
 _MALT_CORE_VERIFIED_IDS = ["FACT-MALT-0001", "FACT-MALT-0002", "FACT-MALT-0003", "FACT-MALT-0004"]
 _YEAST_CORE_VERIFIED_IDS = [f"FACT-YEAST-000{n}" for n in range(1, 6)]
+_WATER_FOUNDATION_VERIFIED_IDS = ["FACT-WATER-0001", "FACT-WATER-0002", "FACT-WATER-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
-    + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS
+    + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
 )
 
 
@@ -306,8 +308,11 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         data = read_registry_file(_PRODUCTION_REGISTRY)
         verified = [r for r in data["records"] if r.get("status") == "verified"]
         classifications = [r["classification"] for r in verified]
-        self.assertEqual(classifications.count("documented_fact"), 26)
-        self.assertEqual(classifications.count("professional_interpretation"), 10)
+        # Issue #430 (V2.2 G3P-3) adds the water-foundation pack
+        # (FACT-WATER-0001..0003): 2 documented_fact (0001..0002), 1
+        # professional_interpretation (0003).
+        self.assertEqual(classifications.count("documented_fact"), 28)
+        self.assertEqual(classifications.count("professional_interpretation"), 11)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
@@ -565,6 +570,77 @@ class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
     def test_every_record_documents_scope_and_wording_trap(self):
         for record in self._malt_records().values():
             self.assertIn("Wording trap", record["notes"])
+
+
+class TestProductionRegistryWaterFoundationVerified(unittest.TestCase):
+    """Issue #430 (V2.2 G3P-3): the Water foundation pack
+    (FACT-WATER-0001..0003), promoted to verified from the external source
+    provenance in the #430 handoff. Qualitative only; the Norwegian
+    chloramine prevalence gap stays explicit."""
+
+    _CONCEPTS = {
+        "FACT-WATER-0001": "water.majority_ingredient",
+        "FACT-WATER-0002": "water.chlorine_chloramine",
+        "FACT-WATER-0003": "water.source_awareness",
+    }
+
+    def _water_records(self):
+        return {r["id"]: r for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"].startswith("FACT-WATER-")}
+
+    def test_returns_exactly_the_three_water_ids(self):
+        self.assertEqual(set(self._water_records()), set(_WATER_FOUNDATION_VERIFIED_IDS))
+
+    def test_each_concept_maps_to_exactly_one_record(self):
+        for fact_id, concept in self._CONCEPTS.items():
+            with self.subTest(concept=concept):
+                ids = [r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept=concept)]
+                self.assertEqual(ids, [fact_id])
+
+    def test_verified_at_is_valid_and_not_in_the_future(self):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        for record in self._water_records().values():
+            stamp = datetime.datetime.fromisoformat(record["verified_at"].replace("Z", "+00:00"))
+            self.assertLessEqual(stamp, now)
+
+    def test_sources_are_external_https_and_never_chief_or_ai(self):
+        for record in self._water_records().values():
+            self.assertGreaterEqual(len(record["sources"]), 2)
+            for source in record["sources"]:
+                self.assertIn(source["tier"], ("A", "B"))
+                self.assertNotIn("chief", (source["ref"] + source["type"]).lower())
+            self.assertTrue(any("https://" in s["ref"] for s in record["sources"]))
+
+    def test_majority_record_is_qualitative_tier_b_only(self):
+        record = self._water_records()["FACT-WATER-0001"]
+        self.assertEqual({s["tier"] for s in record["sources"]}, {"B"})
+        self.assertNotIn("%", record["claim"])
+        self.assertNotIn("key", record["claim"].lower())
+
+    def test_chlorine_record_scopes_norway_to_some_and_keeps_prevalence_gap(self):
+        record = self._water_records()["FACT-WATER-0002"]
+        self.assertIn("some Norwegian waterworks", record["claim"])
+        self.assertIn("not established", record["claim"])
+        for word in ("common in Norway", "many", "most"):
+            self.assertNotIn(word, record["claim"])
+        self.assertIn("SOURCE GAP", record["notes"])
+        self.assertTrue(any("fhi.no" in s["ref"] for s in record["sources"]))
+
+    def test_no_treatment_dosing_or_chemistry_in_claims(self):
+        for record in self._water_records().values():
+            claim = record["claim"].lower()
+            for token in ("ppm", "campden", "boil", "overnight", "salt", "dose", "dosing"):
+                self.assertNotIn(token, claim)
+
+    def test_source_awareness_does_not_generalise_bergen(self):
+        record = self._water_records()["FACT-WATER-0003"]
+        self.assertIn("bergen.kommune.no", " ".join(s["ref"] for s in record["sources"]))
+        self.assertIn("do NOT generalise Bergen", record["notes"])
+
+    def test_every_record_documents_source_gate_and_wording_trap(self):
+        for record in self._water_records().values():
+            self.assertIn("Wording trap", record["notes"])
+            self.assertIn("Source gate:", record["notes"])
+            self.assertNotIn("NOT verified", record["notes"])
 
 
 class TestProductionRegistryYeastCoreFactPackVerifiedOnlyApi(unittest.TestCase):

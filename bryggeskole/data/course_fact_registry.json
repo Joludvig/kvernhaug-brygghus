@@ -868,6 +868,74 @@
       ],
       "concepts": ["yeast.choice_principle"],
       "notes": "White Labs: strain specifications list attenuation, temperature, profile and suitable styles. Fermentis: attenuation, flocculation and temperature tolerance are selection factors; consult each product's technical data sheet. The Fermentis source is lager-specific, so it supports the general method of selection only. Wording trap: producer style recommendations are guidance, not hard compatibility rules; no strain encyclopaedia, catalogue or brand ranking. Source gate: sources were opened/read live by Chief (issue #428 comment, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
+    },
+    {
+      "id": "FACT-WATER-0001",
+      "claim": "Water makes up most of beer, so water quality can matter to the finished beer.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:50:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "educational brewing source",
+          "ref": "Brewers Association, Water Chemistry for Consistent Brewing, https://www.brewersassociation.org/webinar/water-chemistry-for-consistent-brewing/"
+        },
+        {
+          "tier": "B",
+          "type": "educational brewing article",
+          "ref": "Craft Beer & Brewing, Water: The Stuff of Life (and Beer), https://www.beerandbrewing.com/water-the-stuff-of-life-and-beer"
+        }
+      ],
+      "concepts": ["water.majority_ingredient"],
+      "notes": "Qualitative only. Tier B educational brewing sources; no Tier A source was found for this simple majority claim, so the record is kept to the plain qualitative scope. Wording trap: no percentages, do not call water the 'key' ingredient; no ion, pH, salt or target-profile content; existing App/Web water text is not a source. Source gate: sources were read by local research and spot-checked live by Chief (issue #430 handoff, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claim."
+    },
+    {
+      "id": "FACT-WATER-0002",
+      "claim": "Chlorine and chloramine are different disinfectants, and either can create unwanted medicinal flavour in beer; some Norwegian waterworks use chloramine, but how common that is is not established.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:50:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "educational brewing article",
+          "ref": "Craft Beer & Brewing, Water: The Stuff of Life (and Beer), https://www.beerandbrewing.com/water-the-stuff-of-life-and-beer (chlorine/chloramine can react in brewing to give medicinal/plasticky chlorophenol character)"
+        },
+        {
+          "tier": "B",
+          "type": "established brewing text",
+          "ref": "Palmer, How to Brew, water chapter (chloramine is more persistent and harder to remove than chlorine)"
+        },
+        {
+          "tier": "A",
+          "type": "public health authority",
+          "ref": "Folkehelseinstituttet (FHI), Kjemikalier i drikkevann, https://www.fhi.no/sm/drikkevann/handbok-innhold-i-drikkevann/innhold-i-drikkevann/kjemikalier-i-drikkevann/ (some water-treatment plants add ammonium to form chloramine, which disinfects)"
+        }
+      ],
+      "concepts": ["water.chlorine_chloramine"],
+      "notes": "Norway scope is strictly 'some': FHI directly supports only that some Norwegian water-treatment plants form/use chloramine. Explicit unresolved SOURCE GAP: how common chloramine use is in Norway is not established; older FHI Vannrapport 121 and VA-Miljo guidance corroborate existence/use but not prevalence. Never say common/many/most and give no count or share. Beginner wording: check your own water supplier. Wording traps: no 'boil it' or 'leave it overnight' as a universal fix; no Campden/carbon/ascorbic-acid dosing; no ppm, contact-time or removal percentages; no treatment methods in Foundation. Source gate: sources were read by local research and FHI was spot-checked live by Chief (issue #430 handoff, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claims."
+    },
+    {
+      "id": "FACT-WATER-0003",
+      "claim": "Find out which waterworks supplies you and read what it publishes about the water; municipal water suppliers such as Bergen kommune publish water-quality information.",
+      "classification": "professional_interpretation",
+      "status": "verified",
+      "verified_at": "2026-09-29T19:50:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "municipal water supplier publication",
+          "ref": "Bergen kommune, Drikkevannskvalitet, https://www.bergen.kommune.no/innbyggerhjelpen/vann-vei-og-trafikk/vann-og-avlop/vann-og-vannforsyning/drikkevannskvalitet"
+        },
+        {
+          "tier": "A",
+          "type": "municipal water supplier publication",
+          "ref": "Bergen kommune, Bruk av klor ved arbeid paa vannledningsnettet, https://www.bergen.kommune.no/hvaskjer/tema/meldinger-fra-vaktsentralen/driftsrutiner/bruk-av-klor-ved-arbeid-pa-vannledningsnettet"
+        }
+      ],
+      "concepts": ["water.source_awareness"],
+      "notes": "Awareness / check-your-own-waterworks framing only. Bergen kommune is an example that a municipal supplier publishes water-quality and treatment information; do NOT generalise Bergen's treatment practice to Norway as a whole. Wording trap: no target profiles, no ions/residual alkalinity/salt additions, no calculator logic. Source gate: Bergen pages were spot-checked live by Chief (issue #430 handoff, 2026-09-29); the Bridge run could not re-fetch them (WebFetch/WebSearch denied) and encodes only the Chief-scoped claim."
     }
   ]
 }
