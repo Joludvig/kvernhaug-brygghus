@@ -52,10 +52,10 @@ for the fact-pack round, not existing registry concepts.
 | 2 | Clean first, sanitise second | `hygiene.clean_first` (new) | N1 (§5) |
 | 3 | Hot-side / cold-side sanitation boundary | `cool.sanitation_boundary` (*existing*) | FACT-COOL-0003 (reuse) |
 | 4 | Chemical handling: label/SDS, eye/hand protection, ventilation, original-container storage, do not mix cleaning products | `safety.chem_handling` (new) | N2 (§5) |
-| 5 | Fermentation CO₂ in enclosed / poorly ventilated spaces | `safety.fermentation_co2` (new) | N3 (§5); L1 level = owner decision (§13) |
+| 5 | Fermentation CO₂ in enclosed / poorly ventilated spaces | `safety.fermentation_co2` (new) | N3 (§5); L1 MUST = owner decision (§13, resolved) |
 | 6 | Pressure safety for sealed bottles, kegs and rated equipment | `package.pressure_safety` (*existing*) | FACT-PACK-0003 (reuse) |
 
-Concept 5 is listed as MUST-*pending owner decision*. See §13. Concepts 1–4 and 6 are MUST unconditionally.
+Concept 5 is an unconditional Foundation MUST by owner decision (2026-09-30, §13). Concepts 1–4 and 6 are MUST unconditionally.
 
 ## 3. SHOULD, optional and LATER
 
@@ -221,7 +221,7 @@ Indicative id `safety.fundamentals`; the implementation issue fixes the final id
   3. Where the boundary is — hot side / cold side, with the visual (FACT-COOL-0003, FACT-COOL-0001 context)
   4. Handling cleaners and sanitisers (N2)
   5. Hot liquids and boil-over (FACT-BOIL-0004; scald first aid only if O1 ships)
-  6. CO₂ from fermentation (N3, subject to §13)
+  6. CO₂ from fermentation (N3, required; owner decision §13)
   7. Pressure in sealed bottles and kegs (FACT-PACK-0003)
 - Chunks that only restate an existing fact link to the existing Kjøling/overføring, Koking/humle and Pakking chunks rather than duplicate them.
 - Placement: before the process spine as a recommended order, **not a hard gate**; existing modules stay reachable. Kjøling/overføring's sanitation-boundary chunk gets a text link to this module; that link is a later slice.
@@ -256,17 +256,17 @@ A new homebrewer is about to make a first batch with a used fermenter and a bott
 2. They explain what sanitising adds: it reduces microorganisms on a clean surface but does not make anything sterile.
 3. On the brew-day strip they point to where heat stops protecting the wort and say the fermenter, hose, airlock and every tool used from then on must be clean and sanitised (FACT-COOL-0003).
 4. Before opening the sanitiser they check the **label and safety data sheet**, put on eye and hand protection as directed, use it ventilated as directed, and afterwards close it and return it to its original container out of reach of children. When offered a "stronger" mix of two cleaners they decline (N2).
-5. They plan to ferment in a ventilated room rather than a small closed cupboard, and can say why in one sentence (N3, if L1 per §13).
+5. They plan to ferment in a ventilated room rather than a small closed cupboard, and can say why in one sentence (N3, required; owner decision §13).
 6. They say a sealed bottle or keg is under pressure and that only suitable, undamaged, rated equipment should hold it (FACT-PACK-0003).
 
 Pass condition: an independent reader answers all steps correctly on a first read-through; no unverified claim is shown; no dose, contact time or
 product name appears; NO/EN show identical content. Owner-PC QA of the implementation remains a separate gate.
 
-## 13. Owner decision: fermentation CO₂ at Level 1 — MUST vs SHOULD
+## 13. Owner decision: fermentation CO₂ at Level 1 — resolved as MUST
 
-**CO₂ L1 MUST vs SHOULD = OWNER DECISION.** This contract does **not** decide it. It is a hard gate before the module or N3's level is fixed.
+**OWNER DECISION (2026-09-30): CO₂ at L1 = MUST.** This gate is resolved. The decision is recorded here as given by the owner; the research below is the rationale and evidence limit behind it.
 
-**Research recommendation (input to the owner, not a decision):** MUST is supported as a cautious recommendation, with calm qualitative framing,
+**Rationale (from the research recommendation that preceded the decision):** MUST is supported as a cautious recommendation, with calm qualitative framing,
 because:
 
 - severity is high (asphyxiation is possible and can be fatal);
@@ -277,12 +277,11 @@ because:
 **Limit of the evidence:** homebrew-scale probability is not quantified by any authoritative source found (G2). The regulator analogue is
 workplace scale. What makes MUST defensible is severity and cheap mitigation, not measured likelihood.
 
-**Consequences of each choice:**
+**Consequences of the decision:**
 
-- *MUST:* N3 is in the smallest fact pack and the module's CO₂ chunk is required. Framing stays one short, proportionate caution, never an industrial safety unit.
-- *SHOULD:* N3 may move to the second slice, and the CO₂ chunk becomes recommended reading. The learner outcome (§1 item 5) and the acceptance scenario (§12 step 5) are then optional.
+- N3 is in the smallest fact pack, the CO₂ learner outcome (§1 item 5) is required, the acceptance-scenario step (§12 step 5) is required, and the module's CO₂ chunk is required, not optional. Framing stays one short, proportionate caution, never an industrial safety unit.
 
-Nothing else in this contract depends on the answer, so the gate can be resolved without re-opening other decisions.
+Nothing else in this contract depended on the answer, so resolving the gate re-opens no other decision.
 
 ## 14. Smallest implementation slices
 
@@ -290,7 +289,7 @@ Nothing else in this contract depends on the answer, so the gate can be resolved
 |---|---|---|---|
 | 1 | **N1 fact pack**: cleaning vs sanitising + clean-first (sources opened and read; registry records; tests) | Registry + tests | this contract |
 | 2 | **N2 fact pack**: generic chemical handling (SDS-based) | Registry + tests | this contract |
-| 3 | **N3 fact pack**: fermentation CO₂ qualitative hazard | Registry + tests | this contract + **§13 owner decision** |
+| 3 | **N3 fact pack**: fermentation CO₂ qualitative hazard | Registry + tests | this contract + §13 owner decision (**RESOLVED: MUST**) |
 | 4 | Module skeleton with only the sections whose records are verified; questions, NO/EN, mastery, module registration | Module + tests | 1–3 (each section may ship when its record is done) |
 | 5 | Hot-side/cold-side visual | UI | 4 |
 | 6 | Kjøling/overføring link to this module and other Learn→Plan links | UI | 4 |
@@ -333,4 +332,4 @@ rendered page and read the printed number, and must not rely on OCR text for any
 ## Explicitly not done in this document
 
 Course Fact Registry unchanged; no source opened or promoted in this run; no module, question, UI, bridge or visual implemented; no masterdata,
-recipe-engine, Web/public or Sóti change; the CO₂ MUST-vs-SHOULD owner gate is recorded, not decided; no deploy.
+recipe-engine, Web/public or Sóti change; the owner decision that fermentation CO₂ at L1 is MUST (2026-09-30) is recorded in §13; no deploy.
