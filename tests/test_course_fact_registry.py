@@ -249,10 +249,12 @@ _METHOD_CONTEXT_VERIFIED_IDS = [
 _MALT_CORE_VERIFIED_IDS = ["FACT-MALT-0001", "FACT-MALT-0002", "FACT-MALT-0003", "FACT-MALT-0004"]
 _YEAST_CORE_VERIFIED_IDS = [f"FACT-YEAST-000{n}" for n in range(1, 6)]
 _WATER_FOUNDATION_VERIFIED_IDS = ["FACT-WATER-0001", "FACT-WATER-0002", "FACT-WATER-0003"]
+_HOP_CORE_VERIFIED_IDS = ["FACT-HOP-0004", "FACT-HOP-0005"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
     + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
+    + _HOP_CORE_VERIFIED_IDS
 )
 
 
@@ -311,7 +313,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # Issue #430 (V2.2 G3P-3) adds the water-foundation pack
         # (FACT-WATER-0001..0003): 2 documented_fact (0001..0002), 1
         # professional_interpretation (0003).
-        self.assertEqual(classifications.count("documented_fact"), 28)
+        # Issue #440 (V2.2 G3P-4) adds the hops-core pack (FACT-HOP-0004,
+        # FACT-HOP-0005): 2 documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 30)
         self.assertEqual(classifications.count("professional_interpretation"), 11)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -467,12 +471,14 @@ class TestProductionRegistryBoilHopFactPackVerifiedOnlyApi(unittest.TestCase):
     """Issue #366: the third source-backed fact pack, boil/hop fundamentals
     (FACT-BOIL-0001..0004, FACT-HOP-0001..0003)."""
 
-    def test_returns_exactly_the_seven_boil_hop_ids(self):
+    def test_returns_exactly_the_seven_boil_hop_ids_plus_the_two_hop_core_ids(self):
+        # Issue #440 adds FACT-HOP-0004/0005 (no `modules`, so the module
+        # filter below still returns exactly the original seven).
         ids = {
             r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)
             if r["id"].startswith("FACT-BOIL-") or r["id"].startswith("FACT-HOP-")
         }
-        self.assertEqual(ids, set(_BOIL_HOP_VERIFIED_IDS))
+        self.assertEqual(ids, set(_BOIL_HOP_VERIFIED_IDS) | set(_HOP_CORE_VERIFIED_IDS))
 
     def test_module_filter_boil_hop_fundamentals_returns_all_seven(self):
         ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, module="boil_hop.fundamentals")}
@@ -493,6 +499,71 @@ class TestProductionRegistryBoilHopFactPackVerifiedOnlyApi(unittest.TestCase):
             record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
             self.assertTrue(record["sources"])
             self.assertTrue(any(s.get("ref") for s in record["sources"]))
+
+
+class TestProductionRegistryHopCoreFactPackVerifiedOnlyApi(unittest.TestCase):
+    """Issue #440 (V2.2 G3P-4): the Raavarer P4 hops-core fact pack
+    (FACT-HOP-0004, FACT-HOP-0005). HOP-0001..0003 are reused, not changed."""
+
+    _CONCEPTS = {"FACT-HOP-0005": "hop.alpha_vs_ibu", "FACT-HOP-0004": "hop.ageing_storage"}
+
+    def _records(self):
+        return {r["id"]: r for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"] in _HOP_CORE_VERIFIED_IDS}
+
+    def test_returns_exactly_the_two_hop_core_ids(self):
+        self.assertEqual(set(self._records()), set(_HOP_CORE_VERIFIED_IDS))
+
+    def test_each_concept_maps_to_exactly_one_record(self):
+        for fact_id, concept in self._CONCEPTS.items():
+            with self.subTest(concept=concept):
+                ids = [r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept=concept)]
+                self.assertEqual(ids, [fact_id])
+
+    def test_both_are_documented_facts_without_modules(self):
+        for fact_id, record in self._records().items():
+            self.assertEqual(record["classification"], "documented_fact", fact_id)
+            self.assertEqual(record["verified_at"], "2026-09-30T12:00:00Z", fact_id)
+            self.assertNotIn("modules", record, fact_id)
+
+    def test_alpha_vs_ibu_wording_and_sources(self):
+        record = self._records()["FACT-HOP-0005"]
+        self.assertIn("not the beer's IBU", record["claim"])
+        self.assertIn("does not map to any fixed IBU", record["claim"])
+        refs = [s["ref"] for s in record["sources"]]
+        self.assertEqual(len(refs), 2)
+        self.assertTrue(any("beerandbrewing.com/dictionary/0Mo49i2N1B" in r for r in refs))
+        self.assertTrue(any("howtobrew.com/section-1/chapter-5" in r for r in refs))
+        self.assertIn("2026-09-30", " ".join(s["type"] for s in record["sources"]))
+
+    def test_alpha_vs_ibu_does_not_absorb_recipe_ibu_boundaries(self):
+        claim = self._records()["FACT-HOP-0005"]["claim"].lower()
+        for forbidden in ("tinseth", "utilisation", "utilization", "estimate", "perceived", "balance", "cohumulone"):
+            self.assertNotIn(forbidden, claim)
+
+    def test_ageing_storage_uses_tight_claim_without_forbidden_content(self):
+        record = self._records()["FACT-HOP-0004"]
+        claim = record["claim"].lower()
+        self.assertIn("cold, oxygen-excluding storage slows deterioration", claim)
+        for forbidden in ("cheese", "sweaty", "less bitter", "vacuum", "months", "storage index", "%"):
+            self.assertNotIn(forbidden, claim)
+
+    def test_ageing_storage_sources_mark_commercial_interest(self):
+        sources = self._records()["FACT-HOP-0004"]["sources"]
+        self.assertEqual(len(sources), 3)
+        self.assertTrue(any("10.3390/plants12040936" in s["ref"] for s in sources))
+        barthhaas = [s for s in sources if "barthhaas.com" in s["ref"]]
+        self.assertEqual(len(barthhaas), 2)
+        for source in barthhaas:
+            self.assertIn("commercial interest", source["type"])
+
+    def test_existing_hop_records_are_unchanged_in_id_and_concepts(self):
+        expected = {
+            "FACT-HOP-0001": ["hop.isomerization_time", "hop.whirlpool_technique"],
+            "FACT-HOP-0002": ["hop.aroma_volatility", "hop.whirlpool_technique"],
+            "FACT-HOP-0003": ["hop.addition_strategy"],
+        }
+        for fact_id, concepts in expected.items():
+            self.assertEqual(get_verified_record(_PRODUCTION_REGISTRY, fact_id)["concepts"], concepts)
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
