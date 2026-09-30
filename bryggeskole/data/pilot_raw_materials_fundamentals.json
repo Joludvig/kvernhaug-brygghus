@@ -1,0 +1,726 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-RAW-MATERIALS-FUNDAMENTALS",
+  "chunks": [
+    {
+      "id": "CHUNK-RAW-A",
+      "source_claims": ["FACT-MALT-0001"],
+      "text": {
+        "no": "**Malt.** Malt er bygg som er maltet, og er en av de grunnleggende råvarene i øl. Malten leverer karbohydratene/sukkerartene som gjæres, og bidrar også med farge og smak. Bygg egner seg godt til malting fordi det har skall, et lager av stivelse og et enzymsystem. Maltingen skjer i tre steg: bløtlegging, spiring og tørking. Spiringen åpner opp kornets stivelseslager, og tørkingen stopper veksten slik at stivelsen fortsatt er tilgjengelig for bryggeren.",
+        "en": "**Malt.** Malt is barley that has been malted, and it is one of beer's basic ingredients. Malt supplies the carbohydrates/sugars that get fermented, and it also contributes colour and flavour. Barley is well suited to malting because it has a husk, a starch reserve and an enzyme system. Malting is a sequence of three steps: steeping, germination and drying. Germination opens up the grain's starch reserve, and drying halts growth so the starch is still available to the brewer."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-B",
+      "source_claims": ["FACT-MALT-0002", "FACT-MALT-0003"],
+      "text": {
+        "no": "Malt deles ofte i to grupper: basismalt og spesialmalt. Basismalt har høyt enzyminnhold sammen med sukkerartene som trengs til gjæring. Spesialmalt lages ved å endre malting- og tørkeforholdene for å utvikle smak, farge eller andre egenskaper. Kraftigere oppvarming gir mindre enzymer igjen, og mange spesialmalter er laget for å brukes i mindre mengder. Hvordan malten tørkes, brennes eller ristes gir ulik farge og smak, og maltens farge påvirker ølets farge. Farge er likevel ikke en direkte forutsigelse av smak.",
+        "en": "Malts are commonly divided into two groups: base malt and specialty malt. Base malts have high enzyme levels together with the sugars needed for fermentation. Specialty malts are made by altering the malting and drying conditions to develop flavour, colour or other functions. More intense heating leaves fewer enzymes, and many specialty malts are designed to be used in smaller amounts. How the malt is dried, kilned or roasted gives different colour and flavour, and the malt's colour affects the colour of the beer. Colour is still not a direct predictor of flavour."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-C",
+      "source_claims": ["FACT-MALT-0004", "FACT-MASH-0001", "FACT-MASH-0004"],
+      "text": {
+        "no": "Andelen hver malt har av kornblandingen (grist) påvirker hvor sterkt akkurat den malten bidrar til oppskriftens samlede maltkarakter. Det er maltens enzymer som bryter ned stivelse under mesking, og en del blir til dekstriner som vanlig ølgjær ikke gjærer. Hvor gjærbar vørteren blir, avhenger av flere faktorer, blant annet maltens eget enzyminnhold. Detaljene tar du i Mesking-modulen.",
+        "en": "The share each malt has of the grain mix (grist) affects how strongly that malt contributes to the recipe's overall malt character. It is malt enzymes that break down starch during mashing, and some of it becomes dextrins that ordinary brewing yeast does not ferment. How fermentable the wort ends up depends on several factors, including the malt's own enzyme content. You cover the details in the Mashing module."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-D",
+      "source_claims": ["FACT-HOP-0001", "FACT-HOP-0002", "FACT-HOP-0003"],
+      "text": {
+        "no": "**Humle.** Humle gir bitterhet, smak og aroma. Koking omdanner (isomeriserer) humlens alfasyrer til stoffer som er en viktig kilde til bitterhet, og lengre koketid gir generelt mer bitterhet. Aroma og smak kommer i stor grad fra flyktige oljer som koker bort jo lenger humlen er i aktiv koking. Derfor beholder en sen tilsetning mer aroma og smak, men gir generelt lavere bitterhet enn en tidlig tilsetning. Sen humle gir altså ikke null bitterhet, og forskjellen er en retning, ikke et skille mellom alt og ingenting. Mange bryggere bruker flere tilsetninger for å få begge deler.",
+        "en": "**Hops.** Hops provide bitterness, flavour and aroma. Boiling converts (isomerizes) the hop's alpha acids into compounds that are a major source of bitterness, and a longer boil time generally gives more bitterness. Aroma and flavour come largely from volatile oils that boil off the longer the hops stay in an active boil. So a late addition keeps more aroma and flavour but generally gives lower bitterness than an early addition. Late hops therefore do not give zero bitterness, and the difference is a direction, not a split between everything and nothing. Many brewers use several additions to get both."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-E",
+      "source_claims": ["FACT-HOP-0005"],
+      "text": {
+        "no": "Alfasyreprosenten på humlepakken er andelen av humlens vekt som er alfasyrer, og den viser humlens bitringspotensial. Den er ikke ølets IBU. IBU fra en humletilsetning avhenger av hvor mye humle du bruker og hvordan du bruker den, blant annet koketid. Derfor svarer ikke en alfasyreprosent til en fast IBU-verdi.",
+        "en": "The alpha-acid percentage on a hop pack is the share of the hop's weight that is alpha acids, and it indicates the hop's bittering potential. It is not the beer's IBU. The IBU from a hop addition depends on how much hop you use and how you use it, including boil time. So an alpha-acid percentage does not map to a fixed IBU value."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-F",
+      "source_claims": ["FACT-HOP-0004"],
+      "text": {
+        "no": "Humle eldes etter innhøsting. Varme, oksygen og tid bryter ned eller endrer bitterstoffer og aromaoljer. Kald lagring uten oksygen bremser nedbrytingen og hjelper humlen å beholde bryggeverdien sin. Hvor fort humle eldes, avhenger av sort, form, emballasje og forhold.",
+        "en": "Hops age after harvest. Warmth, oxygen and time degrade or change bittering compounds and aroma oils. Cold, oxygen-free storage slows the deterioration and helps the hops keep their brewing value. How fast hops age depends on variety, form, packaging and conditions."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-G",
+      "source_claims": ["FACT-YEAST-0001", "FACT-YEAST-0002"],
+      "text": {
+        "no": "**Gjær.** Under gjæring forbruker ølgjæren gjærbare sukkerarter og produserer alkohol og karbondioksid. Gjærens stoffskifte gir også smaks- og aromastoffer. Gjærens attenuering (forgjæringsgrad) er andelen av sukkerartene i vørteren som gjæren forbruker. Høyere attenuering gir generelt mindre restsukker og kan gi et tørrere øl. Faktisk attenuering avhenger likevel av både gjæren og av gjæringsforhold og vørter.",
+        "en": "**Yeast.** During fermentation, brewer's yeast consumes fermentable sugars and produces alcohol and carbon dioxide. Yeast metabolism also produces flavour and aroma compounds. A yeast's attenuation is the proportion of the wort's sugars that the yeast consumes. Higher attenuation generally leaves less residual sugar and can give a drier beer. Actual attenuation still depends on the yeast as well as on fermentation and wort conditions."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-H",
+      "source_claims": ["FACT-YEAST-0003", "FACT-BREW-0001", "FACT-BREW-0003"],
+      "text": {
+        "no": "Ale- og lagergjær skilles ofte etter type, gjæringsoppførsel og vanlig arbeidstemperatur. Alestammer knyttes typisk til varmere gjæring og lagerstammer til kjølig gjæring, men dette er et nyttig nybegynnermønster og ikke en universell regel. Temperaturen påvirker gjæraktivitet og gjæringshastighet, og temperaturmålet bør velges ut fra veiledningen for den konkrete stammen, ikke ett felles tall for all ale eller lager.",
+        "en": "Ale and lager yeasts are often distinguished by type, fermentation behaviour and usual working temperature. Ale strains are typically associated with warmer fermentation and lager strains with cooler fermentation, but this is a useful beginner pattern rather than a universal rule. Temperature affects yeast activity and fermentation speed, and the temperature target should be chosen from the guidance for the specific strain, not from one shared number for all ales or lagers."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-I",
+      "source_claims": ["FACT-YEAST-0005", "FACT-YEAST-0004"],
+      "text": {
+        "no": "Velg gjær ut fra ølet og prosessen du har planlagt, og bruk produsentens opplysninger, som egnede stiler, smaksprofil, attenuering og anbefalt gjæringstemperatur. Når du pitcher, bruk nok frisk gjær og følg produsentens veiledning for akkurat den gjæren. Riktig mengde avhenger av gjærproduktet og gjæringsforholdene, ikke av én universell celleregel.",
+        "en": "Choose yeast against the beer and process you have planned, using the producer's information such as suitable styles, flavour profile, attenuation and recommended fermentation temperature. When you pitch, use enough healthy yeast and follow the producer's guidance for that particular yeast. The right amount depends on the yeast product and the fermentation conditions, not on one universal cell-count rule."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-J",
+      "source_claims": ["FACT-WATER-0001"],
+      "text": {
+        "no": "**Vann.** Vann utgjør mesteparten av ølet, så vannkvaliteten kan ha betydning for det ferdige ølet. På dette nivået handler det om å vite at vann er en reell råvare, ikke om tall eller målprofiler.",
+        "en": "**Water.** Water makes up most of beer, so water quality can matter to the finished beer. At this level the point is to know that water is a real ingredient, not to learn numbers or target profiles."
+      }
+    },
+    {
+      "id": "CHUNK-RAW-K",
+      "source_claims": ["FACT-WATER-0002", "FACT-WATER-0003"],
+      "text": {
+        "no": "Klor og kloramin er ulike desinfeksjonsmidler, og begge kan gi uønsket medisinsk smak i øl. Noen norske vannverk bruker kloramin, men hvor vanlig det er, er ikke fastslått. Finn ut hvilket vannverk som leverer til deg, og les hva det publiserer om vannet. Ikke anta at vannet ditt er uten klor eller kloramin, og ikke anta at én enkel behandling løser det for alle.",
+        "en": "Chlorine and chloramine are different disinfectants, and either can give an unwanted medicinal flavour in beer. Some Norwegian waterworks use chloramine, but how common that is has not been established. Find out which waterworks supplies you and read what it publishes about the water. Do not assume your water is free of chlorine or chloramine, and do not assume one simple treatment solves it for everyone."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-RAW-001",
+      "type": "concept_check",
+      "concepts": ["malt.what_is_malt"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MALT-0001"],
+      "prompt": {
+        "no": "Hvorfor maltes bygg før det brukes til å brygge øl?",
+        "en": "Why is barley malted before it is used to brew beer?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Spiringen åpner opp kornets stivelseslager, og tørkingen stopper veksten slik at stivelsen er tilgjengelig for bryggeren.",
+            "en": "Germination opens up the grain's starch reserve, and drying stops growth so the starch is available to the brewer."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Maltingen gjør byggen om til alkohol før bryggeren i det hele tatt begynner å mese.",
+            "en": "Malting turns the barley into alcohol before the brewer even starts mashing."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Maltingen fjerner all stivelse fra byggen slik at bare smaken blir igjen.",
+            "en": "Malting removes all the starch from the barley so that only flavour is left."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Malting er bløtlegging, spiring og tørking: spiringen åpner stivelseslageret og tørkingen stopper veksten, så stivelsen er tilgjengelig for bryggeren.",
+        "en": "Correct. Malting is steeping, germination and drying: germination opens the starch reserve and drying halts growth, so the starch is available to the brewer."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Maltingen lager ikke alkohol og fjerner ikke stivelsen. Den åpner stivelseslageret gjennom spiring og stopper veksten ved tørking, så stivelsen er tilgjengelig for bryggeren.",
+        "en": "Not quite. Malting does not make alcohol and does not remove the starch. It opens the starch reserve through germination and halts growth by drying, so the starch is available to the brewer."
+      }
+    },
+    {
+      "id": "Q-RAW-002",
+      "type": "scenario",
+      "concepts": ["malt.base_vs_specialty"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MALT-0002"],
+      "prompt": {
+        "no": "Du setter sammen din første alt-korn-oppskrift. Du trenger en malt som har høyt enzyminnhold og sukkerartene som skal gjæres. Hvilken type malt bygger du oppskriften på?",
+        "en": "You are putting together your first all-grain recipe. You need a malt with high enzyme levels and the sugars that will be fermented. Which type of malt do you build the recipe on?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Basismalt, som har høyt enzyminnhold sammen med sukkerartene som trengs til gjæring.",
+            "en": "Base malt, which has high enzyme levels together with the sugars needed for fermentation."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Kraftig ristet spesialmalt, fordi kraftigere oppvarming gir mer enzymer.",
+            "en": "Heavily roasted specialty malt, because more intense heating gives more enzymes."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Hvilken som helst malt, for forskjellen mellom malttypene er bare hva de heter.",
+            "en": "Any malt at all, because the difference between malt types is only what they are called."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Basismalt har høyt enzyminnhold og sukkerartene som trengs til gjæring. Spesialmalt lages for å gi smak, farge eller andre egenskaper, og mange brukes i mindre mengder.",
+        "en": "Correct. Base malt has high enzyme levels and the sugars needed for fermentation. Specialty malt is made to give flavour, colour or other functions, and many are used in smaller amounts."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Kraftigere oppvarming gir mindre enzymer igjen, ikke mer, og malttypene har ulike roller. Det er basismalt som har høyt enzyminnhold sammen med sukkerartene som trengs til gjæring.",
+        "en": "Not quite. More intense heating leaves fewer enzymes, not more, and malt types have different roles. It is base malt that has high enzyme levels together with the sugars needed for fermentation."
+      }
+    },
+    {
+      "id": "Q-RAW-003",
+      "type": "concept_check",
+      "concepts": ["malt.colour_flavour"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MALT-0003"],
+      "prompt": {
+        "no": "Hva gir spesialmalt ulik farge og smak?",
+        "en": "What gives specialty malts their different colour and flavour?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Forholdene malten tørkes, brennes eller ristes under, som utvikler ulik farge og smak.",
+            "en": "The conditions the malt is dried, kilned or roasted under, which develop different colour and flavour."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Hvilken humle som tilsettes senere i bryggeprosessen.",
+            "en": "Which hops are added later in the brewing process."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Hvilken gjær som brukes til å gjære ølet.",
+            "en": "Which yeast is used to ferment the beer."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Tørke-, brenne- og ristingsforholdene utvikler ulik farge og smak, og maltens farge påvirker ølets farge. Farge er ikke en direkte forutsigelse av smak.",
+        "en": "Correct. The drying, kilning and roasting conditions develop different colour and flavour, and malt colour affects the beer's colour. Colour is not a direct predictor of flavour."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Humle og gjær bidrar til ølet på sine egne måter, men maltens egen farge og smak kommer fra hvordan den tørkes, brennes eller ristes.",
+        "en": "Not quite. Hops and yeast contribute to the beer in their own ways, but a malt's own colour and flavour come from how it is dried, kilned or roasted."
+      }
+    },
+    {
+      "id": "Q-RAW-004",
+      "type": "scenario",
+      "concepts": ["malt.grist_percentage"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-MALT-0004"],
+      "prompt": {
+        "no": "Du brygger samme oppskrift to ganger, men andre gang øker du andelen av en spesialmalt i kornblandingen. Hva kan du forvente?",
+        "en": "You brew the same recipe twice, but the second time you increase one specialty malt's share of the grist. What can you expect?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Den maltens bidrag til oppskriftens maltkarakter blir sterkere.",
+            "en": "That malt's contribution to the recipe's malt character becomes stronger."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ingenting endres, for andelen til en malt har ingen betydning for ølet.",
+            "en": "Nothing changes, because a malt's share has no effect on the beer."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Maltens bidrag blir svakere, fordi mer av den gjør den mindre merkbar.",
+            "en": "The malt's contribution becomes weaker, because more of it makes it less noticeable."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Andelen hver malt har av kornblandingen påvirker hvor sterkt den bidrar til oppskriftens maltkarakter.",
+        "en": "Correct. The share each malt has of the grist affects how strongly it contributes to the recipe's malt character."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Andelen hver malt har av kornblandingen påvirker hvor sterkt den bidrar til oppskriftens maltkarakter, så mer av en malt gir et sterkere bidrag.",
+        "en": "Not quite. The share each malt has of the grist affects how strongly it contributes to the recipe's malt character, so more of a malt gives a stronger contribution."
+      }
+    },
+    {
+      "id": "Q-RAW-005",
+      "type": "scenario",
+      "concepts": ["hop.isomerization_time", "hop.aroma_volatility"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-HOP-0001", "FACT-HOP-0002", "FACT-HOP-0003"],
+      "prompt": {
+        "no": "Du har samme humle og deler den i to: en tilsetning tidlig i koketiden og en ved flameout. Hva er forskjellen?",
+        "en": "You have the same hop and split it in two: one addition early in the boil and one at flameout. What is the difference?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Den tidlige tilsetningen gir generelt mest bitterhet, og flameout-tilsetningen beholder generelt mer aroma og smak. Forskjellen er en retning, og sen humle gir ikke null bitterhet.",
+            "en": "The early addition generally gives the most bitterness, and the flameout addition generally keeps more aroma and flavour. The difference is a direction, and late hops do not give zero bitterness."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "De to tilsetningene gir like mye bitterhet og aroma, siden det er samme humle.",
+            "en": "The two additions give equal bitterness and aroma, since it is the same hop."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Den tidlige tilsetningen gir bare bitterhet og ingen aroma, og flameout-tilsetningen gir bare aroma og ingen bitterhet.",
+            "en": "The early addition gives only bitterness and no aroma, and the flameout addition gives only aroma and no bitterness."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Lengre koketid gir generelt mer bitterhet, mens de flyktige aromaoljene koker bort jo lenger humlen er i aktiv koking. Sen humle gir altså ikke null bitterhet.",
+        "en": "Correct. A longer boil generally gives more bitterness, while the volatile aroma oils boil off the longer the hops are in an active boil. Late hops therefore do not give zero bitterness."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Tidspunktet betyr noe: lengre koketid gir generelt mer bitterhet, mens aromaoljene koker bort. Men forskjellen er en retning, ikke et skille mellom alt og ingenting. Sen humle gir ikke null bitterhet.",
+        "en": "Not quite. Timing matters: a longer boil generally gives more bitterness while the aroma oils boil off. But the difference is a direction, not all versus nothing. Late hops do not give zero bitterness."
+      }
+    },
+    {
+      "id": "Q-RAW-006",
+      "type": "scenario",
+      "concepts": ["hop.alpha_vs_ibu"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-HOP-0005"],
+      "prompt": {
+        "no": "En humlepakke er merket med 12 % alfasyre. En bryggevenn sier at ølet derfor blir 12 IBU. Hva stemmer?",
+        "en": "A hop pack is labelled 12% alpha acid. A brewing friend says the beer will therefore be 12 IBU. What is right?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Alfasyreprosenten viser humlens bitringspotensial. IBU avhenger av hvor mye humle du bruker og hvordan, blant annet koketid.",
+            "en": "The alpha-acid percentage shows the hop's bittering potential. IBU depends on how much hop you use and how, including boil time."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Vennen har rett: alfasyreprosenten er ølets IBU.",
+            "en": "The friend is right: the alpha-acid percentage is the beer's IBU."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Vennen har rett så lenge humlen kokes i 60 minutter, for da er prosenten lik IBU.",
+            "en": "The friend is right as long as the hops are boiled for 60 minutes, because then the percentage equals the IBU."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Alfasyreprosenten er andelen av humlens vekt som er alfasyrer. Den viser bitringspotensialet og svarer ikke til en fast IBU-verdi.",
+        "en": "Correct. The alpha-acid percentage is the share of the hop's weight that is alpha acids. It shows the bittering potential and does not map to a fixed IBU value."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Alfasyreprosenten er en egenskap ved humlen, ikke ølets IBU, og heller ikke ved en bestemt koketid blir de to like. IBU avhenger av mengde og bruk, blant annet koketid.",
+        "en": "Not quite. The alpha-acid percentage is a property of the hop, not the beer's IBU, and it does not become equal at any particular boil time either. IBU depends on amount and use, including boil time."
+      }
+    },
+    {
+      "id": "Q-RAW-007",
+      "type": "scenario",
+      "concepts": ["hop.ageing_storage"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-HOP-0004"],
+      "prompt": {
+        "no": "Du har en åpnet humlepose som har stått lenge i et varmt skap. Hva bør du ta hensyn til før du bruker den?",
+        "en": "You have an opened bag of hops that has sat for a long time in a warm cupboard. What should you take into account before using it?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Varme, oksygen og tid kan ha brutt ned eller endret bitterstoffer og aromaoljer, så humlen kan ha mistet av bryggeverdien sin.",
+            "en": "Warmth, oxygen and time can have degraded or changed the bittering compounds and aroma oils, so the hops may have lost some of their brewing value."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ingenting, for humle endrer seg ikke etter innhøsting.",
+            "en": "Nothing, because hops do not change after harvest."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Bare fargen på pelletene, som ikke har noe å si for bryggeverdien.",
+            "en": "Only the colour of the pellets, which has no bearing on brewing value."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Humle eldes etter innhøsting, og kald lagring uten oksygen bremser nedbrytingen. Hvor fort det går, avhenger av sort, form, emballasje og forhold.",
+        "en": "Correct. Hops age after harvest, and cold, oxygen-free storage slows the deterioration. How fast it happens depends on variety, form, packaging and conditions."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Humle eldes etter innhøsting: varme, oksygen og tid bryter ned eller endrer bitterstoffer og aromaoljer, og det påvirker bryggeverdien.",
+        "en": "Not quite. Hops age after harvest: warmth, oxygen and time degrade or change bittering compounds and aroma oils, and that affects brewing value."
+      }
+    },
+    {
+      "id": "Q-RAW-008",
+      "type": "concept_check",
+      "concepts": ["yeast.organism_role"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-YEAST-0001"],
+      "prompt": {
+        "no": "Hva gjør ølgjæren under gjæringen?",
+        "en": "What does brewer's yeast do during fermentation?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Den forbruker gjærbare sukkerarter og produserer alkohol og karbondioksid, og gir også smaks- og aromastoffer.",
+            "en": "It consumes fermentable sugars and produces alcohol and carbon dioxide, and it also gives flavour and aroma compounds."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Den bryter ned stivelsen i malten til sukker, slik enzymene gjør under mesking.",
+            "en": "It breaks the starch in the malt down into sugar, the way enzymes do during mashing."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Den gir bare karbondioksid, mens alkoholen kommer direkte fra malten.",
+            "en": "It only gives carbon dioxide, while the alcohol comes straight from the malt."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Gjæren forbruker gjærbare sukkerarter og lager alkohol og karbondioksid, og stoffskiftet gir også smak og aroma.",
+        "en": "Correct. Yeast consumes fermentable sugars and makes alcohol and carbon dioxide, and its metabolism also gives flavour and aroma."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Stivelsen brytes ned av maltens enzymer under mesking, ikke av gjæren, og alkoholen kommer fra at gjæren forbruker sukkerartene.",
+        "en": "Not quite. Starch is broken down by the malt's enzymes during mashing, not by the yeast, and the alcohol comes from the yeast consuming the sugars."
+      }
+    },
+    {
+      "id": "Q-RAW-009",
+      "type": "scenario",
+      "concepts": ["yeast.attenuation"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-YEAST-0002"],
+      "prompt": {
+        "no": "To gjærprodukter er ellers like, men det ene har høyere attenuering enn det andre. Hva kan du generelt forvente av ølet med høyest attenuering?",
+        "en": "Two yeast products are otherwise similar, but one has higher attenuation than the other. What can you generally expect from the beer with the higher attenuation?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Mindre restsukker og et øl som kan bli tørrere.",
+            "en": "Less residual sugar and a beer that can turn out drier."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Mer restsukker og et øl som blir søtere.",
+            "en": "More residual sugar and a beer that turns out sweeter."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ingen forskjell i restsukker, for attenuering sier bare noe om gjærens farge.",
+            "en": "No difference in residual sugar, because attenuation only says something about the yeast's colour."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Attenuering er andelen av sukkerartene gjæren forbruker, så høyere attenuering gir generelt mindre restsukker og kan gi et tørrere øl. Faktisk attenuering avhenger også av gjæringsforhold og vørter.",
+        "en": "Correct. Attenuation is the proportion of the sugars the yeast consumes, so higher attenuation generally leaves less residual sugar and can give a drier beer. Actual attenuation also depends on fermentation and wort conditions."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Attenuering er andelen av sukkerartene gjæren forbruker. Jo mer som forbrukes, jo mindre restsukker blir igjen, og jo tørrere kan ølet bli.",
+        "en": "Not quite. Attenuation is the proportion of the sugars the yeast consumes. The more that is consumed, the less residual sugar is left and the drier the beer can turn out."
+      }
+    },
+    {
+      "id": "Q-RAW-010",
+      "type": "scenario",
+      "concepts": ["yeast.ale_vs_lager", "fermentation.yeast_strain"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-YEAST-0003", "FACT-BREW-0003"],
+      "prompt": {
+        "no": "Du har valgt en alegjær og skal planlegge gjæringstemperaturen. Hvordan går du frem?",
+        "en": "You have chosen an ale yeast and need to plan the fermentation temperature. How do you go about it?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Du vet at alegjær typisk gjæres varmere enn lagergjær, og velger temperaturmålet etter veiledningen for akkurat denne stammen.",
+            "en": "You know ale yeast is typically fermented warmer than lager yeast, and you choose the temperature target from the guidance for this particular strain."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Du bruker ett fast temperaturmål som gjelder for all alegjær, uansett stamme.",
+            "en": "You use one fixed temperature target that applies to all ale yeast, whatever the strain."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Du gjør ingen temperaturplanlegging, siden ale- og lagergjær gjærer likt.",
+            "en": "You do no temperature planning, since ale and lager yeast ferment the same way."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Ale og lager skilles typisk på arbeidstemperatur, men det er et nybegynnermønster og ikke en universell regel. Temperaturmålet bør velges ut fra veiledningen for den konkrete stammen.",
+        "en": "Correct. Ale and lager are typically distinguished by working temperature, but that is a beginner pattern and not a universal rule. The temperature target should be chosen from the guidance for the specific strain."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Ale- og lagergjær har typisk ulik arbeidstemperatur, og det finnes ikke ett felles tall for all ale eller lager. Temperaturmålet velges ut fra veiledningen for den konkrete stammen.",
+        "en": "Not quite. Ale and lager yeasts typically have different working temperatures, and there is no shared number for all ales or lagers. The temperature target is chosen from the guidance for the specific strain."
+      }
+    },
+    {
+      "id": "Q-RAW-011",
+      "type": "scenario",
+      "concepts": ["yeast.choice_principle"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-YEAST-0005"],
+      "prompt": {
+        "no": "Du planlegger en ny oppskrift og skal velge gjær. Hva bør du se på?",
+        "en": "You are planning a new recipe and need to choose a yeast. What should you look at?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ølet og prosessen du har planlagt, sammenholdt med produsentens opplysninger om egnede stiler, smaksprofil, attenuering og gjæringstemperatur.",
+            "en": "The beer and process you have planned, compared with the producer's information on suitable styles, flavour profile, attenuation and fermentation temperature."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Hvilken gjær som er mest kjent, siden alle gjærtyper gir samme øl.",
+            "en": "Whichever yeast is best known, since all yeast types give the same beer."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Bare hvor billig gjæren er, siden de andre egenskapene ikke påvirker ølet.",
+            "en": "Only how cheap the yeast is, since its other properties do not affect the beer."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Velg gjær ut fra ølet og prosessen, og bruk produsentens opplysninger som egnede stiler, smaksprofil, attenuering og temperaturveiledning.",
+        "en": "Correct. Choose yeast against the beer and process, using the producer's information such as suitable styles, flavour profile, attenuation and temperature guidance."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Gjær gir ikke samme øl uansett valg. Velg ut fra ølet og prosessen du har planlagt, med produsentens opplysninger om stiler, smaksprofil, attenuering og temperatur.",
+        "en": "Not quite. Yeast does not give the same beer whichever you pick. Choose from the beer and process you have planned, using the producer's information on styles, flavour profile, attenuation and temperature."
+      }
+    },
+    {
+      "id": "Q-RAW-012",
+      "type": "concept_check",
+      "concepts": ["yeast.pitch_principle"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-YEAST-0004"],
+      "prompt": {
+        "no": "Hvordan bestemmer du hvor mye gjær du skal pitche?",
+        "en": "How do you decide how much yeast to pitch?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Du bruker nok frisk gjær og følger produsentens veiledning for akkurat det gjærproduktet.",
+            "en": "You use enough healthy yeast and follow the producer's guidance for that particular yeast product."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Du bruker én fast celletallsregel som gjelder for alle gjærprodukter og alle øl.",
+            "en": "You use one fixed cell-count rule that applies to every yeast product and every beer."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Du bruker den samme lille mengden hver gang, fordi gjæren formerer seg uansett.",
+            "en": "You use the same small amount every time, because the yeast multiplies anyway."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Riktig mengde avhenger av gjærproduktet og gjæringsforholdene, ikke av én universell celleregel. Bruk nok frisk gjær og følg produsentens veiledning.",
+        "en": "Correct. The right amount depends on the yeast product and the fermentation conditions, not on one universal cell-count rule. Use enough healthy yeast and follow the producer's guidance."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Det finnes ikke én universell regel for alle gjærprodukter og øl. Bruk nok frisk gjær og følg produsentens veiledning for akkurat det gjærproduktet.",
+        "en": "Not quite. There is no one universal rule for every yeast product and beer. Use enough healthy yeast and follow the producer's guidance for that particular product."
+      }
+    },
+    {
+      "id": "Q-RAW-013",
+      "type": "concept_check",
+      "concepts": ["water.majority_ingredient"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-WATER-0001"],
+      "prompt": {
+        "no": "Hvorfor regnes vann som en viktig råvare i øl?",
+        "en": "Why is water considered an important ingredient in beer?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Vann utgjør mesteparten av ølet, så vannkvaliteten kan ha betydning for det ferdige ølet.",
+            "en": "Water makes up most of beer, so water quality can matter to the finished beer."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Vann er bare et løsemiddel som ikke påvirker det ferdige ølet.",
+            "en": "Water is just a solvent that does not affect the finished beer."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Vann er viktig bare for bryggerier, ikke for hjemmebryggere.",
+            "en": "Water matters only for breweries, not for homebrewers."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Vann utgjør mesteparten av ølet, så kvaliteten kan ha betydning for det ferdige ølet.",
+        "en": "Correct. Water makes up most of beer, so its quality can matter to the finished beer."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Vann utgjør mesteparten av ølet, så vannkvaliteten kan ha betydning for det ferdige ølet, også for hjemmebryggere.",
+        "en": "Not quite. Water makes up most of beer, so water quality can matter to the finished beer, for homebrewers too."
+      }
+    },
+    {
+      "id": "Q-RAW-014",
+      "type": "scenario",
+      "concepts": ["water.chlorine_chloramine", "water.source_awareness"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-WATER-0002", "FACT-WATER-0003"],
+      "prompt": {
+        "no": "Du skal bruke vann fra springen til neste brygg og vil unngå medisinsk smak i ølet. Hva gjør du først?",
+        "en": "You will use tap water for your next brew and want to avoid a medicinal flavour in the beer. What do you do first?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Du finner ut hvilket vannverk som leverer til deg og leser hva det publiserer om vannet, blant annet om klor eller kloramin.",
+            "en": "You find out which waterworks supplies you and read what it publishes about the water, including about chlorine or chloramine."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Du koker vannet, siden det fjerner både klor og kloramin hos alle.",
+            "en": "You boil the water, since that removes both chlorine and chloramine for everyone."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Du gjør ingenting, for springvann er alltid uten klor og kloramin.",
+            "en": "You do nothing, because tap water is always free of chlorine and chloramine."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Klor og kloramin er ulike desinfeksjonsmidler, og begge kan gi medisinsk smak. Sjekk din egen vannkilde i stedet for å anta noe.",
+        "en": "Correct. Chlorine and chloramine are different disinfectants, and either can give a medicinal flavour. Check your own water source instead of assuming."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Du kan ikke anta at vannet er uten klor eller kloramin, og koking er ikke en universell løsning. Finn først ut hva ditt eget vannverk publiserer om vannet.",
+        "en": "Not quite. You cannot assume the water is free of chlorine or chloramine, and boiling is not a universal fix. First find out what your own waterworks publishes about the water."
+      }
+    }
+  ]
+}

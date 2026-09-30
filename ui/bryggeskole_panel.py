@@ -24,6 +24,8 @@ engine"-arkitektur):
     bryggeskole.pilot_mashing / bryggeskole.pilot_fermentation
         / bryggeskole.pilot_boil_hop / bryggeskole.pilot_cool_transfer
         / bryggeskole.pilot_package / bryggeskole.pilot_method_context
+        / bryggeskole.pilot_raw_materials (issue #458: Råvarer, anbefalt
+        først, aldri en lås)
     bryggeskole.mastery.{apply_answer, mastery_label}
     bryggeskole.mastery_store.{read_mastery_state, write_mastery_state,
         neutral_state_document}
@@ -96,6 +98,7 @@ from bryggeskole import pilot_fermentation as _pilot_gjaring
 from bryggeskole import pilot_mashing as _pilot_mesking
 from bryggeskole import pilot_method_context as _pilot_metodevalg
 from bryggeskole import pilot_package as _pilot_pakking
+from bryggeskole import pilot_raw_materials as _pilot_raavarer
 from ui.i18n import gjeldende_sprak, t
 
 # Hver pilotmodul definerer sin EGEN PilotContentError-klasse (bevisst
@@ -110,6 +113,7 @@ _PILOT_CONTENT_ERRORS = (
     _pilot_kjoling.PilotContentError,
     _pilot_pakking.PilotContentError,
     _pilot_metodevalg.PilotContentError,
+    _pilot_raavarer.PilotContentError,
 )
 
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
@@ -122,6 +126,7 @@ _ENV_BRYGGERI = "bryggeri"
 # by side (lesson Forrige/Neste, summary Prøv igjen/Tilbake).
 _KNAPP_GRUPPE_KOLONNER = (1, 1, 6)
 
+_MODUL_RAAVARER = "raavarer"
 _MODUL_METODEVALG = "metodevalg"
 _MODUL_MESKING = "mesking"
 _MODUL_KOKING = "koking"
@@ -129,15 +134,22 @@ _MODUL_KJOLING = "kjoling"
 _MODUL_GJARING = "gjaring"
 _MODUL_PAKKING = "pakking"
 
-# Rekkefølgen speiler den faktiske brygge-prosessen (forberedelse/metode
-# før mesk før koking før kjøling/overføring før gjæring før pakking) --
-# brukt både til plasseringen i prosessgridet og til _anbefalt_modul()s
-# "anbefalt neste"-signal.
+# Rekkefølgen speiler den faktiske brygge-prosessen (råvarer før
+# forberedelse/metode før mesk før koking før kjøling/overføring før
+# gjæring før pakking) -- brukt både til plasseringen i prosessgridet og
+# til _anbefalt_modul()s "anbefalt neste"-signal. Kun anbefalt rekkefølge
+# (issue #458), aldri en lås: alle moduler er alltid klikkbare.
 _MODUL_REKKEFOLGE = [
-    _MODUL_METODEVALG, _MODUL_MESKING, _MODUL_KOKING, _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING,
+    _MODUL_RAAVARER, _MODUL_METODEVALG, _MODUL_MESKING, _MODUL_KOKING, _MODUL_KJOLING,
+    _MODUL_GJARING, _MODUL_PAKKING,
 ]
 
 _MODULER = {
+    _MODUL_RAAVARER: {
+        "pilot": _pilot_raavarer,
+        "tittel_nokkel": "bryggeskole.modul.raavarer.tittel",
+        "ikon": "🌿",
+    },
     _MODUL_METODEVALG: {
         "pilot": _pilot_metodevalg,
         "tittel_nokkel": "bryggeskole.modul.metodevalg.tittel",
@@ -184,6 +196,7 @@ _MODULER = {
 # som det peker til en ekte modul.
 _PROSESS_STADIER = {
     _ENV_HJEMMEBRYGGER: [
+        {"no": "Råvarer", "en": "Raw materials"},
         {"no": "Forberedelse/metode", "en": "Preparation/method"},
         {"no": "Mesking (kjele/BIAB)", "en": "Mashing (kettle/BIAB)"},
         {"no": "Koking", "en": "Boil"},
@@ -192,6 +205,7 @@ _PROSESS_STADIER = {
         {"no": "Pakking", "en": "Packaging"},
     ],
     _ENV_BRYGGERI: [
+        {"no": "Råvarer", "en": "Raw materials"},
         {"no": "Forberedelse/metode", "en": "Preparation/method"},
         {"no": "Mesk/lauter", "en": "Mash/lauter"},
         {"no": "Kokekar/whirlpool", "en": "Kettle/whirlpool"},
@@ -205,8 +219,8 @@ _PROSESS_STADIER = {
 # aktive/klikkbare (issue #380 fyller den tidligere siste "Kommer
 # senere"-cellen, indeks 0).
 _STADIUM_TIL_MODUL = {
-    0: _MODUL_METODEVALG, 1: _MODUL_MESKING, 2: _MODUL_KOKING, 3: _MODUL_KJOLING,
-    4: _MODUL_GJARING, 5: _MODUL_PAKKING,
+    0: _MODUL_RAAVARER, 1: _MODUL_METODEVALG, 2: _MODUL_MESKING, 3: _MODUL_KOKING,
+    4: _MODUL_KJOLING, 5: _MODUL_GJARING, 6: _MODUL_PAKKING,
 }
 
 # Menneskelesbare visningsnavn for pilotenes konsept-id-er -- aldri de
@@ -241,6 +255,20 @@ _KONSEPT_LABELS = {
     "package.force_carbonation": {"no": "Tvangskarbonering", "en": "Force carbonation"},
     "package.pressure_safety": {"no": "Trykksikkerhet ved pakking", "en": "Packaging pressure safety"},
     "package.path_choice": {"no": "Valg av pakkemetode", "en": "Packaging method choice"},
+    "malt.what_is_malt": {"no": "Hva malt er", "en": "What malt is"},
+    "malt.base_vs_specialty": {"no": "Basismalt og spesialmalt", "en": "Base and specialty malt"},
+    "malt.colour_flavour": {"no": "Maltens farge og smak", "en": "Malt colour and flavour"},
+    "malt.grist_percentage": {"no": "Andeler i kornblandingen", "en": "Grist proportions"},
+    "hop.alpha_vs_ibu": {"no": "Alfasyre og IBU", "en": "Alpha acid and IBU"},
+    "hop.ageing_storage": {"no": "Humleeldring og lagring", "en": "Hop ageing and storage"},
+    "yeast.organism_role": {"no": "Gjærens rolle", "en": "The role of yeast"},
+    "yeast.attenuation": {"no": "Attenuering", "en": "Attenuation"},
+    "yeast.ale_vs_lager": {"no": "Ale- og lagergjær", "en": "Ale and lager yeast"},
+    "yeast.choice_principle": {"no": "Valg av gjær", "en": "Choosing yeast"},
+    "yeast.pitch_principle": {"no": "Pitching-prinsipp", "en": "Pitching principle"},
+    "water.majority_ingredient": {"no": "Vann som råvare", "en": "Water as an ingredient"},
+    "water.chlorine_chloramine": {"no": "Klor og kloramin", "en": "Chlorine and chloramine"},
+    "water.source_awareness": {"no": "Kjenn din vannkilde", "en": "Know your water source"},
     "method.shared_process": {"no": "Delt bryggeprosess", "en": "Shared brewing process"},
     "method.biab": {"no": "Meskepose (BIAB)", "en": "Mash bag (BIAB)"},
     "method.traditional_allgrain": {"no": "Tradisjonelt alt-korn-oppsett", "en": "Traditional all-grain setup"},
