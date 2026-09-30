@@ -250,7 +250,7 @@ _MALT_CORE_VERIFIED_IDS = ["FACT-MALT-0001", "FACT-MALT-0002", "FACT-MALT-0003",
 _YEAST_CORE_VERIFIED_IDS = [f"FACT-YEAST-000{n}" for n in range(1, 6)]
 _WATER_FOUNDATION_VERIFIED_IDS = ["FACT-WATER-0001", "FACT-WATER-0002", "FACT-WATER-0003"]
 _HOP_CORE_VERIFIED_IDS = ["FACT-HOP-0004", "FACT-HOP-0005"]
-_RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001"]
+_RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
@@ -318,7 +318,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # FACT-HOP-0005): 2 documented_fact.
         # Issue #441 (V2.2 Goal 3 R-2) adds FACT-RECIPE-0001: 1
         # documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 31)
+        # Issue #442 (V2.2 Goal 3 R-1) adds FACT-RECIPE-0002: 1
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 32)
         self.assertEqual(classifications.count("professional_interpretation"), 11)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -570,7 +572,7 @@ class TestProductionRegistryHopCoreFactPackVerifiedOnlyApi(unittest.TestCase):
 
 
 class TestProductionRegistryRecipeIbuVsPerceivedBitterness(unittest.TestCase):
-    """Issue #441 (V2.2 Goal 3 R-2): exactly one FACT-RECIPE record.
+    """Issue #441 (V2.2 Goal 3 R-2): FACT-RECIPE-0001 (R-1 adds -0002 below).
     FACT-HOP-0005 owns alpha % vs IBU; R-4 (balance) is not started."""
 
     def _record(self):
@@ -579,7 +581,7 @@ class TestProductionRegistryRecipeIbuVsPerceivedBitterness(unittest.TestCase):
     def test_exactly_one_recipe_record_and_concept_maps_to_it(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
         ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-RECIPE-")]
-        self.assertEqual(ids, ["FACT-RECIPE-0001"])
+        self.assertEqual(ids, ["FACT-RECIPE-0001", "FACT-RECIPE-0002"])
         found = find_verified_records(_PRODUCTION_REGISTRY, concept="recipe.ibu_vs_perceived_bitterness")
         self.assertEqual([r["id"] for r in found], ["FACT-RECIPE-0001"])
 
@@ -615,6 +617,53 @@ class TestProductionRegistryRecipeIbuVsPerceivedBitterness(unittest.TestCase):
         hop = get_verified_record(_PRODUCTION_REGISTRY, "FACT-HOP-0005")
         self.assertEqual(hop["concepts"], ["hop.alpha_vs_ibu"])
         self.assertNotIn("estimate", hop["claim"])
+
+
+class TestProductionRegistryRecipeSpecialtyFermentability(unittest.TestCase):
+    """Issue #442 (V2.2 Goal 3 R-1): FACT-RECIPE-0002. Owns only the
+    ingredient-side tendency; no sweetness/body/magnitude/colour claim."""
+
+    def _record(self):
+        return get_verified_record(_PRODUCTION_REGISTRY, "FACT-RECIPE-0002")
+
+    def test_concept_maps_to_exactly_this_record(self):
+        found = find_verified_records(_PRODUCTION_REGISTRY, concept="recipe.specialty_fermentability")
+        self.assertEqual([r["id"] for r in found], ["FACT-RECIPE-0002"])
+
+    def test_documented_fact_without_modules(self):
+        record = self._record()
+        self.assertEqual(record["classification"], "documented_fact")
+        self.assertNotIn("modules", record)
+
+    def test_claim_is_conservative_and_makes_no_forbidden_claims(self):
+        claim = self._record()["claim"]
+        self.assertIn("generally less fermentable", claim)
+        self.assertIn("How much depends on the malt type and the amount used", claim)
+        lowered = claim.lower()
+        for forbidden in (
+            "sweet", "body", "mouthfeel", "unfermentable", "always", "all specialty", "darker",
+            "colour", "color", "lovibond", "ebc", "%", "small", "ordinary", "sticky", "engine",
+            "final gravity", " fg",
+        ):
+            self.assertNotIn(forbidden, lowered)
+
+    def test_sources_and_limitations_are_explicit(self):
+        record = self._record()
+        refs = " ".join(s["ref"] for s in record["sources"])
+        self.assertIn("10.3390/fermentation7030137", refs)
+        self.assertIn("Briess", refs)
+        self.assertIn("Crisp", refs)
+        self.assertIn("Oxford Companion to Beer", refs)
+        self.assertIn("Palmer", refs)
+        self.assertNotIn("Prado", refs)
+        self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"])
+        self.assertIn("commercial interest", " ".join(s["type"] for s in record["sources"]))
+
+    def test_existing_facts_do_not_carry_the_concept(self):
+        for fact_id in ("FACT-MALT-0002", "FACT-MALT-0003", "FACT-MALT-0004", "FACT-MASH-0001", "FACT-YEAST-0002"):
+            self.assertNotIn(
+                "recipe.specialty_fermentability", get_verified_record(_PRODUCTION_REGISTRY, fact_id)["concepts"]
+            )
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
