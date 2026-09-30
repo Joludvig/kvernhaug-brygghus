@@ -253,12 +253,13 @@ _HOP_CORE_VERIFIED_IDS = ["FACT-HOP-0004", "FACT-HOP-0005"]
 _RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-0003"]
 _MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003"]
 _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
+_SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
     + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
     + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS + _MEASUREMENT_VERIFIED_IDS
-    + _MEASUREMENT_KOMPETENT_VERIFIED_IDS
+    + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _SAFETY_VERIFIED_IDS
 )
 
 
@@ -329,7 +330,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # 3 documented_fact.
         # Issue #445 (V2.2 Goal 3 Maaling Kompetent M3/M6) adds
         # FACT-MEAS-0004..0005: 2 documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 37)
+        # Issue #447 (V2.2 Goal 3 Rengjoring/sikkerhet N1/N2/N3) adds
+        # FACT-SAFE-0001..0003: 3 documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 40)
         self.assertEqual(classifications.count("professional_interpretation"), 12)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -867,6 +870,85 @@ class TestProductionRegistryMeasurementKompetent(unittest.TestCase):
             s["ref"] for s in get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0005")["sources"]
         )
         self.assertIn("USGS", m6_refs)
+
+
+class TestProductionRegistrySafetyFactPack(unittest.TestCase):
+    """Issue #447 (V2.2 Goal 3 Rengjoring/sikkerhet): FACT-SAFE-0001 (N1
+    cleaning vs sanitising + clean-first, one record / two concepts),
+    FACT-SAFE-0002 (N2 generic chemical handling) and FACT-SAFE-0003 (N3
+    qualitative fermentation CO2 hazard). Documented facts only."""
+
+    _CONCEPTS = {
+        "FACT-SAFE-0001": ["hygiene.clean_vs_sanitize", "hygiene.clean_first"],
+        "FACT-SAFE-0002": ["safety.chem_handling"],
+        "FACT-SAFE-0003": ["safety.fermentation_co2"],
+    }
+
+    def test_only_three_safe_records_exist(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-SAFE-")]
+        self.assertEqual(ids, _SAFETY_VERIFIED_IDS)
+
+    def test_each_concept_maps_to_exactly_its_record(self):
+        for fact_id, concepts in self._CONCEPTS.items():
+            for concept in concepts:
+                with self.subTest(concept=concept):
+                    found = find_verified_records(_PRODUCTION_REGISTRY, concept=concept)
+                    self.assertEqual([r["id"] for r in found], [fact_id])
+
+    def test_n1_is_one_record_carrying_both_concepts(self):
+        record = get_verified_record(_PRODUCTION_REGISTRY, "FACT-SAFE-0001")
+        self.assertEqual(record["concepts"], self._CONCEPTS["FACT-SAFE-0001"])
+
+    def test_documented_facts_without_modules(self):
+        for fact_id in _SAFETY_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            self.assertEqual(record["classification"], "documented_fact", fact_id)
+            self.assertNotIn("modules", record, fact_id)
+
+    def test_n1_claim_boundaries(self):
+        claim = get_verified_record(_PRODUCTION_REGISTRY, "FACT-SAFE-0001")["claim"]
+        self.assertIn("does not make anything sterile", claim)
+        self.assertIn("cleaned first and sanitised second", claim)
+        self.assertIn("reduce a sanitiser's effect", claim)
+        for forbidden in ("star san", "pbw", "contact time", "no-rinse", "concentration", "cannot sanitise"):
+            self.assertNotIn(forbidden, claim.lower())
+
+    def test_n2_claim_is_generic_and_product_neutral(self):
+        record = get_verified_record(_PRODUCTION_REGISTRY, "FACT-SAFE-0002")
+        claim = record["claim"]
+        self.assertIn("Follow the product label", claim)
+        self.assertIn("unless the label says it is safe", claim)
+        for forbidden in ("always", "goggles", "gloves", "star san", "pbw", "chlorine", "bleach", "ammonia", "gas"):
+            self.assertNotIn(forbidden, claim.lower())
+        self.assertIn("NO claim about what PBW + Star San release", record["notes"])
+        self.assertIn("US-format", record["notes"])
+
+    def test_n3_claim_is_qualitative_and_keeps_interpretation_visible(self):
+        record = get_verified_record(_PRODUCTION_REGISTRY, "FACT-SAFE-0003")
+        claim = record["claim"]
+        self.assertIn("colourless and odourless", claim)
+        self.assertIn("displace oxygen", claim)
+        self.assertIn("Ferment in a ventilated space", claim)
+        # The CO2 subscript is not an ASCII digit; no quantity may appear.
+        self.assertFalse(any(ch in "0123456789" for ch in claim))
+        for forbidden in ("ppm", "%", "alarm", "buddy", "confined", "dangerous", "harmless"):
+            self.assertNotIn(forbidden, claim.lower())
+        self.assertIn("PROPORTIONATE INTERPRETATION", record["notes"])
+        self.assertIn("CO₂ at L1 = MUST", record["notes"])
+
+    def test_sources_and_limitations_are_explicit(self):
+        for fact_id in _SAFETY_VERIFIED_IDS:
+            record = get_verified_record(_PRODUCTION_REGISTRY, fact_id)
+            self.assertIn("SOURCE LIMITATIONS", record["notes"], fact_id)
+            self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"], fact_id)
+        n1_refs = " ".join(s["ref"] for s in get_verified_record(_PRODUCTION_REGISTRY, "FACT-SAFE-0001")["sources"])
+        self.assertIn("CDC", n1_refs)
+        self.assertIn("Palmer", n1_refs)
+        self.assertNotIn("Star San", n1_refs)
+        n3_refs = " ".join(s["ref"] for s in get_verified_record(_PRODUCTION_REGISTRY, "FACT-SAFE-0003")["sources"])
+        self.assertIn("HSE", n3_refs)
+        self.assertIn("Ontario", n3_refs)
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):

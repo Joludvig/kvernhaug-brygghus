@@ -1233,6 +1233,111 @@
       ],
       "concepts": ["measurement.volume_stages"],
       "notes": "Measurement-side M6 only (Kompetent / L2): hot-vs-cooled volume physics plus the independence of evaporation/process losses. Deliberately NOT claimed: any shrinkage/contraction percentage; any numeric temperature; any loss or boil-off percentage; any system-specific (e.g. BrewZilla) guidance; any efficiency or yield maths. 'Record which stage a volume belongs to' remains methodology per #435, NOT part of this fact. FACT-METHOD-0004 continues to own method-dependent planning/loss variables; this record does not duplicate it. SOURCE LIMITATIONS: no clean wort-specific Tier A expansion source without numbers was found; the claim rests on Tier B BYO trade sources, with USGS as Tier A supporting physics for water only (not wort-specific proof). Kunze printed p.329 section 3.5.1.3 is NOT cited (not visually verified in this round and not required per the Chief source gate). SOURCE-ACCESS LIMITATIONS: this local implementation round did not independently reopen the sources; the record encodes the Chief-scoped claim and the Chief live source spot-check recorded on issue #445 (2026-09-30), whose URLs are carried in the source refs."
+    },
+    {
+      "id": "FACT-SAFE-0001",
+      "claim": "Cleaning removes dirt and residue from a surface. Sanitising then reduces the number of microorganisms on that clean surface to a low level; it does not replace cleaning and does not make anything sterile. Because dirt and residue reduce a sanitiser's effect, equipment is cleaned first and sanitised second.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "public health agency handout (US CDC) -- household scope",
+          "ref": "CDC, The Difference Between Cleaning, Sanitizing, & Disinfecting, pub. 331782-A",
+          "note": "Cleaning removes dirt and germs from surfaces; sanitising lowers the number of germs; neither is the same as sterilising. Household scope, not brewing-specific."
+        },
+        {
+          "tier": "B",
+          "type": "homebrewing guidance (John Palmer, How to Brew ch. 2)",
+          "ref": "Palmer, How to Brew, ch. 2 (accessed via Wayback; live host TLS certificate was expired during research)",
+          "note": "Graded wording: dirt and residue reduce a sanitiser's effect. Access limitation: Wayback copy used."
+        },
+        {
+          "tier": "B",
+          "type": "university extension publication (Clemson HGIC 3885, 2021)",
+          "ref": "Clemson Cooperative Extension HGIC 3885, Cleaning and Sanitation for the Homebrewer, 2021",
+          "note": "Clean first, then sanitise; homebrew scope."
+        }
+      ],
+      "concepts": ["hygiene.clean_vs_sanitize", "hygiene.clean_first"],
+      "notes": "Hygiene N1 (one record, two concepts). Deliberately NOT claimed: that sanitised means sterile; that dirty equipment 'cannot' be sanitised (Palmer's graded 'reduces effect' wording is used instead); any product name, concentration, contact time or 'no-rinse' claim. The Star San tech sheet is deliberately NOT a primary source: it is product-specific and contains a marketing line that conflicts with the general clean-first explanation. FACT-COOL-0003 owns the hot/cold sanitation boundary and is not duplicated. TERMINOLOGY: the claim is English-neutral. For later Norwegian course text, 'sanitering/sanitert' is kept as a product-language choice and must be glossed at first use as a brewing term (reducing microorganisms on a cleaned surface; not sterilisation). No Norwegian authority source read uses 'sanitering' (authorities use 'rengjoring' + 'desinfeksjon'); do not present 'sanitering' as the official Norwegian term or as identical to healthcare/food-industry 'desinfeksjon'. SOURCE LIMITATIONS: CDC is household scope; Palmer and Clemson are Tier B. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the source work recorded on issue #447. Source references are by title/publisher only -- URLs and access dates are not recorded here and must be added at the Chief live spot-check."
+    },
+    {
+      "id": "FACT-SAFE-0002",
+      "claim": "Cleaners and sanitisers can irritate or harm skin and eyes. Follow the product label; the safety data sheet gives the detail. Use the protection specified for the product, use it in a ventilated space, keep it closed in its original container and out of children's reach, and do not mix different cleaning products unless the label says it is safe.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "Norwegian poison information service (Giftinformasjonen/Helsenorge)",
+          "ref": "Giftinformasjonen / Helsenorge, Farlige produkter i hjemmet",
+          "note": "Norway-scope household guidance: follow labels, keep products in the original container, out of children's reach."
+        },
+        {
+          "tier": "A",
+          "type": "national transport authority advisory (Transport Canada CANUTEC)",
+          "ref": "CANUTEC, Improper mixing of common household cleaning products",
+          "note": "Do not mix cleaning products; only the general no-mixing rule is used."
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer SDS (Five Star Star San) -- US format, commercial interest",
+          "ref": "Five Star Chemicals, Star San Safety Data Sheet",
+          "note": "Skin/eye irritation hazard; protection is product-specified. US-format SDS, not a Norwegian label."
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer SDS (Five Star PBW) -- US format, commercial interest",
+          "ref": "Five Star Chemicals, PBW Safety Data Sheet",
+          "note": "Skin/eye irritation hazard; protection is product-specified. US-format SDS, not a Norwegian label."
+        },
+        {
+          "tier": "B",
+          "type": "university extension publication (N.C. Cooperative Extension)",
+          "ref": "N.C. Cooperative Extension, Health Risks of Mixing Household Cleaners",
+          "note": "General no-mixing rule corroboration."
+        },
+        {
+          "tier": "B",
+          "type": "university extension publication (Clemson HGIC 3885, 2021)",
+          "ref": "Clemson Cooperative Extension HGIC 3885, Cleaning and Sanitation for the Homebrewer, 2021",
+          "note": "Homebrew-scope handling precautions."
+        }
+      ],
+      "concepts": ["safety.chem_handling"],
+      "notes": "Generic, product-neutral chemical handling (N2). Protective equipment is label-dependent: there is deliberately NO universal 'always gloves + goggles' rule. Deliberately NOT claimed: any dosing, concentration or contact time; hazard-code teaching; any product recommendation; any specific mixing outcome -- in particular NO claim about what PBW + Star San release when mixed (gas or heat), and no generic acid + alkaline cleaner reaction outcome (not supported by the source round). Specific chlorine chemistry (bleach + acid; bleach + ammonia) stays source-note/later material and is NOT part of this Foundation record. The general rule is only 'do not mix cleaning products unless the label says it is safe'. No US SDS is presented as a Norwegian label; no Norwegian-specific SDS access/process source was verified. SOURCE LIMITATIONS: the two Five Star SDS are US-format manufacturer documents with commercial interest and are used only for the generic skin/eye irritation point. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the source work recorded on issue #447. Source references are by title/publisher only -- URLs and access dates are not recorded here and must be added at the Chief live spot-check."
+    },
+    {
+      "id": "FACT-SAFE-0003",
+      "claim": "Fermentation produces carbon dioxide. CO₂ is colourless and odourless, so it cannot be seen or smelled, and in a small, closed or poorly ventilated space it can build up and displace oxygen. Ferment in a ventilated space.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T19:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "provincial regulator alert (Ontario Ministry of Labour) -- wine, workplace scale",
+          "ref": "Ontario Ministry of Labour, alert on brew-on-premise wine making establishments",
+          "note": "Fermenting carboys/buckets release CO₂ that can accumulate in poorly ventilated areas. Wine + workplace scale."
+        },
+        {
+          "tier": "A",
+          "type": "national regulator guidance (UK HSE)",
+          "ref": "UK HSE, General hazards of Carbon Dioxide",
+          "note": "Generic CO₂: colourless, odourless, displaces oxygen in poorly ventilated spaces."
+        },
+        {
+          "tier": "B",
+          "type": "trade association guidance (Brewers Association) -- industrial scale",
+          "ref": "Brewers Association, CO2 Hazards",
+          "note": "Beer fermentation CO₂ hazard at brewery scale."
+        }
+      ],
+      "concepts": ["safety.fermentation_co2"],
+      "notes": "Qualitative fermentation CO₂ hazard (N3). Owner decision is final: CO₂ at L1 = MUST. Two layers are kept distinct: (1) DOCUMENTED MECHANISM -- fermentation produces CO₂, which is colourless/odourless and can displace oxygen in small, closed or poorly ventilated spaces; (2) 'Ferment in a ventilated space' is a PROPORTIONATE INTERPRETATION from workplace guidance, NOT a quantified homebrew requirement. Deliberately NOT claimed: any ppm or percentage; room-size, batch-size or ventilation-rate figures; time-to-hazard; a CO₂ alarm/monitor requirement; a buddy system; a confined-space procedure; that ordinary home fermentation is inherently dangerous; that it is harmless; anything about cylinder/dispensing CO₂ (not merged with fermentation CO₂); package pressure (FACT-PACK-0003 owns it). 'Heavier than air' is true but notes-only: it can mislead if taught without mixing/air-movement nuance. Kunze p.523 4.9.1 is NOT cited (not visually verified). SOURCE LIMITATIONS: Ontario is wine + workplace scale; HSE is generic CO₂; Brewers Association is industrial beer scale; no ordinary-homebrew CO₂ risk quantification and no home-scale ventilation specification exist in the sources read. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the source work recorded on issue #447. Source references are by title/publisher only -- URLs and access dates are not recorded here and must be added at the Chief live spot-check."
     }
   ]
 }
