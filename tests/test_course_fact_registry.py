@@ -773,7 +773,7 @@ class TestProductionRegistryMeasurementFoundation(unittest.TestCase):
     def test_hydrometer_claim_uses_reference_temperature_without_values(self):
         claim = get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0003")["claim"]
         self.assertIn("reference temperature", claim)
-        self.assertIn("stated by its manufacturer", claim)
+        self.assertIn("stated on the instrument or in its instructions", claim)
         self.assertIn("measured and noted", claim)
 
     def test_sources_and_limitations_are_explicit(self):

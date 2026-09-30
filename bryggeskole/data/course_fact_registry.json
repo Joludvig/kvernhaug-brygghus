@@ -1146,7 +1146,7 @@
     },
     {
       "id": "FACT-MEAS-0003",
-      "claim": "A hydrometer is made to read correctly at one reference temperature, stated by its manufacturer on the instrument or in its instructions, and different hydrometers can have different reference temperatures. A sample at a different temperature can give a different reading, so the sample's temperature should be measured and noted.",
+      "claim": "A hydrometer is made to read correctly at one reference temperature, stated on the instrument or in its instructions, and different hydrometers can have different reference temperatures. A sample at a different temperature can give a different reading, so the sample's temperature should be measured and noted.",
       "classification": "documented_fact",
       "status": "verified",
       "verified_at": "2026-09-30T21:00:00Z",
