@@ -284,6 +284,53 @@
       "notes": "A synthesis/interpretation of FACT-HOP-0001/FACT-HOP-0002, not a new independently measured result -- describes a common brewing strategy, not a fixed numeric schedule (does not assert e.g. '60/20/5 minutes' as a required recipe). No independent citation beyond the two underlying facts' own sources is expected, mirroring FACT-MASH-0004's precedent. Wording trap: do not present any specific minute schedule as the correct or only pattern; do not imply single-addition recipes are wrong."
     },
     {
+      "id": "FACT-HOP-0005",
+      "claim": "A hop's alpha-acid percentage is the share of its weight that is alpha acids, and it indicates the hop's bittering potential; it is not the beer's IBU. The IBU contributed by a hop addition depends on how much hop is used and how it is used, including boil time and other process conditions, so an alpha-acid percentage does not map to any fixed IBU.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T12:00:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "reference encyclopedia entry (The Oxford Companion to Beer, 'alpha acids')",
+          "ref": "https://www.beerandbrewing.com/dictionary/0Mo49i2N1B"
+        },
+        {
+          "tier": "B",
+          "type": "brewing textbook, web edition (John Palmer, How to Brew, ch. 5 Hops; (c) 1999-2015 John Palmer, page carries 2025 author notes; accessed 2026-09-30)",
+          "ref": "https://howtobrew.com/section-1/chapter-5/"
+        }
+      ],
+      "concepts": ["hop.alpha_vs_ibu"],
+      "notes": "Ingredient-side prerequisite only: alpha % is a hop property, alpha % != IBU, and use affects IBU. Deliberately does NOT carry calculated-recipe-IBU-is-an-estimate, wort vs finished-beer IBU, perceived bitterness, beer matrix, balance or recipe formulation -- those remain with Oppskriftsforstaaelse R-2/R-4. Wording traps: do not say 'alpha % is bitterness'; do not say '12% alpha = 12 IBU'; do not say higher alpha always means more IBU; no Tinseth/utilisation equation or utilisation percentages, no IBU target bands, no cohumulone, no hop variety catalogue. Source set fixed by Chief spot-check on issue #440 (2026-09-30); the BarthHaas BBC Pure Hop Pellet 2018 datasheet was not recoverable live and is intentionally not cited here. No producer source, so no commercial-interest flag applies."
+    },
+    {
+      "id": "FACT-HOP-0004",
+      "claim": "Hops age after harvest: warmth, oxygen and time degrade or change bittering compounds and aroma oils, so cold, oxygen-excluding storage slows deterioration and helps preserve brewing value.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-09-30T12:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "peer-reviewed two-year hop storage trial (Rutnik, Ocvirk & Kosir, Plants 2023, 12(4), 936)",
+          "ref": "https://doi.org/10.3390/plants12040936"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical article (BarthHaas Group, 'Hops don't like to get old, either', 15 May 2024) -- commercial interest",
+          "ref": "https://www.barthhaas.com/ressources/blog/blog-article/hops-dont-like-to-get-old-either"
+        },
+        {
+          "tier": "A",
+          "type": "manufacturer technical datasheet (BarthHaas Hop Pellets Type 90 TDS, approved 14 Jun 2024) -- commercial interest, supporting context only",
+          "ref": "https://www.barthhaas.com/fileadmin/user_upload/downloads/sharepoint/hop-pellets-type-90-pellets-tds-en.pdf"
+        }
+      ],
+      "concepts": ["hop.ageing_storage"],
+      "notes": "Direction only. Alpha-acid content can fall during storage, but this does NOT generalise to 'finished beer will always be less bitter'; aroma quality/intensity can decline; ageing rate depends on variety, form, packaging and conditions. Must not include: Hop Storage Index calculations/thresholds, degradation percentages, shelf-life months, exact storage temperatures, 'old hops make less bitter beer', 'old hops become cheesy/sweaty' (cheese clause deliberately dropped by Chief decision), 'vacuum sealing preserves hops' as a universal homebrew claim, 'oxygen ruins hops', 'all varieties age the same', 'pellets always store better than cones'. Two BarthHaas sources are commercial-interest; the claim is corroborated by the independent peer-reviewed trial. Source set fixed by Chief spot-check on issue #440 (2026-09-30)."
+    },
+    {
       "id": "FACT-COOL-0001",
       "claim": "Cooling wort rapidly from boiling temperature down toward the yeast's intended pitching temperature reduces the time the wort spends in a temperature range where unwanted/spoilage microorganisms can grow, and is standard homebrewing practice for reducing infection risk before pitching.",
       "classification": "documented_fact",
