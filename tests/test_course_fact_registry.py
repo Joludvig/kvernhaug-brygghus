@@ -250,7 +250,7 @@ _MALT_CORE_VERIFIED_IDS = ["FACT-MALT-0001", "FACT-MALT-0002", "FACT-MALT-0003",
 _YEAST_CORE_VERIFIED_IDS = [f"FACT-YEAST-000{n}" for n in range(1, 6)]
 _WATER_FOUNDATION_VERIFIED_IDS = ["FACT-WATER-0001", "FACT-WATER-0002", "FACT-WATER-0003"]
 _HOP_CORE_VERIFIED_IDS = ["FACT-HOP-0004", "FACT-HOP-0005"]
-_RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002"]
+_RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
@@ -320,8 +320,10 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # documented_fact.
         # Issue #442 (V2.2 Goal 3 R-1) adds FACT-RECIPE-0002: 1
         # documented_fact.
+        # Issue #443 (V2.2 Goal 3 R-4) adds FACT-RECIPE-0003: 1
+        # professional_interpretation.
         self.assertEqual(classifications.count("documented_fact"), 32)
-        self.assertEqual(classifications.count("professional_interpretation"), 11)
+        self.assertEqual(classifications.count("professional_interpretation"), 12)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
@@ -581,7 +583,7 @@ class TestProductionRegistryRecipeIbuVsPerceivedBitterness(unittest.TestCase):
     def test_exactly_one_recipe_record_and_concept_maps_to_it(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
         ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-RECIPE-")]
-        self.assertEqual(ids, ["FACT-RECIPE-0001", "FACT-RECIPE-0002"])
+        self.assertEqual(ids, ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-0003"])
         found = find_verified_records(_PRODUCTION_REGISTRY, concept="recipe.ibu_vs_perceived_bitterness")
         self.assertEqual([r["id"] for r in found], ["FACT-RECIPE-0001"])
 
@@ -664,6 +666,54 @@ class TestProductionRegistryRecipeSpecialtyFermentability(unittest.TestCase):
             self.assertNotIn(
                 "recipe.specialty_fermentability", get_verified_record(_PRODUCTION_REGISTRY, fact_id)["concepts"]
             )
+
+
+class TestProductionRegistryRecipeBalance(unittest.TestCase):
+    """Issue #443 (V2.2 Goal 3 R-4): FACT-RECIPE-0003. Relational
+    professional interpretation only; no BU:GU, style or directional claims."""
+
+    def _record(self):
+        return get_verified_record(_PRODUCTION_REGISTRY, "FACT-RECIPE-0003")
+
+    def test_concept_maps_to_exactly_this_record(self):
+        found = find_verified_records(_PRODUCTION_REGISTRY, concept="recipe.balance")
+        self.assertEqual([r["id"] for r in found], ["FACT-RECIPE-0003"])
+
+    def test_professional_interpretation_without_modules(self):
+        record = self._record()
+        self.assertEqual(record["classification"], "professional_interpretation")
+        self.assertNotIn("modules", record)
+
+    def test_claim_is_relational_and_makes_no_forbidden_claims(self):
+        claim = self._record()["claim"]
+        self.assertIn("relative to one another", claim)
+        self.assertIn("not by one universal number or ratio", claim)
+        self.assertIn("not a quality score", claim)
+        lowered = claim.lower()
+        for forbidden in (
+            "bu:gu", "ibu", "bjcp", "style", "alcohol", "sweet", "sugar", "fg", "roast", "mineral",
+            "carbonation", "ph ", "temperature", "aroma", "acid", "hop", "malt", "equal", "better",
+            "engine", "always", "harmonisk",
+        ):
+            self.assertNotIn(forbidden, lowered)
+
+    def test_sources_and_limitations_are_explicit(self):
+        record = self._record()
+        refs = " ".join(s["ref"] for s in record["sources"])
+        self.assertIn("Oxford Companion to Beer", refs)
+        self.assertIn("10.23763/BRSC07-01GASTL", refs)
+        self.assertIn("BJCP 2021", refs)
+        self.assertIn("Weikert", refs)
+        self.assertIn("context only", " ".join(s["type"] for s in record["sources"]))
+        self.assertIn("no Tier A source defines 'balance'", record["notes"])
+        self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"])
+
+    def test_r1_r2_facts_are_unchanged_and_not_duplicated(self):
+        for fact_id, concept in (
+            ("FACT-RECIPE-0001", "recipe.ibu_vs_perceived_bitterness"),
+            ("FACT-RECIPE-0002", "recipe.specialty_fermentability"),
+        ):
+            self.assertEqual(get_verified_record(_PRODUCTION_REGISTRY, fact_id)["concepts"], [concept])
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
