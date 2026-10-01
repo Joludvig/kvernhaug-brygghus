@@ -29,6 +29,7 @@ import streamlit as st
 
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
+from bryggeskole.malt_roles_strip import render_malt_roles_strip_svg
 from bryggeskole.method_context_flow import render_method_context_flow_svg
 from bryggeskole.package_flow import render_package_flow_svg
 
@@ -40,3 +41,4 @@ st.markdown(render_boil_timeline_svg(_sprak), unsafe_allow_html=True)
 st.markdown(render_cool_transfer_flow_svg(_sprak), unsafe_allow_html=True)
 st.markdown(render_package_flow_svg(_sprak), unsafe_allow_html=True)
 st.markdown(render_method_context_flow_svg(_sprak), unsafe_allow_html=True)
+st.markdown(render_malt_roles_strip_svg(_sprak), unsafe_allow_html=True)
