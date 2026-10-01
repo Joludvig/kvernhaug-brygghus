@@ -279,6 +279,11 @@ TEKSTER = {
             "resulterende IBU-en/bryggedagsplanen som whirlpool-bevisst."
         ),
         "koking.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Koking.",
+        # V2.2 G3P-7 (issue #462): Råvarer Learn -> Plan-broer.
+        "raavarer.malt.laer_bro.tittel": "🎓 Hva gjør malten i ølet?",
+        "raavarer.malt.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Råvarer.",
+        "raavarer.vann.laer_bro.tittel": "🎓 Hva betyr kildevannet for ølet?",
+        "raavarer.vann.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Råvarer.",
     },
     "en": {
         "tabs.oppskrift": "🍺 Recipe",
@@ -486,6 +491,11 @@ TEKSTER = {
             "IBU/brewday timing as whirlpool-aware."
         ),
         "koking.laer_bro.footer": "Want to practice more? Open Brew School → Boil.",
+        # V2.2 G3P-7 (issue #462): Raw materials Learn -> Plan bridges.
+        "raavarer.malt.laer_bro.tittel": "🎓 What does malt do in the beer?",
+        "raavarer.malt.laer_bro.footer": "Want to practice more? Open Brew School → Raw materials.",
+        "raavarer.vann.laer_bro.tittel": "🎓 What does your source water mean for the beer?",
+        "raavarer.vann.laer_bro.footer": "Want to practice more? Open Brew School → Raw materials.",
     },
 }
 

@@ -1,5 +1,8 @@
 import streamlit as st
 
+from bryggeskole import pilot_raw_materials as _pilot_raavarer
+from ui.i18n import gjeldende_sprak, t
+
 FORETRUKKET_GRUPPE_REKKEFØLGE = [
     "PALE / PILSNER",
     "MUNICH / VIENNA",
@@ -25,8 +28,36 @@ KATEGORI_TIL_GRUPPE = {
 def _malt_gruppe(info):
     return info.get("display_group") or KATEGORI_TIL_GRUPPE.get(info.get("kategori", ""), "SPESIALMALT")
 
+# V2.2 G3P-7 (issue #462): Learn -> Plan-bro som gjenbruker
+# CHUNK-RAW-A/B/C fra den eksisterende, verifiserte Råvarer-piloten
+# (bryggeskole.pilot_raw_materials) uendret -- ingen ny undervisningstekst
+# forfattes her. Read-only, ingen mastery-kall, ingen ny lagringstilstand.
+_LAER_BRO_CHUNK_IDER = ("CHUNK-RAW-A", "CHUNK-RAW-B", "CHUNK-RAW-C")
+
+
+def _render_laer_bro(sprak):
+    """Kollapset Learn -> Plan-bro, rendret nøyaktig én gang per panel
+    (ikke per maltrad). Ugyldig pilotinnhold (PilotContentError) skal
+    aldri krasje Oppskrift-fanen."""
+    with st.expander(t("raavarer.malt.laer_bro.tittel"), expanded=False):
+        try:
+            pilot = _pilot_raavarer.read_pilot_file()
+            chunker = {c["id"]: c for c in pilot["chunks"]}
+            tekster = [
+                _pilot_raavarer.render_chunk(chunker[chunk_id], sprak)["text"]
+                for chunk_id in _LAER_BRO_CHUNK_IDER
+            ]
+        except _pilot_raavarer.PilotContentError:
+            st.error(t("bryggeskole.feil.innhold_ugyldig"))
+            return
+        for tekst in tekster:
+            st.markdown(tekst)
+        st.caption(t("raavarer.malt.laer_bro.footer"))
+
+
 def render_malt_panel(malt_database):
     st.header("🌾 Meskekaret (Grist)")
+    _render_laer_bro(gjeldende_sprak())
 
     # _v must be known before any widget is created so key names are consistent
     _v = st.session_state.get("import_versjon", 0)
