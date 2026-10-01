@@ -2,10 +2,10 @@
 // Bryggeskole module-card grid's responsive layout (issue #394).
 //
 // The bug this catches (owner-PC QA, issue #394): on a narrow/portrait
-// screen the six module cards in _render_skoleoversikt() were squeezed
+// screen the module cards in _render_skoleoversikt() were squeezed
 // into a single row via `st.columns(len(stadier))`, whose per-column
-// `flex-basis` is a PERCENTAGE of the container width -- six columns at
-// 16.6667% each always sum to 100%, so the browser's own flex-wrap never
+// `flex-basis` was a PERCENTAGE of the container width -- the columns
+// always summed to 100%, so the browser's own flex-wrap never
 // actually triggers no matter how narrow the screen gets; the columns
 // just shrink until the module name's text has no room left and the
 // browser's overflow-wrap fallback breaks it mid-word ("Forbere/delse/
@@ -15,8 +15,8 @@
 //
 // Reproduced directly against the pre-fix source (stash-toggle) at
 // viewport width 750px -- sidebar still shown inline (Streamlit's own
-// auto-collapse breakpoint is narrower), main content squeezed to six
-// ~65-100px columns -- and confirmed fixed post-fix at the same width.
+// auto-collapse breakpoint is narrower), main content squeezed to ~65-100px columns -- and confirmed fixed
+// post-fix at the same width. The grid now has seven cards (issue #458).
 //
 // Runs against tests/fixtures/streamlit_harness/bryggeskole_harness.py
 // (already the production render_bryggeskole_panel() call; previously
@@ -27,14 +27,14 @@ const { test, expect } = require('@playwright/test');
 
 // The exact width the bug was reproduced at: narrow/portrait, but wide
 // enough that Streamlit's own sidebar auto-collapse hasn't kicked in yet
-// (so the six-column grid actually gets squeezed, not just handed the
+// (so the module grid actually gets squeezed, not just handed the
 // sidebar's freed-up width).
 const NARROW_PORTRAIT_WIDTH = 750;
 const NARROW_PORTRAIT_HEIGHT = 900;
 
 const MODUL_TEKST = {
-  no: ['Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking'],
-  en: ['Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging'],
+  no: ['Råvarer', 'Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking'],
+  en: ['Raw materials', 'Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging'],
 };
 
 const ENV_KNAPP = {
@@ -134,14 +134,14 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, viewport);
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(6);
+      expect(cards).toHaveLength(7);
 
       const broken = await findMidWordBreaks(page);
       expect(broken, `mid-word breaks found: ${JSON.stringify(broken)}`).toEqual([]);
 
       expect(await hasHorizontalOverflow(page)).toBe(false);
 
-      // Every rendered title text must still be exactly one of the six
+      // Every rendered title text must still be exactly one of the seven
       // expected module names (rules out any content/navigation
       // regression from the layout change).
       const titles = await page.locator('[data-testid="stHorizontalBlock"]').first().locator('[data-testid="stColumn"] p').allTextContents();
@@ -154,16 +154,16 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, { width: NARROW_PORTRAIT_WIDTH, height: NARROW_PORTRAIT_HEIGHT });
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(6);
+      expect(cards).toHaveLength(7);
 
       const rows = new Set(cards.map((c) => c.top));
-      // The reported bug is precisely "all six cards squeezed into one
+      // The reported bug is precisely "all cards squeezed into one
       // row" at this width -- the fix must wrap to at least two rows.
       expect(rows.size, `expected wrapping into multiple rows, got layout: ${JSON.stringify(cards)}`).toBeGreaterThan(1);
 
       // No card should be squeezed thinner than a comfortably readable
       // width (this is what forced the mid-word breaking in the first
-      // place -- six columns fit in ~65-100px each pre-fix).
+      // place -- the columns fit in ~65-100px each pre-fix).
       for (const c of cards) {
         expect(c.width, `card too narrow: ${JSON.stringify(c)}`).toBeGreaterThanOrEqual(150);
       }
@@ -179,7 +179,7 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, viewport);
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(6);
+      expect(cards).toHaveLength(7);
 
       const rows = new Set(cards.map((c) => c.top));
       // At genuinely mobile widths, one column per row is an acceptable
