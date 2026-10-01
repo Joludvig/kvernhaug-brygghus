@@ -1338,6 +1338,47 @@
       ],
       "concepts": ["safety.fermentation_co2"],
       "notes": "Qualitative fermentation CO₂ hazard (N3). Owner decision is final: CO₂ at L1 = MUST. Two layers are kept distinct: (1) DOCUMENTED MECHANISM -- fermentation produces CO₂, which is colourless/odourless and can displace oxygen in small, closed or poorly ventilated spaces; (2) 'Ferment in a ventilated space' is a PROPORTIONATE INTERPRETATION from workplace guidance, NOT a quantified homebrew requirement. Deliberately NOT claimed: any ppm or percentage; room-size, batch-size or ventilation-rate figures; time-to-hazard; a CO₂ alarm/monitor requirement; a buddy system; a confined-space procedure; that ordinary home fermentation is inherently dangerous; that it is harmless; anything about cylinder/dispensing CO₂ (not merged with fermentation CO₂); package pressure (FACT-PACK-0003 owns it). 'Heavier than air' is true but notes-only: it can mislead if taught without mixing/air-movement nuance. Kunze p.523 4.9.1 is NOT cited (not visually verified). SOURCE LIMITATIONS: Ontario is wine + workplace scale; HSE is generic CO₂; Brewers Association is industrial beer scale; no ordinary-homebrew CO₂ risk quantification and no home-scale ventilation specification exist in the sources read. SOURCE-ACCESS LIMITATIONS: this Bridge run could not re-fetch any source (WebFetch/WebSearch not available), so sources were NOT reopened live in this round; the record encodes only the Chief-scoped claim and the source work recorded on issue #447. Source references are by title/publisher only -- URLs and access dates are not recorded here and must be added at the Chief live spot-check."
+    },
+    {
+      "id": "FACT-SENSORY-0001",
+      "claim": "Diacetyl is a compound associated with a butter or butterscotch aroma and flavour in beer. During normal fermentation, yeast releases a precursor that turns into diacetyl in the beer, and healthy yeast can take diacetyl back up and convert it into compounds with little flavour; this depends on the beer staying in contact with enough yeast during fermentation and maturation. Certain lactic acid bacteria can also produce diacetyl. Low levels can be accepted in some beer styles, but diacetyl is generally undesirable when it is unintentionally prominent.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-01T12:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "peer-reviewed review (Journal of the Institute of Brewing) -- abstract only",
+          "ref": "Krogerus K., Gibson B., 125th Anniversary Review: Diacetyl and its control during brewery fermentation, J. Inst. Brew. 119(3):86-97, 2013, DOI 10.1002/jib.84 -- https://cris.vtt.fi/en/publications/125th-anniversary-review-diacetyl-and-its-control-during-brewery-/ (accessed 2026-10-01)",
+          "note": "Issue #463 source gate: butter-tasting; yeast valine-metabolism by-product via alpha-acetolactate with spontaneous decarboxylation; removal by yeast reductase enzymes. Abstract only (full text returned HTTP 403); corroboration, never the sole basis for any element."
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed research (J. Ind. Microbiol. Biotechnol., CC BY 4.0) -- Introduction only, lager yeast",
+          "ref": "Gibson B., Vidgren V., Peddinti G., Krogerus K., Diacetyl control during brewery fermentation via adaptive laboratory engineering of the lager yeast Saccharomyces pastorianus, J. Ind. Microbiol. Biotechnol. 45(12):1103-1112, 2018, DOI 10.1007/s10295-018-2087-4 -- https://pmc.ncbi.nlm.nih.gov/articles/PMC6267509/ (accessed 2026-10-01)",
+          "note": "Issue #463 source gate: butter/butterscotch flavour; precursor diffuses out of the cell and decarboxylates non-enzymatically; diacetyl is taken up by yeast and reduced; in lager an almost invariably undesirable off-flavour. Only the introductory background statements are used."
+        },
+        {
+          "tier": "B",
+          "type": "edited reference work (The Oxford Companion to Beer, entry by G. Philliskirk)",
+          "ref": "Philliskirk G., Diacetyl, in Oliver G. (ed.), The Oxford Companion to Beer, Oxford University Press, 2012 -- https://www.beerandbrewing.com/dictionary/48TDqQibPi (accessed 2026-10-01)",
+          "note": "Issue #463 source gate: butter/butterscotch descriptor; yeast excretes a precursor that breaks down chemically; reabsorption needs sufficient yeast contact; certain lactic acid bacteria can produce it; positive in some ales and stouts, unwelcome when unacceptably high. Read via the Beer & Brewing hosted reproduction, not the printed volume. The entry's threshold number and rest example are NOT carried."
+        },
+        {
+          "tier": "B",
+          "type": "trade association fact sheet (Brewers Association) -- commercial-brewery framing",
+          "ref": "Brewers Association, Beer Off Flavor: Diacetyl, fact sheet (PDF created 2021-12-14) -- https://cdn.brewersassociation.org/wp-content/uploads/2021/12/15135033/Beer_Off_Flavor_Diacetyl-1.pdf (accessed 2026-10-01)",
+          "note": "Issue #463 source gate: precursor produced normally during wort fermentation; re-uptake and conversion needs adequate yeast in suspension; poor yeast health gives incomplete conversion; lactic acid producing bacteria; style dependent. Its thresholds, rest schedule, FAN/O2/pitch figures and enzymatic aids are NOT carried."
+        },
+        {
+          "tier": "B",
+          "type": "industrial brewing textbook (Kunze, Technology Brewing and Malting, 3rd international edition, VLB Berlin) -- visually inspected, structural support only",
+          "ref": "Kunze W., Technology Brewing and Malting, 3rd International Edition, VLB Berlin, s. 4.1.3.1 Diacetyl (vicinal diketones), printed pp. 376-377",
+          "note": "Issue #463 source gate (Chief-accepted as visually inspected Tier B structural support): odourless precursors converted outside the cell; removal only by yeast cells and dependent on yeast concentration and beer-yeast contact. Cited to the printed edition; the local scan has unofficial provenance. Its pH range and temperature figure are NOT carried."
+        }
+      ],
+      "concepts": ["sensory.diacetyl"],
+      "notes": "Sensory S-1 (documented_fact, issue #466; source gate #463 accepted by Chief). The claim contains no numbers, temperatures or times. Deliberately NOT claimed: any threshold or concentration; any fixed diacetyl-rest temperature or time; enzyme products or treatment; slick/oily mouthfeel (no source states it); that a buttery smell proves diacetyl (butter is a descriptor, not proof -- teaching must keep 'this smells buttery' separate from 'this is diacetyl', contract section 10); that more time always fixes it (removal depends on enough yeast contact and conditions, and bacterial diacetyl is a separate route); acetaldehyde or sulphur maturation claims; that diacetyl means infection (bacteria are one possible route, not the default); that diacetyl is always a fault or always acceptable; any named style list. Does not restate FACT-YEAST-0001 / FACT-BREW-0002. SOURCE LIMITATIONS: Krogerus and Gibson 2013 is abstract only; Gibson et al. 2018 is lager-yeast research and only its introduction is used; no Tier A source was opened for style acceptability or bacterial production -- those two elements rest on Tier B (Oxford Companion, Brewers Association); Brewers Association has US trade framing aimed at commercial breweries; Kunze is industrial/lager scope and does not cover bacteria or style acceptability; the Oxford Companion text was read via a hosted reproduction. ASBC/EBC sensory-method sources were not opened. SOURCE-ACCESS LIMITATIONS: this Bridge run did not reopen the sources; the record encodes the Chief-accepted wording and the source evidence recorded and accepted on issue #463 (access date 2026-10-01), whose URLs are carried in the source refs."
     }
   ]
 }

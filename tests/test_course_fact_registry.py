@@ -254,12 +254,13 @@ _RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-000
 _MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003"]
 _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
 _SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
+_SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
     + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
     + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS + _MEASUREMENT_VERIFIED_IDS
-    + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _SAFETY_VERIFIED_IDS
+    + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _SAFETY_VERIFIED_IDS + _SENSORY_VERIFIED_IDS
 )
 
 
@@ -332,7 +333,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # FACT-MEAS-0004..0005: 2 documented_fact.
         # Issue #447 (V2.2 Goal 3 Rengjoring/sikkerhet N1/N2/N3) adds
         # FACT-SAFE-0001..0003: 3 documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 40)
+        # Issue #466 (V2.2 Goal 3 Sensory S-1) adds FACT-SENSORY-0001: 1
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 41)
         self.assertEqual(classifications.count("professional_interpretation"), 12)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -949,6 +952,59 @@ class TestProductionRegistrySafetyFactPack(unittest.TestCase):
         n3_refs = " ".join(s["ref"] for s in get_verified_record(_PRODUCTION_REGISTRY, "FACT-SAFE-0003")["sources"])
         self.assertIn("HSE", n3_refs)
         self.assertIn("Ontario", n3_refs)
+
+
+class TestProductionRegistrySensoryDiacetylFact(unittest.TestCase):
+    """Issue #466 (V2.2 Goal 3 Sensory S-1): FACT-SENSORY-0001, the single
+    narrow `sensory.diacetyl` documented_fact (source gate #463)."""
+
+    def _record(self):
+        return get_verified_record(_PRODUCTION_REGISTRY, "FACT-SENSORY-0001")
+
+    def test_only_one_sensory_record_exists(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-SENSORY-")]
+        self.assertEqual(ids, _SENSORY_VERIFIED_IDS)
+
+    def test_concept_maps_to_exactly_this_record_without_modules(self):
+        found = find_verified_records(_PRODUCTION_REGISTRY, concept="sensory.diacetyl")
+        self.assertEqual([r["id"] for r in found], ["FACT-SENSORY-0001"])
+        record = self._record()
+        self.assertEqual(record["classification"], "documented_fact")
+        self.assertEqual(record["concepts"], ["sensory.diacetyl"])
+        self.assertNotIn("modules", record)
+
+    def test_claim_carries_the_accepted_elements(self):
+        claim = self._record()["claim"]
+        for phrase in (
+            "butter or butterscotch",
+            "precursor",
+            "healthy yeast",
+            "enough yeast",
+            "Certain lactic acid bacteria",
+            "some beer styles",
+            "unintentionally prominent",
+        ):
+            self.assertIn(phrase, claim)
+
+    def test_claim_respects_hard_exclusions(self):
+        claim = self._record()["claim"]
+        self.assertFalse(any(ch.isdigit() for ch in claim))
+        for forbidden in (
+            "threshold", "ppb", "ppm", "mg", "rest", "enzyme", "aldc", "slick",
+            "oily", "mouthfeel", "proves", "always", "acetaldehyde", "sulphur", "sulfur",
+        ):
+            self.assertNotIn(forbidden, claim.lower())
+
+    def test_sources_and_caveats_are_preserved(self):
+        record = self._record()
+        refs = " ".join(s["ref"] for s in record["sources"])
+        for expected in ("10.1002/jib.84", "PMC6267509", "Oxford Companion", "Brewers Association", "Kunze"):
+            self.assertIn(expected, refs)
+        self.assertIn("SOURCE LIMITATIONS", record["notes"])
+        self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"])
+        self.assertIn("abstract only", record["notes"])
+        self.assertIn("Tier B", record["notes"])
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
