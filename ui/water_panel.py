@@ -7,6 +7,7 @@ uten et eksplisitt brukervalg — akkurat som ui/process_panel.py aldri
 velger bryggemåte automatisk.
 """
 import streamlit as st
+from bryggeskole import pilot_raw_materials as _pilot_raavarer
 from config import DEMO_MODE
 from modules.equipment import last_equipment
 from modules.brewday_calc import beregn_vann
@@ -19,6 +20,7 @@ from modules.water_chemistry import (
     PROPORSJONAL, ALT_I_MESK, EGENDEFINERT_FORDELING, SYRER,
 )
 from ui import demo_state
+from ui.i18n import gjeldende_sprak, t
 
 _DEMO_SUFFIKS = " (demo — ikke permanent)"
 
@@ -118,8 +120,36 @@ def _ion_felt(kol, ion):
     return None if ukjent else verdi
 
 
+# V2.2 G3P-7 (issue #462): Learn -> Plan-bro som gjenbruker
+# CHUNK-RAW-J/K fra den eksisterende, verifiserte Råvarer-piloten
+# (bryggeskole.pilot_raw_materials) uendret -- ingen ny undervisningstekst
+# forfattes her. Read-only, ingen mastery-kall, ingen ny lagringstilstand.
+_LAER_BRO_CHUNK_IDER = ("CHUNK-RAW-J", "CHUNK-RAW-K")
+
+
+def _render_laer_bro(sprak):
+    """Kollapset Learn -> Plan-bro, rendret nøyaktig én gang per panel,
+    før de avanserte vannkjemi-kontrollene. Ugyldig pilotinnhold
+    (PilotContentError) skal aldri krasje Oppskrift-fanen."""
+    with st.expander(t("raavarer.vann.laer_bro.tittel"), expanded=False):
+        try:
+            pilot = _pilot_raavarer.read_pilot_file()
+            chunker = {c["id"]: c for c in pilot["chunks"]}
+            tekster = [
+                _pilot_raavarer.render_chunk(chunker[chunk_id], sprak)["text"]
+                for chunk_id in _LAER_BRO_CHUNK_IDER
+            ]
+        except _pilot_raavarer.PilotContentError:
+            st.error(t("bryggeskole.feil.innhold_ugyldig"))
+            return
+        for tekst in tekster:
+            st.markdown(tekst)
+        st.caption(t("raavarer.vann.laer_bro.footer"))
+
+
 def render_water_panel(ctx, malt_database=None):
     st.subheader("💧 Vannkjemi")
+    _render_laer_bro(gjeldende_sprak())
     st.caption(
         "Vannbehandlingen beskriver HVILKET VANN ølet brygges med og "
         "hvordan det justeres med salter/syrer — helt adskilt fra "
