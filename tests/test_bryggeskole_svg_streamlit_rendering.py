@@ -74,6 +74,7 @@ from markdown_it import MarkdownIt
 
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
+from bryggeskole.malt_roles_strip import render_malt_roles_strip_svg
 from bryggeskole.method_context_flow import render_method_context_flow_svg
 from bryggeskole.package_flow import render_package_flow_svg
 
@@ -111,6 +112,14 @@ _CASES = [
         {
             "no": ["BIAB", "Tradisjonelt alt-korn", "Alt-i-ett", "Meskekar/lauterkar", "Kjele"],
             "en": ["BIAB", "Traditional all-grain", "All-in-one", "Mash/lauter vessel", "Kettle"],
+        },
+        {"rect", "line", "path"},
+    ),
+    (
+        render_malt_roles_strip_svg,
+        {
+            "no": ["Basismalt", "Spesialmalt"],
+            "en": ["Base malt", "Specialty malt"],
         },
         {"rect", "line", "path"},
     ),

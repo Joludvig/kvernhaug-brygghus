@@ -84,6 +84,7 @@ from config import DEMO_MODE
 from bryggeskole.answer_order import finn_korrekt_indeks, velg_alternativ_rekkefolge
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
+from bryggeskole.malt_roles_strip import render_malt_roles_strip_svg
 from bryggeskole.mastery import apply_answer, mastery_label
 from bryggeskole.mastery_store import (
     neutral_state_document,
@@ -721,7 +722,14 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
     with st.container(key="bs_leksjon_tekst"):
         st.markdown(_MODULER[modul_id]["pilot"].render_chunk(chunks[idx], sprak)["text"])
 
-    if modul_id == _MODUL_KOKING:
+    if modul_id == _MODUL_RAAVARER:
+        # Råvarer-modulens ene Malt-visual (issue #460): kvalitativ
+        # basismalt->spesialmalt-stripe, kun i bolken som dekker
+        # FACT-MALT-0002 (basis vs. spesialmalt) -- se
+        # bryggeskole/malt_roles_strip.py sin docstring.
+        if "FACT-MALT-0002" in chunks[idx]["source_claims"]:
+            st.markdown(render_malt_roles_strip_svg(sprak), unsafe_allow_html=True)
+    elif modul_id == _MODUL_KOKING:
         # Koking-modulens eneste visuelle krav (issue #366 kontrakt §4):
         # ett statisk, ikke-interaktivt tidslinjediagram, synlig gjennom
         # hele leksjonen (ikke bare første/siste bolk) -- se

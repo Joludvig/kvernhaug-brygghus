@@ -68,6 +68,15 @@ const VISUALS = [
     },
     shapeSelector: 'rect, line',
   },
+  {
+    name: 'malt_roles_strip',
+    ariaLabel: { no: 'Malt: basismalt og spesialmalt', en: 'Malt: base and specialty malt' },
+    labels: {
+      no: ['Basismalt', 'Spesialmalt'],
+      en: ['Base malt', 'Specialty malt'],
+    },
+    shapeSelector: 'rect, line',
+  },
 ];
 
 const LANGUAGES = ['no', 'en'];
