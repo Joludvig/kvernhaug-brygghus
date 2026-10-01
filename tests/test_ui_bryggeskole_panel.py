@@ -69,6 +69,7 @@ from bryggeskole.pilot_boil_hop import read_pilot_file as les_koking_pilot
 from bryggeskole.pilot_cool_transfer import read_pilot_file as les_kjoling_pilot
 from bryggeskole.pilot_package import read_pilot_file as les_pakking_pilot
 from bryggeskole.pilot_method_context import read_pilot_file as les_metodevalg_pilot
+from bryggeskole.pilot_raw_materials import read_pilot_file as les_raavarer_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -230,14 +231,14 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
         _knapp(at, "bs_velg_bryggeri_btn")
 
     def test_alle_seks_stadier_er_klikkbare_ingen_kommer_senere(self):
-        # Issue #380 fyller den tidligere siste ubrukte gridcellen
-        # (indeks 0, tidligere "Maling av malt"/"Mølle") med
-        # Forberedelse/metode -- alle seks stadiene er nå aktive moduler.
+        # Issue #380 fylte den tidligere siste ubrukte gridcellen med
+        # Forberedelse/metode; issue #458 legger Råvarer foran som syvende
+        # stadium -- alle stadiene er aktive moduler, ingen "Kommer senere".
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 6)
+        self.assertEqual(len(aktiv_badges), 7)
         self.assertEqual(len(kommer_badges), 0)
 
     def test_mesking_modulen_rendrer_mesking_pilotinnhold(self):
@@ -441,16 +442,23 @@ class TestStatusMerker(_MedIsolertTilstand):
         self.assertNotIn("Gjennomført denne økten", tekster)
 
     def test_anbefalt_neste_peker_pa_metodevalg_forst(self):
-        # Issue #380: Forberedelse/metode er nå det aller første stadiet i
-        # prosessgridet, så det er den første anbefalingen -- før Mesking.
+        # Issue #458: Råvarer er nå det aller første stadiet i
+        # prosessgridet, så det er den første anbefalingen -- før
+        # Forberedelse/metode (anbefalt rekkefølge, aldri en lås).
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         tekster = " ".join(_alle_synlige_tekster(at))
-        self.assertIn("Anbefalt neste: Forberedelse/metode", tekster)
+        self.assertIn("Anbefalt neste: Råvarer", tekster)
 
     def test_anbefaling_endres_etter_mesking_er_fullfort_denne_okten(self):
         at = self._ny_apptest()
-        self._apne_modul_og_start_sporsmal(at, "metodevalg")
+        self._apne_modul_og_start_sporsmal(at, "raavarer")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_raavarer_pilot()))
+        _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn").click().run()
+
+        _knapp(at, "bs_apne_modul_metodevalg_btn").click().run()
+        self._aktiv_modul = "metodevalg"
+        self._start_sporsmalsrunde(at)
         metodevalg_pilot = les_metodevalg_pilot()
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(metodevalg_pilot))
         _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn").click().run()
@@ -1145,6 +1153,13 @@ class TestKokingModulen(_MedIsolertTilstand):
     def test_anbefalt_rekkefolge_er_metodevalg_mesking_koking_kjoling_gjaring_pakking(self):
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Råvarer", tekster)
+
+        _knapp(at, "bs_apne_modul_raavarer_btn").click().run()
+        self._start_sporsmalsrunde(at, "raavarer")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_raavarer_pilot()), "raavarer")
+        _knapp(at, "bs_oppsummering_tilbake_raavarer_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
         self.assertIn("Anbefalt neste: Forberedelse/metode", tekster)
 
@@ -1848,7 +1863,7 @@ class TestSkoleoversiktGridResponsivIssue394(unittest.TestCase):
         at = AppTest.from_file(_HARNESS)
         at.run()
         _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
-        for modul_id in ("metodevalg", "mesking", "koking", "kjoling", "gjaring", "pakking"):
+        for modul_id in ("raavarer", "metodevalg", "mesking", "koking", "kjoling", "gjaring", "pakking"):
             _knapp(at, f"bs_apne_modul_{modul_id}_btn")
 
     def test_anbefalt_neste_og_modulapning_uendret_etter_grid_refaktorering(self):
@@ -1857,11 +1872,72 @@ class TestSkoleoversiktGridResponsivIssue394(unittest.TestCase):
         _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
         infoer = [i.value for i in at.info]
         self.assertTrue(
-            any("Forberedelse/metode" in v for v in infoer),
+            any("Råvarer" in v for v in infoer),
             "anbefalt-neste-signalet skal fortsatt pense mot første modul",
         )
-        _knapp(at, "bs_apne_modul_metodevalg_btn").click().run()
+        _knapp(at, "bs_apne_modul_raavarer_btn").click().run()
         self.assertEqual(len(at.exception), 0)
+
+
+# ─── Råvarer-modulen (issue #458, V2.2 G3P slice 5): én kombinert
+# Foundation-modul, samme gjenbrukte motor -- kun anbefalt rekkefølge,
+# ingen lås, ingen ny mastery-mekanikk ──────────────────────────────────
+
+class TestRaavarerModulenIssue458(_MedIsolertTilstand):
+    def test_raavarer_er_klikkbar_modul_i_begge_miljo(self):
+        at = self._ny_apptest()
+        _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
+        _knapp(at, "bs_apne_modul_raavarer_btn")
+        at2 = self._ny_apptest()
+        _knapp(at2, "bs_velg_bryggeri_btn").click().run()
+        _knapp(at2, "bs_apne_modul_raavarer_btn")
+
+    def test_raavarer_modulen_rendrer_pilotinnhold_norsk(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "raavarer")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Malt er bygg som er maltet", tekster)
+
+    def test_engelsk_raavarer_modultittel_og_innhold(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "raavarer")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Raw materials", tekster)
+        self.assertIn("Malt is barley that has been malted", tekster)
+
+    def test_raavarer_far_full_leksjon_sporsmal_oppsummering_flyt(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "raavarer")
+        pilot = les_raavarer_pilot()
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(pilot))
+        self.assertEqual(len(at.exception), 0)
+        _knapp(at, "bs_oppsummering_tilbake_raavarer_btn")
+
+    def test_raavarer_registrerer_mastery_for_alle_konsepter(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "raavarer")
+        pilot = les_raavarer_pilot()
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(pilot))
+        tilstand = read_mastery_state()
+        for konsept in _konsept_rekkefolge(pilot):
+            self.assertIn(konsept, tilstand["concepts"])
+            self.assertNotEqual(_konsept_label(konsept, "no"), konsept)
+            self.assertNotEqual(_konsept_label(konsept, "en"), konsept)
+
+    def test_raavarer_laaser_ingen_andre_moduler(self):
+        # Kun anbefalt rekkefølge: alle andre moduler kan åpnes uten å ha
+        # gjennomført Råvarer.
+        at = self._ny_apptest()
+        self._apne_modul(at, "mesking")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Under mesking bryter enzymer", tekster)
+
+    def test_raavarer_widget_nokler_er_modul_scopede(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "raavarer")
+        self.assertTrue(any(b.key == "bs_valg_raavarer_r1_q0" for b in at.radio))
 
 
 if __name__ == "__main__":
