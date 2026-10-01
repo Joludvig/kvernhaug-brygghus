@@ -1379,6 +1379,47 @@
       ],
       "concepts": ["sensory.diacetyl"],
       "notes": "Sensory S-1 (documented_fact, issue #466; source gate #463 accepted by Chief). The claim contains no numbers, temperatures or times. Deliberately NOT claimed: any threshold or concentration; any fixed diacetyl-rest temperature or time; enzyme products or treatment; slick/oily mouthfeel (no source states it); that a buttery smell proves diacetyl (butter is a descriptor, not proof -- teaching must keep 'this smells buttery' separate from 'this is diacetyl', contract section 10); that more time always fixes it (removal depends on enough yeast contact and conditions, and bacterial diacetyl is a separate route); acetaldehyde or sulphur maturation claims; that diacetyl means infection (bacteria are one possible route, not the default); that diacetyl is always a fault or always acceptable; any named style list. Does not restate FACT-YEAST-0001 / FACT-BREW-0002. SOURCE LIMITATIONS: Krogerus and Gibson 2013 is abstract only; Gibson et al. 2018 is lager-yeast research and only its introduction is used; no Tier A source was opened for style acceptability or bacterial production -- those two elements rest on Tier B (Oxford Companion, Brewers Association); Brewers Association has US trade framing aimed at commercial breweries; Kunze is industrial/lager scope and does not cover bacteria or style acceptability; the Oxford Companion text was read via a hosted reproduction. ASBC/EBC sensory-method sources were not opened. SOURCE-ACCESS LIMITATIONS: this Bridge run did not reopen the sources; the record encodes the Chief-accepted wording and the source evidence recorded and accepted on issue #463 (access date 2026-10-01), whose URLs are carried in the source refs."
+    },
+    {
+      "id": "FACT-SENSORY-0002",
+      "claim": "Tasters commonly use a few descriptor families for well-known beer off-flavours: dimethyl sulfide (DMS) is described as sweetcorn or cooked vegetables; oxidised or stale beer as cardboard or paper; acetaldehyde as green apple; and light-struck beer as skunky.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-01T12:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "peer-reviewed review (Foods, MDPI, CC BY 4.0) -- descriptor wording only",
+          "ref": "Sutea C.M., Mudura E., Pop C.R., Salanta L.C., Farcas A.C., Balas P.C., Gal E. et al., Beer Aroma Compounds: Key Odorants, Off-Flavour Compounds and Improvement Proposals, Foods 14(24):4287, 2025, DOI 10.3390/foods14244287 -- PMC12732517 via Europe PMC full-text XML (accessed 2026-10-01)",
+          "note": "Issue #464 source gate: DMS 'sweetcorn, cooked vegetable' odour; oxidised/aged/stale and trans-2-nonenal 'cardboard, papery'; acetaldehyde 'green apples or unripe apples'; MBT 'skunky' odour. Only descriptor wording is used; the review's thresholds, mechanisms and corrective actions are NOT carried. mdpi.com returned 403, so the text was read via Europe PMC."
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed review (Molecules, MDPI) -- one descriptor only",
+          "ref": "Humia B.V., Santos K.S. et al., Beer Molecules and Its Sensory and Biological Properties: A Review, Molecules 24(8):1568, 2019, DOI 10.3390/molecules24081568 -- PMC6515478 via Europe PMC full-text XML (accessed 2026-10-01)",
+          "note": "Issue #464 source gate: used ONLY for the MBT 'skunk-like' off-flavour descriptor (light-struck). It has no DMS, cardboard or green-apple descriptor text."
+        },
+        {
+          "tier": "B",
+          "type": "edited reference work (The Oxford Companion to Beer) -- entries on DMS, oxidation, staling, aldehydes, lightstruck",
+          "ref": "Oliver G. (ed.), The Oxford Companion to Beer, Oxford University Press, 2012: entries 'dimethyl sulfide (DMS)' (Bamforth) https://www.beerandbrewing.com/dictionary/ACrDU6lDUs ; 'oxidation' (Oliver and Dornbusch) https://www.beerandbrewing.com/dictionary/l9v9PEb7Gl ; 'staling' (Oliver) https://www.beerandbrewing.com/dictionary/fSKbwceIOM ; 'aldehydes' (Bamforth) https://www.beerandbrewing.com/dictionary/JhseGsGMcM ; 'lightstruck' (Bird) https://www.beerandbrewing.com/dictionary/eIXf22Zwnt (accessed 2026-10-01)",
+          "note": "Issue #464 source gate: DMS 'cooked sweet corn'; oxidation 'papery, wet cardboard-like'; aldehydes 'cardboard character' and 'green apples'; lightstruck 'commonly referred to as skunky'. Read via the Beer & Brewing hosted reproduction, not the printed volume; the 'oxidation' entry was truncated after its first paragraph. Mechanisms, temperatures and style judgements in the entries are NOT carried."
+        },
+        {
+          "tier": "B",
+          "type": "trade association fact sheet (Brewers Association) -- acetaldehyde descriptor only",
+          "ref": "Brewers Association, Beer Off Flavor: Acetaldehyde, fact sheet (PDF created 2021-07-19) -- https://cdn.brewersassociation.org/wp-content/uploads/2021/07/22092751/Beer_Off_Flavor_Acetaldehyde.pdf (accessed 2026-10-01)",
+          "note": "Issue #464 source gate: green (Granny Smith) apple descriptor. Its thresholds, maturation and yeast-health process content and FAN/zinc figures are NOT carried."
+        },
+        {
+          "tier": "B",
+          "type": "trade association article (Brewers Association) -- public summary line only, weak corroboration",
+          "ref": "Brewers Association Quality Subcommittee, How To Manage Off Flavors in Beer: Dimethyl Sulfide (DMS), 2024-03-18 -- https://www.brewersassociation.org/educational-publications/how-to-manage-off-flavors-in-beer-dimethyl-sulfide-dms/ (accessed 2026-10-01)",
+          "note": "Issue #464 source gate: public summary line only ('creamed corn' aroma); the full article is members-only and was not opened. Not cited beyond that."
+        }
+      ],
+      "concepts": ["sensory.typical_descriptors"],
+      "notes": "Sensory S-4 (documented_fact, issue #467; source gate #464 accepted by Chief). The claim contains no numbers, thresholds, times or temperatures. DESCRIPTOR != DIAGNOSIS is a notes/methodology/teaching boundary and is deliberately NOT asserted as a factual sentence in the claim: no opened source states it as a sentence; it is supported only indirectly (TCA also smells of wet cardboard; skunkiness is commonly misattributed to staling and many compounds contribute to stale flavour; acetaldehyde character changes with concentration). Teaching must keep 'this smells like X' separate from 'this is compound Y' or 'this was caused by Z'. OWNERSHIP: DMS process truth stays with FACT-BOIL-0002; oxidation process truth stays with FACT-OXY-0002; the light-struck mechanism stays with future S-3; acetaldehyde gets descriptor vocabulary ONLY (no maturation, immaturity, cause, yeast-health or process claim); sulphur is not part of S-4. Deliberately NOT claimed: any threshold or concentration; any fixed process time or temperature; that cooked corn proves a short boil; that cardboard proves oxygen pickup; that green apple proves immature beer; that skunky proves one specific packaging error or that skunky means stale; any precursor, boil, oxygen, light, hop, riboflavin or glass content; a broad off-flavour catalogue (extra descriptors such as cabbage, tinned tomato, cucumber, black currant, latex paint, cat or foxy are not carried). Sherry-like is OMITTED by Chief decision (Tier B-only support) and remains a teaching note only. SOURCE LIMITATIONS: the two Tier A sources are both MDPI reviews (same publisher); no ASBC/EBC flavour-terminology standard or flavour wheel was opened; Oxford text was read via a hosted reproduction and its oxidation entry was truncated; the Brewers Association DMS article is members-only and only its public summary line was seen; Kunze DMS/aldehyde pages are OCR-only and not cited; individual sensitivity/anosmia differences are not sourced and not needed. SOURCE-ACCESS LIMITATIONS: this Bridge run did not reopen the sources; the record encodes the Chief-accepted wording and the source evidence recorded and accepted on issue #464 (access date 2026-10-01), whose URLs are carried in the source refs."
     }
   ]
 }

@@ -254,7 +254,7 @@ _RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-000
 _MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003"]
 _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
 _SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
-_SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001"]
+_SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001", "FACT-SENSORY-0002"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
@@ -335,7 +335,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # FACT-SAFE-0001..0003: 3 documented_fact.
         # Issue #466 (V2.2 Goal 3 Sensory S-1) adds FACT-SENSORY-0001: 1
         # documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 41)
+        # Issue #467 (V2.2 Goal 3 Sensory S-4) adds FACT-SENSORY-0002: 1
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 42)
         self.assertEqual(classifications.count("professional_interpretation"), 12)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -961,7 +963,7 @@ class TestProductionRegistrySensoryDiacetylFact(unittest.TestCase):
     def _record(self):
         return get_verified_record(_PRODUCTION_REGISTRY, "FACT-SENSORY-0001")
 
-    def test_only_one_sensory_record_exists(self):
+    def test_only_the_expected_sensory_records_exist(self):
         data = read_registry_file(_PRODUCTION_REGISTRY)
         ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-SENSORY-")]
         self.assertEqual(ids, _SENSORY_VERIFIED_IDS)
@@ -1005,6 +1007,56 @@ class TestProductionRegistrySensoryDiacetylFact(unittest.TestCase):
         self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"])
         self.assertIn("abstract only", record["notes"])
         self.assertIn("Tier B", record["notes"])
+
+
+class TestProductionRegistrySensoryTypicalDescriptorsFact(unittest.TestCase):
+    """Issue #467 (V2.2 Goal 3 Sensory S-4): FACT-SENSORY-0002, the single
+    narrow `sensory.typical_descriptors` documented_fact (source gate #464)."""
+
+    def _record(self):
+        return get_verified_record(_PRODUCTION_REGISTRY, "FACT-SENSORY-0002")
+
+    def test_concept_maps_to_exactly_this_record_without_modules(self):
+        found = find_verified_records(_PRODUCTION_REGISTRY, concept="sensory.typical_descriptors")
+        self.assertEqual([r["id"] for r in found], ["FACT-SENSORY-0002"])
+        record = self._record()
+        self.assertEqual(record["classification"], "documented_fact")
+        self.assertEqual(record["concepts"], ["sensory.typical_descriptors"])
+        self.assertNotIn("modules", record)
+
+    def test_claim_carries_the_four_accepted_descriptor_families(self):
+        claim = self._record()["claim"]
+        for phrase in ("sweetcorn or cooked vegetables", "cardboard or paper", "green apple", "skunky"):
+            self.assertIn(phrase, claim)
+
+    def test_claim_respects_hard_exclusions(self):
+        claim = self._record()["claim"].lower()
+        self.assertFalse(any(ch.isdigit() for ch in claim))
+        for forbidden in (
+            "sherry", "threshold", "ppb", "ppm", "proves", "diagnos", "boil", "oxygen",
+            "matur", "yeast", "riboflavin", "hop", "glass", "sulphur", "sulfur",
+            "cabbage", "tomato", "cucumber",
+        ):
+            self.assertNotIn(forbidden, claim)
+
+    def test_descriptor_is_not_diagnosis_lives_in_notes_not_claim(self):
+        notes = self._record()["notes"]
+        self.assertIn("DESCRIPTOR != DIAGNOSIS", notes)
+        self.assertIn("OMITTED", notes)
+        for owner in ("FACT-BOIL-0002", "FACT-OXY-0002", "S-3"):
+            self.assertIn(owner, notes)
+
+    def test_sources_and_caveats_are_preserved(self):
+        record = self._record()
+        refs = " ".join(s["ref"] for s in record["sources"])
+        for expected in (
+            "10.3390/foods14244287", "PMC12732517", "10.3390/molecules24081568",
+            "Oxford Companion", "Acetaldehyde", "Dimethyl Sulfide",
+        ):
+            self.assertIn(expected, refs)
+        self.assertNotIn("Kunze", refs)
+        for expected in ("SOURCE LIMITATIONS", "SOURCE-ACCESS LIMITATIONS", "members-only", "MDPI", "truncated"):
+            self.assertIn(expected, record["notes"])
 
 
 class TestProductionRegistryMaltCoreFactPackVerifiedOnlyApi(unittest.TestCase):
