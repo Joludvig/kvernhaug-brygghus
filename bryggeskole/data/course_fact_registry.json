@@ -1420,6 +1420,41 @@
       ],
       "concepts": ["sensory.typical_descriptors"],
       "notes": "Sensory S-4 (documented_fact, issue #467; source gate #464 accepted by Chief). The claim contains no numbers, thresholds, times or temperatures. DESCRIPTOR != DIAGNOSIS is a notes/methodology/teaching boundary and is deliberately NOT asserted as a factual sentence in the claim: no opened source states it as a sentence; it is supported only indirectly (TCA also smells of wet cardboard; skunkiness is commonly misattributed to staling and many compounds contribute to stale flavour; acetaldehyde character changes with concentration). Teaching must keep 'this smells like X' separate from 'this is compound Y' or 'this was caused by Z'. OWNERSHIP: DMS process truth stays with FACT-BOIL-0002; oxidation process truth stays with FACT-OXY-0002; the light-struck mechanism stays with future S-3; acetaldehyde gets descriptor vocabulary ONLY (no maturation, immaturity, cause, yeast-health or process claim); sulphur is not part of S-4. Deliberately NOT claimed: any threshold or concentration; any fixed process time or temperature; that cooked corn proves a short boil; that cardboard proves oxygen pickup; that green apple proves immature beer; that skunky proves one specific packaging error or that skunky means stale; any precursor, boil, oxygen, light, hop, riboflavin or glass content; a broad off-flavour catalogue (extra descriptors such as cabbage, tinned tomato, cucumber, black currant, latex paint, cat or foxy are not carried). Sherry-like is OMITTED by Chief decision (Tier B-only support) and remains a teaching note only. SOURCE LIMITATIONS: the two Tier A sources are both MDPI reviews (same publisher); no ASBC/EBC flavour-terminology standard or flavour wheel was opened; Oxford text was read via a hosted reproduction and its oxidation entry was truncated; the Brewers Association DMS article is members-only and only its public summary line was seen; Kunze DMS/aldehyde pages are OCR-only and not cited; individual sensitivity/anosmia differences are not sourced and not needed. SOURCE-ACCESS LIMITATIONS: this Bridge run did not reopen the sources; the record encodes the Chief-accepted wording and the source evidence recorded and accepted on issue #464 (access date 2026-10-01), whose URLs are carried in the source refs."
+    },
+    {
+      "id": "FACT-SENSORY-0003",
+      "claim": "Sourness can be an intended part of a beer: sour beer styles are deliberately made acidic, for example with lactic acid bacteria or mixed microbial cultures. In a beer that was not meant to be sour, unexpected sourness can be associated with unwanted microbial contamination that spoils the beer's flavour.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-01T12:00:00Z",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "peer-reviewed review (Frontiers in Microbiology, CC BY) -- independent Tier A anchor",
+          "ref": "Bouchez A., De Vuyst L., Acetic Acid Bacteria in Sour Beer Production: Friend or Foe?, Front. Microbiol. 13:957167, 2022, DOI 10.3389/fmicb.2022.957167 -- PMC9386357 via Europe PMC full text (accessed 2026-10-01)",
+          "note": "Issue #468 source gate: controlled growth gives a desirable acidic flavour in sour beers; for almost all other beers bacteria are undesirable because of spoilage potential, and acetic acid bacteria spoilage is characterised by a sour taste and vinegary aroma. Organism lists and process detail in the review are NOT carried."
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed review (Foods, MDPI, CC BY) -- beer section only",
+          "ref": "Al-Kharousi Z.S., Highlighting Lactic Acid Bacteria in Beverages: Diversity, Fermentation, Challenges, and Future Perspectives, Foods 14(12):2043, 2025, DOI 10.3390/foods14122043 -- PMC12191484 via Europe PMC full text (accessed 2026-10-01)",
+          "note": "Issue #468 source gate: lactic acid bacteria are integral to traditional sour beer styles and are also common beer spoilage bacteria. The review's health, pathogen and 'undrinkable' language is explicitly NOT carried."
+        },
+        {
+          "tier": "A",
+          "type": "peer-reviewed review (Foods, MDPI, CC BY) -- acidity and spoilage rows only",
+          "ref": "Sutea C.M., Mudura E. et al., Beer Aroma Compounds: Key Odorants, Off-Flavour Compounds and Improvement Proposals, Foods 14(24):4287, 2025, DOI 10.3390/foods14244287 -- PMC12732517 via Europe PMC full text (accessed 2026-10-01)",
+          "note": "Issue #468 source gate: lactic acid bacteria essential in sour beer production; acetic acid from microbiological spoilage. Thresholds and corrective/hygiene actions are NOT carried. Same source as #464 D1."
+        },
+        {
+          "tier": "B",
+          "type": "industrial textbook (VLB Berlin) -- structural support only",
+          "ref": "Kunze W., Technology Brewing and Malting, 3rd International Edition, VLB Berlin, section 7.4.2 'Microbiological examination', printed p. 763 (visually inspected page image from the owner's local copy; cite the printed edition)",
+          "note": "Issue #468 source gate: contaminants spoil the beer's taste; some produce lactic acid but also an unpleasant flavour. Organism names, pH values and 'undrinkable' on the page are NOT carried. Quality scope only."
+        }
+      ],
+      "concepts": ["sensory.sourness_intent_vs_spoilage"],
+      "notes": "Sensory S-2 (documented_fact, issue #470; source gate #468 accepted by Chief). The claim contains no numbers, pH values or thresholds, and no organism names. TASTE ALONE DOES NOT ESTABLISH THE CAUSE is a notes/methodology/teaching boundary and is deliberately NOT asserted as a factual sentence in the claim (Chief decision on #468): no opened source states it as one sentence; it is supported only indirectly (more than one route to acidity, including acetic acid via acetaldehyde oxidation or acetic acid bacteria, and lactic acid from some yeasts without bacteria; organisms are identified by laboratory methods). Teaching may say that sourness shows only that the beer is more sour than intended. The yeast-souring example from the #468 proposal is NOT carried because its support (Osburn et al. 2018) is abstract-only. Deliberately NOT claimed: any health or safety statement in either direction (no 'undrinkable', 'unsafe' or 'safe'; 'spoils the flavour' is a quality phrase only); that sour means infected; that all sour beers are spoiled; any organism catalogue; any pH, acidity number or threshold; diagnostic certainty (a vinegar smell does not prove acetic acid bacteria); treatment, rescue, pasteurisation or sanitation advice; 'infection' as the default word (use 'unwanted microbial contamination' and 'spoilage'). FACT-COOL-0001/0003 and FACT-SAFE-* keep their own scope. SOURCE LIMITATIONS: A2 and A3 are both MDPI reviews (same publisher), A1 (Frontiers) is the independent Tier A anchor; Kunze is industrial scope, a local scan of unofficial provenance, and was inspected as a page image not OCR; no Tier A sensory/consumer source separates normal beer acidity from noticeable sourness; Osburn et al. 2018 (abstract only) and the members-only Brewers Association lactic-acid page were not cited; no health evidence was sought or used. SOURCE-ACCESS LIMITATIONS: this Bridge run did not reopen the sources; the record encodes the Chief-accepted wording and the source evidence recorded and accepted on issue #468 (access date 2026-10-01), whose references are carried in the source refs."
     }
   ]
 }
