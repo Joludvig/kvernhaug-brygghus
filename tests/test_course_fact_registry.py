@@ -254,7 +254,7 @@ _RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-000
 _MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003"]
 _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
 _SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
-_SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001", "FACT-SENSORY-0002"]
+_SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001", "FACT-SENSORY-0002", "FACT-SENSORY-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     _PRODUCTION_VERIFIED_IDS + _MASHING_VERIFIED_IDS + _BOIL_HOP_VERIFIED_IDS
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
@@ -337,7 +337,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # documented_fact.
         # Issue #467 (V2.2 Goal 3 Sensory S-4) adds FACT-SENSORY-0002: 1
         # documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 42)
+        # Issue #470 (V2.2 Goal 3 Sensory S-2) adds FACT-SENSORY-0003: 1
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 43)
         self.assertEqual(classifications.count("professional_interpretation"), 12)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
@@ -1056,6 +1058,55 @@ class TestProductionRegistrySensoryTypicalDescriptorsFact(unittest.TestCase):
             self.assertIn(expected, refs)
         self.assertNotIn("Kunze", refs)
         for expected in ("SOURCE LIMITATIONS", "SOURCE-ACCESS LIMITATIONS", "members-only", "MDPI", "truncated"):
+            self.assertIn(expected, record["notes"])
+
+
+class TestProductionRegistrySensorySournessFact(unittest.TestCase):
+    """Issue #470 (V2.2 Goal 3 Sensory S-2): FACT-SENSORY-0003, the single
+    narrow `sensory.sourness_intent_vs_spoilage` documented_fact (source gate #468)."""
+
+    def _record(self):
+        return get_verified_record(_PRODUCTION_REGISTRY, "FACT-SENSORY-0003")
+
+    def test_concept_maps_to_exactly_this_record_without_modules(self):
+        found = find_verified_records(_PRODUCTION_REGISTRY, concept="sensory.sourness_intent_vs_spoilage")
+        self.assertEqual([r["id"] for r in found], ["FACT-SENSORY-0003"])
+        record = self._record()
+        self.assertEqual(record["classification"], "documented_fact")
+        self.assertEqual(record["concepts"], ["sensory.sourness_intent_vs_spoilage"])
+        self.assertNotIn("modules", record)
+
+    def test_claim_carries_intended_sourness_and_unwanted_contamination(self):
+        claim = self._record()["claim"]
+        for phrase in ("intended", "sour beer", "not meant to be sour", "unwanted microbial contamination", "spoils"):
+            self.assertIn(phrase, claim)
+
+    def test_claim_respects_hard_exclusions(self):
+        claim = self._record()["claim"].lower()
+        self.assertFalse(any(ch.isdigit() for ch in claim))
+        for forbidden in (
+            "infected", "infection", "sour means", "sour =", "taste alone", "proves", "diagnos",
+            "health", "safe", "undrinkable", "harm", "danger", "threshold",
+            "lactobacillus", "pediococcus", "acetobacter", "brettanomyces", "yeast",
+            "treat", "rescue", "pasteur", "sanitis", "sanitiz",
+        ):
+            self.assertNotIn(forbidden, claim)
+
+    def test_taste_alone_boundary_lives_in_notes_not_claim(self):
+        notes = self._record()["notes"]
+        self.assertIn("TASTE ALONE DOES NOT ESTABLISH THE CAUSE", notes)
+        self.assertIn("NOT asserted as a factual sentence", notes)
+        self.assertIn("Osburn", notes)
+
+    def test_sources_and_caveats_are_preserved(self):
+        record = self._record()
+        refs = " ".join(s["ref"] for s in record["sources"])
+        for expected in (
+            "10.3389/fmicb.2022.957167", "PMC9386357", "10.3390/foods14122043", "PMC12191484",
+            "10.3390/foods14244287", "PMC12732517", "Kunze", "p. 763",
+        ):
+            self.assertIn(expected, refs)
+        for expected in ("SOURCE LIMITATIONS", "SOURCE-ACCESS LIMITATIONS", "MDPI", "abstract-only", "members-only"):
             self.assertIn(expected, record["notes"])
 
 
