@@ -114,7 +114,10 @@ restate their mechanisms in a new record.
 (perceived bitterness and balance) are FACT-RECIPE-0001 (#441/#450) and FACT-RECIPE-0003 (#443/#452). All are `verified`; reuse stays within
 each record's own notes and wording traps.
 
-**No registry record exists** for sensory basics, diacetyl, acetaldehyde, light-struck, sourness or spoilage, or typical descriptors.
+**At contract time, no registry record existed** for sensory basics, diacetyl, acetaldehyde, light-struck, sourness or spoilage, or typical
+descriptors. **Status refreshed 2026-10-04:** S-1 diacetyl is now FACT-SENSORY-0001 (#466/#474), S-4 typical descriptors is FACT-SENSORY-0002
+(#467/#476), and S-2 sourness intent vs spoilage is FACT-SENSORY-0003 (#470/#478), all `verified`. Sensory basics, acetaldehyde and light-struck
+(S-3) still have no record of their own; FACT-SENSORY-0002 names only their descriptors (descriptor ≠ diagnosis).
 
 ## 6. Smallest future sensory fact pack
 
@@ -376,7 +379,7 @@ proposed here.
 | **INTENDED** | The recipe snapshot, the brewer's intent, and the predicted values (which #436 treats as estimates) |
 | **OBSERVED** | Sensory notes (§8) plus measured actuals (#435) |
 | **DIFFERENCE** | Described in words; **no grade** |
-| **HYPOTHESIS** | One possible explanation, from the reused facts (fermentation, boil, oxygen, hop timing, and #436 R-2 / R-4 when they land) |
+| **HYPOTHESIS** | One possible explanation, from the reused facts (fermentation, boil, oxygen, hop timing, and #436 R-2 / R-4 — planned at contract time, now landed as FACT-RECIPE-0001 and FACT-RECIPE-0003; status 2026-10-04) |
 | **NEXT CHANGE** | One deliberate change (#436 one-change methodology: as few changes as practical; a hypothesis, not proof) |
 
 Style is **optional context only** (#436 §12). The **predicted flavour wheel is not intended sensory truth**; it is an existing product heuristic and

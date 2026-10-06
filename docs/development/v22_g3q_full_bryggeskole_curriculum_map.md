@@ -1,6 +1,7 @@
 # V2.2 G3Q — Full Bryggeskole curriculum map from Kunze
 
-Version: 1.2 (2026-10-03: §6.2 canonical course architecture added; 2026-10-04: §6.2.8 App course scope and canonical module order)
+Version: 1.3 (2026-10-03: §6.2 canonical course architecture added; 2026-10-04: §6.2.8 App course scope and canonical module order;
+2026-10-04: §6.2.9 pointer to the course stage allocation contract)
 Status: Curriculum audit — decision/prep document, reviewable, not actionable by itself. §6.1–§6.2 are locked owner
 decisions and the canonical source for the Bryggeskole course architecture.
 Governed by: [#419](https://github.com/Joludvig/kvernhaug-brygghus/issues/419), bounded child of
@@ -480,6 +481,14 @@ The visible grid grows toward this order as modules land:
   module.
 
 Implementation detail (ids, chunks, questions, tests) lives in those contracts, not here.
+
+### 6.2.9 Stage allocation per module (2026-10-04)
+
+Which stage (Foundation, Kompetent, Bryggemester, Bryggeri) each module's topics, chunks and questions belong to, the locked
+content moves, the Foundation exit checkpoint, the Kompetent completion criteria and the Bryggemester/Bryggeri boundaries are
+canonical in [v22_course_stage_allocation_contract.md](v22_course_stage_allocation_contract.md). Where §7–§10 and §4 level
+labels in this audit differ from that contract on a stage question, the contract governs (for example: Smak og evaluering is
+Kompetent; quantitative priming is Bryggemester, with the priming concept at Kompetent).
 
 ---
 
