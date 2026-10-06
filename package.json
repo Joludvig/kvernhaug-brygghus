@@ -6,7 +6,8 @@
   "scripts": {
     "test:browser-gate": "playwright test",
     "test:bryggeskole-svg-runtime": "playwright test --config=playwright.streamlit.config.js",
-    "test:bryggeskole-grid-runtime": "playwright test --config=playwright.bryggeskole-grid.config.js"
+    "test:bryggeskole-grid-runtime": "playwright test --config=playwright.bryggeskole-grid.config.js",
+    "test:bryggeskole-quiz-contrast-runtime": "playwright test --config=playwright.bryggeskole-quiz-contrast.config.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0"

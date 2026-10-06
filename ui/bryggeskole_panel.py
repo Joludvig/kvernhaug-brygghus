@@ -561,6 +561,16 @@ def _injiser_bryggeskole_css():
     `@media (prefers-color-scheme: dark)`-grenen og alle hardkodede
     rgba(...)-verdier, som ikke lenger trengs.
 
+    Issue #482 (Streamlit 1.65): 1.65 legger inn en NY wrapper-div med
+    `data-disabled="true"` mellom `stRadioGroup` og `stRadioOption`-
+    labelene, og den dempede fargen sitter nå på DEN. Labelen og `> div`-
+    regelen over arver dermed den dempede fargen (målt 2.23:1). En regel
+    til, `color: inherit` på hvert `[data-disabled="true"]`-element under
+    `stRadioGroup`, lar wrapperen arve radiogruppens fulle temafarge
+    (radiogruppen selv er ikke dempet) -- fortsatt ingen egen fargeverdi.
+    Verifisert i Chromium og Firefox, lyst og mørkt, på 1.65.0 og 1.61.1
+    (tests/playwright_streamlit/quiz-answer-contrast.spec.js).
+
     Issue #394: skoleoversiktens modul-grid (`_render_skoleoversikt()`)
     bruker `st.columns(len(stadier))` -- alltid seks like brede kolonner,
     uansett skjermbredde. En DOM-sporing (Playwright, `getComputedStyle`)
@@ -598,6 +608,9 @@ def _injiser_bryggeskole_css():
             line-height: 1.6;
         }
         .st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] > div {
+            color: inherit !important;
+        }
+        .st-key-bs_svaralternativ [data-testid="stRadioGroup"] [data-disabled="true"] {
             color: inherit !important;
         }
         .st-key-bs_skoleoversikt_grid [data-testid="stColumn"] {
