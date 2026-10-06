@@ -1,7 +1,8 @@
 # V2.2 G3Q — Full Bryggeskole curriculum map from Kunze
 
-Version: 1.0
-Status: Curriculum audit — decision/prep document, reviewable, not actionable by itself
+Version: 1.2 (2026-10-03: §6.2 canonical course architecture added; 2026-10-04: §6.2.8 App course scope and canonical module order)
+Status: Curriculum audit — decision/prep document, reviewable, not actionable by itself. §6.1–§6.2 are locked owner
+decisions and the canonical source for the Bryggeskole course architecture.
 Governed by: [#419](https://github.com/Joludvig/kvernhaug-brygghus/issues/419), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3), under the locked product direction
 [#65](https://github.com/Joludvig/kvernhaug-brygghus/issues/65). Related: [#358](https://github.com/Joludvig/kvernhaug-brygghus/issues/358)
@@ -26,10 +27,12 @@ existing Kvernhaug source hierarchy (#65: Tier A/B/C/D) and Course Fact Registry
 4. [Domain classification matrix (the full map)](#4-domain-classification-matrix-the-full-map)
 5. [Missing-domain matrix](#5-missing-domain-matrix)
 6. [Raw-material gap and the #418 relationship](#6-raw-material-gap-and-the-418-relationship)
-7. [Level 1 — Homebrewer Foundation](#7-level-1--homebrewer-foundation)
-8. [Level 2 — Competent Homebrewer](#8-level-2--competent-homebrewer)
-9. [Bryggemester (optional)](#9-level-3--advanced-homebrewer-optional)
-10. [Bryggeri / profesjonell (optional later track)](#10-level-4--professional--brewery-optional-later-track)
+   - 6.1 [Locked course progression model](#61-locked-course-progression-model)
+   - 6.2 [Canonical course architecture and terminology axes](#62-canonical-course-architecture-and-terminology-axes)
+7. [Hjemmebrygger — Trinn 1: Foundation](#7-hjemmebrygger--trinn-1-foundation)
+8. [Hjemmebrygger — Trinn 2: Kompetent hjemmebrygger](#8-hjemmebrygger--trinn-2-kompetent-hjemmebrygger)
+9. [Bryggemester — frivillig fordypning](#9-bryggemester--frivillig-fordypning)
+10. [Bryggeri / profesjonell — senere spor](#10-bryggeri--profesjonell--senere-spor)
 11. [Safety curriculum](#11-safety-curriculum)
 12. [Science-foundation curriculum](#12-science-foundation-curriculum)
 13. [Visual / interactive opportunities](#13-visual--interactive-opportunities)
@@ -135,7 +138,8 @@ Legend:
 
 - **Cov.** C complete · P partial · A absent.
 - **Location** M module · B bridge · BH Brew History · SH static help · AT App tool · — nowhere.
-- **HB level** MUST · SHOULD · OPT (optional/advanced). A level number (L1–L4) marks where the topic lands in §7–§10.
+- **HB level** MUST · SHOULD · OPT (optional/advanced). A level number (L1–L4) marks where the topic lands in §7–§10:
+  L1 = Foundation, L2 = Kompetent hjemmebrygger, L3 = Bryggemester, L4 = Bryggeri / profesjonell (§6.2.2).
 - **Pro** yes / no — whether the topic continues into a professional track.
 - **Facts** S sufficient · P partial · M missing, judged against the recommended homebrewer scope.
 - **Vis.** H high · M medium · L low visual/interactive value.
@@ -354,6 +358,131 @@ A learner should never be forced to absorb the entire subject before getting the
 
 ---
 
+## 6.2 Canonical course architecture and terminology axes
+
+Owner decision, 2026-10-03, updated 2026-10-04 in §6.2.3, §6.2.4 and §6.2.8 (recorded offline during the GitHub outage; see the
+sync note in §6.2.7).
+This section is the **canonical home** for the Bryggeskole course architecture. Other documents point here instead of
+restating it.
+
+### 6.2.1 Scope
+
+This decision concerns **only the Bryggeskole course**. The Kvernhaug App remains the brewing tool/product as it is;
+nothing here redesigns the App, its tabs or its non-course features.
+
+### 6.2.2 Course progression (unchanged from §6.1)
+
+The 2026-09-29 progression in §6.1 stays canonical:
+
+| Course track | Stage | Role |
+|---|---|---|
+| **Hjemmebrygger** | Trinn 1: **Foundation** | Deliberately low first threshold; safe first brew. Checkpoint, not completion |
+| **Hjemmebrygger** | Trinn 2: **Kompetent hjemmebrygger** | The natural homebrewer completion point |
+| **Bryggemester** | — | Voluntary advanced-depth track after Hjemmebrygger completion |
+| **Bryggeri / profesjonell** | — | Separate later track; never required |
+
+Principle: **Low first threshold. Gradual mastery. Unlimited depth by choice.**
+
+There is **no five-level course model**. Where this document uses the shorthand L1–L4 (§4–§5), it means the four stages
+above, in order: L1 = Foundation, L2 = Kompetent hjemmebrygger, L3 = Bryggemester, L4 = Bryggeri / profesjonell.
+
+### 6.2.3 The course is its own learning product
+
+- The Bryggeskole course is a **distinct learning product**, owned by the Bryggeskole domain
+  ([KBH_CORE_CONTRACT.md](KBH_CORE_CONTRACT.md), Section 1).
+- The full, completed course is intended to live later in its **own standalone app/program**.
+- Some course material may also be exposed on the **website**.
+- The current main Kvernhaug App's Bryggeskole tab is **not** the final home of the entire course.
+- **Decided 2026-10-04 (§6.2.8):** the main App's Bryggeskole surface covers **Foundation → Kompetent hjemmebrygger**.
+  The App itself stays the same brewing tool; only its Bryggeskole/course surface follows course progression.
+- **Intended, not finalised:** the complete course, including Bryggemester depth and later deeper material, lives in a
+  separate standalone course application/product. Its exact technical packaging is neither implemented nor finalised.
+- **Still open:** which course content, if any, also appears on the website. That remains a separate product decision.
+  (v1 of this section, 2026-10-03, left all of this undecided.)
+
+### 6.2.4 Three different axes — never mix them
+
+| Axis | Values | Where | What it is | What it is **not** |
+|---|---|---|---|---|
+| **Course progression** | Hjemmebrygger Foundation → Kompetent hjemmebrygger → Bryggemester → Bryggeri / profesjonell | Bryggeskole course (§6.1–§6.2) | How far the learner has come in the course | Not a UI display mode |
+| **Web presentation mode** | **Bryggelærling / Bryggmester** (UI short form: Lærling / Mester) | Website recipe builder ([web/README.md](../../web/README.md)) | Support level in the **same** web application. Bryggelærling = more guidance, help popups and support ("støttehjul"). Bryggmester = same application and functionality with less guidance, for users who do not need the extra help | Not course levels and never renamed to Foundation / Kompetent / Bryggemester. Web "Bryggmester" is **not** the course track "Bryggemester" — the spelling difference is intentional |
+| **App Bryggeskole environment chooser** | **Hjemmebrygger / Bryggeri** | Bryggeskole tab in the App (`ui/bryggeskole_panel.py`) | Legacy/pilot presentation axis from the #327-era design: changes labels/presentation only, with shared lesson content and shared mastery | Not the course progression, not two separate courses, not Foundation vs Kompetent, and not a hobby-vs-professional track progression. "Bryggeri" here is **not** the Bryggeri / profesjonell track |
+
+Rules that follow:
+
+- The App environment chooser's current behaviour (mostly labels, same lessons) is **intentional legacy behaviour**,
+  not a defect and not evidence of two courses.
+- The chooser **must not** be used as the architecture for future course content. New course content is placed by
+  course stage (§7–§10), never by environment.
+- The chooser stays as it is until a later, separately decided UI cleanup. This decision removes or renames nothing.
+
+### 6.2.5 Web Hjelp & bryggehåndbok is not the course
+
+The website's **Hjelp & bryggehåndbok** (`web/hjelp/`) is user and process guidance for using the website and the
+brewing workflow. It is **not** the Bryggeskole course, even though its pages were historically built under a content
+programme also labelled "Bryggeskole P0–P3B" (see [web/README.md](../../web/README.md)). Consolidating overlapping
+help pages onto registry-backed course content remains a later, separate decision (§15).
+
+### 6.2.6 Kunze / #419 and source rules (unchanged)
+
+Kunze and #419 remain a **curriculum/domain mapping source** only. Nothing here changes Course Fact Registry governance,
+the #65 source hierarchy or source-quality rules (§14.3).
+
+### 6.2.7 Sync note
+
+Recorded locally on branch `offline/course-architecture-decision` while GitHub was unavailable. When GitHub access
+returns, this decision must be mirrored on the governing GitHub records (#419, the #343 roadmap and the #152 HO
+pointer) before it is treated as synchronized. The 2026-10-04 update (§6.2.8) is recorded the same way. Its module
+decisions must also be mirrored on #434 (Måling) and #436 (Oppskriftsforståelse).
+
+### 6.2.8 Update 2026-10-04: App course scope and canonical module order
+
+Owner/Chief decision, 2026-10-04, recorded offline.
+
+**Course surfaces**
+
+| Surface | Status |
+|---|---|
+| Main App Bryggeskole: **Foundation → Kompetent hjemmebrygger** | **Closed** (decided) |
+| Bryggemester (voluntary advanced depth) and later deeper material in a standalone course product | Intended direction; packaging not implemented or finalised (partially open) |
+| Bryggeri / profesjonell | Later professional/industrial depth; never required for the homebrewer course |
+| Course content on the website | **Open**; separate product decision |
+| Web Lærling/Mester support modes and the App Hjemmebrygger/Bryggeri chooser | Unchanged: separate from course progression (§6.2.4) |
+
+**Canonical 11-module order** (1-based positions; this replaces the 0-based numbering in §15 for positions):
+
+| # | Module | Stage |
+|---|---|---|
+| 1 | Råvarer | see its module contract / §7–§8 |
+| 2 | Rengjøring og sikkerhet | see its module contract / §7–§8 |
+| 3 | Forberedelse/metode | see its module contract / §7–§8 |
+| 4 | Mesking | see its module contract / §7–§8 |
+| 5 | Koking/humle | see its module contract / §7–§8 |
+| 6 | Kjøling/overføring | see its module contract / §7–§8 |
+| 7 | Gjæring | see its module contract / §7–§8 |
+| 8 | Pakking | see its module contract / §7–§8 |
+| 9 | Måling og bryggelogg | **Split:** Foundation first, Kompetent later (measurement contract) |
+| 10 | Oppskriftsforståelse | **Entirely Kompetent**; intended for the main App Bryggeskole (recipe-understanding contract) |
+| 11 | Smak og evaluering | see `v22_sensory_evaluation_module_contract.md` |
+
+A stage is stated here only where a module contract locks it. Otherwise the owning module contract and §7–§8 govern.
+
+The visible grid grows toward this order as modules land:
+- Today: Pakking (8) → Smak og evaluering (9).
+- After Måling lands: Måling (9) → Smak (10).
+- After Oppskriftsforståelse lands: Måling (9) → Oppskriftsforståelse (10) → Smak (11).
+
+**Decision pointers** (closed locally, not yet on GitHub):
+- **Måling og bryggelogg:** `v22_measurement_brewlog_module_contract.md`, closed on `offline/measurement-grid-position-correction` @
+  `55eb93b4933d0f3109958410f40f696b4014dfa3`. Position 9; Foundation slice first.
+- **Oppskriftsforståelse:** `v22_recipe_understanding_module_contract.md`, closed on `offline/recipe-understanding-contract` @
+  `865d87d1413610643850909ec63f89a3aacff097`. Kompetent; main App; position 10; implementation waits for the Måling Foundation
+  module.
+
+Implementation detail (ids, chunks, questions, tests) lives in those contracts, not here.
+
+---
+
 ## 7. Hjemmebrygger — Trinn 1: Foundation
 
 **Goal:** brew a first all-grain batch **safely** on the learner's own method (BIAB, traditional kettle, or all-in-one)
@@ -406,7 +535,7 @@ D70 pub/microbrewing, D72 process engineering, D73 filtration/stabilisation, D74
 D76 instrumentation incl. dissolved-oxygen meters, D77 QC/lab analysis, D78 yeast lab, D79 formal sensory panels,
 D80 environment/waste, D81 energy/utilities, D82 automation/plant planning.
 Kunze Chapters 5, 9, 10, 11 and most of 4.4–4.6 are the natural source map for this track. The "Bryggeri" environment
-in the current UI is navigation labels only (#420) and must not be presented as this track.
+in the current UI is navigation labels only (#420) and must not be presented as this track (see the three axes in §6.2.4).
 
 ---
 
@@ -549,7 +678,9 @@ Design notes:
 
 - **Sequence:** Råvarer and Rengjøring og sikkerhet come *before* the process spine in the recommended order. They do not
   lock it. A learner who wants to jump straight to Mesking may, consistent with the current open grid.
-- **Module 8 is placed after the spine** because it is most useful once the learner has something to measure. Its
+- **Module 8 is placed after the spine** because it is most useful once the learner has something to measure.
+  (Numbering in this diagram is 0-based; the canonical 1-based positions are in §6.2.8 — Måling is position 9,
+  Oppskriftsforståelse 10, Smak og evaluering 11.) Its
   temperature basics (D38) are referenced from L1 modules as a short inline note.
 - **Module 10 reuses the G3N/Brew History methodology.** It adds sensory and fault *knowledge* (registry-backed), and
   keeps the evaluate/hypothesis *method* as non-registry product methodology.
@@ -659,6 +790,7 @@ Properties required of this finish point:
 1. CO₂-in-enclosed-space as L1 MUST or SHOULD (§11).
 2. Final Råvarer structure: one combined module or four (#418 decides; this audit recommends one).
 3. Whether module 8 (Måling) should precede the spine for learners who own instruments (this audit recommends after).
+   **Resolved 2026-10-04:** after the spine, position 9 (§6.2.8).
 4. Whether Web hjelp pages overlapping new modules should be consolidated onto the registry (recommended later, out of scope).
 5. Whether the Kunze PDF should be placed in the private Vault. Not done in this issue; see the PR description.
 
