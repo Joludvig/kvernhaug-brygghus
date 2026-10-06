@@ -104,6 +104,7 @@ from bryggeskole import pilot_measurement as _pilot_maaling
 from bryggeskole import pilot_method_context as _pilot_metodevalg
 from bryggeskole import pilot_package as _pilot_pakking
 from bryggeskole import pilot_raw_materials as _pilot_raavarer
+from bryggeskole import pilot_recipe as _pilot_oppskrift
 from bryggeskole import pilot_sensory as _pilot_smak
 from ui.i18n import gjeldende_sprak, t
 
@@ -123,6 +124,7 @@ _PILOT_CONTENT_ERRORS = (
     _pilot_rengjoring.PilotContentError,
     _pilot_smak.PilotContentError,
     _pilot_maaling.PilotContentError,
+    _pilot_oppskrift.PilotContentError,
 )
 
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
@@ -148,6 +150,7 @@ _MODUL_KJOLING = "kjoling"
 _MODUL_GJARING = "gjaring"
 _MODUL_PAKKING = "pakking"
 _MODUL_MAALING = "maaling"
+_MODUL_OPPSKRIFT = "oppskrift"
 _MODUL_SMAK = "smak"
 
 # Rekkefølgen speiler den faktiske brygge-prosessen (råvarer før
@@ -160,10 +163,12 @@ _MODUL_SMAK = "smak"
 # (eierbeslutning D2: evaluering er slutten på bryggesløyfen). Måling og
 # bryggelogg (Foundation, målingskontrakten §21.5/§22) settes inn mellom
 # Pakking og Smak og evaluering -- kanonisk posisjon 9 (læreplankartet
-# §6.2.8); Oppskriftsforståelse kommer senere mellom Måling og Smak.
+# §6.2.8). Oppskriftsforståelse (hele modulen er Kompetent,
+# oppskriftskontrakten §27/§28) settes inn mellom Måling og Smak --
+# kanonisk posisjon 10, Smak og evaluering blir 11.
 _MODUL_REKKEFOLGE = [
     _MODUL_RAAVARER, _MODUL_RENGJORING, _MODUL_METODEVALG, _MODUL_MESKING, _MODUL_KOKING,
-    _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING, _MODUL_MAALING, _MODUL_SMAK,
+    _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING, _MODUL_MAALING, _MODUL_OPPSKRIFT, _MODUL_SMAK,
 ]
 
 _MODULER = {
@@ -212,6 +217,11 @@ _MODULER = {
         "tittel_nokkel": "bryggeskole.modul.maaling.tittel",
         "ikon": "📏",
     },
+    _MODUL_OPPSKRIFT: {
+        "pilot": _pilot_oppskrift,
+        "tittel_nokkel": "bryggeskole.modul.oppskrift.tittel",
+        "ikon": "📝",
+    },
     _MODUL_SMAK: {
         "pilot": _pilot_smak,
         "tittel_nokkel": "bryggeskole.modul.smak.tittel",
@@ -236,7 +246,8 @@ _MODULER = {
 # Issue #472 legger Smak og evaluering til som siste stadium, samme navn i
 # begge miljøer. Måling og bryggelogg settes inn før Smak og evaluering,
 # også med samme navn i begge miljøer (én felles leksjon, ingen
-# miljøspesifikt innhold).
+# miljøspesifikt innhold). Oppskriftsforståelse settes inn mellom Måling og
+# Smak, med samme navn i begge miljøer (én felles leksjon).
 _PROSESS_STADIER = {
     _ENV_HJEMMEBRYGGER: [
         {"no": "Råvarer", "en": "Raw materials"},
@@ -248,6 +259,7 @@ _PROSESS_STADIER = {
         {"no": "Gjæring (bøtte/FermZilla)", "en": "Fermentation (bucket/FermZilla)"},
         {"no": "Pakking", "en": "Packaging"},
         {"no": "Måling og bryggelogg", "en": "Measurement and brew log"},
+        {"no": "Oppskriftsforståelse", "en": "Recipe understanding"},
         {"no": "Smak og evaluering", "en": "Tasting and evaluation"},
     ],
     _ENV_BRYGGERI: [
@@ -260,6 +272,7 @@ _PROSESS_STADIER = {
         {"no": "Konisk gjæringstank", "en": "Conical fermenter"},
         {"no": "Pakking/CIP", "en": "Packaging/CIP"},
         {"no": "Måling og bryggelogg", "en": "Measurement and brew log"},
+        {"no": "Oppskriftsforståelse", "en": "Recipe understanding"},
         {"no": "Smak og evaluering", "en": "Tasting and evaluation"},
     ],
 }
@@ -268,11 +281,12 @@ _PROSESS_STADIER = {
 # aktive/klikkbare (issue #380 fyller den tidligere siste "Kommer
 # senere"-cellen, indeks 0; issue #473 setter inn Rengjøring og sikkerhet
 # som indeks 1; issue #472 legger Smak og evaluering til som indeks 8;
-# Måling og bryggelogg tar indeks 8 og flytter Smak og evaluering til 9).
+# Måling og bryggelogg tar indeks 8 og flytter Smak og evaluering til 9;
+# Oppskriftsforståelse tar indeks 9 og flytter Smak og evaluering til 10).
 _STADIUM_TIL_MODUL = {
     0: _MODUL_RAAVARER, 1: _MODUL_RENGJORING, 2: _MODUL_METODEVALG, 3: _MODUL_MESKING,
     4: _MODUL_KOKING, 5: _MODUL_KJOLING, 6: _MODUL_GJARING, 7: _MODUL_PAKKING, 8: _MODUL_MAALING,
-    9: _MODUL_SMAK,
+    9: _MODUL_OPPSKRIFT, 10: _MODUL_SMAK,
 }
 
 # Menneskelesbare visningsnavn for pilotenes konsept-id-er -- aldri de
@@ -342,6 +356,10 @@ _KONSEPT_LABELS = {
     "measurement.temperature": {"no": "Temperatur og målested", "en": "Temperature and where it was measured"},
     "measurement.hydrometer_temperature": {"no": "Prøvetemperatur og hydrometer", "en": "Sample temperature and hydrometer"},
     "log.planned_vs_actual": {"no": "Planlagt og målt", "en": "Planned and measured"},
+    "recipe.ibu_vs_perceived_bitterness": {"no": "IBU og opplevd bitterhet", "en": "IBU and perceived bitterness"},
+    "recipe.balance": {"no": "Balanse ut fra hensikten", "en": "Balance against intent"},
+    "recipe.style_context": {"no": "Stil som referanseramme", "en": "Style as a reference frame"},
+    "recipe.formulation_workflow": {"no": "Lag oppskriften bevisst", "en": "Building a recipe deliberately"},
 }
 
 _DEMO_TILSTAND_NOKKEL = "_demo_bryggeskole_mastery_tilstand"

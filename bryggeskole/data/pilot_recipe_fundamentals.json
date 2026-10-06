@@ -1,0 +1,439 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-RECIPE-FUNDAMENTALS",
+  "chunks": [
+    {
+      "id": "CHUNK-REC-A",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-MALT-0002",
+        "FACT-MALT-0004",
+        "FACT-HOP-0003",
+        "FACT-YEAST-0005"
+      ],
+      "text": {
+        "no": "**Les oppskriften som en plan.** Tallene oppskriften og appen viser – OG, FG, alkohol, bitterhet og farge – er forventede eller beregnede verdier. Det du måler i ditt eget brygg, forteller hva som faktisk skjedde (se Måling og bryggelogg). Når du leser en oppskrift, spør du hva hver rad gjør. Basismalten gir enzymer og sukkeret gjæren trenger. Spesialmalt er laget for smak, farge eller en annen funksjon, og mange spesialmalter er ment for mindre mengder. Jo større andel en malt har i kornblandingen, jo sterkere bidrar den til maltpreget. Mange oppskrifter har en tidlig humletilsetning for bitterhet og en sen for aroma og smak. Gjæren er valgt ut fra ølet oppskriften sikter mot, gjerne med produsentens informasjon om stiler, smaksprofil, utgjæring og temperatur.",
+        "en": "**Read the recipe as a plan.** The numbers the recipe and the App show – OG, FG, alcohol, bitterness and colour – are predicted or calculated values. What you measure in your own brew tells you what actually happened (see Measurement and brew log). When you read a recipe, ask what each row is doing. The base malt supplies enzymes and the sugars the yeast needs. Specialty malt is made for flavour, colour or another function, and many specialty malts are meant for smaller amounts. The larger a malt's share of the grist, the more strongly it contributes to the malt character. Many recipes have an early hop addition for bitterness and a late one for aroma and flavour. The yeast is chosen for the beer the recipe aims at, often using the producer's information on styles, flavour profile, attenuation and temperature."
+      }
+    },
+    {
+      "id": "CHUNK-REC-B",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-YEAST-0001",
+        "FACT-YEAST-0002",
+        "FACT-MASH-0001",
+        "FACT-MASH-0004",
+        "FACT-RECIPE-0002"
+      ],
+      "text": {
+        "no": "**Fra OG til FG.** OG og FG er definert i Måling og bryggelogg. Her ser vi på hva oppskriften gjør med dem. Gjæren spiser forgjærbart sukker og lager alkohol og CO₂. Men ikke alt i vørteren er forgjærbart: under meskingen blir noe av stivelsen til dekstriner som vanlig ølgjær ikke gjærer. Hvor forgjærbar vørteren blir, avhenger av flere ting, blant annet mesketemperatur, hvor tykk mesken er og maltens egne enzymer – det finnes ingen mesketemperatur som er riktig for alle oppskrifter. Ekstraktet fra karamell- og krystallmalt er generelt mindre forgjærbart enn ekstraktet fra basismalt, så mer av det kan bli igjen som restekstrakt. Hvor mye, avhenger av malttypen og mengden. Utgjæring er hvor stor del av sukkeret gjæren spiser. Den avgjøres ikke av gjæren alene, men også av vørteren og gjæringsforholdene. Høyere utgjæring etterlater vanligvis mindre restsukker og kan gi et tørrere øl. Derfor betyr ikke en høy OG automatisk et søtt øl, og heller ikke automatisk et sterkt øl: det er sukkeret gjæren faktisk spiser, som blir til alkohol.",
+        "en": "**From OG to FG.** OG and FG are defined in Measurement and brew log. Here we look at what the recipe does with them. Yeast consumes fermentable sugar and makes alcohol and CO₂. But not everything in the wort is fermentable: during mashing, some of the starch becomes dextrins that ordinary brewing yeast does not ferment. How fermentable the wort becomes depends on several things, including mash temperature, how thick the mash is and the malt's own enzymes – there is no mash temperature that is right for every recipe. The extract of caramel and crystal malts is generally less fermentable than the extract of base malt, so more of it can remain as residual extract. How much depends on the malt type and the amount. Attenuation is the share of the sugar the yeast consumes. It is not decided by the yeast alone, but also by the wort and the fermentation conditions. Higher attenuation generally leaves less residual sugar and can give a drier beer. So a high OG does not automatically mean a sweet beer, nor automatically a strong one: it is the sugar the yeast actually consumes that becomes alcohol."
+      }
+    },
+    {
+      "id": "CHUNK-REC-C",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-MALT-0002",
+        "FACT-MALT-0003",
+        "FACT-MALT-0004"
+      ],
+      "text": {
+        "no": "**Farge er ikke smak.** Spesialmalt lages ved å endre tørkingen, og måten malten tørkes, kilnes eller ristes på, gir ulike farger og smaker. Maltens farge påvirker i vesentlig grad fargen på det ferdige ølet, så en oppskrift kan trenge justering for å treffe en ønsket farge. Appen viser en beregnet farge i EBC – det er et estimat. Men sammenhengen mellom farge og smak er sammensatt: fargen forutsier ikke smaken én til én. To øl med lik farge kan smake ulikt. Hvor mye en spesialmalt preger ølet, avhenger også av hvor stor andel av kornblandingen den utgjør.",
+        "en": "**Colour is not flavour.** Specialty malt is made by changing how it is dried, and the way malt is dried, kilned or roasted develops different colours and flavours. The malt's colour materially affects the colour of the finished beer, so a recipe may need adjusting to hit a colour you want. The App shows a calculated colour in EBC – it is an estimate. But the link between colour and flavour is complex: colour does not predict flavour one to one. Two beers with the same colour can taste different. How much a specialty malt marks the beer also depends on how large a share of the grist it makes up."
+      }
+    },
+    {
+      "id": "CHUNK-REC-D",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-RECIPE-0001",
+        "FACT-HOP-0001",
+        "FACT-HOP-0002",
+        "FACT-HOP-0005"
+      ],
+      "text": {
+        "no": "**IBU er én akse.** Koking gjør humlens alfasyrer om til isoalfasyrer, som er en viktig kilde til bitterhet. Lengre koking gir mer bitterhet fra en tilsetning, men bare opp mot et praktisk tak. En sen tilsetning beholder mer aroma og gir vanligvis mindre bitterhet – men ikke null. Alfasyreprosenten er en egenskap ved humla, ikke ølets IBU: hvor mye IBU en tilsetning gir, avhenger av mengden og hvordan den brukes. IBU er en standard indeks for bitterhet, og den beregnede IBU-en i oppskriften er et estimat, ikke en garanti. Opplevd bitterhet avhenger også av resten av ølet, så to øl med lignende IBU kan oppleves ulikt bitre. Bruk IBU som én akse i oppskriften, ikke som en dom over hvordan ølet smaker.",
+        "en": "**IBU is one axis.** Boiling turns the hop's alpha acids into iso-alpha acids, a major source of bitterness. A longer boil gives more bitterness from an addition, but only up to a practical ceiling. A late addition keeps more aroma and generally gives less bitterness – but not zero. The alpha-acid percentage is a property of the hop, not the beer's IBU: how much IBU an addition gives depends on the amount and how it is used. IBU is a standard index of bitterness, and the recipe's calculated IBU is an estimate, not a guarantee. Perceived bitterness also depends on the rest of the beer, so two beers with similar IBU can be perceived as differently bitter. Use IBU as one axis of the recipe, not as a verdict on how the beer tastes."
+      }
+    },
+    {
+      "id": "CHUNK-REC-E",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-RECIPE-0003"
+      ],
+      "text": {
+        "no": "**Balanse ut fra hensikten.** Balanse beskriver hvor sterkt de ulike delene av ølet oppleves i forhold til hverandre. Den vurderes opp mot ølet brygger vil lage – ikke etter ett universelt tall eller forhold. Balanse er heller ikke en kvalitetskarakter: et øl kan med vilje la én del stå fram. Spør derfor: hva vil jeg at dette ølet skal være, og passer oppskriften til det?",
+        "en": "**Balance against intent.** Balance describes how strongly the different parts of a beer are perceived relative to one another. It is judged against the beer the brewer intends – not by one universal number or ratio. Balance is not a quality grade either: a beer can deliberately let one part stand out. So ask: what do I want this beer to be, and does the recipe fit that?"
+      }
+    },
+    {
+      "id": "CHUNK-REC-F",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Stil som referanseramme.** En stilbeskrivelse sier hva som er typisk for en øltype. Bruk stilområdet som en sammenligningsramme: det hjelper deg å se hvor oppskriften ligger i forhold til det typiske. Å havne utenfor området gjør ikke oppskriften feil – kanskje er det akkurat det du vil. Stiltreffet appen viser, er kontekst, ikke en karakter på hvor godt ølet blir. Du trenger ikke pugge stilområder.",
+        "en": "**Style as a reference frame.** A style description says what is typical for a kind of beer. Use the style range as a comparison frame: it helps you see where the recipe sits relative to what is typical. Landing outside the range does not make the recipe wrong – it may be exactly what you want. The style match the App shows is context, not a grade for how good the beer will be. You do not need to memorise style ranges."
+      }
+    },
+    {
+      "id": "CHUNK-REC-G",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Lag oppskriften bevisst.** En arbeidsflyt i ni trinn – ikke en fast regel, og du kan begynne hvor som helst: bestem hva du vil at ølet skal være; velg retning for styrke; velg maltstruktur; velg bitterhet og humleuttrykk; velg gjær og retning for utgjæring; velg prosessvalg som støtter målet; sjekk de forventede konsekvensene i appen; brygg, mål og evaluer; endre én bevisst ting neste gang. Måling og evaluering hører hjemme i Måling og bryggelogg og i Smak og evaluering. Når du lærer, endrer du så få ting som mulig, helst én, så resultatet blir lettere å tolke. Skriv endringen ned som en hypotese. Det beviser ikke årsaken: et hjemmebrygg er ikke et kontrollert forsøk, og råvarer, prosess, målinger og smaking varierer. Lær, reflekter og forbedre neste brygg.",
+        "en": "**Build the recipe deliberately.** A nine-step workflow – not a fixed rule, and you can start anywhere: decide what you want the beer to be; choose the strength direction; choose the malt structure; choose bitterness and hop expression; choose the yeast and attenuation direction; choose process choices that support the goal; check the predicted consequences in the App; brew, measure and evaluate; change one deliberate thing next time. Measuring and evaluating belong in Measurement and brew log and in Tasting and evaluation. When you are learning, change as few things as practical, ideally one, so the result is easier to interpret. Write the change down as a hypothesis. It does not prove the cause: a homebrew batch is not a controlled experiment, and ingredients, process, measurements and tasting all vary. Learn, reflect and improve the next brew."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-REC-001",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": [
+        "malt.base_vs_specialty"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [
+        "FACT-MALT-0002"
+      ],
+      "prompt": {
+        "no": "En oppskrift har mest lys basismalt og litt krystallmalt. Hva gjør basismalten i denne oppskriften?",
+        "en": "A recipe has mostly pale base malt and a little crystal malt. What is the base malt doing in this recipe?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Den gir enzymer og sukkeret gjæren trenger.",
+            "en": "It supplies enzymes and the sugars the yeast needs."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Den er der mest for å gi ølet farge.",
+            "en": "It is there mainly to give the beer colour."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Den gir aroma, slik en sen humletilsetning gjør.",
+            "en": "It gives aroma, the way a late hop addition does."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Basismalt har mye enzymer og gir sukkeret gjæren trenger. Spesialmalten er der for smak, farge eller en annen funksjon.",
+        "en": "Correct. Base malt has plenty of enzymes and supplies the sugars the yeast needs. The specialty malt is there for flavour, colour or another function."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Basismalten gir enzymer og sukkeret gjæren trenger. Farge og smak er spesialmaltens oppgave, og aroma kommer fra humla.",
+        "en": "Not quite. The base malt supplies enzymes and the sugars the yeast needs. Colour and flavour are the specialty malt's job, and aroma comes from the hops."
+      }
+    },
+    {
+      "id": "Q-REC-002",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": [
+        "yeast.attenuation"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [
+        "FACT-YEAST-0002"
+      ],
+      "prompt": {
+        "no": "Du brygger samme oppskrift to ganger med samme OG, men med en annen gjær og andre gjæringsforhold. FG blir ulik. Hva passer best?",
+        "en": "You brew the same recipe twice with the same OG, but with a different yeast and different fermentation conditions. The FG comes out different. What fits best?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Utgjæringen avhenger av gjæren og av gjærings- og vørterforholdene, så lik OG gir ikke nødvendigvis lik FG.",
+            "en": "Attenuation depends on the yeast and on the fermentation and wort conditions, so the same OG does not necessarily give the same FG."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Gjæren alene bestemmer utgjæringen, så forholdene kan ikke ha spilt noen rolle.",
+            "en": "The yeast alone decides attenuation, so the conditions cannot have played any part."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Lik OG gir alltid lik FG, så én av avlesningene må være feil.",
+            "en": "The same OG always gives the same FG, so one of the readings must be wrong."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Utgjæring er hvor stor del av sukkeret gjæren spiser, og den avhenger både av gjæren og av gjærings- og vørterforholdene.",
+        "en": "Correct. Attenuation is the share of the sugar the yeast consumes, and it depends on both the yeast and the fermentation and wort conditions."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Utgjæringen avgjøres ikke av gjæren alene, og lik OG gir ikke automatisk lik FG. Gjæren og gjærings- og vørterforholdene spiller inn.",
+        "en": "Not quite. Attenuation is not decided by the yeast alone, and the same OG does not automatically give the same FG. The yeast and the fermentation and wort conditions all play a part."
+      }
+    },
+    {
+      "id": "Q-REC-003",
+      "type": "concept_check",
+      "basis": "fact",
+      "concepts": [
+        "malt.colour_flavour"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [
+        "FACT-MALT-0003"
+      ],
+      "prompt": {
+        "no": "To oppskrifter gir øl med omtrent samme farge. Hva kan du si om smaken?",
+        "en": "Two recipes give beers of about the same colour. What can you say about the flavour?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Lite: fargen forutsier ikke smaken én til én, så de kan smake ulikt.",
+            "en": "Little: colour does not predict flavour one to one, so they can taste different."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "At de smaker likt, fordi samme farge betyr samme maltsmak.",
+            "en": "That they taste the same, because the same colour means the same malt flavour."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ingenting, fordi fargen bare kommer fra humla.",
+            "en": "Nothing, because the colour only comes from the hops."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Måten malten tørkes, kilnes eller ristes på, gir både farge og smak, men sammenhengen er sammensatt. Lik farge betyr ikke lik smak.",
+        "en": "Correct. The way malt is dried, kilned or roasted develops both colour and flavour, but the link is complex. The same colour does not mean the same flavour."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Maltens farge påvirker fargen på ølet, men den forutsier ikke smaken én til én. To øl med lik farge kan smake ulikt.",
+        "en": "Not quite. The malt's colour affects the beer's colour, but it does not predict flavour one to one. Two beers with the same colour can taste different."
+      }
+    },
+    {
+      "id": "Q-REC-004",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": [
+        "recipe.ibu_vs_perceived_bitterness"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [
+        "FACT-RECIPE-0001"
+      ],
+      "prompt": {
+        "no": "To oppskrifter har lignende beregnet IBU, men det ene ølet oppleves klart mer bittert. Hva passer best?",
+        "en": "Two recipes have similar calculated IBU, but one beer is perceived as clearly more bitter. What fits best?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Beregnet IBU er en indeks og et estimat, og opplevd bitterhet avhenger også av resten av ølet.",
+            "en": "Calculated IBU is an index and an estimate, and perceived bitterness also depends on the rest of the beer."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Én av IBU-verdiene må være feil, for lik IBU smaker alltid like bittert.",
+            "en": "One of the IBU values must be wrong, because the same IBU always tastes equally bitter."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Det mest bitre ølet må ha brukt humle med høyere alfasyreprosent.",
+            "en": "The more bitter beer must have used a hop with a higher alpha-acid percentage."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. IBU er én akse og et estimat. Opplevd bitterhet avhenger også av resten av ølet, så lignende IBU kan oppleves ulikt.",
+        "en": "Correct. IBU is one axis and an estimate. Perceived bitterness also depends on the rest of the beer, so similar IBU can be perceived differently."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Lik IBU betyr ikke lik opplevd bitterhet, og alfasyreprosenten er ikke ølets IBU. Opplevd bitterhet avhenger også av resten av ølet.",
+        "en": "Not quite. The same IBU does not mean the same perceived bitterness, and the alpha-acid percentage is not the beer's IBU. Perceived bitterness also depends on the rest of the beer."
+      }
+    },
+    {
+      "id": "Q-REC-005",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": [
+        "recipe.balance"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [
+        "FACT-RECIPE-0003"
+      ],
+      "prompt": {
+        "no": "Du lager med vilje et øl der humlebitterheten tydelig står fram. En venn sier at ølet derfor er i ubalanse og dermed dårlig. Hva passer best?",
+        "en": "You deliberately make a beer where the hop bitterness clearly stands out. A friend says the beer is therefore unbalanced and so it is bad. What fits best?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Balanse vurderes opp mot ølet du vil lage, og et øl kan med vilje la én del stå fram.",
+            "en": "Balance is judged against the beer you intend, and a beer can deliberately let one part stand out."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Vennen har rett: balanse betyr at malt og humle skal være like sterke.",
+            "en": "Your friend is right: balance means malt and hops must be equally strong."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Det finnes ett tall som avgjør om et øl er i balanse.",
+            "en": "There is one number that decides whether a beer is in balance."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Balanse beskriver hvordan delene oppleves i forhold til hverandre, vurdert mot hensikten. Det er ikke en kvalitetskarakter.",
+        "en": "Correct. Balance describes how the parts are perceived relative to one another, judged against the intent. It is not a quality grade."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Balanse betyr ikke at alt skal være like sterkt, og det finnes ikke ett universelt tall for det. Den vurderes opp mot ølet du vil lage.",
+        "en": "Not quite. Balance does not mean everything must be equally strong, and there is no single universal number for it. It is judged against the beer you intend."
+      }
+    },
+    {
+      "id": "Q-REC-006",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": [
+        "recipe.style_context"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "De forventede verdiene for oppskriften din havner litt utenfor stilområdet for stilen du sikter mot. Hva er en fornuftig tanke?",
+        "en": "The predicted values for your recipe land a little outside the style range for the style you are aiming at. What is a sensible way to think about it?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Stilområdet er en sammenligningsramme. Utenfor er ikke automatisk feil – sjekk om det passer det ølet du vil lage.",
+            "en": "The style range is a comparison frame. Outside it is not automatically wrong – check whether it fits the beer you want to make."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Oppskriften er feil og må endres til den ligger innenfor området.",
+            "en": "The recipe is wrong and must be changed until it lies inside the range."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Stiltreffet i appen forteller hvor godt ølet kommer til å bli.",
+            "en": "The style match in the App tells you how good the beer is going to be."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Stil er en referanseramme for hva som er typisk, ikke en regel. Stiltreffet er kontekst, ikke en karakter.",
+        "en": "Correct. Style is a reference frame for what is typical, not a rule. The style match is context, not a grade."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Å ligge utenfor stilområdet gjør ikke oppskriften feil, og stiltreffet er ikke en karakter på ølet. Bruk stilen som en sammenligningsramme.",
+        "en": "Not quite. Lying outside the style range does not make the recipe wrong, and the style match is not a grade for the beer. Use the style as a comparison frame."
+      }
+    },
+    {
+      "id": "Q-REC-007",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": [
+        "recipe.formulation_workflow"
+      ],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "Forrige brygg ble mer bittert enn du ønsket. Hva er et godt neste steg når du vil lære av det?",
+        "en": "Your last brew came out more bitter than you wanted. What is a good next step if you want to learn from it?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Endre én bevisst ting, skriv den ned som en hypotese, og mål og evaluer neste brygg.",
+            "en": "Change one deliberate thing, write it down as a hypothesis, and measure and evaluate the next brew."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Endre humle, malt og gjær på en gang, så blir det fortere bra.",
+            "en": "Change the hops, malt and yeast all at once, so it gets good faster."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Endre én ting – da vet du sikkert at det var årsaken.",
+            "en": "Change one thing – then you know for certain that it was the cause."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Én bevisst endring gjør resultatet lettere å tolke. Det er en hypotese, ikke et bevis – et hjemmebrygg er ikke et kontrollert forsøk.",
+        "en": "Correct. One deliberate change makes the result easier to interpret. It is a hypothesis, not proof – a homebrew batch is not a controlled experiment."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Mange endringer samtidig gjør resultatet vanskelig å tolke, og én endring beviser ikke årsaken. Endre én bevisst ting og behandle den som en hypotese.",
+        "en": "Not quite. Many changes at once make the result hard to interpret, and one change does not prove the cause. Change one deliberate thing and treat it as a hypothesis."
+      }
+    }
+  ]
+}

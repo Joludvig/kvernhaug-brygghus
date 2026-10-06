@@ -16,11 +16,12 @@
 // Reproduced directly against the pre-fix source (stash-toggle) at
 // viewport width 750px -- sidebar still shown inline (Streamlit's own
 // auto-collapse breakpoint is narrower), main content squeezed to ~65-100px columns -- and confirmed fixed
-// post-fix at the same width. The grid now has ten cards (issue #458;
+// post-fix at the same width. The grid now has eleven cards (issue #458;
 // issue #473 adds Rengjøring og sikkerhet right after Råvarer; issue #472
 // adds Smak og evaluering as the final card; Måling og bryggelogg
 // (Foundation, measurement contract §21.5) is inserted as card nine,
-// between Pakking and Smak og evaluering).
+// between Pakking and Smak og evaluering; Oppskriftsforståelse (recipe
+// contract §27.8) is card ten, between Måling and Smak og evaluering).
 //
 // Runs against tests/fixtures/streamlit_harness/bryggeskole_harness.py
 // (already the production render_bryggeskole_panel() call; previously
@@ -37,8 +38,8 @@ const NARROW_PORTRAIT_WIDTH = 750;
 const NARROW_PORTRAIT_HEIGHT = 900;
 
 const MODUL_TEKST = {
-  no: ['Råvarer', 'Rengjøring og sikkerhet', 'Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking', 'Måling og bryggelogg', 'Smak og evaluering'],
-  en: ['Raw materials', 'Cleaning and safety', 'Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging', 'Measurement and brew log', 'Tasting and evaluation'],
+  no: ['Råvarer', 'Rengjøring og sikkerhet', 'Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking', 'Måling og bryggelogg', 'Oppskriftsforståelse', 'Smak og evaluering'],
+  en: ['Raw materials', 'Cleaning and safety', 'Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging', 'Measurement and brew log', 'Recipe understanding', 'Tasting and evaluation'],
 };
 
 const ENV_KNAPP = {

@@ -472,7 +472,8 @@ The visible grid grows toward this order as modules land:
 - Before Måling: Pakking (8) → Smak og evaluering (9).
 - With Måling Foundation (status 2026-10-04: implemented in the offline/local integration, not yet on GitHub/master):
   Pakking (8) → Måling (9) → Smak (10).
-- After Oppskriftsforståelse lands: Måling (9) → Oppskriftsforståelse (10) → Smak (11).
+- With Oppskriftsforståelse (status 2026-10-04: implemented locally/offline on `offline/recipe-understanding-implementation`, not yet
+  on GitHub/master): Måling (9) → Oppskriftsforståelse (10) → Smak (11).
 
 **Decision pointers** (closed locally, not yet on GitHub):
 - **Måling og bryggelogg:** `v22_measurement_brewlog_module_contract.md`, closed on `offline/measurement-grid-position-correction` @
@@ -480,7 +481,7 @@ The visible grid grows toward this order as modules land:
 - **Oppskriftsforståelse:** `v22_recipe_understanding_module_contract.md`, closed on `offline/recipe-understanding-contract` @
   `865d87d1413610643850909ec63f89a3aacff097`. Kompetent; main App; position 10; implementation waits for the Måling Foundation
   module. Status 2026-10-04: that prerequisite is satisfied in the offline integration (not yet on GitHub/master);
-  Oppskriftsforståelse itself is not implemented.
+  Oppskriftsforståelse itself is now implemented locally/offline (`offline/recipe-understanding-implementation`; not yet on GitHub/master).
 
 Implementation detail (ids, chunks, questions, tests) lives in those contracts, not here.
 
