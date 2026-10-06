@@ -563,27 +563,30 @@
       "claim": "Whichever packaging path is used, the beer ends up sealed inside a container that is actively carbonating (bottle conditioning) or being force-carbonated (keg) -- meaning that container holds internal pressure. Using a package, vessel or fitting that is damaged or not intended/rated for the pressure involved creates a risk of over-pressure, leakage or container/equipment failure. Brewers should use pressure-suitable packaging/equipment and respect its rated operating limits.",
       "classification": "documented_fact",
       "status": "verified",
-      "verified_at": "2026-09-23T10:00:00Z",
+      "verified_at": "2026-10-02T06:15:00Z",
       "sources": [
         {
           "tier": "B",
           "type": "Brewers Association educational publication on package over-pressurization",
-          "ref": "https://www.brewersassociation.org/educational-publications/preventing-package-over-pressurization/"
-        },
-        {
-          "tier": "A",
-          "type": "manufacturer technical guidance (Lallemand Brewing, Preserving thiols in homebrewing)",
-          "ref": "https://www.lallemandbrewing.com/en/global/resources/whats-new/preserving-thiols-in-homebrewing-a-step-by-step-guide/"
+          "ref": "https://www.brewersassociation.org/educational-publications/preventing-package-over-pressurization/",
+          "note": "Support is in the linked full resource PDF (https://cdn.brewersassociation.org/wp-content/uploads/2020/01/Preventing-Package-Over-Pressurization.pdf): conditioning CO2 can exceed a package's pressure rating; know the pressure limitations of cans, bottles, growlers, kegs or any other container; exceeding them can cause package failure; suppliers should provide package pressure ratings and limitations. US commercial-brewery scope (FSMA framing)."
         },
         {
           "tier": "B",
           "type": "established homebrewing technical text (John Palmer, How to Brew, Chapter 11)",
-          "ref": "https://howtobrew.com/section-1/chapter-11/"
+          "ref": "https://howtobrew.com/section-1/chapter-11/",
+          "note": "Bottle-conditioning scope: pressure may exceed the bottle strength; bottles can explode. Site TLS certificate was expired at access on 2026-10-02 (content read with certificate verification disabled)."
+        },
+        {
+          "tier": "B",
+          "type": "trade-association-hosted technical seminar (Craft Brewers Conference online seminar, Brewers Association; presenter is a sales manager -- commercial interest)",
+          "ref": "Steve Bradt, A Practical Approach to Refillable Kegs - Quality, Safety, and Maintenance (CBC online seminar, 2020) -- https://cdn.brewersassociation.org/wp-content/uploads/2020/04/CBC-Online-Seminar-Presentation-A-Practical-Approach-to-Refillable-Kegs-Quality-Safety-and-Maintenance.pdf",
+          "note": "Supports 'damaged': damaged keg shells, valves and couplers cause leaks and safety issues; damaged kegs are pulled from service. Keg/valve/coupler scope only."
         }
       ],
       "concepts": ["package.pressure_safety"],
       "modules": ["package.fundamentals"],
-      "notes": "States the existence of this safety boundary and its general cause (unsuitable container/fitting under pressure), not a specific pressure rating, a specific safe/unsafe product list, or a full pressure-vessel engineering treatment. Wording trap: do not name a specific unsafe or safe product/brand; do not turn this into pressure numbers, burst-pressure ratings, or a design/engineering lesson; do not imply every packaging attempt is dangerous -- the point is container/equipment suitability, not that pressure itself is inherently hazardous when suitable equipment is used correctly."
+      "notes": "States the existence of this safety boundary and its general cause (unsuitable container/fitting under pressure), not a specific pressure rating, a specific safe/unsafe product list, or a full pressure-vessel engineering treatment. Wording trap: do not name a specific unsafe or safe product/brand; do not turn this into pressure numbers, burst-pressure ratings, or a design/engineering lesson; do not imply every packaging attempt is dangerous -- the point is container/equipment suitability, not that pressure itself is inherently hazardous when suitable equipment is used correctly. SOURCE REVIEW (#448, 2026-10-02): Lallemand thiol guide removed -- its pressure-safety lines are incidental to a keg procedure, commercial, and redundant. 'Rated/limits/failure' rests on BA Preventing Package Over-Pressurization (full PDF) and Palmer ch. 11 (bottles). 'Damaged' rests on the BA-hosted CBC refillable-keg seminar (kegs/valves/couplers; commercial-interest presenter). Keep 'not intended/rated' wording; do not broaden to 'unrated'. SOURCE LIMITATIONS: no bottle-specific 'damaged' source was opened -- do not teach damaged bottles as a sourced claim; BA material is US commercial-brewery scope (FSMA framing); Palmer web edition accessed with an expired site certificate. No pressure values, ratings or product names are carried."
     },
     {
       "id": "FACT-PACK-0004",

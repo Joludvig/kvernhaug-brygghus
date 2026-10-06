@@ -879,6 +879,27 @@ class TestProductionRegistryMeasurementKompetent(unittest.TestCase):
         self.assertIn("USGS", m6_refs)
 
 
+class TestProductionRegistryPack0003SourceCleanup(unittest.TestCase):
+    """Issue #448: FACT-PACK-0003 source-quality cleanup. Claim wording is
+    unchanged; the off-topic Lallemand thiol guide is removed and the
+    BA-hosted CBC keg seminar carries the 'damaged' component."""
+
+    def test_claim_keeps_not_intended_rated_wording(self):
+        record = get_verified_record(_PRODUCTION_REGISTRY, "FACT-PACK-0003")
+        self.assertIn("damaged or not intended/rated for the pressure involved", record["claim"])
+        self.assertNotIn("unrated", record["claim"])
+        self.assertEqual(record["concepts"], ["package.pressure_safety"])
+
+    def test_sources_after_cleanup(self):
+        record = get_verified_record(_PRODUCTION_REGISTRY, "FACT-PACK-0003")
+        refs = " ".join(s["ref"] for s in record["sources"])
+        self.assertNotIn("lallemandbrewing.com", refs)
+        self.assertIn("preventing-package-over-pressurization", refs)
+        self.assertIn("howtobrew.com/section-1/chapter-11", refs)
+        self.assertIn("Refillable-Kegs-Quality-Safety-and-Maintenance", refs)
+        self.assertIn("no bottle-specific 'damaged' source", record["notes"])
+
+
 class TestProductionRegistrySafetyFactPack(unittest.TestCase):
     """Issue #447 (V2.2 Goal 3 Rengjoring/sikkerhet): FACT-SAFE-0001 (N1
     cleaning vs sanitising + clean-first, one record / two concepts),
