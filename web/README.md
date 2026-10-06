@@ -18,6 +18,11 @@ Seks sider, hver med ett tydelig formål, delt av samme uttrekkbare venstremeny 
 | `verktoy.html` — **Verktøy** | Frittstående bryggeverktøy som ikke krever en oppskrift eller et brygg — foreløpig en ABV-kalkulator fra målt OG+FG (issue #77). |
 | `personvern.html` — **Kontakt og personvern** | Kontakt-e-post og en kort, ærlig forklaring av hvordan V1 behandler data (lokal lagring, ingen analytics/tracking). Lenket fra footer på alle sider, ikke fra hovedmenyen. Lagt til Runde 17. |
 
+> **Begrepsavklaring:** Bryggelærling/Bryggmester-modusene (Lærling/Mester) er støttenivåer i *samme* web-app — ikke
+> kursnivåer, og web-«Bryggmester» er ikke kurssporet «Bryggemester». **Hjelp & bryggehåndbok** er bruks- og
+> prosessveiledning, ikke Bryggeskole-kurset (selv om sidene historisk ble laget under innholdsprogrammet
+> «Bryggeskole P0–P3B»). Kanonisk definisjon: [docs/development/v22_g3q_full_bryggeskole_curriculum_map.md §6.2](../docs/development/v22_g3q_full_bryggeskole_curriculum_map.md#62-canonical-course-architecture-and-terminology-axes).
+
 ## Hva den kan
 
 - Bygge en oppskrift av malt, humle og gjær med live OG, FG, ABV, IBU og EBC

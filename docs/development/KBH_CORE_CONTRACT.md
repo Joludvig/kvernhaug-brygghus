@@ -49,6 +49,10 @@ does not do."
 | **Brew Lab** | Actual brews, observations, and experiments. |
 | **Sóti** | The AI/agent layer. |
 
+The Bryggeskole course (its progression, which stages the App's Bryggeskole surface covers, its relation to the Web and to
+a later standalone course product, and the terminology axes that must not be mixed) is defined canonically in
+[v22_g3q_full_bryggeskole_curriculum_map.md §6.1–§6.2](v22_g3q_full_bryggeskole_curriculum_map.md#62-canonical-course-architecture-and-terminology-axes).
+
 A functional area belongs to exactly one domain for ownership
 purposes, even where its code today happens to live inside the
 Streamlit or Web codebase. Where existing code implements more than

@@ -1,12 +1,14 @@
 # V2.2 — Måling og bryggelogg (measurement and brew log) Foundation/Kompetent contract
 
-Version: 1.0
-Status: Decision/prep document — reviewable, not yet actionable
+Version: 1.1
+Status: **Chief review completed 2026-10-03** (§21). The Foundation slice is approved for implementation-issue creation; the
+issue draft is §22. Module code still requires that implementation issue, which is pending because GitHub is unavailable.
+Not yet actionable as product work. (v1.0: decision/prep document — reviewable, not yet actionable.)
 Governed by: [#434](https://github.com/Joludvig/kvernhaug-brygghus/issues/434), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3); product direction
 [#65](https://github.com/Joludvig/kvernhaug-brygghus/issues/65); curriculum owner
 [#419](https://github.com/Joludvig/kvernhaug-brygghus/issues/419) (merged), whose map
-(`v22_g3q_full_bryggeskole_curriculum_map.md`, §4.5 D38–D44, §4.6 D48, §13, §15) recommends this module as module 8; Brew History
+(`v22_g3q_full_bryggeskole_curriculum_map.md`, §4.5 D38–D44, §4.6 D48, §13, §15) recommends this module as module 8 (the map's 0-based index; position 9 of 11 in the final order); Brew History
 methodology from the G3N contract (`v22_g3n_evaluate_inspect_closure_contract.md`) and `CORE_KBHBREW_V1.md`; current-product
 inventory `v22_g3q_current_bryggeskole_coverage_inventory.md`.
 Authoritative base at creation: `40221da54e48bce86dda446fabd52786c276a1d1`.
@@ -37,7 +39,9 @@ After the Foundation part of Måling og bryggelogg, a homebrewer with no prior k
 
 1. say what **OG** and **FG** are: OG is the gravity of the wort before the yeast is added, FG is the gravity when fermentation has finished; gravity is a density reading that helps follow fermentation; OG and FG are **measurements, not targets**;
 2. explain how to tell fermentation has plausibly **finished**: repeated gravity readings, taken some time apart, stop changing; an airlock that stops bubbling is not proof; one reading is not enough; a stable reading is not automatically the recipe's predicted FG;
-3. **record the temperature of the fermenting beer and where or how it was measured**, keep a measurement separate from a target, and not assume room temperature equals beer temperature;
+3. **record the temperature of the fermenting beer and where or how it was measured**, and keep a measurement separate from a target
+   (Chief 2026-10-03: the v1.0 clause "not assume room temperature equals beer temperature" is removed until a verified fact supports it;
+   it is a factual claim, not methodology — §21.4);
 4. record **how much beer went into the fermenter**;
 5. write down **what they measured or saw** separately from **what they think caused it**;
 6. compare the result with the recipe's plan and treat a difference as **evidence to look at**, not a grade and not a diagnosis;
@@ -72,7 +76,7 @@ Mastery ids equal these concept ids (§11).
 | Foundation MUST | Fermentation finished when repeated gravity readings stop changing | `measurement.fermentation_complete` | M2 (§5) |
 | Foundation MUST | Fermentation temperature: record it and where it was measured; measurement is not a target | `measurement.temperature` | Methodology + FACT-BREW-0001/0002/0003; M5 only later |
 | Foundation MUST | Volume into the fermenter | `measurement.volume` | Methodology (Foundation minimum) |
-| Foundation MUST | Observation kept separate from interpretation | `log.observation_vs_interpretation` | G3N / Brew History methodology (no fact) |
+| Foundation MUST | Observation kept separate from interpretation | `sensory.observation_vs_interpretation` (reused; Chief 2026-10-03, §21.3 — v1.0 proposed `log.observation_vs_interpretation`, now not introduced) | G3N / Brew History methodology (no fact) |
 | Foundation MUST | Planned vs actual without grading | `log.planned_vs_actual` | Existing Brew History comparison (no fact) |
 | Foundation SHOULD | Hydrometer reading depends on the instrument's stated reference temperature | `measurement.hydrometer_temperature` | M4 (§5) |
 | Kompetent | Hydrometer vs refractometer; refractometer after alcohol | `measurement.instrument_choice` | M3 (later) |
@@ -222,7 +226,9 @@ Foundation teaches the traps marked (F); the others are Kompetent.
 
 - **Hydrometer:** valid at one reference temperature, printed on the instrument (F). Needs enough sample to float freely. Do not return the sample to the fermenter (F, hygiene). Cannot be reset; a consistent offset can only be noted or corrected afterwards. Fragile.
 - **Refractometer:** reliable for unfermented wort. Once alcohol is present the reading is not the gravity directly (F: "check with a hydrometer"; the correction is Kompetent). The scale may be Brix rather than gravity. It needs temperature compensation. Disagreement with a hydrometer is usually a correction or method problem, not proof that one is broken.
-- **Thermometer:** liquid, vessel wall and room air read differently, and active fermentation warms the beer (F: record where you measured). Accuracy can be checked (Kompetent; source is food-scope).
+- **Thermometer:** liquid, vessel wall and room air read differently, and active fermentation warms the beer (F: record where you measured;
+  Chief 2026-10-03: Foundation teaches only "record where/how you measured" — the "warms the beer" and room-vs-beer statements stay out
+  until M5 is verified, §21.4). Accuracy can be checked (Kompetent; source is food-scope).
 - **Volume markings:** an unmarked or homemade scale is approximate; hot and cold volumes differ (Kompetent); Foundation records the fermenter volume as measured.
 - **Precision:** teach "as accurate as necessary" (Kunze p. 869). Record what the instrument shows. No decimals of precision, no lab accuracy, no fake precision.
 
@@ -263,7 +269,7 @@ note how and when each measurement was taken.
 
 ## 10. Module and chunk structure
 
-**One module, "Måling og bryggelogg"**, module 8 in the #419 §15 sequence, placed **after** the process spine because it is most useful once the
+**One module, "Måling og bryggelogg"**, module 8 in the #419 §15 sequence (0-based index; position 9 of 11 in the final order), placed **after** the process spine because it is most useful once the
 learner has something to measure. It is not a hard gate; existing modules stay reachable. Indicative id `measurement.fundamentals`; the
 implementation issue fixes the final id and file names.
 
@@ -287,7 +293,8 @@ In this codebase the mastery concept ids are the registry concept ids carried by
 no new mastery mechanics.
 
 Foundation: `measurement.gravity`, `measurement.fermentation_complete`, `measurement.temperature`, `measurement.volume`,
-`log.observation_vs_interpretation`, `log.planned_vs_actual`, and (SHOULD) `measurement.hydrometer_temperature`.
+`sensory.observation_vs_interpretation` (reused from the Smak og evaluering contract; Chief 2026-10-03, §21.3), `log.planned_vs_actual`,
+and (SHOULD) `measurement.hydrometer_temperature`.
 
 Kompetent: `measurement.instrument_choice`, `measurement.instrument_check`, `measurement.volume_stages`, `measurement.uncertainty`,
 `measurement.mash_temperature`, `log.hypothesis_next_change`.
@@ -325,7 +332,7 @@ does not change any of this.
 | brew date | `brewedAt` | |
 | OG | `actuals.og` | one value |
 | FG | `actuals.fg` | one value |
-| volume into the fermenter | `actuals.volumeL` | **stage not defined by the schema; see gate G-1** |
+| volume into the fermenter | none today (notes) | **Not `actuals.volumeL`:** the App's Bryggedag panel writes post-boil volume there (§15 G-1, §21.4) |
 | package date | no field | notes only today |
 | fermentation temperature and where measured | no field | notes only today |
 | observation notes (measured/seen) | `actuals.notes` | measurement/process-adjacent free text |
@@ -348,13 +355,19 @@ These are **product or Core decisions**. This contract records them and neither 
   Foundation minimum is "volume into the fermenter". Recommended interpretation, presented for later owner/Core review only:
   **`actuals.volumeL` = volume into the fermenter.** Not decided here. Until decided, teaching text says "volume into the fermenter" and does not
   claim that the App stores that specific stage.
+  *Correction found at Chief review (2026-10-03):* the schema is silent, but the shipped App is not. `ui/brewday_panel.py` labels its input
+  "Post-boil volum (L)" (`bd_post_boil_vol`) and writes it to `actuals.volumeL`, following the #155 preflight
+  (`app_a1_active_brew_measurement_preflight.md` §6). The v1.0 recommendation above therefore conflicts with current App behaviour. Chief decision
+  (§21.4): the Foundation lesson must **not** map "volume into the fermenter" onto `actuals.volumeL`. G-1 stays an open owner/Core decision; no
+  schema or App change follows from this contract.
 - **G-2 Fermentation temperature.** There is no field. Decide whether it becomes a field, stays in notes, or is deferred.
 - **G-3 Reading date.** There is no per-reading date field.
 - **G-4 Instrument/method.** There is no instrument or method field.
 - **G-5 Multiple readings.** There is one `og` and one `fg` per brew. A repeat or conflicting reading cannot both be stored structurally. The G3N
   audit found a real brew with two conflicting FG values. Decide whether to store a series, keep one value plus notes, or leave it.
 - **G-6 Package date.** No field; decide with G-2 to G-4.
-- **G-7 Kompetent volumes.** Pre-boil, post-boil and packaged volumes have no fields; decide whether they stay notes.
+- **G-7 Kompetent volumes.** Pre-boil and packaged volumes have no fields; post-boil volume is what the App's Bryggedag panel currently writes to
+  `actuals.volumeL` (see G-1). Decide whether the others stay notes.
 
 None of G-1 to G-7 blocks the Foundation fact pack (M1, M2, M4) or the methodology chunks. G-1 must be settled before any UI states which volume the
 App stores. Any schema change needs its own Core issue and version handling.
@@ -365,7 +378,8 @@ A new homebrewer finishes their first batch and wants to know whether it is read
 
 1. Before adding the yeast they measure the wort and write down **OG**, noting that OG is a measurement, not the recipe's target.
 2. They record the **volume that went into the fermenter**, and the **fermentation temperature with where they measured it** (in the liquid, on the
-   vessel or in the room air), and say why room temperature is not assumed to equal beer temperature.
+   vessel or in the room air). (Chief 2026-10-03: the v1.0 step "say why room temperature is not assumed to equal beer temperature" is removed
+   until a verified fact supports it, §21.4.)
 3. When the airlock quiets, they say that is **not proof** of anything. They take a gravity reading, then another some time later, and see whether
    the two are the same. One reading does not tell them; a stable pair is the key signal.
 4. The readings stop changing, but the number is higher than the recipe's predicted FG. They say **stable does not mean the predicted FG**, and
@@ -441,7 +455,248 @@ Visually verified during reconnaissance (rendered page images viewed; printed pa
 Not verified: p. 778, p. 406, and pp. 323–328 and 330. Industrial figures and procedures are LATER. Printed-page offsets differ from PDF page
 numbers by chapter, so a fact-pack round must view the rendered page and read the printed number, and must not rely on OCR text for any exact claim.
 
+## 21. Chief review closure (2026-10-03)
+
+Chief reviewed this contract on 2026-10-03. The decisions were relayed to Local Claude and recorded offline because GitHub was unavailable. They
+must be mirrored on #434 when access returns. Where an earlier section disagrees with this section, this section wins. The earlier text is kept and
+annotated so the change is visible.
+
+### 21.1 Implementation slice
+
+The first implementation slice is **Foundation only**. It does **not** decide whether Kompetent content may later appear in the main App. (Since decided, 2026-10-04: the main App Bryggeskole covers Foundation → Kompetent hjemmebrygger — curriculum map §6.2.3/§6.2.8 — so the later Kompetent Måling slice is in main-App scope. The first slice stays Foundation only.) Kompetent
+is a later slice (§21.6).
+
+### 21.2 Foundation shape (locked)
+
+- Module/topic id: **`measurement.fundamentals`** (the value later used in registry `modules[]`, like `package.fundamentals`).
+- **5 chunks:** `CHUNK-MEAS-A`, `CHUNK-MEAS-B`, `CHUNK-MEAS-C`, `CHUNK-MEAS-D`, `CHUNK-MEAS-E`.
+- **6 questions:** `Q-MEAS-001` … `Q-MEAS-006`, all difficulty `beginner`.
+
+| Chunk | Basis | Content | Allowed source claims |
+|---|---|---|---|
+| A | methodology | Why measure and log: know what happened before guessing why | none |
+| B | fact | Gravity, OG and FG. OG and FG are measurements, not targets | FACT-MEAS-0001; FACT-YEAST-0002 only if the text genuinely needs it as supporting context |
+| C | fact | Fermentation completion: repeated gravity readings taken some time apart stop changing; the airlock is not proof | FACT-MEAS-0002 |
+| D | fact + methodology | Temperature: record the reading **and** where/how it was measured; for a hydrometer sample, note the sample temperature | FACT-MEAS-0003 where applicable |
+| E | methodology | Minimum log; observation vs interpretation; plan vs actual is evidence, not a grade or diagnosis; never overwrite a raw recorded reading, record corrections separately | none |
+
+Chunk C rules:
+- No fixed number of hours or days.
+- Predicted FG is a **plan** value, not a measurement.
+- No factual claim beyond FACT-MEAS-0002 about what a particular stable reading proves or disproves.
+
+### 21.3 Mastery concept
+
+Reuse **`sensory.observation_vs_interpretation`**, defined in `v22_sensory_evaluation_module_contract.md` §4/§26, for observation vs
+interpretation. `log.observation_vs_interpretation` is **not** introduced for the same underlying skill. The cross-module reuse follows the existing
+precedent of `cool.sanitation_boundary` being taught in both Kjøling/overføring and Pakking. Other measurement/log concepts stay module-specific
+where genuinely distinct.
+
+### 21.4 App/course boundary, volume and temperature
+
+Product scope:
+- No Brew History schema change. No Core change.
+- No calculator duplication: the ABV calculation, `modules/calculations.py` and recipe efficiency stay where they are and are not re-taught.
+
+Volume:
+- The lesson must **not** claim that App `actuals.volumeL` is "volume into the fermenter". The App stores post-boil volume there (§15 G-1).
+- Foundation may teach recording the volume into the fermenter as a useful measurement. Integration stays generic: "record the measurement in
+  your brew log/notes".
+
+Temperature:
+- "Room temperature is not beer temperature" is **removed** from Foundation until a verified fact supports it (M5, source gap G3). It is a factual
+  claim and is not reclassified as methodology.
+- Foundation teaches only "record the reading and where/how you measured it".
+
+### 21.5 Grid placement
+
+Måling og bryggelogg is **inserted after Pakking and before Smak og evaluering**: … → 8 Pakking → **9 Måling og bryggelogg** → 10 Smak og
+evaluering (the current 9-card grid becomes 10 cards). Oppskriftsforståelse will later sit between Måling and Smak, following the 11-module order in
+the #419 map §15: 8 Pakking → 9 Måling og bryggelogg → 10 Oppskriftsforståelse → 11 Smak og evaluering. (Corrected 2026-10-04: v1.1 called Måling
+the "10th visible card"; it is position 9.) The grid is not changed by this
+contract.
+
+### 21.6 Kompetent (later slice, not implemented now)
+
+Kept for later, unchanged: instrument choice (FACT-MEAS-0004), instrument checks, volume stages (FACT-MEAS-0005), correction vs raw reading, mash
+temperature, and hypothesis + next change. The **fact gap for instrument checks remains open** (M7 / G4: only food-scope sources; no registry record).
+
+### 21.7 Fact spot-check metadata
+
+Chief live-checked public source material on 2026-10-03:
+- AHA, "How to Take an Accurate Hydrometer Reading", https://homebrewersassociation.org/how-to-brew/how-to-take-an-accurate-hydrometer-reading/
+- Wyeast FAQ, https://wyeastlab.com/faqs/
+- MISCO, https://www.misco.com/beer-calculator/
+
+These were matched only to existing source entries with the same publisher and title:
+
+| Record | AHA hydrometer guidance | Wyeast FAQ on airlock activity | MISCO technical note REV140407-1 | Other |
+|---|---|---|---|---|
+| FACT-MEAS-0001 | URL + Chief spot-check note added | not cited | **not matched** (a different MISCO page was checked) | Wyeast "Yeast Fermentation" and BYO not re-checked |
+| FACT-MEAS-0002 | URL + Chief spot-check note added | URL + Chief spot-check note added | **not matched** | — |
+| FACT-MEAS-0003 | URL + Chief spot-check note added | not cited | **not matched** | BYO not re-checked |
+
+Each record's `notes` gets a dated sentence saying which sources were spot-checked and which remain open. Claims, classification, status and
+`verified_at` are unchanged. No source entry was added or removed.
+
+**Status update 2026-10-04 (source spot-check follow-up; supersedes the "not matched" / "not re-checked" cells above):**
+
+The cited MISCO REV140407-1 technical note was located and matched from the PDF itself, and the BYO (Dave Green) and Wyeast
+"Yeast Fermentation" entries were matched to their pages. These checks were done by Local Claude on Chief instruction and are
+recorded for Chief confirmation on the source entries.
+
+Every source entry of FACT-MEAS-0001..0003 now carries a source-level check. The stored BYO publication/modified dates remain
+unconfirmed. Claims, status and sources are unchanged.
+
+### 21.8 Governance
+
+- The Foundation slice is approved for **implementation-issue creation**. Module code still requires that implementation issue.
+- The issue cannot be created while GitHub is unavailable. The paste-ready draft is §22.
+- Nothing in this contract marks product implementation as started or complete.
+
+## 22. Foundation implementation issue — draft (create on GitHub when access returns)
+
+Paste the block below as the issue body. Title: **V2.2 Måling og bryggelogg — Foundation module (`measurement.fundamentals`)**.
+
+~~~markdown
+## Goal
+
+Implement the **Foundation** part of the Bryggeskole module **Måling og bryggelogg** (`measurement.fundamentals`), exactly as locked in
+`docs/development/v22_measurement_brewlog_module_contract.md` §21 (Chief review 2026-10-03). Foundation only. Kompetent is a later issue.
+
+Governed by #434 (contract, merged in #435), child of #343 (Roadmap V2.2 Goal 3). Facts: #444/#453 (FACT-MEAS-0001..0003).
+
+## Prerequisites
+
+- **Rengjøring og sikkerhet (#473)** and **Smak og evaluering (#472)** are merged first. The grid position below assumes their cards exist.
+- This issue reuses #472's methodology pattern: a required `basis` field, the "Metode, ikke en faktapåstand" / "Method, not a fact claim"
+  caption, and the `sensory.observation_vs_interpretation` concept.
+
+## Scope (exact)
+
+New, topic-scoped files following the existing pilot pattern (as `pilot_package.py` and `pilot_sensory.py` do; no shared generalisation):
+- `bryggeskole/data/pilot_measurement_fundamentals.json`
+  - `schema_version: 1`
+  - `topic_id: PILOT-MEASUREMENT-FUNDAMENTALS`, following the existing `PILOT-<AREA>-FUNDAMENTALS` convention
+- `bryggeskole/pilot_measurement.py`
+  - loads the file and resolves every fact claim through the verified-only registry API (`get_verified_record`)
+  - has its own wording guardrails
+- registration in `ui/bryggeskole_panel.py`
+
+### Chunks (exactly 5)
+
+| id | basis | content | `source_claims` |
+|---|---|---|---|
+| CHUNK-MEAS-A | methodology | Why measure and log: know what happened before guessing why | `[]` |
+| CHUNK-MEAS-B | fact | Gravity, OG, FG; OG and FG are measurements, not targets | `["FACT-MEAS-0001"]` (+ `FACT-YEAST-0002` only if the text genuinely needs it) |
+| CHUNK-MEAS-C | fact | Fermentation completion: repeated readings taken some time apart stop changing; airlock is not proof | `["FACT-MEAS-0002"]` |
+| CHUNK-MEAS-D | fact | Temperature: write down the reading **and** where/how it was measured; for a hydrometer sample note the sample temperature | `["FACT-MEAS-0003"]` |
+| CHUNK-MEAS-E | methodology | Minimum log; observation vs interpretation; plan vs actual is evidence, not a grade/diagnosis; never overwrite a raw reading, record corrections separately | `[]` |
+
+CHUNK-MEAS-D has `basis: "fact"` because it carries FACT-MEAS-0003. Its "write down where/how you measured" part is phrased as a recording
+habit. It is never phrased as a factual claim about temperature differences between places.
+
+### Questions (exactly 6, all `difficulty: "beginner"`)
+
+| id | type | basis | concepts | `source_claims` | tests |
+|---|---|---|---|---|---|
+| Q-MEAS-001 | concept_check | fact | `measurement.gravity` | `["FACT-MEAS-0001"]` | OG/FG are measured values, not recipe targets |
+| Q-MEAS-002 | scenario | fact | `measurement.fermentation_complete` | `["FACT-MEAS-0002"]` | Airlock has gone quiet: what tells you more? (repeated gravity readings, not the airlock) |
+| Q-MEAS-003 | scenario | methodology | `log.planned_vs_actual` | `[]` | Measured FG differs from the recipe's predicted FG: record the reading as it is; predicted FG is a plan value; the difference is evidence to look at, not a grade |
+| Q-MEAS-004 | scenario | methodology | `measurement.temperature` | `[]` | What to write down for fermentation temperature: the reading **and** where/how it was measured |
+| Q-MEAS-005 | concept_check | fact | `measurement.hydrometer_temperature` | `["FACT-MEAS-0003"]` | Note the sample temperature; the reference temperature is the one stated on the instrument or in its instructions |
+| Q-MEAS-006 | scenario | methodology | `sensory.observation_vs_interpretation` | `[]` | Separate what was measured/seen from what you think caused it |
+
+Methodology concept allow-list for this module (closed): `log.planned_vs_actual`, `measurement.temperature`,
+`sensory.observation_vs_interpretation`. Do **not** introduce `log.observation_vs_interpretation`. `measurement.volume` is taught in CHUNK-MEAS-E
+without its own question in this slice.
+
+### Basis rules
+
+- Each fact claim used must be `status: verified` and resolve through the verified-only API.
+- `methodology` requires `source_claims == []` and a concept from the allow-list. Methodology chunks and questions show the method caption and
+  never claim a brewing source.
+- Allowed facts, exactly: FACT-MEAS-0001, FACT-MEAS-0002, FACT-MEAS-0003, and FACT-YEAST-0002 (CHUNK-MEAS-B only, optional). No other record.
+- `modules: ["measurement.fundamentals"]` may be added to the records the module actually uses. This is the only registry change allowed, and
+  `tests/test_course_fact_registry.py`'s "documented facts without modules" assertion is updated accordingly. Claims, classification, status
+  and sources stay unchanged.
+
+### Content rules (binding wording traps, both languages; contract §19 and §21)
+
+- No fixed number of hours or days. One reading is not enough. "Stable" always means readings taken some time apart.
+- Predicted FG is a plan value, not a measurement. No claim beyond FACT-MEAS-0002 about what a stable reading proves or disproves.
+- The airlock is not proof.
+- No "room temperature is not beer temperature" and no "active fermentation warms the beer" (not verified; M5).
+- No universal reference/calibration temperature, fermentation temperature or correction factor. No ABV, attenuation, efficiency, Plato or
+  Brix formulas or numbers.
+- Volume: teach "record the volume into the fermenter in your brew log/notes". **Never** say the App's volume field (`actuals.volumeL`) stores
+  that volume. The App's Bryggedag panel stores post-boil volume there.
+- Plan vs actual is evidence to look at, never a grade, score, pass/fail, diagnosis or blame.
+- Never overwrite a raw reading. A correction is recorded separately.
+- No hypothesis/next-change teaching (Kompetent).
+
+### Placement
+
+Insert after Pakking and before Smak og evaluering in both environments: … → 8 Pakking → **9 Måling og bryggelogg** → 10 Smak og evaluering
+(the grid grows from 9 to 10 cards; Oppskriftsforståelse later goes between Måling and Smak). EN card title: "Measurement and brew
+log". The Hjemmebrygger/Bryggeri chooser stays a presentation axis only. There is one shared lesson set, no per-environment content.
+
+### NO/EN
+
+Every chunk, prompt, option and feedback text exists in `no` and `en` with identical keys and structure. Terminology follows contract §8: *tetthet*,
+*hydrometer*, *OG/FG*, *målt* / *measured*, *planlagt* / *faktisk*; keep measurement, target and interpretation as distinct words.
+
+## Tests
+
+- `tests/test_pilot_measurement.py` (new), mirroring `tests/test_pilot_package.py` / the #472 sensory tests:
+  - exactly the 5 chunk ids and 6 question ids, in order
+  - all questions `beginner`
+  - exact basis, concepts and `source_claims` per the tables above
+  - every fact claim verified
+  - methodology rules: allow-list, empty claims
+  - NO/EN key symmetry
+  - wording-trap guards: no digits for hours/days; no `volumeL`/"into the fermenter" mapping to the App field; no room-vs-beer statement; no
+    ABV/Plato/Brix formula; no `log.observation_vs_interpretation`
+- `tests/test_course_fact_registry.py`: still exactly FACT-MEAS-0001..0005, and claims/status unchanged. Only the `modules` assertion is updated.
+- `tests/test_ui_bryggeskole_panel.py`:
+  - grid order with Måling at position 9, after Pakking and before Smak og evaluering (now position 10), in both environments
+  - lesson renders NO/EN
+  - methodology caption shown only on methodology items
+- Mastery tests: answers are recorded under the concept ids above. `sensory.observation_vs_interpretation` is shared with Smak, not duplicated.
+  Isolated state via `KVERNHAUG_BRYGGESKOLE_STATE_DIR`.
+- `tests/playwright_streamlit/module-grid-responsive.spec.js`: card count updated from 9 to 10 cards and `MODUL_TEKST` (NO/EN) gets Måling at position 9, before Smak. The layout assertions stay
+  as they are. Chromium + Firefox, desktop + mobile.
+- Answer-order tests if the module uses `answer_order.py`.
+- `git diff --check`.
+
+## Owner QA (owner PC)
+
+- NO and EN, both environment choices, desktop and narrow/mobile widths.
+- Walk the contract §16 scenario, steps 1–6, as amended in §21.
+- Check:
+  - no unverified claim shown
+  - no numbers or formulas
+  - no claim about which volume the App stores
+  - methodology captions present
+  - mastery recorded
+- Chief acceptance follows owner QA.
+
+## Non-goals
+
+- No Kompetent content: instrument choice, instrument checks, volume stages, raw-vs-correction depth, mash temperature, hypothesis/next change.
+- No Brew History schema, `.kbhbrew` or Core change. No `actuals.volumeL` decision (G-1 stays open). No new Brew History fields.
+- No Learn→Reflect bridge and no gravity-over-time visual (later slices).
+- No calculator duplication. No App calculator, Web, `web/en/**` or Sóti change.
+- No new Course Fact and no claim/status/source change.
+- No #471 work.
+- No scoring, badges, gating, grading or AI-generated interpretation.
+~~~
+
 ## Explicitly not done in this document
 
 Course Fact Registry unchanged; no source opened or promoted in this run; no module, question, UI, bridge or visual implemented; no Core/schema
 change; no gate in §15 decided; no Web/public or Sóti change; no deploy.
+
+v1.1 (2026-10-03, Chief review closure): records the decisions in §21 and the issue draft in §22. The only registry change is spot-check
+metadata on FACT-MEAS-0001..0003 source entries and notes (§21.7). No claim, classification, status or `verified_at` changed. Still no module,
+UI, Core/schema, Web or Sóti change, no gate decided, and no deploy. No GitHub issue was created.
