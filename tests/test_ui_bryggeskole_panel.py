@@ -1765,6 +1765,21 @@ class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
         override_block = self.kildekode[override_idx:override_idx + 400]
         self.assertIn("!important", override_block)
 
+    def test_streamlit_165_wrapper_arver_temafarge(self):
+        # Issue #482: Streamlit 1.65 demper en ny wrapper-div med
+        # data-disabled="true" mellom stRadioGroup og labelene. Regelen må
+        # være skopet til .st-key-bs_svaralternativ, bruke color: inherit
+        # med !important og ingen egen fargeverdi. Ekte-nettleser-målingen
+        # (>= 4.5:1, lyst og mørkt) ligger i
+        # tests/playwright_streamlit/quiz-answer-contrast.spec.js.
+        selektor = '.st-key-bs_svaralternativ [data-testid="stRadioGroup"] [data-disabled="true"] {'
+        self.assertIn(selektor, self.kildekode)
+        idx = self.kildekode.index(selektor)
+        blokk = self.kildekode[idx:self.kildekode.index("}", idx) + 1]
+        self.assertIn("color: inherit !important;", blokk)
+        self.assertNotIn("rgba(", blokk)
+        self.assertNotIn("rgb(", blokk)
+
     def test_for_svar_typografi_css_uendret_av_kontrast_fiksen(self):
         # Selve FØR-svar-stylingen fra TestQuizTypografiIssue401 skal
         # fortsatt være der, uendret -- denne fiksen legger KUN til en ny
