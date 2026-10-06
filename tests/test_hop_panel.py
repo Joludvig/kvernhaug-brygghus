@@ -19,6 +19,8 @@ logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 from streamlit.testing.v1 import AppTest
 
+from tests.apptest_session_state import apptest_session_state_keys
+
 from modules.i18n import t as _t
 from bryggeskole.pilot_boil_hop import PilotContentError, read_pilot_file, render_chunk
 
@@ -179,7 +181,7 @@ class TestEksisterendeHumleradAtferdUendret(unittest.TestCase):
     def test_ingen_ny_planleggings_session_state_nokkel_introduseres(self):
         at = _ny_at()
         nye_bs_nokler = {
-            k for k in at.session_state
+            k for k in apptest_session_state_keys(at)
             if isinstance(k, str) and k.startswith(("koking_", "laer_bro_", "bo_", "bs_"))
         }
         self.assertEqual(nye_bs_nokler, set())

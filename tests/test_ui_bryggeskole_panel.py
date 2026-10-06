@@ -52,7 +52,14 @@ import unittest
 logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 from streamlit.testing.v1 import AppTest
-from streamlit.testing.v1.errors import AppTestError
+
+try:
+    # Offentlig eksport fra Streamlit 1.63 (sammen med AppTests vakt mot klikk
+    # på disabled widgets). requirements.txt tillater >=1.59, der verken
+    # klassen eller vakten finnes; se test_disabled_knapp_... nedenfor.
+    from streamlit.testing.v1 import AppTestError
+except ImportError:
+    AppTestError = None
 
 from bryggeskole.mastery import apply_answer
 from bryggeskole.mastery_store import (
@@ -533,8 +540,17 @@ class TestFerskSporsmalIngenForhandsvalgOgSubmitVakt(_MedIsolertTilstand):
     def test_disabled_knapp_kan_ikke_klikkes_av_en_lasersimulert_bruker(self):
         at = self._ny_apptest()
         self._apne_modul_og_start_sporsmal(at, "mesking")
-        with self.assertRaises(AppTestError):
-            _knapp(at, f"bs_svar_btn_{self._aktiv_modul}_r1_q0").click().run()
+        knapp = _knapp(at, f"bs_svar_btn_{self._aktiv_modul}_r1_q0")
+        self.assertTrue(knapp.disabled, "«Sjekk svar» skal være disabled uten valgt svar.")
+        if AppTestError is not None:
+            # Streamlit >= 1.63: AppTest avviser klikk en nettleserbruker ikke kan gjøre.
+            with self.assertRaises(AppTestError):
+                knapp.click().run()
+        else:
+            # Streamlit < 1.63 håndhever ikke disabled i AppTest: klikket tvinges
+            # gjennom, og da må server-vakten i _sjekk_svar() alene holde mastery tom.
+            knapp.click().run()
+            self.assertFalse(at.exception, "Et tvunget klikk uten valg skal stoppes av vakten, ikke krasje.")
         tilstand = read_mastery_state()
         self.assertEqual(tilstand["concepts"], {}, "Et forsøk på å svare uten valg skal ikke nå frem til mastery i det hele tatt.")
 
@@ -1610,8 +1626,9 @@ class TestPakkingNavnKonsistensIssue403(_MedIsolertTilstand):
 # hver knapp til å fylle HELE sin halv-brede kolonne -- på normal desktop
 # ble "← Forrige"/"Neste →"/"➡️ Fortsett" enorme, dominerende knapper.
 
-class TestNavigasjonsknapperErKompakteIssue398(unittest.TestCase):
+class TestNavigasjonsknapperErKompakteIssue398(_MedIsolertTilstand):
     def setUp(self):
+        super().setUp()
         import ui.bryggeskole_panel as panel_module
         with open(panel_module.__file__, encoding="utf-8") as fh:
             self.kildekode = fh.read()
@@ -1719,7 +1736,7 @@ class TestNavKnappekolonnerFolgerKnappenIssue398(unittest.TestCase):
 
 # ─── #401: quiz-typografi ───────────────────────────────────────────────────
 
-class TestQuizTypografiIssue401(unittest.TestCase):
+class TestQuizTypografiIssue401(_MedIsolertTilstand):
     def test_svaralternativ_wrapper_og_css_finnes(self):
         import ui.bryggeskole_panel as panel_module
         with open(panel_module.__file__, encoding="utf-8") as fh:
@@ -1761,7 +1778,10 @@ class TestQuizTypografiIssue401(unittest.TestCase):
 # `[data-testid="stRadioOption"]`). AppTest gjengir ikke ekte CSS/DOM, så
 # selve kontrastverdien kan kun verifiseres på kildenivå her (samme mønster
 # som TestNavigasjonsknapperErKompakteIssue398 bruker for width=) --
-# ekte-nettleser-bekreftelsen er den manuelle Playwright-sjekken i PR-en.
+# ekte-nettleser-bekreftelsen er tests/playwright_streamlit/
+# quiz-answer-contrast.spec.js (computed farge + bakgrunn, >= 4.5:1).
+# Kildetestene alene ga falsk trygghet: de var grønne mens ekte Chromium
+# på en annen Streamlit-versjon fortsatt viste 0.4-alfa.
 # Det AppTest KAN verifisere er selve låse-atferden (radioen er fortsatt
 # disabled etter svar), som denne klassen også dekker for å bevise at
 # kontrast-fiksen ikke svekket selve låsingen.
@@ -1776,8 +1796,9 @@ class TestQuizTypografiIssue401(unittest.TestCase):
 # løsningen er derfor `color: inherit`, ingen egen fargeverdi og ingen
 # @media-gren i det hele tatt.
 
-class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
+class TestSvaralternativKontrastEtterSvarIssue401(_MedIsolertTilstand):
     def setUp(self):
+        super().setUp()
         import ui.bryggeskole_panel as panel_module
         with open(panel_module.__file__, encoding="utf-8") as fh:
             self.kildekode = fh.read()
@@ -1833,6 +1854,22 @@ class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
         style_end = self.kildekode.index("</style>")
         css_blokk = self.kildekode[style_start:style_end]
         self.assertNotIn("prefers-color-scheme", css_blokk)
+
+    def test_disabled_kontrast_dekker_ogsaa_baseweb_radio_dom(self):
+        # Offline-oppfølging: `stRadioOption`/`data-disabled` finnes kun i
+        # nyere Streamlits radio-DOM. Eldre Streamlit (1.57) rendrer
+        # `label[data-baseweb="radio"]` uten dem, og den første regelen
+        # traff ingenting der. Det native disabled-inputet er felles for
+        # begge -- egen regel, samme inherit/!important, samme skop.
+        # NB: dette er kun kildekontrakten; selve kontrasten bevises i
+        # ekte nettleser av tests/playwright_streamlit/
+        # quiz-answer-contrast.spec.js.
+        regel = (
+            '.st-key-bs_svaralternativ [role="radiogroup"] label:has(input:disabled) > div {\n'
+            "            color: inherit !important;\n"
+            "        }"
+        )
+        self.assertIn(regel, self.kildekode)
 
     def test_far_svar_css_bruker_important_for_a_slaa_ut_baseweb(self):
         # Uten !important taper vår regel mot BaseWebs egen
@@ -1910,8 +1947,9 @@ class TestSvaralternativKontrastEtterSvarIssue401(unittest.TestCase):
 # vises, knappenes virkemåte, eller anbefalt-neste-signalet -- ren
 # layout-refaktorering, ingen navigasjons-/mastery-endring.
 
-class TestSkoleoversiktGridResponsivIssue394(unittest.TestCase):
+class TestSkoleoversiktGridResponsivIssue394(_MedIsolertTilstand):
     def setUp(self):
+        super().setUp()
         import ui.bryggeskole_panel as panel_module
         with open(panel_module.__file__, encoding="utf-8") as fh:
             self.kildekode = fh.read()

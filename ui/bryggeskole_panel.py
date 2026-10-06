@@ -605,6 +605,20 @@ def _injiser_bryggeskole_css():
     `@media (prefers-color-scheme: dark)`-grenen og alle hardkodede
     rgba(...)-verdier, som ikke lenger trengs.
 
+    Issue #401 (offline-oppfølging): regelen over treffer KUN radio-DOM-en
+    til nyere Streamlit (React Aria: `stRadioOption` + `data-disabled`).
+    Eldre Streamlit (verifisert på 1.57) rendrer BaseWebs
+    `label[data-baseweb="radio"]` uten testid og uten `data-disabled` --
+    der traff ingenting, og ekte Chromium viste fortsatt
+    `rgba(49, 51, 63, 0.4)` (~2.2:1) mens kildetestene var grønne.
+    Signalet begge DOM-ene deler er det native `<input type="radio"
+    disabled>` inni labelen, så en andre regel bruker
+    `label:has(input:disabled) > div` -- samme `color: inherit`, samme
+    skop. Den dempede diven er labelens direkte barn i begge versjoner.
+    To separate regler (ikke én selektorliste) så en nettleser uten
+    `:has()` fortsatt beholder den første. Ekte nettleserbevis:
+    tests/playwright_streamlit/quiz-answer-contrast.spec.js.
+
     Issue #482 (Streamlit 1.65): 1.65 legger inn en NY wrapper-div med
     `data-disabled="true"` mellom `stRadioGroup` og `stRadioOption`-
     labelene, og den dempede fargen sitter nå på DEN. Labelen og `> div`-
@@ -668,6 +682,9 @@ def _injiser_bryggeskole_css():
             line-height: 1.6;
         }
         .st-key-bs_svaralternativ [data-testid="stRadioOption"][data-disabled="true"] > div {
+            color: inherit !important;
+        }
+        .st-key-bs_svaralternativ [role="radiogroup"] label:has(input:disabled) > div {
             color: inherit !important;
         }
         .st-key-bs_svaralternativ [data-testid="stRadioGroup"] [data-disabled="true"] {

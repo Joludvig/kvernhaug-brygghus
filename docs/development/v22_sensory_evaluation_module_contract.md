@@ -110,7 +110,9 @@ Verified registry records on origin/master `d291cdd` (39 records). Reuse is limi
 **Do not duplicate** the DMS process truth or the oxidation process truth. A sensory chunk links to FACT-BOIL-0002 and FACT-OXY-0002; it does not
 restate their mechanisms in a new record.
 
-**Planned, not yet in the registry (dependencies, not reuse today):** #435 M2 (stable gravity), and #436 R-2 / R-4 (perceived bitterness and balance).
+**Planned at contract time, now landed (status refreshed 2026-10-04):** #435 M2 (stable gravity) is FACT-MEAS-0002 (#444/#453), and #436 R-2 / R-4
+(perceived bitterness and balance) are FACT-RECIPE-0001 (#441/#450) and FACT-RECIPE-0003 (#443/#452). All are `verified`; reuse stays within
+each record's own notes and wording traps.
 
 **No registry record exists** for sensory basics, diacetyl, acetaldehyde, light-struck, sourness or spoilage, or typical descriptors.
 

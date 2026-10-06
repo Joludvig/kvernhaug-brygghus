@@ -20,6 +20,8 @@ logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 from streamlit.testing.v1 import AppTest
 
+from tests.apptest_session_state import apptest_session_state_keys
+
 import modules.kbhbrew_storage as kbhbrew_storage
 from modules.i18n import t as _t
 
@@ -127,10 +129,10 @@ class TestKbhbrewHistoryEvaluateBridge(unittest.TestCase):
 
     def test_6_broen_introduserer_ingen_nytt_session_state_utover_expander_flagget(self):
         at = self._ny_apptest(seed_count=1)
-        nokler_for = set(at.session_state)
+        nokler_for = apptest_session_state_keys(at)
         _finn_laer_bro(at)
         at.run()
-        nokler_etter = set(at.session_state)
+        nokler_etter = apptest_session_state_keys(at)
         nye = nokler_etter - nokler_for
         self.assertEqual(nye, set(), f"Broen skal ikke legge til nye session_state-nøkler ved rerendring: {nye}")
 
