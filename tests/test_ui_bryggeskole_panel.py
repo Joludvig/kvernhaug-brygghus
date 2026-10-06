@@ -70,6 +70,7 @@ from bryggeskole.pilot_cool_transfer import read_pilot_file as les_kjoling_pilot
 from bryggeskole.pilot_package import read_pilot_file as les_pakking_pilot
 from bryggeskole.pilot_method_context import read_pilot_file as les_metodevalg_pilot
 from bryggeskole.pilot_raw_materials import read_pilot_file as les_raavarer_pilot
+from bryggeskole.pilot_cleaning_safety import read_pilot_file as les_rengjoring_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -233,13 +234,22 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
     def test_alle_seks_stadier_er_klikkbare_ingen_kommer_senere(self):
         # Issue #380 fylte den tidligere siste ubrukte gridcellen med
         # Forberedelse/metode; issue #458 legger Råvarer foran som syvende
-        # stadium -- alle stadiene er aktive moduler, ingen "Kommer senere".
+        # stadium; issue #473 legger Rengjøring og sikkerhet inn som åttende
+        # -- alle stadiene er aktive moduler, ingen "Kommer senere".
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 7)
+        self.assertEqual(len(aktiv_badges), 8)
         self.assertEqual(len(kommer_badges), 0)
+
+    def test_rengjoring_modulen_rendrer_pilotinnhold_i_begge_miljo(self):
+        # Issue #473: ny Foundation-modul, klikkbar i begge miljøer.
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            at = self._ny_apptest()
+            self._apne_modul(at, "rengjoring", miljo_knapp)
+            tekster = " ".join(_alle_synlige_tekster(at))
+            self.assertIn("Rengjøring og sanitering er to forskjellige ting", tekster)
 
     def test_mesking_modulen_rendrer_mesking_pilotinnhold(self):
         at = self._ny_apptest()
@@ -450,10 +460,26 @@ class TestStatusMerker(_MedIsolertTilstand):
         tekster = " ".join(_alle_synlige_tekster(at))
         self.assertIn("Anbefalt neste: Råvarer", tekster)
 
+    def test_anbefalt_neste_etter_raavarer_er_rengjoring(self):
+        # Issue #473 (eierbeslutning): Rengjøring og sikkerhet kommer rett
+        # etter Råvarer i anbefalt rekkefølge (aldri en lås).
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "raavarer")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_raavarer_pilot()))
+        _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Anbefalt neste: Rengjøring og sikkerhet", tekster)
+
     def test_anbefaling_endres_etter_mesking_er_fullfort_denne_okten(self):
         at = self._ny_apptest()
         self._apne_modul_og_start_sporsmal(at, "raavarer")
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_raavarer_pilot()))
+        _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn").click().run()
+
+        _knapp(at, "bs_apne_modul_rengjoring_btn").click().run()
+        self._aktiv_modul = "rengjoring"
+        self._start_sporsmalsrunde(at)
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_rengjoring_pilot()))
         _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn").click().run()
 
         _knapp(at, "bs_apne_modul_metodevalg_btn").click().run()
@@ -1160,6 +1186,14 @@ class TestKokingModulen(_MedIsolertTilstand):
         self._start_sporsmalsrunde(at, "raavarer")
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_raavarer_pilot()), "raavarer")
         _knapp(at, "bs_oppsummering_tilbake_raavarer_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
+        # Issue #473: Rengjøring og sikkerhet kommer rett etter Råvarer.
+        self.assertIn("Anbefalt neste: Rengjøring og sikkerhet", tekster)
+
+        _knapp(at, "bs_apne_modul_rengjoring_btn").click().run()
+        self._start_sporsmalsrunde(at, "rengjoring")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_rengjoring_pilot()), "rengjoring")
+        _knapp(at, "bs_oppsummering_tilbake_rengjoring_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
         self.assertIn("Anbefalt neste: Forberedelse/metode", tekster)
 
