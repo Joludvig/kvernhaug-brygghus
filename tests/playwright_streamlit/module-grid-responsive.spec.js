@@ -16,9 +16,11 @@
 // Reproduced directly against the pre-fix source (stash-toggle) at
 // viewport width 750px -- sidebar still shown inline (Streamlit's own
 // auto-collapse breakpoint is narrower), main content squeezed to ~65-100px columns -- and confirmed fixed
-// post-fix at the same width. The grid now has nine cards (issue #458;
+// post-fix at the same width. The grid now has ten cards (issue #458;
 // issue #473 adds Rengjøring og sikkerhet right after Råvarer; issue #472
-// adds Smak og evaluering as the final, ninth card).
+// adds Smak og evaluering as the final card; Måling og bryggelogg
+// (Foundation, measurement contract §21.5) is inserted as card nine,
+// between Pakking and Smak og evaluering).
 //
 // Runs against tests/fixtures/streamlit_harness/bryggeskole_harness.py
 // (already the production render_bryggeskole_panel() call; previously
@@ -35,8 +37,8 @@ const NARROW_PORTRAIT_WIDTH = 750;
 const NARROW_PORTRAIT_HEIGHT = 900;
 
 const MODUL_TEKST = {
-  no: ['Råvarer', 'Rengjøring og sikkerhet', 'Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking', 'Smak og evaluering'],
-  en: ['Raw materials', 'Cleaning and safety', 'Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging', 'Tasting and evaluation'],
+  no: ['Råvarer', 'Rengjøring og sikkerhet', 'Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking', 'Måling og bryggelogg', 'Smak og evaluering'],
+  en: ['Raw materials', 'Cleaning and safety', 'Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging', 'Measurement and brew log', 'Tasting and evaluation'],
 };
 
 const ENV_KNAPP = {
@@ -78,11 +80,12 @@ async function gotoModuleGrid(page, lang, finalViewport) {
 // waitForSelector('[data-testid="stHorizontalBlock"]') + fixed sleep was
 // racy: it resolved within ms on the environment chooser's OWN
 // st.columns block (still mounted while the rerun runs), and the grid
-// then streams in 1-2.5s later column by column (3 -> 6 -> 9 cards, with
+// then streams in 1-2.5s later column by column (e.g. 3 -> 6 -> 9 -> 10 cards, with
 // transient mixed blocks such as [224,224,224,344,344]) -- so the
 // measurement sometimes saw a half-rendered or stale block. Ready means:
 // the block the assertions measure (the FIRST stHorizontalBlock) is the
-// grid itself, it has exactly 9 cards, every card has rendered down to
+// grid itself, it has exactly the expected card count (MODUL_TEKST,
+// currently 10), every card has rendered down to
 // its own "open module" button (the last element of each card), no
 // stale elements remain from the rerun, and the card rects are identical
 // on two consecutive animation frames (layout settled).
@@ -170,7 +173,7 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, viewport);
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(9);
+      expect(cards).toHaveLength(MODUL_TEKST.no.length);
 
       const broken = await findMidWordBreaks(page);
       expect(broken, `mid-word breaks found: ${JSON.stringify(broken)}`).toEqual([]);
@@ -190,7 +193,7 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, { width: NARROW_PORTRAIT_WIDTH, height: NARROW_PORTRAIT_HEIGHT });
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(9);
+      expect(cards).toHaveLength(MODUL_TEKST.no.length);
 
       const rows = new Set(cards.map((c) => c.top));
       // The reported bug is precisely "all cards squeezed into one
@@ -215,7 +218,7 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, viewport);
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(9);
+      expect(cards).toHaveLength(MODUL_TEKST.no.length);
 
       const rows = new Set(cards.map((c) => c.top));
       // At genuinely mobile widths, one column per row is an acceptable

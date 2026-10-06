@@ -79,6 +79,7 @@ from bryggeskole.pilot_method_context import read_pilot_file as les_metodevalg_p
 from bryggeskole.pilot_raw_materials import read_pilot_file as les_raavarer_pilot
 from bryggeskole.pilot_cleaning_safety import read_pilot_file as les_rengjoring_pilot
 from bryggeskole.pilot_sensory import read_pilot_file as les_smak_pilot
+from bryggeskole.pilot_measurement import read_pilot_file as les_maaling_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -243,13 +244,14 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
         # Issue #380 fylte den tidligere siste ubrukte gridcellen med
         # Forberedelse/metode; issue #458 legger Råvarer foran som syvende
         # stadium; issue #473 legger Rengjøring og sikkerhet inn som åttende;
-        # issue #472 legger Smak og evaluering til som niende og siste
+        # issue #472 legger Smak og evaluering til som niende og siste;
+        # Måling og bryggelogg (Foundation) blir niende og Smak tiende
         # -- alle stadiene er aktive moduler, ingen "Kommer senere".
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 9)
+        self.assertEqual(len(aktiv_badges), 10)
         self.assertEqual(len(kommer_badges), 0)
 
     def test_rengjoring_modulen_rendrer_pilotinnhold_i_begge_miljo(self):
@@ -1255,7 +1257,16 @@ class TestKokingModulen(_MedIsolertTilstand):
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_pakking_pilot()), "pakking")
         _knapp(at, "bs_oppsummering_tilbake_pakking_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
-        # Issue #472: Smak og evaluering er siste kort, etter Pakking.
+        # Måling og bryggelogg (Foundation) kommer etter Pakking og før
+        # Smak og evaluering (målingskontrakten §21.5).
+        self.assertIn("Anbefalt neste: Måling og bryggelogg", tekster)
+
+        _knapp(at, "bs_apne_modul_maaling_btn").click().run()
+        self._start_sporsmalsrunde(at, "maaling")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_maaling_pilot()), "maaling")
+        _knapp(at, "bs_oppsummering_tilbake_maaling_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
+        # Issue #472: Smak og evaluering er siste kort.
         self.assertIn("Anbefalt neste: Smak og evaluering", tekster)
 
         _knapp(at, "bs_apne_modul_smak_btn").click().run()
@@ -1999,7 +2010,7 @@ class TestSkoleoversiktGridResponsivIssue394(_MedIsolertTilstand):
         at.run()
         _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
         for modul_id in ("raavarer", "rengjoring", "metodevalg", "mesking", "koking", "kjoling", "gjaring",
-                         "pakking", "smak"):
+                         "pakking", "maaling", "smak"):
             _knapp(at, f"bs_apne_modul_{modul_id}_btn")
 
     def test_anbefalt_neste_og_modulapning_uendret_etter_grid_refaktorering(self):
@@ -2066,6 +2077,84 @@ class TestSmakOgEvalueringModulenIssue472(_MedIsolertTilstand):
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_smak_pilot()))
         self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
         _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn")
+
+
+# ─── Måling og bryggelogg (Foundation, målingskontrakten §21.2/§22):
+# posisjon 9 før Smak og evaluering, fem bolker, seks spørsmål, scoped
+# basis med metode-merking, delt observasjon/tolkning-konsept ───────────
+
+class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
+    _ETIKETT_NO = "Metode, ikke en faktapåstand"
+
+    def _bolk_teller(self, at):
+        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+
+    def test_maaling_er_niende_kort_for_smak_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            at = self._ny_apptest()
+            self._velg_miljo(at, miljo_knapp)
+            kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
+            self.assertEqual(len(kort), 10, kort)
+            self.assertEqual(kort[7], "**Pakking**" if miljo_knapp.endswith("hjemmebrygger_btn") else "**Pakking/CIP**")
+            self.assertEqual(kort[8], "**Måling og bryggelogg**", kort)
+            self.assertEqual(kort[9], "**Smak og evaluering**", kort)
+            _knapp(at, "bs_apne_modul_maaling_btn")
+
+    def test_engelsk_korttittel(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._velg_miljo(at)
+        kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
+        self.assertEqual(kort[8:], ["**Measurement and brew log**", "**Tasting and evaluation**"])
+
+    def test_leksjonen_rendrer_norsk_og_engelsk(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "maaling")
+        self.assertIn("Mål først, gjett etterpå", " ".join(_alle_synlige_tekster(at)))
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "maaling")
+        self.assertIn("Measure first, guess later", " ".join(_alle_synlige_tekster(at)))
+
+    def test_alle_fem_bolker_og_metode_merking_kun_pa_metodebolker(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "maaling")
+        pilot = les_maaling_pilot()
+        for idx, chunk in enumerate(pilot["chunks"]):
+            self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 5"])
+            har_etikett = self._ETIKETT_NO in [c.value for c in at.caption]
+            self.assertEqual(har_etikett, chunk["basis"] == "methodology", chunk["id"])
+            if idx < len(pilot["chunks"]) - 1:
+                _knapp(at, "bs_bolk_neste_maaling_btn").click().run()
+                self.assertEqual(len(at.exception), 0)
+        _knapp(at, "bs_start_sporsmal_maaling_btn")
+
+    def test_ferskt_sporsmal_har_ikke_forhandsvalgt_svar(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "maaling")
+        self.assertIsNone(at.radio(key=self._valg_key(0, 1)).value)
+        self.assertTrue(_knapp(at, "bs_svar_btn_maaling_r1_q0").disabled)
+
+    def test_full_flyt_alt_riktig_og_mastery_pa_kontraktens_konsepter(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "maaling")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_maaling_pilot()))
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        _knapp(at, "bs_oppsummering_tilbake_maaling_btn")
+        konsepter = set(read_mastery_state()["concepts"])
+        self.assertEqual(konsepter, {
+            "measurement.gravity", "measurement.fermentation_complete", "log.planned_vs_actual",
+            "measurement.temperature", "measurement.hydrometer_temperature",
+            "sensory.observation_vs_interpretation",
+        })
+        self.assertNotIn("log.observation_vs_interpretation", konsepter)
+
+    def test_observasjon_og_tolkning_er_delt_med_smak(self):
+        maaling = {c for q in les_maaling_pilot()["questions"] for c in q["concepts"]}
+        smak = {c for q in les_smak_pilot()["questions"] for c in q["concepts"]}
+        self.assertEqual(maaling & smak, {"sensory.observation_vs_interpretation"})
 
 
 # ─── Råvarer-modulen (issue #458, V2.2 G3P slice 5): én kombinert
