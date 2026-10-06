@@ -6,8 +6,8 @@
       "id": "CHUNK-SAFE-A",
       "source_claims": ["FACT-SAFE-0001"],
       "text": {
-        "no": "**Rengjøring og sanitering er to forskjellige ting.** Rengjøring fjerner skitt og rester fra en flate. Sanitering kommer etterpå: i hjemmebrygging bruker vi ordet *sanitering* om å redusere mengden mikroorganismer på en flate som allerede er ren, ned til et lavt nivå. Det er ikke det samme som sterilisering – sanitering gjør ingenting sterilt, og den erstatter ikke rengjøring.",
-        "en": "**Cleaning and sanitizing are two different things.** Cleaning removes dirt and residue from a surface. Sanitizing comes after that: in homebrewing, *sanitizing* means reducing the number of microorganisms on a surface that is already clean, down to a low level. It is not the same as sterilizing – sanitizing makes nothing sterile, and it does not replace cleaning."
+        "no": "**Rengjøring og sanitering er to forskjellige ting.** Rengjøring fjerner skitt og rester fra en flate. Sanitering kommer etterpå: i brygging bruker vi ordet *sanitering* om å redusere mengden mikroorganismer på en flate som allerede er ren, ned til et lavt nivå. Det er ikke det samme som sterilisering – sanitering gjør ingenting sterilt, og den erstatter ikke rengjøring.",
+        "en": "**Cleaning and sanitizing are two different things.** Cleaning removes dirt and residue from a surface. Sanitizing comes after that: in brewing, *sanitizing* means reducing the number of microorganisms on a surface that is already clean, down to a low level. It is not the same as sterilizing – sanitizing makes nothing sterile, and it does not replace cleaning."
       }
     },
     {
@@ -22,8 +22,8 @@
       "id": "CHUNK-SAFE-C",
       "source_claims": ["FACT-COOL-0003", "FACT-COOL-0001"],
       "text": {
-        "no": "**Hvor sanitering begynner å bety noe.** Kokingen beskytter vørteren med varme bare mens den faktisk er ved eller nær kokepunktet. Så snart nedkjølingen starter, er den beskyttelsen borte. Fra da av må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og ethvert verktøy du bruker videre. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikroorganismer kan vokse – men kokingen gjør ikke utstyret ditt trygt for resten av bryggedagen. Modulen Kjøling/overføring går nærmere inn på dette.",
-        "en": "**Where sanitizing starts to matter.** Boiling protects the wort with heat only while it is actually at or near boiling temperature. As soon as cooling begins, that protection is gone. From then on, everything that will touch the wort or beer must be clean and sanitized: the chiller, the transfer hose, the fermenter, the airlock and any tool you use from here on. Cooling quickly reduces the time the wort spends in a temperature range where unwanted microorganisms can grow – but the boil does not make your equipment safe for the rest of brew day. The Cooling/transfer module goes into this in more detail."
+        "no": "**Hvor sanitering begynner å bety noe.** Kokingen beskytter vørteren med varme bare mens den faktisk er ved eller nær kokepunktet. Så snart nedkjølingen starter, er den beskyttelsen borte. Fra da av må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og ethvert verktøy du bruker videre. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikroorganismer kan vokse – men kokingen gjør ikke utstyret ditt trygt for resten av bryggedagen. Modulen om kjøling og overføring går nærmere inn på dette.",
+        "en": "**Where sanitizing starts to matter.** Boiling protects the wort with heat only while it is actually at or near boiling temperature. As soon as cooling begins, that protection is gone. From then on, everything that will touch the wort or beer must be clean and sanitized: the chiller, the transfer hose, the fermenter, the airlock and any tool you use from here on. Cooling quickly reduces the time the wort spends in a temperature range where unwanted microorganisms can grow – but the boil does not make your equipment safe for the rest of brew day. The module on cooling and transfer goes into this in more detail."
       }
     },
     {
@@ -38,8 +38,8 @@
       "id": "CHUNK-SAFE-E",
       "source_claims": ["FACT-BOIL-0004"],
       "text": {
-        "no": "**Varm vørter og overkoking.** I de første minuttene etter at vørteren har begynt å koke kraftig, dannes det ofte skum som kan stige raskt – nok til at kjelen kan koke over hvis den er godt fylt og ingen følger med. Å skru ned varmen en kort stund, bruke et antiskummiddel eller holde et øye med kjelen i denne perioden er vanlig praksis blant hjemmebryggere for å unngå det.",
-        "en": "**Hot wort and boil-over.** In the first minutes after the wort reaches a rolling boil, a foam often forms and can rise quickly – enough for the kettle to boil over if it is fairly full and nobody is watching. Briefly reducing the heat, using an anti-foam aid or keeping an eye on the kettle during this window is common homebrewing practice to prevent it."
+        "no": "**Varm vørter og overkoking.** I de første minuttene etter at vørteren har begynt å koke kraftig, dannes det ofte skum som kan stige raskt – nok til at kjelen kan koke over hvis den er godt fylt og ingen følger med. I disse minuttene kan du skru ned varmen en kort stund for å redusere risikoen for overkoking.",
+        "en": "**Hot wort and boil-over.** In the first minutes after the wort reaches a rolling boil, a foam often forms and can rise quickly – enough for the kettle to boil over if it is fairly full and nobody is watching. During these minutes, you can briefly reduce the heat to reduce the risk of a boil-over."
       }
     },
     {
@@ -54,7 +54,7 @@
       "id": "CHUNK-SAFE-G",
       "source_claims": ["FACT-PACK-0003"],
       "text": {
-        "no": "**Trykk i flasker og fat.** Uansett om du tapper på flaske eller fat, ender ølet opp i en lukket beholder under trykk – fra konditionering på flaske eller fra tvangskarbonering på fat. En beholder, et fat eller en kobling som er skadet eller ikke beregnet for det trykket, kan føre til overtrykk, lekkasje eller svikt i beholderen eller utstyret. Bruk derfor trykkegnet utstyr og hold deg innenfor de angitte grensene.",
+        "no": "**Trykk i flasker og fat.** Uansett om du tapper på flaske eller fat, ender ølet opp i en lukket beholder under trykk – fra kondisjonering på flaske eller fra tvangskarbonering på fat. En beholder, et fat eller en kobling som er skadet eller ikke beregnet for det trykket, kan føre til overtrykk, lekkasje eller svikt i beholderen eller utstyret. Bruk derfor trykkegnet utstyr og hold deg innenfor de angitte grensene.",
         "en": "**Pressure in bottles and kegs.** Whether you bottle or keg, the beer ends up in a sealed container under pressure – from bottle conditioning or from force carbonation in a keg. A container, keg or fitting that is damaged or not rated for that pressure can lead to over-pressure, leakage or failure of the container or equipment. So use pressure-suitable equipment and stay within its rated limits."
       }
     }
@@ -382,7 +382,7 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-PACK-0003"],
       "prompt": {
-        "no": "Ølet ditt skal konditioneres på flaske eller tvangskarboneres på fat. Hva slags beholder og utstyr bør du bruke?",
+        "no": "Ølet ditt skal kondisjoneres på flaske eller tvangskarboneres på fat. Hva slags beholder og utstyr bør du bruke?",
         "en": "Your beer will be bottle conditioned or force carbonated in a keg. What kind of container and equipment should you use?"
       },
       "options": [

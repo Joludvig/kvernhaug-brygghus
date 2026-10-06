@@ -130,7 +130,11 @@ _ENV_BRYGGERI = "bryggeri"
 # button pair, plus one wide trailing spacer column that absorbs the
 # rest of the row so the pair doesn't spread across the whole width.
 # Used everywhere two related Bryggeskole nav/action buttons render side
-# by side (lesson Forrige/Neste, summary Prøv igjen/Tilbake).
+# by side (lesson Forrige/Neste, summary Prøv igjen/Tilbake). Above the
+# mobile breakpoint the ratio no longer sets the button-column WIDTH --
+# the scoped `.st-key-bs_nav_actions` rule in _injiser_bryggeskole_css()
+# sizes those columns to their button (see there); the ratio only keeps
+# the column order and the trailing spacer.
 _KNAPP_GRUPPE_KOLONNER = (1, 1, 6)
 
 _MODUL_RAAVARER = "raavarer"
@@ -282,7 +286,7 @@ _KONSEPT_LABELS = {
     "oxygen.post_pitch": {"no": "Oksygen under gjæring", "en": "Oxygen during fermentation"},
     "oxygen.timing_distinction": {"no": "Oksygen-tidspunkt", "en": "Oxygen timing"},
     "transfer.method_tradeoffs": {"no": "Overføringsmetoder", "en": "Transfer methods"},
-    "package.priming": {"no": "Flaskekonditionering", "en": "Bottle conditioning"},
+    "package.priming": {"no": "Flaskekondisjonering", "en": "Bottle conditioning"},
     "package.force_carbonation": {"no": "Tvangskarbonering", "en": "Force carbonation"},
     "package.pressure_safety": {"no": "Trykksikkerhet ved pakking", "en": "Packaging pressure safety"},
     "package.path_choice": {"no": "Valg av pakkemetode", "en": "Packaging method choice"},
@@ -632,7 +636,23 @@ def _injiser_bryggeskole_css():
     rader helt ned til én kolonne på svært smale skjermer, uten en eneste
     `@media`-brytningspunkt å vedlikeholde. Ingen global
     `.stColumn`/`.stHorizontalBlock`-endring -- selektoren er skopet
-    nøyaktig som resten av denne funksjonen."""
+    nøyaktig som resten av denne funksjonen.
+
+    Issue #398 (responsiv oppfølging, offline eier-QA): navigasjonsraden
+    (`_KNAPP_GRUPPE_KOLONNER` = (1, 1, 6)) ga hver knappekolonne
+    Streamlits egen `width`/`flex: 1 1 calc(12.5% - 1rem)` -- en ÅTTENDEDEL
+    av raden. Målt i ekte nettleser (Playwright, app.py med sidebar åpen):
+    ved 900px er raden 440px, kolonnen 44px, og knappene (min-width 0,
+    white-space normal) brytes til «← Forrige» 4 linjer, «Neste →» 3 og
+    «▶️ Start spørsmål» 7 linjer, bokstav for bokstav; ved 1280px 2
+    linjer. Ikke knappen, men kolonnebredden var feilen. Regelen under
+    lar knappekolonnene i `.st-key-bs_nav_actions` følge sin egen knapp
+    (`flex: 0 1 auto` + `width: auto` -- BEGGE trengs, siden
+    `flex-basis: auto` ellers faller tilbake til Streamlits prosent-
+    `width`), uten noen pikselverdi. Streamlits mobilregel
+    (`@media (max-width: 640px)` → `min-width: calc(100% - 1.5rem)`) røres
+    ikke, så mobilens stablede oppsett er uendret. Dekket av
+    tests/playwright_streamlit/nav-buttons-responsive.spec.js."""
     st.markdown(
         """
         <style>
@@ -656,6 +676,10 @@ def _injiser_bryggeskole_css():
         .st-key-bs_skoleoversikt_grid [data-testid="stColumn"] {
             flex: 1 1 220px !important;
             min-width: 220px !important;
+        }
+        .st-key-bs_nav_actions [data-testid="stColumn"] {
+            flex: 0 1 auto !important;
+            width: auto !important;
         }
         </style>
         """,
@@ -831,7 +855,10 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
     # side-by-side buttons, not spread across the whole width". Below the
     # narrow/mobile breakpoint Streamlit stacks all three columns
     # full-width regardless of ratio, so this is a no-op there (the third
-    # column just renders as empty, harmless whitespace).
+    # column just renders as empty, harmless whitespace). Above it, the
+    # scoped `.st-key-bs_nav_actions` CSS sizes each button column to its
+    # button, so a narrow row (sidebar open) can no longer squeeze the
+    # labels into letter-stacked columns -- see _injiser_bryggeskole_css().
     with st.container(key="bs_nav_actions"):
         col1, col2, _spacer = st.columns(_KNAPP_GRUPPE_KOLONNER)
         with col1:

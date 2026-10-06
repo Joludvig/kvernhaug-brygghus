@@ -67,12 +67,46 @@ async function gotoModuleGrid(page, lang, finalViewport) {
     await page.waitForTimeout(400);
   }
   await page.getByRole('button', { name: ENV_KNAPP[lang] }).first().click();
-  await page.waitForSelector('[data-testid="stHorizontalBlock"]');
-  await page.waitForTimeout(300);
+  await waitForModuleGridReady(page);
   if (needsResize) {
     await page.setViewportSize(finalViewport);
-    await page.waitForTimeout(300);
+    await waitForModuleGridReady(page);
   }
+}
+
+// Deterministic readiness gate before any measurement. A bare
+// waitForSelector('[data-testid="stHorizontalBlock"]') + fixed sleep was
+// racy: it resolved within ms on the environment chooser's OWN
+// st.columns block (still mounted while the rerun runs), and the grid
+// then streams in 1-2.5s later column by column (3 -> 6 -> 9 cards, with
+// transient mixed blocks such as [224,224,224,344,344]) -- so the
+// measurement sometimes saw a half-rendered or stale block. Ready means:
+// the block the assertions measure (the FIRST stHorizontalBlock) is the
+// grid itself, it has exactly 9 cards, every card has rendered down to
+// its own "open module" button (the last element of each card), no
+// stale elements remain from the rerun, and the card rects are identical
+// on two consecutive animation frames (layout settled).
+async function waitForModuleGridReady(page) {
+  await page.evaluate(() => { window.__gridSignatur = null; });
+  await page.waitForFunction((antallKort) => {
+    const blokk = document.querySelector('[data-testid="stHorizontalBlock"]');
+    if (!blokk || !blokk.closest('.st-key-bs_skoleoversikt_grid')) return false;
+    if (document.querySelector('[data-stale="true"]')) return false;
+    const cols = [...blokk.querySelectorAll(':scope > [data-testid="stColumn"]')];
+    if (cols.length !== antallKort) return false;
+    const ferdige = cols.every((c) => {
+      const knapp = c.querySelector('[class*="st-key-bs_apne_modul_"] button');
+      return knapp && knapp.getBoundingClientRect().width > 0;
+    });
+    if (!ferdige) return false;
+    const signatur = cols.map((c) => {
+      const r = c.getBoundingClientRect();
+      return `${Math.round(r.top)},${Math.round(r.left)},${Math.round(r.width)},${Math.round(r.height)}`;
+    }).join('|');
+    const stabil = signatur === window.__gridSignatur;
+    window.__gridSignatur = signatur;
+    return stabil;
+  }, MODUL_TEKST.no.length, { polling: 'raf', timeout: 20_000 });
 }
 
 // Genuine layout measurement: bounding rect of each stColumn card, to
