@@ -18,27 +18,14 @@
 // collide and each spec file only ever talks to the harness it needs.
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const { defineConfig, devices } = require('@playwright/test');
+const { resolveStreamlitPythonCommand } = require('./tests/playwright_streamlit/streamlit_runtime');
 
 const PORT = 8525;
 
-// Same Python-executable resolution as playwright.config.js / issue #211.
-function resolveServerPythonCommand() {
-  if (process.platform === 'win32') {
-    const venvPython = path.join('.venv', 'Scripts', 'python.exe');
-    if (fs.existsSync(venvPython)) {
-      return venvPython;
-    }
-    return 'py -3';
-  }
-  const venvPython = path.join('.venv', 'bin', 'python3');
-  if (fs.existsSync(venvPython)) {
-    return venvPython;
-  }
-  return 'python3';
-}
+// Same validated resolver as playwright.streamlit.config.js -- no silent
+// `py -3` fallback (see streamlit_runtime.js).
+const STREAMLIT_PYTHON = resolveStreamlitPythonCommand();
 
 module.exports = defineConfig({
   testDir: './tests/playwright_streamlit',
@@ -58,7 +45,7 @@ module.exports = defineConfig({
   },
   webServer: {
     command:
-      `${resolveServerPythonCommand()} -m streamlit run tests/fixtures/streamlit_harness/bryggeskole_harness.py ` +
+      `${STREAMLIT_PYTHON} -m streamlit run tests/fixtures/streamlit_harness/bryggeskole_harness.py ` +
       `--server.headless true --server.port ${PORT} --server.address 127.0.0.1 ` +
       '--browser.gatherUsageStats false',
     url: `http://127.0.0.1:${PORT}/`,

@@ -17,7 +17,7 @@
 // with KVERNHAUG_BRYGGESKOLE_STATE_DIR pointed at a fresh temp dir --
 // never the real data/bryggeskole_mastery_state.json.
 //
-// KBH_STREAMLIT_PYTHON optionally overrides the Python interpreter, so the
+// KBH_STREAMLIT_PYTHON (via the shared resolver) optionally overrides the Python interpreter, so the
 // same spec can be run against a different installed Streamlit version
 // (the #401 regression was Streamlit-version-dependent DOM).
 'use strict';
@@ -26,27 +26,15 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { defineConfig, devices } = require('@playwright/test');
+const { resolveStreamlitPythonCommand } = require('./tests/playwright_streamlit/streamlit_runtime');
 
 const PORT = 8527;
 
-// Same Python-executable resolution as playwright.config.js / issue #211.
-function resolveServerPythonCommand() {
-  if (process.env.KBH_STREAMLIT_PYTHON) {
-    return `"${process.env.KBH_STREAMLIT_PYTHON}"`;
-  }
-  if (process.platform === 'win32') {
-    const venvPython = path.join('.venv', 'Scripts', 'python.exe');
-    if (fs.existsSync(venvPython)) {
-      return venvPython;
-    }
-    return 'py -3';
-  }
-  const venvPython = path.join('.venv', 'bin', 'python3');
-  if (fs.existsSync(venvPython)) {
-    return venvPython;
-  }
-  return 'python3';
-}
+// Same validated resolver as playwright.streamlit.config.js and
+// playwright.bryggeskole-grid.config.js -- KBH_STREAMLIT_PYTHON -> repo .venv ->
+// (CI only) PATH python, checked against requirements.txt's Streamlit minimum;
+// never a silent `py -3` / system-Python fallback (see streamlit_runtime.js).
+const STREAMLIT_PYTHON = resolveStreamlitPythonCommand();
 
 const STATE_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'kbh-quiz-contrast-state-'));
 
@@ -66,7 +54,7 @@ module.exports = defineConfig({
   },
   webServer: {
     command:
-      `${resolveServerPythonCommand()} -m streamlit run tests/fixtures/streamlit_harness/bryggeskole_harness.py ` +
+      `${STREAMLIT_PYTHON} -m streamlit run tests/fixtures/streamlit_harness/bryggeskole_harness.py ` +
       `--server.headless true --server.port ${PORT} --server.address 127.0.0.1 ` +
       '--browser.gatherUsageStats false',
     url: `http://127.0.0.1:${PORT}/`,

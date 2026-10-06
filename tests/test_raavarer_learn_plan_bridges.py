@@ -15,6 +15,8 @@ logging.getLogger("streamlit").setLevel(logging.ERROR)
 
 from streamlit.testing.v1 import AppTest
 
+from tests.apptest_session_state import apptest_session_state_keys
+
 from bryggeskole import pilot_raw_materials as pilot
 from modules.i18n import t as _t
 
@@ -98,7 +100,7 @@ class TestRaavarerBridges(unittest.TestCase):
         for navn, (app, _ider, _nokkel) in _BRIDGES.items():
             with self.subTest(navn):
                 at = _kjor(app)
-                nye = [k for k in at.session_state if isinstance(k, str) and ("laer_bro" in k or "raavarer" in k)]
+                nye = [k for k in sorted(apptest_session_state_keys(at)) if isinstance(k, str) and ("laer_bro" in k or "raavarer" in k)]
                 self.assertEqual(nye, [])
 
     def test_ugyldig_pilotinnhold_feiler_trygt(self):

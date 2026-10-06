@@ -18,29 +18,15 @@
 // broadening that gate's documented, already-reviewed scope.
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const { defineConfig, devices } = require('@playwright/test');
+const { resolveStreamlitPythonCommand } = require('./tests/playwright_streamlit/streamlit_runtime');
 
 const PORT = 8523;
 
-// Same Python-executable resolution as playwright.config.js (issue
-// #211): prefer a project venv if one exists, else fall back to the
-// platform's canonical python3/py launcher.
-function resolveServerPythonCommand() {
-  if (process.platform === 'win32') {
-    const venvPython = path.join('.venv', 'Scripts', 'python.exe');
-    if (fs.existsSync(venvPython)) {
-      return venvPython;
-    }
-    return 'py -3';
-  }
-  const venvPython = path.join('.venv', 'bin', 'python3');
-  if (fs.existsSync(venvPython)) {
-    return venvPython;
-  }
-  return 'python3';
-}
+// KBH_STREAMLIT_PYTHON -> repo .venv -> (CI only) PATH python, validated
+// against requirements.txt's Streamlit minimum; fails fast otherwise --
+// never a silent `py -3` fallback (see streamlit_runtime.js).
+const STREAMLIT_PYTHON = resolveStreamlitPythonCommand();
 
 module.exports = defineConfig({
   testDir: './tests/playwright_streamlit',
@@ -63,7 +49,7 @@ module.exports = defineConfig({
   },
   webServer: {
     command:
-      `${resolveServerPythonCommand()} -m streamlit run tests/playwright_streamlit/harness_app.py ` +
+      `${STREAMLIT_PYTHON} -m streamlit run tests/playwright_streamlit/harness_app.py ` +
       `--server.headless true --server.port ${PORT} --server.address 127.0.0.1 ` +
       '--browser.gatherUsageStats false',
     url: `http://127.0.0.1:${PORT}/`,

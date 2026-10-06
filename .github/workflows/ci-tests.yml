@@ -67,3 +67,6 @@ jobs:
 
       - name: Run Node contract tests -- .kbhbrew
         run: node tests/js/test_kbhbrew_contract.js
+
+      - name: Run Node contract tests -- Streamlit runtime guard
+        run: node tests/js/test_streamlit_runtime_guard.js
