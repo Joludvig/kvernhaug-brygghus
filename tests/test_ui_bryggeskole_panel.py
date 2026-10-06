@@ -1682,6 +1682,41 @@ class TestNavigasjonsknapperErKompakteIssue398(unittest.TestCase):
         )
 
 
+# ─── #398 (responsiv oppfølging): knappekolonner følger knappen ────────────
+#
+# Offline eier-QA: ved 641-1280px med sidebar åpen ga (1, 1, 6)-ratioen hver
+# knappekolonne en åttendedel av raden (44px ved 900px), og «Start spørsmål»
+# ble brutt bokstav for bokstav over 7 linjer. AppTest gjengir ikke ekte
+# layout, så selve geometrien bevises i
+# tests/playwright_streamlit/nav-buttons-responsive.spec.js; dette er bare
+# kildevakten for at den skopede regelen finnes og forblir pikselfri.
+
+class TestNavKnappekolonnerFolgerKnappenIssue398(unittest.TestCase):
+    def setUp(self):
+        import ui.bryggeskole_panel as panel_module
+        with open(panel_module.__file__, encoding="utf-8") as fh:
+            self.kildekode = fh.read()
+
+    def _regel(self):
+        start = self.kildekode.index('.st-key-bs_nav_actions [data-testid="stColumn"] {')
+        return self.kildekode[start:self.kildekode.index("}", start)]
+
+    def test_knappekolonnene_er_innholdsbredde_ikke_prosent(self):
+        regel = self._regel()
+        # Begge trengs: flex-basis auto faller ellers tilbake til
+        # Streamlits egen prosent-width (calc(12.5% - 1rem)).
+        self.assertIn("flex: 0 1 auto", regel)
+        self.assertIn("width: auto", regel)
+        self.assertNotIn("%", regel)
+        self.assertNotIn("px", regel)
+
+    def test_mobilens_stabling_overstyres_ikke(self):
+        # Streamlits mobilregel setter min-width: calc(100% - 1.5rem) på
+        # kolonnene -- det er den som stabler knappene på mobil, og den
+        # skal stå urørt.
+        self.assertNotIn("min-width", self._regel())
+
+
 # ─── #401: quiz-typografi ───────────────────────────────────────────────────
 
 class TestQuizTypografiIssue401(unittest.TestCase):
@@ -1905,13 +1940,16 @@ class TestSkoleoversiktGridResponsivIssue394(unittest.TestCase):
         # -- en bar ".stColumn"/"[data-testid=\"stColumn\"]"-regel uten
         # denne scopingen ville lekket til ALLE st.columns()-kall i hele
         # appen (forbudt per oppgavens "ingen global Streamlit
-        # layout-endring"-krav).
+        # layout-endring"-krav). Issue #398 (responsiv oppfølging) legger
+        # til én regel til, like strengt skopet til nav-radens egen
+        # `.st-key-bs_nav_actions`-container.
         import re
+        tillatte_scoper = (".st-key-bs_skoleoversikt_grid ", ".st-key-bs_nav_actions ")
         for m in re.finditer(r'\[data-testid="stColumn"\][^\n]*\{', self.kildekode):
             linje_start = self.kildekode.rfind("\n", 0, m.start()) + 1
             linje = self.kildekode[linje_start:m.end()]
-            self.assertIn(
-                ".st-key-bs_skoleoversikt_grid", linje,
+            self.assertTrue(
+                linje.strip().startswith(tillatte_scoper),
                 f"ikke-skopet stColumn-regel funnet: {linje!r}",
             )
 
