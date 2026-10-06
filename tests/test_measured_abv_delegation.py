@@ -87,12 +87,14 @@ class _MedLastetOppskrift(unittest.TestCase):
 
 class TestBrewLogActualAbvDelegererTilCore(_MedLastetOppskrift):
     """ui/recipe_card.py sin bryggelogg-skjema-innsending
-    ("actual_abv")."""
+    ("actual_abv"). Feltene ligger i et st.form: verdiene settes uten
+    egen run() og sendes i ÉN run() med submit-knappen (Streamlit 1.65
+    holder skjemaverdier til innsending)."""
 
     def test_gyldig_og_fg_gir_uendret_standard_abv(self):
         at = self._last_app_med_oppskrift()
-        _finn_number_input(at, "Faktisk OG").set_value(1.055).run()
-        _finn_number_input(at, "Faktisk FG (valgfritt)").set_value(1.012).run()
+        _finn_number_input(at, "Faktisk OG").set_value(1.055)
+        _finn_number_input(at, "Faktisk FG (valgfritt)").set_value(1.012)
         _finn_button(at, "Legg til loggoppføring").click().run()
         self.assertFalse(at.exception, f"app.py kastet exception ved innsending: {at.exception}")
 
@@ -105,8 +107,8 @@ class TestBrewLogActualAbvDelegererTilCore(_MedLastetOppskrift):
 
     def test_fg_storre_enn_og_lagrer_ingen_negativ_abv(self):
         at = self._last_app_med_oppskrift()
-        _finn_number_input(at, "Faktisk OG").set_value(1.010).run()
-        _finn_number_input(at, "Faktisk FG (valgfritt)").set_value(1.055).run()
+        _finn_number_input(at, "Faktisk OG").set_value(1.010)
+        _finn_number_input(at, "Faktisk FG (valgfritt)").set_value(1.055)
         _finn_button(at, "Legg til loggoppføring").click().run()
         self.assertFalse(at.exception, f"app.py kastet exception ved innsending: {at.exception}")
 
