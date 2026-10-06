@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-CLEANING-SAFETY-FUNDAMENTALS",
+  "chunks": [
+    {
+      "id": "CHUNK-SAFE-A",
+      "source_claims": ["FACT-SAFE-0001"],
+      "text": {
+        "no": "**Rengjøring og sanitering er to forskjellige ting.** Rengjøring fjerner skitt og rester fra en flate. Sanitering kommer etterpå: i hjemmebrygging bruker vi ordet *sanitering* om å redusere mengden mikroorganismer på en flate som allerede er ren, ned til et lavt nivå. Det er ikke det samme som sterilisering – sanitering gjør ingenting sterilt, og den erstatter ikke rengjøring.",
+        "en": "**Cleaning and sanitizing are two different things.** Cleaning removes dirt and residue from a surface. Sanitizing comes after that: in homebrewing, *sanitizing* means reducing the number of microorganisms on a surface that is already clean, down to a low level. It is not the same as sterilizing – sanitizing makes nothing sterile, and it does not replace cleaning."
+      }
+    },
+    {
+      "id": "CHUNK-SAFE-B",
+      "source_claims": ["FACT-SAFE-0001"],
+      "text": {
+        "no": "**Rengjør først, saniter etterpå.** Skitt og rester svekker virkningen av saniteringsmiddelet. Derfor rengjør du utstyret først, slik at flaten er ren, og saniterer det etterpå. Ser du rester i et gjæringskar, er det rengjøring som trengs først – ellers virker saniteringen dårligere.",
+        "en": "**Clean first, sanitize second.** Dirt and residue reduce a sanitizer's effect. That is why you clean your equipment first, so the surface is clean, and sanitize it afterwards. If you see residue in a fermenter, cleaning comes first – otherwise the sanitizing step works less well."
+      }
+    },
+    {
+      "id": "CHUNK-SAFE-C",
+      "source_claims": ["FACT-COOL-0003", "FACT-COOL-0001"],
+      "text": {
+        "no": "**Hvor sanitering begynner å bety noe.** Kokingen beskytter vørteren med varme bare mens den faktisk er ved eller nær kokepunktet. Så snart nedkjølingen starter, er den beskyttelsen borte. Fra da av må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og ethvert verktøy du bruker videre. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikroorganismer kan vokse – men kokingen gjør ikke utstyret ditt trygt for resten av bryggedagen. Modulen Kjøling/overføring går nærmere inn på dette.",
+        "en": "**Where sanitizing starts to matter.** Boiling protects the wort with heat only while it is actually at or near boiling temperature. As soon as cooling begins, that protection is gone. From then on, everything that will touch the wort or beer must be clean and sanitized: the chiller, the transfer hose, the fermenter, the airlock and any tool you use from here on. Cooling quickly reduces the time the wort spends in a temperature range where unwanted microorganisms can grow – but the boil does not make your equipment safe for the rest of brew day. The Cooling/transfer module goes into this in more detail."
+      }
+    },
+    {
+      "id": "CHUNK-SAFE-D",
+      "source_claims": ["FACT-SAFE-0002"],
+      "text": {
+        "no": "**Trygg håndtering av rengjørings- og saniteringsmidler.** Disse midlene kan irritere eller skade hud og øyne. Følg produktets etikett – sikkerhetsdatabladet gir detaljene. Bruk den beskyttelsen som er angitt for produktet, bruk det på et sted med god ventilasjon, oppbevar det lukket i originalemballasjen og utilgjengelig for barn, og bland ikke ulike rengjøringsprodukter med mindre etiketten sier at det er trygt.",
+        "en": "**Handling cleaners and sanitizers safely.** These products can irritate or harm skin and eyes. Follow the product label – the safety data sheet gives the detail. Use the protection specified for the product, use it in a ventilated space, keep it closed in its original container and out of children's reach, and do not mix different cleaning products unless the label says it is safe."
+      }
+    },
+    {
+      "id": "CHUNK-SAFE-E",
+      "source_claims": ["FACT-BOIL-0004"],
+      "text": {
+        "no": "**Varm vørter og overkoking.** I de første minuttene etter at vørteren har begynt å koke kraftig, dannes det ofte skum som kan stige raskt – nok til at kjelen kan koke over hvis den er godt fylt og ingen følger med. Å skru ned varmen en kort stund, bruke et antiskummiddel eller holde et øye med kjelen i denne perioden er vanlig praksis blant hjemmebryggere for å unngå det.",
+        "en": "**Hot wort and boil-over.** In the first minutes after the wort reaches a rolling boil, a foam often forms and can rise quickly – enough for the kettle to boil over if it is fairly full and nobody is watching. Briefly reducing the heat, using an anti-foam aid or keeping an eye on the kettle during this window is common homebrewing practice to prevent it."
+      }
+    },
+    {
+      "id": "CHUNK-SAFE-F",
+      "source_claims": ["FACT-SAFE-0003"],
+      "text": {
+        "no": "**CO₂ fra gjæringen.** Gjæringen produserer karbondioksid (CO₂). CO₂ er fargeløs og luktfri, så du kan verken se eller lukte den. I et lite, lukket eller dårlig ventilert rom kan den samle seg og fortrenge oksygenet. Derfor: la ølet gjære i et rom med god ventilasjon – ikke i et lite, lukket skap.",
+        "en": "**CO₂ from fermentation.** Fermentation produces carbon dioxide (CO₂). CO₂ is colourless and odourless, so you can neither see nor smell it. In a small, closed or poorly ventilated space it can build up and displace oxygen. So: ferment in a ventilated space – not in a small, closed cupboard."
+      }
+    },
+    {
+      "id": "CHUNK-SAFE-G",
+      "source_claims": ["FACT-PACK-0003"],
+      "text": {
+        "no": "**Trykk i flasker og fat.** Uansett om du tapper på flaske eller fat, ender ølet opp i en lukket beholder under trykk – fra konditionering på flaske eller fra tvangskarbonering på fat. En beholder, et fat eller en kobling som er skadet eller ikke beregnet for det trykket, kan føre til overtrykk, lekkasje eller svikt i beholderen eller utstyret. Bruk derfor trykkegnet utstyr og hold deg innenfor de angitte grensene.",
+        "en": "**Pressure in bottles and kegs.** Whether you bottle or keg, the beer ends up in a sealed container under pressure – from bottle conditioning or from force carbonation in a keg. A container, keg or fitting that is damaged or not rated for that pressure can lead to over-pressure, leakage or failure of the container or equipment. So use pressure-suitable equipment and stay within its rated limits."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-SAFE-001",
+      "type": "concept_check",
+      "concepts": ["hygiene.clean_vs_sanitize"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-SAFE-0001"],
+      "prompt": {
+        "no": "Hva gjør sanitering med en flate som allerede er rengjort?",
+        "en": "What does sanitizing do to a surface that has already been cleaned?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Den reduserer mengden mikroorganismer til et lavt nivå, men gjør ikke flaten steril.",
+            "en": "It reduces the number of microorganisms to a low level, but does not make the surface sterile."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Den gjør flaten helt steril, slik at ingen mikroorganismer er igjen.",
+            "en": "It makes the surface completely sterile, so no microorganisms are left."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Den fjerner skitt og rester, så rengjøring blir unødvendig.",
+            "en": "It removes dirt and residue, so cleaning becomes unnecessary."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Sanitering reduserer mengden mikroorganismer på en ren flate til et lavt nivå. Den gjør ingenting sterilt, og den erstatter ikke rengjøring.",
+        "en": "Correct. Sanitizing reduces the number of microorganisms on a clean surface to a low level. It makes nothing sterile, and it does not replace cleaning."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Sanitering gjør ingenting sterilt, og det er rengjøring – ikke sanitering – som fjerner skitt og rester. Sanitering reduserer mengden mikroorganismer på en flate som allerede er ren.",
+        "en": "Not quite. Sanitizing makes nothing sterile, and it is cleaning – not sanitizing – that removes dirt and residue. Sanitizing reduces the number of microorganisms on a surface that is already clean."
+      }
+    },
+    {
+      "id": "Q-SAFE-002",
+      "type": "scenario",
+      "concepts": ["hygiene.clean_first"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-SAFE-0001"],
+      "prompt": {
+        "no": "Du skal bruke et gjæringskar som har synlige rester fra forrige brygg. Hva gjør du?",
+        "en": "You are about to use a fermenter that has visible residue from the previous batch. What do you do?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Rengjør karet først slik at restene er borte, og saniterer det etterpå.",
+            "en": "Clean the fermenter first so the residue is gone, and sanitize it afterwards."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Bruker ekstra mye saniteringsmiddel, så slipper du å rengjøre.",
+            "en": "Use extra sanitizer, so you can skip the cleaning."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Saniterer først og rengjør etterpå – rekkefølgen spiller ingen rolle.",
+            "en": "Sanitize first and clean afterwards – the order does not matter."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Skitt og rester svekker virkningen av saniteringsmiddelet, så du rengjør først og saniterer etterpå.",
+        "en": "Correct. Dirt and residue reduce a sanitizer's effect, so you clean first and sanitize afterwards."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Sanitering erstatter ikke rengjøring, og rester svekker virkningen av saniteringsmiddelet. Riktig rekkefølge er å rengjøre først og sanitere etterpå.",
+        "en": "Not quite. Sanitizing does not replace cleaning, and residue reduces a sanitizer's effect. The right order is to clean first and sanitize afterwards."
+      }
+    },
+    {
+      "id": "Q-SAFE-003",
+      "type": "concept_check",
+      "concepts": ["cool.sanitation_boundary"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-COOL-0003"],
+      "prompt": {
+        "no": "Når slutter kokingen å beskytte vørteren med varme?",
+        "en": "When does the boil stop protecting the wort with heat?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Så snart nedkjølingen starter – fra da av må alt som rører vørteren være rent og sanitert.",
+            "en": "As soon as cooling begins – from then on, everything that touches the wort must be clean and sanitized."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Aldri – en god koking beskytter vørteren resten av bryggedagen.",
+            "en": "Never – a good boil protects the wort for the rest of brew day."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Først når ølet er tappet på flaske eller fat.",
+            "en": "Only once the beer has been bottled or kegged."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Kokingen beskytter med varme bare mens vørteren er ved eller nær kokepunktet. Fra nedkjølingen starter, må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert.",
+        "en": "Correct. The boil protects with heat only while the wort is at or near boiling temperature. From the moment cooling begins, everything that touches the wort or beer must be clean and sanitized."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Kokingen gjør ikke utstyret trygt for resten av bryggedagen. Varmebeskyttelsen er borte så snart nedkjølingen starter, og fra da av må alt som rører vørteren være rent og sanitert.",
+        "en": "Not quite. The boil does not make your equipment safe for the rest of brew day. The heat protection is gone as soon as cooling begins, and from then on everything that touches the wort must be clean and sanitized."
+      }
+    },
+    {
+      "id": "Q-SAFE-004",
+      "type": "scenario",
+      "concepts": ["cool.sanitation_boundary"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-COOL-0003"],
+      "prompt": {
+        "no": "Kokingen er ferdig, og du skal kjøle vørteren og overføre den til gjæringskaret. Hvilket utstyr må være rent og sanitert?",
+        "en": "The boil is finished, and you are about to cool the wort and transfer it to the fermenter. Which equipment must be clean and sanitized?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Alt som kommer i kontakt med vørteren fra nå av: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og verktøyet du bruker.",
+            "en": "Everything that touches the wort from now on: the chiller, the transfer hose, the fermenter, the airlock and the tools you use."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Bare gjæringskaret, siden resten av utstyret har vært i nærheten av den kokende vørteren.",
+            "en": "Only the fermenter, since the rest of the equipment has been near the boiling wort."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ingenting, fordi kokingen har gjort vørteren steril.",
+            "en": "Nothing, because the boil has made the wort sterile."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Når nedkjølingen starter, beskytter ikke varmen lenger. Alt som kommer i kontakt med vørteren eller ølet fra da av må være rent og sanitert.",
+        "en": "Correct. Once cooling begins, heat no longer protects the wort. Everything that touches the wort or beer from then on must be clean and sanitized."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Kokingen beskytter bare mens vørteren er ved eller nær kokepunktet, og den gjør ikke resten av utstyret trygt. Kjøleren, slangen, gjæringskaret, gjæringslåsen og verktøyet må alle være rene og sanitert.",
+        "en": "Not quite. The boil protects only while the wort is at or near boiling temperature, and it does not make the rest of your equipment safe. The chiller, the hose, the fermenter, the airlock and your tools must all be clean and sanitized."
+      }
+    },
+    {
+      "id": "Q-SAFE-005",
+      "type": "scenario",
+      "concepts": ["safety.chem_handling"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-SAFE-0002"],
+      "prompt": {
+        "no": "En venn foreslår å blande to ulike rengjøringsprodukter for å få en «sterkere» blanding. Hva gjør du?",
+        "en": "A friend suggests mixing two different cleaning products to get a \"stronger\" mix. What do you do?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Lar være å blande dem, med mindre etiketten sier at det er trygt.",
+            "en": "Do not mix them, unless the label says it is safe."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Blander dem, siden to produkter sammen alltid gjør bedre jobb.",
+            "en": "Mix them, since two products together always do a better job."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Blander dem, så lenge du gjør det utendørs.",
+            "en": "Mix them, as long as you do it outdoors."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Bland ikke ulike rengjøringsprodukter med mindre etiketten sier at det er trygt – følg alltid produktets etikett.",
+        "en": "Correct. Do not mix different cleaning products unless the label says it is safe – always follow the product label."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Den enkle regelen er å ikke blande ulike rengjøringsprodukter med mindre etiketten sier at det er trygt. Det gjelder uansett hvor du står.",
+        "en": "Not quite. The simple rule is not to mix different cleaning products unless the label says it is safe. That applies wherever you are."
+      }
+    },
+    {
+      "id": "Q-SAFE-006",
+      "type": "concept_check",
+      "concepts": ["safety.chem_handling"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-SAFE-0002"],
+      "prompt": {
+        "no": "Hvor finner du først ut hvordan et rengjørings- eller saniteringsmiddel skal håndteres trygt?",
+        "en": "Where do you first find out how to handle a cleaner or sanitizer safely?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "På produktets etikett – sikkerhetsdatabladet gir detaljene.",
+            "en": "On the product label – the safety data sheet gives the detail."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ingen steder – alle slike midler håndteres på nøyaktig samme måte.",
+            "en": "Nowhere – all such products are handled in exactly the same way."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "I oppskriften på ølet du skal brygge.",
+            "en": "In the recipe for the beer you are brewing."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Følg produktets etikett og bruk den beskyttelsen som er angitt for produktet. Sikkerhetsdatabladet gir detaljene.",
+        "en": "Correct. Follow the product label and use the protection specified for the product. The safety data sheet gives the detail."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Produktene er ulike, så det er produktets egen etikett du følger, og sikkerhetsdatabladet gir detaljene – blant annet hvilken beskyttelse du skal bruke.",
+        "en": "Not quite. Products differ, so you follow the product's own label, and the safety data sheet gives the detail – including which protection to use."
+      }
+    },
+    {
+      "id": "Q-SAFE-007",
+      "type": "scenario",
+      "concepts": ["safety.fermentation_co2"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-SAFE-0003"],
+      "prompt": {
+        "no": "Du skal sette et gjæringskar til gjæring. Hvor bør det stå?",
+        "en": "You are setting a fermenter up to ferment. Where should it stand?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "I et rom med god ventilasjon, fordi CO₂ fra gjæringen kan samle seg i små, lukkede rom og fortrenge oksygen.",
+            "en": "In a ventilated space, because CO₂ from fermentation can build up in small, closed spaces and displace oxygen."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "I et lite, lukket skap – CO₂ lukter så tydelig at du merker det i tide.",
+            "en": "In a small, closed cupboard – CO₂ smells so clearly that you will notice it in time."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Hvor som helst – gjæringen lager ingen gass.",
+            "en": "Anywhere – fermentation produces no gas."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Gjæringen produserer CO₂, som er fargeløs og luktfri. I et lite, lukket eller dårlig ventilert rom kan den samle seg og fortrenge oksygenet, så la ølet gjære et sted med god ventilasjon.",
+        "en": "Correct. Fermentation produces CO₂, which is colourless and odourless. In a small, closed or poorly ventilated space it can build up and displace oxygen, so ferment in a ventilated space."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Gjæringen produserer CO₂, og CO₂ kan verken ses eller luktes. I et lite, lukket eller dårlig ventilert rom kan den samle seg og fortrenge oksygenet – la derfor ølet gjære i et rom med god ventilasjon.",
+        "en": "Not quite. Fermentation produces CO₂, and CO₂ can be neither seen nor smelled. In a small, closed or poorly ventilated space it can build up and displace oxygen – so ferment in a ventilated space."
+      }
+    },
+    {
+      "id": "Q-SAFE-008",
+      "type": "concept_check",
+      "concepts": ["package.pressure_safety"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-PACK-0003"],
+      "prompt": {
+        "no": "Ølet ditt skal konditioneres på flaske eller tvangskarboneres på fat. Hva slags beholder og utstyr bør du bruke?",
+        "en": "Your beer will be bottle conditioned or force carbonated in a keg. What kind of container and equipment should you use?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Trykkegnet utstyr som ikke er skadet, og som brukes innenfor de angitte grensene.",
+            "en": "Pressure-suitable equipment that is not damaged, used within its rated limits."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Hvilken som helst beholder som kan lukkes tett, siden trykket ikke betyr noe.",
+            "en": "Any container that can be sealed tightly, since the pressure does not matter."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Den beholderen du har for hånden, også om den ikke er beregnet for trykk.",
+            "en": "Whatever container you have to hand, even if it is not rated for pressure."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Ølet ender opp i en lukket beholder under trykk. Bruk trykkegnet utstyr og hold deg innenfor de angitte grensene.",
+        "en": "Correct. The beer ends up in a sealed container under pressure. Use pressure-suitable equipment and stay within its rated limits."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. En lukket beholder med ølet i er under trykk. En beholder, et fat eller en kobling som er skadet eller ikke beregnet for det trykket, kan føre til overtrykk, lekkasje eller svikt.",
+        "en": "Not quite. A sealed container of beer is under pressure. A container, keg or fitting that is damaged or not rated for that pressure can lead to over-pressure, leakage or failure."
+      }
+    }
+  ]
+}

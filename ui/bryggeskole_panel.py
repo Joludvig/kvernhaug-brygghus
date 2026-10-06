@@ -26,6 +26,8 @@ engine"-arkitektur):
         / bryggeskole.pilot_package / bryggeskole.pilot_method_context
         / bryggeskole.pilot_raw_materials (issue #458: Råvarer, anbefalt
         først, aldri en lås)
+        / bryggeskole.pilot_cleaning_safety (issue #473: Rengjøring og
+        sikkerhet, anbefalt rett etter Råvarer, aldri en lås)
     bryggeskole.mastery.{apply_answer, mastery_label}
     bryggeskole.mastery_store.{read_mastery_state, write_mastery_state,
         neutral_state_document}
@@ -94,6 +96,7 @@ from bryggeskole.mastery_store import (
 from bryggeskole.method_context_flow import render_method_context_flow_svg
 from bryggeskole.package_flow import render_package_flow_svg
 from bryggeskole import pilot_boil_hop as _pilot_koking
+from bryggeskole import pilot_cleaning_safety as _pilot_rengjoring
 from bryggeskole import pilot_cool_transfer as _pilot_kjoling
 from bryggeskole import pilot_fermentation as _pilot_gjaring
 from bryggeskole import pilot_mashing as _pilot_mesking
@@ -115,6 +118,7 @@ _PILOT_CONTENT_ERRORS = (
     _pilot_pakking.PilotContentError,
     _pilot_metodevalg.PilotContentError,
     _pilot_raavarer.PilotContentError,
+    _pilot_rengjoring.PilotContentError,
 )
 
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
@@ -128,6 +132,7 @@ _ENV_BRYGGERI = "bryggeri"
 _KNAPP_GRUPPE_KOLONNER = (1, 1, 6)
 
 _MODUL_RAAVARER = "raavarer"
+_MODUL_RENGJORING = "rengjoring"
 _MODUL_METODEVALG = "metodevalg"
 _MODUL_MESKING = "mesking"
 _MODUL_KOKING = "koking"
@@ -139,10 +144,11 @@ _MODUL_PAKKING = "pakking"
 # forberedelse/metode før mesk før koking før kjøling/overføring før
 # gjæring før pakking) -- brukt både til plasseringen i prosessgridet og
 # til _anbefalt_modul()s "anbefalt neste"-signal. Kun anbefalt rekkefølge
-# (issue #458), aldri en lås: alle moduler er alltid klikkbare.
+# (issue #458), aldri en lås: alle moduler er alltid klikkbare. Issue #473
+# setter Rengjøring og sikkerhet rett etter Råvarer (eierbeslutning).
 _MODUL_REKKEFOLGE = [
-    _MODUL_RAAVARER, _MODUL_METODEVALG, _MODUL_MESKING, _MODUL_KOKING, _MODUL_KJOLING,
-    _MODUL_GJARING, _MODUL_PAKKING,
+    _MODUL_RAAVARER, _MODUL_RENGJORING, _MODUL_METODEVALG, _MODUL_MESKING, _MODUL_KOKING,
+    _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING,
 ]
 
 _MODULER = {
@@ -150,6 +156,11 @@ _MODULER = {
         "pilot": _pilot_raavarer,
         "tittel_nokkel": "bryggeskole.modul.raavarer.tittel",
         "ikon": "🌿",
+    },
+    _MODUL_RENGJORING: {
+        "pilot": _pilot_rengjoring,
+        "tittel_nokkel": "bryggeskole.modul.rengjoring.tittel",
+        "ikon": "🧼",
     },
     _MODUL_METODEVALG: {
         "pilot": _pilot_metodevalg,
@@ -194,10 +205,13 @@ _MODULER = {
 # steder uansett miljøvalg. Det første stadiet het tidligere "Maling av
 # malt"/"Mølle" og var kun orientering; issue #380 gir det navnet
 # Forberedelse/metode i BEGGE miljøer (Chief-avgjørelse i kontrakt §5) nå
-# som det peker til en ekte modul.
+# som det peker til en ekte modul. Issue #473 legger inn Rengjøring og
+# sikkerhet rett etter Råvarer, med samme navn i begge miljøer (bevisst
+# ikke "CIP" -- industriell rengjøring er utenfor Foundation-omfanget).
 _PROSESS_STADIER = {
     _ENV_HJEMMEBRYGGER: [
         {"no": "Råvarer", "en": "Raw materials"},
+        {"no": "Rengjøring og sikkerhet", "en": "Cleaning and safety"},
         {"no": "Forberedelse/metode", "en": "Preparation/method"},
         {"no": "Mesking (kjele/BIAB)", "en": "Mashing (kettle/BIAB)"},
         {"no": "Koking", "en": "Boil"},
@@ -207,6 +221,7 @@ _PROSESS_STADIER = {
     ],
     _ENV_BRYGGERI: [
         {"no": "Råvarer", "en": "Raw materials"},
+        {"no": "Rengjøring og sikkerhet", "en": "Cleaning and safety"},
         {"no": "Forberedelse/metode", "en": "Preparation/method"},
         {"no": "Mesk/lauter", "en": "Mash/lauter"},
         {"no": "Kokekar/whirlpool", "en": "Kettle/whirlpool"},
@@ -218,10 +233,11 @@ _PROSESS_STADIER = {
 
 # Samme indekser i begge miljøer -- nå alle seks stadiene er
 # aktive/klikkbare (issue #380 fyller den tidligere siste "Kommer
-# senere"-cellen, indeks 0).
+# senere"-cellen, indeks 0; issue #473 setter inn Rengjøring og sikkerhet
+# som indeks 1).
 _STADIUM_TIL_MODUL = {
-    0: _MODUL_RAAVARER, 1: _MODUL_METODEVALG, 2: _MODUL_MESKING, 3: _MODUL_KOKING,
-    4: _MODUL_KJOLING, 5: _MODUL_GJARING, 6: _MODUL_PAKKING,
+    0: _MODUL_RAAVARER, 1: _MODUL_RENGJORING, 2: _MODUL_METODEVALG, 3: _MODUL_MESKING,
+    4: _MODUL_KOKING, 5: _MODUL_KJOLING, 6: _MODUL_GJARING, 7: _MODUL_PAKKING,
 }
 
 # Menneskelesbare visningsnavn for pilotenes konsept-id-er -- aldri de
@@ -276,6 +292,10 @@ _KONSEPT_LABELS = {
     "method.all_in_one": {"no": "Alt-i-ett bryggemaskin", "en": "All-in-one brewing machine"},
     "method.planning_variables": {"no": "Metodeavhengig planlegging", "en": "Method-dependent planning"},
     "method.no_hierarchy": {"no": "Ingen metodehierarki", "en": "No method hierarchy"},
+    "hygiene.clean_vs_sanitize": {"no": "Rengjøring og sanitering", "en": "Cleaning and sanitizing"},
+    "hygiene.clean_first": {"no": "Rengjør først", "en": "Clean first"},
+    "safety.chem_handling": {"no": "Trygg håndtering av midler", "en": "Safe handling of products"},
+    "safety.fermentation_co2": {"no": "CO₂ fra gjæring", "en": "CO₂ from fermentation"},
 }
 
 _DEMO_TILSTAND_NOKKEL = "_demo_bryggeskole_mastery_tilstand"
