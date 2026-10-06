@@ -103,6 +103,7 @@ from bryggeskole import pilot_mashing as _pilot_mesking
 from bryggeskole import pilot_method_context as _pilot_metodevalg
 from bryggeskole import pilot_package as _pilot_pakking
 from bryggeskole import pilot_raw_materials as _pilot_raavarer
+from bryggeskole import pilot_sensory as _pilot_smak
 from ui.i18n import gjeldende_sprak, t
 
 # Hver pilotmodul definerer sin EGEN PilotContentError-klasse (bevisst
@@ -119,6 +120,7 @@ _PILOT_CONTENT_ERRORS = (
     _pilot_metodevalg.PilotContentError,
     _pilot_raavarer.PilotContentError,
     _pilot_rengjoring.PilotContentError,
+    _pilot_smak.PilotContentError,
 )
 
 _ENV_HJEMMEBRYGGER = "hjemmebrygger"
@@ -139,16 +141,19 @@ _MODUL_KOKING = "koking"
 _MODUL_KJOLING = "kjoling"
 _MODUL_GJARING = "gjaring"
 _MODUL_PAKKING = "pakking"
+_MODUL_SMAK = "smak"
 
 # Rekkefølgen speiler den faktiske brygge-prosessen (råvarer før
 # forberedelse/metode før mesk før koking før kjøling/overføring før
 # gjæring før pakking) -- brukt både til plasseringen i prosessgridet og
 # til _anbefalt_modul()s "anbefalt neste"-signal. Kun anbefalt rekkefølge
 # (issue #458), aldri en lås: alle moduler er alltid klikkbare. Issue #473
-# setter Rengjøring og sikkerhet rett etter Råvarer (eierbeslutning).
+# setter Rengjøring og sikkerhet rett etter Råvarer (eierbeslutning). Issue
+# #472 legger Smak og evaluering til som siste kort, etter Pakking
+# (eierbeslutning D2: evaluering er slutten på bryggesløyfen).
 _MODUL_REKKEFOLGE = [
     _MODUL_RAAVARER, _MODUL_RENGJORING, _MODUL_METODEVALG, _MODUL_MESKING, _MODUL_KOKING,
-    _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING,
+    _MODUL_KJOLING, _MODUL_GJARING, _MODUL_PAKKING, _MODUL_SMAK,
 ]
 
 _MODULER = {
@@ -192,6 +197,11 @@ _MODULER = {
         "tittel_nokkel": "bryggeskole.modul.pakking.tittel",
         "ikon": "📦",
     },
+    _MODUL_SMAK: {
+        "pilot": _pilot_smak,
+        "tittel_nokkel": "bryggeskole.modul.smak.tittel",
+        "ikon": "👃",
+    },
 }
 
 # Seks representative prosess-stadier (forberedelse/metode -> mesk ->
@@ -208,6 +218,8 @@ _MODULER = {
 # som det peker til en ekte modul. Issue #473 legger inn Rengjøring og
 # sikkerhet rett etter Råvarer, med samme navn i begge miljøer (bevisst
 # ikke "CIP" -- industriell rengjøring er utenfor Foundation-omfanget).
+# Issue #472 legger Smak og evaluering til som siste stadium, samme navn i
+# begge miljøer.
 _PROSESS_STADIER = {
     _ENV_HJEMMEBRYGGER: [
         {"no": "Råvarer", "en": "Raw materials"},
@@ -218,6 +230,7 @@ _PROSESS_STADIER = {
         {"no": "Kjøling", "en": "Cooling"},
         {"no": "Gjæring (bøtte/FermZilla)", "en": "Fermentation (bucket/FermZilla)"},
         {"no": "Pakking", "en": "Packaging"},
+        {"no": "Smak og evaluering", "en": "Tasting and evaluation"},
     ],
     _ENV_BRYGGERI: [
         {"no": "Råvarer", "en": "Raw materials"},
@@ -228,16 +241,17 @@ _PROSESS_STADIER = {
         {"no": "Varmeveksler", "en": "Heat exchanger"},
         {"no": "Konisk gjæringstank", "en": "Conical fermenter"},
         {"no": "Pakking/CIP", "en": "Packaging/CIP"},
+        {"no": "Smak og evaluering", "en": "Tasting and evaluation"},
     ],
 }
 
 # Samme indekser i begge miljøer -- nå alle seks stadiene er
 # aktive/klikkbare (issue #380 fyller den tidligere siste "Kommer
 # senere"-cellen, indeks 0; issue #473 setter inn Rengjøring og sikkerhet
-# som indeks 1).
+# som indeks 1; issue #472 legger Smak og evaluering til som indeks 8).
 _STADIUM_TIL_MODUL = {
     0: _MODUL_RAAVARER, 1: _MODUL_RENGJORING, 2: _MODUL_METODEVALG, 3: _MODUL_MESKING,
-    4: _MODUL_KOKING, 5: _MODUL_KJOLING, 6: _MODUL_GJARING, 7: _MODUL_PAKKING,
+    4: _MODUL_KOKING, 5: _MODUL_KJOLING, 6: _MODUL_GJARING, 7: _MODUL_PAKKING, 8: _MODUL_SMAK,
 }
 
 # Menneskelesbare visningsnavn for pilotenes konsept-id-er -- aldri de
@@ -296,6 +310,12 @@ _KONSEPT_LABELS = {
     "hygiene.clean_first": {"no": "Rengjør først", "en": "Clean first"},
     "safety.chem_handling": {"no": "Trygg håndtering av midler", "en": "Safe handling of products"},
     "safety.fermentation_co2": {"no": "CO₂ fra gjæring", "en": "CO₂ from fermentation"},
+    "sensory.tasting_sequence": {"no": "Smak med vilje", "en": "Tasting on purpose"},
+    "sensory.tasting_habits": {"no": "Smakevaner", "en": "Tasting habits"},
+    "sensory.observation_vs_interpretation": {"no": "Observasjon og tolkning", "en": "Observation and interpretation"},
+    "sensory.fault_vs_character": {"no": "Feil eller karakter?", "en": "Fault or character?"},
+    "sensory.evaluate_against_intent": {"no": "Vurder mot hensikten", "en": "Evaluate against intent"},
+    "sensory.expectation_note": {"no": "Forventning og sammenligning", "en": "Expectation and comparison"},
 }
 
 _DEMO_TILSTAND_NOKKEL = "_demo_bryggeskole_mastery_tilstand"
@@ -754,6 +774,10 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
     st.caption(t("bryggeskole.leksjon.bolk_teller", n=idx + 1, totalt=totalt))
     with st.container(key="bs_leksjon_tekst"):
         st.markdown(_MODULER[modul_id]["pilot"].render_chunk(chunks[idx], sprak)["text"])
+    if chunks[idx].get("basis") == "methodology":
+        # Issue #472 (D1b): liten, sekundær merking -- metode, ikke en
+        # faktapåstand. Andre piloter har ingen "basis" og påvirkes ikke.
+        st.caption(t("bryggeskole.metode_etikett"))
 
     if modul_id == _MODUL_RAAVARER:
         # Råvarer-modulens ene Malt-visual (issue #460): kvalitativ
@@ -869,6 +893,8 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
     st.caption(t("bryggeskole.steg.sporsmal", n=idx + 1, totalt=totalt))
     with st.container(key="bs_sporsmal_tekst"):
         st.markdown(rendret["prompt"])
+    if sporsmal.get("basis") == "methodology":
+        st.caption(t("bryggeskole.metode_etikett"))
 
     with st.container(key="bs_svaralternativ"):
         st.radio(

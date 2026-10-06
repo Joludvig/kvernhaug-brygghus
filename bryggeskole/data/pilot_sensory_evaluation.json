@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "topic_id": "PILOT-SENSORY-EVALUATION",
+  "chunks": [
+    {
+      "id": "CHUNK-SENS-A",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Smak med vilje.** Gå gjennom ølet i en fast rekkefølge: **se** (farge og klarhet), **lukt**, **smak** (sødme, bitterhet, syrlighet, og preg fra malt, humle og gjær), **følelse** (fylde, kullsyre, tørt eller snerpende) og **notér**. Skriv med dine egne ord først, og hold det du faktisk sanser adskilt fra hva du tror det skyldes. Fire enkle vaner hjelper: bruk et rent glass uten lukt, lukt kort tid etter skjenking, sammenlign under like forhold, og smak gjerne side om side med et annet øl eller forrige brygg. Forventninger kan påvirke det du opplever – en side-om-side-sammenligning, eller at en annen skjenker uten å si hvilket øl som er hvilket, kan redusere noe av den effekten.",
+        "en": "**Taste on purpose.** Go through the beer in a fixed order: **look** (colour and clarity), **smell**, **taste** (sweetness, bitterness, sourness, and character from malt, hops and yeast), **feel** (body, carbonation, dry or puckering) and **note**. Write in your own words first, and keep what you actually perceive separate from what you think caused it. Four simple habits help: use a clean, odour-free glass, smell soon after pouring, compare under the same conditions, and taste side by side with another beer or your last batch when useful. Expectations can influence what you perceive – a side-by-side comparison, or having someone else pour without telling you which beer is which, can reduce some of that effect."
+      }
+    },
+    {
+      "id": "CHUNK-SENS-B",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Beskriv – ikke diagnostiser.** Det du skriver ned, kan deles i fire trinn. En **observasjon** er det du faktisk sanser: «Ølet ser uklart ut.» En **tolkning** bruker ord som «kan» og «muligens»: «Det kan ha flere årsaker.» En **hypotese** er din mulige forklaring – ikke en sannhet: «Kanskje jeg tappet for tidlig.» En **beslutning** er det du gjør neste gang: «Neste gang lar jeg det stå lenger før tapping.» Én observasjon beviser aldri en årsak, og «jeg vet ikke ennå» er et fullverdig svar.",
+        "en": "**Describe, don't diagnose.** What you write down can be split into four steps. An **observation** is what you actually perceive: \"The beer looks hazy.\" An **interpretation** uses words like \"may\" and \"could\": \"It could have several causes.\" A **hypothesis** is your possible explanation – not a truth: \"Maybe I packaged too early.\" A **decision** is what you will do next time: \"Next time I will let it stand longer before packaging.\" One observation never proves a cause, and \"I don't know yet\" is a complete answer."
+      }
+    },
+    {
+      "id": "CHUNK-SENS-F",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Feil eller karakter?** En beskrivelse er en observasjon. Om den er en feil, avhenger av hva du ønsket, hvor sterk den er, og sammenhengen. Det samme preget kan være helt riktig i ett øl og uønsket i et annet. At du eller andre ikke liker noe, gjør det ikke til en feil i ølet – og at ølet ikke passer en stil, er ikke i seg selv en feil hvis det ikke var det du siktet mot. Det betyr ikke at alt er like greit: et tydelig preg du ikke ønsket, er verdt å notere og følge opp. Still deg tre spørsmål: Ønsket jeg dette? Hvor sterkt er det? Passer det med ølet jeg ville lage?",
+        "en": "**Fault or character?** A descriptor is an observation. Whether it is a fault depends on what you intended, how strong it is, and the context. The same character can be exactly right in one beer and unwanted in another. You or someone else disliking something does not make it a fault in the beer – and a beer not matching a style is not a fault in itself if that style was not what you were aiming for. That does not mean anything goes: a clear character you did not intend is worth noting and following up. Ask yourself three questions: Did I intend this? How strong is it? Does it fit the beer I wanted to make?"
+      }
+    },
+    {
+      "id": "CHUNK-SENS-G",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Vurder mot hensikten – og velg én endring.** Sammenlign ølet du fikk med ølet du ville lage, og beskriv forskjellen med ord – ikke med en karakter. Bryggeloggen har egne felt for dette: sanseinntrykk skriver du som observasjoner, vurderingen kan være ja, kanskje eller nei («kanskje» er et gyldig svar), tolkningen og den mulige forklaringen får hvert sitt felt, og under «Neste gang» skriver du det du vil gjøre annerledes. Velg **én** bevisst endring, og se på den som en test av hypotesen din – ikke som et bevis. Da kan du faktisk se hva endringen gjorde i neste brygg.",
+        "en": "**Evaluate against your intent – and choose one change.** Compare the beer you got with the beer you meant to make, and describe the difference in words – not with a grade. Brew History has separate fields for this: you write sensory impressions as observations, the judgement can be yes, maybe or no (\"maybe\" is a valid answer), your interpretation and possible explanation each get their own field, and under \"Next time\" you write what you will do differently. Choose **one** deliberate change, and treat it as a test of your hypothesis – not as proof. That way you can actually see what the change did in the next batch."
+      }
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-SENS-001",
+      "type": "concept_check",
+      "basis": "methodology",
+      "concepts": ["sensory.tasting_sequence"],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "Hva er NOTÉR-steget til når du smaker på ølet ditt?",
+        "en": "What is the NOTE step for when you taste your beer?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Å skrive ned det du faktisk sanser, adskilt fra hva du tror det skyldes.",
+            "en": "Writing down what you actually perceive, kept separate from what you think caused it."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Å gi ølet én samlet karakter.",
+            "en": "Giving the beer one overall grade."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Å fastslå hva som gikk galt i bryggingen.",
+            "en": "Establishing what went wrong in the brew."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. NOTÉR handler om å skrive ned observasjonene dine med egne ord, og holde dem adskilt fra tolkningen.",
+        "en": "Correct. NOTE is about writing down your observations in your own words, and keeping them separate from interpretation."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. NOTÉR er ikke en karakter og ikke en diagnose – det er å skrive ned det du faktisk sanser, adskilt fra hva du tror det skyldes.",
+        "en": "Not quite. NOTE is not a grade and not a diagnosis – it is writing down what you actually perceive, kept separate from what you think caused it."
+      }
+    },
+    {
+      "id": "Q-SENS-002",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": ["sensory.tasting_habits"],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "Du vil sammenligne to av dine egne øl. Hva gir den mest rettferdige sammenligningen?",
+        "en": "You want to compare two of your own beers. What gives the fairest comparison?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Rene glass uten lukt og like forhold for begge ølene.",
+            "en": "Clean, odour-free glasses and the same conditions for both beers."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Å smake det ene i dag og det andre om en stund, i ulike glass.",
+            "en": "Tasting one today and the other some time later, in different glasses."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Å smake det du tror er best først, så du vet hva du ser etter.",
+            "en": "Tasting the one you think is best first, so you know what to look for."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Rene glass og like forhold gjør at forskjellen du kjenner, kommer fra ølet – ikke fra måten du smakte på.",
+        "en": "Correct. Clean glasses and the same conditions mean the difference you notice comes from the beer – not from the way you tasted."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Ulike glass og forhold kan gi forskjeller som ikke kommer fra ølet, og forventninger kan påvirke det du opplever. Sammenlign med rene glass og like forhold.",
+        "en": "Not quite. Different glasses and conditions can create differences that do not come from the beer, and expectations can influence what you perceive. Compare with clean glasses and the same conditions."
+      }
+    },
+    {
+      "id": "Q-SENS-003",
+      "type": "concept_check",
+      "basis": "methodology",
+      "concepts": ["sensory.observation_vs_interpretation"],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "Hvilken av disse setningene er en observasjon?",
+        "en": "Which of these sentences is an observation?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "«Ølet ser uklart ut.»",
+            "en": "\"The beer looks hazy.\""
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "«Det skyldes nok at jeg tappet for tidlig.»",
+            "en": "\"That is probably because I packaged too early.\""
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "«Neste gang lar jeg det stå lenger.»",
+            "en": "\"Next time I will let it stand longer.\""
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. En observasjon beskriver bare det du sanser. Årsaken er en hypotese, og planen for neste gang er en beslutning.",
+        "en": "Correct. An observation only describes what you perceive. The cause is a hypothesis, and the plan for next time is a decision."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. En setning om årsaken er en hypotese, og en plan for neste gang er en beslutning. Observasjonen er det du faktisk ser, lukter eller smaker.",
+        "en": "Not quite. A sentence about the cause is a hypothesis, and a plan for next time is a decision. The observation is what you actually see, smell or taste."
+      }
+    },
+    {
+      "id": "Q-SENS-004",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": ["sensory.observation_vs_interpretation"],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "Du kjenner et preg i ølet du ikke ventet, men du vet ikke hva det skyldes. Hva skriver du i loggen?",
+        "en": "You notice a character in the beer you did not expect, but you do not know what caused it. What do you write in the log?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Observasjonen, og at du ennå ikke vet årsaken – det er et fullverdig svar.",
+            "en": "The observation, and that you do not know the cause yet – that is a complete answer."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Den årsaken som virker mest sannsynlig, skrevet som om den er bevist.",
+            "en": "The most likely-seeming cause, written as if it were proven."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ingenting, siden du ikke vet svaret.",
+            "en": "Nothing, since you do not know the answer."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Skriv ned det du sanset, og at årsaken ennå er usikker. «Jeg vet ikke ennå» er et gyldig svar.",
+        "en": "Correct. Write down what you perceived, and that the cause is still uncertain. \"I don't know yet\" is a valid answer."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Én observasjon beviser ikke en årsak, men den er likevel verdt å skrive ned. Noter det du sanset, og at du ennå ikke vet hva det skyldes.",
+        "en": "Not quite. One observation does not prove a cause, but it is still worth writing down. Note what you perceived, and that you do not know the cause yet."
+      }
+    },
+    {
+      "id": "Q-SENS-005",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": ["sensory.fault_vs_character"],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "En venn smaker ølet ditt og sier at hen ikke liker det. Betyr det at ølet har en feil?",
+        "en": "A friend tastes your beer and says they don't like it. Does that mean the beer has a fault?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ikke nødvendigvis – det avhenger av hva du ønsket, hvor sterkt preget er, og sammenhengen.",
+            "en": "Not necessarily – it depends on what you intended, how strong the character is, and the context."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja – hvis noen ikke liker det, er det en feil.",
+            "en": "Yes – if someone does not like it, it is a fault."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei – smak er bare personlig, så ingenting kan være en feil.",
+            "en": "No – taste is purely personal, so nothing can be a fault."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. At noen ikke liker et øl, gjør det ikke til en feil. Spør heller: Ønsket jeg dette, hvor sterkt er det, og passer det med ølet jeg ville lage?",
+        "en": "Correct. Someone disliking a beer does not make it a fault. Ask instead: Did I intend this, how strong is it, and does it fit the beer I wanted to make?"
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Personlig smak alene avgjør ikke om noe er en feil – men det betyr heller ikke at alt er like greit. Det avhenger av hva du ønsket, hvor sterkt preget er, og sammenhengen.",
+        "en": "Not quite. Personal taste alone does not decide whether something is a fault – but that does not mean anything goes either. It depends on what you intended, how strong the character is, and the context."
+      }
+    },
+    {
+      "id": "Q-SENS-006",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": ["sensory.evaluate_against_intent"],
+      "difficulty": "beginner",
+      "source_claims": [],
+      "prompt": {
+        "no": "Ølet ble annerledes enn du ønsket, og du har flere ideer om hva som kan være årsaken. Hva er den beste planen for neste brygg?",
+        "en": "The beer turned out differently from what you intended, and you have several ideas about what might have caused it. What is the best plan for the next batch?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Å velge én bevisst endring og se på den som en test av hypotesen din.",
+            "en": "Choosing one deliberate change and treating it as a test of your hypothesis."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Å endre alt du kan på en gang, så noe av det sikkert virker.",
+            "en": "Changing everything you can at once, so something is bound to work."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Å ikke endre noe, men skrive at problemet er løst.",
+            "en": "Changing nothing, but writing that the problem is solved."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Med én bevisst endring kan du se hva akkurat den endringen gjorde i neste brygg.",
+        "en": "Correct. With one deliberate change you can see what exactly that change did in the next batch."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Endrer du mange ting samtidig, kan du ikke vite hvilken endring som virket. Velg én bevisst endring, og se på den som en test – ikke som et bevis.",
+        "en": "Not quite. If you change many things at once, you cannot know which change worked. Choose one deliberate change, and treat it as a test – not as proof."
+      }
+    }
+  ]
+}

@@ -16,8 +16,9 @@
 // Reproduced directly against the pre-fix source (stash-toggle) at
 // viewport width 750px -- sidebar still shown inline (Streamlit's own
 // auto-collapse breakpoint is narrower), main content squeezed to ~65-100px columns -- and confirmed fixed
-// post-fix at the same width. The grid now has eight cards (issue #458;
-// issue #473 adds Rengjøring og sikkerhet right after Råvarer).
+// post-fix at the same width. The grid now has nine cards (issue #458;
+// issue #473 adds Rengjøring og sikkerhet right after Råvarer; issue #472
+// adds Smak og evaluering as the final, ninth card).
 //
 // Runs against tests/fixtures/streamlit_harness/bryggeskole_harness.py
 // (already the production render_bryggeskole_panel() call; previously
@@ -34,8 +35,8 @@ const NARROW_PORTRAIT_WIDTH = 750;
 const NARROW_PORTRAIT_HEIGHT = 900;
 
 const MODUL_TEKST = {
-  no: ['Råvarer', 'Rengjøring og sikkerhet', 'Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking'],
-  en: ['Raw materials', 'Cleaning and safety', 'Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging'],
+  no: ['Råvarer', 'Rengjøring og sikkerhet', 'Forberedelse/metode', 'Mesking (kjele/BIAB)', 'Koking', 'Kjøling', 'Gjæring (bøtte/FermZilla)', 'Pakking', 'Smak og evaluering'],
+  en: ['Raw materials', 'Cleaning and safety', 'Preparation/method', 'Mashing (kettle/BIAB)', 'Boil', 'Cooling', 'Fermentation (bucket/FermZilla)', 'Packaging', 'Tasting and evaluation'],
 };
 
 const ENV_KNAPP = {
@@ -135,14 +136,14 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, viewport);
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(8);
+      expect(cards).toHaveLength(9);
 
       const broken = await findMidWordBreaks(page);
       expect(broken, `mid-word breaks found: ${JSON.stringify(broken)}`).toEqual([]);
 
       expect(await hasHorizontalOverflow(page)).toBe(false);
 
-      // Every rendered title text must still be exactly one of the eight
+      // Every rendered title text must still be exactly one of the nine
       // expected module names (rules out any content/navigation
       // regression from the layout change).
       const titles = await page.locator('[data-testid="stHorizontalBlock"]').first().locator('[data-testid="stColumn"] p').allTextContents();
@@ -155,7 +156,7 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, { width: NARROW_PORTRAIT_WIDTH, height: NARROW_PORTRAIT_HEIGHT });
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(8);
+      expect(cards).toHaveLength(9);
 
       const rows = new Set(cards.map((c) => c.top));
       // The reported bug is precisely "all cards squeezed into one
@@ -180,7 +181,7 @@ for (const lang of ['no', 'en']) {
       await gotoModuleGrid(page, lang, viewport);
 
       const cards = await getCardLayout(page);
-      expect(cards).toHaveLength(8);
+      expect(cards).toHaveLength(9);
 
       const rows = new Set(cards.map((c) => c.top));
       // At genuinely mobile widths, one column per row is an acceptable

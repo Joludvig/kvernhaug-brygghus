@@ -71,6 +71,7 @@ from bryggeskole.pilot_package import read_pilot_file as les_pakking_pilot
 from bryggeskole.pilot_method_context import read_pilot_file as les_metodevalg_pilot
 from bryggeskole.pilot_raw_materials import read_pilot_file as les_raavarer_pilot
 from bryggeskole.pilot_cleaning_safety import read_pilot_file as les_rengjoring_pilot
+from bryggeskole.pilot_sensory import read_pilot_file as les_smak_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -234,13 +235,14 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
     def test_alle_seks_stadier_er_klikkbare_ingen_kommer_senere(self):
         # Issue #380 fylte den tidligere siste ubrukte gridcellen med
         # Forberedelse/metode; issue #458 legger Råvarer foran som syvende
-        # stadium; issue #473 legger Rengjøring og sikkerhet inn som åttende
+        # stadium; issue #473 legger Rengjøring og sikkerhet inn som åttende;
+        # issue #472 legger Smak og evaluering til som niende og siste
         # -- alle stadiene er aktive moduler, ingen "Kommer senere".
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 8)
+        self.assertEqual(len(aktiv_badges), 9)
         self.assertEqual(len(kommer_badges), 0)
 
     def test_rengjoring_modulen_rendrer_pilotinnhold_i_begge_miljo(self):
@@ -1237,6 +1239,14 @@ class TestKokingModulen(_MedIsolertTilstand):
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_pakking_pilot()), "pakking")
         _knapp(at, "bs_oppsummering_tilbake_pakking_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
+        # Issue #472: Smak og evaluering er siste kort, etter Pakking.
+        self.assertIn("Anbefalt neste: Smak og evaluering", tekster)
+
+        _knapp(at, "bs_apne_modul_smak_btn").click().run()
+        self._start_sporsmalsrunde(at, "smak")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_smak_pilot()), "smak")
+        _knapp(at, "bs_oppsummering_tilbake_smak_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
         self.assertNotIn("Anbefalt neste", tekster)
 
     def test_koking_widget_nokler_er_modul_scopede(self):
@@ -1912,7 +1922,8 @@ class TestSkoleoversiktGridResponsivIssue394(unittest.TestCase):
         at = AppTest.from_file(_HARNESS)
         at.run()
         _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
-        for modul_id in ("raavarer", "metodevalg", "mesking", "koking", "kjoling", "gjaring", "pakking"):
+        for modul_id in ("raavarer", "rengjoring", "metodevalg", "mesking", "koking", "kjoling", "gjaring",
+                         "pakking", "smak"):
             _knapp(at, f"bs_apne_modul_{modul_id}_btn")
 
     def test_anbefalt_neste_og_modulapning_uendret_etter_grid_refaktorering(self):
@@ -1926,6 +1937,59 @@ class TestSkoleoversiktGridResponsivIssue394(unittest.TestCase):
         )
         _knapp(at, "bs_apne_modul_raavarer_btn").click().run()
         self.assertEqual(len(at.exception), 0)
+
+
+# ─── Smak og evaluering (issue #472, V2.2 G3S slice 6): metodikk-bolker
+# med scoped basis "methodology" -- siste kort, liten metode-merking ─────
+
+class TestSmakOgEvalueringModulenIssue472(_MedIsolertTilstand):
+    _ETIKETT_NO = "Metode, ikke en faktapåstand"
+
+    def test_smak_er_siste_kort_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            at = self._ny_apptest()
+            self._velg_miljo(at, miljo_knapp)
+            kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
+            self.assertEqual(kort[-1], "**Smak og evaluering**", kort)
+            self.assertEqual(kort[0], "**Råvarer**", kort)
+            self.assertEqual(kort[1], "**Rengjøring og sikkerhet**", kort)
+            _knapp(at, "bs_apne_modul_smak_btn")
+
+    def test_metodebolk_viser_liten_metode_merking(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "smak")
+        tekster = " ".join(_alle_synlige_tekster(at))
+        self.assertIn("Smak med vilje", tekster)
+        captions = [c.value for c in at.caption]
+        self.assertIn(self._ETIKETT_NO, captions)
+        # Sekundær merking, aldri et varselbanner.
+        for element in list(at.warning) + list(at.error) + list(at.info):
+            self.assertNotIn("faktapåstand", element.value)
+
+    def test_metode_merking_vises_ogsa_pa_metodesporsmal(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "smak")
+        self.assertIn(self._ETIKETT_NO, [c.value for c in at.caption])
+
+    def test_andre_moduler_far_ingen_metode_merking(self):
+        for modul_id in ("rengjoring", "raavarer"):
+            at = self._ny_apptest()
+            self._apne_modul_og_start_sporsmal(at, modul_id)
+            self.assertNotIn(self._ETIKETT_NO, [c.value for c in at.caption], modul_id)
+
+    def test_engelsk_merking(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "smak")
+        self.assertIn("Method, not a fact claim", [c.value for c in at.caption])
+
+    def test_full_flyt_alt_riktig_gir_oppsummering(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "smak")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_smak_pilot()))
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn")
 
 
 # ─── Råvarer-modulen (issue #458, V2.2 G3P slice 5): én kombinert
