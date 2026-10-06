@@ -4,6 +4,8 @@ Version: 1.1
 Status: **Chief review completed 2026-10-03** (§21). The Foundation slice is approved for implementation-issue creation; the
 issue draft is §22. Module code still requires that implementation issue, which is pending because GitHub is unavailable.
 Not yet actionable as product work. (v1.0: decision/prep document — reviewable, not yet actionable.)
+Status refresh 2026-10-04: the Foundation slice is implemented offline (§21.8); not yet on GitHub/master. Kompetent is not
+implemented.
 Governed by: [#434](https://github.com/Joludvig/kvernhaug-brygghus/issues/434), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3); product direction
 [#65](https://github.com/Joludvig/kvernhaug-brygghus/issues/65); curriculum owner
@@ -552,7 +554,10 @@ unconfirmed. Claims, status and sources are unchanged.
 
 - The Foundation slice is approved for **implementation-issue creation**. Module code still requires that implementation issue.
 - The issue cannot be created while GitHub is unavailable. The paste-ready draft is §22.
-- Nothing in this contract marks product implementation as started or complete.
+- Status refresh (2026-10-04): the **Foundation** slice is implemented locally/offline on
+  `offline/measurement-foundation-implementation` and merged into the offline integration rehearsal (10 cards; Måling at
+  position 9, before Smak). It has **not yet landed on GitHub/master**: the §22 issue and a PR are still required.
+- **Kompetent** (§21.6) is **not implemented**.
 
 ## 22. Foundation implementation issue — draft (create on GitHub when access returns)
 

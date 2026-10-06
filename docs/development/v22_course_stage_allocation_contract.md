@@ -1,6 +1,6 @@
 # V2.2 — Bryggeskole course stage allocation contract
 
-Version: 1.0 (2026-10-04)
+Version: 1.0 (2026-10-04); status refresh 2026-10-04 after the Måling Foundation implementation (§A.1)
 Status: **Canonical, locked owner/Chief decisions** for *where* course content belongs by stage. Decision/architecture
 document only: it implements nothing and changes no lesson, registry, UI or Web file.
 Recorded offline during the GitHub outage; see the sync note in §K.
@@ -51,21 +51,26 @@ for the stage question only.
 
 ### A.1 Reference implementation state
 
-Status labels in §C describe the **green integration rehearsal** `offline/full-integration-rehearsal` @
-`68e146b7b67ebb8f292ae5bd29a2ce873cc0668d` (local, not on GitHub). Verified there on 2026-10-04:
+The contract was decided against the **green integration rehearsal** `offline/full-integration-rehearsal` @
+`68e146b7b67ebb8f292ae5bd29a2ce873cc0668d` (local, not on GitHub), which then showed 9 cards and had no Måling module.
+
+**Status refresh (2026-10-04).** The Måling og bryggelogg **Foundation** module is now implemented on
+`offline/measurement-foundation-implementation` and merged into the local/offline integration rehearsal. It has **not yet
+landed on GitHub/master**. Status labels in §C describe that offline integration state:
 
 | Check | State |
 |---|---|
-| Visible module cards | **9**: Råvarer, Rengjøring og sikkerhet, Forberedelse/metode, Mesking, Koking/humle, Kjøling/overføring, Gjæring, Pakking, Smak og evaluering (`_MODUL_REKKEFOLGE`, `ui/bryggeskole_panel.py`) |
-| Måling og bryggelogg | **Not implemented.** Foundation contracted and locked (measurement contract §21.2); no pilot file, no card |
-| Oppskriftsforståelse | **Not implemented.** Kompetent contracted (recipe contract §27); **blocked by the Måling Foundation module** (§27.8) |
+| Visible module cards | **10**: Råvarer, Rengjøring og sikkerhet, Forberedelse/metode, Mesking, Koking/humle, Kjøling/overføring, Gjæring, Pakking, Måling og bryggelogg, Smak og evaluering (`_MODUL_REKKEFOLGE`, `ui/bryggeskole_panel.py`) |
+| Måling og bryggelogg | **Foundation implemented** in the offline/local integration (`measurement.fundamentals`, CHUNK-MEAS-A…E, Q-MEAS-001…006; position 9); not yet on GitHub/master. **Kompetent not implemented** (measurement contract §21.6) |
+| Oppskriftsforståelse | **Not implemented.** Kompetent contracted (recipe contract §27). Its Måling Foundation prerequisite (§27.8) is satisfied in the offline integration; not yet on GitHub/master |
 | Smak og evaluering | **Visible**, but contractually **Kompetent** (sensory contract §1–§3). Implemented chunks are methodology only (SENS-A, B, F, G) |
 | `FACT-MASH-0003` (iodine test) | **draft**; every other registry record is `verified` (58 records) |
 | Stage labels in the UI | None. All visible cards are one open grid |
 
-**On GitHub master `e48deb5`** only 7 cards are visible: Rengjøring og sikkerhet (#473) and Smak og evaluering (#472)
-exist only in the offline product stack until it lands. "IMPLEMENTED" for those two modules therefore means "implemented
-in the offline stack, not yet on master". This contract does not change either state.
+**On GitHub master `e48deb5`** only 7 cards are visible: Rengjøring og sikkerhet (#473), Smak og evaluering (#472) and
+Måling og bryggelogg Foundation (no issue yet; draft in measurement contract §22) exist only in the offline product stack
+until it lands. "IMPLEMENTED" for those three modules therefore means "implemented in the offline stack, not yet on
+master". This contract does not change either state.
 
 ## B. Four-stage model
 
@@ -181,7 +186,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 
 | Stage | Content | Status |
 |---|---|---|
-| Foundation | **Locked, preserved exactly** (measurement contract §1, §21.2): OG/FG as measurements, not targets; finished fermentation = repeated stable readings; temperature + where/how measured; volume into the fermenter; observation vs interpretation; plan vs actual; minimum useful brew log. **No formulas, no manual maths.** CHUNK-MEAS-A…E, Q-MEAS-001…006; FACT-MEAS-0001…0003 (verified) | CONTRACTED, not implemented |
+| Foundation | **Locked, preserved exactly** (measurement contract §1, §21.2): OG/FG as measurements, not targets; finished fermentation = repeated stable readings; temperature + where/how measured; volume into the fermenter; observation vs interpretation; plan vs actual; minimum useful brew log. **No formulas, no manual maths.** CHUNK-MEAS-A…E, Q-MEAS-001…006; FACT-MEAS-0001…0003 (verified) | IMPLEMENTED (offline integration; not yet on GitHub/master) |
 | Kompetent | Instrument choice (FACT-MEAS-0004), refractometer after alcohol, instrument checks, volume stages (FACT-MEAS-0005), raw reading vs correction, mash temperature, hypothesis + next change (measurement §21.6) | CONTRACTED (later slice); instrument-check fact GAP |
 | Bryggemester | Correction formulas, pH measurement (D41), pressure gauges (D42), efficiency maths (D66) | OUT OF APP |
 | Bryggeri | Laboratory methods, inline instrumentation (D76), QC (D77) | OUT OF APP |
@@ -191,7 +196,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 | Stage | Content | Status |
 |---|---|---|
 | Foundation | **None. No Foundation recipe module.** Prerequisites only (Råvarer and Måling Foundation) | — |
-| Kompetent | **Entire module** (recipe contract §27): recipe as a plan; OG → fermentability → attenuation → FG; colour is not flavour; IBU as one axis; balance against intent; style as a frame; one deliberate change. CHUNK-REC-A…G, Q-REC-001…007; FACT-RECIPE-0001…0003 plus reused ingredient facts | CONTRACTED; blocked by Måling Foundation |
+| Kompetent | **Entire module** (recipe contract §27): recipe as a plan; OG → fermentability → attenuation → FG; colour is not flavour; IBU as one axis; balance against intent; style as a frame; one deliberate change. CHUNK-REC-A…G, Q-REC-001…007; FACT-RECIPE-0001…0003 plus reused ingredient facts | CONTRACTED, not implemented; Måling Foundation prerequisite satisfied offline |
 | Bryggemester | Utilisation/Tinseth, colour-unit conversion, efficiency maths, apparent vs real attenuation detail, yeast biochemistry, structured experimentation beyond one change (D83) | OUT OF APP |
 | Bryggeri | Statistical experiment design (D83) | OUT OF APP |
 
@@ -290,7 +295,8 @@ memorise:
 7. package safely;
 8. keep the minimum brew log.
 
-Today items 6 and 8 are not yet taught: Måling Foundation is not implemented, and the Gjæring Foundation gap (§D.9) is open.
+Status refresh: items 6 and 8 are now taught by the Måling Foundation module in the offline integration (not yet on
+GitHub/master). The Gjæring Foundation gap (§D.9) is still open, so Gjæring and Pakking do not yet link to item 6.
 
 ## F. Kompetent completion criteria
 
@@ -342,9 +348,9 @@ a reason to teach a topic in the homebrew course.
 
 | Gap | Stage | State |
 |---|---|---|
-| Måling og bryggelogg Foundation module | F | CONTRACTED, facts verified (FACT-MEAS-0001…0003); not implemented |
+| Måling og bryggelogg Foundation module | F | IMPLEMENTED in the offline integration (FACT-MEAS-0001…0003); not yet on GitHub/master; implementation issue pending (measurement contract §22) |
 | Fermentation after pitching (simple) | F | GAP. FACT-YEAST-0001 supports "yeast consumes sugar and makes alcohol and CO₂". **No record for signs of active fermentation or phases** |
-| Airlock not proof; finished = stable readings | F | Sourced by FACT-MEAS-0002; taught in Måling F once implemented; Gjæring/Pakking links not yet present |
+| Airlock not proof; finished = stable readings | F | Sourced by FACT-MEAS-0002; taught in Måling F (implemented offline); Gjæring/Pakking links not yet present |
 | Any safety consequence of packaging too early | F | GAP. FACT-PACK-0003 covers damaged or unrated containers only; no record for early packaging |
 | Spoilage vs safety; electrical near liquids; scald first aid | F | GAP (cleaning contract §3/§6) |
 | Priming concept (amount controls carbonation; use a trusted tool) | K | GAP: no contract; FACT-PACK-0001 covers priming as a process only |

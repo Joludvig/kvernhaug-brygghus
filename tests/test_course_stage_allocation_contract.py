@@ -22,8 +22,8 @@ _CONTRACT_DOC = os.path.join(_ROOT, "docs", "development", "v22_course_stage_all
 _REGISTRY = os.path.join(_ROOT, "bryggeskole", "data", "course_fact_registry.json")
 _DATA = os.path.join(_ROOT, "bryggeskole", "data")
 
-# Implementerte moduler: id-prefiks -> pilotfil. MEAS og REC er kun
-# kontraktsfestet (ikke implementert) og sjekkes derfor ikke her.
+# Implementerte moduler: id-prefiks -> pilotfil. REC er kun kontraktsfestet
+# (ikke implementert) og sjekkes derfor ikke her.
 _PILOT_FOR_PREFIX = {
     "RAW": "pilot_raw_materials_fundamentals.json",
     "SAFE": "pilot_cleaning_safety_fundamentals.json",
@@ -33,6 +33,7 @@ _PILOT_FOR_PREFIX = {
     "COOLXFER": "pilot_cool_transfer_fundamentals.json",
     "FERM": "pilot_fermentation_temperature.json",
     "PACK": "pilot_package_fundamentals.json",
+    "MEAS": "pilot_measurement_fundamentals.json",
     "SENS": "pilot_sensory_evaluation.json",
 }
 _ID_RE = re.compile(r"\b(CHUNK|Q)-(" + "|".join(_PILOT_FOR_PREFIX) + r")-([A-Z]|\d{3})\b")

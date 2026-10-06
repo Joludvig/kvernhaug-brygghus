@@ -469,8 +469,9 @@ Owner/Chief decision, 2026-10-04, recorded offline.
 A stage is stated here only where a module contract locks it. Otherwise the owning module contract and §7–§8 govern.
 
 The visible grid grows toward this order as modules land:
-- Today: Pakking (8) → Smak og evaluering (9).
-- After Måling lands: Måling (9) → Smak (10).
+- Before Måling: Pakking (8) → Smak og evaluering (9).
+- With Måling Foundation (status 2026-10-04: implemented in the offline/local integration, not yet on GitHub/master):
+  Pakking (8) → Måling (9) → Smak (10).
 - After Oppskriftsforståelse lands: Måling (9) → Oppskriftsforståelse (10) → Smak (11).
 
 **Decision pointers** (closed locally, not yet on GitHub):
@@ -478,7 +479,8 @@ The visible grid grows toward this order as modules land:
   `55eb93b4933d0f3109958410f40f696b4014dfa3`. Position 9; Foundation slice first.
 - **Oppskriftsforståelse:** `v22_recipe_understanding_module_contract.md`, closed on `offline/recipe-understanding-contract` @
   `865d87d1413610643850909ec63f89a3aacff097`. Kompetent; main App; position 10; implementation waits for the Måling Foundation
-  module.
+  module. Status 2026-10-04: that prerequisite is satisfied in the offline integration (not yet on GitHub/master);
+  Oppskriftsforståelse itself is not implemented.
 
 Implementation detail (ids, chunks, questions, tests) lives in those contracts, not here.
 

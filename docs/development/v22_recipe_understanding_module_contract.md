@@ -4,6 +4,8 @@ Version: 1.1
 Status: **Chief review completed 2026-10-03** (§27). The module is approved for implementation-issue creation; the issue draft is §28.
 Implementation depends on the Måling og bryggelogg Foundation module landing first, and the issue is pending because GitHub is unavailable.
 Not yet actionable as product work. (v1.0: decision/prep document — reviewable, not yet actionable.)
+Status refresh 2026-10-04: the Måling Foundation dependency is satisfied in the offline/local integration (not yet on
+GitHub/master). This module itself is not implemented.
 Governed by: [#436](https://github.com/Joludvig/kvernhaug-brygghus/issues/436), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3); product direction
 [#65](https://github.com/Joludvig/kvernhaug-brygghus/issues/65); curriculum owner
@@ -631,6 +633,9 @@ Final order: … Pakking → Måling og bryggelogg → **Oppskriftsforståelse**
 Implementation **must wait until the Måling og bryggelogg Foundation module has landed**. The issue draft may be created before then, and it declares
 the dependency.
 
+Status refresh (2026-10-04): the Måling Foundation module is implemented in the offline/local integration, so the
+dependency is satisfied there. It has not yet landed on GitHub/master. Oppskriftsforståelse is not implemented.
+
 ### 27.9 Recipe-editor bridge
 
 The recipe-editor consequence view / visual bridge (§14, §22, §24 slice 9) is a **separate, later UI slice**. It is not part of the first module
@@ -680,6 +685,7 @@ The search leads listed above were not used as evidence. The Briess `?p=20059` l
 - The module is approved for **implementation-issue creation**. Implementation depends on Måling landing first (§27.8).
 - The issue cannot be created while GitHub is unavailable. The paste-ready draft is §28.
 - Nothing here marks product implementation as started or complete.
+- Status refresh (2026-10-04): the Måling Foundation dependency (§27.8) is satisfied offline; not yet on GitHub/master.
 
 ## 28. Implementation issue — draft (create on GitHub when access returns)
 
