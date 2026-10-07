@@ -232,6 +232,94 @@
       "notes": "Practical course guidance synthesized from multiple sources; the registry classification remains professional_interpretation, separate from verification status, mirroring FACT-BREW-0003's precedent."
     },
     {
+      "id": "FACT-MASH-0005",
+      "claim": "After the mash, the sweet wort is separated from the spent grain. How this is done depends on the equipment: in a mash/lauter tun the wort drains out through a false bottom, manifold or similar and the bed of grain itself acts as the filter; in an all-in-one system the grain sits in a basket or malt pipe that is lifted and left to drain; in brew-in-a-bag the bag holding the grain is lifted out. When draining through a grain bed in a lauter tun, the first runnings are often cloudy with bits of grain, and many brewers gently recirculate them over the grain bed (vorlauf) until the wort runs largely free of grain particles; it does not need to be perfectly clear.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-05T12:25:09+02:00",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "homebrewing text (John Palmer, How to Brew) -- author sells the book, commercial interest",
+          "ref": "John Palmer, How to Brew, Section 3, Chapter 17 - Lautering (copyright 1999-2015, with an Author's Note 2025) -- https://howtobrew.com/section-3/chapter-17",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: lautering is the method of separating the sweet wort from the mash; the grain bed forms its own filter and the false bottom or manifold underneath only distributes the collection points; the first few quarts are cloudy with proteins and grain debris and are poured back on top of the grain bed (vorlauf) until the wort is chunk free, still a little cloudy. Does not support (not used): its quantities, times and temperatures, crush, mashout or stuck-sparge depth. Expired TLS certificate on 2026-10-05."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer)",
+          "ref": "The Oxford Companion to Beer (ed. Garrett Oliver, Oxford University Press 2012), Keith Thomas, 'sparging', via Craft Beer & Brewing -- https://beerandbrewing.com/dictionary/Yibra5GU76",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: the mash must be drained and separated from the residual solids, which filter the wort as it runs off. Does not support (not used): pH, tannins, flow-rate matching."
+        },
+        {
+          "tier": "B",
+          "type": "homebrew magazine article",
+          "ref": "Brew Your Own, Joe Vella, Lautering 101 (published 2017-08-17, modified 2025-09-02) -- https://byo.com/articles/lautering/",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: lautering separates the liquid sweet wort from the solid spent grain once the mash is complete; there are different methods and equipment (a mash-lauter tun with a false bottom, manifold or braid; Brew-In-A-Bag with a fabric filter in the brewpot); the first runnings are very cloudy and are poured back over the grain bed (vorlauf). Does not support (not used): temperatures, times, ratios."
+        },
+        {
+          "tier": "B",
+          "type": "homebrew magazine article",
+          "ref": "Craft Beer & Brewing, Libby Murphy, The Art and the Science of the Vorlauf Process (2016-07-12) -- https://beerandbrewing.com/the-art-and-the-science-of-the-vorlauf-process/",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: a set grain bed creates a filter; cloudy first runnings with grains in them are poured back over the top; there are arguments for and against vorlauf; running it until crystal clear is not necessary, the main goal is to clear the wort of grains. Does not support (not used): finings, cold crash, tannin temperature."
+        },
+        {
+          "tier": "A",
+          "type": "system manual (all-in-one only) -- equipment seller, commercial interest",
+          "ref": "Grainfather Connect (G30) Instructions (PDF) -- https://help.grainfather.com/hc/en-us/article_attachments/15548590179345",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports (all-in-one only): lift the basket, rotate it onto its support and let the mash liquid drain into the boiler. Does not support: any general claim. Date not shown."
+        },
+        {
+          "tier": "A",
+          "type": "system manual (all-in-one only) -- equipment seller, commercial interest",
+          "ref": "KegLand, 65L BrewZilla Gen 4 Instruction Manual (last updated 30/08/2022; PDF hosted by MoreBeer/MoreWine) -- https://morewine.com/cdn/shop/files/BrewZilla-65L-Gen-4-US-Instructions-MB.pdf",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports (all-in-one only): lift the malt pipe out of the boiler with its handle, rotate it and let it drain. Does not support (not used): its mash recirculation, which is for an even temperature through the grain bed and is NOT a clarity step; water volumes, temperatures."
+        }
+      ],
+      "concepts": ["mashing.grain_separation"],
+      "notes": "Mesking Kompetent M1 (mashing Kompetent contract section 9; stage contract section F.2: D18 method-aware grain separation = MUST). General principle (wort is separated from the spent grain after the mash) and method-specific steps are kept apart: the grain bed as the filter and vorlauf are claimed for a lauter tun ONLY; basket/malt-pipe lift-and-drain for all-in-one only; bag lift for BIAB only. Chief boundary 2026-10-05: target wording 'largely free of grain particles' / 'stort sett fri for kornpartikler'. Wording trap: no crystal-clear requirement; never 'every method uses a grain-bed filter or vorlauf'; all-in-one recirculation is NOT a clarity procedure; no method hierarchy ('proper', 'real', 'advanced'); no run-off speed, valve opening, times or volumes; no grain-bed engineering, rice hulls or stuck-sparge depth; no bag-squeezing claim either way; no mashout, sparge pH or temperature rule; no milling/crush (D16 SHOULD); no conversion check (FACT-MASH-0003 stays draft). OWNERSHIP: FACT-METHOD-0001 (BIAB layout), FACT-METHOD-0002 (traditional layout), FACT-METHOD-0003 (all-in-one layout) and FACT-METHOD-0005 (no hierarchy) remain authoritative for the layouts; this record adds only the separation practice. INDEPENDENCE: John Palmer, the Oxford Companion entry (Keith Thomas), BYO (Joe Vella) and Craft Beer & Brewing (Libby Murphy; Dave Carpenter) are independent lines; Dave Carpenter's 'Lautering and Sparging' and his Illustrated Guide ch. 15 (https://beerandbrewing.com/the-illustrated-guide-to-homebrewing-chapter-15-collecting-wort, 2023-09-02, read as corroboration, not cited) are one line; the Grainfather and KegLand manuals are separate producers and support only their own system's procedure, never a general claim. Non-Kunze (curriculum map section 19.1 gap, printed pp. 257, 259-260). SOURCE-ACCESS LIMITATIONS: Local Claude read every cited source in full on 2026-10-05 from the original page HTML or PDF (source pack docs/development/v22_mashing_m1_m2_source_pack.md); howtobrew.com served an expired TLS certificate that day and was fetched read-only without certificate checking; the Grainfather PDF shows no date. Chief live source spot-check PASS 2026-10-05 (M1 PASS, M2 PASS), recorded offline during the GitHub outage (no issue number exists yet). VERIFIED_AT PROVENANCE: 2026-10-05T12:25:09+02:00 is when the Chief's live source spot-check PASS for M1/M2 was received locally (the local session log records the brief at 2026-10-05T10:25:09Z, truncated to whole seconds). The spot-check itself happened on or before that moment; its exact clock time is not recorded."
+    },
+    {
+      "id": "FACT-MASH-0006",
+      "claim": "After the mash has drained, sugar-rich wort is still held in the wet grain. Sparging - rinsing the grain with more hot water, continuously or in one or more batches - recovers more of that sugar. In a no-sparge approach the full water volume goes into the mash and only the first runnings are collected, which is simpler but leaves more sugar behind. When wort is collected in stages, later runnings are weaker than the first. How much wort and sugar a brewer collects therefore depends on the method and on their own system.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-05T12:25:09+02:00",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "homebrewing text (John Palmer, How to Brew) -- author sells the book, commercial interest",
+          "ref": "John Palmer, How to Brew, Section 3, Chapter 17 - Lautering (copyright 1999-2015, with an Author's Note 2025) -- https://howtobrew.com/section-3/chapter-17 (ch. 18 Extraction for the equipment-dependence sentence: https://howtobrew.com/section-3/chapter-18)",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: sparging is rinsing the grain bed to extract as much of the sugars as possible; continuous and batch sparging; no-sparge produces the beer entirely from first runnings and quite a bit of wort is left behind; parti-gyle first runnings are about twice the gravity of the second runnings (used only as evidence that later runnings are weaker); ch. 18: extract efficiency depends on your methods and equipment. Does not support (not used): volumes, gravity cut-offs, efficiency numbers, temperatures, 'smoother, richer tasting'. Expired TLS certificate on 2026-10-05."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer)",
+          "ref": "The Oxford Companion to Beer (ed. Garrett Oliver, Oxford University Press 2012), Keith Thomas, 'sparging', via Craft Beer & Brewing -- https://beerandbrewing.com/dictionary/Yibra5GU76",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: much of the sugar remains on the surface and crevices of the husks after draining; rinsing with fresh hot liquor removes it; historically a number of beers of different strengths were produced from a single mash. Does not support (not used): pH, tannins, flow matching."
+        },
+        {
+          "tier": "B",
+          "type": "homebrew magazine article",
+          "ref": "Craft Beer & Brewing, Dave Carpenter, Lautering and Sparging (2016-02-09) -- https://www.beerandbrewing.com/lautering-and-sparging",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: fly sparge, batch sparge and no-sparge; no-sparge conducts the mash with the full volume of water at reduced efficiency; do what works for you and your equipment and keep good notes so that you understand how your system behaves. Does not support (not used): temperatures, volumes, any method ranking. Same author as the Illustrated Guide ch. 15 (corroborating, not independent)."
+        },
+        {
+          "tier": "B",
+          "type": "homebrew magazine article",
+          "ref": "Brew Your Own, Joe Vella, Lautering 101 (published 2017-08-17, modified 2025-09-02) -- https://byo.com/articles/lautering/",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: sparging rinses residual sugars from the grain bed; batch and fly sparging. Does not support (not used): temperatures, times, ratios."
+        },
+        {
+          "tier": "A",
+          "type": "system manual (all-in-one only) -- equipment seller, commercial interest",
+          "ref": "KegLand, 65L BrewZilla Gen 4 Instruction Manual (last updated 30/08/2022; PDF hosted by MoreBeer/MoreWine) -- https://morewine.com/cdn/shop/files/BrewZilla-65L-Gen-4-US-Instructions-MB.pdf",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports (own system only): sparging rinses the grain of the majority of the remaining sugars; keep sparging until the runnings fall to a low gravity (corroborates that later runnings are weaker). Does not support (not used): water volumes, temperatures, its gravity figure."
+        }
+      ],
+      "concepts": ["mashing.wort_collection"],
+      "notes": "Mesking Kompetent M2 (mashing Kompetent contract section 9; stage contract section F.2: D19 wort collection travels with D18). All four optional clauses were robustly supported and are kept. Wording trap: no efficiency or yield maths, no PPG/points-per-pound; no sparge-water formula or absorption factor; no gravity cut-offs; no temperatures; no tannin/pH rules; no parti-gyle as course content (it is only evidence that later runnings are weaker); no fly-vs-batch ranking; never 'no-sparge tastes richer' or makes better or worse beer; no milling; no conversion check. OWNERSHIP: FACT-METHOD-0004 owns equipment planning numbers (absorption, dead space, losses); FACT-MEAS-0001 and FACT-MEAS-0005 own pre-boil gravity and hot/cooled volume; FACT-METHOD-0002 already says that sparging recovers further sugar in the traditional layout. INDEPENDENCE: John Palmer, the Oxford Companion entry (Keith Thomas), BYO (Joe Vella) and Craft Beer & Brewing (Libby Murphy; Dave Carpenter) are independent lines; Dave Carpenter's 'Lautering and Sparging' and his Illustrated Guide ch. 15 (https://beerandbrewing.com/the-illustrated-guide-to-homebrewing-chapter-15-collecting-wort, 2023-09-02, read as corroboration, not cited) are one line; the Grainfather and KegLand manuals are separate producers and support only their own system's procedure, never a general claim. Non-Kunze (curriculum map section 19.1 gap, printed pp. 257, 259-260). SOURCE-ACCESS LIMITATIONS: Local Claude read every cited source in full on 2026-10-05 from the original page HTML or PDF (source pack docs/development/v22_mashing_m1_m2_source_pack.md); howtobrew.com served an expired TLS certificate that day and was fetched read-only without certificate checking; the Grainfather PDF shows no date. Chief live source spot-check PASS 2026-10-05 (M1 PASS, M2 PASS), recorded offline during the GitHub outage (no issue number exists yet). VERIFIED_AT PROVENANCE: 2026-10-05T12:25:09+02:00 is when the Chief's live source spot-check PASS for M1/M2 was received locally (the local session log records the brief at 2026-10-05T10:25:09Z, truncated to whole seconds). The spot-check itself happened on or before that moment; its exact clock time is not recorded."
+    },
+    {
       "id": "FACT-BOIL-0001",
       "claim": "Boiling wort to an active, sustained boil inactivates the malt enzymes that were active during mashing (stopping further starch conversion) and reduces the wort's microbial load carried over from the mash/lauter.",
       "classification": "documented_fact",

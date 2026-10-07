@@ -338,7 +338,7 @@ class TestLaeringsflyt(_MedIsolertTilstand):
         self._besvar_sporsmal(at, 0, 1, fasit[0])
         self.assertTrue(len(at.success) >= 1, "Riktig svar skal vise en positiv feedback-melding.")
         self._fortsett(at, 0, 1)
-        self._fullfor_alle_sporsmal(at, 1, {1: fasit[1], 2: fasit[2]})
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(1, len(fasit))})
         _knapp(at, f"bs_prov_igjen_{self._aktiv_modul}_btn")
         _knapp(at, f"bs_oppsummering_tilbake_{self._aktiv_modul}_btn")
 
@@ -764,21 +764,16 @@ class TestDemoModeIngenSkriving(unittest.TestCase):
                 "assert not at.exception, at.exception; "
                 "knapp('bs_apne_modul_mesking_btn').click().run(); "
                 "[knapp('bs_bolk_neste_mesking_btn').click().run() for _ in range(len(pilot['chunks']) - 1)]; knapp('bs_start_sporsmal_mesking_btn').click().run(); "
-                "at.radio(key='bs_valg_mesking_r1_q0').set_value(fasit[0]).run(); "
-                "knapp('bs_svar_btn_mesking_r1_q0').click().run(); "
-                "knapp('bs_fortsett_btn_mesking_r1_q0').click().run(); "
-                "at.radio(key='bs_valg_mesking_r1_q1').set_value(fasit[1]).run(); "
-                "knapp('bs_svar_btn_mesking_r1_q1').click().run(); "
-                "knapp('bs_fortsett_btn_mesking_r1_q1').click().run(); "
-                "at.radio(key='bs_valg_mesking_r1_q2').set_value(fasit[2]).run(); "
-                "knapp('bs_svar_btn_mesking_r1_q2').click().run(); "
-                "knapp('bs_fortsett_btn_mesking_r1_q2').click().run(); "
+                "[(at.radio(key='bs_valg_mesking_r1_q%d' % i).set_value(fasit[i]).run(), "
+                "knapp('bs_svar_btn_mesking_r1_q%d' % i).click().run(), "
+                "knapp('bs_fortsett_btn_mesking_r1_q%d' % i).click().run()) for i in range(len(pilot['questions']))]; "
                 "assert not at.exception, at.exception; "
+                "knapp('bs_prov_igjen_mesking_btn'); "
                 "print('OK')"
             )
             resultat = subprocess.run(
                 [sys.executable, "-c", script],
-                cwd=_REPO_ROOT, env=env, capture_output=True, text=True, timeout=60,
+                cwd=_REPO_ROOT, env=env, capture_output=True, text=True, timeout=180,
             )
             self.assertEqual(resultat.returncode, 0, f"stdout={resultat.stdout}\nstderr={resultat.stderr}")
             self.assertIn("OK", resultat.stdout)
@@ -1568,10 +1563,14 @@ class TestMetodevalgModulen(_MedIsolertTilstand):
             | set(_konsept_rekkefolge(les_kjoling_pilot()))
             | set(_konsept_rekkefolge(les_pakking_pilot()))
         )
-        self.assertTrue(metodevalg_konsepter.isdisjoint(andre_konsepter))
+        # method.planning_variables er BEVISST gjenbrukt i Mesking Kompetent
+        # (meskekontrakten §5, Q-MASH-007), samme fakta (FACT-METHOD-0004).
+        gjenbrukt = {"method.planning_variables"}
+        self.assertTrue(gjenbrukt <= set(_konsept_rekkefolge(les_mesking_pilot())))
+        self.assertTrue((metodevalg_konsepter - gjenbrukt).isdisjoint(andre_konsepter))
         for k in metodevalg_konsepter:
             self.assertIn(k, tilstand["concepts"])
-        for k in andre_konsepter:
+        for k in andre_konsepter - gjenbrukt:
             self.assertNotIn(k, tilstand["concepts"])
 
     def test_engelsk_metodevalg_modultittel_og_flytdiagram_oversettes(self):
@@ -2506,6 +2505,135 @@ class TestGjaringKompetent(_MedIsolertTilstand):
         # fermentation.yeast_strain var delt allerede før Kompetent (Q-FERM-002/Q-RAW-010).
         self.assertEqual(gjaring & raavarer, {"yeast.pitch_principle", "yeast.attenuation", "fermentation.yeast_strain"})
         for konsept in self._NYE_KONSEPTER:
+            self.assertNotEqual(_konsept_label(konsept, "no"), konsept)
+            self.assertNotEqual(_konsept_label(konsept, "en"), konsept)
+
+
+# ─── Mesking Kompetent (meskekontrakten §6.1/§7.1): bolk D–F og
+# Q-MASH-004…008 i samme modul og samme kort, etter Foundation A–C ─────────
+
+class TestMeskingKompetent(_MedIsolertTilstand):
+    _ETIKETT = {"no": "Metode, ikke en faktapåstand", "en": "Method, not a fact claim"}
+    _KOMPETENT_TITLER = {
+        "no": ("Skille vørteren fra kornet", "Samle vørteren", "Sjekk før kokingen"),
+        "en": ("Separating wort from grain", "Collecting the wort", "A check before the boil"),
+    }
+    _KOMPETENT_KONSEPTER = ("mashing.grain_separation", "mashing.wort_collection", "method.planning_variables",
+                            "mashing.preboil_check")
+
+    def _bolk_teller(self, at):
+        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+
+    def test_fortsatt_elleve_kort_mesking_pa_plass_fire_pakking_pa_plass_atte(self):
+        for miljo_knapp, mesk, pakk in (("bs_velg_hjemmebrygger_btn", "**Mesking (kjele/BIAB)**", "**Pakking**"),
+                                        ("bs_velg_bryggeri_btn", "**Mesk/lauter**", "**Pakking/CIP**")):
+            with self.subTest(miljo=miljo_knapp):
+                at = self._ny_apptest()
+                self._velg_miljo(at, miljo_knapp)
+                kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
+                self.assertEqual(len(kort), 11, kort)
+                self.assertEqual(kort[3], mesk)
+                self.assertEqual(kort.count(mesk), 1)
+                self.assertEqual(kort[7], pakk)
+
+    def test_kompetentbolkene_rendrer_med_riktig_merking_i_begge_sprak_og_miljo(self):
+        pilot = les_mesking_pilot()
+        for sprak in ("no", "en"):
+            for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+                with self.subTest(sprak=sprak, miljo=miljo_knapp):
+                    at = self._ny_apptest()
+                    if sprak == "en":
+                        at.session_state["sprak"] = "en"
+                        at.run()
+                    self._apne_modul(at, "mesking", miljo_knapp)
+                    for idx in range(6):
+                        chunk = pilot["chunks"][idx]
+                        teller = (f"Læringsbolk {idx + 1} av 6" if sprak == "no"
+                                  else f"Learning block {idx + 1} of 6")
+                        self.assertEqual(self._bolk_teller(at), [teller])
+                        if idx >= 3:
+                            self.assertIn(self._KOMPETENT_TITLER[sprak][idx - 3],
+                                          " ".join(_alle_synlige_tekster(at)))
+                        har_etikett = self._ETIKETT[sprak] in [c.value for c in at.caption]
+                        self.assertEqual(har_etikett, chunk.get("basis") == "methodology", chunk["id"])
+                        if idx < 5:
+                            _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
+                            self.assertEqual(len(at.exception), 0)
+                    _knapp(at, "bs_start_sporsmal_mesking_btn")
+
+    def test_kompetentsporsmal_har_ikke_forhandsvalg_og_sjekk_svar_er_av(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "mesking")
+        fasit = _korrekt_svar_ider(les_mesking_pilot())
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(3)})
+        # Første Kompetent-spørsmål (Q-MASH-004, indeks 3).
+        self.assertIsNone(at.radio(key=self._valg_key(3, 1)).value)
+        self.assertTrue(_knapp(at, "bs_svar_btn_mesking_r1_q3").disabled)
+
+    def test_riktig_og_feil_tilbakemelding_pa_kompetentsporsmal(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "mesking")
+        pilot = les_mesking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        feil = _feil_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(4)})
+        # Q-MASH-005 (vorlauf, indeks 4): feil svar gir forklarende tilbakemelding.
+        self._besvar_sporsmal(at, 4, 1, feil[4])
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn(pilot["questions"][4]["feedback_incorrect"]["no"], tekst)
+        self._fortsett(at, 4, 1)
+        self._fullfor_alle_sporsmal(at, 1, {5: fasit[5], 6: fasit[6]})
+        # Q-MASH-008 (metodespørsmålet, indeks 7): riktig svar.
+        self._besvar_sporsmal(at, 7, 1, fasit[7])
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn(pilot["questions"][7]["feedback_correct"]["no"], tekst)
+
+    def test_full_flyt_etiketter_og_prov_igjen_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            with self.subTest(miljo=miljo_knapp):
+                at = self._ny_apptest()
+                self._apne_modul_og_start_sporsmal(at, "mesking", miljo_knapp)
+                fasit = _korrekt_svar_ider(les_mesking_pilot())
+                self.assertEqual(len(fasit), 8)
+                self._fullfor_alle_sporsmal(at, 1, fasit)
+                self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+                tekst = " ".join(_alle_synlige_tekster(at))
+                for konsept in self._KOMPETENT_KONSEPTER:
+                    self.assertIn(_konsept_label(konsept, "no"), tekst)
+                    self.assertNotIn(konsept, tekst)
+                forste = read_mastery_state()["concepts"]
+                _knapp(at, f"bs_prov_igjen_{self._aktiv_modul}_btn").click().run()
+                self.assertEqual(len(at.exception), 0, f"Uventet unntak ved Prøv igjen: {at.exception}")
+                self.assertIsNone(at.radio(key=self._valg_key(0, 2)).value)
+                self.assertTrue(_knapp(at, "bs_svar_btn_mesking_r2_q0").disabled)
+                self._fullfor_alle_sporsmal(at, 2, fasit)
+                andre = read_mastery_state()["concepts"]
+                for konsept in self._KOMPETENT_KONSEPTER:
+                    self.assertGreater(andre[konsept]["attempts"], forste[konsept]["attempts"], konsept)
+
+    def test_engelsk_full_flyt_viser_lesbare_etiketter(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul_og_start_sporsmal(at, "mesking")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_mesking_pilot()))
+        tekst = " ".join(_alle_synlige_tekster(at))
+        for konsept in self._KOMPETENT_KONSEPTER:
+            self.assertIn(_konsept_label(konsept, "en"), tekst)
+            self.assertNotIn(konsept, tekst)
+
+    def test_delt_mastery_med_forberedelse_metode(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "mesking")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_mesking_pilot()))
+        self.assertEqual(read_mastery_state()["concepts"]["method.planning_variables"]["attempts"], 1)
+        _knapp(at, "bs_oppsummering_tilbake_mesking_btn").click().run()
+        _knapp(at, "bs_apne_modul_metodevalg_btn").click().run()
+        self._aktiv_modul = "metodevalg"
+        self._start_sporsmalsrunde(at)
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_metodevalg_pilot()))
+        self.assertEqual(read_mastery_state()["concepts"]["method.planning_variables"]["attempts"], 2)
+        for konsept in ("mashing.grain_separation", "mashing.wort_collection", "mashing.preboil_check"):
             self.assertNotEqual(_konsept_label(konsept, "no"), konsept)
             self.assertNotEqual(_konsept_label(konsept, "en"), konsept)
 

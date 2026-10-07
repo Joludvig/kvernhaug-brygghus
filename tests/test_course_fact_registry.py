@@ -256,6 +256,7 @@ _MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003
 _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
 _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS = ["FACT-MEAS-0006"]
 _FERMENTATION_KOMPETENT_VERIFIED_IDS = ["FACT-BREW-0004", "FACT-BREW-0005"]
+_MASHING_KOMPETENT_VERIFIED_IDS = ["FACT-MASH-0005", "FACT-MASH-0006"]
 _SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
 _SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001", "FACT-SENSORY-0002", "FACT-SENSORY-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
@@ -265,6 +266,7 @@ _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS + _MEASUREMENT_VERIFIED_IDS
     + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS
     + _SAFETY_VERIFIED_IDS + _SENSORY_VERIFIED_IDS + _FERMENTATION_KOMPETENT_VERIFIED_IDS
+    + _MASHING_KOMPETENT_VERIFIED_IDS
 )
 
 
@@ -346,7 +348,10 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # Gjæring Kompetent G1/G2 (offline, Chief live source spot-check
         # 2026-10-05; no GitHub issue yet) adds FACT-BREW-0004..0005: 2
         # documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 45)
+        # Mesking Kompetent M1/M2 (offline, Chief live source spot-check
+        # 2026-10-05; no GitHub issue yet) adds FACT-MASH-0005..0006: 2
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 47)
         # Measurement M7 (offline, Chief live source spot-check 2026-10-05;
         # no GitHub issue yet) adds FACT-MEAS-0006: 1
         # professional_interpretation.
@@ -457,8 +462,11 @@ class TestProductionRegistryMashingFactPackVerifiedOnlyApi(unittest.TestCase):
     stays `draft`, see TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims)."""
 
     def test_returns_exactly_the_three_mashing_ids(self):
+        # The Mesking Kompetent M1/M2 records (FACT-MASH-0005..0006) are
+        # covered by TestProductionRegistryMashingKompetentM1M2.
         ids = {r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"].startswith("FACT-MASH-")}
-        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS))
+        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS + _MASHING_KOMPETENT_VERIFIED_IDS))
+        self.assertEqual(ids - set(_MASHING_KOMPETENT_VERIFIED_IDS), set(_MASHING_VERIFIED_IDS))
 
     def test_concept_filter_mashing_temperature_returns_expected_two(self):
         ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept="mashing.temperature")}
@@ -1501,6 +1509,115 @@ class TestProductionRegistryFermentationKompetentG1G2(unittest.TestCase):
         self.assertIn("INDEPENDENCE", records["FACT-BREW-0004"]["notes"])
         self.assertIn("FACT-SENSORY-0001", records["FACT-BREW-0005"]["notes"])
         self.assertIn("dropped entirely", records["FACT-BREW-0005"]["notes"])
+
+
+class TestProductionRegistryMashingKompetentM1M2(unittest.TestCase):
+    """Mesking Kompetent M1/M2 (mashing Kompetent contract §9; source pack
+    docs/development/v22_mashing_m1_m2_source_pack.md): Chief live
+    spot-check PASS 2026-10-05 (M1 PASS, M2 PASS). The claims are the
+    bounded source-pack versions inside the Chief-approved boundaries."""
+
+    _CONCEPTS = {"FACT-MASH-0005": "mashing.grain_separation", "FACT-MASH-0006": "mashing.wort_collection"}
+
+    def _records(self):
+        return {fid: get_verified_record(_PRODUCTION_REGISTRY, fid) for fid in self._CONCEPTS}
+
+    def test_verified_documented_facts_without_modules(self):
+        for fact_id, record in self._records().items():
+            with self.subTest(fact_id=fact_id):
+                self.assertIsNotNone(record)
+                self.assertEqual(record["status"], "verified")
+                self.assertEqual(record["classification"], "documented_fact")
+                self.assertEqual(record["concepts"], [self._CONCEPTS[fact_id]])
+                # Not in the Foundation module filter (mashing.fundamentals).
+                self.assertNotIn("modules", record)
+                # The local receipt of the Chief PASS (session log), not an
+                # invented clock time.
+                self.assertEqual(record["verified_at"], "2026-10-05T12:25:09+02:00")
+                self.assertIn("VERIFIED_AT PROVENANCE", record["notes"])
+                self.assertIn("2026-10-05T10:25:09Z", record["notes"])
+
+    def test_each_concept_maps_to_exactly_one_record(self):
+        for fact_id, concept in self._CONCEPTS.items():
+            ids = [r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept=concept)]
+            self.assertEqual(ids, [fact_id])
+
+    def test_fact_mash_0003_stays_draft(self):
+        data = read_registry_file(_PRODUCTION_REGISTRY)
+        record = next(r for r in data["records"] if r["id"] == "FACT-MASH-0003")
+        self.assertEqual(record["status"], "draft")
+        self.assertNotIn("verified_at", record)
+
+    def test_m1_keeps_the_bounded_method_aware_clauses(self):
+        claim = self._records()["FACT-MASH-0005"]["claim"]
+        for needle in ("separated from the spent grain", "depends on the equipment",
+                       "in a mash/lauter tun", "bed of grain itself acts as the filter",
+                       "in an all-in-one system", "basket or malt pipe that is lifted and left to drain",
+                       "in brew-in-a-bag the bag holding the grain is lifted out",
+                       "When draining through a grain bed in a lauter tun", "many brewers gently recirculate",
+                       "largely free of grain particles", "does not need to be perfectly clear"):
+            self.assertIn(needle, claim)
+
+    def test_m2_keeps_the_bounded_clauses(self):
+        claim = self._records()["FACT-MASH-0006"]["claim"]
+        for needle in ("still held in the wet grain", "Sparging", "continuously or in one or more batches",
+                       "recovers more of that sugar", "no-sparge", "full water volume goes into the mash",
+                       "leaves more sugar behind", "later runnings are weaker than the first",
+                       "depends on the method and on their own system"):
+            self.assertIn(needle, claim)
+
+    def test_claims_carry_no_numbers_or_excluded_topics(self):
+        for fact_id, record in self._records().items():
+            claim = record["claim"].lower()
+            with self.subTest(fact_id=fact_id):
+                self.assertIsNone(re.search(r"\d", claim))
+                self.assertNotIn("ph", re.findall(r"[a-z]+", claim))
+                for trap in ("crystal clear", "every method", "always", "efficien", "yield", "ppg", "points",
+                             "gravity", "tannin", "temperature", "squeez", "mill", "crush", "iodine",
+                             "conversion", "parti-gyle", "richer", "better", "proper", "stuck", "rice hull",
+                             "minute", "litre", "quart"):
+                    self.assertNotIn(trap, claim)
+
+    def test_sources_tiers_flags_and_spot_check(self):
+        for fact_id, record in self._records().items():
+            with self.subTest(fact_id=fact_id):
+                sources = record["sources"]
+                self.assertGreaterEqual(len(sources), 4)
+                self.assertTrue(any("howtobrew.com" in s["ref"] for s in sources))
+                self.assertTrue(any("beerandbrewing.com/dictionary/Yibra5GU76" in s["ref"] for s in sources))
+                self.assertTrue(any(s["tier"] == "A" for s in sources))
+                for source in sources:
+                    self.assertIn(source["tier"], ("A", "B"))
+                    self.assertIn("https://", source["ref"])
+                    self.assertIn("Chief live spot-check PASS 2026-10-05", source["note"])
+                    self.assertIn("Supports", source["note"])
+                    self.assertIn("not support", source["note"])
+                    if source["tier"] == "A" or "How to Brew" in source["ref"]:
+                        self.assertIn("commercial interest", source["type"])
+                    if source["tier"] == "A":
+                        # System manuals support only their own system's procedure.
+                        self.assertIn("all-in-one only", source["type"])
+                        self.assertIn("only)", source["note"])
+
+    def test_m1_does_not_use_all_in_one_recirculation_as_clarity(self):
+        record = self._records()["FACT-MASH-0005"]
+        brewzilla = next(s for s in record["sources"] if "BrewZilla" in s["ref"])
+        self.assertIn("NOT a clarity step", brewzilla["note"])
+        self.assertIn("all-in-one recirculation is NOT a clarity procedure", record["notes"])
+
+    def test_notes_record_traps_ownership_and_limitations(self):
+        records = self._records()
+        for record in records.values():
+            self.assertIn("Wording trap", record["notes"])
+            self.assertIn("INDEPENDENCE", record["notes"])
+            self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"])
+            self.assertIn("expired TLS certificate", record["notes"])
+            self.assertIn("Non-Kunze", record["notes"])
+            self.assertIn("M1 PASS, M2 PASS", record["notes"])
+        self.assertIn("FACT-METHOD-0005", records["FACT-MASH-0005"]["notes"])
+        self.assertIn("largely free of grain particles", records["FACT-MASH-0005"]["notes"])
+        self.assertIn("FACT-METHOD-0004", records["FACT-MASH-0006"]["notes"])
+        self.assertIn("no fly-vs-batch ranking", records["FACT-MASH-0006"]["notes"])
 
 
 class TestGetVerifiedRecordLookup(unittest.TestCase):
