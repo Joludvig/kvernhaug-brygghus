@@ -18,6 +18,9 @@ FACT-OXY-0002). The trusted-tool guidance is labelled methodology. **No new fact
 - Light-struck remains DEFERRED SHOULD.
 - The remaining Kompetent MUST blocker is Mesking D18/D19 (fact pack M1/M2 awaiting the Chief spot-check).
 
+**Status refresh 2026-10-05 (2):** Chief review GREEN; merged into the offline integration rehearsal (`cb8942e`).
+**Pakking Kompetent is COMPLETE locally/offline**; not on GitHub/master.
+
 ## 1. Authority and scope
 
 - Stage allocation contract:

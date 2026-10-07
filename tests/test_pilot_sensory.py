@@ -66,7 +66,7 @@ _EXISTING_PILOTS = (
 # Kompetent contract §12: absent basis = fact, closed methodology allow-list),
 # tested in tests/test_pilot_fermentation.py; the others still reject it.
 # pilot_package likewise (package Kompetent contract §7).
-_NO_METHODOLOGY_PILOTS = tuple(p for p in _EXISTING_PILOTS if p not in ("pilot_fermentation", "pilot_package"))
+_NO_METHODOLOGY_PILOTS = tuple(p for p in _EXISTING_PILOTS if p not in ("pilot_fermentation", "pilot_package", "pilot_mashing"))
 
 # Second slice: the fact-based fault chunks C-E and their questions. Every
 # other item stays methodology with source_claims == [].

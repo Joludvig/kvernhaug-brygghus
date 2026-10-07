@@ -25,6 +25,33 @@
         "no": "Mesketemperatur er bare én av flere faktorer som påvirker vørterens gjærbarhet og sammensetning - mesketykkelse (forholdet mellom vann og malt) og maltens eget enzyminnhold spiller også inn. Derfor finnes det ingen universell mesketemperatur som er riktig for alle oppskrifter eller alle mål med ølet; temperaturvalget bør ses i sammenheng med disse andre faktorene.",
         "en": "Mash temperature is only one of several factors that affect the wort's fermentability and composition - mash thickness (the water-to-grist ratio) and the malt's own enzyme content also play a role. That's why there is no single, universal mash temperature that is correct for every recipe or every desired beer outcome; the temperature choice should be considered together with these other factors."
       }
+    },
+    {
+      "id": "CHUNK-MASH-D",
+      "basis": "fact",
+      "source_claims": ["FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0005", "FACT-MASH-0005"],
+      "text": {
+        "no": "**Skille vørteren fra kornet.** Etter meskingen skal den søte vørteren skilles fra masken, det brukte kornet. Hvordan det gjøres, avhenger av utstyret ditt. I et tradisjonelt oppsett med eget mesk-/silekar renner vørteren ut gjennom en falsk bunn eller et rørsystem, og selve kornsengen fungerer som filter. I et alt-i-ett-anlegg ligger kornet i en kurv eller et maltrør som løftes opp og får renne av. Med BIAB løftes posen med kornet ut av kjelen og får renne av. Når vørteren renner gjennom en kornseng i et silekar, er den første vørteren ofte grumsete med kornbiter. Mange bryggere heller den da forsiktig tilbake over kornsengen til vørteren renner stort sett fri for kornpartikler – den trenger ikke å være helt klar. Det steget hører til silning gjennom en kornseng, ikke til alle metoder. Samme jobb, ulikt utstyr: ingen av metodene er bedre enn de andre.",
+        "en": "**Separating wort from grain.** After the mash, the sweet wort has to be separated from the spent grain. How that is done depends on your equipment. In a traditional setup with a separate mash/lauter tun, the wort drains out through a false bottom or manifold, and the grain bed itself acts as the filter. In an all-in-one system, the grain sits in a basket or malt pipe that is lifted and left to drain. In BIAB, the bag with the grain is lifted out of the kettle and left to drain. When wort drains through a grain bed in a lauter tun, the first runnings are often cloudy with bits of grain. Many brewers then gently pour them back over the grain bed until the wort runs largely free of grain particles – it does not need to be perfectly clear. That step belongs to draining through a grain bed, not to every method. Same job, different equipment: none of the methods is better than the others."
+      }
+    },
+    {
+      "id": "CHUNK-MASH-E",
+      "basis": "fact",
+      "source_claims": ["FACT-MASH-0006", "FACT-METHOD-0004"],
+      "text": {
+        "no": "**Samle vørteren.** Når mesken har rent av, holder det våte kornet fortsatt på sukkerrik vørter. Skylling (sparging) – å skylle kornet med mer varmt vann, enten jevnt og kontinuerlig eller i én eller flere omganger – får ut mer av det sukkeret. Noen bryggere skyller ikke i det hele tatt: de bruker hele vannmengden i meskingen og samler bare den første vørteren. Det er enklere, men mer sukker blir igjen i kornet. Samler du vørteren i flere omganger, er de senere avrenningene svakere enn den første. Hvor mye vørter og sukker du får ut, avhenger derfor av metoden og ditt eget anlegg. Vannmengder, det kornet holder igjen og dødvolum er heller ikke like mellom oppsett, så planlegg med tallene for ditt eget utstyr, ikke noen andres.",
+        "en": "**Collecting the wort.** When the mash has drained, the wet grain still holds sugar-rich wort. Sparging – rinsing the grain with more hot water, continuously or in one or more batches – recovers more of that sugar. Some brewers do not sparge at all: they put the full water volume into the mash and collect only the first runnings. That is simpler, but more sugar stays behind in the grain. If you collect the wort in stages, the later runnings are weaker than the first. So how much wort and sugar you collect depends on your method and your own system. Water volumes, what the grain holds back and dead space also differ between setups, so plan with your own equipment's numbers rather than someone else's."
+      }
+    },
+    {
+      "id": "CHUNK-MASH-F",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Sjekk før kokingen.** Før du begynner å koke, er det et godt øyeblikk å stoppe opp. Vit hva planen din forventet av vørtermengde og tetthet før kokingen. Mål og noter vørtermengden, og skriv om den er målt varm eller avkjølt (se Måling og bryggelogg). Mål og noter tettheten, og skriv at prøven er tatt før kokingen, med instrument og prøvens temperatur slik du ellers gjør. Sammenlign så planen med det du faktisk målte. Avviker de, skriver du én hypotese – en mulig forklaring, ikke et bevis – og velger én bevisst endring til et senere brygg. Du trenger ingen effektivitetsberegning for dette, og ingen fasit forteller deg automatisk hva som gikk galt. Skriv tallene slik du faktisk leste dem, uten mer presisjon enn målingen har.",
+        "en": "**A check before the boil.** Before you start the boil is a good moment to pause. Know what your plan expected for wort volume and gravity before the boil. Measure and note the wort volume, and write down whether it was measured hot or cooled (see Measurement and brew log). Measure and note the gravity, and write down that the sample was taken before the boil, with the instrument and the sample's temperature as you usually do. Then compare the plan with what you actually measured. If they differ, write one hypothesis – a possible explanation, not proof – and choose one deliberate change for a future brew. You do not need an efficiency calculation for this, and no answer key will tell you automatically what went wrong. Write the numbers as you actually read them, with no more precision than the measurement has."
+      }
     }
   ],
   "questions": [
@@ -161,6 +188,236 @@
       "feedback_incorrect": {
         "no": "Ikke helt. Mesketemperatur har betydning, men er ikke den eneste faktoren, og heller ikke et fast tall som passer alt - mesketykkelse og maltens enzyminnhold har også betydning, og det er derfor ingen enkelt universell mesketemperatur passer alle oppskrifter.",
         "en": "Not quite. Mash temperature does matter, but it isn't the only factor, and it also isn't a single fixed number that works for everything - mash thickness and the malt's enzyme content matter too, which is why no single universal mash temperature fits every recipe."
+      }
+    },
+    {
+      "id": "Q-MASH-004",
+      "type": "concept_check",
+      "basis": "fact",
+      "concepts": ["mashing.grain_separation"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003"],
+      "prompt": {
+        "no": "Tre bryggere skiller vørteren fra kornet etter meskingen. Én løfter ut en pose (BIAB), én lar vørteren renne ut gjennom kornsengen i et eget silekar, og én løfter maltrøret i et alt-i-ett-anlegg. Hva er riktigst å si om dette?",
+        "en": "Three brewers separate the wort from the grain after the mash. One lifts out a bag (BIAB), one lets the wort drain through the grain bed in a separate lauter tun, and one lifts the malt pipe in an all-in-one system. Which statement fits best?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Bare den som bruker et eget silekar, skiller egentlig vørteren fra kornet; de to andre hopper over steget.",
+            "en": "Only the brewer with a separate lauter tun really separates the wort from the grain; the other two skip that step."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "De gjør den samme jobben – skiller vørteren fra kornet – med ulikt utstyr, og ingen av metodene er bedre enn de andre.",
+            "en": "They do the same job – separating the wort from the grain – with different equipment, and none of the methods is better than the others."
+          },
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Alle tre må resirkulere den første vørteren over en kornseng, ellers er vørteren ikke skilt fra kornet.",
+            "en": "All three must recirculate the first runnings over a grain bed, or the wort is not separated from the grain."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. BIAB, tradisjonelt oppsett med silekar og alt-i-ett-anlegg skiller alle vørteren fra kornet – posen løftes ut, vørteren renner gjennom kornsengen, eller kurven/maltrøret løftes. Samme jobb, ulikt utstyr, og ingen metode er bedre enn de andre.",
+        "en": "Correct. BIAB, a traditional setup with a lauter tun and an all-in-one system all separate the wort from the grain – the bag is lifted out, the wort drains through the grain bed, or the basket/malt pipe is lifted. Same job, different equipment, and no method is better than the others."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Alle tre skiller vørteren fra kornet, bare med ulikt utstyr: posen løftes ut, vørteren renner gjennom kornsengen, eller kurven/maltrøret løftes. Resirkulering over kornsengen hører til silning gjennom en kornseng, ikke til alle metoder – og ingen metode er bedre enn de andre.",
+        "en": "Not quite. All three separate the wort from the grain, just with different equipment: the bag is lifted out, the wort drains through the grain bed, or the basket/malt pipe is lifted. Recirculating over the grain bed belongs to draining through a grain bed, not to every method – and no method is better than the others."
+      }
+    },
+    {
+      "id": "Q-MASH-005",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["mashing.grain_separation"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-MASH-0005"],
+      "prompt": {
+        "no": "Du brygger med et tradisjonelt mesk-/silekar med falsk bunn. Når du åpner kranen, er den første vørteren grumsete og har kornbiter i seg. Hva er en vanlig og fornuftig fremgangsmåte?",
+        "en": "You brew with a traditional mash/lauter tun with a false bottom. When you open the valve, the first runnings are cloudy with bits of grain in them. What is a common and sensible approach?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Samle den første vørteren og hell den forsiktig tilbake over kornsengen til vørteren renner stort sett fri for kornpartikler – den trenger ikke å være helt klar.",
+            "en": "Collect the first runnings and gently pour them back over the grain bed until the wort runs largely free of grain particles – it does not need to be perfectly clear."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Fortsett å resirkulere til vørteren er helt klar; alt annet er en feil.",
+            "en": "Keep recirculating until the wort is perfectly clear; anything else is a mistake."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Grumsete første vørter betyr at meskingen har mislyktes, så du må begynne på nytt.",
+            "en": "Cloudy first runnings mean the mash has failed, so you have to start again."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Når vørteren renner gjennom en kornseng, er den første vørteren ofte grumsete. Kornsengen fungerer som filter, og mange bryggere heller den første vørteren forsiktig tilbake over kornsengen til den er stort sett fri for kornpartikler. Den trenger ikke å være helt klar.",
+        "en": "Correct. When wort drains through a grain bed, the first runnings are often cloudy. The grain bed acts as the filter, and many brewers gently pour the first runnings back over it until the wort is largely free of grain particles. It does not need to be perfectly clear."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Grumsete første vørter er vanlig når vørteren renner gjennom en kornseng, og betyr ikke at noe har gått galt. Mange bryggere heller den forsiktig tilbake over kornsengen til den er stort sett fri for kornpartikler – helt klar trenger den ikke å være.",
+        "en": "Not quite. Cloudy first runnings are common when wort drains through a grain bed and do not mean anything has gone wrong. Many brewers gently pour them back over the grain bed until the wort is largely free of grain particles – it does not need to be perfectly clear."
+      }
+    },
+    {
+      "id": "Q-MASH-006",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["mashing.wort_collection"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-MASH-0006"],
+      "prompt": {
+        "no": "Mesken har rent av, og en bryggevenn sier: «Nå er alt sukkeret ute av kornet – det er ingen vits i å gjøre noe mer.» Stemmer det?",
+        "en": "The mash has drained, and a brewing friend says: \"All the sugar is out of the grain now – there is no point in doing anything more.\" Is that right?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ja – alt sukkeret renner ut med den første vørteren.",
+            "en": "Yes – all the sugar runs out with the first runnings."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Nei – men den senere avrenningen er sterkere enn den første, så det beste kommer til slutt.",
+            "en": "No – but the later runnings are stronger than the first, so the best comes last."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Nei – det våte kornet holder fortsatt på sukkerrik vørter. Skyller du kornet (sparging), får du ut mer. Brygger du uten skylling, bruker du hele vannmengden i meskingen og godtar at mer sukker blir igjen.",
+            "en": "No – the wet grain still holds sugar-rich wort. If you rinse the grain (sparging), you recover more. If you brew without sparging, you put the full water volume into the mash and accept that more sugar stays behind."
+          },
+          "correct": true
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Det våte kornet holder fortsatt på sukkerrik vørter. Skylling får ut mer av den, mens brygging uten skylling bruker hele vannmengden i meskingen og lar mer sukker bli igjen. Samler du i flere omganger, er de senere avrenningene svakere enn den første.",
+        "en": "Correct. The wet grain still holds sugar-rich wort. Sparging recovers more of it, while brewing without sparging puts the full water volume into the mash and leaves more sugar behind. If you collect in stages, the later runnings are weaker than the first."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Det våte kornet holder fortsatt på sukkerrik vørter etter at mesken har rent av, og de senere avrenningene er svakere enn den første, ikke sterkere. Skylling får ut mer; uten skylling går hele vannmengden i meskingen, og mer sukker blir igjen.",
+        "en": "Not quite. The wet grain still holds sugar-rich wort after the mash has drained, and the later runnings are weaker than the first, not stronger. Sparging recovers more; without sparging, the full water volume goes into the mash and more sugar stays behind."
+      }
+    },
+    {
+      "id": "Q-MASH-007",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["method.planning_variables"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-METHOD-0004"],
+      "prompt": {
+        "no": "Du har fått et nytt bryggeanlegg og vil kopiere vannmengdene fra en venn som brygger med et helt annet oppsett. Hva er det beste utgangspunktet?",
+        "en": "You have a new brewing system and want to copy the water volumes from a friend who brews on a completely different setup. What is the best starting point?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Bruk vennens tall uendret – vannmengdene er de samme uansett anlegg.",
+            "en": "Use your friend's numbers unchanged – water volumes are the same whatever the system."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Planlegg med tallene for ditt eget utstyr – hvor mye kornet holder igjen, dødvolum og vannmengder er ikke like mellom oppsett.",
+            "en": "Plan with your own equipment's numbers – what the grain holds back, dead space and water volumes are not the same between setups."
+          },
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Bytt til metoden med minst tap, siden den alltid er den beste.",
+            "en": "Switch to the method with the lowest losses, since that is always the best one."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Vannmengder, dødvolum og hvor mye kornet holder igjen varierer med utstyr og metode. Derfor planlegger du med tallene for ditt eget anlegg, ikke en felles fasit for alle oppsett.",
+        "en": "Correct. Water volumes, dead space and how much the grain holds back vary with equipment and method. That is why you plan with your own system's numbers, not one shared answer for every setup."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Vannmengder, dødvolum og hvor mye kornet holder igjen varierer med utstyr og metode, så en annens tall passer ikke automatisk ditt anlegg – og ingen metode er alltid best. Planlegg med tallene for ditt eget utstyr.",
+        "en": "Not quite. Water volumes, dead space and how much the grain holds back vary with equipment and method, so someone else's numbers do not automatically fit your system – and no method is always best. Plan with your own equipment's numbers."
+      }
+    },
+    {
+      "id": "Q-MASH-008",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": ["mashing.preboil_check"],
+      "difficulty": "intermediate",
+      "source_claims": [],
+      "prompt": {
+        "no": "Før kokingen måler du mindre vørter og lavere tetthet enn planen din forventet. Hva er en god fremgangsmåte?",
+        "en": "Before the boil, you measure less wort and a lower gravity than your plan expected. What is a good approach?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Regn ut effektiviteten med mange desimaler – da vet du nøyaktig hva som gikk galt.",
+            "en": "Calculate the efficiency to many decimal places – then you know exactly what went wrong."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Endre mesketemperatur, vannmengde og skyllemetode på én gang neste gang, så finner du feilen raskest.",
+            "en": "Change the mash temperature, the water volume and the sparging method all at once next time, so you find the problem fastest."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Noter volumet (og om det er målt varmt eller avkjølt) og tettheten, sammenlign med planen, skriv én hypotese og velg én bevisst endring til et senere brygg.",
+            "en": "Note the volume (and whether it was measured hot or cooled) and the gravity, compare them with the plan, write one hypothesis and choose one deliberate change for a future brew."
+          },
+          "correct": true
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Noter det du faktisk målte, med volumet merket varmt eller avkjølt, og sammenlign med planen. En hypotese er en mulig forklaring, ikke et bevis – og endrer du bare én ting om gangen, er det lettere å se hva endringen gjorde.",
+        "en": "Correct. Note what you actually measured, with the volume marked hot or cooled, and compare it with the plan. A hypothesis is a possible explanation, not proof – and if you change only one thing at a time, it is easier to see what the change did."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Flere desimaler gir ikke mer sikker kunnskap, og ingen beregning forteller deg automatisk hva som gikk galt. Endrer du mange ting samtidig, vet du ikke hvilken endring som virket. Noter målingene, sammenlign med planen, skriv én hypotese og velg én bevisst endring.",
+        "en": "Not quite. More decimal places do not give more certain knowledge, and no calculation tells you automatically what went wrong. If you change many things at once, you will not know which change worked. Note the measurements, compare with the plan, write one hypothesis and choose one deliberate change."
       }
     }
   ]
