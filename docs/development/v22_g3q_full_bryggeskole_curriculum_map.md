@@ -493,6 +493,10 @@ canonical in [v22_course_stage_allocation_contract.md](v22_course_stage_allocati
 labels in this audit differ from that contract on a stage question, the contract governs (for example: Smak og evaluering is
 Kompetent; quantitative priming is Bryggemester, with the priming concept at Kompetent).
 
+Status refresh (Chief decision, 2026-10-04): **Foundation required content is complete locally/offline** — the
+Foundation exit checkpoint is teachable end-to-end (stage allocation contract §E.1, §D.9). Not yet on GitHub/master;
+Kompetent course work and the Foundation/Kompetent stage presentation in the UI remain unfinished.
+
 ---
 
 ## 7. Hjemmebrygger — Trinn 1: Foundation

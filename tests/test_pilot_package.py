@@ -343,5 +343,30 @@ class TestEvaluateAnswer(unittest.TestCase):
         self.assertNotIn("score", result)
 
 
+
+class TestFermentationCompletionPointer(unittest.TestCase):
+    """Stage allocation contract §D.9: Pakking links to the Måling
+    completion check as a process dependency only -- no new claim and no
+    unsupported safety consequence of packaging too early."""
+
+    def setUp(self):
+        self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
+
+    def test_pointer_present_in_no_and_en(self):
+        chunk = self.data["chunks"][0]
+        self.assertEqual(chunk["id"], "CHUNK-PACK-A")
+        self.assertTrue(chunk["text"]["no"].endswith(
+            "Og før du pakker: bruk sjekken for ferdig gjæring som du lærer i Måling og bryggelogg."))
+        self.assertTrue(chunk["text"]["en"].endswith(
+            "And before you package: use the completion check taught in Measurement and brew log."))
+        self.assertEqual(chunk["source_claims"], ["FACT-COOL-0003"])
+
+    def test_no_unsupported_early_packaging_consequence(self):
+        raw = json.dumps(self.data, ensure_ascii=False).lower()
+        for banned in ("flaskebombe", "bottle bomb", "eksploder", "explode", "for tidlig", "too early",
+                       "FACT-MEAS".lower()):
+            self.assertNotIn(banned, raw)
+
+
 if __name__ == "__main__":
     unittest.main()

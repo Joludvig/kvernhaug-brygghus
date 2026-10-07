@@ -25,6 +25,14 @@
         "no": "Fordi virkningen av temperatur varierer fra stamme til stamme, bør du velge gjæringstemperatur ut fra anbefalingen for akkurat den gjærstammen du bruker - ikke ut fra en generell tommelfingerregel om at 'ale skal gjæres varmt' eller 'lager skal gjæres kaldt'. Stammespesifikk veiledning gir et mer pålitelig utgangspunkt enn én universell regel.",
         "en": "Because the effect of temperature varies from strain to strain, you should choose your fermentation temperature based on the guidance for the specific yeast strain you are using - not a general rule of thumb like 'ales are fermented warm' or 'lagers are fermented cold'. Strain-specific guidance gives a more reliable starting point than one universal rule."
       }
+    },
+    {
+      "id": "CHUNK-FERM-D",
+      "source_claims": ["FACT-YEAST-0001", "FACT-MEAS-0001", "FACT-MEAS-0002"],
+      "text": {
+        "no": "Etter pitching gjærer gjæren det forgjærbare sukkeret i vørteren og lager alkohol og CO₂. Mens det skjer, synker tettheten vanligvis, fordi gjæren gjør sukker om til alkohol. Hvordan vet du at gjæringen er ferdig? Bruk tetthetsmålinger: flere målinger tatt på samme måte, med litt tid imellom, som har sluttet å endre seg, tyder på at gjæringen sannsynligvis er ferdig. Luftlåsen er ikke et pålitelig tegn på hvor langt gjæringen har kommet – heller ikke på at den er ferdig. Hvordan du måler og noterer, lærer du i Måling og bryggelogg.",
+        "en": "After pitching, the yeast ferments the fermentable sugar in the wort and makes alcohol and CO₂. While that happens, the gravity generally falls, because the yeast turns sugar into alcohol. How do you know fermentation has finished? Use gravity readings: several readings taken the same way, some time apart, that have stopped changing indicate that fermentation has plausibly finished. The airlock is not a reliable sign of how far fermentation has come – nor of whether it has finished. How to measure and log is taught in Measurement and brew log."
+      }
     }
   ],
   "questions": [
@@ -116,6 +124,51 @@
       "feedback_incorrect": {
         "no": "Begge disse svarene bommer på samme kjernepunkt: smakseffekten av temperatur er ikke lik for alle gjærstammer, og temperatur er heller ikke uten betydning for smak. Effekten er stammeavhengig, så bruk stammespesifikk veiledning i stedet for én universell regel.",
         "en": "Both of these answers miss the same core point: the flavor effect of temperature is not the same for every yeast strain, and temperature isn't irrelevant to flavor either. The effect is strain-dependent, so use strain-specific guidance instead of one universal rule."
+      }
+    },
+    {
+      "id": "Q-FERM-003",
+      "type": "scenario",
+      "concepts": ["measurement.fermentation_complete"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MEAS-0002"],
+      "prompt": {
+        "no": "Luftlåsen har sluttet å boble. Hva er en god måte å finne ut om gjæringen er ferdig?",
+        "en": "The airlock has stopped bubbling. What is a good way to find out whether fermentation has finished?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ta flere tetthetsmålinger med litt tid imellom og se om tallet har sluttet å endre seg.",
+            "en": "Take several gravity readings some time apart and see whether the number has stopped changing."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Den er ferdig – når luftlåsen slutter å boble, er gjæringen over.",
+            "en": "It has finished – when the airlock stops bubbling, fermentation is over."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ta én tetthetsmåling – én avlesning er nok.",
+            "en": "Take one gravity reading – one reading is enough."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Gjentatte tetthetsmålinger som har sluttet å endre seg, tyder på at gjæringen sannsynligvis er ferdig. Luftlåsen er ikke et pålitelig tegn.",
+        "en": "Correct. Repeated gravity readings that have stopped changing indicate that fermentation has plausibly finished. The airlock is not a reliable sign."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Luftlåsen er ikke et pålitelig tegn, og én måling alene er ikke nok. Ta flere tetthetsmålinger med litt tid imellom og se om tallet har sluttet å endre seg.",
+        "en": "Not quite. The airlock is not a reliable sign, and one reading on its own is not enough. Take several gravity readings some time apart and see whether the number has stopped changing."
       }
     }
   ]

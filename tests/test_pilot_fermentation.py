@@ -51,6 +51,16 @@ def _load_fixture(name):
         return json.load(fh)
 
 
+# The temperature chunks use FACT-BREW-0001..0003 (#95). The Foundation
+# completion slice (stage allocation contract §D.9) adds only already
+# verified records: FACT-YEAST-0001 (yeast makes alcohol and CO2) and
+# FACT-MEAS-0001/0002 (gravity falls during fermentation; stable repeated
+# readings = plausibly finished; airlock not a reliable indicator).
+_ALLOWED_FACTS = {
+    "FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003",
+    "FACT-YEAST-0001", "FACT-MEAS-0001", "FACT-MEAS-0002",
+}
+
 class TestValidMinimalFixturePasses(unittest.TestCase):
     def test_no_errors_against_registry_fixture(self):
         data = _load_fixture("valid_minimal.json")
@@ -225,14 +235,19 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
     def test_schema_version(self):
         self.assertEqual(self.data["schema_version"], PILOT_SCHEMA_VERSION)
 
-    def test_exactly_three_chunks(self):
-        self.assertEqual(len(self.data["chunks"]), 3)
+    def test_exactly_four_chunks(self):
+        # Three temperature chunks (#95) plus the Foundation completion
+        # chunk CHUNK-FERM-D (stage allocation contract §D.9).
+        self.assertEqual([c["id"] for c in self.data["chunks"]],
+                         ["CHUNK-FERM-A", "CHUNK-FERM-B", "CHUNK-FERM-C", "CHUNK-FERM-D"])
 
-    def test_chunk_source_claims_cover_exactly_fact_brew_0001_to_0003(self):
+    def test_chunk_source_claims_cover_exactly_the_allowed_facts(self):
         referenced = set()
         for chunk in self.data["chunks"]:
             referenced.update(chunk["source_claims"])
-        self.assertEqual(referenced, {"FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003"})
+        self.assertEqual(referenced, _ALLOWED_FACTS)
+        self.assertEqual(self.data["chunks"][3]["source_claims"],
+                         ["FACT-YEAST-0001", "FACT-MEAS-0001", "FACT-MEAS-0002"])
 
     def test_at_least_one_concept_check_and_one_scenario_question(self):
         types = [q["type"] for q in self.data["questions"]]
@@ -240,10 +255,9 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
         self.assertIn("scenario", types)
         self.assertGreaterEqual(len(self.data["questions"]), 2)
 
-    def test_question_source_claims_are_subset_of_fact_brew_0001_to_0003(self):
-        allowed = {"FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003"}
+    def test_question_source_claims_are_subset_of_the_allowed_facts(self):
         for question in self.data["questions"]:
-            self.assertTrue(set(question["source_claims"]) <= allowed)
+            self.assertTrue(set(question["source_claims"]) <= _ALLOWED_FACTS)
 
     def test_no_new_factual_claims_are_introduced(self):
         all_claims = set()
@@ -251,7 +265,7 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
             all_claims.update(chunk["source_claims"])
         for question in self.data["questions"]:
             all_claims.update(question["source_claims"])
-        self.assertEqual(all_claims, {"FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003"})
+        self.assertEqual(all_claims, _ALLOWED_FACTS)
 
     def test_every_question_declares_stable_id_concepts_difficulty_and_source_claims(self):
         for question in self.data["questions"]:
@@ -345,6 +359,75 @@ class TestEvaluateAnswer(unittest.TestCase):
     def test_result_never_carries_a_raw_numeric_score(self):
         result = evaluate_answer(self.question, self.correct_option_id, "en")
         self.assertNotIn("score", result)
+
+
+
+class TestFoundationCompletionSlice(unittest.TestCase):
+    """Stage allocation contract §D.9: after pitching, airlock not proof,
+    finished = repeated stable gravity readings, link to Måling -- only
+    within FACT-YEAST-0001 and FACT-MEAS-0001/0002."""
+
+    def setUp(self):
+        self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
+        self.chunk = self.data["chunks"][3]
+        self.question = self.data["questions"][2]
+        self.new_text = " ".join(
+            list(self.chunk["text"].values())
+            + [t for f in ("prompt", "feedback_correct", "feedback_incorrect") for t in self.question[f].values()]
+            + [t for o in self.question["options"] for t in o["text"].values()]
+        ).lower()
+        self.teaching = " ".join(
+            list(self.chunk["text"].values()) + list(self.question["feedback_correct"].values())
+        ).lower()
+
+    def test_exact_question_mapping_reuses_the_maaling_concept(self):
+        q = self.question
+        self.assertEqual((q["id"], q["type"], q["difficulty"]), ("Q-FERM-003", "scenario", "beginner"))
+        self.assertEqual(q["concepts"], ["measurement.fermentation_complete"])
+        self.assertEqual(q["source_claims"], ["FACT-MEAS-0002"])
+        concepts = {c for qq in self.data["questions"] for c in qq["concepts"]}
+        self.assertNotIn("fermentation.complete", concepts)
+        self.assertNotIn("fermentation.completion", concepts)
+
+    def test_no_en_symmetry(self):
+        for bilingual in [self.chunk["text"], self.question["prompt"], self.question["feedback_correct"],
+                          self.question["feedback_incorrect"]] + [o["text"] for o in self.question["options"]]:
+            self.assertEqual(set(bilingual), {"no", "en"})
+            self.assertTrue(bilingual["no"].strip() and bilingual["en"].strip())
+
+    def test_after_pitching_wording(self):
+        self.assertIn("etter pitching gjærer gjæren det forgjærbare sukkeret", self.teaching)
+        self.assertIn("lager alkohol og co₂", self.teaching)
+        self.assertIn("after pitching, the yeast ferments the fermentable sugar", self.teaching)
+
+    def test_stable_readings_and_maaling_link(self):
+        self.assertIn("som har sluttet å endre seg, tyder på at gjæringen sannsynligvis er ferdig", self.teaching)
+        self.assertIn("that have stopped changing indicate that fermentation has plausibly finished", self.teaching)
+        self.assertIn("med litt tid imellom", self.teaching)
+        self.assertIn("måling og bryggelogg", self.teaching)
+        self.assertIn("measurement and brew log", self.teaching)
+
+    def test_airlock_is_never_proof_or_an_activity_diagnostic(self):
+        self.assertIn("luftlåsen er ikke et pålitelig tegn", self.teaching)
+        self.assertIn("the airlock is not a reliable sign", self.teaching)
+        for banned in ("bobler betyr", "bubbles mean", "bubbling means", "sunn gjæring", "healthy fermentation",
+                       "ingen bobler betyr", "no bubbles means", "har stoppet, så", "stopped, so",
+                       "luftlåsen viser", "the airlock shows"):
+            self.assertNotIn(banned, self.teaching)
+
+    def test_no_unsupported_signs_phases_days_or_kompetent_depth(self):
+        self.assertNotRegex(self.new_text, r"[0-9]")
+        for banned in ("skum", "krausen", "foam", "lukt", "smell", "lyd", "sound", "synlig", "visible",
+                       "fase", "phase", "lag-", "døgn", "dag", "day", "timer", "hour", "uke", "week",
+                       "diacetyl", "modning", "conditioning", "maturation", "starter", "viabilitet", "viability",
+                       "pitchemengde", "pitch rate", "trykkgjæring", "pressure", "høst", "harvest",
+                       "glykolyse", "glycolysis", "stuck", "stall", "hengt seg", "flaskebombe", "bottle bomb", "eksplo"):
+            self.assertNotRegex(self.new_text, r"\b" + banned)
+
+    def test_stable_is_not_package_now_and_not_the_planned_fg(self):
+        for banned in ("pakk med en gang", "package immediately", "klar til å pakkes", "ready to package",
+                       "planlagte fg", "planned fg", "bevist", "proven", "proves"):
+            self.assertNotIn(banned, self.new_text)
 
 
 if __name__ == "__main__":

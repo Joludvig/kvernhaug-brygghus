@@ -1,6 +1,7 @@
 # V2.2 — Bryggeskole course stage allocation contract
 
-Version: 1.0 (2026-10-04); status refresh 2026-10-04 after the Måling Foundation and Oppskriftsforståelse implementations (§A.1)
+Version: 1.0 (2026-10-04); status refresh 2026-10-04 after the Måling Foundation and Oppskriftsforståelse implementations (§A.1) and the Foundation
+fermentation completion slice (§C.7, §D.9); Chief decision 2026-10-04: Foundation required content complete offline (§E.1)
 Status: **Canonical, locked owner/Chief decisions** for *where* course content belongs by stage. Decision/architecture
 document only: it implements nothing and changes no lesson, registry, UI or Web file.
 Recorded offline during the GitHub outage; see the sync note in §K.
@@ -59,12 +60,12 @@ The contract was decided against the **green integration rehearsal** `offline/fu
 landed on GitHub/master**. Status labels in §C describe that offline integration state:
 
 **Status refresh 2 (2026-10-04).** **Oppskriftsforståelse** (entirely Kompetent) is now implemented locally/offline on
-`offline/recipe-understanding-implementation` (based on the integration rehearsal with Måling), pending Chief review before it is merged
-into the integration rehearsal. It has **not yet landed on GitHub/master**. The table includes it:
+`offline/recipe-understanding-implementation` (based on the integration rehearsal with Måling) and, after Chief review, merged into the integration rehearsal
+(`f259a6c`). It has **not yet landed on GitHub/master**. The table includes it:
 
 | Check | State |
 |---|---|
-| Visible module cards | **11** with Oppskriftsforståelse (10 in the integration rehearsal until it is merged): Råvarer, Rengjøring og sikkerhet, Forberedelse/metode, Mesking, Koking/humle, Kjøling/overføring, Gjæring, Pakking, Måling og bryggelogg, Oppskriftsforståelse, Smak og evaluering (`_MODUL_REKKEFOLGE`, `ui/bryggeskole_panel.py`) |
+| Visible module cards | **11**: Råvarer, Rengjøring og sikkerhet, Forberedelse/metode, Mesking, Koking/humle, Kjøling/overføring, Gjæring, Pakking, Måling og bryggelogg, Oppskriftsforståelse, Smak og evaluering (`_MODUL_REKKEFOLGE`, `ui/bryggeskole_panel.py`) |
 | Måling og bryggelogg | **Foundation implemented** in the offline/local integration (`measurement.fundamentals`, CHUNK-MEAS-A…E, Q-MEAS-001…006; position 9); not yet on GitHub/master. **Kompetent not implemented** (measurement contract §21.6) |
 | Oppskriftsforståelse | **Implemented locally/offline** (entire module Kompetent; `recipe.fundamentals`, CHUNK-REC-A…G, Q-REC-001…007; position 10) on `offline/recipe-understanding-implementation`; not yet on GitHub/master. Its Måling Foundation prerequisite (§27.8) is satisfied offline |
 | Smak og evaluering | **Visible**, but contractually **Kompetent** (sensory contract §1–§3). Implemented chunks are methodology only (SENS-A, B, F, G) |
@@ -172,7 +173,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 | Stage | Content | Status |
 |---|---|---|
 | Foundation | Temperature affects activity and flavour; follow the strain's guidance (CHUNK-FERM-A…C; FACT-BREW-0001…0003). Pitch principle is in Råvarer (FACT-YEAST-0004) | IMPLEMENTED |
-| Foundation (locked gap) | What happens after pitching at a simple level; knowing fermentation is active **without treating airlock activity as proof**; **finished = repeated stable gravity readings**; semantic links to Måling and Pakking (§D.9) | GAP (partly sourced, §I) |
+| Foundation (locked gap) | What happens after pitching at a simple level; knowing fermentation is active **without treating airlock activity as proof**; **finished = repeated stable gravity readings**; semantic links to Måling and Pakking (§D.9) | GAP (partly sourced, §I). Status refresh 2026-10-04: implemented locally/offline on `offline/foundation-fermentation-completion` (CHUNK-FERM-D, Q-FERM-003; not yet on GitHub/master) for after pitching, airlock not proof, finished = stable readings and the Måling link. "Knowing fermentation is active" is taught only through measurement (gravity generally falls during fermentation, FACT-MEAS-0001); no verified record supports a visible or audible sign. **Chief decision 2026-10-04:** the measurement route satisfies this requirement at Foundation; visible/audible signs and phases are non-blocking optional future depth (§D.9) |
 | Kompetent | Pitching/viability concept (D45), phases (D26), by-products limited to the sourced diacetyl example plus strain/temperature flavour (D47; FACT-SENSORY-0001, FACT-BREW-0002), completion in depth (D48), conditioning/maturation (D27), yeast metabolism concept (D61) | MAPPED (roadmap slice 7, no contract) |
 | Bryggemester | Starters, harvesting/reuse (D49), pressure fermentation (D50), yeast biochemistry, special methods (D67), simple viability checks | OUT OF APP |
 | Bryggeri | Propagation plants / yeast lab (D78), cylindroconical schemes, CO₂ recovery (D72) | OUT OF APP |
@@ -181,7 +182,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 
 | Stage | Content | Status |
 |---|---|---|
-| Foundation | Sanitation continues; priming is a small new fermentation in the bottle; force carbonation as a concept; minimise oxygen; pressure safety; both paths legitimate (CHUNK-PACK-A…E; FACT-COOL-0003, FACT-PACK-0001…0004, FACT-OXY-0002). Link: package only when fermentation is finished (§D.9) | IMPLEMENTED; link GAP |
+| Foundation | Sanitation continues; priming is a small new fermentation in the bottle; force carbonation as a concept; minimise oxygen; pressure safety; both paths legitimate (CHUNK-PACK-A…E; FACT-COOL-0003, FACT-PACK-0001…0004, FACT-OXY-0002). Link: package only when fermentation is finished (§D.9) | IMPLEMENTED; link implemented locally/offline on `offline/foundation-fermentation-completion` as a process pointer to the Måling completion check (no new claim, no early-packaging consequence); not yet on GitHub/master |
 | Kompetent | **Priming concept:** the priming amount controls carbonation; follow a trusted recipe, calculator or table; **no manual calculation** required (§D.6). Clarification (D28), shelf life brief (D58) | Priming concept GAP (no contract); D28/D58 MAPPED (roadmap slice 11) |
 | Bryggemester | Quantitative priming and carbonation maths, pressure/kegging depth, gauges and regulators (D42, D50), foam (D57) | OUT OF APP |
 | Bryggeri | Commercial packaging lines (D74), filtration/stabilisation/pasteurisation (D73) | OUT OF APP |
@@ -283,6 +284,18 @@ Foundation must eventually include:
 
 No unsupported detail is added now. Fact/source status is in §I.
 
+Status refresh (2026-10-04): items 1, 3 and 4 are implemented locally/offline on `offline/foundation-fermentation-completion` (not yet
+on GitHub/master) within FACT-YEAST-0001 and FACT-MEAS-0001/0002. Item 2 is covered only by the measurement route
+(falling gravity during fermentation; the airlock is not a reliable sign).
+
+**Chief decision (2026-10-04).** Item 2 is **satisfied by the measurement route**: gravity generally falls while
+fermentation is happening (FACT-MEAS-0001); airlock activity is not a reliable indicator of progress or completion
+(FACT-MEAS-0002); repeated stable gravity readings are the Foundation completion check. A positive visual, audible or
+smell checklist (krausen, foam, smell, sound, bubbling, phase signs) is **not required for Foundation** and must not be
+taught as Foundation evidence. There is still no verified record for such signs or for detailed fermentation phases;
+that is **non-blocking, optional future depth**, to be sourced later only if useful. All four items are therefore met
+locally/offline (not yet on GitHub/master).
+
 ## E. Foundation exit checkpoint
 
 > **"I can brew, ferment and package one batch safely and explain what each stage does."**
@@ -301,6 +314,20 @@ memorise:
 
 Status refresh: items 6 and 8 are now taught by the Måling Foundation module in the offline integration (not yet on
 GitHub/master). The Gjæring Foundation gap (§D.9) is still open, so Gjæring and Pakking do not yet link to item 6.
+Status refresh 2 (2026-10-04): Gjæring and Pakking now link to item 6 locally/offline on `offline/foundation-fermentation-completion`
+(not yet on GitHub/master); §D.9 item 2 is satisfied by the measurement route (Chief decision 2026-10-04, §D.9).
+
+### E.1 Foundation required content — status (Chief decision, 2026-10-04)
+
+**Foundation required content is COMPLETE locally/offline** (offline integration rehearsal with `offline/foundation-fermentation-completion`
+merged). The learner can reach the checkpoint above end-to-end: every item 1–8 is taught by an implemented module.
+
+This means only that the required Foundation learning content exists and the checkpoint is teachable end-to-end. It
+does **not** mean:
+- that the work is on GitHub/master (it is not; issues and PRs are still required);
+- that the whole Bryggeskole, or Kompetent, is complete (Kompetent course work remains incomplete, §F);
+- that stage presentation is done (Foundation/Kompetent separation in the UI is still unbuilt, §J);
+- that every optional or source-gap item is closed (the remaining F rows in §I are non-blocking open gaps).
 
 ## F. Kompetent completion criteria
 
@@ -353,8 +380,8 @@ a reason to teach a topic in the homebrew course.
 | Gap | Stage | State |
 |---|---|---|
 | Måling og bryggelogg Foundation module | F | IMPLEMENTED in the offline integration (FACT-MEAS-0001…0003); not yet on GitHub/master; implementation issue pending (measurement contract §22) |
-| Fermentation after pitching (simple) | F | GAP. FACT-YEAST-0001 supports "yeast consumes sugar and makes alcohol and CO₂". **No record for signs of active fermentation or phases** |
-| Airlock not proof; finished = stable readings | F | Sourced by FACT-MEAS-0002; taught in Måling F (implemented offline); Gjæring/Pakking links not yet present |
+| Fermentation after pitching (simple) | F | GAP. FACT-YEAST-0001 supports "yeast consumes sugar and makes alcohol and CO₂". **No record for signs of active fermentation or phases**. Status refresh 2026-10-04: the supported part is implemented offline (CHUNK-FERM-D, `offline/foundation-fermentation-completion`); visible/audible signs and phases remain without a record — **non-blocking, optional future depth** (Chief decision 2026-10-04, §D.9) |
+| Airlock not proof; finished = stable readings | F | Sourced by FACT-MEAS-0002; taught in Måling F (implemented offline); Gjæring/Pakking links implemented offline on `offline/foundation-fermentation-completion` (not yet on GitHub/master) |
 | Any safety consequence of packaging too early | F | GAP. FACT-PACK-0003 covers damaged or unrated containers only; no record for early packaging |
 | Spoilage vs safety; electrical near liquids; scald first aid | F | GAP (cleaning contract §3/§6) |
 | Priming concept (amount controls carbonation; use a trusted tool) | K | GAP: no contract; FACT-PACK-0001 covers priming as a process only |

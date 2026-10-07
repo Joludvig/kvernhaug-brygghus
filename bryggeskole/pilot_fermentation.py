@@ -6,8 +6,11 @@ consumer API (bryggeskole/course_fact_registry.py, issue #91).
 
 Scope, stated plainly (mirrors the governing issue):
 - one bounded pilot topic -- fermentation temperature fundamentals --
-  consuming only FACT-BREW-0001..0003;
-- three bilingual (NO/EN) learning chunks, plus at least one concept-check
+  consuming FACT-BREW-0001..0003, plus the Foundation completion slice
+  (course stage allocation contract §D.9; offline, no GitHub issue yet):
+  CHUNK-FERM-D / Q-FERM-003 reuse FACT-YEAST-0001 and FACT-MEAS-0001/0002
+  and the shared Måling mastery concept measurement.fermentation_complete;
+- four bilingual (NO/EN) learning chunks, plus at least one concept-check
   and one scenario/application question, each declaring source_claims
   that must resolve to a *verified* Course Fact Registry record;
 - a pure, fail-closed content validator plus pure renderer/view-model
