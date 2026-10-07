@@ -20,9 +20,11 @@ import unittest
 
 from bryggeskole.course_fact_registry import CourseFactRegistryError
 from bryggeskole.pilot_fermentation import (
+    BASES,
     DEFAULT_PILOT_PATH,
     DEFAULT_REGISTRY_PATH,
     DIFFICULTIES,
+    METHODOLOGY_CONCEPTS,
     PILOT_SCHEMA_VERSION,
     QUESTION_TYPES,
     PilotContentError,
@@ -56,10 +58,48 @@ def _load_fixture(name):
 # verified records: FACT-YEAST-0001 (yeast makes alcohol and CO2) and
 # FACT-MEAS-0001/0002 (gravity falls during fermentation; stable repeated
 # readings = plausibly finished; airlock not a reliable indicator).
-_ALLOWED_FACTS = {
+_FOUNDATION_FACTS = {
     "FACT-BREW-0001", "FACT-BREW-0002", "FACT-BREW-0003",
     "FACT-YEAST-0001", "FACT-MEAS-0001", "FACT-MEAS-0002",
 }
+# Gjæring Kompetent (fermentation Kompetent contract §12): the verified G1/G2
+# records FACT-BREW-0004/0005 plus reused Råvarer/Måling/Smak/Kjøling facts.
+_KOMPETENT_FACTS = {
+    "FACT-YEAST-0001", "FACT-YEAST-0002", "FACT-YEAST-0004", "FACT-MASH-0001",
+    "FACT-OXY-0001", "FACT-OXY-0003", "FACT-BREW-0002", "FACT-BREW-0003",
+    "FACT-BREW-0004", "FACT-BREW-0005", "FACT-MEAS-0001", "FACT-MEAS-0002",
+    "FACT-MEAS-0004", "FACT-SENSORY-0001",
+}
+_ALLOWED_FACTS = _FOUNDATION_FACTS | _KOMPETENT_FACTS
+
+# Locked shape (contract §12): (id, basis, source_claims).
+_FOUNDATION_CHUNKS = [
+    ("CHUNK-FERM-A", ["FACT-BREW-0001"]),
+    ("CHUNK-FERM-B", ["FACT-BREW-0002"]),
+    ("CHUNK-FERM-C", ["FACT-BREW-0003"]),
+    ("CHUNK-FERM-D", ["FACT-YEAST-0001", "FACT-MEAS-0001", "FACT-MEAS-0002"]),
+]
+_KOMPETENT_CHUNKS = [
+    ("CHUNK-FERM-E", "fact", ["FACT-YEAST-0001", "FACT-MASH-0001", "FACT-YEAST-0002"]),
+    ("CHUNK-FERM-F", "fact", ["FACT-YEAST-0004", "FACT-OXY-0001", "FACT-OXY-0003", "FACT-BREW-0003"]),
+    ("CHUNK-FERM-G", "fact", ["FACT-BREW-0004", "FACT-MEAS-0001"]),
+    ("CHUNK-FERM-H", "fact", ["FACT-MEAS-0002", "FACT-MEAS-0001", "FACT-YEAST-0002", "FACT-MEAS-0004"]),
+    ("CHUNK-FERM-I", "fact", ["FACT-SENSORY-0001", "FACT-BREW-0002", "FACT-YEAST-0001"]),
+    ("CHUNK-FERM-J", "fact", ["FACT-BREW-0005", "FACT-SENSORY-0001"]),
+    ("CHUNK-FERM-K", "methodology", []),
+]
+# (id, type, basis, concepts, source_claims)
+_KOMPETENT_QUESTIONS = [
+    ("Q-FERM-004", "concept_check", "fact", ["fermentation.yeast_metabolism"], ["FACT-YEAST-0001", "FACT-MASH-0001"]),
+    ("Q-FERM-005", "scenario", "fact", ["yeast.pitch_principle"], ["FACT-YEAST-0004", "FACT-OXY-0001"]),
+    ("Q-FERM-006", "scenario", "fact", ["fermentation.phases"], ["FACT-BREW-0004"]),
+    ("Q-FERM-007", "scenario", "fact", ["measurement.fermentation_complete"], ["FACT-MEAS-0002", "FACT-MEAS-0001"]),
+    ("Q-FERM-008", "scenario", "fact", ["yeast.attenuation"], ["FACT-YEAST-0002"]),
+    ("Q-FERM-009", "scenario", "fact", ["fermentation.byproducts"], ["FACT-SENSORY-0001"]),
+    ("Q-FERM-010", "scenario", "fact", ["fermentation.conditioning"], ["FACT-BREW-0005", "FACT-SENSORY-0001"]),
+    ("Q-FERM-011", "scenario", "methodology", ["fermentation.process_reasoning"], []),
+]
+_KOMPETENT_IDS = {row[0] for row in _KOMPETENT_CHUNKS + _KOMPETENT_QUESTIONS}
 
 class TestValidMinimalFixturePasses(unittest.TestCase):
     def test_no_errors_against_registry_fixture(self):
@@ -235,11 +275,12 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
     def test_schema_version(self):
         self.assertEqual(self.data["schema_version"], PILOT_SCHEMA_VERSION)
 
-    def test_exactly_four_chunks(self):
+    def test_foundation_chunks_then_kompetent_chunks(self):
         # Three temperature chunks (#95) plus the Foundation completion
-        # chunk CHUNK-FERM-D (stage allocation contract §D.9).
+        # chunk CHUNK-FERM-D (stage allocation contract §D.9), followed by
+        # the Kompetent chunks E..K (fermentation Kompetent contract §12).
         self.assertEqual([c["id"] for c in self.data["chunks"]],
-                         ["CHUNK-FERM-A", "CHUNK-FERM-B", "CHUNK-FERM-C", "CHUNK-FERM-D"])
+                         [row[0] for row in _FOUNDATION_CHUNKS] + [row[0] for row in _KOMPETENT_CHUNKS])
 
     def test_chunk_source_claims_cover_exactly_the_allowed_facts(self):
         referenced = set()
@@ -272,7 +313,10 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
             self.assertRegex(question["id"], r"^Q-[A-Z0-9]+-\d{3}$")
             self.assertTrue(question["concepts"])
             self.assertIn(question["difficulty"], DIFFICULTIES)
-            self.assertTrue(question["source_claims"])
+            if question.get("basis", "fact") == "fact":
+                self.assertTrue(question["source_claims"])
+            else:
+                self.assertEqual(question["source_claims"], [])
 
     def test_no_raw_score_field_anywhere_in_content(self):
         raw = json.dumps(self.data)
@@ -428,6 +472,222 @@ class TestFoundationCompletionSlice(unittest.TestCase):
         for banned in ("pakk med en gang", "package immediately", "klar til å pakkes", "ready to package",
                        "planlagte fg", "planned fg", "bevist", "proven", "proves"):
             self.assertNotIn(banned, self.new_text)
+
+
+def _minimal_with(chunk_extra=None, question_extra=None):
+    data = _load_fixture("valid_minimal.json")
+    if chunk_extra is not None:
+        data["chunks"].append(chunk_extra)
+    if question_extra is not None:
+        q = json.loads(json.dumps(data["questions"][0]))
+        q["id"] = "Q-TEST-099"
+        q.update(question_extra)
+        data["questions"].append(q)
+    return data
+
+
+class TestScopedBasisRule(unittest.TestCase):
+    """Fermentation Kompetent contract §8/§12: an optional basis. Absent
+    means "fact" (Foundation items unchanged); "methodology" needs empty
+    source_claims and, on a question, an approved methodology concept."""
+
+    def test_value_sets(self):
+        self.assertEqual(BASES, ("fact", "methodology"))
+        self.assertEqual(METHODOLOGY_CONCEPTS, frozenset({"fermentation.process_reasoning"}))
+
+    def test_absent_basis_is_fact_and_needs_claims(self):
+        chunk = {"id": "CHUNK-TEST-B", "source_claims": [], "text": {"no": "x", "en": "x"}}
+        errors = validate_pilot_content(_minimal_with(chunk_extra=chunk), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("non-empty list" in e for e in errors), errors)
+
+    def test_explicit_fact_basis_is_valid(self):
+        chunk = {"id": "CHUNK-TEST-B", "basis": "fact", "source_claims": ["FACT-TEST-0020"],
+                 "text": {"no": "x", "en": "x"}}
+        self.assertEqual(validate_pilot_content(_minimal_with(chunk_extra=chunk), registry_path=_REGISTRY_FIXTURE), [])
+
+    def test_methodology_chunk_needs_empty_claims(self):
+        ok = {"id": "CHUNK-TEST-B", "basis": "methodology", "source_claims": [], "text": {"no": "x", "en": "x"}}
+        self.assertEqual(validate_pilot_content(_minimal_with(chunk_extra=ok), registry_path=_REGISTRY_FIXTURE), [])
+        bad = dict(ok, source_claims=["FACT-TEST-0020"])
+        errors = validate_pilot_content(_minimal_with(chunk_extra=bad), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("requires 'source_claims' to be an empty list" in e for e in errors), errors)
+
+    def test_methodology_question_only_with_an_approved_concept(self):
+        ok = {"basis": "methodology", "source_claims": [], "concepts": ["fermentation.process_reasoning"]}
+        self.assertEqual(validate_pilot_content(_minimal_with(question_extra=ok), registry_path=_REGISTRY_FIXTURE), [])
+        bad = dict(ok, concepts=["fermentation.phases"])
+        errors = validate_pilot_content(_minimal_with(question_extra=bad), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("not an approved methodology concept" in e for e in errors), errors)
+
+    def test_unknown_basis_fails_closed(self):
+        chunk = {"id": "CHUNK-TEST-B", "basis": "opinion", "source_claims": ["FACT-TEST-0020"],
+                 "text": {"no": "x", "en": "x"}}
+        errors = validate_pilot_content(_minimal_with(chunk_extra=chunk), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("invalid basis" in e for e in errors), errors)
+
+
+def _kompetent_text(data, teaching_only=False):
+    """Lower-cased Kompetent text. With teaching_only, only what the module
+    teaches as right: chunks, correct options and correct feedback."""
+    parts = []
+    for chunk in data["chunks"]:
+        if chunk["id"] in _KOMPETENT_IDS:
+            parts.extend(chunk["text"].values())
+    for q in data["questions"]:
+        if q["id"] not in _KOMPETENT_IDS:
+            continue
+        parts.extend(q["feedback_correct"].values())
+        for o in q["options"]:
+            if o["correct"] or not teaching_only:
+                parts.extend(o["text"].values())
+        if not teaching_only:
+            parts.extend(q["prompt"].values())
+            parts.extend(q["feedback_incorrect"].values())
+    return " ".join(parts).lower()
+
+
+class TestFermentationKompetentShape(unittest.TestCase):
+    """Fermentation Kompetent contract §12: the locked E..K / Q-004..011 shape
+    in the same module, after an unchanged Foundation."""
+
+    def setUp(self):
+        self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
+
+    def test_foundation_items_are_unchanged_and_carry_no_basis(self):
+        chunks = self.data["chunks"][:4]
+        self.assertEqual([(c["id"], c["source_claims"]) for c in chunks], [tuple(r) for r in _FOUNDATION_CHUNKS])
+        self.assertEqual([q["id"] for q in self.data["questions"][:3]], ["Q-FERM-001", "Q-FERM-002", "Q-FERM-003"])
+        for item in chunks + self.data["questions"][:3]:
+            self.assertNotIn("basis", item, item["id"])
+
+    def test_kompetent_chunks_match_the_locked_shape(self):
+        got = [(c["id"], c["basis"], c["source_claims"]) for c in self.data["chunks"][4:]]
+        self.assertEqual(got, [tuple(r) for r in _KOMPETENT_CHUNKS])
+
+    def test_kompetent_questions_match_the_locked_shape(self):
+        got = [(q["id"], q["type"], q["basis"], q["concepts"], q["source_claims"]) for q in self.data["questions"][3:]]
+        self.assertEqual(got, [tuple(r) for r in _KOMPETENT_QUESTIONS])
+        for q in self.data["questions"][3:]:
+            self.assertEqual(q["difficulty"], "intermediate", q["id"])
+            self.assertEqual(len(q["options"]), 3, q["id"])
+            self.assertEqual(sum(o["correct"] for o in q["options"]), 1, q["id"])
+
+    def test_concepts_are_the_approved_set(self):
+        concepts = {c for q in self.data["questions"][3:] for c in q["concepts"]}
+        self.assertEqual(concepts, {
+            "fermentation.yeast_metabolism", "yeast.pitch_principle", "fermentation.phases",
+            "measurement.fermentation_complete", "yeast.attenuation", "fermentation.byproducts",
+            "fermentation.conditioning", "fermentation.process_reasoning",
+        })
+
+    def test_learn_plan_bridge_chunks_are_still_foundation_a_b_c(self):
+        from ui import yeast_panel
+        self.assertEqual(yeast_panel._LAER_BRO_CHUNK_IDER, ("CHUNK-FERM-A", "CHUNK-FERM-B", "CHUNK-FERM-C"))
+
+
+class TestFermentationKompetentGuardrails(unittest.TestCase):
+    """Binding wording traps (contract §8, §12) and the Chief refinements:
+    no numbers, no Bryggemester depth, completion stays stable readings,
+    G2 names no by-product and never says 'not everything can be fixed by
+    waiting'."""
+
+    def setUp(self):
+        self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
+        self.visible = _kompetent_text(self.data)
+        self.teaching = _kompetent_text(self.data, teaching_only=True)
+        self.chunks = {c["id"]: c["text"] for c in self.data["chunks"]}
+
+    def test_no_numbers_units_or_maths(self):
+        self.assertNotRegex(self.visible, r"[0-9]")
+        for banned in ("°", "%", " grader", " degrees", "celler per", "cells per", "million", "milliard",
+                       "billion", "plato", "abv", "regn ut", "calculate", "formel", "formula"):
+            self.assertNotIn(banned, self.visible)
+
+    def test_no_bryggemester_depth(self):
+        for banned in ("gjærstarter", "yeast starter", "starter culture", "høste gjær", "harvest", "repitch",
+                       "gjenbruk av gjær", "propag", "trykkgjæring", "pressure ferment", "glykolyse", "glycolysis",
+                       "pyruvat", "pyruvate", "viabilitet", "viability", "vitalitet", "vitality", "diacetylrast",
+                       "diacetyl rest", "high gravity", "alkoholfri", "non-alcoholic", "low-alcohol",
+                       "finings", "klaringsmiddel", "isinglass", "gelatin", "kaldmodning", "cold condition",
+                       "lagering", "ramp"):
+            self.assertNotIn(banned, self.visible)
+
+    def test_no_broad_by_product_catalogue_or_g2_named_by_products(self):
+        for banned in ("ester", "fusel", "høyere alkohol", "higher alcohol", "acetaldehyd", "svovel",
+                       "sulphur", "sulfur", "h2s", "grønt eple", "green apple"):
+            self.assertNotIn(banned, self.visible)
+        diacetyl_items = {cid for cid, text in self.chunks.items() if "diacetyl" in text["no"].lower()}
+        self.assertEqual(diacetyl_items, {"CHUNK-FERM-I", "CHUNK-FERM-J"})
+
+    def test_chief_refinement_sentence_is_absent(self):
+        for banned in ("ikke alt kan rettes opp", "not everything can be fixed", "fixed by waiting",
+                       "kan rettes opp ved å vente", "mer tid gjør ikke alltid", "does not always make"):
+            self.assertNotIn(banned, self.visible)
+
+    def test_no_universal_claims_in_teaching(self):
+        for banned in ("alltid", "always", "aldri", "never", "garantert", "guarantee"):
+            self.assertNotIn(banned, self.teaching)
+
+    def test_airlock_and_visible_signs_are_never_proof(self):
+        for banned in ("krausen", "kräusen", "skum", "foam", "bobler betyr", "bubbles mean", "synlig aktivitet",
+                       "visible activity", "luftlåsen viser", "the airlock shows"):
+            self.assertNotIn(banned, self.visible)
+        self.assertIn("luftlåsen er ikke et pålitelig tegn", self.chunks["CHUNK-FERM-H"]["no"].lower())
+        self.assertIn("the airlock is not a reliable sign", self.chunks["CHUNK-FERM-H"]["en"].lower())
+
+    def test_completion_stays_repeated_stable_readings(self):
+        h = self.chunks["CHUNK-FERM-H"]
+        self.assertIn("har sluttet å endre seg", h["no"])
+        self.assertIn("én avlesning er ikke nok", h["no"].lower())
+        self.assertIn("have stopped changing", h["en"])
+        self.assertIn("ikke ett sluttall", h["no"])
+        self.assertIn("no single finishing number", h["en"])
+
+    def test_g1_wording_is_bounded(self):
+        g = self.chunks["CHUNK-FERM-G"]
+        for needle in ("går ikke i ett jevnt tempo", "oppstartsperiode", "det meste av det gjærbare sukkeret",
+                       "fortsetter gjæringen roligere", "glir over i hverandre", "navngir og deler dem inn ulikt",
+                       "avhenger av gjæren, vørteren og forholdene"):
+            self.assertIn(needle, g["no"])
+        for needle in ("does not run at one steady pace", "start-up period", "most of the fermentable sugar",
+                       "continues more slowly", "blend into each other", "name and divide them differently",
+                       "depends on the yeast, the wort and the conditions"):
+            self.assertIn(needle, g["en"])
+        for banned in ("lag", "eksponentiell", "exponential", "stationær", "stationary", "primær", "primary",
+                       "sekundær", "secondary"):
+            self.assertNotRegex(" ".join(g.values()).lower(), r"\b" + banned + r"\b")
+
+    def test_g2_wording_is_bounded(self):
+        j = self.chunks["CHUNK-FERM-J"]
+        for needle in ("mer tid", "modning (også kalt kondisjonering)", "glir over i slutten av gjæringen",
+                       "noen av biproduktene", "synker også gjerne til bunns", "ofte klarere",
+                       "avhenger av gjæren", "noen øl skal være uklare", "ikke ett riktig antall dager"):
+            self.assertIn(needle, j["no"])
+        for needle in ("more time", "maturation or conditioning", "some of the by-products", "tend to settle",
+                       "often becomes clearer", "meant to stay hazy", "no single right number of days"):
+            self.assertIn(needle, j["en"])
+
+    def test_pitching_is_healthy_yeast_and_producer_guidance(self):
+        f = self.chunks["CHUNK-FERM-F"]
+        for needle in ("nok sunn gjær", "produsentens veiledning", "ikke ett universelt celletall",
+                       "avhenger av gjæren og prosessen", "fersk tørrgjær", "unngår du unødvendig oksygen"):
+            self.assertIn(needle, f["no"].lower())
+        self.assertIn("no single universal cell count", f["en"])
+
+    def test_methodology_block_keeps_hypothesis_apart_from_proof(self):
+        k = self.chunks["CHUNK-FERM-K"]
+        for needle in ("hypotese", "ikke som en bevist årsak", "én bevisst endring", "hvor og hvordan du målte",
+                       "ikke om ølet smaker ferdig"):
+            self.assertIn(needle, k["no"])
+        for needle in ("hypothesis", "not as a proven cause", "one deliberate change"):
+            self.assertIn(needle, k["en"])
+        for banned in ("appen", "the app", "bryggedag", "fermentation_temp_target"):
+            self.assertNotIn(banned, self.visible)
+
+    def test_no_negation_stem_questions(self):
+        for q in self.data["questions"][3:]:
+            for lang, prompt in q["prompt"].items():
+                self.assertNotRegex(prompt.lower(), r"\b(ikke|not)\b.*\?$", q["id"])
 
 
 if __name__ == "__main__":

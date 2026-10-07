@@ -33,6 +33,69 @@
         "no": "Etter pitching gjærer gjæren det forgjærbare sukkeret i vørteren og lager alkohol og CO₂. Mens det skjer, synker tettheten vanligvis, fordi gjæren gjør sukker om til alkohol. Hvordan vet du at gjæringen er ferdig? Bruk tetthetsmålinger: flere målinger tatt på samme måte, med litt tid imellom, som har sluttet å endre seg, tyder på at gjæringen sannsynligvis er ferdig. Luftlåsen er ikke et pålitelig tegn på hvor langt gjæringen har kommet – heller ikke på at den er ferdig. Hvordan du måler og noterer, lærer du i Måling og bryggelogg.",
         "en": "After pitching, the yeast ferments the fermentable sugar in the wort and makes alcohol and CO₂. While that happens, the gravity generally falls, because the yeast turns sugar into alcohol. How do you know fermentation has finished? Use gravity readings: several readings taken the same way, some time apart, that have stopped changing indicate that fermentation has plausibly finished. The airlock is not a reliable sign of how far fermentation has come – nor of whether it has finished. How to measure and log is taught in Measurement and brew log."
       }
+    },
+    {
+      "id": "CHUNK-FERM-E",
+      "basis": "fact",
+      "source_claims": ["FACT-YEAST-0001", "FACT-MASH-0001", "FACT-YEAST-0002"],
+      "text": {
+        "no": "**Hva gjæren gjør med vørteren.** Under gjæringen bruker gjæren det gjærbare sukkeret i vørteren og lager alkohol og CO₂. Gjærens omsetning lager også smaks- og aromastoffer. Ikke alt i vørteren er gjærbart: under meskingen blir noe av stivelsen til dekstriner, som vanlig ølgjær ikke gjærer. Hvor stor andel av sukkeret gjæren faktisk bruker – attenueringen – avhenger av gjæren, men også av vørteren og gjæringsforholdene.",
+        "en": "**What yeast does with the wort.** During fermentation, the yeast uses the fermentable sugar in the wort and makes alcohol and CO₂. Yeast metabolism also produces flavour and aroma compounds. Not everything in the wort is fermentable: during mashing, some of the starch becomes dextrins, which ordinary brewing yeast does not ferment. How much of the sugar the yeast actually uses – the attenuation – depends on the yeast, but also on the wort and the fermentation conditions."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-F",
+      "basis": "fact",
+      "source_claims": ["FACT-YEAST-0004", "FACT-OXY-0001", "FACT-OXY-0003", "FACT-BREW-0003"],
+      "text": {
+        "no": "**Tilsett nok sunn gjær.** Når du tilsetter gjæren, bruker du nok sunn gjær og følger produsentens veiledning for akkurat den gjæren. Riktig mengde avhenger av gjærproduktet og gjæringsforholdene – det finnes ikke ett universelt celletall. Oksygen før eller rundt tilsettingen kan hjelpe gjæren å bygge sunne cellemembraner, men om du må lufte vørteren bevisst, avhenger av gjæren og prosessen. Fersk tørrgjær ved vanlig første tilsetting er et vanlig tilfelle der det kanskje ikke trengs. Når gjæringen er i gang, unngår du unødvendig oksygen. Gjæringstemperaturen velger du ut fra veiledningen for stammen, ikke ut fra én generell regel.",
+        "en": "**Pitch enough healthy yeast.** When you pitch, use enough healthy yeast and follow the producer's guidance for that particular yeast. The right amount depends on the yeast product and the fermentation conditions – there is no single universal cell count. Oxygen before or around pitching can help the yeast build healthy cell membranes, but whether you need to aerate the wort deliberately depends on the yeast and the process. Fresh dry yeast at a normal first pitch is a common case where it may not be needed. Once fermentation is underway, avoid unnecessary oxygen. Choose the fermentation temperature from the guidance for the strain, not from one general rule."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-G",
+      "basis": "fact",
+      "source_claims": ["FACT-BREW-0004", "FACT-MEAS-0001"],
+      "text": {
+        "no": "**Gjæringen over tid.** Gjæringen går ikke i ett jevnt tempo. Rett etter at gjæren er tilsatt, er det en oppstartsperiode mens gjæren tilpasser seg vørteren. Så kommer hoveddelen, den mest aktive perioden, der det meste av det gjærbare sukkeret brukes opp. Etterpå fortsetter gjæringen roligere. Disse delene glir over i hverandre, og bryggebøker navngir og deler dem inn ulikt. Hvor lenge hver del varer, avhenger av gjæren, vørteren og forholdene. Mens gjæren gjør sukker om til alkohol, synker tettheten som regel. Ett blikk på gjæringskaret, eller ett øyeblikk, forteller ikke hvor hele gjæringen står – neste bolk handler om hvordan du ser at den er ferdig.",
+        "en": "**Fermentation over time.** Fermentation does not run at one steady pace. Right after pitching there is a start-up period while the yeast adapts to the wort. Then comes the main, most active period, when most of the fermentable sugar is used up. After that, fermentation continues more slowly. These stages blend into each other, and brewing books name and divide them differently. How long each lasts depends on the yeast, the wort and the conditions. While the yeast turns sugar into alcohol, the gravity generally falls. One look at the fermenter, or one moment in time, does not tell you where the whole fermentation is – the next block covers how to tell when it has finished."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-H",
+      "basis": "fact",
+      "source_claims": ["FACT-MEAS-0002", "FACT-MEAS-0001", "FACT-YEAST-0002", "FACT-MEAS-0004"],
+      "text": {
+        "no": "**Ferdig – mer i dybden.** OG og FG er begge målte verdier: tettheten før gjæringen starter og når den er ferdig. Gjæringen er sannsynligvis ferdig når flere tetthetsmålinger tatt med litt tid imellom har sluttet å endre seg. Én avlesning er ikke nok, og luftlåsen er ikke et pålitelig tegn. Hvor langt tettheten faller, avhenger av gjæren og av vørteren og gjæringsforholdene, så det finnes ikke ett sluttall å vente på. En annen sluttetthet enn i et annet brygg er i seg selv ikke bevis på at noe gikk galt. Når det er alkohol i ølet, gir et refraktometer ikke lenger tettheten direkte: bruk et hydrometer, eller en passende korreksjon som også bruker den opprinnelige avlesningen (se Måling og bryggelogg).",
+        "en": "**Finished – in more depth.** OG and FG are both measured values: the gravity before fermentation starts and when it has finished. Fermentation has plausibly finished when several gravity readings taken some time apart have stopped changing. One reading is not enough, and the airlock is not a reliable sign. How far the gravity falls depends on the yeast and on the wort and fermentation conditions, so there is no single finishing number to wait for. A different final gravity from another batch is not, by itself, proof that something went wrong. Once alcohol is present, a refractometer no longer gives the gravity directly: use a hydrometer, or an appropriate correction that also uses the original reading (see Measurement and brew log)."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-I",
+      "basis": "fact",
+      "source_claims": ["FACT-SENSORY-0001", "FACT-BREW-0002", "FACT-YEAST-0001"],
+      "text": {
+        "no": "**Biprodukter: diacetyl som eksempel.** I tillegg til alkohol og CO₂ lager gjæren smaks- og aromastoffer, og hvor mye gjæringstemperaturen endrer dem, avhenger av stammen. Diacetyl er eksempelet dette kurset bygger på. Det forbindes med smak og aroma av smør eller butterscotch. Under en normal gjæring skiller gjæren ut et forstadium som blir til diacetyl i ølet, og sunn gjær kan ta diacetylen opp igjen og gjøre den om til stoffer med lite smak – så lenge ølet er i kontakt med nok gjær gjennom gjæring og modning. Visse melkesyrebakterier kan også lage diacetyl. En smørduft er en observasjon, ikke bevis på diacetyl – det øver du på å skille i Smak og evaluering.",
+        "en": "**By-products: diacetyl as the example.** Besides alcohol and CO₂, yeast makes flavour and aroma compounds, and how much the fermentation temperature changes them depends on the strain. Diacetyl is the example this course builds on. It is associated with a butter or butterscotch aroma and flavour. During normal fermentation, yeast releases a precursor that turns into diacetyl in the beer, and healthy yeast can take the diacetyl back up and turn it into compounds with little flavour – as long as the beer stays in contact with enough yeast through fermentation and maturation. Certain lactic acid bacteria can also produce diacetyl. A buttery smell is an observation, not proof of diacetyl – you practise telling them apart in Tasting and evaluation."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-J",
+      "basis": "fact",
+      "source_claims": ["FACT-BREW-0005", "FACT-SENSORY-0001"],
+      "text": {
+        "no": "**Modning – hvorfor vente.** Når den mest aktive delen av gjæringen er over, får ølet vanligvis mer tid før du pakker eller serverer det. Bryggere kaller dette modning (også kalt kondisjonering), og det glir over i slutten av gjæringen. Gjær som fortsatt er aktiv, kan redusere noen av biproduktene som ble laget tidligere. Diacetyl fra forrige bolk er eksempelet: sunn gjær kan ta den opp igjen så lenge ølet er i kontakt med nok gjær. Gjær og andre partikler synker også gjerne til bunns, så ølet blir ofte klarere. Hvor mye, avhenger av gjæren, og noen øl skal være uklare. Hvor lang tid dette tar, avhenger av ølet, gjæren og forholdene. Det finnes ikke ett riktig antall dager.",
+        "en": "**Maturation – why wait.** When the most active part of fermentation is over, the beer is usually given more time before you package or serve it. Brewers call this maturation or conditioning, and it blends into the end of fermentation. Yeast that is still active can reduce some of the by-products made earlier. Diacetyl from the previous block is the example: healthy yeast can take it back up as long as the beer stays in contact with enough yeast. Yeast and other particles also tend to settle, so the beer often becomes clearer. How much depends on the yeast, and some beers are meant to stay hazy. How long this takes depends on the beer, the yeast and the conditions. There is no single right number of days."
+      }
+    },
+    {
+      "id": "CHUNK-FERM-K",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Gjæringslogg og praktisk resonnering.** Skriv ned det du kan sjekke senere: hvilket gjærprodukt du brukte og hvordan du tilsatte det sammenlignet med produsentens veiledning, gjæringstemperaturen sammen med hvor og hvordan du målte den, og hver tetthetsmåling med dato. Hold det du målte, adskilt fra det du smakte eller luktet: en stabil tetthet sier noe om gjæringen, ikke om ølet smaker ferdig. Sammenlign plan og faktisk resultat. Hvis noe var annerledes, skriver du én mulig forklaring som en hypotese – ikke som en bevist årsak – og velger én bevisst endring til neste gang. Én lukt eller én måling er ikke nok til å diagnostisere en hel gjæring.",
+        "en": "**Fermentation log and practical reasoning.** Write down what you can check later: which yeast product you used and how you pitched it compared with the producer's guidance, the fermentation temperature together with where and how you measured it, and each gravity reading with its date. Keep what you measured apart from what you tasted or smelled: a stable gravity tells you about the fermentation, not whether the beer tastes ready. Compare plan and actual. If something differed, write one possible explanation as a hypothesis – not as a proven cause – and choose one deliberate change for next time. One smell or one reading is not enough to diagnose a whole fermentation."
+      }
     }
   ],
   "questions": [
@@ -169,6 +232,374 @@
       "feedback_incorrect": {
         "no": "Ikke helt. Luftlåsen er ikke et pålitelig tegn, og én måling alene er ikke nok. Ta flere tetthetsmålinger med litt tid imellom og se om tallet har sluttet å endre seg.",
         "en": "Not quite. The airlock is not a reliable sign, and one reading on its own is not enough. Take several gravity readings some time apart and see whether the number has stopped changing."
+      }
+    },
+    {
+      "id": "Q-FERM-004",
+      "type": "concept_check",
+      "basis": "fact",
+      "concepts": ["fermentation.yeast_metabolism"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-YEAST-0001", "FACT-MASH-0001"],
+      "prompt": {
+        "no": "Hvilken påstand om hva gjæren gjør under gjæringen, stemmer?",
+        "en": "Which statement about what yeast does during fermentation is correct?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Gjæren gjærer det gjærbare sukkeret til alkohol og CO₂ og lager også smaks- og aromastoffer. Dekstriner fra meskingen gjærer vanlig ølgjær ikke.",
+            "en": "The yeast ferments the fermentable sugar into alcohol and CO₂ and also makes flavour and aroma compounds. Ordinary brewing yeast does not ferment dextrins from the mash."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Gjæren gjærer all slags sukker og stivelse i vørteren, så ingenting fra malten blir igjen.",
+            "en": "The yeast ferments every kind of sugar and starch in the wort, so nothing from the malt is left."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Gjæren lager bare alkohol – all smak kommer fra malt og humle.",
+            "en": "The yeast only makes alcohol – all the flavour comes from malt and hops."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Gjæren bruker det gjærbare sukkeret og lager alkohol, CO₂ og smaks- og aromastoffer, mens dekstriner ikke gjæres av vanlig ølgjær.",
+        "en": "Correct. The yeast uses the fermentable sugar and makes alcohol, CO₂ and flavour and aroma compounds, while ordinary brewing yeast does not ferment dextrins."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Ikke alt i vørteren er gjærbart – vanlig ølgjær gjærer ikke dekstriner – og gjærens omsetning lager også smaks- og aromastoffer.",
+        "en": "Not quite. Not everything in the wort is fermentable – ordinary brewing yeast does not ferment dextrins – and yeast metabolism also produces flavour and aroma compounds."
+      }
+    },
+    {
+      "id": "Q-FERM-005",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["yeast.pitch_principle"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-YEAST-0004", "FACT-OXY-0001"],
+      "prompt": {
+        "no": "En venn sier: «Bruk alltid samme celletall, og rist inn så mye luft du kan i vørteren, uansett hvilken gjær du bruker.» Hva er en bedre fremgangsmåte?",
+        "en": "A friend says: 'Always pitch the same number of cells, and shake as much air into the wort as you can, whatever yeast you use.' What is a better approach?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Tilsett nok sunn gjær etter produsentens veiledning for den gjæren. Om du må lufte bevisst, avhenger av gjæren og prosessen – fersk tørrgjær ved vanlig første tilsetting trenger det ofte ikke.",
+            "en": "Pitch enough healthy yeast following the producer's guidance for that yeast. Whether you need to aerate deliberately depends on the yeast and the process – fresh dry yeast at a normal first pitch often does not need it."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Vennen har rett – ett celletall og mest mulig luft passer for all gjær.",
+            "en": "Your friend is right – one cell count and as much air as possible suit every yeast."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Tilsett så lite gjær som mulig, og hold oksygen helt unna vørteren også før tilsettingen.",
+            "en": "Pitch as little yeast as possible, and keep oxygen away from the wort completely, even before pitching."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Riktig mengde avhenger av gjærproduktet og forholdene, ikke av ett universelt celletall, og behovet for bevisst lufting avhenger av gjæren og prosessen.",
+        "en": "Correct. The right amount depends on the yeast product and the conditions, not on one universal cell count, and whether deliberate aeration is needed depends on the yeast and the process."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Bruk nok sunn gjær og følg produsentens veiledning. Oksygen før eller rundt tilsettingen kan hjelpe gjæren, men behovet for bevisst lufting avhenger av gjæren og prosessen.",
+        "en": "Not quite. Use enough healthy yeast and follow the producer's guidance. Oxygen before or around pitching can help the yeast, but whether deliberate aeration is needed depends on the yeast and the process."
+      }
+    },
+    {
+      "id": "Q-FERM-006",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["fermentation.phases"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-BREW-0004"],
+      "prompt": {
+        "no": "Kort tid etter at gjæren er tilsatt, ser en brygger én gang på gjæringskaret og mener å vite nøyaktig hvor hele gjæringen står. Hva er en bedre måte å tenke på?",
+        "en": "Shortly after pitching, a brewer looks at the fermenter once and believes they know exactly where the whole fermentation stands. What is a better way to think about it?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Gjæringen endrer seg over tid – en oppstartsperiode, en mest aktiv periode der det meste av sukkeret brukes, og en roligere periode – og delene glir over i hverandre, så ett øyeblikk beskriver ikke hele prosessen.",
+            "en": "Fermentation changes over time – a start-up period, a most active period when most of the sugar is used, and a slower period – and the stages blend into each other, so one moment does not describe the whole process."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Gjæringen går i ett jevnt tempo fra tilsetting til slutt, så ett blikk forteller alt.",
+            "en": "Fermentation runs at one steady pace from pitching to finish, so one look tells you everything."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Alle gjæringer følger samme faste tidsplan, så du kan lese hvor gjæringen står ut fra hvor lenge den har gått.",
+            "en": "Every fermentation follows the same fixed timetable, so you can tell where it stands from how long it has been running."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Gjæringen har en oppstart, en mest aktiv del og en roligere del som glir over i hverandre, og varigheten avhenger av gjæren, vørteren og forholdene.",
+        "en": "Correct. Fermentation has a start-up, a most active part and a slower part that blend into each other, and how long each lasts depends on the yeast, the wort and the conditions."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Gjæringen går ikke i ett jevnt tempo og følger ingen fast tidsplan – hvor lenge hver del varer, avhenger av gjæren, vørteren og forholdene.",
+        "en": "Not quite. Fermentation does not run at one steady pace or follow a fixed timetable – how long each part lasts depends on the yeast, the wort and the conditions."
+      }
+    },
+    {
+      "id": "Q-FERM-007",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["measurement.fermentation_complete"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-MEAS-0002", "FACT-MEAS-0001"],
+      "prompt": {
+        "no": "Luftlåsen har sluttet å boble, og én tetthetsmåling ser lav nok ut. Kan du si at gjæringen er ferdig?",
+        "en": "The airlock has stopped bubbling, and one gravity reading looks low enough. Can you say fermentation has finished?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ikke ennå – ta flere målinger med litt tid imellom, og regn den som ferdig når tallet har sluttet å endre seg.",
+            "en": "Not yet – take more readings some time apart, and treat it as finished when the number has stopped changing."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ja – luftlåsen har stoppet og avlesningen ser lav ut, så den er ferdig.",
+            "en": "Yes – the airlock has stopped and the reading looks low, so it has finished."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Ja – hvis avlesningen ligger nær FG-en i oppskriften, er gjæringen ferdig.",
+            "en": "Yes – if the reading is close to the FG in the recipe, fermentation has finished."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Gjentatte tetthetsmålinger som har sluttet å endre seg, tyder på at gjæringen sannsynligvis er ferdig. Én avlesning og luftlåsen er ikke nok.",
+        "en": "Correct. Repeated gravity readings that have stopped changing indicate that fermentation has plausibly finished. One reading and the airlock are not enough."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Luftlåsen er ikke et pålitelig tegn, og én avlesning – også en som ligger nær oppskriftens FG – viser ikke at tettheten har sluttet å endre seg.",
+        "en": "Not quite. The airlock is not a reliable sign, and one reading – even one close to the recipe's FG – does not show that the gravity has stopped changing."
+      }
+    },
+    {
+      "id": "Q-FERM-008",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["yeast.attenuation"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-YEAST-0002"],
+      "prompt": {
+        "no": "Du brygget samme vørter to ganger med to forskjellige gjærtyper. Begge er ferdige med stabile målinger, men sluttettheten er ulik. Hva er den mest rimelige konklusjonen?",
+        "en": "You brewed the same wort twice with two different yeasts. Both have finished with stable readings, but the final gravities differ. What is the most reasonable conclusion?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Attenueringen avhenger av gjæren og av vørteren og gjæringsforholdene, så en ulik sluttetthet er i seg selv ikke bevis på at noe gikk galt.",
+            "en": "Attenuation depends on the yeast as well as on the wort and fermentation conditions, so a different final gravity is not, by itself, proof that something went wrong."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Ett av bryggene må ha gått galt – samme vørter ender alltid på samme sluttetthet.",
+            "en": "One of the batches must have gone wrong – the same wort always ends at the same final gravity."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Gjæren betyr ingenting for sluttettheten – det må være målingen som er feil.",
+            "en": "The yeast makes no difference to the final gravity – the measurement must be wrong."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Hvor stor andel av sukkeret gjæren bruker, avhenger av gjæren og forholdene, så ulike gjærtyper kan gi ulik sluttetthet.",
+        "en": "Correct. How much of the sugar the yeast uses depends on the yeast and the conditions, so different yeasts can give different final gravities."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Attenueringen avhenger av gjæren og av vørteren og gjæringsforholdene, så samme vørter kan ende på ulik sluttetthet med ulik gjær.",
+        "en": "Not quite. Attenuation depends on the yeast and on the wort and fermentation conditions, so the same wort can end at different final gravities with different yeasts."
+      }
+    },
+    {
+      "id": "Q-FERM-009",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["fermentation.byproducts"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-SENSORY-0001"],
+      "prompt": {
+        "no": "Ølet ditt lukter tydelig smør. Hva er den beste måten å tenke på det?",
+        "en": "Your beer clearly smells of butter. What is the best way to think about it?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Det kan være diacetyl, som henger sammen med kontakt med gjær gjennom gjæring og modning – men lukten alene er ikke bevis. Noter det som en observasjon.",
+            "en": "It may be diacetyl, which is linked to contact with yeast through fermentation and maturation – but the smell alone is not proof. Note it as an observation."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Det er helt sikkert en infeksjon, så brygget må kastes.",
+            "en": "It is certainly an infection, so the batch has to be thrown away."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "En smørduft beviser diacetyl, og ingenting i gjæringen kan påvirke den.",
+            "en": "A buttery smell proves diacetyl, and nothing in the fermentation can affect it."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Smør er en observasjon. Diacetyl er én mulighet, og sunn gjær kan ta den opp igjen når ølet er i kontakt med nok gjær gjennom gjæring og modning.",
+        "en": "Correct. Butter is an observation. Diacetyl is one possibility, and healthy yeast can take it back up when the beer stays in contact with enough yeast through fermentation and maturation."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. En smørduft er en observasjon, ikke bevis – verken på diacetyl eller på infeksjon. Diacetyl henger sammen med kontakt med gjær gjennom gjæring og modning.",
+        "en": "Not quite. A buttery smell is an observation, not proof – neither of diacetyl nor of infection. Diacetyl is linked to contact with yeast through fermentation and maturation."
+      }
+    },
+    {
+      "id": "Q-FERM-010",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["fermentation.conditioning"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-BREW-0005", "FACT-SENSORY-0001"],
+      "prompt": {
+        "no": "Den mest aktive gjæringen er over. En venn sier: «Det er ingen grunn til å gi ølet mer tid.» Hva er et bedre svar?",
+        "en": "The most active fermentation is over. A friend says: 'There is no reason to give the beer any more time.' What is a better answer?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ølet får vanligvis mer tid: gjær som fortsatt er aktiv, kan redusere noen tidligere biprodukter, og gjær og partikler synker gjerne til bunns. Hvor lenge, avhenger av ølet, gjæren og forholdene.",
+            "en": "Beer is usually given more time: yeast that is still active can reduce some earlier by-products, and yeast and particles tend to settle. How long depends on the beer, the yeast and the conditions."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Vent nøyaktig like mange dager for alle øl – da er ølet alltid klart.",
+            "en": "Wait exactly the same number of days for every beer – then it is always ready."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Mer tid gjør alltid alle øl bedre, og alle øl skal ende helt klare.",
+            "en": "More time always makes every beer better, and every beer should end up completely clear."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Modningen gir aktiv gjær tid til å redusere noen biprodukter og lar gjær og partikler synke, men det finnes ikke én riktig varighet.",
+        "en": "Correct. Maturation gives active yeast time to reduce some by-products and lets yeast and particles settle, but there is no single right duration."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Det finnes ingen fast varighet for alle øl – hvor lenge, avhenger av ølet, gjæren og forholdene. Hvor klart ølet blir, avhenger av gjæren, og noen øl skal være uklare.",
+        "en": "Not quite. There is no fixed duration for every beer – how long depends on the beer, the yeast and the conditions. How clear the beer gets depends on the yeast, and some beers are meant to stay hazy."
+      }
+    },
+    {
+      "id": "Q-FERM-011",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": ["fermentation.process_reasoning"],
+      "difficulty": "intermediate",
+      "source_claims": [],
+      "prompt": {
+        "no": "Ølet ble tørrere enn du planla. Hva er det mest nyttige neste steget?",
+        "en": "Your beer turned out drier than you planned. What is the most useful next step?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Sammenlign loggen – gjær, tilsetting, temperatur med hvor og hvordan du målte, og daterte tetthetsmålinger – med planen. Skriv én mulig forklaring som en hypotese, og velg én bevisst endring til neste gang.",
+            "en": "Compare your log – yeast, pitching, temperature with where and how you measured it, and dated gravity readings – with the plan. Write one possible explanation as a hypothesis, and choose one deliberate change for next time."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Bestem årsaken ut fra smaken, og endre flere ting samtidig neste gang.",
+            "en": "Decide the cause from the taste, and change several things at once next time."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Skriv ned årsaken som et faktum uten å sjekke loggen.",
+            "en": "Write down the cause as a fact without checking the log."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Loggen gir deg noe å sammenligne med planen. En forklaring er en hypotese, ikke en bevist årsak, og én bevisst endring gjør det mulig å se hva den gjorde.",
+        "en": "Correct. The log gives you something to compare with the plan. An explanation is a hypothesis, not a proven cause, and one deliberate change lets you see what it did."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Én smak er ikke nok til å fastslå årsaken. Sammenlign loggen med planen, skriv forklaringen som en hypotese og endre én ting om gangen.",
+        "en": "Not quite. One taste is not enough to establish the cause. Compare the log with the plan, write the explanation as a hypothesis and change one thing at a time."
       }
     }
   ]

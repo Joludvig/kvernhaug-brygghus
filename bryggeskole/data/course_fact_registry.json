@@ -73,6 +73,88 @@
       "notes": "Practical course guidance derived from multiple manufacturer technical sources; the registry classification remains professional_interpretation, separate from verification status."
     },
     {
+      "id": "FACT-BREW-0004",
+      "claim": "After yeast is pitched, fermentation does not run at one steady rate. Brewing sources describe it in stages: an early period in which the yeast adapts to the wort before active fermentation gets going; a main, more active period in which most of the fermentable sugar is consumed; and a later, slower period in which fermentation continues at a reduced rate. The stages overlap rather than switching sharply, sources name and divide them differently, and how long and how vigorous each stage is depends on the yeast, the wort and the fermentation conditions.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-05T09:10:01+02:00",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "yeast producer glossary (White Labs) -- yeast seller, commercial interest",
+          "ref": "White Labs, Glossary -- https://www.whitelabs.com/glossary",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: 'Primary Fermentation' is the initial phase where yeast growth happens and most of the wort sugars are consumed; 'Secondary Fermentation' occurs after primary when the rate of fermentation decreases. Does not support: an early lag/adaptation period, durations, overlap. Page date not shown."
+        },
+        {
+          "tier": "B",
+          "type": "homebrewing text (John Palmer, How to Brew) -- author sells the book, commercial interest",
+          "ref": "John Palmer, How to Brew, Section 1, Chapter 8 - Fermentation (copyright 1999-2015, with an Author's Note 2025) -- https://howtobrew.com/section-1/chapter-8",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: three phases (Adaptation or Lagtime, Attenuative or Primary, Maturation or Secondary) that occur in parallel rather than one ending before the next; the yeast adjust to the wort right after pitching before primary fermentation begins; the majority of attenuation occurs in the vigorous primary phase; slower maturation; timing depends on conditions, yeast strain and fermentation environment. Does not support (not used): its day counts, gravity fractions, pitch-rate arithmetic. Expired TLS certificate on 2026-10-05."
+        },
+        {
+          "tier": "B",
+          "type": "homebrew magazine article (Brew Your Own) -- author founded White Labs, commercial interest",
+          "ref": "Brew Your Own, Dr. Chris White, Fermentation Timeline (published 2001-07-08, modified 2025-11-05) -- https://byo.com/articles/fermentation-time-line/",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: lag phase of acclimation, exponential growth phase in which the yeast consume the sugars, stationary phase in which growth slows. Not independent of White Labs. Does not support (not used): its hour/day ranges, oxygen ppm, temperature advice, airlock/krausen descriptions."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer) -- author founded White Labs, commercial interest",
+          "ref": "The Oxford Companion to Beer (ed. Garrett Oliver, Oxford University Press 2012), Chris White, 'lag phase', via Craft Beer & Brewing -- https://www.beerandbrewing.com/dictionary/MkKGQWjuiT",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: the lag phase is the period between pitching and the beginning of fermentation while the yeast acclimates; its length depends on wort type and gravity, temperature, yeast strain, yeast health, pitching rate and aeration. Not independent of White Labs. Does not support (not used): its 3-15 h range."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer)",
+          "ref": "The Oxford Companion to Beer (OUP 2012), Graham G. Stewart, 'maturation', via Craft Beer & Brewing -- https://www.beerandbrewing.com/dictionary/7JSOfuS2SQ",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: there is significant overlap between fermentation and maturation. Does not support (not used): its 3-10 day figure."
+        }
+      ],
+      "concepts": ["fermentation.phases"],
+      "notes": "Gjæring Kompetent G1 (fermentation Kompetent contract §10; Chief decision 2026-10-05: BREW numbering, no FACT-FERM-* prefix). Teaches only that fermentation changes over time and that one moment does not describe the whole process. It is NOT a phase taxonomy: the sources divide and name the stages differently (White Labs primary/secondary; Palmer adaptation/attenuative/maturation; Chris White lag/exponential growth/stationary), so no stage name is taught as the correct one. Wording trap: no durations or day counts (the sources' hours/days are deliberately not used); no gravity-rate curve and no claim about gravity in the early period; no krausen, foam, bubbles or airlock as proof of a stage or of completion; no lag time as a quality metric; no oxygen, sterol or growth biochemistry (FACT-OXY-0001 owns oxygen); no pitch-rate numbers (FACT-YEAST-0004 owns pitching). OWNERSHIP: FACT-MEAS-0001 (gravity falls as sugar is fermented), FACT-MEAS-0002 (completion = repeated stable readings, still authoritative), FACT-YEAST-0001 (sugar -> alcohol + CO2 + flavour), FACT-BREW-0001 (warmer = faster). Wyeast's activator page ('shortens lag time') was read but is not cited. INDEPENDENCE: Chris White founded White Labs, so his BYO article and Oxford Companion 'lag phase' entry are one source line with the White Labs glossary; John Palmer and the other Oxford Companion authors are independent lines. SOURCE-ACCESS LIMITATIONS: Local Claude read every cited source in full on 2026-10-05 from the original page HTML (source pack docs/development/v22_fermentation_g1_g2_source_pack.md); howtobrew.com served an expired TLS certificate that day and was fetched read-only without certificate checking; the White Labs glossary shows no page date. Chief live source spot-check PASS 2026-10-05, recorded offline during the GitHub outage (no issue number exists yet). VERIFIED_AT PROVENANCE: 2026-10-05T09:10:01+02:00 is when the Chief's live source spot-check PASS for G1/G2 was received locally (the local session log records the brief at 2026-10-05T07:10:01Z, truncated to whole seconds). The spot-check itself happened on or before that moment; its exact clock time is not recorded."
+    },
+    {
+      "id": "FACT-BREW-0005",
+      "claim": "After the most active part of fermentation, beer is commonly given further time before it is packaged or served; brewers call this maturation or conditioning, and it overlaps with the end of fermentation. During this time yeast that is still active can reduce some of the by-products formed earlier in fermentation. Yeast and other suspended material also tend to settle, so the beer often becomes clearer, although how much depends on the yeast strain and some beers are meant to stay hazy. How long is needed depends on the beer, the yeast and the conditions; there is no single universal duration.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-05T09:10:01+02:00",
+      "sources": [
+        {
+          "tier": "A",
+          "type": "yeast producer glossary (White Labs) -- yeast seller, commercial interest",
+          "ref": "White Labs, Glossary -- https://www.whitelabs.com/glossary",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: 'Lagering/Conditioning' is a beer's maturation step that allows yeast to clean up the beer and solids to precipitate; 'Secondary Fermentation' lets aroma and flavour mellow and yeast settle out of suspension; 'Flocculation' often results in a clear beer, is strain-dependent, and a low-flocculation strain stays in suspension longer, creating haze. Does not support (not used): its refrigeration step as a rule, durations. Page date not shown."
+        },
+        {
+          "tier": "B",
+          "type": "homebrewing text (John Palmer, How to Brew) -- author sells the book, commercial interest",
+          "ref": "John Palmer, How to Brew, Section 1, Chapter 8 - Fermentation (copyright 1999-2015, with an Author's Note 2025) -- https://howtobrew.com/section-1/chapter-8",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: maturation runs in parallel with primary; once the easy food is gone the yeast re-process some of the earlier by-products; at the end of fermentation the suspended yeast settles out and the beer clears; maturation takes a few days or weeks depending on the yeast strain and the fermentation environment. Does not support (not used): its day counts, secondary-vessel advice, cold conditioning, finings, named by-products. Expired TLS certificate on 2026-10-05."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer)",
+          "ref": "The Oxford Companion to Beer (OUP 2012), Graham G. Stewart, 'maturation', via Craft Beer & Brewing -- https://www.beerandbrewing.com/dictionary/7JSOfuS2SQ",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: maturation covers the time between the end of primary fermentation and preparing the beer for packaging; it is also called conditioning, lagering and aging; it overlaps significantly with fermentation; undesirable compounds are reduced by the continuing action of the yeast or by other pathways; ales can be short, lagers take weeks. Does not support (not used): temperatures, industrial immobilised-yeast detail, finings, named compounds."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer)",
+          "ref": "The Oxford Companion to Beer (OUP 2012), Tim Hampson, 'green beer', via Craft Beer & Brewing -- https://www.beerandbrewing.com/dictionary/m7kpIIbx7I",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: green beer still needs a period of conditioning before packaging; the yeast still has work to do to remove some unwanted by-products; green beer is often cloudy with unsettled yeast unless it is meant to be served hazy; maturation can be a few days or a few months depending on the beer. Does not support (not used): named by-products, filtration."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer) -- terminology",
+          "ref": "The Oxford Companion to Beer (OUP 2012), Garrett Oliver, 'conditioning', via Craft Beer & Brewing -- https://www.beerandbrewing.com/dictionary/SPzTs0I06Q",
+          "note": "Chief live spot-check PASS 2026-10-05. Supports: 'conditioning' is a post-fermentation catch-all term for maturation and carbonation (terminology only). Does not support: any process step."
+        }
+      ],
+      "concepts": ["fermentation.conditioning"],
+      "notes": "Gjæring Kompetent G2 (fermentation Kompetent contract §10; Chief decision 2026-10-05: BREW numbering). The general 'why wait' concept: it describes the time after the most active fermentation, not a definition of the word 'conditioning', whose meaning overlaps (it also covers carbonation and refermentation in bottle or cask). Norwegian course text uses 'modning' as the main word so it does not collide with Pakking's 'flaskekondisjonering' (FACT-PACK-0001). Chief refinement 2026-10-05: the teaching sentence 'not everything can be fixed by waiting' is dropped entirely, from the claim and from learner wording. Wording trap: no 'yeast cleans up all off-flavours' and no 'more time always improves beer'; no duration or day count (the sources' figures are deliberately not used); no mandatory cold conditioning, lagering schedule or temperature; no finings or clarification depth; no 'every beer must become clear'; no packaging after a fixed number of days; no named by-products. OWNERSHIP: diacetyl stays with FACT-SENSORY-0001 and must not be generalised from it; acetaldehyde and sulphur are not named (sensory contract §30-§31); completion stays with FACT-MEAS-0002; bottle conditioning/priming with FACT-PACK-0001; oxygen with FACT-OXY-0002. Chris White's BYO article and Paul Buttrick's 'secondary fermentation' entry were read as corroboration but are not cited. SOURCE-ACCESS LIMITATIONS: Local Claude read every cited source in full on 2026-10-05 from the original page HTML (source pack docs/development/v22_fermentation_g1_g2_source_pack.md); howtobrew.com served an expired TLS certificate that day and was fetched read-only without certificate checking; the White Labs glossary shows no page date. Chief live source spot-check PASS 2026-10-05, recorded offline during the GitHub outage (no issue number exists yet). VERIFIED_AT PROVENANCE: 2026-10-05T09:10:01+02:00 is when the Chief's live source spot-check PASS for G1/G2 was received locally (the local session log records the brief at 2026-10-05T07:10:01Z, truncated to whole seconds). The spot-check itself happened on or before that moment; its exact clock time is not recorded."
+    },
+    {
       "id": "FACT-MASH-0001",
       "claim": "During mashing, malt enzymes -- primarily alpha- and beta-amylase -- break down starch; not all of it is broken all the way down into fermentable sugars, and some is instead converted into larger dextrins that ordinary brewing yeast does not ferment.",
       "classification": "documented_fact",

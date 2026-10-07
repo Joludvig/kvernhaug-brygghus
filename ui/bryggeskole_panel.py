@@ -297,6 +297,12 @@ _KONSEPT_LABELS = {
     "fermentation.yeast_activity": {"no": "Gjæraktivitet", "en": "Yeast activity"},
     "fermentation.flavor": {"no": "Smak og aroma", "en": "Flavor and aroma"},
     "fermentation.yeast_strain": {"no": "Gjærstamme-avhengighet", "en": "Yeast strain dependence"},
+    # Gjæring Kompetent (gjæringskontrakten §12).
+    "fermentation.yeast_metabolism": {"no": "Hva gjæren gjør", "en": "What yeast does"},
+    "fermentation.phases": {"no": "Gjæringen over tid", "en": "Fermentation over time"},
+    "fermentation.byproducts": {"no": "Biprodukter fra gjæringen", "en": "Fermentation by-products"},
+    "fermentation.conditioning": {"no": "Modning", "en": "Maturation"},
+    "fermentation.process_reasoning": {"no": "Gjæringslogg og resonnering", "en": "Fermentation log and reasoning"},
     "mashing.starch_conversion": {"no": "Stivelsesomdanning", "en": "Starch conversion"},
     "mashing.dextrins": {"no": "Dekstriner", "en": "Dextrins"},
     "mashing.temperature": {"no": "Mesketemperatur", "en": "Mash temperature"},

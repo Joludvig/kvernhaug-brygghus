@@ -255,6 +255,7 @@ _RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-000
 _MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003"]
 _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
 _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS = ["FACT-MEAS-0006"]
+_FERMENTATION_KOMPETENT_VERIFIED_IDS = ["FACT-BREW-0004", "FACT-BREW-0005"]
 _SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
 _SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001", "FACT-SENSORY-0002", "FACT-SENSORY-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
@@ -263,7 +264,7 @@ _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
     + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS + _MEASUREMENT_VERIFIED_IDS
     + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS
-    + _SAFETY_VERIFIED_IDS + _SENSORY_VERIFIED_IDS
+    + _SAFETY_VERIFIED_IDS + _SENSORY_VERIFIED_IDS + _FERMENTATION_KOMPETENT_VERIFIED_IDS
 )
 
 
@@ -342,7 +343,10 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # documented_fact.
         # Issue #470 (V2.2 Goal 3 Sensory S-2) adds FACT-SENSORY-0003: 1
         # documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 43)
+        # Gjæring Kompetent G1/G2 (offline, Chief live source spot-check
+        # 2026-10-05; no GitHub issue yet) adds FACT-BREW-0004..0005: 2
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 45)
         # Measurement M7 (offline, Chief live source spot-check 2026-10-05;
         # no GitHub issue yet) adds FACT-MEAS-0006: 1
         # professional_interpretation.
@@ -1410,6 +1414,93 @@ class TestProductionRegistryYeastCoreFactPackVerifiedOnlyApi(unittest.TestCase):
     def test_every_record_documents_scope_and_wording_trap(self):
         for record in self._yeast_records().values():
             self.assertIn("Wording trap", record["notes"])
+
+
+class TestProductionRegistryFermentationKompetentG1G2(unittest.TestCase):
+    """Gjæring Kompetent G1/G2 (fermentation Kompetent contract §10; source
+    pack docs/development/v22_fermentation_g1_g2_source_pack.md): Chief live
+    spot-check PASS 2026-10-05. BREW numbering, no FACT-FERM-* prefix. The
+    claims are the bounded source-pack versions; the Chief refinement drops
+    "not everything can be fixed by waiting" entirely."""
+
+    _CONCEPTS = {"FACT-BREW-0004": "fermentation.phases", "FACT-BREW-0005": "fermentation.conditioning"}
+
+    def _records(self):
+        return {fid: get_verified_record(_PRODUCTION_REGISTRY, fid) for fid in self._CONCEPTS}
+
+    def test_verified_documented_facts_without_modules(self):
+        for fact_id, record in self._records().items():
+            with self.subTest(fact_id=fact_id):
+                self.assertIsNotNone(record)
+                self.assertEqual(record["status"], "verified")
+                self.assertEqual(record["classification"], "documented_fact")
+                self.assertEqual(record["concepts"], [self._CONCEPTS[fact_id]])
+                self.assertNotIn("modules", record)
+                # The local receipt of the Chief PASS (session log), not an
+                # invented clock time.
+                self.assertEqual(record["verified_at"], "2026-10-05T09:10:01+02:00")
+                self.assertIn("VERIFIED_AT PROVENANCE", record["notes"])
+
+    def test_each_concept_maps_to_exactly_one_record_and_no_ferm_prefix(self):
+        for fact_id, concept in self._CONCEPTS.items():
+            ids = [r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept=concept)]
+            self.assertEqual(ids, [fact_id])
+        ids = {r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY)}
+        self.assertFalse(any(i.startswith("FACT-FERM-") for i in ids))
+
+    def test_g1_keeps_the_bounded_clauses(self):
+        claim = self._records()["FACT-BREW-0004"]["claim"]
+        for needle in ("does not run at one steady rate", "adapts to the wort",
+                       "most of the fermentable sugar is consumed", "later, slower period",
+                       "overlap rather than switching sharply", "name and divide them differently",
+                       "depends on the yeast, the wort and the fermentation conditions"):
+            self.assertIn(needle, claim)
+
+    def test_g2_keeps_the_bounded_clauses(self):
+        claim = self._records()["FACT-BREW-0005"]["claim"]
+        for needle in ("further time", "maturation or conditioning", "overlaps with the end of fermentation",
+                       "reduce some of the by-products", "tend to settle", "often becomes clearer",
+                       "depends on the yeast strain", "meant to stay hazy", "no single universal duration"):
+            self.assertIn(needle, claim)
+
+    def test_claims_carry_no_numbers_traps_or_named_by_products(self):
+        for fact_id, record in self._records().items():
+            claim = record["claim"].lower()
+            with self.subTest(fact_id=fact_id):
+                self.assertIsNone(re.search(r"\d", claim))
+                for trap in ("krausen", "kräusen", "bubble", "airlock", "lag time", "day", "week", "hour",
+                             "acetaldehyde", "sulph", "sulfur", "diacetyl", "ester", "fusel", "finings",
+                             "cold condition", "lagering", "always", "all off-flavour", "fixed by waiting",
+                             "not everything"):
+                    self.assertNotIn(trap, claim)
+
+    def test_sources_tiers_flags_and_spot_check(self):
+        for fact_id, record in self._records().items():
+            with self.subTest(fact_id=fact_id):
+                sources = record["sources"]
+                self.assertGreaterEqual(len(sources), 2)
+                self.assertEqual(sources[0]["tier"], "A")
+                self.assertIn("whitelabs.com/glossary", sources[0]["ref"])
+                self.assertIn("commercial interest", sources[0]["type"])
+                self.assertTrue(any("howtobrew.com" in s["ref"] for s in sources))
+                for source in sources:
+                    self.assertIn(source["tier"], ("A", "B"))
+                    self.assertIn("https://", source["ref"])
+                    self.assertIn("Chief live spot-check PASS 2026-10-05", source["note"])
+                    self.assertIn("Supports:", source["note"])
+                    self.assertIn("not support", source["note"])
+
+    def test_notes_record_traps_ownership_and_limitations(self):
+        records = self._records()
+        for record in records.values():
+            self.assertIn("Wording trap", record["notes"])
+            self.assertIn("SOURCE-ACCESS LIMITATIONS", record["notes"])
+            self.assertIn("expired TLS certificate", record["notes"])
+            self.assertIn("FACT-MEAS-0002", record["notes"])
+        self.assertIn("NOT a phase taxonomy", records["FACT-BREW-0004"]["notes"])
+        self.assertIn("INDEPENDENCE", records["FACT-BREW-0004"]["notes"])
+        self.assertIn("FACT-SENSORY-0001", records["FACT-BREW-0005"]["notes"])
+        self.assertIn("dropped entirely", records["FACT-BREW-0005"]["notes"])
 
 
 class TestGetVerifiedRecordLookup(unittest.TestCase):
