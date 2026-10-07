@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "notes": "Canonical course stage per chunk and question (stage UI contract §6; allocation from the stage allocation contract §C/§D). Course stage only: not question difficulty, not the Hjemmebrygger/Bryggeri environment, not learner progress.",
+  "modules": [
+    {
+      "module": "raavarer",
+      "topic_id": "PILOT-RAW-MATERIALS-FUNDAMENTALS",
+      "notes": "Stage allocation contract §D.4: all chunks stay Foundation; six questions move to Kompetent.",
+      "foundation": {
+        "chunks": ["CHUNK-RAW-A", "CHUNK-RAW-B", "CHUNK-RAW-C", "CHUNK-RAW-D", "CHUNK-RAW-E", "CHUNK-RAW-F", "CHUNK-RAW-G", "CHUNK-RAW-H", "CHUNK-RAW-I", "CHUNK-RAW-J", "CHUNK-RAW-K"],
+        "questions": ["Q-RAW-001", "Q-RAW-002", "Q-RAW-003", "Q-RAW-005", "Q-RAW-007", "Q-RAW-008", "Q-RAW-013", "Q-RAW-014"]
+      },
+      "kompetent": {
+        "chunks": [],
+        "questions": ["Q-RAW-004", "Q-RAW-006", "Q-RAW-009", "Q-RAW-010", "Q-RAW-011", "Q-RAW-012"]
+      }
+    },
+    {
+      "module": "rengjoring",
+      "topic_id": "PILOT-CLEANING-SAFETY-FUNDAMENTALS",
+      "foundation": {
+        "chunks": ["CHUNK-SAFE-A", "CHUNK-SAFE-B", "CHUNK-SAFE-C", "CHUNK-SAFE-D", "CHUNK-SAFE-E", "CHUNK-SAFE-F", "CHUNK-SAFE-G"],
+        "questions": ["Q-SAFE-001", "Q-SAFE-002", "Q-SAFE-003", "Q-SAFE-004", "Q-SAFE-005", "Q-SAFE-006", "Q-SAFE-007", "Q-SAFE-008"]
+      },
+      "kompetent": {
+        "chunks": [],
+        "questions": []
+      }
+    },
+    {
+      "module": "metodevalg",
+      "topic_id": "PILOT-METHOD-CONTEXT-FUNDAMENTALS",
+      "foundation": {
+        "chunks": ["CHUNK-METHOD-A", "CHUNK-METHOD-B", "CHUNK-METHOD-C", "CHUNK-METHOD-D", "CHUNK-METHOD-E"],
+        "questions": ["Q-METHOD-001", "Q-METHOD-002", "Q-METHOD-003", "Q-METHOD-004", "Q-METHOD-005"]
+      },
+      "kompetent": {
+        "chunks": [],
+        "questions": []
+      }
+    },
+    {
+      "module": "mesking",
+      "topic_id": "PILOT-MASHING-FUNDAMENTALS",
+      "notes": "Stage allocation contract §D.1 (MASH-B/C, Q-002/003) and the Mesking Kompetent slice (MASH-D..F, Q-004..008).",
+      "foundation": {
+        "chunks": ["CHUNK-MASH-A"],
+        "questions": ["Q-MASH-001"]
+      },
+      "kompetent": {
+        "chunks": ["CHUNK-MASH-B", "CHUNK-MASH-C", "CHUNK-MASH-D", "CHUNK-MASH-E", "CHUNK-MASH-F"],
+        "questions": ["Q-MASH-002", "Q-MASH-003", "Q-MASH-004", "Q-MASH-005", "Q-MASH-006", "Q-MASH-007", "Q-MASH-008"]
+      }
+    },
+    {
+      "module": "koking",
+      "topic_id": "PILOT-BOIL-HOP-FUNDAMENTALS",
+      "notes": "Stage UI contract §6.3 interim rule: CHUNK-BOILHOP-B stays Foundation until its content is split (boil-over safety; Q-BOILHOP-003). §D.2: BOILHOP-F, Q-002, Q-007 Kompetent; Q-008 (hot break) Kompetent; Q-004/005 stay Foundation.",
+      "foundation": {
+        "chunks": ["CHUNK-BOILHOP-A", "CHUNK-BOILHOP-B", "CHUNK-BOILHOP-C", "CHUNK-BOILHOP-D", "CHUNK-BOILHOP-E"],
+        "questions": ["Q-BOILHOP-001", "Q-BOILHOP-003", "Q-BOILHOP-004", "Q-BOILHOP-005", "Q-BOILHOP-006"]
+      },
+      "kompetent": {
+        "chunks": ["CHUNK-BOILHOP-F"],
+        "questions": ["Q-BOILHOP-002", "Q-BOILHOP-007", "Q-BOILHOP-008"]
+      }
+    },
+    {
+      "module": "kjoling",
+      "topic_id": "PILOT-COOL-TRANSFER-FUNDAMENTALS",
+      "notes": "Stage UI contract §6.3 interim rule: CHUNK-COOLXFER-D stays Foundation until its content is split (oxygen timing rule). §D.3: Q-COOLXFER-004/005 Kompetent.",
+      "foundation": {
+        "chunks": ["CHUNK-COOLXFER-A", "CHUNK-COOLXFER-B", "CHUNK-COOLXFER-C", "CHUNK-COOLXFER-D", "CHUNK-COOLXFER-E"],
+        "questions": ["Q-COOLXFER-001", "Q-COOLXFER-002", "Q-COOLXFER-003", "Q-COOLXFER-006"]
+      },
+      "kompetent": {
+        "chunks": [],
+        "questions": ["Q-COOLXFER-004", "Q-COOLXFER-005"]
+      }
+    },
+    {
+      "module": "gjaring",
+      "topic_id": "PILOT-FERMENTATION-TEMPERATURE",
+      "foundation": {
+        "chunks": ["CHUNK-FERM-A", "CHUNK-FERM-B", "CHUNK-FERM-C", "CHUNK-FERM-D"],
+        "questions": ["Q-FERM-001", "Q-FERM-002", "Q-FERM-003"]
+      },
+      "kompetent": {
+        "chunks": ["CHUNK-FERM-E", "CHUNK-FERM-F", "CHUNK-FERM-G", "CHUNK-FERM-H", "CHUNK-FERM-I", "CHUNK-FERM-J", "CHUNK-FERM-K"],
+        "questions": ["Q-FERM-004", "Q-FERM-005", "Q-FERM-006", "Q-FERM-007", "Q-FERM-008", "Q-FERM-009", "Q-FERM-010", "Q-FERM-011"]
+      }
+    },
+    {
+      "module": "pakking",
+      "topic_id": "PILOT-PACKAGE-FUNDAMENTALS",
+      "foundation": {
+        "chunks": ["CHUNK-PACK-A", "CHUNK-PACK-B", "CHUNK-PACK-C", "CHUNK-PACK-D", "CHUNK-PACK-E"],
+        "questions": ["Q-PACK-001", "Q-PACK-002", "Q-PACK-003", "Q-PACK-004", "Q-PACK-005"]
+      },
+      "kompetent": {
+        "chunks": ["CHUNK-PACK-F", "CHUNK-PACK-G", "CHUNK-PACK-H", "CHUNK-PACK-I"],
+        "questions": ["Q-PACK-006", "Q-PACK-007", "Q-PACK-008", "Q-PACK-009"]
+      }
+    },
+    {
+      "module": "maaling",
+      "topic_id": "PILOT-MEASUREMENT-FUNDAMENTALS",
+      "foundation": {
+        "chunks": ["CHUNK-MEAS-A", "CHUNK-MEAS-B", "CHUNK-MEAS-C", "CHUNK-MEAS-D", "CHUNK-MEAS-E"],
+        "questions": ["Q-MEAS-001", "Q-MEAS-002", "Q-MEAS-003", "Q-MEAS-004", "Q-MEAS-005", "Q-MEAS-006"]
+      },
+      "kompetent": {
+        "chunks": ["CHUNK-MEAS-F", "CHUNK-MEAS-G", "CHUNK-MEAS-H", "CHUNK-MEAS-I", "CHUNK-MEAS-J"],
+        "questions": ["Q-MEAS-007", "Q-MEAS-008", "Q-MEAS-009", "Q-MEAS-010", "Q-MEAS-011", "Q-MEAS-012", "Q-MEAS-013"]
+      }
+    },
+    {
+      "module": "oppskrift",
+      "topic_id": "PILOT-RECIPE-FUNDAMENTALS",
+      "notes": "Stage allocation contract §C.10: the whole module is Kompetent, whatever the question difficulty.",
+      "foundation": {
+        "chunks": [],
+        "questions": []
+      },
+      "kompetent": {
+        "chunks": ["CHUNK-REC-A", "CHUNK-REC-B", "CHUNK-REC-C", "CHUNK-REC-D", "CHUNK-REC-E", "CHUNK-REC-F", "CHUNK-REC-G"],
+        "questions": ["Q-REC-001", "Q-REC-002", "Q-REC-003", "Q-REC-004", "Q-REC-005", "Q-REC-006", "Q-REC-007"]
+      }
+    },
+    {
+      "module": "smak",
+      "topic_id": "PILOT-SENSORY-EVALUATION",
+      "notes": "Stage allocation contract §C.11/§D.5: the whole module is Kompetent; the optional Foundation taster (CHUNK-SENS-A) is not exposed.",
+      "foundation": {
+        "chunks": [],
+        "questions": []
+      },
+      "kompetent": {
+        "chunks": ["CHUNK-SENS-A", "CHUNK-SENS-B", "CHUNK-SENS-C", "CHUNK-SENS-D", "CHUNK-SENS-E", "CHUNK-SENS-F", "CHUNK-SENS-G"],
+        "questions": ["Q-SENS-001", "Q-SENS-002", "Q-SENS-003", "Q-SENS-004", "Q-SENS-007", "Q-SENS-008", "Q-SENS-009", "Q-SENS-010", "Q-SENS-005", "Q-SENS-006"]
+      }
+    }
+  ]
+}
