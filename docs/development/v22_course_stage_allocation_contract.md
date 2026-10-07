@@ -6,7 +6,7 @@ og evaluering fault chunks (§A.1, §C.11); status refresh 2026-10-04 after the 
 closure (§A.1, §C.9, §C.11, §I); status refresh 2026-10-05 after FACT-MEAS-0006 (M7) and the Måling Kompetent implementation
 (§A.1, §C.9, §I); status refresh 2026-10-05 after the Måling Kompetent merge and the Gjæring Kompetent readiness contract
 (§A.1, §C.7, §C.9, §I); status refresh 2026-10-05 after FACT-BREW-0004/0005 (G1/G2) and the Gjæring Kompetent implementation
-(§C.7, §I); status refresh 2026-10-05 after the Chief-approved Gjæring Kompetent merge (§C.7, §C.9, §I); Chief decisions 2026-10-05: Kompetent completion rule and priority rulings (§F.1, §F.2, §I); status refresh 2026-10-05 after the Pakking Kompetent implementation (§C.8, §I); status refresh 2026-10-05 after the Chief-approved Pakking merge, FACT-MASH-0005/0006 (M1/M2) and the Mesking Kompetent implementation (§C.3, §C.4, §C.8, §I); Kompetent required-content evaluation (§F.3)
+(§C.7, §I); status refresh 2026-10-05 after the Chief-approved Gjæring Kompetent merge (§C.7, §C.9, §I); Chief decisions 2026-10-05: Kompetent completion rule and priority rulings (§F.1, §F.2, §I); status refresh 2026-10-05 after the Pakking Kompetent implementation (§C.8, §I); status refresh 2026-10-05 after the Chief-approved Pakking merge, FACT-MASH-0005/0006 (M1/M2) and the Mesking Kompetent implementation (§C.3, §C.4, §C.8, §I); Kompetent required-content evaluation (§F.3); pointer 2026-10-05 to the stage UI contract (§J.2)
 Status: **Canonical, locked owner/Chief decisions** for *where* course content belongs by stage. Decision/architecture
 document only: it implements nothing and changes no lesson, registry, UI or Web file.
 Recorded offline during the GitHub outage; see the sync note in §K.
@@ -461,6 +461,9 @@ a reason to teach a topic in the homebrew course.
 2. **No stage field exists today.** Pilot JSON has no stage attribute, and question `difficulty` is **item difficulty, not
    the course stage** (recipe contract §27.2). How stages are expressed (a data field, module grouping, presentation in the
    grid) is a later product/UI decision. It must not reuse the App environment chooser (curriculum map §6.2.4).
+   Pointer 2026-10-05: that presentation decision is proposed in
+   [v22_course_stage_ui_contract.md](v22_course_stage_ui_contract.md) (offline, `offline/course-stage-ui-contract`,
+   for Chief review). It adds a separate stage map instead of a stage field and changes no allocation in this contract.
 3. **Mastery stays concept-based.** Moving a chunk or question between stages does not create or rename a mastery concept.
    Reuse follows the existing precedent (`cool.sanitation_boundary`, `sensory.observation_vs_interpretation`).
 4. **Smak placement.** Presenting Smak og evaluering as Kompetent is a presentation change for the stage-presentation slice.
