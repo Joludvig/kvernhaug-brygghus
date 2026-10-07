@@ -80,6 +80,7 @@ from bryggeskole.pilot_raw_materials import read_pilot_file as les_raavarer_pilo
 from bryggeskole.pilot_cleaning_safety import read_pilot_file as les_rengjoring_pilot
 from bryggeskole.pilot_sensory import read_pilot_file as les_smak_pilot
 from bryggeskole.pilot_measurement import read_pilot_file as les_maaling_pilot
+from bryggeskole.pilot_recipe import read_pilot_file as les_oppskrift_pilot
 from ui.bryggeskole_panel import _konsept_label, _konsept_rekkefolge
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -245,13 +246,14 @@ class TestMiljovalgOgSkoleoversikt(_MedIsolertTilstand):
         # Forberedelse/metode; issue #458 legger Råvarer foran som syvende
         # stadium; issue #473 legger Rengjøring og sikkerhet inn som åttende;
         # issue #472 legger Smak og evaluering til som niende og siste;
-        # Måling og bryggelogg (Foundation) blir niende og Smak tiende
+        # Måling og bryggelogg (Foundation) blir niende og Smak tiende;
+        # Oppskriftsforståelse blir tiende og Smak ellevte
         # -- alle stadiene er aktive moduler, ingen "Kommer senere".
         at = self._ny_apptest()
         self._velg_miljo(at, "bs_velg_hjemmebrygger_btn")
         aktiv_badges = [c.value for c in at.caption if "Leksjon tilgjengelig" in c.value]
         kommer_badges = [c.value for c in at.caption if "Kommer senere" in c.value]
-        self.assertEqual(len(aktiv_badges), 10)
+        self.assertEqual(len(aktiv_badges), 11)
         self.assertEqual(len(kommer_badges), 0)
 
     def test_rengjoring_modulen_rendrer_pilotinnhold_i_begge_miljo(self):
@@ -1266,6 +1268,15 @@ class TestKokingModulen(_MedIsolertTilstand):
         self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_maaling_pilot()), "maaling")
         _knapp(at, "bs_oppsummering_tilbake_maaling_btn").click().run()
         tekster = " ".join(_alle_synlige_tekster(at))
+        # Oppskriftsforståelse kommer etter Måling og før Smak og evaluering
+        # (oppskriftskontrakten §27.8).
+        self.assertIn("Anbefalt neste: Oppskriftsforståelse", tekster)
+
+        _knapp(at, "bs_apne_modul_oppskrift_btn").click().run()
+        self._start_sporsmalsrunde(at, "oppskrift")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_oppskrift_pilot()), "oppskrift")
+        _knapp(at, "bs_oppsummering_tilbake_oppskrift_btn").click().run()
+        tekster = " ".join(_alle_synlige_tekster(at))
         # Issue #472: Smak og evaluering er siste kort.
         self.assertIn("Anbefalt neste: Smak og evaluering", tekster)
 
@@ -2010,7 +2021,7 @@ class TestSkoleoversiktGridResponsivIssue394(_MedIsolertTilstand):
         at.run()
         _knapp(at, "bs_velg_hjemmebrygger_btn").click().run()
         for modul_id in ("raavarer", "rengjoring", "metodevalg", "mesking", "koking", "kjoling", "gjaring",
-                         "pakking", "maaling", "smak"):
+                         "pakking", "maaling", "oppskrift", "smak"):
             _knapp(at, f"bs_apne_modul_{modul_id}_btn")
 
     def test_anbefalt_neste_og_modulapning_uendret_etter_grid_refaktorering(self):
@@ -2090,14 +2101,16 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
         return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
 
     def test_maaling_er_niende_kort_for_smak_i_begge_miljo(self):
+        # Måling er fortsatt posisjon 9; Oppskriftsforståelse ligger nå
+        # mellom Måling og Smak (oppskriftskontrakten §27.8).
         for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
             at = self._ny_apptest()
             self._velg_miljo(at, miljo_knapp)
             kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
-            self.assertEqual(len(kort), 10, kort)
+            self.assertEqual(len(kort), 11, kort)
             self.assertEqual(kort[7], "**Pakking**" if miljo_knapp.endswith("hjemmebrygger_btn") else "**Pakking/CIP**")
             self.assertEqual(kort[8], "**Måling og bryggelogg**", kort)
-            self.assertEqual(kort[9], "**Smak og evaluering**", kort)
+            self.assertEqual(kort[10], "**Smak og evaluering**", kort)
             _knapp(at, "bs_apne_modul_maaling_btn")
 
     def test_engelsk_korttittel(self):
@@ -2106,7 +2119,9 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
         at.run()
         self._velg_miljo(at)
         kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
-        self.assertEqual(kort[8:], ["**Measurement and brew log**", "**Tasting and evaluation**"])
+        self.assertEqual(kort[8:], [
+            "**Measurement and brew log**", "**Recipe understanding**", "**Tasting and evaluation**",
+        ])
 
     def test_leksjonen_rendrer_norsk_og_engelsk(self):
         at = self._ny_apptest()
@@ -2155,6 +2170,97 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
         maaling = {c for q in les_maaling_pilot()["questions"] for c in q["concepts"]}
         smak = {c for q in les_smak_pilot()["questions"] for c in q["concepts"]}
         self.assertEqual(maaling & smak, {"sensory.observation_vs_interpretation"})
+
+
+# ─── Oppskriftsforståelse (oppskriftskontrakten §27/§28): hele modulen er
+# Kompetent, posisjon 10 mellom Måling og Smak, sju bolker, sju spørsmål,
+# gjenbrukte Råvarer-konsepter (ingen duplikater), metode-merking kun på
+# metodeinnhold ──────────────────────────────────────────────────────────
+
+class TestOppskriftsforstaaelse(_MedIsolertTilstand):
+    _ETIKETT_NO = "Metode, ikke en faktapåstand"
+    _KONSEPTER = {
+        "malt.base_vs_specialty", "yeast.attenuation", "malt.colour_flavour",
+        "recipe.ibu_vs_perceived_bitterness", "recipe.balance", "recipe.style_context",
+        "recipe.formulation_workflow",
+    }
+
+    def _bolk_teller(self, at):
+        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+
+    def test_oppskrift_er_tiende_kort_mellom_maaling_og_smak_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            at = self._ny_apptest()
+            self._velg_miljo(at, miljo_knapp)
+            kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
+            self.assertEqual(len(kort), 11, kort)
+            self.assertEqual(kort[8:], [
+                "**Måling og bryggelogg**", "**Oppskriftsforståelse**", "**Smak og evaluering**",
+            ], kort)
+            _knapp(at, "bs_apne_modul_oppskrift_btn")
+
+    def test_leksjonen_rendrer_norsk_og_engelsk(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "oppskrift")
+        self.assertIn("Les oppskriften som en plan", " ".join(_alle_synlige_tekster(at)))
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul(at, "oppskrift")
+        self.assertIn("Read the recipe as a plan", " ".join(_alle_synlige_tekster(at)))
+
+    def test_samme_leksjon_i_bryggeri_miljo(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "oppskrift", "bs_velg_bryggeri_btn")
+        self.assertIn("Les oppskriften som en plan", " ".join(_alle_synlige_tekster(at)))
+
+    def test_alle_sju_bolker_og_metode_merking_kun_pa_metodebolker(self):
+        at = self._ny_apptest()
+        self._apne_modul(at, "oppskrift")
+        pilot = les_oppskrift_pilot()
+        for idx, chunk in enumerate(pilot["chunks"]):
+            self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 7"])
+            har_etikett = self._ETIKETT_NO in [c.value for c in at.caption]
+            self.assertEqual(har_etikett, chunk["basis"] == "methodology", chunk["id"])
+            if idx < len(pilot["chunks"]) - 1:
+                _knapp(at, "bs_bolk_neste_oppskrift_btn").click().run()
+                self.assertEqual(len(at.exception), 0)
+        _knapp(at, "bs_start_sporsmal_oppskrift_btn")
+
+    def test_ferskt_sporsmal_har_ikke_forhandsvalgt_svar(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "oppskrift")
+        self.assertIsNone(at.radio(key=self._valg_key(0, 1)).value)
+        self.assertTrue(_knapp(at, "bs_svar_btn_oppskrift_r1_q0").disabled)
+
+    def test_full_flyt_mastery_pa_kontraktens_konsepter_og_prov_igjen(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "oppskrift")
+        fasit = _korrekt_svar_ider(les_oppskrift_pilot())
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        _knapp(at, "bs_oppsummering_tilbake_oppskrift_btn")
+        forste = read_mastery_state()["concepts"]
+        self.assertEqual(set(forste), self._KONSEPTER)
+        self.assertNotIn("recipe.one_change", forste)
+        self.assertNotIn("log.hypothesis_next_change", forste)
+
+        _knapp(at, f"bs_prov_igjen_{self._aktiv_modul}_btn").click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved Prøv igjen: {at.exception}")
+        self._fullfor_alle_sporsmal(at, 2, fasit)
+        andre = read_mastery_state()["concepts"]
+        self.assertEqual(set(andre), self._KONSEPTER)
+        for konsept in self._KONSEPTER:
+            self.assertEqual(andre[konsept]["attempts"], 2, konsept)
+            self.assertGreaterEqual(andre[konsept]["mastery"], forste[konsept]["mastery"], konsept)
+
+    def test_gjenbrukte_konsepter_deles_med_raavarer(self):
+        oppskrift = {c for q in les_oppskrift_pilot()["questions"] for c in q["concepts"]}
+        raavarer = {c for q in les_raavarer_pilot()["questions"] for c in q["concepts"]}
+        self.assertEqual(oppskrift & raavarer, {"malt.base_vs_specialty", "yeast.attenuation", "malt.colour_flavour"})
+        for konsept in oppskrift:
+            self.assertNotEqual(_konsept_label(konsept, "no"), konsept, konsept)
+            self.assertNotEqual(_konsept_label(konsept, "en"), konsept, konsept)
 
 
 # ─── Råvarer-modulen (issue #458, V2.2 G3P slice 5): én kombinert

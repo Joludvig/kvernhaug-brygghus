@@ -5,7 +5,8 @@ Status: **Chief review completed 2026-10-03** (§27). The module is approved for
 Implementation depends on the Måling og bryggelogg Foundation module landing first, and the issue is pending because GitHub is unavailable.
 Not yet actionable as product work. (v1.0: decision/prep document — reviewable, not yet actionable.)
 Status refresh 2026-10-04: the Måling Foundation dependency is satisfied in the offline/local integration (not yet on
-GitHub/master). This module itself is not implemented.
+GitHub/master). Status refresh 2: the module is implemented locally/offline on
+`offline/recipe-understanding-implementation` (§27.11); not yet on GitHub/master.
 Governed by: [#436](https://github.com/Joludvig/kvernhaug-brygghus/issues/436), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3); product direction
 [#65](https://github.com/Joludvig/kvernhaug-brygghus/issues/65); curriculum owner
@@ -587,6 +588,13 @@ Chunk-specific bans:
 - **D:** no directional claim for alcohol, residual sugar, roast, water or hop character on perceived bitterness.
 - **F:** no BJCP numbers, no style memorisation, no style-match percentage as a quality score.
 
+Chief decision (2026-10-04, after the offline implementation review), narrowing B and C to the verified fact scope:
+- **B — tendencies:** alcohol tendency is implemented where supported (FACT-YEAST-0001); dryness tendency is implemented where
+  supported (FACT-YEAST-0002); **body tendency is DEFERRED / FACT GAP** until a separately sourced, verified fact supports it
+  (FACT-RECIPE-0002 explicitly excludes body and sweetness). No body claim is taught.
+- **C — EBC:** EBC appears only as the App's calculated colour estimate. The scale direction ("higher means darker") is not
+  taught until a verified fact supports it. Colour is not flavour is unchanged.
+
 ### 27.4 Question shape
 
 | Question | Type | Tests |
@@ -635,6 +643,7 @@ the dependency.
 
 Status refresh (2026-10-04): the Måling Foundation module is implemented in the offline/local integration, so the
 dependency is satisfied there. It has not yet landed on GitHub/master. Oppskriftsforståelse is not implemented.
+Status refresh 2 (2026-10-04): Oppskriftsforståelse is now implemented locally/offline (§27.11).
 
 ### 27.9 Recipe-editor bridge
 
@@ -686,6 +695,11 @@ The search leads listed above were not used as evidence. The Briess `?p=20059` l
 - The issue cannot be created while GitHub is unavailable. The paste-ready draft is §28.
 - Nothing here marks product implementation as started or complete.
 - Status refresh (2026-10-04): the Måling Foundation dependency (§27.8) is satisfied offline; not yet on GitHub/master.
+- Status refresh 2 (2026-10-04): the module is implemented locally/offline on `offline/recipe-understanding-implementation` (11 cards;
+  Oppskriftsforståelse at position 10, between Måling and Smak). It has **not yet landed on GitHub/master**: the §28 issue
+  and a PR are still required.
+- Chief decision (2026-10-04): body tendency deferred as a FACT GAP and EBC kept to the App colour estimate (§27.3). The
+  Course Fact Registry is unchanged.
 
 ## 28. Implementation issue — draft (create on GitHub when access returns)
 
