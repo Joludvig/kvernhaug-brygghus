@@ -6,7 +6,7 @@ og evaluering fault chunks (§A.1, §C.11); status refresh 2026-10-04 after the 
 closure (§A.1, §C.9, §C.11, §I); status refresh 2026-10-05 after FACT-MEAS-0006 (M7) and the Måling Kompetent implementation
 (§A.1, §C.9, §I); status refresh 2026-10-05 after the Måling Kompetent merge and the Gjæring Kompetent readiness contract
 (§A.1, §C.7, §C.9, §I); status refresh 2026-10-05 after FACT-BREW-0004/0005 (G1/G2) and the Gjæring Kompetent implementation
-(§C.7, §I); status refresh 2026-10-05 after the Chief-approved Gjæring Kompetent merge (§C.7, §C.9, §I); Chief decisions 2026-10-05: Kompetent completion rule and priority rulings (§F.1, §F.2, §I)
+(§C.7, §I); status refresh 2026-10-05 after the Chief-approved Gjæring Kompetent merge (§C.7, §C.9, §I); Chief decisions 2026-10-05: Kompetent completion rule and priority rulings (§F.1, §F.2, §I); status refresh 2026-10-05 after the Pakking Kompetent implementation (§C.8, §I)
 Status: **Canonical, locked owner/Chief decisions** for *where* course content belongs by stage. Decision/architecture
 document only: it implements nothing and changes no lesson, registry, UI or Web file.
 Recorded offline during the GitHub outage; see the sync note in §K.
@@ -188,7 +188,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 | Stage | Content | Status |
 |---|---|---|
 | Foundation | Sanitation continues; priming is a small new fermentation in the bottle; force carbonation as a concept; minimise oxygen; pressure safety; both paths legitimate (CHUNK-PACK-A…E; FACT-COOL-0003, FACT-PACK-0001…0004, FACT-OXY-0002). Link: package only when fermentation is finished (§D.9) | IMPLEMENTED; link implemented locally/offline on `offline/foundation-fermentation-completion` as a process pointer to the Måling completion check (no new claim, no early-packaging consequence); not yet on GitHub/master |
-| Kompetent | **Priming concept:** the priming amount controls carbonation; follow a trusted recipe, calculator or table; **no manual calculation** required (§D.6). Clarification (D28), shelf life brief (D58) | Priming concept GAP (no contract); D28/D58 MAPPED (roadmap slice 11) |
+| Kompetent | **Priming concept:** the priming amount controls carbonation; follow a trusted recipe, calculator or table; **no manual calculation** required (§D.6). Clarification (D28), shelf life brief (D58) | Priming concept GAP (no contract); D28/D58 MAPPED (roadmap slice 11). Status refresh 2026-10-05: contracted (`v22_package_kompetent_module_contract.md`) and **implemented locally/offline** on `offline/packing-kompetent-implementation` in the same module and card (CHUNK-PACK-F…I, Q-PACK-006…009): priming concept (FACT-PACK-0001 + trusted-tool methodology) and the short D28/D58 reuse (FACT-BREW-0005, FACT-OXY-0002) per §F.2. Pending Chief review; not merged into the integration rehearsal; not on GitHub/master. Finings, clarification technique, cold-conditioning practice and shelf-life depth stay SHOULD |
 | Bryggemester | Quantitative priming and carbonation maths, pressure/kegging depth, gauges and regulators (D42, D50), foam (D57) | OUT OF APP |
 | Bryggeri | Commercial packaging lines (D74), filtration/stabilisation/pasteurisation (D73) | OUT OF APP |
 
@@ -419,7 +419,7 @@ a reason to teach a topic in the homebrew course.
 | Airlock not proof; finished = stable readings | F | Sourced by FACT-MEAS-0002; taught in Måling F (implemented offline); Gjæring/Pakking links implemented offline on `offline/foundation-fermentation-completion` (not yet on GitHub/master) |
 | Any safety consequence of packaging too early | F | GAP. FACT-PACK-0003 covers damaged or unrated containers only; no record for early packaging |
 | Spoilage vs safety; electrical near liquids; scald first aid | F | GAP (cleaning contract §3/§6) |
-| Priming concept (amount controls carbonation; use a trusted tool) | K | GAP: no contract; FACT-PACK-0001 covers priming as a process only |
+| Priming concept (amount controls carbonation; use a trusted tool) | K | GAP: no contract; FACT-PACK-0001 covers priming as a process only. Status refresh 2026-10-05: implemented locally/offline on `offline/packing-kompetent-implementation` (CHUNK-PACK-F/G, Q-PACK-006/007; no new fact), pending Chief review |
 | Instrument checks | K | GAP (measurement M7 / G4). Readiness closure 2026-10-04: the only blocker for Måling Kompetent. The exact requirement is in measurement §23.3. Status refresh 2026-10-05: **CLOSED** for hydrometer + refractometer by FACT-MEAS-0006 (Chief live source spot-check 2026-10-05); thermometer checks stay out of scope (no brewing-relevant Tier A source) |
 | Conversion check | K | `FACT-MASH-0003` **draft**; needs a second source. Chief ruling 2026-10-05 (§F.2): SHOULD, non-blocking |
 | Grain separation / wort collection | K | MAPPED; Kunze SOURCE GAP printed pp. 257, 259–260 (curriculum map §19.1). Chief ruling 2026-10-05 (§F.2): D18 grain separation is the remaining Mesking MUST; D19 wort collection travels with it in the same slice |

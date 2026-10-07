@@ -9,6 +9,15 @@ Status:
 **Verdict: IMPLEMENTATION READY** (§8). Every fact item rests on an already verified record (FACT-PACK-0001, FACT-BREW-0005,
 FACT-OXY-0002). The trusted-tool guidance is labelled methodology. **No new fact is needed.**
 
+**Status refresh 2026-10-05:**
+- **Implemented locally/offline** on `offline/packing-kompetent-implementation` exactly as locked (CHUNK-PACK-F…I, Q-PACK-006…009, scoped basis rule in
+  `pilot_package.py`), pending Chief review.
+- Not merged into the integration rehearsal; not on GitHub/master.
+- Foundation CHUNK-PACK-A…E / Q-PACK-001…005 are unchanged.
+- Måling, Gjæring and Oppskriftsforståelse Kompetent and the Smak MUST content remain complete.
+- Light-struck remains DEFERRED SHOULD.
+- The remaining Kompetent MUST blocker is Mesking D18/D19 (fact pack M1/M2 awaiting the Chief spot-check).
+
 ## 1. Authority and scope
 
 - Stage allocation contract:
