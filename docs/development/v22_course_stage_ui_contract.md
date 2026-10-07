@@ -1,6 +1,6 @@
 # V2.2 — Bryggeskole course stage UI contract (Foundation → Kompetent hjemmebrygger)
 
-Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15)
+Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15); 1.2 (2026-10-05): S1 merged, S2 status (§15); 1.3 (2026-10-05): S2 Chief GREEN, S3 status (§15)
 
 Status:
 - **Contract for review.** Docs only. It implements nothing: no app behaviour, UI, mastery store, lesson JSON, registry or
@@ -15,8 +15,13 @@ Status:
 **Status 2026-10-05:**
 - Chief review GREEN. All seven §17 defaults are approved, plus the explicit-stage-choice refinement (§7.3).
 - The contract is merged into the offline integration rehearsal (`0bd8397`).
-- **S1 (stage metadata) is IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s1-metadata`, pending Chief review.
-- **S2–S5 are NOT IMPLEMENTED.** The stage UI is not complete, and nothing is on GitHub/master.
+- **S1 (stage metadata) is MERGED LOCALLY/OFFLINE** into the integration rehearsal (`f003bc4`).
+- **S2 (lesson rendering by stage) is IMPLEMENTED LOCALLY/OFFLINE** (Chief GREEN). It is combined with S3 on
+  `offline/course-stage-ui-s3-selector` and **NOT YET MERGED**.
+- **S3 (stage selector + cards) is IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s3-selector`, on top of
+  S2. It is pending Chief review and not merged. S2 + S3 merge together; a clean full-suite run on the combined tree
+  is required first.
+- **S4 and S5 are NOT IMPLEMENTED.** The stage UI is not complete, and nothing is on GitHub/master.
 
 Governed by (never restated or changed here):
 - [curriculum map §6.2](v22_g3q_full_bryggeskole_curriculum_map.md#62-canonical-course-architecture-and-terminology-axes):
@@ -410,12 +415,76 @@ Order and merging:
 
 | Slice | Status |
 |---|---|
-| S1 | **IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s1-metadata`. Files: `bryggeskole/course_stage.py`, `bryggeskole/data/course_stage_map.json`, `tests/test_course_stage_map.py`. Foundation 48 chunks / 45 questions / 9 modules; Kompetent 36 / 54 / 9; 84 / 99 total. Interim locks as approved. Fail-closed validator. No runtime consumer, so behaviour is unchanged. Pending Chief review; not merged |
-| S2 | NOT IMPLEMENTED |
-| S3 | NOT IMPLEMENTED |
+| S1 | **MERGED LOCALLY/OFFLINE** (Chief GREEN; integration `f003bc4`). Files: `bryggeskole/course_stage.py`, `bryggeskole/data/course_stage_map.json`, `tests/test_course_stage_map.py`. Foundation 48 chunks / 45 questions / 9 modules; Kompetent 36 / 54 / 9; 84 / 99 total. Interim locks as approved. Fail-closed validator |
+| S2 | **IMPLEMENTED LOCALLY/OFFLINE** (Chief GREEN; `offline/course-stage-ui-s2-rendering`), combined with S3 on `offline/course-stage-ui-s3-selector`; **NOT YET MERGED**. It must not merge alone. Details below the table |
+| S3 | **IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s3-selector` (on top of S2); **pending Chief review; NOT merged**. Details below the table |
 | S4 | NOT IMPLEMENTED |
 | S5 | NOT IMPLEMENTED |
 | C1 | Not started (optional; separate content decision) |
+
+S2 as implemented (`ui/bryggeskole_panel.py`):
+- **Lesson context.**
+  - The stage of the lesson context is the internal session key `bs_aktiv_trinn`.
+  - S2 gives the learner no way to set it; that is S3. So the normal entry keeps today's single flow, today's keys
+    and today's breadcrumb, and does not read the stage map at all.
+- **Stage content.**
+  - Content comes only from `course_stage.items_for_stage()`.
+  - The existing lesson, question and summary renderers run on a stage view of the pilot, in the same order.
+- **Sessions and keys.**
+  - Sessions are keyed `module`, `module@foundation` and `module@kompetent`.
+  - The single flow and Foundation keep today's widget keys. Kompetent uses the `_k` infix
+    (`bs_valg_mesking_k_r1_q0`, …).
+- **Questions-only stage** (Råvarer and Kjøling Kompetent): a neutral intro, "Repeter Foundation-delen", then the
+  questions.
+- **Single-stage modules:** an explicit "no separate Trinn 2 part" / "belongs to Trinn 2" state with a stage
+  switch. No session is created for it.
+- **Breadcrumb:** the environment and stage axes stay separate.
+  - NO: "Trinn 1 · Foundation" / "Trinn 2 · Kompetent".
+  - EN: "Stage 1 · Foundation" / "Stage 2 · Competent homebrewer".
+  - The keys are `bryggeskole.trinn.sti.*`. The breadcrumb uses the full EN stage name, per the Chief S2 brief, rather
+    than the §9 short form.
+- **Invalid or missing map:** logged once per session, no crash, no guessing, today's single flow.
+- **Mastery:** apply_answer, concept ids and the schema are unchanged. Summaries show only the stage's concepts.
+- **Since S3:** the normal entry is stage-aware. `bs_aktiv_trinn` is only the lesson context, set by a card action
+  and cleared on leaving the module; the single flow remains only as the invalid/missing-map fallback.
+
+S3 as implemented (`ui/bryggeskole_panel.py`, `bryggeskole/course_stage.py`, `modules/i18n.py`):
+- **One authoritative stage.**
+  - The lens is the selector's own key `bs_trinn` (`foundation`/`kompetent`; never an environment value).
+  - It is written back at the start of every run, so it survives runs where the radio is not drawn (open module,
+    environment screen).
+  - `bs_trinn_valgt_eksplisitt` records an explicit choice: the selector's `on_change`, or a card action that
+    switches the lens. A widget value Streamlit only materialised never sets it.
+- **Default (§7.3, Chief refinement).**
+  - Without an explicit choice the lens is Foundation, or Kompetent once every Foundation module is worked through.
+  - After an explicit choice nothing changes the lens for the rest of the session: no progress change, environment
+    switch, language switch or rerun.
+- **Selector:** one horizontal `st.radio` above the grid, NO "Trinn 1 · Foundation" / "Trinn 2 · Kompetent
+  hjemmebrygger", EN "Stage 1 · Foundation" / "Stage 2 · Competent homebrewer", with a help text and a one-line
+  caption. The environment chooser stays first and unchanged.
+- **Cards:** the same 11 cards, order and `bs_apne_modul_{id}_btn` keys in both lenses. Titles stay tied to the
+  environment. Each card has one stage line and one button; nothing is disabled or greyed.
+  - Both-stage module: "Innhold i dette trinnet"; today's session badges for that (module, stage); the button opens
+    the selected stage.
+  - Foundation-only module (Rengjøring og sikkerhet, Forberedelse/metode) in the Kompetent lens: "Bygger på
+    Foundation – ingen egen Trinn 2-del" + "Repeter". It opens the Foundation lesson; the lens stays Kompetent.
+  - Kompetent-only module (Oppskriftsforståelse, Smak og evaluering) in the Foundation lens: "Hører til Trinn 2" +
+    "Se Trinn 2-innholdet". It switches the lens to Kompetent (an explicit choice) and opens the module there.
+- **Guidance (no lock, §8):**
+  - "Anbefalt neste" names the first module in canonical order with content at the selected stage that is neither
+    worked through there nor completed at that stage this session.
+  - Kompetent lens with Foundation gaps: one quiet tip line.
+  - Foundation worked through: "Du har gått gjennom Trinn 1. Klar for Trinn 2?" (not after an explicit Kompetent
+    choice). No completion, certification or mastery wording.
+- **Readiness helper:** pure `course_stage.module_stage_status()` / `stage_worked_through()`, read-only over
+  `answered_questions` (§7.2), reusable by S4. No S4 counts or per-card status are shown.
+- **Fallback:** with an invalid or missing map there is no selector, no stage line and no stage guidance: today's
+  overview and single flow.
+- **Tests:**
+  - The legacy panel suite pins the single-flow engine (the fallback).
+  - The stage-split normal path is covered by the S2 and S3 suites, including a card-driven full walk of all 18
+    (module, stage) pairs.
+  - Chromium smoke: `tests/playwright_streamlit/stage-selector-smoke.spec.js`.
 
 ## 16. Acceptance tests
 
@@ -497,5 +566,9 @@ recorded answer correct):
 
 Next safe step: Chief review, then implement **S1** (metadata only) on its own branch.
 Status 2026-10-05: S1 is implemented (§15). Next: Chief review of S1; if GREEN, merge S1 and start S2 together with S3.
+Status 2026-10-05 (2): S1 merged; S2 implemented and pending Chief review. Next: if S2 is GREEN, keep it unmerged and
+implement S3 on top of it; after S3 is GREEN, merge S2 + S3 together.
+Status 2026-10-05 (3): S2 Chief GREEN; S3 implemented on top of it, pending Chief review. Next: if GREEN, merge the
+combined S2+S3 state into the integration (after a clean full suite), then implement S4.
 
 Sync note: mirror on #419 / the #343 roadmap when GitHub returns. No issue number is assigned.

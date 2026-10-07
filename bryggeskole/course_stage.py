@@ -1,8 +1,8 @@
 """
 Bryggeskole course stage map -- S1 of the course stage UI contract
 (docs/development/v22_course_stage_ui_contract.md §6, §15; offline, no
-GitHub issue yet). Metadata and validation only: nothing in the app reads
-this module yet (S2/S3 will), so adding it changes no runtime behaviour.
+GitHub issue yet). Metadata, validation and pure lookups; the Bryggeskole
+panel is its only runtime consumer (stage UI S2/S3).
 
 Scope, stated plainly:
 - one canonical stage map, bryggeskole/data/course_stage_map.json, that
@@ -257,3 +257,47 @@ def items_for_stage(stage_map, module_id, pilot, stage):
         "chunks": [c for c in pilot["chunks"] if c["id"] in chunk_ids],
         "questions": [q for q in pilot["questions"] if q["id"] in question_ids],
     }
+
+
+# ---------------------------------------------------------------------------
+# Learner progress per (module, stage), derived read-only from a mastery
+# document's existing `answered_questions` (stage UI contract §7.2). Pure:
+# the caller passes the answered_questions dict in; nothing here reads or
+# writes mastery state. Stage UI S3 uses stage_worked_through() for the
+# default lens and the "Ready for Stage 2?" guidance; S4 will reuse
+# module_stage_status() for its per-card status.
+
+STATUS_NOT_STARTED = "not_started"
+STATUS_IN_PROGRESS = "in_progress"
+STATUS_WORKED_THROUGH = "worked_through"
+
+
+def module_stage_status(stage_map, module_id, stage, answered_questions):
+    """None when the module has no questions in `stage` (no status there),
+    otherwise one of the STATUS_* values:
+    - not started: no stage question has an attempt;
+    - worked through: every stage question has an attempt and its latest
+      recorded answer was correct;
+    - in progress: anything in between."""
+    _require_stage(stage)
+    question_ids = _module_entry(stage_map, module_id)[stage]["questions"]
+    if not question_ids:
+        return None
+    answered_questions = answered_questions or {}
+    tried = [qid for qid in question_ids if (answered_questions.get(qid) or {}).get("attempts", 0) > 0]
+    if not tried:
+        return STATUS_NOT_STARTED
+    if len(tried) == len(question_ids) and all(answered_questions[qid].get("last_correct") is True
+                                               for qid in question_ids):
+        return STATUS_WORKED_THROUGH
+    return STATUS_IN_PROGRESS
+
+
+def stage_worked_through(stage_map, stage, answered_questions):
+    """True when every module that has questions in `stage` is worked
+    through. Learner guidance only -- never a qualification, and never
+    about development completeness (stage UI contract §7.3, §7.4)."""
+    statuses = [module_stage_status(stage_map, module_id, stage, answered_questions)
+                for module_id in MODULE_ORDER]
+    statuses = [status for status in statuses if status is not None]
+    return bool(statuses) and all(status == STATUS_WORKED_THROUGH for status in statuses)
