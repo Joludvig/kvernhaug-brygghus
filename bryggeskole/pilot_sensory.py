@@ -26,6 +26,18 @@ fact-based chunks 3-5 (diacetyl, descriptors, sourness/light-struck).
 No compound or fault names, no numbers, no scores, no slider teaching, no
 automatic diagnosis.
 
+Second slice (offline, no GitHub issue yet): the fact-based chunks
+CHUNK-SENS-C (diacetyl as the sourced maturation example; acetaldehyde as
+green-apple vocabulary only; sulphur as an observation only), -D (DMS and
+oxidation descriptors, reusing FACT-BOIL-0002 / FACT-OXY-0002 for process
+truth) and -E (intended sourness vs unwanted microbial contamination /
+spoilage, no health claim), with Q-SENS-007..010 on basis "fact". They use
+only FACT-SENSORY-0001..0003, FACT-BOIL-0002 and FACT-OXY-0002; descriptor
+is never diagnosis. Light-struck (contract §13, SHOULD) is DEFERRED: it
+needs the S-3 record, which does not exist offline (#471 status unknown),
+so no light-struck or skunky content is taught. The methodology allow-list
+is unchanged.
+
 Stdlib-only and side-effect-free, like the other pilots.
 `validate_pilot_content()` never raises for a malformed pilot-content shape;
 it returns a list of error strings (empty == valid). `read_pilot_file()` is

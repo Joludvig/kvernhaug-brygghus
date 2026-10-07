@@ -530,6 +530,17 @@ Each slice is a separate child issue after Chief review; none is part of #438.
 8. **Chunk 5** after S-2 and S-3.
 9. **Brew History guidance** only as copy that points at the existing fields; no schema change.
 
+**Status refresh (2026-10-04, offline; not yet on GitHub/master).** Slice 6 (methodology chunks 1, 2, 6, 7) is implemented in the offline
+stack (#472). Slices 7 and the supported part of 8 are implemented locally/offline on `offline/sensory-fault-chunks`, pending Chief review:
+`CHUNK-SENS-C` (diacetyl via FACT-SENSORY-0001; acetaldehyde as green-apple vocabulary only via FACT-SENSORY-0002; sulphur as an
+observation only, with no fact), `CHUNK-SENS-D` (DMS and oxidation descriptors via FACT-SENSORY-0002, process truth from
+FACT-BOIL-0002 / FACT-OXY-0002) and `CHUNK-SENS-E` (intended sourness vs unwanted microbial contamination via FACT-SENSORY-0003; no
+health claim), with `Q-SENS-007…010` on the MUST concepts `sensory.diacetyl`, `sensory.dms_recognition`,
+`sensory.oxidation_recognition` and `sensory.sourness_intent_vs_spoilage`. **Light-struck (SHOULD, §13) is DEFERRED**: S-3 does not exist
+offline and #471 is unknown, so chunk 5 carries no light-struck or skunky content. The acetaldehyde and sulphur SHOULD items are taught in
+the chunk text without their own questions or mastery concepts, and the §28 visuals are not built. With that, every MUST item is
+implemented, and the module is complete except the deferred SHOULD light-struck item, subject to Chief review.
+
 Do not build UI before this contract is reviewed.
 
 ## 31. Dependencies / later gates

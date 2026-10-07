@@ -1,7 +1,8 @@
 # V2.2 — Bryggeskole course stage allocation contract
 
 Version: 1.0 (2026-10-04); status refresh 2026-10-04 after the Måling Foundation and Oppskriftsforståelse implementations (§A.1) and the Foundation
-fermentation completion slice (§C.7, §D.9); Chief decision 2026-10-04: Foundation required content complete offline (§E.1)
+fermentation completion slice (§C.7, §D.9); Chief decision 2026-10-04: Foundation required content complete offline (§E.1); status refresh 2026-10-04 after the Smak
+og evaluering fault chunks (§A.1, §C.11)
 Status: **Canonical, locked owner/Chief decisions** for *where* course content belongs by stage. Decision/architecture
 document only: it implements nothing and changes no lesson, registry, UI or Web file.
 Recorded offline during the GitHub outage; see the sync note in §K.
@@ -68,7 +69,7 @@ landed on GitHub/master**. Status labels in §C describe that offline integratio
 | Visible module cards | **11**: Råvarer, Rengjøring og sikkerhet, Forberedelse/metode, Mesking, Koking/humle, Kjøling/overføring, Gjæring, Pakking, Måling og bryggelogg, Oppskriftsforståelse, Smak og evaluering (`_MODUL_REKKEFOLGE`, `ui/bryggeskole_panel.py`) |
 | Måling og bryggelogg | **Foundation implemented** in the offline/local integration (`measurement.fundamentals`, CHUNK-MEAS-A…E, Q-MEAS-001…006; position 9); not yet on GitHub/master. **Kompetent not implemented** (measurement contract §21.6) |
 | Oppskriftsforståelse | **Implemented locally/offline** (entire module Kompetent; `recipe.fundamentals`, CHUNK-REC-A…G, Q-REC-001…007; position 10) on `offline/recipe-understanding-implementation`; not yet on GitHub/master. Its Måling Foundation prerequisite (§27.8) is satisfied offline |
-| Smak og evaluering | **Visible**, but contractually **Kompetent** (sensory contract §1–§3). Implemented chunks are methodology only (SENS-A, B, F, G) |
+| Smak og evaluering | **Visible**, but contractually **Kompetent** (sensory contract §1–§3). Implemented chunks are methodology only (SENS-A, B, F, G). Status refresh 2026-10-04: the fact-based fault chunks SENS-C, D, E (Q-SENS-007…010) are implemented locally/offline on `offline/sensory-fault-chunks`, pending Chief review and not yet merged into the integration rehearsal or on GitHub/master; light-struck is DEFERRED (S-3, §I) |
 | `FACT-MASH-0003` (iodine test) | **draft**; every other registry record is `verified` (58 records) |
 | Stage labels in the UI | None. All visible cards are one open grid |
 
@@ -210,7 +211,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 | Stage | Content | Status |
 |---|---|---|
 | Foundation | **No Foundation teaching and not part of Foundation completion.** The observation-vs-interpretation checkpoint is taught in Måling Foundation. CHUNK-SENS-A (simple tasting order) **may** be offered as an **optional Foundation taster** (§D.5) | Taster: not presented today |
-| Kompetent | **The module is Kompetent.** Methodology: tasting sequence, describe ≠ diagnose, fault vs character, evaluate against intent + one change (CHUNK-SENS-A, B, F, G; Q-SENS-001…006). Beginner fault set: diacetyl (with acetaldehyde/sulphur as observation only), DMS + oxidation, light-struck (SHOULD) + intended sourness vs spoilage (sensory §27 chunks 3–5; FACT-SENSORY-0001…0003, FACT-BOIL-0002, FACT-OXY-0002) | Methodology IMPLEMENTED (offline stack, #472); fault chunks CONTRACTED; light-struck record GAP |
+| Kompetent | **The module is Kompetent.** Methodology: tasting sequence, describe ≠ diagnose, fault vs character, evaluate against intent + one change (CHUNK-SENS-A, B, F, G; Q-SENS-001…006). Beginner fault set: diacetyl (with acetaldehyde/sulphur as observation only), DMS + oxidation, light-struck (SHOULD) + intended sourness vs spoilage (sensory §27 chunks 3–5; FACT-SENSORY-0001…0003, FACT-BOIL-0002, FACT-OXY-0002) | Methodology IMPLEMENTED (offline stack, #472); fault chunks CONTRACTED; light-struck record GAP. Status refresh 2026-10-04: fault chunks 3–5 (CHUNK-SENS-C…E, Q-SENS-007…010) implemented locally/offline on `offline/sensory-fault-chunks` (not yet on GitHub/master) for diacetyl (with acetaldehyde as vocabulary and sulphur as observation only), DMS + oxidation and intended sourness vs spoilage; light-struck DEFERRED, blocked by S-3 / #471 |
 | Bryggemester | Wider off-flavour catalogue, causes of acetaldehyde/sulphur, staling depth | OUT OF APP |
 | Bryggeri | Formal sensory panels, scoresheets, thresholds, statistics, lab analysis (D79) | OUT OF APP |
 
@@ -388,7 +389,7 @@ a reason to teach a topic in the homebrew course.
 | Instrument checks | K | GAP (measurement M7 / G4) |
 | Conversion check | K | `FACT-MASH-0003` **draft**; needs a second source |
 | Grain separation / wort collection | K | MAPPED; Kunze SOURCE GAP printed pp. 257, 259–260 (curriculum map §19.1) |
-| Light-struck | K (SHOULD) | No record of its own; S-3 not landed; FACT-SENSORY-0002 names the descriptor only |
+| Light-struck | K (SHOULD) | No record of its own; S-3 not landed; FACT-SENSORY-0002 names the descriptor only. Status refresh 2026-10-04: the only Smak content still missing; deferred until S-3 / #471 is resolved (no skunky or light-struck teaching offline) |
 | Adjuncts, mash pH concept, colour/flavour formation depth | K | MAPPED; no facts |
 | Gjæring Kompetent expansion, Pakking extension | K | MAPPED (roadmap slices 7 and 11), no contracts |
 | Stage presentation in the UI | F/K | GAP: no mechanism exists (§J) |
