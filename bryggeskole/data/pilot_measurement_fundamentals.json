@@ -52,6 +52,57 @@
         "no": "**En minimal bryggelogg.** Du trenger ikke logge alt. Disse sju punktene holder langt: bryggedato; OG (målt før gjæren tilsettes); gjæringstemperatur og hvor eller hvordan den ble målt; FG (målt etter gjentatte stabile målinger); volumet som gikk inn i gjæringskaret; pakkedato; og observasjoner – det du målte eller så. Skriv dem i bryggeloggen eller notatene dine. Skriv det du observerte for seg, og det du tror er årsaken for seg, og merk en gjetning som en gjetning – «usikker ennå» er et fullverdig svar. Sammenlign gjerne med planen i oppskriften: en forskjell er noe å se nærmere på, ikke en karakter og ikke en diagnose. Og skriv aldri over en målt verdi. Hvis du senere korrigerer noe, skriver du det ved siden av, slik at den opprinnelige avlesningen står urørt.",
         "en": "**A minimal brew log.** You do not need to log everything. These seven items go a long way: brew date; OG (measured before the yeast goes in); fermentation temperature and where or how it was measured; FG (measured after repeated stable readings); the volume that went into the fermenter; package date; and observations – what you measured or saw. Write them in your brew log or notes. Write what you observed separately from what you think caused it, and mark a guess as a guess – \"still uncertain\" is a complete answer. Compare with the recipe's plan if you like: a difference is something to look into, not a grade and not a diagnosis. And never write over a measured value. If you correct something later, write it alongside, so the original reading stays untouched."
       }
+    },
+    {
+      "id": "CHUNK-MEAS-F",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-MEAS-0004"
+      ],
+      "text": {
+        "no": "**Hydrometer eller refraktometer?** Et hydrometer måler tettheten. Et refraktometer måler noe annet: prøvens brytningsindeks – hvordan den bryter lyset – ofte vist som Brix. På vørter som ikke har begynt å gjære, kan refraktometeravlesningen brukes til å anslå tettheten. Det er et anslag, ikke en eksakt omregning. Men når det er alkohol i prøven, gir den rå refraktometeravlesningen ikke lenger tettheten direkte. Etter at gjæringen har startet, måler du derfor tettheten med hydrometer, eller du anslår den med en egnet refraktometerkorreksjon som også bruker den opprinnelige avlesningen fra før gjæringen. Velg instrument etter hva du skal finne ut, og hvor i brygget du er.",
+        "en": "**Hydrometer or refractometer?** A hydrometer measures gravity. A refractometer measures something else: the sample's refractive index – how it bends light – often shown as Brix. On wort that has not started fermenting, the refractometer reading can be used to estimate gravity. That is an estimate, not an exact conversion. But once alcohol is present, the raw refractometer reading no longer gives gravity directly. After fermentation has started, you therefore measure gravity with a hydrometer, or estimate it with an appropriate refractometer correction that also uses your original reading from before fermentation. Choose the instrument by what you need to find out, and where you are in the brew."
+      }
+    },
+    {
+      "id": "CHUNK-MEAS-G",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-MEAS-0006"
+      ],
+      "text": {
+        "no": "**Sjekk instrumentet før du stoler på det.** Et hydrometer kan du sjekke i destillert vann ved den referansetemperaturen som står oppgitt for akkurat ditt hydrometer. Der er forventet avlesning vannpunktet, 1,000. Viser hydrometeret et fast avvik ved det punktet, noterer du avviket og tar hensyn til det i senere målinger. Et refraktometer nullstilles eller sjekkes med destillert eller avionisert vann, slik bruksanvisningen for instrumentet ditt sier. Men en bestått sjekk beviser ikke at alle senere målinger er riktige. Én sjekk i vann viser ikke at hele hydrometerskalaen stemmer, og nullstillingen av refraktometeret fjerner ikke andre feilkilder, som prøvens temperatur eller alkohol i prøven. Sjekken er en vane, ikke en laboratoriekalibrering.",
+        "en": "**Check the instrument before you rely on it.** You can check a hydrometer in distilled water at the reference temperature stated for your particular hydrometer. There, the expected reading is the water point, 1.000. If the hydrometer shows a consistent offset at that point, you note the offset and take it into account in later readings. A refractometer is zeroed or checked with distilled or deionised water, as the instructions for your instrument say. But a passed check does not prove that every later reading is right. One check in water does not show that the whole hydrometer scale is right, and zeroing the refractometer does not remove other error sources, such as the sample's temperature or alcohol in the sample. The check is a habit, not a lab calibration."
+      }
+    },
+    {
+      "id": "CHUNK-MEAS-H",
+      "basis": "fact",
+      "source_claims": [
+        "FACT-MEAS-0005"
+      ],
+      "text": {
+        "no": "**Volum – og når du målte det.** Den samme vørteren tar mer plass når den er varm enn etter at den er avkjølt. Et volum målt varmt og et volum målt avkjølt er derfor ikke målinger du kan bytte om. Fordamping og tap i prosessen kan i tillegg endre volumet, uavhengig av temperaturen. Når du skriver ned et volum, skriver du derfor også hvilket trinn det gjelder – for eksempel før koking, etter koking, inn i gjæringskaret eller det som ble pakket – og om vørteren var varm eller avkjølt. Skriv det i bryggeloggen eller notatene dine.",
+        "en": "**Volume – and when you measured it.** The same wort takes up more volume when it is hot than after it has cooled. A volume measured hot and a volume measured cooled are therefore not measurements you can swap for each other. Evaporation and process losses can also change the volume, independently of temperature. When you write down a volume, you therefore also write which stage it belongs to – for example before the boil, after the boil, into the fermenter or what was packaged – and whether the wort was hot or cooled. Write it in your brew log or notes."
+      }
+    },
+    {
+      "id": "CHUNK-MEAS-I",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Rå avlesning, korreksjon og mesketemperatur.** For hver tetthetsmåling noterer du datoen, hvilket instrument du brukte og prøvens temperatur. Det du leser av, er den rå avlesningen. Hvis du senere korrigerer den – for eksempel for et kjent avvik på instrumentet eller med en refraktometerkorreksjon – skriver du korreksjonen ved siden av og lar den rå avlesningen stå. Da kan du alltid se hva instrumentet faktisk viste. Skriv tallet slik instrumentet viser det, uten flere desimaler enn du faktisk kan lese av. Det samme gjelder mesketemperaturen: den du sikter mot, er en plan, og den du leser av, er en måling. Skriv ned avlesningen og hvor eller hvordan du målte den, ved siden av målet – aldri målet i stedet for målingen.",
+        "en": "**Raw reading, correction and mash temperature.** For each gravity reading, note the date, which instrument you used and the sample's temperature. What you read is the raw reading. If you correct it later – for example for a known offset on the instrument or with a refractometer correction – write the correction alongside and leave the raw reading in place. Then you can always see what the instrument actually showed. Write the number as the instrument shows it, with no more decimals than you can actually read. The same goes for the mash temperature: the one you aim for is a plan, and the one you read is a measurement. Write down the reading and where or how you measured it, alongside the target – never the target instead of the measurement."
+      }
+    },
+    {
+      "id": "CHUNK-MEAS-J",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Én hypotese og én bevisst endring.** Når brygget er ferdig, sammenligner du plan og måling, slik du gjør i bryggeloggen, og skriver et kort notat om forskjellen. Så kan du skrive én hypotese: en mulig forklaring du vil teste, merket som en hypotese. Den er ikke en måling, ikke en observasjon og ikke en sannhet. Velg deretter én bevisst endring til neste brygg, og skriv den ned før du brygger. Endrer du bare én ting om gangen, er det lettere å se hva endringen gjorde. Hypotesen er din egen, med dine ord – ingen fyller den ut for deg. Og «usikker ennå» er fortsatt et fullverdig svar.",
+        "en": "**One hypothesis and one deliberate change.** When the brew is finished, compare the plan with what you measured, as you do in your brew log, and write a short note about the difference. Then you can write one hypothesis: a possible explanation you want to test, marked as a hypothesis. It is not a measurement, not an observation and not a truth. Then choose one deliberate change for the next brew, and write it down before you brew. If you change only one thing at a time, it is easier to see what the change did. The hypothesis is your own, in your own words – nobody fills it in for you. And \"still uncertain\" is still a complete answer."
+      }
     }
   ],
   "questions": [
@@ -347,6 +398,350 @@
       "feedback_incorrect": {
         "no": "Ikke helt. Det svaret blander en gjetning inn som om den var en måling. Skriv først det du målte, og så for seg det du tror, merket som en gjetning.",
         "en": "Not quite. That answer mixes a guess in as if it were a measurement. Write what you measured first, and then separately what you think, marked as a guess."
+      }
+    },
+    {
+      "id": "Q-MEAS-007",
+      "type": "concept_check",
+      "basis": "fact",
+      "concepts": [
+        "measurement.instrument_choice"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [
+        "FACT-MEAS-0004"
+      ],
+      "prompt": {
+        "no": "Hva måler et hydrometer og et refraktometer?",
+        "en": "What do a hydrometer and a refractometer measure?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Hydrometeret måler tettheten. Refraktometeret måler brytningsindeksen, ofte vist som Brix, og kan på vørter som ikke har begynt å gjære, brukes til å anslå tettheten.",
+            "en": "The hydrometer measures gravity. The refractometer measures the refractive index, often shown as Brix, and on wort that has not started fermenting it can be used to estimate gravity."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "De måler det samme, så tallene skal alltid være like.",
+            "en": "They measure the same thing, so the numbers should always be the same."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Refraktometeret måler tettheten direkte, også når det er alkohol i prøven.",
+            "en": "The refractometer measures gravity directly, even when there is alcohol in the sample."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Hydrometeret måler tettheten, mens refraktometeret måler brytningsindeksen. På vørter som ikke har begynt å gjære, kan refraktometeret brukes til å anslå tettheten – et anslag, ikke en eksakt omregning.",
+        "en": "Correct. The hydrometer measures gravity, while the refractometer measures the refractive index. On wort that has not started fermenting, the refractometer can be used to estimate gravity – an estimate, not an exact conversion."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. De to instrumentene måler ulike ting: hydrometeret tettheten, refraktometeret brytningsindeksen. Når det er alkohol i prøven, gir den rå refraktometeravlesningen ikke lenger tettheten direkte.",
+        "en": "Not quite. The two instruments measure different things: the hydrometer gravity, the refractometer the refractive index. Once alcohol is present, the raw refractometer reading no longer gives gravity directly."
+      }
+    },
+    {
+      "id": "Q-MEAS-008",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": [
+        "measurement.instrument_choice"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [
+        "FACT-MEAS-0004"
+      ],
+      "prompt": {
+        "no": "Gjæringen har pågått en stund, og du vil vite tettheten. Du har både hydrometer og refraktometer. Hva gjør du?",
+        "en": "Fermentation has been going for a while, and you want to know the gravity. You have both a hydrometer and a refractometer. What do you do?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Måler med hydrometeret, eller bruker refraktometeret med en egnet korreksjon som også bruker den opprinnelige avlesningen fra før gjæringen.",
+            "en": "Measure with the hydrometer, or use the refractometer with an appropriate correction that also uses the original reading from before fermentation."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Leser av refraktometeret og skriver tallet rett inn som tettheten.",
+            "en": "Read the refractometer and write the number straight in as the gravity."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Bruker refraktometeret, siden automatisk temperaturkompensasjon tar seg av alkoholen.",
+            "en": "Use the refractometer, since automatic temperature compensation takes care of the alcohol."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Når det er alkohol i prøven, gir den rå refraktometeravlesningen ikke lenger tettheten direkte. Da måler du med hydrometer, eller du bruker en korreksjon som også trenger avlesningen fra før gjæringen.",
+        "en": "Correct. Once alcohol is present, the raw refractometer reading no longer gives gravity directly. Then you measure with a hydrometer, or use a correction that also needs the reading from before fermentation."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Med alkohol i prøven er den rå refraktometeravlesningen ikke tettheten, og temperaturkompensasjon er noe annet enn alkoholproblemet. Mål med hydrometer, eller bruk en korreksjon som også trenger avlesningen fra før gjæringen.",
+        "en": "Not quite. With alcohol in the sample, the raw refractometer reading is not the gravity, and temperature compensation is a different issue from the alcohol problem. Measure with a hydrometer, or use a correction that also needs the reading from before fermentation."
+      }
+    },
+    {
+      "id": "Q-MEAS-009",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": [
+        "measurement.instrument_check"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [
+        "FACT-MEAS-0006"
+      ],
+      "prompt": {
+        "no": "Du sjekker hydrometeret i destillert vann ved referansetemperaturen som står oppgitt for det, og det viser vannpunktet, 1,000. Hva har du vist?",
+        "en": "You check your hydrometer in distilled water at the reference temperature stated for it, and it shows the water point, 1.000. What have you shown?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "At hydrometeret viser riktig ved vannpunktet – ikke at hele skalaen og alle senere målinger er riktige.",
+            "en": "That the hydrometer reads correctly at the water point – not that the whole scale and every later reading are right."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "At hydrometeret er nøyaktig over hele skalaen.",
+            "en": "That the hydrometer is accurate across the whole scale."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "At du ikke lenger trenger å notere prøvens temperatur.",
+            "en": "That you no longer need to note the sample's temperature."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. En sjekk i vann viser bare vannpunktet. Den beviser ikke at hele skalaen stemmer, og prøvens temperatur må du fortsatt notere.",
+        "en": "Correct. A check in water only shows the water point. It does not prove the whole scale is right, and you still need to note the sample's temperature."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. En bestått sjekk i vann viser bare at vannpunktet stemmer. Den beviser ikke at hele skalaen eller alle senere målinger er riktige, og andre feilkilder, som prøvens temperatur, er der fortsatt.",
+        "en": "Not quite. A passed check in water only shows that the water point is right. It does not prove that the whole scale or every later reading is right, and other error sources, such as the sample's temperature, remain."
+      }
+    },
+    {
+      "id": "Q-MEAS-010",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": [
+        "measurement.volume_stages"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [
+        "FACT-MEAS-0005"
+      ],
+      "prompt": {
+        "no": "Du målte volumet i kjelen rett etter kokingen, mens vørteren var varm, og igjen i gjæringskaret etter kjøling. Tallene er ulike. Hva skriver du i loggen?",
+        "en": "You measured the volume in the kettle right after the boil, while the wort was hot, and again in the fermenter after cooling. The numbers differ. What do you write in the log?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Begge tallene, hvert med trinnet det gjelder og om vørteren var varm eller avkjølt – varm vørter tar mer plass, og tap underveis kan også endre volumet.",
+            "en": "Both numbers, each with the stage it belongs to and whether the wort was hot or cooled – hot wort takes up more volume, and losses along the way can also change the volume."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Bare ett av tallene, siden det andre må være feil.",
+            "en": "Only one of the numbers, since the other one must be wrong."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "At forskjellen bare skyldes fordamping.",
+            "en": "That the difference is due only to evaporation."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Varm og avkjølt vørter er ikke målinger du kan bytte om, og fordamping og tap kan endre volumet uavhengig av temperaturen. Derfor skriver du trinnet og om vørteren var varm eller avkjølt.",
+        "en": "Correct. Hot and cooled wort are not measurements you can swap, and evaporation and losses can change the volume independently of temperature. So you write the stage and whether the wort was hot or cooled."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Den samme vørteren tar mer plass varm enn avkjølt, og tap kan i tillegg endre volumet. Begge tallene kan være riktige målinger – skriv dem med trinn og temperaturtilstand.",
+        "en": "Not quite. The same wort takes up more volume hot than cooled, and losses can change the volume as well. Both numbers can be correct measurements – write them with their stage and whether the wort was hot or cooled."
+      }
+    },
+    {
+      "id": "Q-MEAS-011",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": [
+        "measurement.uncertainty"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [],
+      "prompt": {
+        "no": "Hydrometeret ditt viste et fast avvik da du sjekket det i vann. I dag leser du av en prøve. Hvordan fører du det i loggen?",
+        "en": "Your hydrometer showed a consistent offset when you checked it in water. Today you read a sample. How do you record it in the log?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Den rå avlesningen som den er, og korreksjonen for avviket ved siden av – den rå avlesningen står urørt.",
+            "en": "The raw reading as it is, and the correction for the offset alongside – the raw reading stays untouched."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Bare det korrigerte tallet, så loggen blir ryddig.",
+            "en": "Only the corrected number, so the log stays tidy."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Det korrigerte tallet med så mange desimaler som mulig, så det blir mest nøyaktig.",
+            "en": "The corrected number with as many decimals as possible, so it is as accurate as it can be."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Den rå avlesningen viser hva instrumentet faktisk viste. Korreksjonen skriver du ved siden av, og du skriver ikke flere desimaler enn du kan lese av.",
+        "en": "Correct. The raw reading shows what the instrument actually showed. You write the correction alongside, and you write no more decimals than you can read."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Skriv aldri over den rå avlesningen. Skriv korreksjonen ved siden av, og ikke flere desimaler enn du faktisk kan lese av – ekstra desimaler gjør ikke målingen mer nøyaktig.",
+        "en": "Not quite. Never write over the raw reading. Write the correction alongside, and no more decimals than you can actually read – extra decimals do not make the measurement more accurate."
+      }
+    },
+    {
+      "id": "Q-MEAS-012",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": [
+        "measurement.mash_temperature"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [],
+      "prompt": {
+        "no": "Planen sier én mesketemperatur, men du leser av noe annet i mesken. Hva skriver du?",
+        "en": "The plan says one mash temperature, but you read something else in the mash. What do you write?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Temperaturen du leste av, og hvor eller hvordan du målte den – ved siden av målet i planen.",
+            "en": "The temperature you read, and where or how you measured it – alongside the target in the plan."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Temperaturen i planen, siden det var den du siktet mot.",
+            "en": "The temperature in the plan, since that is the one you were aiming for."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "At mesken mislyktes, og at ølet derfor blir dårlig.",
+            "en": "That the mash failed, and that the beer will therefore be bad."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Målet er en plan, og avlesningen er en måling. Du skriver avlesningen og hvor eller hvordan du målte den, ved siden av målet.",
+        "en": "Correct. The target is a plan, and the reading is a measurement. You write the reading and where or how you measured it, alongside the target."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Loggen skal vise det du faktisk leste av og hvor du målte det, ved siden av målet – ikke målet i stedet for målingen, og ikke en dom over brygget.",
+        "en": "Not quite. The log should show what you actually read and where you measured it, alongside the target – not the target instead of the measurement, and not a verdict on the brew."
+      }
+    },
+    {
+      "id": "Q-MEAS-013",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": [
+        "log.hypothesis_next_change"
+      ],
+      "difficulty": "intermediate",
+      "source_claims": [],
+      "prompt": {
+        "no": "FG-en ble høyere enn planlagt. Hva er et godt neste steg i loggen før neste brygg?",
+        "en": "The FG came out higher than planned. What is a good next step in the log before the next brew?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Skrive én hypotese, merket som en hypotese, og én bevisst endring du vil prøve neste gang.",
+            "en": "Write one hypothesis, marked as a hypothesis, and one deliberate change you want to try next time."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Skrive årsaken som sikker og endre flere ting samtidig neste gang.",
+            "en": "Write the cause as certain and change several things at once next time."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Skrive at gjæren var årsaken, siden FG-en ble høy.",
+            "en": "Write that the yeast was the cause, since the FG came out high."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. En hypotese er en mulig forklaring du vil teste, ikke en sannhet. Med én bevisst endring om gangen er det lettere å se hva endringen gjorde.",
+        "en": "Correct. A hypothesis is a possible explanation you want to test, not a truth. With one deliberate change at a time, it is easier to see what the change did."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. En høy FG alene forteller ikke årsaken. Skriv én hypotese, merket som en hypotese, og velg én bevisst endring – endrer du flere ting samtidig, er det vanskelig å se hva som virket.",
+        "en": "Not quite. A high FG on its own does not tell you the cause. Write one hypothesis, marked as a hypothesis, and choose one deliberate change – if you change several things at once, it is hard to see what worked."
       }
     }
   ]

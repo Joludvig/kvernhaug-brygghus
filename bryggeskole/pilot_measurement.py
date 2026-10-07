@@ -1,6 +1,6 @@
 """
 Bryggeskole measurement pilot -- the Måling og bryggelogg module,
-Foundation slice only (V2.2, contract
+Foundation slice plus the Kompetent slice (V2.2, contract
 docs/development/v22_measurement_brewlog_module_contract.md §21.2 and the
 §22 implementation draft; offline implementation, the GitHub issue is not
 created yet). Topic-scoped copy of bryggeskole/pilot_sensory.py, never a
@@ -9,14 +9,17 @@ shared "pilot engine".
 Like pilot_sensory.py, every chunk and question carries a required
 `basis`, "fact" or "methodology":
 - basis "fact": non-empty source_claims, each resolving through the
-  registry's verified-only API (here only FACT-MEAS-0001..0003, and
-  FACT-YEAST-0002 for CHUNK-MEAS-B if ever needed -- contract §22);
+  registry's verified-only API (here only FACT-MEAS-0001..0006, and
+  FACT-YEAST-0002 for CHUNK-MEAS-B if ever needed -- contract §22, §24);
 - basis "methodology": Kvernhaug method content, not a sourced claim --
   `source_claims` must be exactly [] and a methodology question's concepts
   must come from this module's own closed METHODOLOGY_CONCEPTS allow-list
   (contract §22: log.planned_vs_actual, measurement.temperature,
   sensory.observation_vs_interpretation -- the last one is shared with
-  Smak og evaluering, never duplicated as log.observation_vs_interpretation);
+  Smak og evaluering, never duplicated as log.observation_vs_interpretation;
+  contract §24 adds the Kompetent methodology concepts
+  measurement.uncertainty, measurement.mash_temperature and
+  log.hypothesis_next_change);
 - a missing or unknown basis fails validation.
 
 Scope (Foundation, locked): chunks CHUNK-MEAS-A..E and questions
@@ -28,6 +31,20 @@ no universal reference temperature, formula, ABV, efficiency or
 refractometer depth; the volume into the fermenter is a brew-log note and
 is never mapped onto the App's actuals.volumeL (which stores post-boil
 volume); no hypothesis/next-change teaching (Kompetent).
+
+Kompetent slice (contract §24; offline, not on GitHub/master): chunks
+CHUNK-MEAS-F..J after E and questions Q-MEAS-007..013 after 006, all
+intermediate, in the same module and card (no second Measurement card, no
+stage UI). F: hydrometer vs refractometer and the alcohol boundary
+(FACT-MEAS-0004); G: the instrument-check habit, hydrometer and
+refractometer only (FACT-MEAS-0006); H: volume stages, hot vs cooled
+(FACT-MEAS-0005); I (methodology): date/instrument/sample temperature per
+reading, raw reading vs correction without fake precision, mash
+temperature as a measurement; J (methodology): one hypothesis and one
+deliberate next change. Still no correction equation, ABV or efficiency
+maths, universal reference temperature, tolerance or calibration
+interval, thermometer check, App actuals.volumeL mapping, or hypothesis
+presented as proof.
 
 Stdlib-only and side-effect-free, like the other pilots.
 `validate_pilot_content()` never raises for a malformed pilot-content shape;
@@ -62,6 +79,10 @@ METHODOLOGY_CONCEPTS = frozenset({
     "log.planned_vs_actual",
     "measurement.temperature",
     "sensory.observation_vs_interpretation",
+    # Kompetent (contract §24).
+    "measurement.uncertainty",
+    "measurement.mash_temperature",
+    "log.hypothesis_next_change",
 })
 
 TOPIC_ID_PATTERN = re.compile(r"^PILOT-[A-Z0-9]+(-[A-Z0-9]+)*$")

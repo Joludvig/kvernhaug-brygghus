@@ -2133,12 +2133,15 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
         self._apne_modul(at, "maaling")
         self.assertIn("Measure first, guess later", " ".join(_alle_synlige_tekster(at)))
 
-    def test_alle_fem_bolker_og_metode_merking_kun_pa_metodebolker(self):
+    def test_alle_bolker_og_metode_merking_kun_pa_metodebolker(self):
+        # Foundation A–E etterfølges nå av Kompetent F–J i samme modul
+        # (målingskontrakten §24): ti bolker.
         at = self._ny_apptest()
         self._apne_modul(at, "maaling")
         pilot = les_maaling_pilot()
+        self.assertEqual(len(pilot["chunks"]), 10)
         for idx, chunk in enumerate(pilot["chunks"]):
-            self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 5"])
+            self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 10"])
             har_etikett = self._ETIKETT_NO in [c.value for c in at.caption]
             self.assertEqual(har_etikett, chunk["basis"] == "methodology", chunk["id"])
             if idx < len(pilot["chunks"]) - 1:
@@ -2163,6 +2166,9 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
             "measurement.gravity", "measurement.fermentation_complete", "log.planned_vs_actual",
             "measurement.temperature", "measurement.hydrometer_temperature",
             "sensory.observation_vs_interpretation",
+            # Kompetent (målingskontrakten §24).
+            "measurement.instrument_choice", "measurement.instrument_check", "measurement.volume_stages",
+            "measurement.uncertainty", "measurement.mash_temperature", "log.hypothesis_next_change",
         })
         self.assertNotIn("log.observation_vs_interpretation", konsepter)
 
@@ -2170,6 +2176,127 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
         maaling = {c for q in les_maaling_pilot()["questions"] for c in q["concepts"]}
         smak = {c for q in les_smak_pilot()["questions"] for c in q["concepts"]}
         self.assertEqual(maaling & smak, {"sensory.observation_vs_interpretation"})
+
+
+# ─── Måling og bryggelogg, Kompetent (målingskontrakten §23–§24): bolk F–J
+# og Q-MEAS-007…013 i samme modul og samme kort, etter Foundation A–E ──────
+
+class TestMaalingKompetent(_MedIsolertTilstand):
+    _ETIKETT_NO = "Metode, ikke en faktapåstand"
+    _KOMPETENT_TITLER = {
+        "no": ("Hydrometer eller refraktometer?", "Sjekk instrumentet før du stoler på det",
+               "Volum – og når du målte det", "Rå avlesning, korreksjon og mesketemperatur",
+               "Én hypotese og én bevisst endring"),
+        "en": ("Hydrometer or refractometer?", "Check the instrument before you rely on it",
+               "Volume – and when you measured it", "Raw reading, correction and mash temperature",
+               "One hypothesis and one deliberate change"),
+    }
+    _KOMPETENT_KONSEPTER = (
+        "measurement.instrument_choice", "measurement.instrument_check", "measurement.volume_stages",
+        "measurement.uncertainty", "measurement.mash_temperature", "log.hypothesis_next_change",
+    )
+
+    def _bolk_teller(self, at):
+        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+
+    def test_fortsatt_elleve_kort_og_ett_maalingskort(self):
+        at = self._ny_apptest()
+        self._velg_miljo(at)
+        kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
+        self.assertEqual(len(kort), 11, kort)
+        self.assertEqual(kort.count("**Måling og bryggelogg**"), 1)
+        self.assertEqual(kort[8], "**Måling og bryggelogg**")
+
+    def test_kompetentbolkene_rendrer_med_riktig_merking_i_begge_sprak_og_miljo(self):
+        pilot = les_maaling_pilot()
+        for sprak in ("no", "en"):
+            for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+                with self.subTest(sprak=sprak, miljo=miljo_knapp):
+                    at = self._ny_apptest()
+                    if sprak == "en":
+                        at.session_state["sprak"] = "en"
+                        at.run()
+                    self._apne_modul(at, "maaling", miljo_knapp)
+                    for _ in range(5):
+                        _knapp(at, "bs_bolk_neste_maaling_btn").click().run()
+                    for idx, tittel in enumerate(self._KOMPETENT_TITLER[sprak]):
+                        chunk = pilot["chunks"][5 + idx]
+                        teller = (f"Læringsbolk {6 + idx} av 10" if sprak == "no"
+                                  else f"Learning block {6 + idx} of 10")
+                        self.assertEqual(self._bolk_teller(at), [teller])
+                        self.assertIn(tittel, " ".join(_alle_synlige_tekster(at)))
+                        etikett = self._ETIKETT_NO if sprak == "no" else "Method, not a fact claim"
+                        har_etikett = etikett in [c.value for c in at.caption]
+                        self.assertEqual(har_etikett, chunk["basis"] == "methodology", chunk["id"])
+                        if idx < 4:
+                            _knapp(at, "bs_bolk_neste_maaling_btn").click().run()
+                            self.assertEqual(len(at.exception), 0)
+                    _knapp(at, "bs_start_sporsmal_maaling_btn")
+
+    def test_kompetentsporsmal_har_ikke_forhandsvalg_og_sjekk_svar_er_av(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "maaling")
+        fasit = _korrekt_svar_ider(les_maaling_pilot())
+        # Svar riktig på Foundation-spørsmålene, og sjekk så det første
+        # Kompetent-spørsmålet (Q-MEAS-007, indeks 6).
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(6)})
+        self.assertIsNone(at.radio(key=self._valg_key(6, 1)).value)
+        self.assertTrue(_knapp(at, "bs_svar_btn_maaling_r1_q6").disabled)
+
+    def test_feil_svar_gir_tilbakemelding_pa_kompetentsporsmal(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "maaling")
+        pilot = les_maaling_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        feil = _feil_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(8)})
+        self._besvar_sporsmal(at, 8, 1, feil[8])
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn(pilot["questions"][8]["feedback_incorrect"]["no"], tekst)
+
+    def test_full_flyt_mastery_etiketter_og_prov_igjen_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            with self.subTest(miljo=miljo_knapp):
+                at = self._ny_apptest()
+                self._apne_modul_og_start_sporsmal(at, "maaling", miljo_knapp)
+                fasit = _korrekt_svar_ider(les_maaling_pilot())
+                self._fullfor_alle_sporsmal(at, 1, fasit)
+                self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+                tekst = " ".join(_alle_synlige_tekster(at))
+                for konsept in self._KOMPETENT_KONSEPTER:
+                    self.assertIn(_konsept_label(konsept, "no"), tekst)
+                    self.assertNotIn(konsept, tekst)
+                forste = read_mastery_state()["concepts"]
+                for konsept in self._KOMPETENT_KONSEPTER:
+                    self.assertIn(konsept, forste)
+                self.assertNotIn("measurement.fermentation_temperature", forste)
+
+                _knapp(at, f"bs_prov_igjen_{self._aktiv_modul}_btn").click().run()
+                self.assertEqual(len(at.exception), 0, f"Uventet unntak ved Prøv igjen: {at.exception}")
+                self.assertIsNone(at.radio(key=self._valg_key(0, 2)).value)
+                self._fullfor_alle_sporsmal(at, 2, fasit)
+                andre = read_mastery_state()["concepts"]
+                for konsept in self._KOMPETENT_KONSEPTER:
+                    self.assertGreater(andre[konsept]["attempts"], forste[konsept]["attempts"], konsept)
+
+    def test_engelsk_full_flyt_viser_lesbare_etiketter(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul_og_start_sporsmal(at, "maaling")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_maaling_pilot()))
+        tekst = " ".join(_alle_synlige_tekster(at))
+        for konsept in self._KOMPETENT_KONSEPTER:
+            self.assertIn(_konsept_label(konsept, "en"), tekst)
+            self.assertNotIn(konsept, tekst)
+
+    def test_delt_mastery_med_andre_moduler_er_uendret(self):
+        maaling = {c for q in les_maaling_pilot()["questions"] for c in q["concepts"]}
+        smak = {c for q in les_smak_pilot()["questions"] for c in q["concepts"]}
+        self.assertEqual(maaling & smak, {"sensory.observation_vs_interpretation"})
+        for konsept in self._KOMPETENT_KONSEPTER:
+            self.assertNotEqual(_konsept_label(konsept, "no"), konsept)
+            self.assertNotEqual(_konsept_label(konsept, "en"), konsept)
 
 
 # ─── Foundation-gjæringsslutt (stage allocation contract §D.9): Gjæring får
