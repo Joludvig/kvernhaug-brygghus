@@ -62,6 +62,10 @@ _EXISTING_PILOTS = (
     "pilot_boil_hop", "pilot_cleaning_safety", "pilot_cool_transfer", "pilot_fermentation",
     "pilot_mashing", "pilot_method_context", "pilot_package", "pilot_raw_materials",
 )
+# pilot_fermentation now carries its own scoped basis rule (fermentation
+# Kompetent contract §12: absent basis = fact, closed methodology allow-list),
+# tested in tests/test_pilot_fermentation.py; the others still reject it.
+_NO_METHODOLOGY_PILOTS = tuple(p for p in _EXISTING_PILOTS if p != "pilot_fermentation")
 
 # Second slice: the fact-based fault chunks C-E and their questions. Every
 # other item stays methodology with source_claims == [].
@@ -214,7 +218,7 @@ class TestExistingPilotsUnchanged(unittest.TestCase):
         return doc
 
     def test_every_existing_pilot_rejects_methodology_records(self):
-        for name in _EXISTING_PILOTS:
+        for name in _NO_METHODOLOGY_PILOTS:
             with self.subTest(pilot=name):
                 module = importlib.import_module(f"bryggeskole.{name}")
                 self.assertFalse(hasattr(module, "METHODOLOGY_CONCEPTS"))
