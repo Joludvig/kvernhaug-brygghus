@@ -6,7 +6,7 @@ og evaluering fault chunks (§A.1, §C.11); status refresh 2026-10-04 after the 
 closure (§A.1, §C.9, §C.11, §I); status refresh 2026-10-05 after FACT-MEAS-0006 (M7) and the Måling Kompetent implementation
 (§A.1, §C.9, §I); status refresh 2026-10-05 after the Måling Kompetent merge and the Gjæring Kompetent readiness contract
 (§A.1, §C.7, §C.9, §I); status refresh 2026-10-05 after FACT-BREW-0004/0005 (G1/G2) and the Gjæring Kompetent implementation
-(§C.7, §I); status refresh 2026-10-05 after the Chief-approved Gjæring Kompetent merge (§C.7, §C.9, §I)
+(§C.7, §I); status refresh 2026-10-05 after the Chief-approved Gjæring Kompetent merge (§C.7, §C.9, §I); Chief decisions 2026-10-05: Kompetent completion rule and priority rulings (§F.1, §F.2, §I)
 Status: **Canonical, locked owner/Chief decisions** for *where* course content belongs by stage. Decision/architecture
 document only: it implements nothing and changes no lesson, registry, UI or Web file.
 Recorded offline during the GitHub outage; see the sync note in §K.
@@ -349,6 +349,36 @@ The learner can:
 6. compare planned with actual;
 7. make one evidence-based, deliberate change for the next brew.
 
+### F.1 Kompetent required content — completion rule (Chief decision, 2026-10-05)
+
+**"KOMPETENT HJEMMEBRYGGER REQUIRED CONTENT = COMPLETE"** may be declared when:
+
+a) every curriculum/stage item classified MUST, plus every explicit locked Kompetent stage decision (such as §D.6), is
+   implemented in the offline integration and backed by verified facts or clearly labelled methodology;
+b) all §F Kompetent learner outcomes are taught end-to-end;
+c) SHOULD / OPTIONAL / Bryggemester / Bryggeri items are explicitly non-blocking (§F.2, §G, §H, §I).
+
+The declaration does **not** mean:
+- that the work is on GitHub/master;
+- that the stage presentation UI is complete (§J);
+- that owner real-brew acceptance is complete;
+- that every SHOULD or source-gap item is closed.
+
+The real-brew checkpoint ("Level 2 = homebrewer completion", curriculum map §16–§17) stays a **separate, later** checkpoint.
+
+### F.2 Kompetent priority rulings (Chief decision, 2026-10-05)
+
+| Item | Ruling |
+|---|---|
+| D18 method-aware grain separation / lautering (Mesking) | **MUST** — the remaining Mesking required-content blocker |
+| D19 wort collection | Included **with the D18 Mesking slice**. It is not a new independent MUST; it travels with grain separation because it is the same practical process step and the same source work |
+| §D.6 priming concept (Pakking) | **Locked Kompetent decision** — required (§F.1 a) |
+| D28 clarification / D58 shelf life (Pakking) | A **short Kompetent reuse treatment** is included inside the Pakking slice: settling/clearer beer reuses FACT-BREW-0005; the oxygen/shelf-stability brief reuses FACT-OXY-0002. Finings, clarification techniques, cold-conditioning practice and shelf-life depth stay **SHOULD, non-blocking** |
+| D16 milling / crush | **SHOULD, non-blocking** |
+| Conversion check (FACT-MASH-0003) | **SHOULD, non-blocking**. No second source is forced merely to close Kompetent |
+| Light-struck (S-3 / #471) | **DEFERRED SHOULD**, non-blocking; #471 untouched |
+| D05 adjuncts, D51 mash pH, D63 haze, D64 Maillard depth, D66 efficiency concept | SHOULD, non-blocking (curriculum-map priority) |
+
 ## G. Bryggemester entry boundary
 
 Content becomes optional Bryggemester depth (outside the main App) when it needs any of:
@@ -391,8 +421,8 @@ a reason to teach a topic in the homebrew course.
 | Spoilage vs safety; electrical near liquids; scald first aid | F | GAP (cleaning contract §3/§6) |
 | Priming concept (amount controls carbonation; use a trusted tool) | K | GAP: no contract; FACT-PACK-0001 covers priming as a process only |
 | Instrument checks | K | GAP (measurement M7 / G4). Readiness closure 2026-10-04: the only blocker for Måling Kompetent. The exact requirement is in measurement §23.3. Status refresh 2026-10-05: **CLOSED** for hydrometer + refractometer by FACT-MEAS-0006 (Chief live source spot-check 2026-10-05); thermometer checks stay out of scope (no brewing-relevant Tier A source) |
-| Conversion check | K | `FACT-MASH-0003` **draft**; needs a second source |
-| Grain separation / wort collection | K | MAPPED; Kunze SOURCE GAP printed pp. 257, 259–260 (curriculum map §19.1) |
+| Conversion check | K | `FACT-MASH-0003` **draft**; needs a second source. Chief ruling 2026-10-05 (§F.2): SHOULD, non-blocking |
+| Grain separation / wort collection | K | MAPPED; Kunze SOURCE GAP printed pp. 257, 259–260 (curriculum map §19.1). Chief ruling 2026-10-05 (§F.2): D18 grain separation is the remaining Mesking MUST; D19 wort collection travels with it in the same slice |
 | Light-struck | K (SHOULD) | No record of its own; S-3 not landed; FACT-SENSORY-0002 names the descriptor only. Status refresh 2026-10-04: the only Smak content still missing; deferred until S-3 / #471 is resolved (no skunky or light-struck teaching offline) |
 | Adjuncts, mash pH concept, colour/flavour formation depth | K | MAPPED; no facts |
 | Gjæring Kompetent expansion, Pakking extension | K | MAPPED (roadmap slices 7 and 11), no contracts. Status refresh 2026-10-05: Gjæring Kompetent contracted in `v22_fermentation_kompetent_module_contract.md` (NOT IMPLEMENTATION READY); blocked only by fact pack G1 (phases) + G2 (conditioning/maturation). Status refresh 2026-10-05: G1/G2 verified (FACT-BREW-0004/0005); Gjæring Kompetent implemented locally/offline on `offline/fermentation-kompetent-implementation`, pending Chief review, not on GitHub/master. Status refresh 2026-10-05: Gjæring Kompetent Chief-approved and merged into the offline integration rehearsal (`2779f18`); **CLOSED** for Gjæring. Pakking extension still has no contract |
