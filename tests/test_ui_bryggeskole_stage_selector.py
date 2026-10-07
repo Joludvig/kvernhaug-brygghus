@@ -566,7 +566,7 @@ class TestGuidance(_S3Test):
         self.assertEqual(_t("bryggeskole.trinn.tips_foundation", "en"),
                          "Tip: You still have some Foundation sections you can revisit.")
 
-    def test_no_locks_no_progress_counts_no_completion_wording(self):
+    def test_no_locks_no_completion_wording(self):
         _seed(_alle_foundation(), unntak={"Q-MASH-001"})
         for sprak in ("no", "en"):
             for trinn in course_stage.STAGES:
@@ -578,8 +578,10 @@ class TestGuidance(_S3Test):
                     tekst = " ".join(_alle_synlige_tekster(at)).lower()
                     for ord_ in _FORBUDTE_ORD:
                         self.assertNotIn(ord_, tekst)
-                    self.assertIsNone(re.search(r"\d+\s+(av|of)\s+\d+", tekst), tekst)
-                    self.assertNotIn("gjennomgått", tekst)  # S4's per-card status
+                    # Since S4 the one count on the page is the stage's module
+                    # count line (tests/test_ui_bryggeskole_stage_progress.py).
+                    tellinger = re.findall(r"\d+\s+(?:av|of)\s+\d+", tekst)
+                    self.assertEqual(len(tellinger), 1, tekst)
 
 
 class TestMasteryIsReadOnly(_S3Test):

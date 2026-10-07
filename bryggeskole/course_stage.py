@@ -263,9 +263,9 @@ def items_for_stage(stage_map, module_id, pilot, stage):
 # Learner progress per (module, stage), derived read-only from a mastery
 # document's existing `answered_questions` (stage UI contract §7.2). Pure:
 # the caller passes the answered_questions dict in; nothing here reads or
-# writes mastery state. Stage UI S3 uses stage_worked_through() for the
-# default lens and the "Ready for Stage 2?" guidance; S4 will reuse
-# module_stage_status() for its per-card status.
+# writes mastery state. The stage UI uses module_stage_status() for card
+# status and the recommendation, stage_progress() for the stage count, and
+# stage_worked_through() for the default lens and the guidance (S3/S4).
 
 STATUS_NOT_STARTED = "not_started"
 STATUS_IN_PROGRESS = "in_progress"
@@ -293,11 +293,20 @@ def module_stage_status(stage_map, module_id, stage, answered_questions):
     return STATUS_IN_PROGRESS
 
 
+def stage_progress(stage_map, stage, answered_questions):
+    """(worked_through, total) module counts for `stage` (contract §7.3):
+    `total` is the number of modules that have questions in `stage`, taken
+    from the map; `worked_through` counts those whose module_stage_status()
+    is worked through. Counts only -- never a percentage or score."""
+    statuses = [module_stage_status(stage_map, module_id, stage, answered_questions)
+                for module_id in MODULE_ORDER]
+    statuses = [status for status in statuses if status is not None]
+    return sum(status == STATUS_WORKED_THROUGH for status in statuses), len(statuses)
+
+
 def stage_worked_through(stage_map, stage, answered_questions):
     """True when every module that has questions in `stage` is worked
     through. Learner guidance only -- never a qualification, and never
     about development completeness (stage UI contract §7.3, §7.4)."""
-    statuses = [module_stage_status(stage_map, module_id, stage, answered_questions)
-                for module_id in MODULE_ORDER]
-    statuses = [status for status in statuses if status is not None]
-    return bool(statuses) and all(status == STATUS_WORKED_THROUGH for status in statuses)
+    worked_through, total = stage_progress(stage_map, stage, answered_questions)
+    return total > 0 and worked_through == total

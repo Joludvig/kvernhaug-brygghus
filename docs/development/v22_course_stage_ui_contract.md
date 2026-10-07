@@ -1,6 +1,6 @@
 # V2.2 — Bryggeskole course stage UI contract (Foundation → Kompetent hjemmebrygger)
 
-Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15); 1.2 (2026-10-05): S1 merged, S2 status (§15); 1.3 (2026-10-05): S2 Chief GREEN, S3 status (§15)
+Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15); 1.2 (2026-10-05): S1 merged, S2 status (§15); 1.3 (2026-10-05): S2 Chief GREEN, S3 status (§15); 1.4 (2026-10-05): S2+S3 merged, S4 status (§15)
 
 Status:
 - **Contract for review.** Docs only. It implements nothing: no app behaviour, UI, mastery store, lesson JSON, registry or
@@ -16,12 +16,12 @@ Status:
 - Chief review GREEN. All seven §17 defaults are approved, plus the explicit-stage-choice refinement (§7.3).
 - The contract is merged into the offline integration rehearsal (`0bd8397`).
 - **S1 (stage metadata) is MERGED LOCALLY/OFFLINE** into the integration rehearsal (`f003bc4`).
-- **S2 (lesson rendering by stage) is IMPLEMENTED LOCALLY/OFFLINE** (Chief GREEN). It is combined with S3 on
-  `offline/course-stage-ui-s3-selector` and **NOT YET MERGED**.
-- **S3 (stage selector + cards) is IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s3-selector`, on top of
-  S2. It is pending Chief review and not merged. S2 + S3 merge together; a clean full-suite run on the combined tree
-  is required first.
-- **S4 and S5 are NOT IMPLEMENTED.** The stage UI is not complete, and nothing is on GitHub/master.
+- **S2 (lesson rendering by stage) and S3 (stage selector + cards) are MERGED LOCALLY/OFFLINE** as one combined
+  S2+S3 state into the integration rehearsal (`4f34e67`), after Chief GREEN and a clean full suite (4053 tests,
+  0 failures, 0 errors).
+- **S4 (progress per stage) is IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s4-progress`. It is pending
+  Chief review and not merged.
+- **S5 is NOT STARTED.** The stage UI is NOT COMPLETE, and nothing is on GitHub/master.
 
 Governed by (never restated or changed here):
 - [curriculum map §6.2](v22_g3q_full_bryggeskole_curriculum_map.md#62-canonical-course-architecture-and-terminology-axes):
@@ -416,10 +416,10 @@ Order and merging:
 | Slice | Status |
 |---|---|
 | S1 | **MERGED LOCALLY/OFFLINE** (Chief GREEN; integration `f003bc4`). Files: `bryggeskole/course_stage.py`, `bryggeskole/data/course_stage_map.json`, `tests/test_course_stage_map.py`. Foundation 48 chunks / 45 questions / 9 modules; Kompetent 36 / 54 / 9; 84 / 99 total. Interim locks as approved. Fail-closed validator |
-| S2 | **IMPLEMENTED LOCALLY/OFFLINE** (Chief GREEN; `offline/course-stage-ui-s2-rendering`), combined with S3 on `offline/course-stage-ui-s3-selector`; **NOT YET MERGED**. It must not merge alone. Details below the table |
-| S3 | **IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s3-selector` (on top of S2); **pending Chief review; NOT merged**. Details below the table |
-| S4 | NOT IMPLEMENTED |
-| S5 | NOT IMPLEMENTED |
+| S2 | **MERGED LOCALLY/OFFLINE** as combined S2+S3 (Chief GREEN; integration `4f34e67`; full suite 4053 OK). Details below the table |
+| S3 | **MERGED LOCALLY/OFFLINE** as combined S2+S3 (Chief GREEN incl. the auto-default guidance polish; integration `4f34e67`). Details below the table |
+| S4 | **IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s4-progress`; **pending Chief review; NOT merged**. Details below the table |
+| S5 | NOT STARTED |
 | C1 | Not started (optional; separate content decision) |
 
 S2 as implemented (`ui/bryggeskole_panel.py`):
@@ -474,8 +474,10 @@ S3 as implemented (`ui/bryggeskole_panel.py`, `bryggeskole/course_stage.py`, `mo
   - "Anbefalt neste" names the first module in canonical order with content at the selected stage that is neither
     worked through there nor completed at that stage this session.
   - Kompetent lens with Foundation gaps: one quiet tip line.
-  - Foundation worked through: "Du har gått gjennom Trinn 1. Klar for Trinn 2?" (not after an explicit Kompetent
-    choice). No completion, certification or mastery wording.
+  - Foundation worked through, Foundation lens: "Du har gått gjennom Trinn 1. Klar for Trinn 2?".
+  - Foundation worked through, lens auto-defaulted to Kompetent (no explicit choice): "Du har gått gjennom Trinn 1.
+    Trinn 2 vises som anbefalt neste steg." (Chief S3 polish). After an explicit Kompetent choice: no line.
+  - No completion, certification or mastery wording.
 - **Readiness helper:** pure `course_stage.module_stage_status()` / `stage_worked_through()`, read-only over
   `answered_questions` (§7.2), reusable by S4. No S4 counts or per-card status are shown.
 - **Fallback:** with an invalid or missing map there is no selector, no stage line and no stage guidance: today's
@@ -485,6 +487,31 @@ S3 as implemented (`ui/bryggeskole_panel.py`, `bryggeskole/course_stage.py`, `mo
   - The stage-split normal path is covered by the S2 and S3 suites, including a card-driven full walk of all 18
     (module, stage) pairs.
   - Chromium smoke: `tests/playwright_streamlit/stage-selector-smoke.spec.js`.
+
+S4 as implemented (`ui/bryggeskole_panel.py`, `bryggeskole/course_stage.py`, `modules/i18n.py`):
+- **One definition.**
+  - Status per (module, stage) is `course_stage.module_stage_status()` (§7.2), read-only over the stored
+    `answered_questions`: not started / in progress / worked through, with the latest answer authoritative.
+  - The new `stage_progress()` counts modules from it, and `stage_worked_through()` is now defined through
+    `stage_progress()`.
+  - Cards, the stage count, "Anbefalt neste", the default lens and the guidance all use these helpers. There is
+    no second rule.
+- **Cards.**
+  - A card with content at the selected stage shows one quiet status caption: "Ikke startet" / "Påbegynt" /
+    "Gjennomgått" (EN "Not started" / "In progress" / "Worked through").
+  - Single-stage special cards keep their S3 line and action, with no status at the stage they lack.
+- **Old badges.**
+  - On stage cards the stage status replaces "Øvd på tidligere", "Påbegynt" and "Gjennomført denne økten":
+    one persistent vocabulary per card. Earlier sessions count automatically through the stable question ids.
+  - Only the session-local button text (Start / Fortsett / Se resultat) stays.
+  - The single-flow fallback overview keeps the legacy badges.
+- **Stage count:** "{n} av {totalt} moduler gjennomgått" / "{n} of {totalt} modules worked through" under the
+  selector. The total is the number of modules with questions at that stage in the map (9 and 9 today), never
+  hard-coded, and never a percentage, score or grade.
+- **Storage:** no migration, no schema change, no write from the overview.
+- **Tests:**
+  - `tests/test_ui_bryggeskole_stage_progress.py`.
+  - Chromium smoke: `tests/playwright_streamlit/stage-progress-smoke.spec.js` (seeded isolated history).
 
 ## 16. Acceptance tests
 
@@ -570,5 +597,7 @@ Status 2026-10-05 (2): S1 merged; S2 implemented and pending Chief review. Next:
 implement S3 on top of it; after S3 is GREEN, merge S2 + S3 together.
 Status 2026-10-05 (3): S2 Chief GREEN; S3 implemented on top of it, pending Chief review. Next: if GREEN, merge the
 combined S2+S3 state into the integration (after a clean full suite), then implement S4.
+Status 2026-10-05 (4): S2+S3 merged (`4f34e67`); S4 implemented, pending Chief review. Next: if GREEN, merge S4 and
+run S5 (final responsive / i18n / browser / full-suite QA). The stage UI is not complete.
 
 Sync note: mirror on #419 / the #343 roadmap when GitHub returns. No issue number is assigned.
