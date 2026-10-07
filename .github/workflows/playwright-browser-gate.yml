@@ -84,6 +84,15 @@ jobs:
       - name: Run Bryggeskole module-grid responsive runtime gate
         run: npm run test:bryggeskole-grid-runtime
 
+      # Stage UI specs that depend on or write learner history run on their
+      # own servers and isolated state dirs (see the two configs). Until those
+      # specs exist, --pass-with-no-tests keeps these steps green.
+      - name: Run Bryggeskole stage UI progress runtime gate (seeded, isolated state)
+        run: npm run test:bryggeskole-stage-progress-runtime
+
+      - name: Run Bryggeskole stage UI final-matrix runtime gate (isolated state)
+        run: npm run test:bryggeskole-stage-final-runtime
+
       - name: Upload Playwright report (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
