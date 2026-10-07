@@ -194,7 +194,8 @@ test('real probe returns null for a non-existent or non-Python executable', () =
 // --- configs actually use the guard ------------------------------------
 
 test('every Streamlit runtime config uses the guard and has no silent fallback', () => {
-  for (const navn of ['playwright.streamlit.config.js', 'playwright.bryggeskole-grid.config.js', 'playwright.bryggeskole-quiz-contrast.config.js']) {
+  for (const navn of ['playwright.streamlit.config.js', 'playwright.bryggeskole-grid.config.js', 'playwright.bryggeskole-quiz-contrast.config.js',
+    'playwright.bryggeskole-stage-progress.config.js', 'playwright.bryggeskole-stage-final.config.js']) {
     const tekst = fs.readFileSync(path.join(ROOT, navn), 'utf8');
     assert.ok(tekst.includes("require('./tests/playwright_streamlit/streamlit_runtime')"), navn);
     assert.match(tekst, /command:\s*\n?\s*`\$\{STREAMLIT_PYTHON\} -m streamlit run /, navn);
