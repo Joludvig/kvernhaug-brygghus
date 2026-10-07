@@ -2172,6 +2172,67 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
         self.assertEqual(maaling & smak, {"sensory.observation_vs_interpretation"})
 
 
+# ─── Foundation-gjæringsslutt (stage allocation contract §D.9): Gjæring får
+# én Foundation-bolk (etter pitching, luftlås ikke bevis, stabile målinger)
+# og ett spørsmål på Målings delte konsept; Pakking peker til Måling ──────
+
+class TestFoundationGjaringFerdigOgPakkingLenke(_MedIsolertTilstand):
+    _GJAR_NO = "Etter pitching gjærer gjæren det forgjærbare sukkeret"
+    _GJAR_EN = "After pitching, the yeast ferments the fermentable sugar"
+    _PAKK_NO = "Og før du pakker: bruk sjekken for ferdig gjæring som du lærer i Måling og bryggelogg."
+    _PAKK_EN = "And before you package: use the completion check taught in Measurement and brew log."
+
+    def _til_siste_bolk(self, at, modul_id):
+        self._bla_til_siste_bolk(at, modul_id)
+        return " ".join(_alle_synlige_tekster(at))
+
+    def test_gjaring_siste_bolk_norsk_og_engelsk_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            for sprak, forventet in (("no", self._GJAR_NO), ("en", self._GJAR_EN)):
+                with self.subTest(miljo=miljo_knapp, sprak=sprak):
+                    at = self._ny_apptest()
+                    if sprak == "en":
+                        at.session_state["sprak"] = "en"
+                        at.run()
+                    self._apne_modul(at, "gjaring", miljo_knapp)
+                    self.assertIn(forventet, self._til_siste_bolk(at, "gjaring"))
+                    teller = [c.value for c in at.caption
+                              if c.value.startswith(("Læringsbolk", "Learning block"))]
+                    self.assertTrue(teller and teller[0].endswith(("4 av 4", "4 of 4")), teller)
+
+    def test_pakking_peker_til_maaling_norsk_og_engelsk_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            for sprak, forventet in (("no", self._PAKK_NO), ("en", self._PAKK_EN)):
+                with self.subTest(miljo=miljo_knapp, sprak=sprak):
+                    at = self._ny_apptest()
+                    if sprak == "en":
+                        at.session_state["sprak"] = "en"
+                        at.run()
+                    self._apne_modul(at, "pakking", miljo_knapp)
+                    self.assertIn(forventet, " ".join(_alle_synlige_tekster(at)))
+
+    def test_gjaring_full_flyt_deler_ferdig_konseptet_med_maaling(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "gjaring")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_gjaring_pilot()))
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        _knapp(at, "bs_oppsummering_tilbake_gjaring_btn")
+        konsepter = read_mastery_state()["concepts"]
+        self.assertEqual(konsepter["measurement.fermentation_complete"]["attempts"], 1)
+        self.assertNotIn("fermentation.complete", konsepter)
+
+        _knapp(at, "bs_oppsummering_tilbake_gjaring_btn").click().run()
+        _knapp(at, "bs_apne_modul_maaling_btn").click().run()
+        self._aktiv_modul = "maaling"
+        self._start_sporsmalsrunde(at)
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_maaling_pilot()))
+        konsepter = read_mastery_state()["concepts"]
+        self.assertEqual(konsepter["measurement.fermentation_complete"]["attempts"], 2)
+        gjaring = {c for q in les_gjaring_pilot()["questions"] for c in q["concepts"]}
+        maaling = {c for q in les_maaling_pilot()["questions"] for c in q["concepts"]}
+        self.assertEqual(gjaring & maaling, {"measurement.fermentation_complete"})
+
+
 # ─── Oppskriftsforståelse (oppskriftskontrakten §27/§28): hele modulen er
 # Kompetent, posisjon 10 mellom Måling og Smak, sju bolker, sju spørsmål,
 # gjenbrukte Råvarer-konsepter (ingen duplikater), metode-merking kun på
