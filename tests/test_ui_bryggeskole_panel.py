@@ -48,6 +48,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 logging.getLogger("streamlit").setLevel(logging.ERROR)
 
@@ -134,8 +135,23 @@ class _MedIsolertTilstand(unittest.TestCase):
     # de bygger nøkler for.
     _aktiv_modul = None
 
+    # Stage UI S3: the normal entry is stage-split (Foundation lens by
+    # default, contract §3). The classes in THIS file test the lesson
+    # engine on whole modules, so they pin today's single flow -- the
+    # panel's real fallback when no valid stage map exists (contract §6.1,
+    # §11) -- by giving the panel no stage map. The stage-split normal path
+    # is covered by tests/test_ui_bryggeskole_stage_rendering.py (S2) and
+    # tests/test_ui_bryggeskole_stage_selector.py (S3, including a full
+    # card-driven walk of every (module, stage) pair); their base classes
+    # set this to False.
+    _ENKELTFLYT = True
+
     def setUp(self):
         self._aktiv_modul = None
+        if self._ENKELTFLYT:
+            patcher = mock.patch("ui.bryggeskole_panel._hent_trinnkart", return_value=None)
+            patcher.start()
+            self.addCleanup(patcher.stop)
         self._gammel_env = os.environ.get(_STATE_DIR_ENV)
         self._tmpdir = tempfile.TemporaryDirectory()
         os.environ[_STATE_DIR_ENV] = self._tmpdir.name
@@ -747,6 +763,8 @@ class TestDemoModeIngenSkriving(unittest.TestCase):
     TestUtstyrssnarveiDemoMode."""
 
     def test_demo_mode_fullfort_flyt_skriver_ingen_fil(self):
+        # Stage UI S3: runs the real normal path -- the default Foundation
+        # lens, so Mesking shows its Foundation part (from the stage map).
         with tempfile.TemporaryDirectory() as tmp:
             env = dict(os.environ)
             env["DEMO_MODE"] = "1"
@@ -754,8 +772,11 @@ class TestDemoModeIngenSkriving(unittest.TestCase):
             script = (
                 "import logging; logging.getLogger('streamlit').setLevel(logging.ERROR); "
                 "from streamlit.testing.v1 import AppTest; "
+                "from bryggeskole import course_stage; "
                 "from bryggeskole.pilot_mashing import read_pilot_file; "
                 "pilot = read_pilot_file(); "
+                "pilot = dict(pilot, **course_stage.items_for_stage(course_stage.load_stage_map(), 'mesking', pilot, 'foundation')); "
+                "assert len(pilot['questions']) >= 1; "
                 "fasit = {i: next(o['id'] for o in q['options'] if o['correct']) for i, q in enumerate(pilot['questions'])}; "
                 f"at = AppTest.from_file(r{_HARNESS!r}); at.run(); "
                 "assert not at.exception, at.exception; "
@@ -1663,7 +1684,9 @@ class TestNavigasjonsknapperErKompakteIssue398(_MedIsolertTilstand):
         # igjen/Tilbake) er det samme gjentatte navigasjons-/handlings-
         # knappmønsteret -- alle fire kildeforekomstene skal dele samme
         # kompakte layout-fiks, ikke bare den ene issue #398 selv navnga.
-        self.assertEqual(self.kildekode.count('st.container(key="bs_nav_actions")'), 4)
+        # Stage UI S2 adds a fifth: the questions-only stage lesson row
+        # (Repeter Foundation-delen / Start spørsmål), same pattern.
+        self.assertEqual(self.kildekode.count('st.container(key="bs_nav_actions")'), 5)
 
     def test_ingen_width_stretch_igjen_pa_nav_actions_knappene(self):
         # De konkrete knappe-nøklene issue #398/#260 sin flyt bruker.
@@ -1706,8 +1729,11 @@ class TestNavigasjonsknapperErKompakteIssue398(_MedIsolertTilstand):
         # #398's nav/action-button scope), so this only asserts the new
         # pattern's presence at the two nav-button call sites, not a
         # file-wide absence of the old one.
+        # Stage UI S2 adds a third side-by-side row with the same grouping:
+        # the questions-only stage lesson (Repeter Foundation-delen / Start
+        # spørsmål).
         import ui.bryggeskole_panel as panel_module
-        self.assertEqual(self.kildekode.count("st.columns(_KNAPP_GRUPPE_KOLONNER)"), 2)
+        self.assertEqual(self.kildekode.count("st.columns(_KNAPP_GRUPPE_KOLONNER)"), 3)
 
         kolonner = panel_module._KNAPP_GRUPPE_KOLONNER
         self.assertEqual(len(kolonner), 3, "to knappekolonner + én spacer-kolonne")

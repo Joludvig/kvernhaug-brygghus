@@ -78,11 +78,13 @@ avgrenset til fire urelaterte domener og bryggeskole/mastery_store.py
 er allerede sin egen isolerte lese/skrive-grense.
 """
 import datetime
+import logging
 import random
 
 import streamlit as st
 
 from config import DEMO_MODE
+from bryggeskole import course_stage as _course_stage
 from bryggeskole.answer_order import finn_korrekt_indeks, velg_alternativ_rekkefolge
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
@@ -385,6 +387,49 @@ _KONSEPT_LABELS = {
 
 _DEMO_TILSTAND_NOKKEL = "_demo_bryggeskole_mastery_tilstand"
 
+_LOGGER = logging.getLogger(__name__)
+
+# Stage UI S2 (docs/development/v22_course_stage_ui_contract.md §5, §6.1,
+# §11): the lesson renderer can show ONE course stage of a module -- only
+# that stage's chunks and questions, from bryggeskole/data/
+# course_stage_map.json via bryggeskole.course_stage (never from
+# difficulty, chunk letters or lists here). If the stage map cannot be
+# loaded or validated, today's single flow is used: stages are never
+# guessed.
+#
+# Stage UI S3 (contract §3, §4, §7.3, §8): ONE authoritative stage, the
+# learner's course-stage lens, lives in the selector's own key `bs_trinn`
+# ("foundation"/"kompetent" -- never the legacy environment values). The
+# lesson context `bs_aktiv_trinn` is not a second model: it is only the
+# stage a card action opened the current module at -- the lens, except for
+# the one contract case where a card reviews Foundation content under the
+# Kompetent lens -- and it is cleared when the learner leaves the module.
+# `bs_trinn_valgt_eksplisitt` records an explicit learner choice (the
+# selector's on_change, or a card action that switches the lens). Without
+# one, the lens follows the default (Foundation, or Kompetent once
+# Foundation is worked through); with one, nothing changes it again in
+# this session (Chief refinement, §7.3).
+_TRINN_STATE_KEY = "bs_aktiv_trinn"
+_TRINN_VALG_KEY = "bs_trinn"
+_TRINN_EKSPLISITT_KEY = "bs_trinn_valgt_eksplisitt"
+_TRINNKART_CACHE_KEY = "_bs_trinnkart"
+_TRINN_VALG_NOKKEL = {
+    "foundation": "bryggeskole.trinn.foundation",
+    "kompetent": "bryggeskole.trinn.kompetent",
+}
+_TRINN_FORKLARING_NOKKEL = {
+    "foundation": "bryggeskole.trinn.foundation_forklaring",
+    "kompetent": "bryggeskole.trinn.kompetent_forklaring",
+}
+# Widget-key infix per stage. Foundation keeps today's keys exactly; every
+# other stage gets its own infix so two stages of one module can never
+# share widget state. Mastery ids (question/concept ids) are not affected.
+_TRINN_NOKKEL_INFIKS = {"foundation": "", "kompetent": "_k"}
+_TRINN_STI_NOKKEL = {
+    "foundation": "bryggeskole.trinn.sti.foundation",
+    "kompetent": "bryggeskole.trinn.sti.kompetent",
+}
+
 
 def _konsept_label(konsept_id, sprak):
     return _KONSEPT_LABELS.get(konsept_id, {}).get(sprak, konsept_id)
@@ -427,7 +472,107 @@ def _init_state():
     st.session_state.setdefault("bs_miljo", None)
     st.session_state.setdefault("bs_aktiv_modul", None)
     st.session_state.setdefault("bs_modul_sesjon", {})
+    st.session_state.setdefault(_TRINN_STATE_KEY, None)
+    st.session_state.setdefault(_TRINN_EKSPLISITT_KEY, False)
+    if _TRINN_VALG_KEY in st.session_state:
+        # Streamlit drops a widget's state in any run where the widget is
+        # not drawn (inside a module, on the environment screen). Writing
+        # the value back before the selector exists keeps the lens through
+        # those runs -- the documented way to carry widget state.
+        st.session_state[_TRINN_VALG_KEY] = st.session_state[_TRINN_VALG_KEY]
     _ovd_tidligere_baseline()
+
+
+def _hent_trinnkart():
+    """The validated course stage map, or None if it cannot be loaded or
+    validated (stage UI contract §6.1). Read once per Streamlit session. A
+    failure is logged once and never repaired; the caller then falls back
+    to the single flow (no selector, no stage lines, no stage lessons)."""
+    if _TRINNKART_CACHE_KEY not in st.session_state:
+        try:
+            kart = _course_stage.load_stage_map()
+        except (ValueError, OSError) as exc:
+            _LOGGER.warning(
+                "Bryggeskole: course stage map unavailable (%s); using the single-flow lesson.",
+                type(exc).__name__,
+            )
+            kart = None
+        st.session_state[_TRINNKART_CACHE_KEY] = kart
+    return st.session_state[_TRINNKART_CACHE_KEY]
+
+
+def _valgt_trinn():
+    """The learner's stage lens (the `bs_trinn` value); Foundation until the
+    overview has set it."""
+    trinn = st.session_state.get(_TRINN_VALG_KEY)
+    return trinn if trinn in _course_stage.STAGES else "foundation"
+
+
+def _svarte_sporsmal():
+    """Read-only view of the stored answered_questions (never written here)."""
+    return _les_tilstand().get("answered_questions") or {}
+
+
+def _standard_trinn(svarte):
+    """The default lens without an explicit choice (contract §3, §7.3):
+    Foundation, or Kompetent once every Foundation module is worked through."""
+    foundation_gjennomgatt = _course_stage.stage_worked_through(_hent_trinnkart(), "foundation", svarte)
+    return "kompetent" if foundation_gjennomgatt else "foundation"
+
+
+def _marker_trinn_eksplisitt():
+    """on_change of the selector: only a real learner change lands here --
+    the value Streamlit materialises for an untouched widget never does."""
+    st.session_state[_TRINN_EKSPLISITT_KEY] = True
+
+
+def _aktivt_trinn():
+    """The course stage of the lesson context, or None for today's single
+    flow when no valid stage map exists. The lesson context is the stage the
+    module was opened at; without one (or with an unknown value) it is the
+    lens."""
+    if _hent_trinnkart() is None:
+        return None
+    trinn = st.session_state.get(_TRINN_STATE_KEY)
+    return trinn if trinn in _course_stage.STAGES else _valgt_trinn()
+
+
+def _sesjon_nokkel(modul_id, trinn):
+    """Lesson sessions are keyed by (module, stage). The single flow keeps
+    today's key (the module id), so its sessions are unchanged."""
+    return modul_id if trinn is None else f"{modul_id}@{trinn}"
+
+
+def _widget_base(modul_id, trinn):
+    """Widget-key base: the module id for the single flow and Foundation
+    (today's keys), plus the stage infix otherwise (e.g. "mesking_k")."""
+    return modul_id if trinn is None else modul_id + _TRINN_NOKKEL_INFIKS[trinn]
+
+
+def _trinn_visning(modul_id, pilot, trinn):
+    """The pilot as the lesson context sees it: unchanged for the single
+    flow, otherwise a shallow copy holding only that stage's chunks and
+    questions, in the pilot's own order. The existing lesson/question/
+    summary renderers run on this view unchanged."""
+    if trinn is None:
+        return pilot
+    items = _course_stage.items_for_stage(_hent_trinnkart(), modul_id, pilot, trinn)
+    return dict(pilot, chunks=items["chunks"], questions=items["questions"])
+
+
+def _bytt_trinn(trinn):
+    """Switches only the stage of the lesson context; the open module stays
+    open and the lens is unchanged (in-lesson «Repeter Foundation-delen»)."""
+    st.session_state[_TRINN_STATE_KEY] = trinn
+
+
+def _bytt_til_kompetent_eksplisitt():
+    """A learner action that intentionally moves to Trinn 2 (in-lesson «Gå
+    til Trinn 2-delen»): lens and lesson context become Kompetent, and it
+    counts as an explicit choice (contract §4, §7.3)."""
+    st.session_state[_TRINN_VALG_KEY] = "kompetent"
+    st.session_state[_TRINN_EKSPLISITT_KEY] = True
+    st.session_state[_TRINN_STATE_KEY] = "kompetent"
 
 
 def _ny_modul_sesjon():
@@ -504,33 +649,58 @@ def _les_modul_sesjon(modul_id):
     return st.session_state["bs_modul_sesjon"].get(modul_id)
 
 
+# Leaving a module (or the environment) clears only the lesson context. The
+# lens `bs_trinn` and its explicit marker are kept, so an environment switch
+# (Hjemmebrygger <-> Bryggeri) or a language switch never changes the stage
+# (contract §12).
 def _velg_miljo(miljo):
     st.session_state["bs_miljo"] = miljo
     st.session_state["bs_aktiv_modul"] = None
+    st.session_state[_TRINN_STATE_KEY] = None
 
 
 def _bytt_miljo():
     st.session_state["bs_miljo"] = None
     st.session_state["bs_aktiv_modul"] = None
+    st.session_state[_TRINN_STATE_KEY] = None
 
 
-def _apne_modul(modul_id):
+def _apne_modul(modul_id, trinn=None):
+    """Opens a module; card actions pass the stage to open it at (S3). The
+    single flow (no valid stage map) passes None."""
     st.session_state["bs_aktiv_modul"] = modul_id
-    _modul_sesjon(modul_id)
+    st.session_state[_TRINN_STATE_KEY] = trinn
+    trinn = _aktivt_trinn()
+    if trinn is not None and not _course_stage.module_has_stage(_hent_trinnkart(), modul_id, trinn):
+        # Nothing to begin at this stage (stage UI S2): no session is
+        # created, so nothing can later read it as «Påbegynt».
+        return
+    _modul_sesjon(_sesjon_nokkel(modul_id, trinn))
+
+
+def _apne_modul_i_kompetent(modul_id):
+    """Card action «Se Trinn 2-innholdet» on a Kompetent-only module in the
+    Foundation lens: switches the lens to Kompetent -- an explicit choice
+    for the rest of the session -- and opens the module there (§4)."""
+    st.session_state[_TRINN_VALG_KEY] = "kompetent"
+    st.session_state[_TRINN_EKSPLISITT_KEY] = True
+    _apne_modul(modul_id, "kompetent")
 
 
 def _tilbake_til_oversikt():
     st.session_state["bs_aktiv_modul"] = None
+    st.session_state[_TRINN_STATE_KEY] = None
 
 
-def _bla_bolk(modul_id, delta, totalt):
+def _bla_bolk(sesjon_id, delta, totalt):
     """Flytter leksjonsposisjonen én bolk fram/tilbake, klemt innenfor
-    modulens egne bolker."""
-    sesjon = _modul_sesjon(modul_id)
+    modulens egne bolker. `sesjon_id` is the (module, stage) session key
+    (_sesjon_nokkel()); for the single flow it is the module id."""
+    sesjon = _modul_sesjon(sesjon_id)
     sesjon["bolk_idx"] = max(0, min(totalt - 1, sesjon["bolk_idx"] + delta))
 
 
-def _start_sporsmal_runde(modul_id):
+def _start_sporsmal_runde(sesjon_id):
     """Starter (eller re-starter, ved «Prøv igjen») spørsmålsrunden fra
     første spørsmål. Øker ALLTID sesjon["runde"], slik at hvert
     spørsmål-widget-key blir garantert unikt for denne runden -- uten
@@ -540,7 +710,7 @@ def _start_sporsmal_runde(modul_id):
     trukket på nytt. `apply_answer()`s egen `first_attempt`-logikk leser
     fortsatt den PERSISTERTE mastery-tilstanden uendret -- «Prøv igjen»
     resetter aldri selve mastery-tilstanden, kun denne UI-runden."""
-    sesjon = _modul_sesjon(modul_id)
+    sesjon = _modul_sesjon(sesjon_id)
     sesjon["runde"] += 1
     sesjon["fase"] = "sporsmal"
     sesjon["sporsmal_idx"] = 0
@@ -569,7 +739,10 @@ def _hent_alternativ_rekkefolge(sesjon, sporsmal):
     return id_rekkefolge
 
 
-def _sjekk_svar(modul_id, sporsmal, sprak, widget_key, runde):
+def _sjekk_svar(modul_id, sporsmal, sprak, widget_key, runde, sesjon_id=None):
+    """`sesjon_id` is the (module, stage) session key; None means the
+    single flow (the module id). Mastery is keyed by the question's own
+    ids exactly as before -- the stage never enters apply_answer()."""
     pilot_modul = _MODULER[modul_id]["pilot"]
     valgt_id = st.session_state.get(widget_key)
     if valgt_id is None:
@@ -582,7 +755,7 @@ def _sjekk_svar(modul_id, sporsmal, sprak, widget_key, runde):
     tilstand = _les_tilstand()
     nytt_tilstand = apply_answer(tilstand, sporsmal, resultat["correct"], now=_utc_now_iso())
     _skriv_tilstand(nytt_tilstand)
-    sesjon = _modul_sesjon(modul_id)
+    sesjon = _modul_sesjon(sesjon_id or modul_id)
     sesjon["siste_feedback"] = {
         "question_id": resultat["question_id"],
         "runde": runde,
@@ -592,8 +765,8 @@ def _sjekk_svar(modul_id, sporsmal, sprak, widget_key, runde):
     }
 
 
-def _neste_sporsmal(modul_id, totalt):
-    sesjon = _modul_sesjon(modul_id)
+def _neste_sporsmal(sesjon_id, totalt):
+    sesjon = _modul_sesjon(sesjon_id)
     ny_idx = sesjon["sporsmal_idx"] + 1
     sesjon["sporsmal_idx"] = ny_idx
     sesjon["siste_feedback"] = None
@@ -765,15 +938,17 @@ def _injiser_bryggeskole_css():
     )
 
 
-def _modul_status(modul_id):
+def _modul_status(modul_id, sesjon_id=None):
     """Returnerer (ovd_tidligere, sesjon) for statusmerkene på et
     modul-kort:
     - ovd_tidligere: praksis som fantes FØR denne økten -- lest fra
       øktens baseline (_ovd_tidligere_baseline()), aldri fra den levende
       tilstanden, slik at øktens egne svar ikke kan skape merket.
     - sesjon: None hvis aldri åpnet denne økten; ellers selve
-      sesjondict-en, som avgjør "Påbegynt" vs. "Gjennomført denne økten"."""
-    return _ovd_tidligere_baseline().get(modul_id, False), _les_modul_sesjon(modul_id)
+      sesjondict-en, som avgjør "Påbegynt" vs. "Gjennomført denne økten".
+      Stage UI S3: sesjon_id er (modul, trinn)-økten kortet viser;
+      standard er enkeltflytens nøkkel (modul-id-en)."""
+    return _ovd_tidligere_baseline().get(modul_id, False), _les_modul_sesjon(sesjon_id or modul_id)
 
 
 def _anbefalt_modul():
@@ -788,6 +963,69 @@ def _anbefalt_modul():
         if not (sesjon and sesjon["fullfort_denne_okten"]):
             return modul_id
     return None
+
+
+def _anbefalt_modul_i_trinn(trinn, svarte):
+    """Stage UI S3 (contract §8): the recommendation for the selected lens --
+    the first module in canonical order that has content at that stage and
+    is neither worked through there (answered_questions, §7.2) nor completed
+    at that stage in this session. Never a lock; None when nothing is left."""
+    kart = _hent_trinnkart()
+    for modul_id in _MODUL_REKKEFOLGE:
+        if not _course_stage.module_has_stage(kart, modul_id, trinn):
+            continue
+        status = _course_stage.module_stage_status(kart, modul_id, trinn, svarte)
+        if status == _course_stage.STATUS_WORKED_THROUGH:
+            continue
+        sesjon = _les_modul_sesjon(_sesjon_nokkel(modul_id, trinn))
+        if sesjon and sesjon["fullfort_denne_okten"]:
+            continue
+        return modul_id
+    return None
+
+
+def _render_trinnvalg(svarte):
+    """The compact stage lens above the grid (contract §3): one horizontal
+    radio, key `bs_trinn`. Without an explicit choice the default is written
+    to the key before the widget exists (Foundation, or Kompetent once
+    Foundation is worked through); after an explicit choice the value is
+    never overridden here (only filled in if it were missing). Returns the
+    selected stage."""
+    if not st.session_state.get(_TRINN_EKSPLISITT_KEY):
+        st.session_state[_TRINN_VALG_KEY] = _standard_trinn(svarte)
+    elif st.session_state.get(_TRINN_VALG_KEY) not in _course_stage.STAGES:
+        st.session_state[_TRINN_VALG_KEY] = "foundation"
+    # Labels resolved now, in the current language (never a raw stage id).
+    etiketter = {verdi: t(_TRINN_VALG_NOKKEL[verdi]) for verdi in _course_stage.STAGES}
+    trinn = st.radio(
+        t("bryggeskole.trinn.velg"),
+        options=list(_course_stage.STAGES),
+        format_func=etiketter.__getitem__,
+        key=_TRINN_VALG_KEY,
+        horizontal=True,
+        help=t("bryggeskole.trinn.velg_hjelp"),
+        on_change=_marker_trinn_eksplisitt,
+    )
+    st.caption(t(_TRINN_FORKLARING_NOKKEL[trinn]))
+    return trinn
+
+
+def _render_trinnveiledning(trinn, svarte):
+    """Quiet guidance only -- no lock, no completion claim (contract §7.3,
+    §7.4, §8). Once Foundation is worked through: «Klar for Trinn 2?» while
+    the learner still looks at Foundation; when the lens moved to Kompetent
+    by default (no explicit choice), a line saying Trinn 2 is now shown as
+    the recommended next step (Chief S3 polish); after an explicit
+    Kompetent choice, nothing. In the Kompetent lens with Foundation gaps,
+    one tip line."""
+    foundation_gjennomgatt = _course_stage.stage_worked_through(_hent_trinnkart(), "foundation", svarte)
+    if foundation_gjennomgatt:
+        if trinn == "foundation":
+            st.success(t("bryggeskole.trinn.klar_for_trinn2"))
+        elif not st.session_state.get(_TRINN_EKSPLISITT_KEY):
+            st.success(t("bryggeskole.trinn.trinn2_anbefalt"))
+    elif trinn == "kompetent":
+        st.caption(t("bryggeskole.trinn.tips_foundation"))
 
 
 def _render_miljovalg():
@@ -811,10 +1049,61 @@ def _render_miljovalg():
             )
 
 
+def _render_trinnkort(modul_id, trinn):
+    """The body of one canonical card under the stage lens (contract §4):
+    one stage line, today's session badges for that (module, stage), and
+    one button with the unchanged key `bs_apne_modul_{id}_btn`. A module
+    without content at the selected stage is never disabled or greyed: it
+    gets its own line and an action that opens the stage it does have."""
+    knapp_key = f"bs_apne_modul_{modul_id}_btn"
+    if not _course_stage.module_has_stage(_hent_trinnkart(), modul_id, trinn):
+        if trinn == "kompetent":
+            # Foundation-only module: review its Foundation content. The
+            # lens stays Kompetent; only that lesson opens at Foundation.
+            st.caption(t("bryggeskole.trinn.kort.bygger_pa_foundation"))
+            st.button(
+                t("bryggeskole.trinn.kort.repeter"), key=knapp_key,
+                width="stretch", on_click=_apne_modul, args=(modul_id, "foundation"),
+            )
+        else:
+            st.caption(t("bryggeskole.trinn.kort.horer_til_trinn2"))
+            st.button(
+                t("bryggeskole.trinn.kort.se_trinn2"), key=knapp_key,
+                width="stretch", on_click=_apne_modul_i_kompetent, args=(modul_id,),
+            )
+        return
+
+    st.caption(t("bryggeskole.trinn.kort.innhold"))
+    ovd_tidligere, sesjon = _modul_status(modul_id, _sesjon_nokkel(modul_id, trinn))
+    if ovd_tidligere:
+        st.caption(t("bryggeskole.status.ovd_tidligere"))
+    if sesjon and sesjon["fullfort_denne_okten"]:
+        st.caption(t("bryggeskole.status.fullfort_okt"))
+        knapp_tekst = t("bryggeskole.modul.se_resultat")
+    elif sesjon:
+        st.caption(t("bryggeskole.status.pabegynt"))
+        knapp_tekst = t("bryggeskole.modul.fortsett")
+    else:
+        knapp_tekst = t("bryggeskole.modul.start")
+    st.button(
+        knapp_tekst, key=knapp_key,
+        width="stretch", on_click=_apne_modul, args=(modul_id, trinn),
+    )
+
+
 def _render_skoleoversikt(miljo, sprak):
     st.subheader(t(f"bryggeskole.miljo.{miljo}"))
 
-    anbefalt = _anbefalt_modul()
+    # Stage UI S3: the stage lens over the same grid. With no valid stage
+    # map, none of it is drawn and the overview is exactly today's.
+    trinn = None
+    if _hent_trinnkart() is not None:
+        svarte = _svarte_sporsmal()
+        trinn = _render_trinnvalg(svarte)
+        _render_trinnveiledning(trinn, svarte)
+        anbefalt = _anbefalt_modul_i_trinn(trinn, svarte)
+    else:
+        anbefalt = _anbefalt_modul()
     if anbefalt is not None:
         st.info(t("bryggeskole.anbefalt_neste", modul=t(_MODULER[anbefalt]["tittel_nokkel"])))
 
@@ -831,6 +1120,10 @@ def _render_skoleoversikt(miljo, sprak):
                 st.markdown(f"**{stadium[sprak]}**")
                 if modul_id is None:
                     st.caption(t("bryggeskole.prosess.kommer_badge"))
+                    continue
+
+                if trinn is not None:
+                    _render_trinnkort(modul_id, trinn)
                     continue
 
                 st.caption(t("bryggeskole.prosess.aktiv_badge"))
@@ -857,17 +1150,52 @@ def _render_skoleoversikt(miljo, sprak):
                 )
 
 
-def _render_leksjon(modul_id, sesjon, pilot, sprak):
+def _render_repeter_foundation_knapp(base):
+    st.button(
+        t("bryggeskole.trinn.repeter_foundation"), key=f"bs_trinn_repeter_{base}_btn",
+        width="content", on_click=_bytt_trinn, args=("foundation",),
+    )
+
+
+def _render_leksjon_kun_sporsmal(sesjon_id, base):
+    """Stage UI S2 (contract §5): a stage with questions but no chunks of
+    its own (e.g. Kompetent in Råvarer and Kjøling/overføring). No chunk is
+    invented: one neutral intro, a way back to the Foundation lesson, and
+    the questions."""
+    st.info(t("bryggeskole.trinn.kun_sporsmal"))
+    with st.container(key="bs_nav_actions"):
+        col1, col2, _spacer = st.columns(_KNAPP_GRUPPE_KOLONNER)
+        with col1:
+            _render_repeter_foundation_knapp(base)
+        with col2:
+            st.button(
+                t("bryggeskole.leksjon.start_sporsmal"), key=f"bs_start_sporsmal_{base}_btn",
+                width="content", type="primary",
+                on_click=_start_sporsmal_runde, args=(sesjon_id,),
+            )
+
+
+def _render_leksjon(modul_id, sesjon, pilot, sprak, sesjon_id=None, base=None, trinn=None):
     """ÉN læringsbolk om gangen (issue #338 / Chief review PR #340).
 
     Tidligere ble alle pilotens chunks rendret i én lang skjerm og
     læreren hoppet rett til spørsmålene. Nå er leksjonen en egen liten
     reise: bolk 1 -> Neste -> bolk 2 -> ... -> Start spørsmål, med
     posisjonen lagret per modul, slik at en tur innom skoleoversikten
-    gjenopptar nøyaktig samme bolk."""
+    gjenopptar nøyaktig samme bolk.
+
+    Stage UI S2: `pilot` is the lesson context's view (_trinn_visning()),
+    so a stage shows only its own chunks; `sesjon_id`/`base` are the
+    (module, stage) session key and widget-key base (both the module id for
+    the single flow)."""
+    sesjon_id = sesjon_id or modul_id
+    base = base or modul_id
     st.write("---")
     chunks = pilot["chunks"]
     totalt = len(chunks)
+    if totalt == 0:
+        _render_leksjon_kun_sporsmal(sesjon_id, base)
+        return
     # Defensivt klem: innholdet kan i prinsippet ha blitt kortere siden
     # posisjonen ble lagret (kun mulig ved innholdsendring i dev).
     idx = max(0, min(sesjon["bolk_idx"], totalt - 1))
@@ -941,28 +1269,38 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak):
         col1, col2, _spacer = st.columns(_KNAPP_GRUPPE_KOLONNER)
         with col1:
             st.button(
-                t("bryggeskole.leksjon.forrige"), key=f"bs_bolk_forrige_{modul_id}_btn",
+                t("bryggeskole.leksjon.forrige"), key=f"bs_bolk_forrige_{base}_btn",
                 width="content", disabled=idx == 0,
-                on_click=_bla_bolk, args=(modul_id, -1, totalt),
+                on_click=_bla_bolk, args=(sesjon_id, -1, totalt),
             )
         with col2:
             if idx + 1 < totalt:
                 st.button(
-                    t("bryggeskole.leksjon.neste"), key=f"bs_bolk_neste_{modul_id}_btn",
+                    t("bryggeskole.leksjon.neste"), key=f"bs_bolk_neste_{base}_btn",
                     width="content", type="primary",
-                    on_click=_bla_bolk, args=(modul_id, 1, totalt),
+                    on_click=_bla_bolk, args=(sesjon_id, 1, totalt),
                 )
             else:
                 # «Start spørsmål» finnes KUN på siste bolk -- det er det som
                 # gjør leksjonen til en sekvens og ikke en scroll-skjerm.
                 st.button(
-                    t("bryggeskole.leksjon.start_sporsmal"), key=f"bs_start_sporsmal_{modul_id}_btn",
+                    t("bryggeskole.leksjon.start_sporsmal"), key=f"bs_start_sporsmal_{base}_btn",
                     width="content", type="primary",
-                    on_click=_start_sporsmal_runde, args=(modul_id,),
+                    on_click=_start_sporsmal_runde, args=(sesjon_id,),
                 )
+    if trinn is not None and trinn != "foundation" and _course_stage.module_has_stage(
+        _hent_trinnkart(), modul_id, "foundation"
+    ):
+        # Stage UI S2 (contract §5): a quiet way back to this module's
+        # Foundation lesson from a later stage. Never forced.
+        _render_repeter_foundation_knapp(base)
 
 
-def _render_sporsmal(modul_id, sesjon, pilot, sprak):
+def _render_sporsmal(modul_id, sesjon, pilot, sprak, sesjon_id=None, base=None):
+    """Stage UI S2: `pilot` is the lesson context's view, so a stage asks
+    only its own questions; `sesjon_id`/`base` as in _render_leksjon()."""
+    sesjon_id = sesjon_id or modul_id
+    base = base or modul_id
     st.write("---")
     pilot_modul = _MODULER[modul_id]["pilot"]
     sporsmal_liste = pilot["questions"]
@@ -982,7 +1320,9 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
     # begge moduler starter på samme runde-/spørsmålsindeks, så en
     # modul-agnostisk nøkkel ville latt Streamlit gjenbruke den lagrede
     # radioverdien fra den ene modulen når den andre åpnes i samme økt.
-    widget_key = f"bs_valg_{modul_id}_r{runde}_q{idx}"
+    # Stage UI S2: the base also carries the stage infix (e.g. "mesking_k"),
+    # for the same reason between two stages of one module.
+    widget_key = f"bs_valg_{base}_r{runde}_q{idx}"
 
     id_rekkefolge = _hent_alternativ_rekkefolge(sesjon, sporsmal)
     rendret_by_id = {o["id"]: o for o in rendret["options"]}
@@ -1020,8 +1360,9 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
         # Streamlits standard "velg første alternativ"-oppførsel.
         with st.container(key="bs_nav_actions"):
             st.button(
-                t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_{modul_id}_r{runde}_q{idx}",
-                width="content", on_click=_sjekk_svar, args=(modul_id, sporsmal, sprak, widget_key, runde),
+                t("bryggeskole.sporsmal.svar_knapp"), key=f"bs_svar_btn_{base}_r{runde}_q{idx}",
+                width="content", on_click=_sjekk_svar,
+                args=(modul_id, sporsmal, sprak, widget_key, runde, sesjon_id),
                 disabled=st.session_state.get(widget_key) is None,
             )
     else:
@@ -1036,8 +1377,8 @@ def _render_sporsmal(modul_id, sesjon, pilot, sprak):
         (st.success if siste["correct"] else st.error)(siste["feedback"])
         with st.container(key="bs_nav_actions"):
             st.button(
-                t("bryggeskole.sporsmal.fortsett"), key=f"bs_fortsett_btn_{modul_id}_r{runde}_q{idx}",
-                width="content", on_click=_neste_sporsmal, args=(modul_id, totalt),
+                t("bryggeskole.sporsmal.fortsett"), key=f"bs_fortsett_btn_{base}_r{runde}_q{idx}",
+                width="content", on_click=_neste_sporsmal, args=(sesjon_id, totalt),
             )
 
 
@@ -1072,7 +1413,12 @@ def _konsept_runde_status(tilstand, pilot, konsept_id):
     return all(resultater)
 
 
-def _render_oppsummering(modul_id, pilot, sprak):
+def _render_oppsummering(modul_id, pilot, sprak, sesjon_id=None, base=None):
+    """Stage UI S2: with a stage view as `pilot`, the summary lists only the
+    concepts of that stage's questions. «Over tid» is still the one shared
+    concept mastery -- no stage-specific mastery exists."""
+    sesjon_id = sesjon_id or modul_id
+    base = base or modul_id
     st.write("---")
     tilstand = _les_tilstand()
     konsepter = _konsept_rekkefolge(pilot)
@@ -1116,44 +1462,84 @@ def _render_oppsummering(modul_id, pilot, sprak):
         col1, col2, _spacer = st.columns(_KNAPP_GRUPPE_KOLONNER)
         with col1:
             st.button(
-                t("bryggeskole.oppsummering.prov_igjen"), key=f"bs_prov_igjen_{modul_id}_btn",
-                width="content", on_click=_start_sporsmal_runde, args=(modul_id,),
+                t("bryggeskole.oppsummering.prov_igjen"), key=f"bs_prov_igjen_{base}_btn",
+                width="content", on_click=_start_sporsmal_runde, args=(sesjon_id,),
             )
         with col2:
             st.button(
-                t("bryggeskole.tilbake_til_oversikt"), key=f"bs_oppsummering_tilbake_{modul_id}_btn",
+                t("bryggeskole.tilbake_til_oversikt"), key=f"bs_oppsummering_tilbake_{base}_btn",
                 width="content", on_click=_tilbake_til_oversikt,
             )
 
 
+def _render_ingen_trinndel(trinn, base):
+    """Stage UI S2 (contract §4, §6.2): the module has no content at the
+    requested stage. Nothing is invented. Foundation-only module asked for
+    Kompetent -> Foundation is the material; Kompetent-only module asked for
+    Foundation -> it belongs to Trinn 2. S3 cards never open a module at a
+    stage it lacks; this state stays as the safe answer if it is reached."""
+    if trinn == "foundation":
+        st.info(t("bryggeskole.trinn.horer_til_kompetent"))
+        st.button(
+            t("bryggeskole.trinn.til_kompetent"), key=f"bs_trinn_til_kompetent_{base}_btn",
+            width="content", on_click=_bytt_til_kompetent_eksplisitt,
+        )
+    else:
+        st.info(t("bryggeskole.trinn.ingen_kompetent_del"))
+        _render_repeter_foundation_knapp(base)
+
+
 def _render_modul(modul_id, miljo, sprak):
     modul_info = _MODULER[modul_id]
-    sesjon = _modul_sesjon(modul_id)
+    # Stage UI S2/S3: the lesson context is (module, stage). trinn is None
+    # only for today's single flow, the fallback when the stage map is
+    # unavailable.
+    trinn = _aktivt_trinn()
+    sesjon_id = _sesjon_nokkel(modul_id, trinn)
+    base = _widget_base(modul_id, trinn)
 
-    st.caption(
-        f"{t('tabs.bryggeskole')} ▸ {t(f'bryggeskole.miljo.{miljo}')} ▸ {t(modul_info['tittel_nokkel'])}"
-    )
-    st.button(t("bryggeskole.tilbake_til_oversikt"), key=f"bs_tilbake_{modul_id}_btn", on_click=_tilbake_til_oversikt)
+    # Two separate axes in the breadcrumb: the legacy environment and, when
+    # a stage is active, the course stage (contract §5, §12).
+    sti = [t("tabs.bryggeskole"), t(f"bryggeskole.miljo.{miljo}")]
+    if trinn is not None:
+        sti.append(t(_TRINN_STI_NOKKEL[trinn]))
+    sti.append(t(modul_info["tittel_nokkel"]))
+    st.caption(" ▸ ".join(sti))
+    st.button(t("bryggeskole.tilbake_til_oversikt"), key=f"bs_tilbake_{base}_btn", on_click=_tilbake_til_oversikt)
     st.subheader(f"{modul_info['ikon']} {t(modul_info['tittel_nokkel'])}")
 
+    visning = None
+    if trinn is not None:
+        try:
+            pilot = modul_info["pilot"].read_pilot_file()
+        except _PILOT_CONTENT_ERRORS:
+            st.error(t("bryggeskole.feil.innhold_ugyldig"))
+            return
+        visning = _trinn_visning(modul_id, pilot, trinn)
+        if not visning["chunks"] and not visning["questions"]:
+            _render_ingen_trinndel(trinn, base)
+            return
+
+    sesjon = _modul_sesjon(sesjon_id)
     fase = sesjon["fase"]
     if fase == "leksjon":
         st.caption(t("bryggeskole.steg.leksjon"))
     elif fase == "oppsummering":
         st.caption(t("bryggeskole.steg.oppsummering"))
 
-    try:
-        pilot = modul_info["pilot"].read_pilot_file()
-    except _PILOT_CONTENT_ERRORS:
-        st.error(t("bryggeskole.feil.innhold_ugyldig"))
-        return
+    if visning is None:
+        try:
+            visning = modul_info["pilot"].read_pilot_file()
+        except _PILOT_CONTENT_ERRORS:
+            st.error(t("bryggeskole.feil.innhold_ugyldig"))
+            return
 
     if fase == "leksjon":
-        _render_leksjon(modul_id, sesjon, pilot, sprak)
+        _render_leksjon(modul_id, sesjon, visning, sprak, sesjon_id, base, trinn)
     elif fase == "sporsmal":
-        _render_sporsmal(modul_id, sesjon, pilot, sprak)
+        _render_sporsmal(modul_id, sesjon, visning, sprak, sesjon_id, base)
     else:
-        _render_oppsummering(modul_id, pilot, sprak)
+        _render_oppsummering(modul_id, visning, sprak, sesjon_id, base)
 
 
 def render_bryggeskole_panel():

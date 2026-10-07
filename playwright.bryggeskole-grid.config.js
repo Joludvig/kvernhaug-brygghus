@@ -31,7 +31,8 @@ module.exports = defineConfig({
   testDir: './tests/playwright_streamlit',
   // nav-buttons-responsive.spec.js (issue #398 responsive follow-up)
   // uses the same harness, so it shares this config/port.
-  testMatch: ['**/module-grid-responsive.spec.js', '**/nav-buttons-responsive.spec.js'],
+  // stage-selector-smoke.spec.js (stage UI S3) uses it too.
+  testMatch: ['**/module-grid-responsive.spec.js', '**/nav-buttons-responsive.spec.js', '**/stage-selector-smoke.spec.js'],
   fullyParallel: true,
   workers: process.env.CI ? undefined : 1,
   forbidOnly: !!process.env.CI,

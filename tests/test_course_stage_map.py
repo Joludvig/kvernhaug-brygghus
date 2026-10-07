@@ -376,17 +376,21 @@ class TestFailClosed(_WithProduction):
 
 
 class TestS1HasNoRuntimeEffect(unittest.TestCase):
-    """S1 is metadata only: nothing in the app reads it yet, and the module
-    is pure (stage UI contract §15)."""
+    """S1 is metadata only and the module is pure (stage UI contract §15).
+    Since S2 the Bryggeskole panel is the one runtime consumer (lesson
+    rendering by stage); the app shell and the Learn bridges still never
+    read the stage map."""
 
     def _source(self, *parts):
         with io.open(os.path.join(_ROOT, *parts), encoding="utf-8") as fh:
             return fh.read()
 
-    def test_no_runtime_consumer_yet(self):
-        for parts in (("app.py",), ("ui", "bryggeskole_panel.py"), ("ui", "process_panel.py"),
-                      ("ui", "hop_panel.py"), ("ui", "yeast_panel.py")):
+    def test_only_the_bryggeskole_panel_consumes_the_map(self):
+        for parts in (("app.py",), ("ui", "process_panel.py"), ("ui", "hop_panel.py"),
+                      ("ui", "yeast_panel.py"), ("ui", "kbhbrew_history_panel.py")):
             self.assertNotIn("course_stage", self._source(*parts), parts)
+        self.assertIn("from bryggeskole import course_stage as _course_stage",
+                      self._source("ui", "bryggeskole_panel.py"))
 
     def test_module_is_pure(self):
         source = self._source("bryggeskole", "course_stage.py")
