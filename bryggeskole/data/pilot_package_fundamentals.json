@@ -41,6 +41,42 @@
         "no": "Flasking og tapping på fat er begge vanlige, fullverdige måter å pakke hjemmebrygget øl på. Ingen av dem er «nybegynnermetoden» eller «den seriøse bryggerens metode» - det riktige valget for deg avhenger av utstyr, budsjett, lagringsplass og hvordan du skal servere ølet, ikke av at den ene metoden gir et bedre øl. Når saniteringen er ivaretatt og ølet er ferdig kondisjonert eller karbonert, har begge veier nådd samme naturlige sluttpunkt: et karbonert, ferdig øl klart til servering eller lagring.",
         "en": "Bottling and kegging are both common, fully legitimate ways to package homebrewed beer. Neither is \"the beginner method\" or \"the serious brewer's method\" - the right choice for you depends on equipment, budget, storage space and how you'll serve the beer, not on one method producing better beer. Once sanitation has been respected and the beer is properly conditioned or carbonated, both paths have reached the same natural completion point: a carbonated, finished beer ready to serve or store."
       }
+    },
+    {
+      "id": "CHUNK-PACK-F",
+      "basis": "fact",
+      "source_claims": ["FACT-PACK-0001"],
+      "text": {
+        "no": "**Primemengde og karbonering.** Primesukkeret starter en ny, liten gjæring i den lukkede flasken, og CO₂-en den lager, karbonerer ølet. Mengden primesukker påvirker derfor hvor karbonert ølet blir. Hvor mye som trengs, avhenger av det konkrete ølet – blant annet hvor mye CO₂ det allerede inneholder, temperaturen og ølstilen – og av hvor mye karbonering du ønsker. Det finnes ikke én mengde som passer alle brygg.",
+        "en": "**Priming amount and carbonation.** Priming sugar starts a new, small fermentation in the sealed bottle, and the CO₂ it makes carbonates the beer. So the amount of priming sugar affects how carbonated the beer becomes. How much is needed depends on the specific beer – including how much CO₂ it already holds, its temperature and its style – and on how much carbonation you want. There is no single amount that fits every batch."
+      }
+    },
+    {
+      "id": "CHUNK-PACK-G",
+      "basis": "methodology",
+      "source_claims": [],
+      "text": {
+        "no": "**Bruk et verktøy du stoler på.** Du trenger ikke regne ut primemengden selv. Hent mengden fra oppskriften, en primekalkulator eller en karboneringstabell du stoler på, og gi verktøyet de opplysningene det ber om om ølet ditt. Skriv ned hvilket verktøy og hvilken mengde du brukte. Da kan du sammenligne med hvordan karboneringen ble, og eventuelt gjøre én bevisst endring neste gang.",
+        "en": "**Use a tool you trust.** You do not need to work out the priming amount yourself. Take the amount from your recipe, a priming calculator or a carbonation table you trust, and give the tool the details it asks for about your beer. Write down which tool and which amount you used. Then you can compare with how the carbonation turned out, and make one deliberate change next time if needed."
+      }
+    },
+    {
+      "id": "CHUNK-PACK-H",
+      "basis": "fact",
+      "source_claims": ["FACT-BREW-0005"],
+      "text": {
+        "no": "**Klarhet før pakking.** Med tid etter den mest aktive gjæringen synker gjær og andre partikler gjerne til bunns, så ølet blir ofte klarere. Hvor mye, avhenger av gjærstammen, og noen øl skal være uklare. Et uklart øl er derfor ikke automatisk en feil – sammenlign med ølet du hadde tenkt å lage.",
+        "en": "**Clarity before packaging.** With time after the most active fermentation, yeast and other suspended material tend to settle, so the beer often becomes clearer. How much depends on the yeast strain, and some beers are meant to stay hazy. A hazy beer is therefore not automatically a mistake – compare it with the beer you intended to make."
+      }
+    },
+    {
+      "id": "CHUNK-PACK-I",
+      "basis": "fact",
+      "source_claims": ["FACT-OXY-0002"],
+      "text": {
+        "no": "**Oksygen og holdbarhet.** Når gjæringen først er i gang, er oksygen i ølet som regel uønsket: det kan bidra til en gammel, pappaktig smak, svakere humlearoma og dårligere holdbarhet. Når du fyller flasker eller fat, unngår du derfor unødvendig skvulping og luftkontakt. Dette er en retning, ikke en regel om at én eksponering ødelegger hele brygget.",
+        "en": "**Oxygen and shelf life.** Once fermentation is underway, oxygen getting into the beer is generally unwanted: it can contribute to stale, cardboard-like flavours, weaker hop aroma and reduced shelf stability. So when you fill bottles or a keg, avoid unnecessary splashing and air contact. This is a direction, not a rule that one exposure ruins the whole batch."
+      }
     }
   ],
   "questions": [
@@ -267,6 +303,190 @@
       "feedback_incorrect": {
         "no": "Ikke helt. Ingen av metodene er universelt «den seriøse» eller «den beste» - valget er et praktisk spørsmål, og begge veier når samme sluttpunkt: et ferdig, klart øl.",
         "en": "Not quite. Neither method is universally \"the serious one\" or \"the best\" - the choice is a practical question, and both paths reach the same completion point: a finished, ready beer."
+      }
+    },
+    {
+      "id": "Q-PACK-006",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["package.priming"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-PACK-0001"],
+      "prompt": {
+        "no": "Du skal flaske et øl du vil ha kraftig karbonert, og senere et øl du bare vil ha lett karbonert. En venn sier at du kan bruke samme primemengde til begge. Hva er riktig?",
+        "en": "You are bottling one beer you want strongly carbonated, and later one you want only lightly carbonated. A friend says you can use the same priming amount for both. What is right?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Mengden bør passe til hvert øl og karboneringen du ønsker – det finnes ikke én mengde for alle brygg.",
+            "en": "The amount should suit each beer and the carbonation you want – there is no single amount for every batch."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Samme mengde gir samme karbonering i alle øl, så vennen har rett.",
+            "en": "The same amount gives the same carbonation in every beer, so your friend is right."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Primemengden påvirker ikke karboneringen – det gjør bare flaskestørrelsen.",
+            "en": "The priming amount does not affect carbonation – only the bottle size does."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Primesukkeret karbonerer ølet gjennom en ny, liten gjæring, og hvor mye som trengs, avhenger av ølet og karboneringen du ønsker.",
+        "en": "Correct. Priming sugar carbonates the beer through a new, small fermentation, and how much is needed depends on the beer and the carbonation you want."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Mengden primesukker påvirker hvor karbonert ølet blir, og riktig mengde avhenger av det konkrete ølet og ønsket karbonering.",
+        "en": "Not quite. The amount of priming sugar affects how carbonated the beer becomes, and the right amount depends on the specific beer and the carbonation you want."
+      }
+    },
+    {
+      "id": "Q-PACK-007",
+      "type": "scenario",
+      "basis": "methodology",
+      "concepts": ["package.priming_tool"],
+      "difficulty": "intermediate",
+      "source_claims": [],
+      "prompt": {
+        "no": "Hvordan finner du ut hvor mye primesukker du skal bruke?",
+        "en": "How do you decide how much priming sugar to use?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Hent mengden fra oppskriften, en primekalkulator eller en karboneringstabell du stoler på, gi den opplysningene den ber om, og skriv ned hva du brukte.",
+            "en": "Take the amount from your recipe, a priming calculator or a carbonation table you trust, give it the details it asks for, and write down what you used."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Gjett – litt ekstra er alltid tryggest.",
+            "en": "Guess – a bit extra is always safest."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Du må regne det ut for hånd med en formel før du kan flaske.",
+            "en": "You have to work it out by hand with a formula before you can bottle."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Et verktøy du stoler på gir deg mengden uten at du må regne selv, og notatet gjør det mulig å justere neste gang.",
+        "en": "Correct. A tool you trust gives you the amount without doing the maths yourself, and the note lets you adjust next time."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Du trenger verken å gjette eller å regne for hånd: bruk oppskriften, en primekalkulator eller en karboneringstabell du stoler på, og skriv ned hva du brukte.",
+        "en": "Not quite. You need neither to guess nor to calculate by hand: use your recipe, a priming calculator or a carbonation table you trust, and write down what you used."
+      }
+    },
+    {
+      "id": "Q-PACK-008",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["fermentation.conditioning"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-BREW-0005"],
+      "prompt": {
+        "no": "Ølet ditt er fortsatt litt uklart når det er tid for å pakke. Hva er den beste måten å tenke på det?",
+        "en": "Your beer is still a little hazy when it is time to package. What is the best way to think about it?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Hvor klart ølet blir, avhenger av gjæren, og noen øl skal være uklare – sammenlign med ølet du hadde tenkt å lage.",
+            "en": "How clear the beer gets depends on the yeast, and some beers are meant to stay hazy – compare with the beer you intended."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Alle øl skal være helt klare før pakking, ellers har noe gått galt.",
+            "en": "Every beer has to be completely clear before packaging, otherwise something has gone wrong."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Uklarhet endrer seg aldri – gjær og partikler synker ikke.",
+            "en": "Haze never changes – yeast and particles do not settle."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Gjær og partikler synker gjerne med tid, men hvor klart ølet blir, avhenger av gjærstammen, og noen øl skal være uklare.",
+        "en": "Correct. Yeast and particles tend to settle with time, but how clear the beer gets depends on the yeast strain, and some beers are meant to stay hazy."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Gjær og partikler synker gjerne med tid, så ølet blir ofte klarere – men hvor mye, avhenger av gjæren, og noen øl skal være uklare.",
+        "en": "Not quite. Yeast and particles tend to settle with time, so the beer often becomes clearer – but how much depends on the yeast, and some beers are meant to stay hazy."
+      }
+    },
+    {
+      "id": "Q-PACK-009",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["oxygen.post_pitch"],
+      "difficulty": "intermediate",
+      "source_claims": ["FACT-OXY-0002"],
+      "prompt": {
+        "no": "Når du fyller flasker, hvorfor er det lurt å unngå skvulping?",
+        "en": "When you fill bottles, why is it worth avoiding splashing?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Oksygen etter at gjæringen er i gang kan bidra til gammel, pappaktig smak, svakere humlearoma og dårligere holdbarhet.",
+            "en": "Oxygen after fermentation is underway can contribute to stale, cardboard-like flavours, weaker hop aroma and reduced shelf stability."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Det spiller ingen rolle – når gjæringen er ferdig, har oksygen ingen virkning.",
+            "en": "It does not matter – once fermentation is done, oxygen has no effect."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Den minste skvulp ødelegger hele brygget umiddelbart.",
+            "en": "The slightest splash instantly ruins the whole batch."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Unødvendig oksygen etter at gjæringen er i gang kan gi gammel smak, svakere humlearoma og dårligere holdbarhet – så du fyller rolig.",
+        "en": "Correct. Unnecessary oxygen after fermentation is underway can give stale flavours, weaker hop aroma and reduced shelf stability – so you fill gently."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Oksygen er som regel uønsket også ved pakking, men det er en retning – ikke slik at én skvulp ødelegger alt.",
+        "en": "Not quite. Oxygen is generally unwanted at packaging too, but it is a direction – not that one splash ruins everything."
       }
     }
   ]

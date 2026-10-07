@@ -1426,7 +1426,10 @@ class TestPakkingModulen(_MedIsolertTilstand):
 
         tilstand = read_mastery_state()
         pakking_konsepter = set(_konsept_rekkefolge(pilot))
-        nye_pakking_konsepter = pakking_konsepter - {"cool.sanitation_boundary", "oxygen.post_pitch"}
+        # fermentation.conditioning er BEVISST gjenbrukt fra Gjæring i
+        # Pakking Kompetent (pakkekontrakten §5), samme fakta (FACT-BREW-0005).
+        gjenbrukt = {"cool.sanitation_boundary", "oxygen.post_pitch", "fermentation.conditioning"}
+        nye_pakking_konsepter = pakking_konsepter - gjenbrukt
         andre_konsepter = (
             set(_konsept_rekkefolge(les_mesking_pilot()))
             | set(_konsept_rekkefolge(les_gjaring_pilot()))
@@ -1435,7 +1438,7 @@ class TestPakkingModulen(_MedIsolertTilstand):
         self.assertTrue(nye_pakking_konsepter.isdisjoint(andre_konsepter))
         for k in nye_pakking_konsepter:
             self.assertIn(k, tilstand["concepts"])
-        for k in andre_konsepter:
+        for k in andre_konsepter - gjenbrukt:
             self.assertNotIn(k, tilstand["concepts"])
 
     def test_pakking_deler_mastery_med_kjoling_for_gjenbrukte_konsepter(self):
@@ -2505,6 +2508,129 @@ class TestGjaringKompetent(_MedIsolertTilstand):
         for konsept in self._NYE_KONSEPTER:
             self.assertNotEqual(_konsept_label(konsept, "no"), konsept)
             self.assertNotEqual(_konsept_label(konsept, "en"), konsept)
+
+
+# ─── Pakking Kompetent (pakkekontrakten §6–§7): bolk F–I og Q-PACK-006…009
+# i samme modul og samme kort, etter Foundation A–E ───────────────────────
+
+class TestPakkingKompetent(_MedIsolertTilstand):
+    _ETIKETT = {"no": "Metode, ikke en faktapåstand", "en": "Method, not a fact claim"}
+    _KOMPETENT_TITLER = {
+        "no": ("Primemengde og karbonering", "Bruk et verktøy du stoler på", "Klarhet før pakking",
+               "Oksygen og holdbarhet"),
+        "en": ("Priming amount and carbonation", "Use a tool you trust", "Clarity before packaging",
+               "Oxygen and shelf life"),
+    }
+    _KOMPETENT_KONSEPTER = ("package.priming", "package.priming_tool", "fermentation.conditioning",
+                            "oxygen.post_pitch")
+
+    def _bolk_teller(self, at):
+        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+
+    def test_fortsatt_elleve_kort_og_ett_pakkekort_pa_plass_atte(self):
+        for miljo_knapp, tittel in (("bs_velg_hjemmebrygger_btn", "**Pakking**"),
+                                    ("bs_velg_bryggeri_btn", "**Pakking/CIP**")):
+            with self.subTest(miljo=miljo_knapp):
+                at = self._ny_apptest()
+                self._velg_miljo(at, miljo_knapp)
+                kort = [m.value for m in at.markdown if m.value.startswith("**") and m.value.endswith("**")]
+                self.assertEqual(len(kort), 11, kort)
+                self.assertEqual(kort[7], tittel)
+                self.assertEqual(kort.count(tittel), 1)
+
+    def test_kompetentbolkene_rendrer_med_riktig_merking_i_begge_sprak_og_miljo(self):
+        pilot = les_pakking_pilot()
+        for sprak in ("no", "en"):
+            for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+                with self.subTest(sprak=sprak, miljo=miljo_knapp):
+                    at = self._ny_apptest()
+                    if sprak == "en":
+                        at.session_state["sprak"] = "en"
+                        at.run()
+                    self._apne_modul(at, "pakking", miljo_knapp)
+                    for idx in range(9):
+                        chunk = pilot["chunks"][idx]
+                        teller = (f"Læringsbolk {idx + 1} av 9" if sprak == "no"
+                                  else f"Learning block {idx + 1} of 9")
+                        self.assertEqual(self._bolk_teller(at), [teller])
+                        if idx >= 5:
+                            self.assertIn(self._KOMPETENT_TITLER[sprak][idx - 5],
+                                          " ".join(_alle_synlige_tekster(at)))
+                        har_etikett = self._ETIKETT[sprak] in [c.value for c in at.caption]
+                        self.assertEqual(har_etikett, chunk.get("basis") == "methodology", chunk["id"])
+                        if idx < 8:
+                            _knapp(at, "bs_bolk_neste_pakking_btn").click().run()
+                            self.assertEqual(len(at.exception), 0)
+                    _knapp(at, "bs_start_sporsmal_pakking_btn")
+
+    def test_kompetentsporsmal_har_ikke_forhandsvalg_og_sjekk_svar_er_av(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "pakking")
+        fasit = _korrekt_svar_ider(les_pakking_pilot())
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(5)})
+        # Første Kompetent-spørsmål (Q-PACK-006, indeks 5).
+        self.assertIsNone(at.radio(key=self._valg_key(5, 1)).value)
+        self.assertTrue(_knapp(at, "bs_svar_btn_pakking_r1_q5").disabled)
+
+    def test_feil_svar_gir_tilbakemelding_pa_metodesporsmalet(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "pakking")
+        pilot = les_pakking_pilot()
+        fasit = _korrekt_svar_ider(pilot)
+        feil = _feil_svar_ider(pilot)
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(6)})
+        # Q-PACK-007 (primeverktøy, indeks 6).
+        self._besvar_sporsmal(at, 6, 1, feil[6])
+        tekst = " ".join(_alle_synlige_tekster(at))
+        self.assertIn(pilot["questions"][6]["feedback_incorrect"]["no"], tekst)
+
+    def test_full_flyt_etiketter_og_prov_igjen_i_begge_miljo(self):
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            with self.subTest(miljo=miljo_knapp):
+                at = self._ny_apptest()
+                self._apne_modul_og_start_sporsmal(at, "pakking", miljo_knapp)
+                fasit = _korrekt_svar_ider(les_pakking_pilot())
+                self.assertEqual(len(fasit), 9)
+                self._fullfor_alle_sporsmal(at, 1, fasit)
+                self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+                tekst = " ".join(_alle_synlige_tekster(at))
+                for konsept in self._KOMPETENT_KONSEPTER:
+                    self.assertIn(_konsept_label(konsept, "no"), tekst)
+                    self.assertNotIn(konsept, tekst)
+                forste = read_mastery_state()["concepts"]
+                _knapp(at, f"bs_prov_igjen_{self._aktiv_modul}_btn").click().run()
+                self.assertEqual(len(at.exception), 0, f"Uventet unntak ved Prøv igjen: {at.exception}")
+                self.assertIsNone(at.radio(key=self._valg_key(0, 2)).value)
+                self.assertTrue(_knapp(at, "bs_svar_btn_pakking_r2_q0").disabled)
+                self._fullfor_alle_sporsmal(at, 2, fasit)
+                andre = read_mastery_state()["concepts"]
+                for konsept in self._KOMPETENT_KONSEPTER:
+                    self.assertGreater(andre[konsept]["attempts"], forste[konsept]["attempts"], konsept)
+
+    def test_engelsk_full_flyt_viser_lesbare_etiketter(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul_og_start_sporsmal(at, "pakking")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_pakking_pilot()))
+        tekst = " ".join(_alle_synlige_tekster(at))
+        for konsept in self._KOMPETENT_KONSEPTER:
+            self.assertIn(_konsept_label(konsept, "en"), tekst)
+            self.assertNotIn(konsept, tekst)
+
+    def test_delt_mastery_med_gjaring(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "pakking")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_pakking_pilot()))
+        self.assertEqual(read_mastery_state()["concepts"]["fermentation.conditioning"]["attempts"], 1)
+        _knapp(at, "bs_oppsummering_tilbake_pakking_btn").click().run()
+        _knapp(at, "bs_apne_modul_gjaring_btn").click().run()
+        self._aktiv_modul = "gjaring"
+        self._start_sporsmalsrunde(at)
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_gjaring_pilot()))
+        self.assertEqual(read_mastery_state()["concepts"]["fermentation.conditioning"]["attempts"], 2)
+        self.assertNotEqual(_konsept_label("package.priming_tool", "no"), "package.priming_tool")
+        self.assertNotEqual(_konsept_label("package.priming_tool", "en"), "package.priming_tool")
 
 
 # ─── Smak og evaluering, feilbolkene C–E (sensorikk-kontrakten §§9–16, §27

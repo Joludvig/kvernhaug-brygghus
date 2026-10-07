@@ -327,6 +327,8 @@ _KONSEPT_LABELS = {
     "package.force_carbonation": {"no": "Tvangskarbonering", "en": "Force carbonation"},
     "package.pressure_safety": {"no": "Trykksikkerhet ved pakking", "en": "Packaging pressure safety"},
     "package.path_choice": {"no": "Valg av pakkemetode", "en": "Packaging method choice"},
+    # Pakking Kompetent (pakkekontrakten §5).
+    "package.priming_tool": {"no": "Primemengde fra et verktøy", "en": "Priming amount from a trusted tool"},
     "malt.what_is_malt": {"no": "Hva malt er", "en": "What malt is"},
     "malt.base_vs_specialty": {"no": "Basismalt og spesialmalt", "en": "Base and specialty malt"},
     "malt.colour_flavour": {"no": "Maltens farge og smak", "en": "Malt colour and flavour"},

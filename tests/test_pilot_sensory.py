@@ -65,7 +65,8 @@ _EXISTING_PILOTS = (
 # pilot_fermentation now carries its own scoped basis rule (fermentation
 # Kompetent contract §12: absent basis = fact, closed methodology allow-list),
 # tested in tests/test_pilot_fermentation.py; the others still reject it.
-_NO_METHODOLOGY_PILOTS = tuple(p for p in _EXISTING_PILOTS if p != "pilot_fermentation")
+# pilot_package likewise (package Kompetent contract §7).
+_NO_METHODOLOGY_PILOTS = tuple(p for p in _EXISTING_PILOTS if p not in ("pilot_fermentation", "pilot_package"))
 
 # Second slice: the fact-based fault chunks C-E and their questions. Every
 # other item stays methodology with source_claims == [].

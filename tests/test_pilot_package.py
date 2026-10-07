@@ -22,9 +22,11 @@ import unittest
 
 from bryggeskole.course_fact_registry import CourseFactRegistryError
 from bryggeskole.pilot_package import (
+    BASES,
     DEFAULT_PILOT_PATH,
     DEFAULT_REGISTRY_PATH,
     DIFFICULTIES,
+    METHODOLOGY_CONCEPTS,
     PILOT_SCHEMA_VERSION,
     QUESTION_TYPES,
     PilotContentError,
@@ -43,18 +45,38 @@ _REGISTRY_FIXTURE = os.path.join(
 _PRODUCTION_PILOT = DEFAULT_PILOT_PATH
 _PRODUCTION_REGISTRY = DEFAULT_REGISTRY_PATH
 
+# Foundation (#374) uses six facts; the Kompetent slice (package Kompetent
+# contract §6–§7) reuses FACT-PACK-0001 and FACT-OXY-0002 and adds only the
+# already verified FACT-BREW-0005.
 _ALL_FACTS = {
     "FACT-COOL-0003", "FACT-OXY-0002",
     "FACT-PACK-0001", "FACT-PACK-0002", "FACT-PACK-0003", "FACT-PACK-0004",
+    "FACT-BREW-0005",
 }
 
-_EXPECTED_CHUNK_IDS = [
+_FOUNDATION_CHUNK_IDS = [
     "CHUNK-PACK-A", "CHUNK-PACK-B", "CHUNK-PACK-C", "CHUNK-PACK-D", "CHUNK-PACK-E",
 ]
+_KOMPETENT_CHUNKS = [
+    ("CHUNK-PACK-F", "fact", ["FACT-PACK-0001"]),
+    ("CHUNK-PACK-G", "methodology", []),
+    ("CHUNK-PACK-H", "fact", ["FACT-BREW-0005"]),
+    ("CHUNK-PACK-I", "fact", ["FACT-OXY-0002"]),
+]
+_KOMPETENT_QUESTIONS = [
+    ("Q-PACK-006", "scenario", "fact", ["package.priming"], ["FACT-PACK-0001"]),
+    ("Q-PACK-007", "scenario", "methodology", ["package.priming_tool"], []),
+    ("Q-PACK-008", "scenario", "fact", ["fermentation.conditioning"], ["FACT-BREW-0005"]),
+    ("Q-PACK-009", "scenario", "fact", ["oxygen.post_pitch"], ["FACT-OXY-0002"]),
+]
+_KOMPETENT_IDS = {r[0] for r in _KOMPETENT_CHUNKS + _KOMPETENT_QUESTIONS}
+_EXPECTED_CHUNK_IDS = _FOUNDATION_CHUNK_IDS + [r[0] for r in _KOMPETENT_CHUNKS]
 
 _EXPECTED_CONCEPTS = {
     "cool.sanitation_boundary", "package.priming", "package.force_carbonation",
     "oxygen.post_pitch", "package.pressure_safety", "package.path_choice",
+    # Kompetent: one new methodology concept plus the reused Gjæring concept.
+    "package.priming_tool", "fermentation.conditioning",
 }
 
 
@@ -131,7 +153,7 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
     def test_topic_id(self):
         self.assertEqual(self.data["topic_id"], "PILOT-PACKAGE-FUNDAMENTALS")
 
-    def test_exactly_five_chunks_with_expected_ids_in_order(self):
+    def test_foundation_then_kompetent_chunks_in_order(self):
         self.assertEqual([c["id"] for c in self.data["chunks"]], _EXPECTED_CHUNK_IDS)
 
     def test_at_least_one_question_per_chunk_count_is_compact(self):
@@ -167,19 +189,22 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
             referenced.update(question["source_claims"])
         self.assertEqual(referenced, _ALL_FACTS)
 
-    def test_exactly_six_distinct_concepts(self):
+    def test_exactly_the_expected_concepts(self):
         concepts = set()
         for question in self.data["questions"]:
             concepts.update(question["concepts"])
         self.assertEqual(concepts, _EXPECTED_CONCEPTS)
-        self.assertEqual(len(concepts), 6)
+        self.assertEqual(len(concepts), 8)
 
     def test_every_question_declares_stable_id_concepts_difficulty_and_source_claims(self):
         for question in self.data["questions"]:
             self.assertRegex(question["id"], r"^Q-[A-Z0-9]+-\d{3}$")
             self.assertTrue(question["concepts"])
             self.assertIn(question["difficulty"], DIFFICULTIES)
-            self.assertTrue(question["source_claims"])
+            if question.get("basis", "fact") == "fact":
+                self.assertTrue(question["source_claims"])
+            else:
+                self.assertEqual(question["source_claims"], [])
 
     def test_no_raw_score_field_anywhere_in_content(self):
         raw = json.dumps(self.data)
@@ -366,6 +391,162 @@ class TestFermentationCompletionPointer(unittest.TestCase):
         for banned in ("flaskebombe", "bottle bomb", "eksploder", "explode", "for tidlig", "too early",
                        "FACT-MEAS".lower()):
             self.assertNotIn(banned, raw)
+
+
+def _minimal_with(chunk_extra=None, question_extra=None):
+    data = _load_fixture("valid_minimal.json")
+    if chunk_extra is not None:
+        data["chunks"].append(chunk_extra)
+    if question_extra is not None:
+        q = json.loads(json.dumps(data["questions"][0]))
+        q["id"] = "Q-TEST-099"
+        q.update(question_extra)
+        data["questions"].append(q)
+    return data
+
+
+class TestScopedBasisRule(unittest.TestCase):
+    """Package Kompetent contract §7: optional basis. Absent means "fact"
+    (Foundation unchanged); "methodology" needs empty source_claims and, on
+    a question, the approved methodology concept; unknown fails closed."""
+
+    def test_value_sets(self):
+        self.assertEqual(BASES, ("fact", "methodology"))
+        self.assertEqual(METHODOLOGY_CONCEPTS, frozenset({"package.priming_tool"}))
+
+    def test_absent_basis_is_fact_and_needs_claims(self):
+        chunk = {"id": "CHUNK-TEST-B", "source_claims": [], "text": {"no": "x", "en": "x"}}
+        errors = validate_pilot_content(_minimal_with(chunk_extra=chunk), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("non-empty list" in e for e in errors), errors)
+
+    def test_fact_basis_needs_a_verified_claim(self):
+        chunk = {"id": "CHUNK-TEST-B", "basis": "fact", "source_claims": ["FACT-TEST-0023"],
+                 "text": {"no": "x", "en": "x"}}
+        errors = validate_pilot_content(_minimal_with(chunk_extra=chunk), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("not a verified Course Fact" in e for e in errors), errors)
+
+    def test_methodology_chunk_needs_empty_claims(self):
+        ok = {"id": "CHUNK-TEST-B", "basis": "methodology", "source_claims": [], "text": {"no": "x", "en": "x"}}
+        self.assertEqual(validate_pilot_content(_minimal_with(chunk_extra=ok), registry_path=_REGISTRY_FIXTURE), [])
+        bad = dict(ok, source_claims=["FACT-TEST-0020"])
+        errors = validate_pilot_content(_minimal_with(chunk_extra=bad), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("requires 'source_claims' to be an empty list" in e for e in errors), errors)
+
+    def test_methodology_question_only_with_the_approved_concept(self):
+        ok = {"basis": "methodology", "source_claims": [], "concepts": ["package.priming_tool"]}
+        self.assertEqual(validate_pilot_content(_minimal_with(question_extra=ok), registry_path=_REGISTRY_FIXTURE), [])
+        bad = dict(ok, concepts=["package.priming"])
+        errors = validate_pilot_content(_minimal_with(question_extra=bad), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("not an approved methodology concept" in e for e in errors), errors)
+
+    def test_unknown_basis_fails_closed(self):
+        chunk = {"id": "CHUNK-TEST-B", "basis": "opinion", "source_claims": ["FACT-TEST-0020"],
+                 "text": {"no": "x", "en": "x"}}
+        errors = validate_pilot_content(_minimal_with(chunk_extra=chunk), registry_path=_REGISTRY_FIXTURE)
+        self.assertTrue(any("invalid basis" in e for e in errors), errors)
+
+
+def _kompetent_text(data, teaching_only=False):
+    parts = []
+    for chunk in data["chunks"]:
+        if chunk["id"] in _KOMPETENT_IDS:
+            parts.extend(chunk["text"].values())
+    for q in data["questions"]:
+        if q["id"] not in _KOMPETENT_IDS:
+            continue
+        parts.extend(q["feedback_correct"].values())
+        for o in q["options"]:
+            if o["correct"] or not teaching_only:
+                parts.extend(o["text"].values())
+        if not teaching_only:
+            parts.extend(q["prompt"].values())
+            parts.extend(q["feedback_incorrect"].values())
+    return " ".join(parts).lower()
+
+
+class TestPakkingKompetentShape(unittest.TestCase):
+    """Package Kompetent contract §6–§7: CHUNK-PACK-F..I and Q-PACK-006..009
+    appended in the same module after an unchanged Foundation."""
+
+    def setUp(self):
+        self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
+
+    def test_foundation_items_unchanged_and_carry_no_basis(self):
+        self.assertEqual([c["id"] for c in self.data["chunks"][:5]], _FOUNDATION_CHUNK_IDS)
+        self.assertEqual([q["id"] for q in self.data["questions"][:5]], [f"Q-PACK-00{n}" for n in range(1, 6)])
+        for item in self.data["chunks"][:5] + self.data["questions"][:5]:
+            self.assertNotIn("basis", item, item["id"])
+
+    def test_kompetent_chunks_match_the_locked_shape(self):
+        got = [(c["id"], c["basis"], c["source_claims"]) for c in self.data["chunks"][5:]]
+        self.assertEqual(got, [tuple(r) for r in _KOMPETENT_CHUNKS])
+
+    def test_kompetent_questions_match_the_locked_shape(self):
+        got = [(q["id"], q["type"], q["basis"], q["concepts"], q["source_claims"]) for q in self.data["questions"][5:]]
+        self.assertEqual(got, [tuple(r) for r in _KOMPETENT_QUESTIONS])
+        for q in self.data["questions"][5:]:
+            self.assertEqual(q["difficulty"], "intermediate", q["id"])
+            self.assertEqual(len(q["options"]), 3, q["id"])
+            self.assertEqual(sum(o["correct"] for o in q["options"]), 1, q["id"])
+
+
+class TestPakkingKompetentGuardrails(unittest.TestCase):
+    """Binding wording traps (package Kompetent contract §7)."""
+
+    def setUp(self):
+        self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
+        self.visible = _kompetent_text(self.data)
+        self.teaching = _kompetent_text(self.data, teaching_only=True)
+        self.chunks = {c["id"]: c["text"] for c in self.data["chunks"]}
+
+    def test_no_numbers_units_or_formulas(self):
+        self.assertNotRegex(self.visible, r"[0-9]")
+        for banned in (" gram", "g/l", "volum co", "volumes of co", "°", "%", "psi", "kpa", " bar ",
+                       "regn ut slik", "residual", "restkullsyre", "tabellverdi", "table value"):
+            self.assertNotIn(banned, self.visible)
+        # "formula" may appear only in the rejected distractor of Q-PACK-007.
+        for banned in ("formel", "formula"):
+            self.assertNotIn(banned, self.teaching)
+
+    def test_priming_tool_is_methodology_without_manual_maths(self):
+        g = self.chunks["CHUNK-PACK-G"]
+        for needle in ("trenger ikke regne ut primemengden selv", "oppskriften", "primekalkulator",
+                       "karboneringstabell du stoler på", "skriv ned"):
+            self.assertIn(needle, g["no"].lower())
+        for needle in ("do not need to work out the priming amount yourself", "calculator", "table you trust",
+                       "write down"):
+            self.assertIn(needle, g["en"].lower())
+        self.assertEqual(METHODOLOGY_CONCEPTS, frozenset({"package.priming_tool"}))
+
+    def test_priming_fact_stays_within_pack_0001(self):
+        f = self.chunks["CHUNK-PACK-F"]
+        self.assertIn("ikke én mengde som passer alle brygg", f["no"])
+        self.assertIn("no single amount that fits every batch", f["en"])
+        for banned in ("sukkertype", "sugar type", "dextrose", "druesukker", "honning", "honey"):
+            self.assertNotIn(banned, self.visible)
+
+    def test_clarity_stays_within_brew_0005(self):
+        h = self.chunks["CHUNK-PACK-H"]
+        for needle in ("gjerne til bunns", "ofte klarere", "avhenger av gjærstammen", "noen øl skal være uklare"):
+            self.assertIn(needle, h["no"])
+        for banned in ("finings", "klaringsmiddel", "gelatin", "isinglass", "kaldkrasj", "cold crash",
+                       "cold condition", "kaldmodning", "kjøl ned", "må være blank", "must be bright",
+                       "must be clear", "skal være helt klar"):
+            self.assertNotIn(banned, self.teaching)
+
+    def test_oxygen_stays_within_oxy_0002(self):
+        i = self.chunks["CHUNK-PACK-I"]
+        for needle in ("pappaktig", "svakere humlearoma", "dårligere holdbarhet", "unødvendig skvulping",
+                       "ikke en regel om at én eksponering ødelegger"):
+            self.assertIn(needle, i["no"])
+        for banned in ("oksidasjonskjemi", "oxidation chemistry", "aldehyd", "aldehyde", "radikal", "radical",
+                       "måneder", "months", "uker", "weeks", "best før", "best before",
+                       "ødelegger ølet umiddelbart", "instantly ruins the beer"):
+            self.assertNotIn(banned, self.teaching)
+
+    def test_no_universal_claims_in_teaching(self):
+        for banned in ("alltid", "always", "aldri", "never", "garantert", "guarantee"):
+            self.assertNotIn(banned, self.teaching)
 
 
 if __name__ == "__main__":

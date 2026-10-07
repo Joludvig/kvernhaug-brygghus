@@ -17,6 +17,17 @@ docs/development/v22_g3f_package_module_contract.md):
   reused verified records (FACT-COOL-0003, FACT-OXY-0002, already taught
   by pilot_cool_transfer.py under the same concept ids) plus four new
   verified FACT-PACK-0001..0004 records;
+- the Kompetent slice (package Kompetent contract
+  docs/development/v22_package_kompetent_module_contract.md; offline, no
+  GitHub issue yet) appends CHUNK-PACK-F…I and Q-PACK-006…009 to the same
+  module: the stage-contract §D.6 priming concept (FACT-PACK-0001 plus
+  trusted-tool methodology) and short reuse of FACT-BREW-0005 and
+  FACT-OXY-0002;
+- an optional `basis`, "fact" or "methodology" (the scoped rule from
+  pilot_fermentation.py): an ABSENT basis means "fact" and keeps the
+  normal non-empty, verified source_claims rule; "methodology" requires
+  source_claims == [] and, on a question, concepts only from this
+  module's closed METHODOLOGY_CONCEPTS allow-list;
 - five bilingual (NO/EN) learning chunks, plus five questions/scenarios,
   each declaring source_claims that must resolve to a *verified* Course
   Fact Registry record;
@@ -70,6 +81,16 @@ DIFFICULTIES = ("beginner", "intermediate", "advanced")
 
 QUESTION_TYPES = ("concept_check", "scenario")
 
+# Scoped basis rule (package Kompetent contract §7). `basis` is OPTIONAL:
+# an absent basis means "fact", so the Foundation items (CHUNK-PACK-A…E,
+# Q-PACK-001…005) need no change. "methodology" must carry
+# source_claims == [] and may only use this module's closed allow-list.
+BASES = ("fact", "methodology")
+
+METHODOLOGY_CONCEPTS = frozenset({
+    "package.priming_tool",
+})
+
 TOPIC_ID_PATTERN = re.compile(r"^PILOT-[A-Z0-9]+(-[A-Z0-9]+)*$")
 CHUNK_ID_PATTERN = re.compile(r"^CHUNK-[A-Z0-9]+-[A-Z]$")
 QUESTION_ID_PATTERN = re.compile(r"^Q-[A-Z0-9]+-\d{3}$")
@@ -83,6 +104,9 @@ _QUESTION_ALLOWED_FIELDS = frozenset({
     "id", "type", "concepts", "difficulty", "source_claims", "prompt",
     "options", "feedback_correct", "feedback_incorrect",
 })
+
+# Optional on both chunks and questions; absent == "fact".
+_OPTIONAL_FIELDS = frozenset({"basis"})
 
 _OPTION_ALLOWED_FIELDS = frozenset({"id", "text", "correct"})
 
@@ -141,6 +165,30 @@ def _validate_source_claims(value, path, errors, registry_path):
             )
 
 
+def _validate_basis_and_claims(item, path, errors, registry_path):
+    """Returns the item's effective basis ("fact" when absent), or None if
+    an explicit basis is invalid. `fact` delegates to the unchanged
+    source-claim validator; `methodology` requires an empty source_claims
+    list."""
+    basis = item.get("basis", "fact")
+    if basis not in BASES:
+        errors.append(f"{path}: invalid basis {basis!r} (must be one of {BASES}).")
+        basis = None
+    if "source_claims" not in item:
+        return basis
+    if basis == "methodology":
+        if item["source_claims"] != []:
+            errors.append(
+                f"{path}: basis 'methodology' requires 'source_claims' to be an empty list "
+                f"(methodology is not a sourced factual claim)."
+            )
+    else:
+        # basis == "fact" (explicit or absent), or an invalid basis (already
+        # reported): the normal non-empty, verified-only rule still applies.
+        _validate_source_claims(item["source_claims"], path, errors, registry_path)
+    return basis
+
+
 def _validate_concepts(value, path, errors):
     if not isinstance(value, list) or not value:
         errors.append(f"{path}: 'concepts' must be a non-empty list.")
@@ -163,7 +211,7 @@ def _validate_chunk(chunk, index, errors, seen_ids, registry_path):
         errors.append(f"{path}: chunk must be an object, got {type(chunk).__name__}.")
         return
 
-    unknown = sorted(set(chunk) - _CHUNK_ALLOWED_FIELDS)
+    unknown = sorted(set(chunk) - _CHUNK_ALLOWED_FIELDS - _OPTIONAL_FIELDS)
     if unknown:
         errors.append(f"{path}: unknown field(s) {unknown}.")
 
@@ -180,8 +228,7 @@ def _validate_chunk(chunk, index, errors, seen_ids, registry_path):
         else:
             seen_ids.add(chunk_id)
 
-    if "source_claims" in chunk:
-        _validate_source_claims(chunk["source_claims"], path, errors, registry_path)
+    _validate_basis_and_claims(chunk, path, errors, registry_path)
 
     if "text" in chunk:
         _validate_bilingual_text(chunk["text"], f"{path}.text", errors)
@@ -246,7 +293,7 @@ def _validate_question(question, index, errors, seen_ids, registry_path):
         errors.append(f"{path}: question must be an object, got {type(question).__name__}.")
         return
 
-    unknown = sorted(set(question) - _QUESTION_ALLOWED_FIELDS)
+    unknown = sorted(set(question) - _QUESTION_ALLOWED_FIELDS - _OPTIONAL_FIELDS)
     if unknown:
         errors.append(f"{path}: unknown field(s) {unknown}.")
 
@@ -272,8 +319,14 @@ def _validate_question(question, index, errors, seen_ids, registry_path):
     if "concepts" in question:
         _validate_concepts(question["concepts"], path, errors)
 
-    if "source_claims" in question:
-        _validate_source_claims(question["source_claims"], path, errors, registry_path)
+    basis = _validate_basis_and_claims(question, path, errors, registry_path)
+    if basis == "methodology" and isinstance(question.get("concepts"), list):
+        for concept in question["concepts"]:
+            if concept not in METHODOLOGY_CONCEPTS:
+                errors.append(
+                    f"{path}: concept {concept!r} is not an approved methodology concept "
+                    f"(allowed: {sorted(METHODOLOGY_CONCEPTS)})."
+                )
 
     if "prompt" in question:
         _validate_bilingual_text(question["prompt"], f"{path}.prompt", errors)
