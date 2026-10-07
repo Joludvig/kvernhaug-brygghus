@@ -2233,6 +2233,90 @@ class TestFoundationGjaringFerdigOgPakkingLenke(_MedIsolertTilstand):
         self.assertEqual(gjaring & maaling, {"measurement.fermentation_complete"})
 
 
+# ─── Smak og evaluering, feilbolkene C–E (sensorikk-kontrakten §§9–16, §27
+# bolk 3–5): faktabolker mellom B og F, lys-preg utsatt (S-3/#471) ───────
+
+class TestSmakFeilbolker(_MedIsolertTilstand):
+    _ETIKETT_NO = "Metode, ikke en faktapåstand"
+    _FAKTA_BOLKER = ("CHUNK-SENS-C", "CHUNK-SENS-D", "CHUNK-SENS-E")
+    _KONSEPTER = {
+        "sensory.tasting_sequence", "sensory.tasting_habits", "sensory.observation_vs_interpretation",
+        "sensory.diacetyl", "sensory.dms_recognition", "sensory.oxidation_recognition",
+        "sensory.sourness_intent_vs_spoilage", "sensory.fault_vs_character", "sensory.evaluate_against_intent",
+    }
+
+    def _bolk_teller(self, at):
+        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+
+    def test_sju_bolker_metode_merking_kun_pa_metodebolker_i_begge_miljo(self):
+        pilot = les_smak_pilot()
+        for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
+            at = self._ny_apptest()
+            self._apne_modul(at, "smak", miljo_knapp)
+            for idx, chunk in enumerate(pilot["chunks"]):
+                self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 7"])
+                har_etikett = self._ETIKETT_NO in [c.value for c in at.caption]
+                self.assertEqual(har_etikett, chunk["basis"] == "methodology", (miljo_knapp, chunk["id"]))
+                if idx < len(pilot["chunks"]) - 1:
+                    _knapp(at, "bs_bolk_neste_smak_btn").click().run()
+                    self.assertEqual(len(at.exception), 0)
+
+    def test_feilbolkene_rendrer_norsk_og_engelsk(self):
+        for sprak, forventet in (("no", ("Smør, grønt eple og svovel", "Kokt mais og papp",
+                                           "Syrlig – med vilje eller ikke?")),
+                                 ("en", ("Butter, green apple and sulphur", "Cooked corn and cardboard",
+                                         "Sour – on purpose or not?"))):
+            at = self._ny_apptest()
+            if sprak == "en":
+                at.session_state["sprak"] = "en"
+                at.run()
+            self._apne_modul(at, "smak")
+            _knapp(at, "bs_bolk_neste_smak_btn").click().run()
+            for tittel in forventet:
+                _knapp(at, "bs_bolk_neste_smak_btn").click().run()
+                self.assertIn(tittel, " ".join(_alle_synlige_tekster(at)), (sprak, tittel))
+
+    def test_ferskt_sporsmal_har_ikke_forhandsvalgt_svar(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "smak")
+        self.assertIsNone(at.radio(key=self._valg_key(0, 1)).value)
+        self.assertTrue(_knapp(at, "bs_svar_btn_smak_r1_q0").disabled)
+
+    def test_full_flyt_mastery_etiketter_og_prov_igjen(self):
+        at = self._ny_apptest()
+        self._apne_modul_og_start_sporsmal(at, "smak")
+        fasit = _korrekt_svar_ider(les_smak_pilot())
+        self._fullfor_alle_sporsmal(at, 1, fasit)
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
+        tekst = " ".join(_alle_synlige_tekster(at))
+        for konsept in ("sensory.diacetyl", "sensory.dms_recognition", "sensory.oxidation_recognition",
+                        "sensory.sourness_intent_vs_spoilage"):
+            self.assertIn(_konsept_label(konsept, "no"), tekst)
+            self.assertNotIn(konsept, tekst)
+        forste = read_mastery_state()["concepts"]
+        self.assertEqual(set(forste), self._KONSEPTER)
+        self.assertNotIn("sensory.lightstruck", forste)
+
+        _knapp(at, f"bs_prov_igjen_{self._aktiv_modul}_btn").click().run()
+        self.assertEqual(len(at.exception), 0, f"Uventet unntak ved Prøv igjen: {at.exception}")
+        self.assertIsNone(at.radio(key=self._valg_key(0, 2)).value)
+        self._fullfor_alle_sporsmal(at, 2, fasit)
+        andre = read_mastery_state()["concepts"]
+        for konsept in ("sensory.diacetyl", "sensory.dms_recognition", "sensory.oxidation_recognition",
+                        "sensory.sourness_intent_vs_spoilage"):
+            self.assertEqual(andre[konsept]["attempts"], 2, konsept)
+
+    def test_engelsk_full_flyt_viser_lesbare_etiketter(self):
+        at = self._ny_apptest()
+        at.session_state["sprak"] = "en"
+        at.run()
+        self._apne_modul_og_start_sporsmal(at, "smak")
+        self._fullfor_alle_sporsmal(at, 1, _korrekt_svar_ider(les_smak_pilot()))
+        tekst = " ".join(_alle_synlige_tekster(at))
+        for konsept in ("sensory.diacetyl", "sensory.sourness_intent_vs_spoilage"):
+            self.assertIn(_konsept_label(konsept, "en"), tekst)
+
+
 # ─── Oppskriftsforståelse (oppskriftskontrakten §27/§28): hele modulen er
 # Kompetent, posisjon 10 mellom Måling og Smak, sju bolker, sju spørsmål,
 # gjenbrukte Råvarer-konsepter (ingen duplikater), metode-merking kun på

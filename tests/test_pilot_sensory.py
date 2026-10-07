@@ -26,7 +26,7 @@ import re
 import tempfile
 import unittest
 
-from bryggeskole.course_fact_registry import CourseFactRegistryError
+from bryggeskole.course_fact_registry import CourseFactRegistryError, get_verified_record
 from bryggeskole.pilot_sensory import (
     BASES,
     DEFAULT_PILOT_PATH,
@@ -63,6 +63,21 @@ _EXISTING_PILOTS = (
     "pilot_mashing", "pilot_method_context", "pilot_package", "pilot_raw_materials",
 )
 
+# Second slice: the fact-based fault chunks C-E and their questions. Every
+# other item stays methodology with source_claims == [].
+_FACT_CLAIMS = {
+    "CHUNK-SENS-C": ["FACT-SENSORY-0001", "FACT-SENSORY-0002"],
+    "CHUNK-SENS-D": ["FACT-SENSORY-0002", "FACT-BOIL-0002", "FACT-OXY-0002"],
+    "CHUNK-SENS-E": ["FACT-SENSORY-0003"],
+    "Q-SENS-007": ["FACT-SENSORY-0001"],
+    "Q-SENS-008": ["FACT-SENSORY-0002", "FACT-BOIL-0002"],
+    "Q-SENS-009": ["FACT-SENSORY-0002", "FACT-OXY-0002"],
+    "Q-SENS-010": ["FACT-SENSORY-0003"],
+}
+_METHODOLOGY_IDS = {
+    "CHUNK-SENS-A", "CHUNK-SENS-B", "CHUNK-SENS-F", "CHUNK-SENS-G",
+    "Q-SENS-001", "Q-SENS-002", "Q-SENS-003", "Q-SENS-004", "Q-SENS-005", "Q-SENS-006",
+}
 
 def _bi(no, en):
     return {"no": no, "en": en}
@@ -222,23 +237,38 @@ class TestProductionPilotContent(unittest.TestCase):
         self.assertEqual(self.data["schema_version"], PILOT_SCHEMA_VERSION)
         self.assertEqual(self.data["topic_id"], "PILOT-SENSORY-EVALUATION")
 
-    def test_chunks_are_a_b_f_g_with_c_to_e_reserved(self):
+    def test_chunks_are_a_to_g_in_contract_order(self):
         self.assertEqual([c["id"] for c in self.data["chunks"]],
-                         ["CHUNK-SENS-A", "CHUNK-SENS-B", "CHUNK-SENS-F", "CHUNK-SENS-G"])
+                         [f"CHUNK-SENS-{x}" for x in "ABCDEFG"])
 
-    def test_six_questions_in_order(self):
-        self.assertEqual([q["id"] for q in self.data["questions"]], [f"Q-SENS-{n:03d}" for n in range(1, 7)])
+    def test_questions_follow_chunk_order(self):
+        # A, A, B, B, then the fault chunks C, D, D, E, then F, G.
+        self.assertEqual([q["id"] for q in self.data["questions"]],
+                         ["Q-SENS-001", "Q-SENS-002", "Q-SENS-003", "Q-SENS-004", "Q-SENS-007", "Q-SENS-008",
+                          "Q-SENS-009", "Q-SENS-010", "Q-SENS-005", "Q-SENS-006"])
 
-    def test_this_slice_is_methodology_only_with_no_fact_claims(self):
+    def test_methodology_items_carry_no_fact_claims(self):
         for item in self.data["chunks"] + self.data["questions"]:
-            self.assertEqual(item["basis"], "methodology", item["id"])
-            self.assertEqual(item["source_claims"], [], item["id"])
+            if item["id"] in _METHODOLOGY_IDS:
+                self.assertEqual(item["basis"], "methodology", item["id"])
+                self.assertEqual(item["source_claims"], [], item["id"])
+
+    def test_fault_items_have_the_exact_fact_basis_and_claims(self):
+        items = {i["id"]: i for i in self.data["chunks"] + self.data["questions"]}
+        for item_id, claims in _FACT_CLAIMS.items():
+            self.assertEqual(items[item_id]["basis"], "fact", item_id)
+            self.assertEqual(items[item_id]["source_claims"], claims, item_id)
+            for claim in claims:
+                self.assertIsNotNone(get_verified_record(DEFAULT_REGISTRY_PATH, claim), claim)
+        self.assertEqual(set(items) - set(_FACT_CLAIMS), _METHODOLOGY_IDS)
 
     def test_question_concepts_match_the_prep_table(self):
         self.assertEqual(
             [q["concepts"] for q in self.data["questions"]],
             [["sensory.tasting_sequence"], ["sensory.tasting_habits"],
              ["sensory.observation_vs_interpretation"], ["sensory.observation_vs_interpretation"],
+             ["sensory.diacetyl"], ["sensory.dms_recognition"], ["sensory.oxidation_recognition"],
+             ["sensory.sourness_intent_vs_spoilage"],
              ["sensory.fault_vs_character"], ["sensory.evaluate_against_intent"]],
         )
 
@@ -278,14 +308,19 @@ class TestContentSafetyGuardrails(unittest.TestCase):
     def setUp(self):
         self.data = read_pilot_file(DEFAULT_PILOT_PATH, registry_path=DEFAULT_REGISTRY_PATH)
         visible = []
+        method_visible = []
         for chunk in self.data["chunks"]:
             visible.extend(chunk["text"].values())
+            if chunk["id"] in _METHODOLOGY_IDS:
+                method_visible.extend(chunk["text"].values())
         for q in self.data["questions"]:
-            for field in ("prompt", "feedback_correct", "feedback_incorrect"):
-                visible.extend(q[field].values())
-            for o in q["options"]:
-                visible.extend(o["text"].values())
+            texts = [t for field in ("prompt", "feedback_correct", "feedback_incorrect") for t in q[field].values()]
+            texts += [t for o in q["options"] for t in o["text"].values()]
+            visible.extend(texts)
+            if q["id"] in _METHODOLOGY_IDS:
+                method_visible.extend(texts)
         self.visible = " ".join(visible).lower()
+        self.method_visible = " ".join(method_visible).lower()
         self.teaching = " ".join(
             [t for c in self.data["chunks"] for t in c["text"].values()]
             + [t for q in self.data["questions"] for t in q["feedback_correct"].values()]
@@ -295,15 +330,25 @@ class TestContentSafetyGuardrails(unittest.TestCase):
         self.assertNotRegex(self.visible, r"[0-9]")
         self.assertNotIn("°", self.visible)
 
-    def test_no_compound_or_fault_names_in_this_slice(self):
+    def test_no_compound_or_fault_names_in_the_methodology_items(self):
+        # The methodology chunks/questions (A, B, F, G; Q-SENS-001..006) stay
+        # free of compound and fault names; those live only in C-E.
         for banned in ("diacetyl", "dms", "dimetyl", "dimethyl", "acetaldehyd", "oksid", "oxid", "lightstruck",
                        "light-struck", "lyspåvirket", "skunk", "smør", "butter", "papp", "cardboard", "sulf", "svovel"):
-            self.assertNotIn(banned, self.visible)
+            self.assertNotIn(banned, self.method_visible)
 
-    def test_no_contamination_or_microbiology_claims(self):
-        for banned in ("infeksjon", "infection", "infected", "forurens", "contaminat", "bakterie", "bacteria",
-                       "spoil", "bederv"):
+    def test_no_light_struck_content_anywhere(self):
+        # Light-struck is DEFERRED until the S-3 record exists (#471 unknown).
+        for banned in ("lightstruck", "light-struck", "light struck", "lyspåvirket", "lysskadet", "skunk",
+                       "riboflavin", "brunt glass", "brown glass", "grønt glass", "green glass", "klart glass",
+                       "clear glass", "sollys", "sunlight", "uv-lys", "uv light", "ultrafiolett", "ultraviolet"):
+            self.assertIsNone(re.search(r"\b" + re.escape(banned), self.visible), banned)
+
+    def test_no_infection_wording_and_no_microbiology_in_methodology(self):
+        for banned in ("infeksjon", "infection", "infected", "infisert"):
             self.assertNotIn(banned, self.visible)
+        for banned in ("forurens", "contaminat", "bakterie", "bacteria", "spoil", "bederv"):
+            self.assertNotIn(banned, self.method_visible)
 
     def test_no_scores_sliders_bjcp_or_automatic_diagnosis(self):
         for banned in ("poeng", "points", "score", "slider", "glidebryter", "flavorprofile", "bjcp",
@@ -364,6 +409,94 @@ class TestNoStreamlitImport(unittest.TestCase):
         with open(module.__file__, encoding="utf-8") as fh:
             source = fh.read()
         self.assertIsNone(re.search(r"^\s*(import|from)\s+streamlit", source, re.MULTILINE))
+
+
+
+class TestFaultChunkGuardrails(unittest.TestCase):
+    """Contract §§9-16, 24: recognise and describe carefully; descriptor is
+    never diagnosis; no causes for acetaldehyde/sulphur; no health claim;
+    light-struck deferred."""
+
+    def setUp(self):
+        self.data = read_pilot_file(DEFAULT_PILOT_PATH, registry_path=DEFAULT_REGISTRY_PATH)
+        items = {i["id"]: i for i in self.data["chunks"] + self.data["questions"]}
+        self.items = items
+
+        def texts(item):
+            if "text" in item:
+                return list(item["text"].values())
+            out = [t for f in ("prompt", "feedback_correct", "feedback_incorrect") for t in item[f].values()]
+            return out + [t for o in item["options"] for t in o["text"].values()]
+
+        fault_ids = list(_FACT_CLAIMS)
+        self.fault_visible = " ".join(t for i in fault_ids for t in texts(items[i])).lower()
+        self.fault_teaching = " ".join(
+            [t for i in fault_ids if i.startswith("CHUNK") for t in items[i]["text"].values()]
+            + [t for i in fault_ids if i.startswith("Q-") for t in items[i]["feedback_correct"].values()]
+        ).lower()
+
+    def test_no_en_symmetry(self):
+        for item_id in _FACT_CLAIMS:
+            item = self.items[item_id]
+            bilinguals = [item["text"]] if "text" in item else (
+                [item["prompt"], item["feedback_correct"], item["feedback_incorrect"]] + [o["text"] for o in item["options"]])
+            for b in bilinguals:
+                self.assertEqual(set(b), {"no", "en"}, item_id)
+                self.assertTrue(b["no"].strip() and b["en"].strip(), item_id)
+
+    def test_new_questions_are_beginner_fact_questions_with_existing_concepts(self):
+        for qid in ("Q-SENS-007", "Q-SENS-008", "Q-SENS-009", "Q-SENS-010"):
+            q = self.items[qid]
+            self.assertEqual((q["type"], q["basis"], q["difficulty"]), ("scenario", "fact", "beginner"), qid)
+            self.assertEqual(len(q["options"]), 3, qid)
+            self.assertEqual(sum(1 for o in q["options"] if o["correct"]), 1, qid)
+        concepts = {c for q in self.data["questions"] for c in q["concepts"]}
+        for absent in ("sensory.lightstruck", "sensory.sulphur_observation", "sensory.acetaldehyde_recognition",
+                       "sensory.diacetyl_recognition", "sensory.sourness", "sensory.spoilage"):
+            self.assertNotIn(absent, concepts)
+        self.assertEqual(set(METHODOLOGY_CONCEPTS), _APPROVED_METHODOLOGY_CONCEPTS)
+
+    def test_descriptor_is_never_diagnosis(self):
+        self.assertIn("«dette lukter smør» er en observasjon, ikke et bevis på diacetyl", self.fault_teaching)
+        self.assertIn("en beskrivelse er ikke en diagnose", self.fault_teaching)
+        self.assertIn("a descriptor is not a diagnosis", self.fault_teaching)
+        self.assertIn("beviser ikke at kokingen var for kort", self.fault_teaching)
+        self.assertIn("beviser ikke at du sprutet ved overføringen", self.fault_teaching)
+        for banned in ("smør = diacetyl", "butter = diacetyl", "smør betyr diacetyl", "butter means diacetyl",
+                       "betyr at kokingen var for kort", "means the boil was too short",
+                       "gjæren sviktet helt sikkert", "the yeast definitely failed"):
+            self.assertNotIn(banned, self.fault_teaching)
+
+    def test_no_numbers_thresholds_or_fixed_rests(self):
+        self.assertNotRegex(self.fault_visible, r"[0-9%°]")
+        for banned in ("ppm", "ppb", "terskel", "threshold", "diacetylrast", "diacetyl rest", "minutt", "minute",
+                       "dager", "days", "timer", "hours", "enzym", "enzyme"):
+            self.assertNotIn(banned, self.fault_visible)
+
+    def test_acetaldehyde_and_sulphur_carry_no_cause_or_maturation_claim(self):
+        teaching = self.fault_teaching
+        self.assertIn("beskrivelsen sier ingenting om årsaken", teaching)
+        self.assertIn("uten å slutte noe om hva det skyldes", teaching)
+        for banned in ("umodent", "immature", "green beer", "grønt øl", "trenger mer tid", "needs more time",
+                       "forsvinner med tid", "fades with time", "går over", "goes away", "svovel betyr", "sulphur means",
+                       "svovel er midlertidig", "sulphur is temporary", "stammeavhengig svovel"):
+            self.assertNotIn(banned, self.fault_visible)
+
+    def test_no_health_or_safety_claims_about_sourness_or_spoilage(self):
+        for banned in ("farlig", "dangerous", "trygt", "safe", "usikkert", "unsafe", "helse", "health", "syk", "sick",
+                       "ikke drikk", "do not drink", "don't drink", "udrikkelig", "undrinkable", "giftig", "toxic"):
+            # Whole words: "healthy yeast" (FACT-SENSORY-0001) is not a health claim.
+            self.assertIsNone(re.search(r"\b" + re.escape(banned) + r"\b", self.fault_visible), banned)
+        self.assertIn("smaken alene viser bare at ølet er surere enn du ønsket", self.fault_teaching)
+        self.assertIn("taste alone only shows that the beer is more sour than you intended", self.fault_teaching)
+
+    def test_boil_and_oxygen_wording_traps(self):
+        # FACT-BOIL-0002: the precursor is never the volatile material.
+        self.assertIn("det er dms selv som er flyktig", self.fault_teaching)
+        self.assertNotRegex(self.fault_visible, r"forstadi\w* (er|som er) flyktig|precursor (is|that is) volatile")
+        # FACT-OXY-0002: a risk direction, never "instantly ruins".
+        for banned in ("ødelegger alltid", "always ruins", "instantly", "med en gang ødelagt"):
+            self.assertNotIn(banned, self.fault_visible)
 
 
 if __name__ == "__main__":
