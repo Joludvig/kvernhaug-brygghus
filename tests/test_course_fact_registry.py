@@ -16,6 +16,7 @@ import datetime
 import io
 import json
 import os
+import re
 import unittest
 
 from bryggeskole.course_fact_registry import (
@@ -253,6 +254,7 @@ _HOP_CORE_VERIFIED_IDS = ["FACT-HOP-0004", "FACT-HOP-0005"]
 _RECIPE_VERIFIED_IDS = ["FACT-RECIPE-0001", "FACT-RECIPE-0002", "FACT-RECIPE-0003"]
 _MEASUREMENT_VERIFIED_IDS = ["FACT-MEAS-0001", "FACT-MEAS-0002", "FACT-MEAS-0003"]
 _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
+_MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS = ["FACT-MEAS-0006"]
 _SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
 _SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001", "FACT-SENSORY-0002", "FACT-SENSORY-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
@@ -260,7 +262,8 @@ _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     + _COOL_TRANSFER_VERIFIED_IDS + _PACKAGE_VERIFIED_IDS + _METHOD_CONTEXT_VERIFIED_IDS
     + _MALT_CORE_VERIFIED_IDS + _YEAST_CORE_VERIFIED_IDS + _WATER_FOUNDATION_VERIFIED_IDS
     + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS + _MEASUREMENT_VERIFIED_IDS
-    + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _SAFETY_VERIFIED_IDS + _SENSORY_VERIFIED_IDS
+    + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS
+    + _SAFETY_VERIFIED_IDS + _SENSORY_VERIFIED_IDS
 )
 
 
@@ -340,7 +343,10 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # Issue #470 (V2.2 Goal 3 Sensory S-2) adds FACT-SENSORY-0003: 1
         # documented_fact.
         self.assertEqual(classifications.count("documented_fact"), 43)
-        self.assertEqual(classifications.count("professional_interpretation"), 12)
+        # Measurement M7 (offline, Chief live source spot-check 2026-10-05;
+        # no GitHub issue yet) adds FACT-MEAS-0006: 1
+        # professional_interpretation.
+        self.assertEqual(classifications.count("professional_interpretation"), 13)
         self.assertEqual(classifications.count("practical_experience"), 2)
 
     def test_fact_brew_0003_is_professional_interpretation_not_documented_fact(self):
@@ -746,10 +752,15 @@ class TestProductionRegistryMeasurementFoundation(unittest.TestCase):
 
     def test_meas_records_are_exactly_foundation_plus_kompetent(self):
         # Issue #445 appends the Kompetent M3/M6 records after the three
-        # Foundation records; no other FACT-MEAS record may exist.
+        # Foundation records, and M7 (FACT-MEAS-0006, offline 2026-10-05)
+        # follows them; no other FACT-MEAS record may exist.
         data = read_registry_file(_PRODUCTION_REGISTRY)
         ids = [r["id"] for r in data["records"] if r["id"].startswith("FACT-MEAS-")]
-        self.assertEqual(ids, _MEASUREMENT_VERIFIED_IDS + _MEASUREMENT_KOMPETENT_VERIFIED_IDS)
+        self.assertEqual(
+            ids,
+            _MEASUREMENT_VERIFIED_IDS + _MEASUREMENT_KOMPETENT_VERIFIED_IDS
+            + _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS,
+        )
 
     def test_each_concept_maps_to_exactly_one_record(self):
         for fact_id, concept in self._CONCEPTS.items():
@@ -811,7 +822,8 @@ class TestProductionRegistryMeasurementKompetent(unittest.TestCase):
     """Issue #445 (V2.2 Goal 3 Maaling Kompetent): FACT-MEAS-0004 (M3
     instrument choice / alcohol boundary) and FACT-MEAS-0005 (M6 hot vs
     cooled volume). Documented facts only; no equations, numbers or
-    system-specific rules. M5 and M7 stay methodology, not records."""
+    system-specific rules. M5 stays out of the registry; M7 is its own
+    record (FACT-MEAS-0006, TestProductionRegistryMeasurementInstrumentCheck)."""
 
     _CONCEPTS = {
         "FACT-MEAS-0004": "measurement.instrument_choice",
@@ -837,11 +849,15 @@ class TestProductionRegistryMeasurementKompetent(unittest.TestCase):
             for forbidden in ("formula", "equation", "factor", "plato", "abv", "%", "°"):
                 self.assertNotIn(forbidden, claim.lower(), fact_id)
 
-    def test_m5_and_m7_are_not_registry_records(self):
+    def test_m5_is_not_a_registry_record_and_m7_is_exactly_one(self):
+        # M5 (fermenter vs room temperature) is still unsourced (G3) and must
+        # not exist. M7 (instrument check) became FACT-MEAS-0006 after the
+        # Chief live source spot-check on 2026-10-05.
         data = read_registry_file(_PRODUCTION_REGISTRY)
         concepts = {c for r in data["records"] for c in r.get("concepts", [])}
-        for concept in ("measurement.fermentation_temperature", "measurement.instrument_check"):
-            self.assertNotIn(concept, concepts)
+        self.assertNotIn("measurement.fermentation_temperature", concepts)
+        holders = [r["id"] for r in data["records"] if "measurement.instrument_check" in r.get("concepts", [])]
+        self.assertEqual(holders, ["FACT-MEAS-0006"])
 
     def test_instrument_choice_claim_boundaries(self):
         claim = get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0004")["claim"]
@@ -877,6 +893,70 @@ class TestProductionRegistryMeasurementKompetent(unittest.TestCase):
             s["ref"] for s in get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0005")["sources"]
         )
         self.assertIn("USGS", m6_refs)
+
+
+class TestProductionRegistryMeasurementInstrumentCheck(unittest.TestCase):
+    """Measurement M7 (FACT-MEAS-0006): the instrument-check habit for the
+    hydrometer and the refractometer only. Offline round; Chief live source
+    spot-check PASS 2026-10-05 on the source pack
+    docs/development/v22_measurement_m7_instrument_check_source_pack.md.
+    Chief refinements: no thermometer, no universal "cannot be reset"
+    claim, classification professional_interpretation."""
+
+    def setUp(self):
+        self.record = get_verified_record(_PRODUCTION_REGISTRY, "FACT-MEAS-0006")
+
+    def test_verified_interpretation_without_modules(self):
+        self.assertIsNotNone(self.record)
+        self.assertEqual(self.record["status"], "verified")
+        self.assertEqual(self.record["classification"], "professional_interpretation")
+        self.assertEqual(self.record["concepts"], ["measurement.instrument_check"])
+        self.assertNotIn("modules", self.record)
+        # The local receipt of the Chief PASS (session log), not an invented clock time.
+        self.assertEqual(self.record["verified_at"], "2026-10-05T00:17:37+02:00")
+        self.assertIn("VERIFIED_AT PROVENANCE", self.record["notes"])
+
+    def test_claim_scope_is_hydrometer_and_refractometer(self):
+        claim = self.record["claim"]
+        for needle in ("hydrometer", "distilled water", "reference temperature stated for that hydrometer",
+                       "1.000 specific gravity", "consistent offset", "recorded and accounted for",
+                       "refractometer is zeroed or checked", "as its instructions specify",
+                       "Neither check proves that every later reading is correct",
+                       "does not show that the whole hydrometer scale is right",
+                       "does not remove other error sources"):
+            self.assertIn(needle, claim)
+
+    def test_claim_traps(self):
+        claim = self.record["claim"].lower()
+        for forbidden in ("thermometer", "ice", "cannot be reset", "can't be reset", "file", "nail polish", "tape",
+                          "tolerance", "daily", "always", "more accurate", "agree", "formula", "equation",
+                          "sucrose", "sugar solution", "dme", "brand", "°", "%"):
+            self.assertNotIn(forbidden, claim)
+        # The only number in the claim is the water point itself.
+        self.assertEqual(re.findall(r"\d+(?:\.\d+)?", claim), ["1.000"])
+
+    def test_sources_tiers_and_flags(self):
+        sources = self.record["sources"]
+        refs = " ".join(s["ref"] for s in sources)
+        for needle in ("AHA", "Jon Stika", "Craft Beer & Brewing", "Hanna", "HI96841", "MAN96841 07/24",
+                       "MISCO", "REV140407-1"):
+            self.assertIn(needle, refs)
+        self.assertNotIn("Dave Green", refs)
+        self.assertNotIn("wsu", refs.lower())
+        tiers = {s["ref"].split(",")[0]: s["tier"] for s in sources}
+        self.assertEqual(tiers["Hanna Instruments"], "A")
+        self.assertEqual(tiers["MISCO"], "A")
+        for s in sources:
+            self.assertIn("Chief live spot-check PASS 2026-10-05", s["note"], s["ref"])
+            if s["tier"] == "A":
+                self.assertIn("commercial interest", s["type"], s["ref"])
+
+    def test_notes_record_limits_and_refinements(self):
+        notes = self.record["notes"]
+        for needle in ("SOURCE LIMITATIONS", "SOURCE-ACCESS LIMITATIONS", "THERMOMETER is deliberately NOT covered",
+                       "'cannot be reset'", "FACT-MEAS-0004", "FACT-MEAS-0003", "Tier-B-only",
+                       "not a tolerance and not a temperature"):
+            self.assertIn(needle, notes)
 
 
 class TestProductionRegistryPack0003SourceCleanup(unittest.TestCase):

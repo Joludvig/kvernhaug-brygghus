@@ -2,7 +2,9 @@
 
 Version: 1.0 (2026-10-04); status refresh 2026-10-04 after the Måling Foundation and Oppskriftsforståelse implementations (§A.1) and the Foundation
 fermentation completion slice (§C.7, §D.9); Chief decision 2026-10-04: Foundation required content complete offline (§E.1); status refresh 2026-10-04 after the Smak
-og evaluering fault chunks (§A.1, §C.11)
+og evaluering fault chunks (§A.1, §C.11); status refresh 2026-10-04 after the Chief-approved Smak merge and the Måling Kompetent readiness
+closure (§A.1, §C.9, §C.11, §I); status refresh 2026-10-05 after FACT-MEAS-0006 (M7) and the Måling Kompetent implementation
+(§A.1, §C.9, §I)
 Status: **Canonical, locked owner/Chief decisions** for *where* course content belongs by stage. Decision/architecture
 document only: it implements nothing and changes no lesson, registry, UI or Web file.
 Recorded offline during the GitHub outage; see the sync note in §K.
@@ -67,9 +69,9 @@ landed on GitHub/master**. Status labels in §C describe that offline integratio
 | Check | State |
 |---|---|
 | Visible module cards | **11**: Råvarer, Rengjøring og sikkerhet, Forberedelse/metode, Mesking, Koking/humle, Kjøling/overføring, Gjæring, Pakking, Måling og bryggelogg, Oppskriftsforståelse, Smak og evaluering (`_MODUL_REKKEFOLGE`, `ui/bryggeskole_panel.py`) |
-| Måling og bryggelogg | **Foundation implemented** in the offline/local integration (`measurement.fundamentals`, CHUNK-MEAS-A…E, Q-MEAS-001…006; position 9); not yet on GitHub/master. **Kompetent not implemented** (measurement contract §21.6) |
+| Måling og bryggelogg | **Foundation implemented** in the offline/local integration (`measurement.fundamentals`, CHUNK-MEAS-A…E, Q-MEAS-001…006; position 9); not yet on GitHub/master. **Kompetent not implemented** (measurement contract §21.6). Status refresh 2026-10-05: **Kompetent implemented locally/offline** on `offline/measurement-kompetent-implementation` in the same module and card (CHUNK-MEAS-F…J, Q-MEAS-007…013; measurement contract §24), pending Chief review; not yet merged into the integration rehearsal and not on GitHub/master |
 | Oppskriftsforståelse | **Implemented locally/offline** (entire module Kompetent; `recipe.fundamentals`, CHUNK-REC-A…G, Q-REC-001…007; position 10) on `offline/recipe-understanding-implementation`; not yet on GitHub/master. Its Måling Foundation prerequisite (§27.8) is satisfied offline |
-| Smak og evaluering | **Visible**, but contractually **Kompetent** (sensory contract §1–§3). Implemented chunks are methodology only (SENS-A, B, F, G). Status refresh 2026-10-04: the fact-based fault chunks SENS-C, D, E (Q-SENS-007…010) are implemented locally/offline on `offline/sensory-fault-chunks`, pending Chief review and not yet merged into the integration rehearsal or on GitHub/master; light-struck is DEFERRED (S-3, §I) |
+| Smak og evaluering | **Visible**, but contractually **Kompetent** (sensory contract §1–§3). Implemented chunks are methodology only (SENS-A, B, F, G). Status refresh 2026-10-04: the fact-based fault chunks SENS-C, D, E (Q-SENS-007…010) are implemented locally/offline on `offline/sensory-fault-chunks`, pending Chief review and not yet merged into the integration rehearsal or on GitHub/master; light-struck is DEFERRED (S-3, §I). Status refresh 2026-10-04: Chief approved them (Q-SENS-007…010; acetaldehyde/sulphur text-only; visuals not required) and they are merged into the offline integration rehearsal (not on GitHub/master). **All MUST content complete**; light-struck remains a DEFERRED SHOULD item |
 | `FACT-MASH-0003` (iodine test) | **draft**; every other registry record is `verified` (58 records) |
 | Stage labels in the UI | None. All visible cards are one open grid |
 
@@ -193,7 +195,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 | Stage | Content | Status |
 |---|---|---|
 | Foundation | **Locked, preserved exactly** (measurement contract §1, §21.2): OG/FG as measurements, not targets; finished fermentation = repeated stable readings; temperature + where/how measured; volume into the fermenter; observation vs interpretation; plan vs actual; minimum useful brew log. **No formulas, no manual maths.** CHUNK-MEAS-A…E, Q-MEAS-001…006; FACT-MEAS-0001…0003 (verified) | IMPLEMENTED (offline integration; not yet on GitHub/master) |
-| Kompetent | Instrument choice (FACT-MEAS-0004), refractometer after alcohol, instrument checks, volume stages (FACT-MEAS-0005), raw reading vs correction, mash temperature, hypothesis + next change (measurement §21.6) | CONTRACTED (later slice); instrument-check fact GAP |
+| Kompetent | Instrument choice (FACT-MEAS-0004), refractometer after alcohol, instrument checks, volume stages (FACT-MEAS-0005), raw reading vs correction, mash temperature, hypothesis + next change (measurement §21.6) | CONTRACTED (later slice); instrument-check fact GAP. Readiness closure 2026-10-04 (measurement §23): **not implementation-ready**. Everything except instrument checks is READY (FACT-MEAS-0003…0005 + methodology); instrument checks are BLOCKED until an M7 record is verified. Status refresh 2026-10-05: FACT-MEAS-0006 (M7, hydrometer + refractometer only, thermometer excluded) is verified after the Chief live source spot-check, and Kompetent is implemented locally/offline on `offline/measurement-kompetent-implementation` (CHUNK-MEAS-F…J, Q-MEAS-007…013; measurement §24), pending Chief review; not on GitHub/master |
 | Bryggemester | Correction formulas, pH measurement (D41), pressure gauges (D42), efficiency maths (D66) | OUT OF APP |
 | Bryggeri | Laboratory methods, inline instrumentation (D76), QC (D77) | OUT OF APP |
 
@@ -211,7 +213,7 @@ Not below Foundation-exit: numbers, pH, ions, target profiles, strain/hop/malt e
 | Stage | Content | Status |
 |---|---|---|
 | Foundation | **No Foundation teaching and not part of Foundation completion.** The observation-vs-interpretation checkpoint is taught in Måling Foundation. CHUNK-SENS-A (simple tasting order) **may** be offered as an **optional Foundation taster** (§D.5) | Taster: not presented today |
-| Kompetent | **The module is Kompetent.** Methodology: tasting sequence, describe ≠ diagnose, fault vs character, evaluate against intent + one change (CHUNK-SENS-A, B, F, G; Q-SENS-001…006). Beginner fault set: diacetyl (with acetaldehyde/sulphur as observation only), DMS + oxidation, light-struck (SHOULD) + intended sourness vs spoilage (sensory §27 chunks 3–5; FACT-SENSORY-0001…0003, FACT-BOIL-0002, FACT-OXY-0002) | Methodology IMPLEMENTED (offline stack, #472); fault chunks CONTRACTED; light-struck record GAP. Status refresh 2026-10-04: fault chunks 3–5 (CHUNK-SENS-C…E, Q-SENS-007…010) implemented locally/offline on `offline/sensory-fault-chunks` (not yet on GitHub/master) for diacetyl (with acetaldehyde as vocabulary and sulphur as observation only), DMS + oxidation and intended sourness vs spoilage; light-struck DEFERRED, blocked by S-3 / #471 |
+| Kompetent | **The module is Kompetent.** Methodology: tasting sequence, describe ≠ diagnose, fault vs character, evaluate against intent + one change (CHUNK-SENS-A, B, F, G; Q-SENS-001…006). Beginner fault set: diacetyl (with acetaldehyde/sulphur as observation only), DMS + oxidation, light-struck (SHOULD) + intended sourness vs spoilage (sensory §27 chunks 3–5; FACT-SENSORY-0001…0003, FACT-BOIL-0002, FACT-OXY-0002) | Methodology IMPLEMENTED (offline stack, #472); fault chunks CONTRACTED; light-struck record GAP. Status refresh 2026-10-04: fault chunks 3–5 (CHUNK-SENS-C…E, Q-SENS-007…010) implemented locally/offline on `offline/sensory-fault-chunks` (not yet on GitHub/master) for diacetyl (with acetaldehyde as vocabulary and sulphur as observation only), DMS + oxidation and intended sourness vs spoilage; light-struck DEFERRED, blocked by S-3 / #471. Status refresh 2026-10-04: Chief-approved and merged into the offline integration rehearsal (not on GitHub/master); **COMPLETE for all MUST content**, light-struck DEFERRED SHOULD |
 | Bryggemester | Wider off-flavour catalogue, causes of acetaldehyde/sulphur, staling depth | OUT OF APP |
 | Bryggeri | Formal sensory panels, scoresheets, thresholds, statistics, lab analysis (D79) | OUT OF APP |
 
@@ -386,7 +388,7 @@ a reason to teach a topic in the homebrew course.
 | Any safety consequence of packaging too early | F | GAP. FACT-PACK-0003 covers damaged or unrated containers only; no record for early packaging |
 | Spoilage vs safety; electrical near liquids; scald first aid | F | GAP (cleaning contract §3/§6) |
 | Priming concept (amount controls carbonation; use a trusted tool) | K | GAP: no contract; FACT-PACK-0001 covers priming as a process only |
-| Instrument checks | K | GAP (measurement M7 / G4) |
+| Instrument checks | K | GAP (measurement M7 / G4). Readiness closure 2026-10-04: the only blocker for Måling Kompetent. The exact requirement is in measurement §23.3. Status refresh 2026-10-05: **CLOSED** for hydrometer + refractometer by FACT-MEAS-0006 (Chief live source spot-check 2026-10-05); thermometer checks stay out of scope (no brewing-relevant Tier A source) |
 | Conversion check | K | `FACT-MASH-0003` **draft**; needs a second source |
 | Grain separation / wort collection | K | MAPPED; Kunze SOURCE GAP printed pp. 257, 259–260 (curriculum map §19.1) |
 | Light-struck | K (SHOULD) | No record of its own; S-3 not landed; FACT-SENSORY-0002 names the descriptor only. Status refresh 2026-10-04: the only Smak content still missing; deferred until S-3 / #471 is resolved (no skunky or light-struck teaching offline) |

@@ -5,7 +5,10 @@ Status: **Chief review completed 2026-10-03** (§21). The Foundation slice is ap
 issue draft is §22. Module code still requires that implementation issue, which is pending because GitHub is unavailable.
 Not yet actionable as product work. (v1.0: decision/prep document — reviewable, not yet actionable.)
 Status refresh 2026-10-04: the Foundation slice is implemented offline (§21.8); not yet on GitHub/master. Kompetent is not
-implemented.
+implemented. Kompetent readiness closure 2026-10-04 (§23): **not implementation-ready**. Six of the seven Kompetent concepts are ready;
+`measurement.instrument_check` is blocked by the open M7/G4 fact gap. M7 closure 2026-10-05 (§24): FACT-MEAS-0006 verified after the
+Chief live source spot-check; Kompetent is **implementation-ready** and its shape is locked (CHUNK-MEAS-F…J, Q-MEAS-007…013).
+Status refresh 2026-10-05: Kompetent is implemented locally/offline on `offline/measurement-kompetent-implementation` (§21.8); not yet on GitHub/master.
 Governed by: [#434](https://github.com/Joludvig/kvernhaug-brygghus/issues/434), bounded child of
 [#343](https://github.com/Joludvig/kvernhaug-brygghus/issues/343) (Roadmap V2.2, Goal 3); product direction
 [#65](https://github.com/Joludvig/kvernhaug-brygghus/issues/65); curriculum owner
@@ -522,6 +525,7 @@ contract.
 
 Kept for later, unchanged: instrument choice (FACT-MEAS-0004), instrument checks, volume stages (FACT-MEAS-0005), correction vs raw reading, mash
 temperature, and hypothesis + next change. The **fact gap for instrument checks remains open** (M7 / G4: only food-scope sources; no registry record).
+Readiness closure 2026-10-04: §23 separates what is ready now from what is blocked, and states the exact M7 requirement.
 
 ### 21.7 Fact spot-check metadata
 
@@ -558,6 +562,10 @@ unconfirmed. Claims, status and sources are unchanged.
   `offline/measurement-foundation-implementation` and merged into the offline integration rehearsal (10 cards; Måling at
   position 9, before Smak). It has **not yet landed on GitHub/master**: the §22 issue and a PR are still required.
 - **Kompetent** (§21.6) is **not implemented**.
+- Status refresh (2026-10-05): **Kompetent is implemented locally/offline** on `offline/measurement-kompetent-implementation` (CHUNK-MEAS-F…J,
+  Q-MEAS-007…013; §24), pending Chief review. It is not yet merged into the integration rehearsal and not on GitHub/master.
+  - The Foundation slice is unchanged and remains complete.
+  - Smak og evaluering MUST content remains complete; light-struck remains a deferred SHOULD item (S-3 / #471).
 
 ## 22. Foundation implementation issue — draft (create on GitHub when access returns)
 
@@ -697,6 +705,142 @@ Every chunk, prompt, option and feedback text exists in `no` and `en` with ident
 - No scoring, badges, gating, grading or AI-generated interpretation.
 ~~~
 
+## 23. Kompetent readiness closure (2026-10-04, offline)
+
+Read-only assessment made from the offline integration rehearsal after the Smak og evaluering merge
+(`7f44cd0f8d9c89cc5faeeed4c20ac8006f2c78c4`; not on GitHub/master). It reviews the Kompetent scope in §2, §3, §11 and §21.6 against the
+registry and the shipped Foundation module (`measurement.fundamentals`, CHUNK-MEAS-A…E, Q-MEAS-001…006). It adds no fact, source, registry
+change, chunk, question or product code. The intended Kompetent stage is **not narrowed**: all seven §3 Kompetent concepts stay in scope.
+
+**Verdict (superseded 2026-10-05 by §24, where M7 is verified and Kompetent is implementation-ready): Kompetent is NOT implementation-ready.** One Kompetent concept, `measurement.instrument_check`, has no verified registry record
+(§5 M7, §6 G4, §21.6). §2 outcome 3 is therefore unsupported. Until that gap closes or Chief decides otherwise (§23.4), the Kompetent slice
+is not opened.
+
+### 23.1 READY NOW (supported by verified records or by methodology)
+
+| §2 outcome | Concept | Basis | Support | Binding limits |
+|---|---|---|---|---|
+| 1 Hydrometer vs refractometer | `measurement.instrument_choice` | fact | FACT-MEAS-0004 (verified, `documented_fact`) | The refractometer measures refractive index (often shown as Brix), not density. On unfermented wort it can only *estimate* gravity. No Brix-to-SG maths, no claim that a hydrometer is always more accurate, no claim that the two readings should always agree, no brand ranking |
+| 2 Refractometer after alcohol | `measurement.instrument_choice` | fact | FACT-MEAS-0004 | Once alcohol is present the raw reading is not gravity. Use a hydrometer, or a correction that also needs the original reading. No correction equation, no Wort Correction Factor, no worked example (§6 G7), and ATC ≠ an alcohol fix |
+| 4 Date, instrument and sample temperature per reading | (recording habit; sample temperature reuses `measurement.hydrometer_temperature`) | methodology + fact | Methodology; FACT-MEAS-0003 for the sample temperature | No universal reference temperature, no temperature-correction formula (§6 G5), no timestamp precision (§6 G6) |
+| 5 Volume stages, hot vs cold | `measurement.volume_stages` | fact | FACT-MEAS-0005 (verified, `documented_fact`) | Hot wort occupies more volume than cooled wort, and evaporation/process losses change volume independently. "Record which stage a volume belongs to" is methodology (#435), not part of the fact. No shrinkage, loss or boil-off percentage, no temperature number. Does not duplicate FACT-METHOD-0004. Must not map any stage onto App `actuals.volumeL` (§15 G-1, G-7 still open); integration copy stays "record it in your brew log/notes" |
+| 6 Raw reading vs correction | `measurement.uncertainty` | methodology | Methodology (§3 row; G3N "never overwrite a raw reading", already taught in CHUNK-MEAS-E) | Keep the raw number and record any correction separately. Record what the instrument shows, with no fake precision. Kunze p. 869 is structural support only, never a cited `source_claim`. No numeric error bands or measurement-uncertainty maths |
+| 7 Mash temperature as a measurement | `measurement.mash_temperature` | methodology | Methodology; FACT-MASH-0004 as context only | The reading is distinct from the mash target. Record the reading and where/how it was measured. Do not re-teach the mash-temperature direction (Mesking Kompetent, CHUNK-MASH-B/C). No claim about temperature spread within a mash or about how many points to measure, since no record supports it |
+| 8 Planned vs actual + hypothesis + next change | `log.hypothesis_next_change` | methodology | G3N / Brew History methodology (no fact) | A hypothesis is not a measurement, not a sensory observation and not asserted causal truth. Make one deliberate change. Never auto-fill it. Reuse the existing Brew History comparison (§12) |
+
+Implementation notes for when the slice opens:
+- The three methodology concepts (`measurement.uncertainty`, `measurement.mash_temperature`, `log.hypothesis_next_change`) are not in
+  `bryggeskole/pilot_measurement.py` `METHODOLOGY_CONCEPTS` today. The implementation round must extend that closed allow-list explicitly.
+- Kompetent chunk/question ids and counts are **not locked**. §10 gives an indicative shape: about 4 chunks and 4–5 questions. The natural
+  continuation is CHUNK-MEAS-F… and Q-MEAS-007…, which Chief must lock when the slice opens.
+- No in-module stage marker exists (stage allocation contract §J). Placing Kompetent chunks in the same module is a UI/stage decision that
+  this section does not take.
+
+### 23.2 BLOCKED
+
+| §2 outcome | Concept | Status | Why |
+|---|---|---|---|
+| 3 Instrument checks (a simple habit, not lab calibration; what the check does and does not prove) | `measurement.instrument_check` | **BLOCKED — fact gap** | No registry record exists. `tests/test_course_fact_registry.py` asserts the concept is absent (`test_m5_and_m7_are_not_registry_records`). The only thermometer-check source found is food-scope (WSU Extension from USDA; the FSIS page returned 403), which is not brewing-relevant. The §6 source map lists BYO (Dave Green), "Hydrometers and Refractometers", Tier B, for distilled-water checking. It was read only through a summarising fetch and has never been scoped into a claim |
+
+Not blocking, kept as-is: M5 fermenter-vs-room temperature (`measurement.fermentation_temperature`, §6 G3) remains outside Foundation
+and outside this Kompetent scope (§21.4). It is not a Kompetent concept in §3.
+
+### 23.3 Exact fact gap to close
+
+The gap closes only through **one registry-mutating fact-pack round for M7** that meets §6:
+1. **Concept:** `measurement.instrument_check` (`documented_fact` or `professional_interpretation`, decided by the round).
+2. **Claim direction:** §2 outcome 3 only. A simple check of a homebrew instrument against a known reference, and what the check does and does
+   **not** prove. No lab calibration, no numbers presented as universal, no correction formulas.
+3. **Sources:**
+   - At least one **brewing-relevant** source that is **opened and read in full** (Tier A preferred: an instrument maker's instructions or
+     extension/university brewing material; Tier B: established brewing text or AHA/BYO).
+   - Food-scope thermometer guidance alone does **not** close the gap.
+   - The URL, publication or revision date (or "not shown"), tier, and what the source supports and does not support must all be recorded.
+   - A commercial-interest manufacturer must be flagged.
+4. **Review:** Chief live spot-check. Then a verified record, with `test_m5_and_m7_are_not_registry_records` changed in the same round so it
+   no longer forbids `measurement.instrument_check`.
+5. **Scope:** if the readable sources cover only some instruments (for example the hydrometer/refractometer water check but not
+   thermometers), the record and the lesson are limited to those instruments. Nothing is generalised.
+
+Until then: no instrument-check chunk, no question, no mastery concept, and no wording such as "check your thermometer in ice water" in
+any lesson, in either language.
+
+### 23.4 Decision for Chief
+
+- **Option 1 (default for this closure):** keep the Kompetent slice closed until M7 is verified, then implement it whole.
+- **Option 2:** split Kompetent like Smak (light-struck deferred). Implement §23.1 now, with instrument checks as a named deferred item.
+  - This is only allowed if Chief records that instrument checks may ship later.
+  - It must not be described as Kompetent complete.
+
+This closure does not choose Option 2.
+
+## 24. M7 closure and Kompetent shape lock (2026-10-05, offline)
+
+**M7 verified.**
+- `FACT-MEAS-0006` (`measurement.instrument_check`, `professional_interpretation`) is a verified registry record.
+- It follows the Chief live source spot-check PASS on 2026-10-05 of the source pack
+  `v22_measurement_m7_instrument_check_source_pack.md`.
+- Chief decisions:
+  - **hydrometer + refractometer only; thermometer excluded**
+  - Tier-B-only hydrometer support accepted
+  - Tier A refractometer support from Hanna (HI96841 manual, MAN96841 07/24) and MISCO (REV140407-1)
+  - the universal claim "a hydrometer cannot be reset" is **not** registered or taught. The record uses the narrower wording: check in
+    distilled water at the hydrometer's stated reference temperature; the expected water-point reading is 1.000; record a consistent
+    offset there and account for it later; a one-point water check does not prove the whole scale or every later reading
+  - the refractometer is zeroed or checked with distilled/deionised water as its instructions specify; this does not remove other error
+    sources, and alcohol stays governed by FACT-MEAS-0004
+- BYO (Dave Green) is not cited in the record.
+- The §23.3 gap is closed. `test_m5_and_m7_are_not_registry_records` became
+  `test_m5_is_not_a_registry_record_and_m7_is_exactly_one`. M5 (`measurement.fermentation_temperature`) is still not a record.
+
+**Kompetent is IMPLEMENTATION-READY.**
+- All seven §2/§23.1 topics are supported.
+- The Chief decision of §23.4 (no split) is honoured: the whole slice is implemented together.
+
+**Locked shape** (natural continuation; same module `measurement.fundamentals`, same card at position 9, no second Measurement card, no
+stage UI; Foundation A–E and Q-MEAS-001…006 unchanged):
+
+| Chunk | Basis | Content | Source claims |
+|---|---|---|---|
+| CHUNK-MEAS-F | fact | Hydrometer vs refractometer; a refractometer is an estimate on unfermented wort; after alcohol a hydrometer, or a correction that also uses the original reading | FACT-MEAS-0004 |
+| CHUNK-MEAS-G | fact | Instrument check, hydrometer + refractometer only; a passed check is not proof | FACT-MEAS-0006 |
+| CHUNK-MEAS-H | fact (+ the #435 "record the stage" methodology sentence) | Volume stages; hot vs cooled; evaporation and losses independently | FACT-MEAS-0005 |
+| CHUNK-MEAS-I | methodology | Date, instrument and sample temperature per reading; raw reading kept, correction written alongside, no fake precision; mash temperature reading vs target, with where/how | none |
+| CHUNK-MEAS-J | methodology | Planned-vs-actual note, one hypothesis (not a measurement, observation or truth; never auto-filled) and one deliberate next change | none |
+
+| Question | Type | Basis | Concept | Source claims |
+|---|---|---|---|---|
+| Q-MEAS-007 | concept_check | fact | `measurement.instrument_choice` | FACT-MEAS-0004 |
+| Q-MEAS-008 | scenario | fact | `measurement.instrument_choice` (alcohol boundary) | FACT-MEAS-0004 |
+| Q-MEAS-009 | scenario | fact | `measurement.instrument_check` | FACT-MEAS-0006 |
+| Q-MEAS-010 | scenario | fact | `measurement.volume_stages` | FACT-MEAS-0005 |
+| Q-MEAS-011 | scenario | methodology | `measurement.uncertainty` | none |
+| Q-MEAS-012 | scenario | methodology | `measurement.mash_temperature` | none |
+| Q-MEAS-013 | scenario | methodology | `log.hypothesis_next_change` | none |
+
+All Kompetent questions have difficulty `intermediate`, three options and one correct answer.
+
+Shape notes:
+- The Foundation questions stay `beginner`.
+- **Deviation from §10 (about 4 chunks, 4–5 questions), recorded so it is not silent:**
+  - There are 5 chunks, because instrument choice, instrument check and volume stages each rest on a different verified record.
+  - There are 7 questions: one per Kompetent concept, plus a second `measurement.instrument_choice` question for the alcohol boundary.
+    This covers all seven Kompetent topics without inventing a concept.
+- No new concept id is introduced. §2 outcome 4 (date/instrument/sample temperature) is taught in CHUNK-MEAS-I and has no question
+  of its own. Its sample-temperature part is the Foundation concept `measurement.hydrometer_temperature`.
+- `bryggeskole/pilot_measurement.py` `METHODOLOGY_CONCEPTS` gains exactly `measurement.uncertainty`, `measurement.mash_temperature` and
+  `log.hypothesis_next_change`.
+
+**Binding traps** (enforced by `tests/test_pilot_measurement.py` `TestKompetentGuardrails`):
+- the only number is the water point (1,000 / 1.000)
+- no correction equation, ABV, efficiency or yield maths, tolerance or calibration interval
+- no thermometer check, no "cannot be reset", no physical hydrometer adjustment
+- no accuracy hierarchy and no agreement claim
+- no App `actuals.volumeL` mapping
+- no hypothesis presented as proof, and no auto-filled explanation
+
+The Foundation guardrails (§19, §21, §22) remain in force for CHUNK-MEAS-A…E and Q-MEAS-001…006.
+
 ## Explicitly not done in this document
 
 Course Fact Registry unchanged; no source opened or promoted in this run; no module, question, UI, bridge or visual implemented; no Core/schema
@@ -705,3 +849,7 @@ change; no gate in §15 decided; no Web/public or Sóti change; no deploy.
 v1.1 (2026-10-03, Chief review closure): records the decisions in §21 and the issue draft in §22. The only registry change is spot-check
 metadata on FACT-MEAS-0001..0003 source entries and notes (§21.7). No claim, classification, status or `verified_at` changed. Still no module,
 UI, Core/schema, Web or Sóti change, no gate decided, and no deploy. No GitHub issue was created.
+
+v1.2 (2026-10-04, offline Kompetent readiness closure): adds §23 (READY NOW / BLOCKED / exact M7 fact gap / Chief option) and two status pointers. Docs only: no registry, fact, source, module, question, UI or Core change. Not on GitHub/master.
+
+v1.3 (2026-10-05, offline M7 closure): adds §24 (FACT-MEAS-0006 verified after the Chief live source spot-check; Kompetent implementation-ready; shape locked as CHUNK-MEAS-F…J and Q-MEAS-007…013) and status pointers. The only registry change is the new FACT-MEAS-0006 record. Not on GitHub/master.

@@ -540,6 +540,9 @@ health claim), with `Q-SENS-007…010` on the MUST concepts `sensory.diacetyl`, 
 offline and #471 is unknown, so chunk 5 carries no light-struck or skunky content. The acetaldehyde and sulphur SHOULD items are taught in
 the chunk text without their own questions or mastery concepts, and the §28 visuals are not built. With that, every MUST item is
 implemented, and the module is complete except the deferred SHOULD light-struck item, subject to Chief review.
+Chief review 2026-10-04: approved (Q-SENS-007…010; acetaldehyde/sulphur text-only; the §28 visuals are not required for completeness) and
+merged into the offline integration rehearsal (not on GitHub/master). **Smak og evaluering is COMPLETE for all MUST content**; light-struck
+remains DEFERRED SHOULD, blocked by S-3 / #471.
 
 Do not build UI before this contract is reviewed.
 
