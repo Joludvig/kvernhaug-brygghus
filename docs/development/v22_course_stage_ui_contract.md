@@ -295,6 +295,18 @@ unchanged. For example, a stored Q-MASH-001 shows as Mesking Foundation progress
     rerun may switch it back.
   - Implemented in S3/S4; S1 has no UI and is unaffected.
 - It never says "Foundation complete" or "Kompetent complete" as a qualification.
+- **End-of-coursework guidance (issue #506, Chief decision 2026-10-08).** In the Kompetent lens, when **both**
+  Foundation and Kompetent are worked through, the overview shows one guidance line instead of the Stage-2 lines above:
+  - NO: "Du har gått gjennom Trinn 2 · Kompetent hjemmebrygger. Neste steg er å bruke det du har lært på et ekte brygg
+    og lære av resultatet. Når du har gjort det, kan Hjemmebrygger-løpet avsluttes her – dypere spor er valgfritt."
+  - EN: "You've worked through Stage 2 · Competent homebrewer. Next, use what you've learned on a real brew and learn
+    from the result. Once you've done that, the Homebrewer journey can end here — deeper tracks are optional."
+  - It means coursework worked through plus the next real-brew checkpoint (curriculum map §17). It does **not** claim
+    that Hjemmebrygger is complete before the real brew, and it is no qualification, certificate, score or unlock.
+  - Kompetent worked through without Foundation shows no such line. The Foundation lens and the default lens are
+    unchanged.
+  - It creates no third stage: "deeper tracks are optional" is the only mention of later tracks (§14). No storage or
+    schema change; it is derived read-only from `answered_questions`, like every other status.
 
 ### 7.4 Development completeness ≠ learner completion
 - §E.1/§F.3 milestone states are project facts and appear **only in docs**.
@@ -393,7 +405,8 @@ Targets: 1280 / 900 / 750 / 390 px, sidebar expanded and collapsed, NO and EN, b
 
 ## 14. Explicit non-goals
 
-- No Bryggemester or Bryggeri content, stage values or UI.
+- No Bryggemester or Bryggeri content, stage values or UI. The §7.3 end-of-coursework line may say that deeper tracks
+  are optional; that is not a Bryggemester stage, card, lesson, selector option or link.
 - No new course content, chunk split, fact or registry change. C1 is separate (§6.3).
 - No change to the legacy environment chooser, its labels or behaviour (a rename is an open decision, §17).
 - No optional Foundation taster (CHUNK-SENS-A).
