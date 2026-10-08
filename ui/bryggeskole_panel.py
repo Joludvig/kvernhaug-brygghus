@@ -417,6 +417,14 @@ _TRINN_VALG_NOKKEL = {
     "foundation": "bryggeskole.trinn.foundation",
     "kompetent": "bryggeskole.trinn.kompetent",
 }
+# Stage UI S4 (contract §7.2, §7.3): the canonical per-(module, stage)
+# status from course_stage.module_stage_status(), read-only over the stored
+# answered_questions. It replaces the session badges on stage cards.
+_TRINN_STATUS_NOKKEL = {
+    _course_stage.STATUS_NOT_STARTED: "bryggeskole.trinn.status.ikke_startet",
+    _course_stage.STATUS_IN_PROGRESS: "bryggeskole.trinn.status.pabegynt",
+    _course_stage.STATUS_WORKED_THROUGH: "bryggeskole.trinn.status.gjennomgatt",
+}
 _TRINN_FORKLARING_NOKKEL = {
     "foundation": "bryggeskole.trinn.foundation_forklaring",
     "kompetent": "bryggeskole.trinn.kompetent_forklaring",
@@ -938,7 +946,7 @@ def _injiser_bryggeskole_css():
     )
 
 
-def _modul_status(modul_id, sesjon_id=None):
+def _modul_status(modul_id):
     """Returnerer (ovd_tidligere, sesjon) for statusmerkene på et
     modul-kort:
     - ovd_tidligere: praksis som fantes FØR denne økten -- lest fra
@@ -946,9 +954,9 @@ def _modul_status(modul_id, sesjon_id=None):
       tilstanden, slik at øktens egne svar ikke kan skape merket.
     - sesjon: None hvis aldri åpnet denne økten; ellers selve
       sesjondict-en, som avgjør "Påbegynt" vs. "Gjennomført denne økten".
-      Stage UI S3: sesjon_id er (modul, trinn)-økten kortet viser;
-      standard er enkeltflytens nøkkel (modul-id-en)."""
-    return _ovd_tidligere_baseline().get(modul_id, False), _les_modul_sesjon(sesjon_id or modul_id)
+    Stage UI S4: brukes kun av enkeltflyt-oversikten (fallback); trinnkortene
+    viser trinnstatusen fra answered_questions i stedet."""
+    return _ovd_tidligere_baseline().get(modul_id, False), _les_modul_sesjon(modul_id)
 
 
 def _anbefalt_modul():
@@ -1010,6 +1018,14 @@ def _render_trinnvalg(svarte):
     return trinn
 
 
+def _render_trinnfremdrift(trinn, svarte):
+    """S4 (contract §7.3): module count for the selected stage, e.g. «4 av 9
+    moduler gjennomgått». The total comes from the stage map; never a
+    percentage, score or grade."""
+    gjennomgatt, totalt = _course_stage.stage_progress(_hent_trinnkart(), trinn, svarte)
+    st.caption(t("bryggeskole.trinn.fremdrift", n=gjennomgatt, totalt=totalt))
+
+
 def _render_trinnveiledning(trinn, svarte):
     """Quiet guidance only -- no lock, no completion claim (contract §7.3,
     §7.4, §8). Once Foundation is worked through: «Klar for Trinn 2?» while
@@ -1049,12 +1065,13 @@ def _render_miljovalg():
             )
 
 
-def _render_trinnkort(modul_id, trinn):
+def _render_trinnkort(modul_id, trinn, svarte):
     """The body of one canonical card under the stage lens (contract §4):
-    one stage line, today's session badges for that (module, stage), and
+    one stage line, the learner's status for that (module, stage) (S4), and
     one button with the unchanged key `bs_apne_modul_{id}_btn`. A module
     without content at the selected stage is never disabled or greyed: it
-    gets its own line and an action that opens the stage it does have."""
+    gets its own line and an action that opens the stage it does have --
+    and no status, since it has none at this stage."""
     knapp_key = f"bs_apne_modul_{modul_id}_btn"
     if not _course_stage.module_has_stage(_hent_trinnkart(), modul_id, trinn):
         if trinn == "kompetent":
@@ -1074,14 +1091,17 @@ def _render_trinnkort(modul_id, trinn):
         return
 
     st.caption(t("bryggeskole.trinn.kort.innhold"))
-    ovd_tidligere, sesjon = _modul_status(modul_id, _sesjon_nokkel(modul_id, trinn))
-    if ovd_tidligere:
-        st.caption(t("bryggeskole.status.ovd_tidligere"))
+    # S4: one persistent status vocabulary per card. The stage status
+    # (from answered_questions, so earlier sessions count) replaces the
+    # session badges «Øvd på tidligere» / «Påbegynt» / «Gjennomført denne
+    # økten»; only the button text stays session-local.
+    status = _course_stage.module_stage_status(_hent_trinnkart(), modul_id, trinn, svarte)
+    if status is not None:
+        st.caption(t(_TRINN_STATUS_NOKKEL[status]))
+    sesjon = _les_modul_sesjon(_sesjon_nokkel(modul_id, trinn))
     if sesjon and sesjon["fullfort_denne_okten"]:
-        st.caption(t("bryggeskole.status.fullfort_okt"))
         knapp_tekst = t("bryggeskole.modul.se_resultat")
     elif sesjon:
-        st.caption(t("bryggeskole.status.pabegynt"))
         knapp_tekst = t("bryggeskole.modul.fortsett")
     else:
         knapp_tekst = t("bryggeskole.modul.start")
@@ -1100,6 +1120,7 @@ def _render_skoleoversikt(miljo, sprak):
     if _hent_trinnkart() is not None:
         svarte = _svarte_sporsmal()
         trinn = _render_trinnvalg(svarte)
+        _render_trinnfremdrift(trinn, svarte)
         _render_trinnveiledning(trinn, svarte)
         anbefalt = _anbefalt_modul_i_trinn(trinn, svarte)
     else:
@@ -1123,7 +1144,7 @@ def _render_skoleoversikt(miljo, sprak):
                     continue
 
                 if trinn is not None:
-                    _render_trinnkort(modul_id, trinn)
+                    _render_trinnkort(modul_id, trinn, svarte)
                     continue
 
                 st.caption(t("bryggeskole.prosess.aktiv_badge"))
