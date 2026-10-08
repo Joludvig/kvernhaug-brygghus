@@ -1,6 +1,6 @@
 # V2.2 — Bryggeskole course stage UI contract (Foundation → Kompetent hjemmebrygger)
 
-Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15); 1.2 (2026-10-05): S1 merged, S2 status (§15); 1.3 (2026-10-05): S2 Chief GREEN, S3 status (§15); 1.4 (2026-10-05): S2+S3 merged, S4 status (§15)
+Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15); 1.2 (2026-10-05): S1 merged, S2 status (§15); 1.3 (2026-10-05): S2 Chief GREEN, S3 status (§15); 1.4 (2026-10-05): S2+S3 merged, S4 status (§15); 1.5 (2026-10-05): S4 merged, S5 verified, stage UI complete locally/offline (§15)
 
 Status:
 - **Contract for review.** Docs only. It implements nothing: no app behaviour, UI, mastery store, lesson JSON, registry or
@@ -19,9 +19,17 @@ Status:
 - **S2 (lesson rendering by stage) and S3 (stage selector + cards) are MERGED LOCALLY/OFFLINE** as one combined
   S2+S3 state into the integration rehearsal (`4f34e67`), after Chief GREEN and a clean full suite (4053 tests,
   0 failures, 0 errors).
-- **S4 (progress per stage) is IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s4-progress`. It is pending
-  Chief review and not merged.
-- **S5 is NOT STARTED.** The stage UI is NOT COMPLETE, and nothing is on GitHub/master.
+- **S4 (progress per stage) is MERGED LOCALLY/OFFLINE** into the integration rehearsal (`a29f1d0`), after Chief
+  GREEN.
+- **S5 (final QA) is VERIFIED LOCALLY/OFFLINE** on `offline/course-stage-ui-s5-final-qa`. No product change was
+  needed (§15).
+- **FOUNDATION → KOMPETENT STAGE UI: COMPLETE LOCALLY/OFFLINE.** This means only that the stage presentation is
+  implemented and its local/offline QA is done. It does NOT mean:
+  - GitHub/master complete, deployed or live;
+  - the owner real-brew checkpoint;
+  - Bryggemester, or Bryggeri/professional as a course stage;
+  - all SHOULD/source gaps closed;
+  - #471.
 
 Governed by (never restated or changed here):
 - [curriculum map §6.2](v22_g3q_full_bryggeskole_curriculum_map.md#62-canonical-course-architecture-and-terminology-axes):
@@ -418,8 +426,8 @@ Order and merging:
 | S1 | **MERGED LOCALLY/OFFLINE** (Chief GREEN; integration `f003bc4`). Files: `bryggeskole/course_stage.py`, `bryggeskole/data/course_stage_map.json`, `tests/test_course_stage_map.py`. Foundation 48 chunks / 45 questions / 9 modules; Kompetent 36 / 54 / 9; 84 / 99 total. Interim locks as approved. Fail-closed validator |
 | S2 | **MERGED LOCALLY/OFFLINE** as combined S2+S3 (Chief GREEN; integration `4f34e67`; full suite 4053 OK). Details below the table |
 | S3 | **MERGED LOCALLY/OFFLINE** as combined S2+S3 (Chief GREEN incl. the auto-default guidance polish; integration `4f34e67`). Details below the table |
-| S4 | **IMPLEMENTED LOCALLY/OFFLINE** on `offline/course-stage-ui-s4-progress`; **pending Chief review; NOT merged**. Details below the table |
-| S5 | NOT STARTED |
+| S4 | **MERGED LOCALLY/OFFLINE** (Chief GREEN; integration `a29f1d0`). Details below the table |
+| S5 | **VERIFIED LOCALLY/OFFLINE** on `offline/course-stage-ui-s5-final-qa` (tests only; no product change). Details below the table |
 | C1 | Not started (optional; separate content decision) |
 
 S2 as implemented (`ui/bryggeskole_panel.py`):
@@ -513,6 +521,30 @@ S4 as implemented (`ui/bryggeskole_panel.py`, `bryggeskole/course_stage.py`, `mo
   - `tests/test_ui_bryggeskole_stage_progress.py`.
   - Chromium smoke: `tests/playwright_streamlit/stage-progress-smoke.spec.js` (seeded isolated history).
 
+S5 as verified (tests only; no product change was needed):
+- **AppTest** (`tests/test_ui_bryggeskole_stage_final_qa.py`):
+  - All 18 (module, stage) pairs end to end from their cards, spread over NO/EN × Hjemmebrygger/Bryggeri:
+    - stage, breadcrumb, chunks or the questions-only intro, and the widget-key family;
+    - no preselected answer, disabled «Sjekk svar», wrong and correct feedback;
+    - retry, summary, and both ways back to the overview;
+    - card status Ikke startet → Påbegynt (latest answer wrong) → Gjennomgått (corrected), plus the stage count.
+  - One session through every switch: default, explicit choices, environment and language switches, lesson-only
+    Foundation review, and the Kompetent-only card.
+  - Auto-default only without an explicit choice; independent stage progress from history.
+  - i18n pass: no raw keys, raw stage ids, legacy «Leksjon tilgjengelig» or Norwegian in EN.
+  - Malformed and missing map: the single flow with legacy badges, warned once per session.
+- **Browser** (`tests/playwright_streamlit/stage-final-matrix.spec.js`):
+  - Chromium and Firefox; full NO/EN × Hjemmebrygger/Bryggeri × Foundation/Kompetent matrix at
+    1280/900/750/390 px, plus the sidebar expanded and collapsed.
+  - Checked: the selector, 11 cards, the special card actions, and a lesson walked to the summary.
+  - Result: no clipping, no broken words, no horizontal overflow.
+- **Observations, not stage-UI defects (left unchanged):**
+  - Streamlit's own disabled «Sjekk svar» styling is about 2.2:1. It is an inactive control and unchanged since
+    PR #328.
+  - The answered options keep full contrast (#401).
+  - The small labels in the Koking timeline SVG (#366) at 390 px.
+- **Full suite:** 4081 tests, 0 failures, 0 errors, 53 skipped (isolated state).
+
 ## 16. Acceptance tests
 
 S1 (unit, no UI):
@@ -599,5 +631,8 @@ Status 2026-10-05 (3): S2 Chief GREEN; S3 implemented on top of it, pending Chie
 combined S2+S3 state into the integration (after a clean full suite), then implement S4.
 Status 2026-10-05 (4): S2+S3 merged (`4f34e67`); S4 implemented, pending Chief review. Next: if GREEN, merge S4 and
 run S5 (final responsive / i18n / browser / full-suite QA). The stage UI is not complete.
+Status 2026-10-05 (5): S4 merged (`a29f1d0`); S5 verified. **FOUNDATION → KOMPETENT STAGE UI: COMPLETE
+LOCALLY/OFFLINE** (presentation implemented, local/offline QA done). This is not GitHub/master, not deployed and
+not the owner real-brew checkpoint. Next: Chief review, then a new milestone backup (V5).
 
 Sync note: mirror on #419 / the #343 roadmap when GitHub returns. No issue number is assigned.
