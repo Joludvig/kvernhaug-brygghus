@@ -1033,11 +1033,20 @@ def _render_trinnveiledning(trinn, svarte):
     by default (no explicit choice), a line saying Trinn 2 is now shown as
     the recommended next step (Chief S3 polish); after an explicit
     Kompetent choice, nothing. In the Kompetent lens with Foundation gaps,
-    one tip line."""
-    foundation_gjennomgatt = _course_stage.stage_worked_through(_hent_trinnkart(), "foundation", svarte)
+    one tip line.
+
+    Issue #506 (contract §7.3): in the Kompetent lens, once BOTH stages are
+    worked through, one end-of-coursework line takes precedence -- it points
+    to the real brew as the next step and says deeper tracks are optional.
+    Guidance only: no stored completion, no claim that Hjemmebrygger is
+    complete before the real brew, no Bryggemester stage."""
+    kart = _hent_trinnkart()
+    foundation_gjennomgatt = _course_stage.stage_worked_through(kart, "foundation", svarte)
     if foundation_gjennomgatt:
         if trinn == "foundation":
             st.success(t("bryggeskole.trinn.klar_for_trinn2"))
+        elif _course_stage.stage_worked_through(kart, "kompetent", svarte):
+            st.success(t("bryggeskole.trinn.trinn2_gjennomgatt"))
         elif not st.session_state.get(_TRINN_EKSPLISITT_KEY):
             st.success(t("bryggeskole.trinn.trinn2_anbefalt"))
     elif trinn == "kompetent":
