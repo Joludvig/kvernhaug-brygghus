@@ -663,7 +663,7 @@
           "tier": "B",
           "type": "Brew Your Own technical article on transferring beer",
           "ref": "BYO, Chris Colby, Transferring Beer -- https://byo.com/articles/transferring-beer-techniques/",
-          "note": "Live source check 2026-10-08 (Quiz QA Phase 2, local run), for Chief confirmation; not yet a Chief spot-check. Supports, verbatim: 'The advantage of using a pump is that liquid can be moved uphill or between vessels at the same level.'; 'The most popular kind of pump for homebrewers is a centrifugal pump.'; 'Centrifugal pumps are not self-priming and the pump will quit moving liquid if there is a large enough bubble in the stream of liquid.'; 'Situating your pump at or near the lowest point in the tubing goes a long way towards avoiding this problem.' Does not support (not adopted): any numeric lift/head, flow or temperature limit; the named pump model and price. Page dates: not shown on the page."
+          "note": "Live source check 2026-10-08 (Quiz QA Phase 2, local run); Chief independent spot-check PASS 2026-10-08, source approved. Supports, verbatim: 'The advantage of using a pump is that liquid can be moved uphill or between vessels at the same level.'; 'The most popular kind of pump for homebrewers is a centrifugal pump.'; 'Centrifugal pumps are not self-priming and the pump will quit moving liquid if there is a large enough bubble in the stream of liquid.'; 'Situating your pump at or near the lowest point in the tubing goes a long way towards avoiding this problem.' Does not support (not adopted): any numeric lift/head, flow or temperature limit; the named pump model and price. Page dates: not shown on the page."
         },
         {
           "tier": "B",
