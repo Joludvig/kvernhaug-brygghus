@@ -118,42 +118,42 @@
         "FACT-MEAS-0001"
       ],
       "prompt": {
-        "no": "Hva er OG og FG?",
-        "en": "What are OG and FG?"
+        "no": "Hva er forskjellen på målt OG/FG og planlagt OG/FG i oppskriften?",
+        "en": "What is the difference between measured OG/FG and the planned OG/FG in a recipe?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Tettheter du måler i ditt eget brygg: OG før gjæringen starter og FG når gjæringen er ferdig.",
-            "en": "Gravities you measure in your own brew: OG before fermentation begins and FG when fermentation has finished."
+            "no": "Målt OG og FG er tettheter du leser av i ditt eget brygg – OG før gjæringen starter og FG når den er ferdig. Planlagt OG og FG er oppskriftens forventede eller beregnede verdier.",
+            "en": "Measured OG and FG are gravities you read in your own brew – OG before fermentation begins and FG when it has finished. Planned OG and FG are the recipe's expected or calculated values."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Tallene oppskriften planlegger, som brygget skal treffe.",
-            "en": "The numbers the recipe plans, which the brew is supposed to hit."
+            "no": "Det er ingen forskjell – oppskriftens OG og FG er det samme som det du måler, så du kan skrive dem inn i bryggeloggen.",
+            "en": "There is no difference – the recipe's OG and FG are the same as what you measure, so you can write them into your brew log."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Den laveste tettheten ølet kan nå, og hvor mye sukker det ferdige ølet inneholder.",
-            "en": "The lowest gravity the beer can reach, and how much sugar the finished beer contains."
+            "no": "Planlagt FG er den laveste tettheten ølet kan nå, og målt FG viser hvor mye sukker det ferdige ølet inneholder.",
+            "en": "Planned FG is the lowest gravity the beer can reach, and measured FG shows how much sugar the finished beer contains."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. OG og FG er målinger: OG måles før gjæringen starter, og FG når gjæringen er ferdig. Oppskriftens tall er en plan.",
-        "en": "Correct. OG and FG are measurements: OG is measured before fermentation begins, and FG when fermentation has finished. The recipe's numbers are a plan."
+        "no": "Riktig. Målt OG og FG er tall du faktisk leser av: OG før gjæringen starter og FG når den er ferdig. Planlagt OG og FG er oppskriftens forventede eller beregnede verdier – en plan du kan sammenligne målingene med.",
+        "en": "Correct. Measured OG and FG are numbers you actually read: OG before fermentation begins and FG when it has finished. Planned OG and FG are the recipe's expected or calculated values – a plan you can compare your measurements with."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. OG og FG er tettheter du faktisk måler – OG før gjæringen starter og FG når den er ferdig. Oppskriftens tall er en plan, ikke en måling.",
-        "en": "Not quite. OG and FG are gravities you actually measure – OG before fermentation begins and FG when it has finished. The recipe's numbers are a plan, not a measurement."
+        "no": "Ikke helt. Målt OG og FG er tettheter du faktisk leser av i ditt eget brygg. Planlagt OG og FG i oppskriften er forventede eller beregnede verdier – nyttige som plan, men ikke en måling. Skriv ned det du målte, også når det ikke stemmer med planen.",
+        "en": "Not quite. Measured OG and FG are gravities you actually read in your own brew. The planned OG and FG in the recipe are expected or calculated values – useful as a plan, but not a measurement. Write down what you measured, even when it does not match the plan."
       }
     },
     {
@@ -485,8 +485,8 @@
         {
           "id": "c",
           "text": {
-            "no": "Bruker refraktometeret, siden automatisk temperaturkompensasjon tar seg av alkoholen.",
-            "en": "Use the refractometer, since automatic temperature compensation takes care of the alcohol."
+            "no": "Bruker refraktometeret og regner om avlesningen på samme måte som for vørteren før gjæringen – da blir tettheten riktig.",
+            "en": "Use the refractometer and convert the reading the same way as for the wort before fermentation – then the gravity is right."
           },
           "correct": false
         }
@@ -496,8 +496,8 @@
         "en": "Correct. Once alcohol is present, the raw refractometer reading no longer gives gravity directly. Then you measure with a hydrometer, or use a correction that also needs the reading from before fermentation."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Med alkohol i prøven er den rå refraktometeravlesningen ikke tettheten, og temperaturkompensasjon er noe annet enn alkoholproblemet. Mål med hydrometer, eller bruk en korreksjon som også trenger avlesningen fra før gjæringen.",
-        "en": "Not quite. With alcohol in the sample, the raw refractometer reading is not the gravity, and temperature compensation is a different issue from the alcohol problem. Measure with a hydrometer, or use a correction that also needs the reading from before fermentation."
+        "no": "Ikke helt. Med alkohol i prøven er den rå refraktometeravlesningen ikke tettheten, og den samme omregningen som før gjæringen holder ikke lenger. Mål med hydrometer, eller bruk en korreksjon som også trenger avlesningen fra før gjæringen.",
+        "en": "Not quite. With alcohol in the sample, the raw refractometer reading is not the gravity, and the same conversion as before fermentation no longer holds. Measure with a hydrometer, or use a correction that also needs the reading from before fermentation."
       }
     },
     {

@@ -135,8 +135,8 @@
         "en": "Correct. Base malt has plenty of enzymes and supplies the sugars the yeast needs. The specialty malt is there for flavour, colour or another function."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Basismalten gir enzymer og sukkeret gjæren trenger. Farge og smak er spesialmaltens oppgave, og aroma kommer fra humla.",
-        "en": "Not quite. The base malt supplies enzymes and the sugars the yeast needs. Colour and flavour are the specialty malt's job, and aroma comes from the hops."
+        "no": "Ikke helt. Basismalten gir først og fremst enzymer og sukkeret gjæren trenger, og den bidrar også til maltpreget. Spesialmalten velges mest for smak, farge eller en annen funksjon, og aroma og smak kan komme fra både malt, humle og gjær.",
+        "en": "Not quite. The base malt mainly supplies enzymes and the sugars the yeast needs, and it also contributes to the malt character. The specialty malt is chosen mainly for flavour, colour or another function, and aroma and flavour can come from malt, hops and yeast."
       }
     },
     {

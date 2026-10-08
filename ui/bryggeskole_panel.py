@@ -322,7 +322,7 @@ _KONSEPT_LABELS = {
     "hop.addition_strategy": {"no": "Tilsetningsstrategi", "en": "Addition strategy"},
     "hop.whirlpool_technique": {"no": "Whirlpool-teknikk", "en": "Whirlpool technique"},
     "cool.speed": {"no": "Nedkjølingshastighet", "en": "Cooling speed"},
-    "cool.cold_break": {"no": "Kjøldis", "en": "Cold break"},
+    "cool.cold_break": {"no": "Cold break", "en": "Cold break"},
     "cool.sanitation_boundary": {"no": "Saniteringsgrense", "en": "Sanitation boundary"},
     "oxygen.pre_pitch": {"no": "Oksygen før pitching", "en": "Pre-pitch oxygen"},
     "oxygen.post_pitch": {"no": "Oksygen under gjæring", "en": "Oxygen during fermentation"},

@@ -31,8 +31,8 @@
       "basis": "fact",
       "source_claims": ["FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0005", "FACT-MASH-0005"],
       "text": {
-        "no": "**Skille vørteren fra kornet.** Etter meskingen skal den søte vørteren skilles fra masken, det brukte kornet. Hvordan det gjøres, avhenger av utstyret ditt. I et tradisjonelt oppsett med eget mesk-/silekar renner vørteren ut gjennom en falsk bunn eller et rørsystem, og selve kornsengen fungerer som filter. I et alt-i-ett-anlegg ligger kornet i en kurv eller et maltrør som løftes opp og får renne av. Med BIAB løftes posen med kornet ut av kjelen og får renne av. Når vørteren renner gjennom en kornseng i et silekar, er den første vørteren ofte grumsete med kornbiter. Mange bryggere heller den da forsiktig tilbake over kornsengen til vørteren renner stort sett fri for kornpartikler – den trenger ikke å være helt klar. Det steget hører til silning gjennom en kornseng, ikke til alle metoder. Samme jobb, ulikt utstyr: ingen av metodene er bedre enn de andre.",
-        "en": "**Separating wort from grain.** After the mash, the sweet wort has to be separated from the spent grain. How that is done depends on your equipment. In a traditional setup with a separate mash/lauter tun, the wort drains out through a false bottom or manifold, and the grain bed itself acts as the filter. In an all-in-one system, the grain sits in a basket or malt pipe that is lifted and left to drain. In BIAB, the bag with the grain is lifted out of the kettle and left to drain. When wort drains through a grain bed in a lauter tun, the first runnings are often cloudy with bits of grain. Many brewers then gently pour them back over the grain bed until the wort runs largely free of grain particles – it does not need to be perfectly clear. That step belongs to draining through a grain bed, not to every method. Same job, different equipment: none of the methods is better than the others."
+        "no": "**Skille vørteren fra kornet.** Etter meskingen skal den søte vørteren skilles fra masken, det brukte kornet. Hvordan det gjøres, avhenger av utstyret ditt. I et tradisjonelt oppsett med eget mesk-/silekar renner vørteren ut gjennom en falsk bunn eller et rørsystem, og selve kornsengen fungerer som filter. I et alt-i-ett-anlegg ligger kornet i en kurv eller et maltrør som løftes opp og får renne av. Med BIAB løftes posen med kornet ut av kjelen og får renne av. Når vørteren renner gjennom en kornseng i et silekar, er den første vørteren ofte grumsete med kornbiter. Mange bryggere heller den da forsiktig tilbake over kornsengen til vørteren renner stort sett fri for kornpartikler – den trenger ikke å være helt klar. Det steget hører til silning gjennom en kornseng, ikke til alle metoder. Samme jobb, ulikt utstyr: ingen av metodene er universelt best – hvilken som passer best, avhenger av utstyr, plass, budsjett og arbeidsflyt.",
+        "en": "**Separating wort from grain.** After the mash, the sweet wort has to be separated from the spent grain. How that is done depends on your equipment. In a traditional setup with a separate mash/lauter tun, the wort drains out through a false bottom or manifold, and the grain bed itself acts as the filter. In an all-in-one system, the grain sits in a basket or malt pipe that is lifted and left to drain. In BIAB, the bag with the grain is lifted out of the kettle and left to drain. When wort drains through a grain bed in a lauter tun, the first runnings are often cloudy with bits of grain. Many brewers then gently pour them back over the grain bed until the wort runs largely free of grain particles – it does not need to be perfectly clear. That step belongs to draining through a grain bed, not to every method. Same job, different equipment: no method is universally best – which one fits best depends on equipment, space, budget and workflow."
       }
     },
     {
@@ -213,8 +213,8 @@
         {
           "id": "b",
           "text": {
-            "no": "De gjør den samme jobben – skiller vørteren fra kornet – med ulikt utstyr, og ingen av metodene er bedre enn de andre.",
-            "en": "They do the same job – separating the wort from the grain – with different equipment, and none of the methods is better than the others."
+            "no": "De gjør den samme jobben – skiller vørteren fra kornet – med ulikt utstyr. Ingen av metodene er universelt best – hvilken som passer best, avhenger av utstyr, plass, budsjett og arbeidsflyt.",
+            "en": "They do the same job – separating the wort from the grain – with different equipment. No method is universally best – which one fits best depends on equipment, space, budget and workflow."
           },
           "correct": true
         },
@@ -228,12 +228,12 @@
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. BIAB, tradisjonelt oppsett med silekar og alt-i-ett-anlegg skiller alle vørteren fra kornet – posen løftes ut, vørteren renner gjennom kornsengen, eller kurven/maltrøret løftes. Samme jobb, ulikt utstyr, og ingen metode er bedre enn de andre.",
-        "en": "Correct. BIAB, a traditional setup with a lauter tun and an all-in-one system all separate the wort from the grain – the bag is lifted out, the wort drains through the grain bed, or the basket/malt pipe is lifted. Same job, different equipment, and no method is better than the others."
+        "no": "Riktig. BIAB, tradisjonelt oppsett med silekar og alt-i-ett-anlegg skiller alle vørteren fra kornet – posen løftes ut, vørteren renner gjennom kornsengen, eller kurven/maltrøret løftes. Samme jobb, ulikt utstyr, og ingen metode er universelt best – hvilken som passer best, avhenger av utstyr, plass, budsjett og arbeidsflyt.",
+        "en": "Correct. BIAB, a traditional setup with a lauter tun and an all-in-one system all separate the wort from the grain – the bag is lifted out, the wort drains through the grain bed, or the basket/malt pipe is lifted. Same job, different equipment, and no method is universally best – which one fits best depends on equipment, space, budget and workflow."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Alle tre skiller vørteren fra kornet, bare med ulikt utstyr: posen løftes ut, vørteren renner gjennom kornsengen, eller kurven/maltrøret løftes. Resirkulering over kornsengen hører til silning gjennom en kornseng, ikke til alle metoder – og ingen metode er bedre enn de andre.",
-        "en": "Not quite. All three separate the wort from the grain, just with different equipment: the bag is lifted out, the wort drains through the grain bed, or the basket/malt pipe is lifted. Recirculating over the grain bed belongs to draining through a grain bed, not to every method – and no method is better than the others."
+        "no": "Ikke helt. Alle tre skiller vørteren fra kornet, bare med ulikt utstyr: posen løftes ut, vørteren renner gjennom kornsengen, eller kurven/maltrøret løftes. Resirkulering over kornsengen hører til silning gjennom en kornseng, ikke til alle metoder – og ingen metode er universelt best.",
+        "en": "Not quite. All three separate the wort from the grain, just with different equipment: the bag is lifted out, the wort drains through the grain bed, or the basket/malt pipe is lifted. Recirculating over the grain bed belongs to draining through a grain bed, not to every method – and no method is universally best."
       }
     },
     {

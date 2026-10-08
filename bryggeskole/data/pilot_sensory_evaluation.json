@@ -61,8 +61,8 @@
       "basis": "methodology",
       "source_claims": [],
       "text": {
-        "no": "**Vurder mot hensikten – og velg én endring.** Sammenlign ølet du fikk med ølet du ville lage, og beskriv forskjellen med ord – ikke med en karakter. Bryggeloggen har egne felt for dette: sanseinntrykk skriver du som observasjoner, vurderingen kan være ja, kanskje eller nei («kanskje» er et gyldig svar), tolkningen og den mulige forklaringen får hvert sitt felt, og under «Neste gang» skriver du det du vil gjøre annerledes. Velg **én** bevisst endring, og se på den som en test av hypotesen din – ikke som et bevis. Da kan du faktisk se hva endringen gjorde i neste brygg.",
-        "en": "**Evaluate against your intent – and choose one change.** Compare the beer you got with the beer you meant to make, and describe the difference in words – not with a grade. Brew History has separate fields for this: you write sensory impressions as observations, the judgement can be yes, maybe or no (\"maybe\" is a valid answer), your interpretation and possible explanation each get their own field, and under \"Next time\" you write what you will do differently. Choose **one** deliberate change, and treat it as a test of your hypothesis – not as proof. That way you can actually see what the change did in the next batch."
+        "no": "**Vurder mot hensikten – og velg én endring.** Sammenlign ølet du fikk med ølet du ville lage, og beskriv forskjellen med ord – ikke med en karakter. Bryggeloggen har egne felt for dette: sanseinntrykk skriver du som observasjoner, vurderingen kan være ja, kanskje eller nei («kanskje» er et gyldig svar), tolkningen og den mulige forklaringen får hvert sitt felt, og under «Neste gang» skriver du det du vil gjøre annerledes. Velg **én** bevisst endring, og se på den som en test av hypotesen din – ikke som et bevis. Da blir resultatet i neste brygg lettere å tolke, men det beviser ikke årsaken: et hjemmebrygg er ikke et kontrollert forsøk.",
+        "en": "**Evaluate against your intent – and choose one change.** Compare the beer you got with the beer you meant to make, and describe the difference in words – not with a grade. Brew History has separate fields for this: you write sensory impressions as observations, the judgement can be yes, maybe or no (\"maybe\" is a valid answer), your interpretation and possible explanation each get their own field, and under \"Next time\" you write what you will do differently. Choose **one** deliberate change, and treat it as a test of your hypothesis – not as proof. That makes the result in the next batch easier to interpret, but it does not prove the cause: a homebrew batch is not a controlled experiment."
       }
     }
   ],
@@ -519,8 +519,8 @@
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Med én bevisst endring kan du se hva akkurat den endringen gjorde i neste brygg.",
-        "en": "Correct. With one deliberate change you can see what exactly that change did in the next batch."
+        "no": "Riktig. Med én bevisst endring blir resultatet i neste brygg lettere å tolke – men det beviser ikke årsaken.",
+        "en": "Correct. With one deliberate change, the result in the next batch is easier to interpret – but it does not prove the cause."
       },
       "feedback_incorrect": {
         "no": "Ikke helt. Endrer du mange ting samtidig, kan du ikke vite hvilken endring som virket. Velg én bevisst endring, og se på den som en test – ikke som et bevis.",
