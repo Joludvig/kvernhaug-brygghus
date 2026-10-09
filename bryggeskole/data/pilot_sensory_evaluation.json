@@ -351,42 +351,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-SENSORY-0002", "FACT-OXY-0002"],
       "prompt": {
-        "no": "Ølet ditt smaker papp. Hva passer best?",
-        "en": "Your beer tastes of cardboard. What fits best?"
+        "no": "Ølet ditt smaker papp, og du noterer det som en observasjon. Hvilken mulig forklaring hører best sammen med den beskrivelsen?",
+        "en": "Your beer tastes of cardboard, and you note it as an observation. Which possible explanation goes best with that descriptor?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Noter det. Oksidasjon er én mulighet – oksygen etter at gjæringen er godt i gang kan gi pappsmak – men smaken alene sier ikke hva som var årsaken.",
-            "en": "Note it. Oxidation is one possibility – oxygen after fermentation is well underway can give a cardboard flavour – but the taste alone does not say what caused it."
+            "no": "Oksidasjon, for eksempel fra oksygen etter at gjæringen var godt i gang.",
+            "en": "Oxidation, for example from oxygen after fermentation was well underway."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Det beviser at du sprutet da du overførte ølet.",
-            "en": "It proves you splashed when you transferred the beer."
+            "no": "DMS, for eksempel fra en koking som var for kort eller for svak.",
+            "en": "DMS, for example from a boil that was too short or too weak."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Pappsmak er en vanlig og ønsket del av de fleste øl.",
-            "en": "A cardboard flavour is a normal and wanted part of most beers."
+            "no": "Diacetyl, for eksempel fra for lite kontakt med gjær under gjæring og modning.",
+            "en": "Diacetyl, for example from too little contact with yeast during fermentation and maturation."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Papp er en vanlig beskrivelse av oksidert eller gammelt øl, og oksygen etter at gjæringen er godt i gang er som regel uønsket. Men smaken alene beviser ikke årsaken.",
-        "en": "Correct. Cardboard is a common descriptor for oxidised or stale beer, and oxygen once fermentation is well underway is generally undesirable. But the taste alone does not prove the cause."
+        "no": "Riktig. Papp er en vanlig beskrivelse av oksidert eller gammelt øl, og oksygen etter at gjæringen er godt i gang er som regel uønsket. Det er likevel én mulighet – smaken alene beviser ikke årsaken.",
+        "en": "Correct. Cardboard is a common descriptor for oxidised or stale beer, and oxygen once fermentation is well underway is generally undesirable. It is still one possibility – the taste alone does not prove the cause."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Pappsmak er sjelden noe du vil ha, men den beviser heller ikke én bestemt årsak. Noter det, og hold oksidasjon som én mulig forklaring.",
-        "en": "Not quite. A cardboard flavour is rarely something you want, but it does not prove one specific cause either. Note it, and keep oxidation as one possible explanation."
+        "no": "Ikke helt. Beskrivelsene hører til hver sin mulige forklaring: kokt mais forbindes med DMS, smør med diacetyl, og papp med oksidert eller gammelt øl. Papp peker derfor mot oksidasjon som én mulighet, uten å bevise den.",
+        "en": "Not quite. Each descriptor goes with its own possible explanation: cooked corn is associated with DMS, butter with diacetyl, and cardboard with oxidised or stale beer. So cardboard suggests oxidation as one possibility, without proving it."
       }
     },
     {
@@ -397,42 +397,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-SENSORY-0003"],
       "prompt": {
-        "no": "Pale alen din, som ikke skulle være sur, smaker tydelig syrlig. Hva kan du si ut fra smaken?",
-        "en": "Your pale ale, which was not meant to be sour, tastes clearly sour. What can you say from the taste?"
+        "no": "Pale alen din skulle ikke være sur, men smaker tydelig syrlig. Hva kan du konkludere ut fra smaken alene?",
+        "en": "Your pale ale was not meant to be sour, but it tastes clearly sour. What can you conclude from the taste alone?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "At ølet er surere enn du ønsket. Uønsket mikrobiell forurensning er én mulig forklaring, men smaken alene forteller ikke årsaken.",
-            "en": "That the beer is more sour than you intended. Unwanted microbial contamination is one possible explanation, but the taste alone does not tell you the cause."
+            "no": "At ølet er surere enn du ønsket.",
+            "en": "That the beer is more sour than you intended."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "At ølet helt sikkert er ødelagt av forurensning.",
-            "en": "That the beer has definitely been spoiled by contamination."
+            "no": "At ølet er forurenset av uønskede mikroorganismer.",
+            "en": "That the beer is contaminated by unwanted microorganisms."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "At alle sure øl er ødelagte øl.",
-            "en": "That all sour beers are spoiled beers."
+            "no": "At syrligheten er i orden, siden mange ølstiler lages for å være sure.",
+            "en": "That the sourness is fine, since many beer styles are made to be sour."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Syrlighet kan være tilsiktet i sure ølstiler, men i et øl som ikke skulle være surt, kan den henge sammen med uønsket mikrobiell forurensning. Smaken alene viser bare at ølet er surere enn du ønsket.",
-        "en": "Correct. Sourness can be intended in sour beer styles, but in a beer that was not meant to be sour, it can be associated with unwanted microbial contamination. Taste alone only shows that the beer is more sour than you intended."
+        "no": "Riktig. Smaken alene viser bare at ølet er surere enn du ønsket. I et øl som ikke skulle være surt, kan uønsket mikrobiell forurensning være én forklaring, men smaken kan ikke avgjøre det.",
+        "en": "Correct. Taste alone only shows that the beer is more sour than you intended. In a beer that was not meant to be sour, unwanted microbial contamination can be one explanation, but the taste cannot settle it."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Sure ølstiler lages bevisst syrlige, så syrlighet er ikke alltid en feil – og smaken alene beviser ikke at ølet er forurenset. Noter at det er surere enn ønsket, og hold årsaken åpen.",
-        "en": "Not quite. Sour beer styles are made acidic on purpose, so sourness is not always a fault – and taste alone does not prove contamination. Note that it is more sour than intended, and keep the cause open."
+        "no": "Ikke helt. Syrlighet er meningen i ølstiler som lages for å være sure – pale alen din skulle ikke være det. Samtidig beviser ikke smaken at ølet er forurenset. Noter at det er surere enn ønsket, og hold årsaken åpen.",
+        "en": "Not quite. Sourness is intended in styles made to be sour – your pale ale was not meant to be. At the same time, the taste does not prove the beer is contaminated. Note that it is more sour than intended, and keep the cause open."
       }
     },
     {
@@ -443,31 +443,31 @@
       "difficulty": "beginner",
       "source_claims": [],
       "prompt": {
-        "no": "En venn smaker ølet ditt og sier at hen ikke liker det. Betyr det at ølet har en feil?",
-        "en": "A friend tastes your beer and says they don't like it. Does that mean the beer has a fault?"
+        "no": "En venn smaker ølet ditt og liker det ikke. Hva bør avgjøre om ølet har en feil?",
+        "en": "A friend tastes your beer and does not like it. What should decide whether the beer has a fault?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Ikke nødvendigvis – det avhenger av hva du ønsket, hvor sterkt preget er, og sammenhengen.",
-            "en": "Not necessarily – it depends on what you intended, how strong the character is, and the context."
+            "no": "Om preget er uønsket, hvor sterkt det er, og om det passer ølet du ville lage.",
+            "en": "Whether the character is unintended, how strong it is, and whether it fits the beer you wanted to make."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja – hvis noen ikke liker det, er det en feil.",
-            "en": "Yes – if someone does not like it, it is a fault."
+            "no": "Om flere enn vennen din heller ikke liker det – da er det trolig en feil.",
+            "en": "Whether more people than your friend also dislike it – then it is probably a fault."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei – smak er bare personlig, så ingenting kan være en feil.",
-            "en": "No – taste is purely personal, so nothing can be a fault."
+            "no": "Om ølet passer stilen – havner det utenfor stilen, er det en feil.",
+            "en": "Whether the beer fits the style – if it falls outside the style, it is a fault."
           },
           "correct": false
         }
@@ -477,8 +477,8 @@
         "en": "Correct. Someone disliking a beer does not make it a fault. Ask instead: Did I intend this, how strong is it, and does it fit the beer I wanted to make?"
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Personlig smak alene avgjør ikke om noe er en feil – men det betyr heller ikke at alt er like greit. Det avhenger av hva du ønsket, hvor sterkt preget er, og sammenhengen.",
-        "en": "Not quite. Personal taste alone does not decide whether something is a fault – but that does not mean anything goes either. It depends on what you intended, how strong the character is, and the context."
+        "no": "Ikke helt. Verken hvor mange som liker ølet, eller om det ligger innenfor en stil, avgjør alene om noe er en feil. Det avhenger av hva du ønsket, hvor sterkt preget er, og sammenhengen – og et tydelig preg du ikke ønsket, er verdt å notere.",
+        "en": "Not quite. Neither how many people like the beer nor whether it fits a style decides on its own whether something is a fault. It depends on what you intended, how strong the character is, and the context – and a clear character you did not intend is worth noting."
       }
     },
     {

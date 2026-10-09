@@ -51,42 +51,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-COOL-0001"],
       "prompt": {
-        "no": "En bryggevenn sier: 'Kokingen har allerede gjort alt sterilt, så jeg trenger ikke bry meg om hvor fort jeg kjøler ned.' Stemmer det, ut fra det du har lært?",
-        "en": "A brewing friend says: 'The boil already made everything sterile, so I don't need to worry about how fast I cool down.' Is that correct, based on what you've learned?"
+        "no": "Hvorfor kjøler bryggere vørteren raskt ned etter kokingen?",
+        "en": "Why do brewers cool the wort down quickly after the boil?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - rask nedkjøling reduserer tiden vørteren er i et temperaturområde der uønskede mikrober kan vokse; det er en risikoreduksjon, ikke en garanti, og ikke en fortsettelse av kokingens egen beskyttelse.",
-            "en": "No - rapid cooling reduces the time the wort spends in a temperature range where unwanted microbes can grow; it's a risk-reduction direction, not a guarantee, and not a continuation of boiling's own protection."
+            "no": "For å korte ned tiden vørteren står i et temperaturområde der uønskede mikroorganismer kan vokse.",
+            "en": "To shorten the time the wort spends in a temperature range where unwanted microorganisms can grow."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - siden vørteren allerede er steril fra kokingen, spiller nedkjølingshastigheten ingen rolle.",
-            "en": "Yes - since the wort is already sterile from boiling, cooling speed doesn't matter."
+            "no": "For å gjøre vørteren steril, slik at ingen mikroorganismer kan overleve før gjæren tilsettes.",
+            "en": "To make the wort sterile, so that no microorganisms can survive before the yeast is added."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - men bare fordi nedkjølingshastighet ikke har noen betydning for infeksjonsrisiko i det hele tatt.",
-            "en": "No - but only because cooling speed has no bearing on infection risk at all."
+            "no": "For å bli fortere ferdig – hvor raskt vørteren kjøles, betyr lite for hvordan ølet blir.",
+            "en": "To finish sooner – how fast the wort cools makes little difference to how the beer turns out."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikrober kan vokse - en risikoreduksjon, ikke en garanti mot infeksjon, og en helt egen, senere eksponeringsperiode enn kokingens egen mikrobereduksjon.",
-        "en": "Correct. Rapid cooling reduces the time the wort spends in a temperature range where unwanted microbes can grow - a risk-reduction direction, not a guarantee against infection, and a separate, later exposure window than boiling's own microbial reduction."
+        "no": "Riktig. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikroorganismer kan vokse, før gjæren er tilsatt. Det er en risikoreduksjon, ikke en garanti.",
+        "en": "Correct. Rapid cooling reduces the time the wort spends in a temperature range where unwanted microorganisms can grow, before the yeast is added. It is a risk reduction, not a guarantee."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Nedkjølingshastighet betyr noe: rask nedkjøling reduserer tiden vørteren er i et risikofylt temperaturområde, men verken garanterer null infeksjon eller er en fortsettelse av kokingens beskyttelse.",
-        "en": "Not quite. Cooling speed does matter: rapid cooling reduces the time the wort spends in a risky temperature range, but it neither guarantees zero infection nor continues boiling's own protection."
+        "no": "Ikke helt. Nedkjølingen gjør ikke vørteren steril, og farten er ikke bare et spørsmål om å bli ferdig: jo raskere vørteren kjøles, jo kortere står den i et temperaturområde der uønskede mikroorganismer kan vokse. Det reduserer risikoen, men garanterer ikke null infeksjonsrisiko.",
+        "en": "Not quite. Cooling does not make the wort sterile, and speed is not just about finishing sooner: the faster the wort cools, the shorter it spends in a temperature range where unwanted microorganisms can grow. That reduces the risk, but does not guarantee zero infection risk."
       }
     },
     {
@@ -141,42 +141,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-COOL-0003"],
       "prompt": {
-        "no": "Du er akkurat ferdig med å koke, og griper en slange som ble brukt (uskylt) på en tidligere bryggedag, for å føre vørteren over i gjæringskaret. Er det trygt, basert på det du har lært?",
-        "en": "You've just finished boiling, and you reach for a hose that was used (unrinsed) on a previous brew day, to run the wort into the fermenter. Is that safe, based on what you've learned?"
+        "no": "Kokingen er ferdig, og du vil føre vørteren over i gjæringskaret med en slange som ble brukt på en tidligere bryggedag og ikke er vasket. Hva gjør du?",
+        "en": "The boil is finished, and you want to run the wort into the fermenter with a hose that was used on an earlier brew day and has not been washed. What do you do?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - starten på nedkjølingen er grensen for hygienen, så slangen (og alt annet som møter vørteren fra nå av) må være rengjort og sanitert først. Varm vørter gjør ikke en uvasket slange trygg.",
-            "en": "No - the start of cooling is the hygiene boundary, so the hose (and everything else that meets the wort from now on) must be cleaned and sanitized first. Hot wort does not make an unwashed hose safe."
+            "no": "Rengjør slangen og saniterer den før den kommer i kontakt med vørteren.",
+            "en": "Clean the hose and sanitize it before it comes into contact with the wort."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - siden vørteren nettopp har kokt, er den fortsatt beskyttet uansett hva slangen har vært borti tidligere.",
-            "en": "Yes - since the wort just boiled, it's still protected regardless of what the hose has touched before."
+            "no": "Bruker den som den er – den varme vørteren tar knekken på det som sitter i slangen.",
+            "en": "Use it as it is – the hot wort will kill whatever is left in the hose."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei, men bare fordi slangen er gammel - hadde den vært ny, hadde det ikke vært noe problem å bruke den uvasket.",
-            "en": "No, but only because the hose is old - if it were new, using it unwashed would not be a problem."
+            "no": "Skyller slangen godt med varmt vann – da er den klar til bruk.",
+            "en": "Rinse the hose well with hot water – then it is ready to use."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Starten på nedkjølingen er grensen for hygienen - alt som fra det øyeblikket møter vørten eller ølet, inkludert en tidligere brukt slange, må være rent og sanitert. Varmen i vørteren gjør ikke utstyret trygt.",
-        "en": "Correct. The start of cooling is the hygiene boundary - everything that touches the wort or beer from that moment on, including a previously used hose, must be clean and sanitized. The heat in the wort does not make the equipment safe."
+        "no": "Riktig. Fra nedkjølingen starter, må alt som møter vørteren eller ølet være rent og sanitert – også en slange. Rengjøringen fjerner restene, og saniteringen reduserer mikroorganismene på den rene flaten.",
+        "en": "Correct. From the start of cooling, everything that touches the wort or beer must be clean and sanitized – a hose included. Cleaning removes the residue, and sanitizing reduces the microorganisms on the clean surface."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Starten på nedkjølingen er grensen for hygienen, og varmen i vørteren gjør ikke en usanitert slange trygg - det avgjørende er at slangen ikke er sanitert, ikke hvor gammel den er eller hvor nylig kokingen skjedde.",
-        "en": "Not quite. The start of cooling is the hygiene boundary, and the heat in the wort does not make an unsanitized hose safe - what matters is that the hose isn't sanitized, not its age or how recently the boil happened."
+        "no": "Ikke helt. Varmen i vørteren gjør ikke en uvasket slange trygg, og skylling med vann er ikke det samme som sanitering. Slangen må både rengjøres og saniteres før den møter vørteren.",
+        "en": "Not quite. The heat in the wort does not make an unwashed hose safe, and rinsing with water is not the same as sanitizing. The hose must be both cleaned and sanitized before it touches the wort."
       }
     },
     {
@@ -186,42 +186,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-OXY-0001", "FACT-OXY-0003"],
       "prompt": {
-        "no": "En bryggevenn spør: 'Bør jeg ALLTID lufte vørteren bevisst rett før jeg pitcher gjæren?' Hva er riktig svar, basert på det du har lært?",
-        "en": "A brewing friend asks: 'Should I ALWAYS deliberately aerate the wort right before pitching yeast?' What's the correct answer, based on what you've learned?"
+        "no": "Du skal tilsette fersk, aktiv tørrgjær på vanlig måte. Hva gjelder for å lufte vørteren bevisst før du tilsetter gjæren?",
+        "en": "You are about to add fresh, active dry yeast the normal way. What applies to deliberately aerating the wort before you add the yeast?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - behovet er betinget: det avhenger av gjærens form/tilstand og prosessen. Fersk, aktiv tørrgjær ved normal førstegangs-pitching trenger ofte ikke ekstra lufting, mens andre situasjoner kan ha nytte av det.",
-            "en": "No - the need is conditional: it depends on the yeast's form/state and the process. Fresh active dry yeast at a normal first pitch often doesn't need extra aeration, while other situations may benefit from it."
+            "no": "Det trengs ofte ikke, fordi de tørkede cellene allerede har reservene de trenger.",
+            "en": "It is often not needed, because the dried cells already have the reserves they need."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - all vørt må alltid luftes bevisst før pitching, uansett gjærtype eller situasjon.",
-            "en": "Yes - all wort must always be deliberately aerated before pitching, regardless of yeast type or situation."
+            "no": "Det trengs ofte, fordi tørkede celler mangler reservene de trenger for å vokse.",
+            "en": "It is often needed, because dried cells lack the reserves they need to grow."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - oksygen er alltid skadelig for gjær, så du bør aldri lufte vørteren, uansett tidspunkt.",
-            "en": "No - oxygen is always harmful to yeast, so you should never aerate the wort, at any point."
+            "no": "Det bør unngås, fordi oksygen gir oksidert smak også før gjæren er tilsatt.",
+            "en": "It should be avoided, because oxygen causes oxidised flavours even before the yeast is added."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Pre-pitch oksygenbehov er betinget, ikke universelt: det avhenger av gjær/prosess, og fersk aktiv tørrgjær ved normal pitching er et vanlig eksempel der ekstra lufting ofte er unødvendig - men det betyr ikke at oksygen generelt er skadelig før pitching.",
-        "en": "Correct. Pre-pitch oxygen need is conditional, not universal: it depends on the yeast/process, and fresh active dry yeast at a normal pitch is a common example where extra aeration is often unnecessary - but that doesn't mean oxygen is generally harmful before pitching."
+        "no": "Riktig. Gjær kan bruke oksygen før eller rundt tilsettingen til å bygge sunne celler, men om du må lufte bevisst, avhenger av gjæren og prosessen. Fersk, aktiv tørrgjær ved vanlig første tilsetting er et vanlig eksempel der det ofte ikke trengs, fordi cellene er produsert med reserver av steroler og fettsyrer.",
+        "en": "Correct. Yeast can use oxygen before or around pitching to build healthy cells, but whether you need to aerate deliberately depends on the yeast and the process. Fresh, active dry yeast at a normal first pitch is a common example where it is often not needed, because the cells are produced with sterol and fatty-acid reserves."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Verken 'alltid lufte' eller 'aldri lufte, oksygen er skadelig' er riktig - behovet for pre-pitch oksygen er betinget av gjærens form/tilstand og prosessen, med fersk tørrgjær som et vanlig unntak fra å trenge ekstra lufting.",
-        "en": "Not quite. Neither 'always aerate' nor 'never aerate, oxygen is harmful' is correct - pre-pitch oxygen need is conditional on the yeast's form/state and the process, with fresh dry yeast as a common exception to needing extra aeration."
+        "no": "Ikke helt. De tørkede cellene er produsert med reserver, så fersk tørrgjær trenger ofte ikke ekstra lufting. Og oksygen før tilsettingen er noe annet enn oksygen når gjæringen er godt i gang: det er da unødvendig oksygen er uønsket og kan gi oksidert smak.",
+        "en": "Not quite. Dried cells are produced with reserves, so fresh dry yeast often does not need extra aeration. And oxygen before pitching is different from oxygen once fermentation is well underway: that is when unnecessary oxygen is undesirable and can contribute to oxidised flavours."
       }
     },
     {
@@ -276,42 +276,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-TRANSFER-0001"],
       "prompt": {
-        "no": "Hva er hovedforskjellen mellom tyngdekraft-overføring og pumpe-overføring?",
-        "en": "What's the main difference between gravity transfer and pump transfer?"
+        "no": "Hva er den viktigste forskjellen på å overføre med tyngdekraft og med pumpe?",
+        "en": "What is the main difference between transferring by gravity and with a pump?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Tyngdekraft krever en høydeforskjell mellom karene, men ingen pumpe. En pumpe kan også flytte væsken oppover eller mellom kar på samme nivå, men krever mer utstyr og rengjøring og har egne begrensninger - ingen av dem er universelt riktig.",
-            "en": "Gravity requires an elevation difference between the vessels, but no pump. A pump can also move liquid uphill or between vessels at the same level, but needs more equipment and cleaning and has its own limits - neither is universally correct."
+            "no": "Med tyngdekraft må mottakerkaret stå lavere; med pumpe slipper du det, men får mer utstyr å rengjøre.",
+            "en": "With gravity the receiving vessel must sit lower; with a pump it need not, but you get more equipment to clean."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Tyngdekraft er alltid den beste metoden, og pumpe bør aldri brukes i hjemmebrygging.",
-            "en": "Gravity is always the best method, and a pump should never be used in homebrewing."
+            "no": "Med tyngdekraft må mottakerkaret stå lavere; med pumpe slipper du det, og rengjøringen blir enklere.",
+            "en": "With gravity the receiving vessel must sit lower; with a pump it need not, and cleaning gets easier."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Pumpe er alltid den beste metoden, og tyngdekraft fungerer aldri i praksis.",
-            "en": "Pump is always the best method, and gravity never works in practice."
+            "no": "Med tyngdekraft blir det mer sprut og luft; med pumpe blir overføringen lukket og uten luftkontakt.",
+            "en": "With gravity you get more splashing and air; with a pump the transfer is closed, with no air contact."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Tyngdekraft og pumpe er en praktisk avveining - høydeforskjell/ingen pumpe versus mer utstyr/rengjøring, men uten krav om at mottakerkaret står lavere (selv om pumpen har egne begrensninger) - ikke en situasjon der den ene metoden alltid er riktig.",
-        "en": "Correct. Gravity and pump transfer are a practical trade-off - elevation difference/no pump versus more equipment/cleaning, but no need for the receiving vessel to sit lower (though the pump has its own limits) - not a case where one method is always correct."
+        "no": "Riktig. Det er en praktisk avveining: tyngdekraft krever en høydeforskjell mellom karene, men ingen pumpe, mens en pumpe kan flytte væsken oppover eller mellom kar på samme nivå, men krever mer utstyr og rengjøring. Pumpen har også egne begrensninger: de vanligste hjemmebryggpumpene er ikke selvsugende og må være fylt med væske.",
+        "en": "Correct. It is a practical trade-off: gravity needs an elevation difference between the vessels but no pump, while a pump can move liquid uphill or between vessels at the same level, but needs more equipment and cleaning. The pump also has its own limits: the most common homebrew pumps are not self-priming and must be filled with liquid."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Verken tyngdekraft eller pumpe er universelt best - det er en avveining mellom å trenge en høydeforskjell (tyngdekraft) og å trenge mer utstyr/rengjøring (pumpe), avhengig av oppsettet ditt.",
-        "en": "Not quite. Neither gravity nor pump is universally best - it's a trade-off between needing an elevation difference (gravity) and needing more equipment/cleaning (pump), depending on your setup."
+        "no": "Ikke helt. En pumpe gir mer utstyr å rengjøre, ikke mindre. Og om overføringen er lukket, er et eget valg, uavhengig av tyngdekraft eller pumpe. Hovedforskjellen er høydeforskjellen mot utstyret og rengjøringen.",
+        "en": "Not quite. A pump means more equipment to clean, not less. And whether the transfer is closed is a separate choice, independent of gravity or pump. The main difference is the height difference versus the equipment and cleaning."
       }
     }
   ]
