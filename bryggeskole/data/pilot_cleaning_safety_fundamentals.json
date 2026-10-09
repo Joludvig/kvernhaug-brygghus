@@ -209,35 +209,35 @@
         {
           "id": "a",
           "text": {
-            "no": "Alt som kommer i kontakt med vørteren fra nå av: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og verktøyet du bruker.",
-            "en": "Everything that touches the wort from now on: the chiller, the transfer hose, the fermenter, the airlock and the tools you use."
+            "no": "Alt som rører vørteren fra nå av – kjøleren og slangen like mye som gjæringskaret.",
+            "en": "Everything that touches the wort from now on – the chiller and the hose as much as the fermenter."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Bare gjæringskaret, siden resten av utstyret har vært i nærheten av den kokende vørteren.",
-            "en": "Only the fermenter, since the rest of the equipment has been near the boiling wort."
+            "no": "Bare gjæringskaret – det er der vørteren skal stå i lang tid mens den gjærer.",
+            "en": "Only the fermenter – that is where the wort will sit for a long time while it ferments."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Ingenting, fordi kokingen har gjort vørteren steril.",
-            "en": "Nothing, because the boil has made the wort sterile."
+            "no": "Utstyret til tappingen – hygienen blir viktig først når ølet skal på flasker eller fat.",
+            "en": "The packaging equipment – hygiene starts to matter only when the beer goes into bottles or kegs."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Når nedkjølingen starter, beskytter ikke varmen lenger. Alt som kommer i kontakt med vørteren eller ølet fra da av må være rent og sanitert.",
-        "en": "Correct. Once cooling begins, heat no longer protects the wort. Everything that touches the wort or beer from then on must be clean and sanitized."
+        "no": "Riktig. Fra nedkjølingen starter, må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og verktøyet du bruker. Kokingen gjør ikke utstyret trygt for resten av bryggedagen.",
+        "en": "Correct. From the start of cooling, everything that touches the wort or beer must be clean and sanitized: the chiller, the transfer hose, the fermenter, the airlock and the tools you use. The boil does not make your equipment safe for the rest of brew day."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Kokingen beskytter bare mens vørteren er ved eller nær kokepunktet, og den gjør ikke resten av utstyret trygt. Kjøleren, slangen, gjæringskaret, gjæringslåsen og verktøyet må alle være rene og sanitert.",
-        "en": "Not quite. The boil protects only while the wort is at or near boiling temperature, and it does not make the rest of your equipment safe. The chiller, the hose, the fermenter, the airlock and your tools must all be clean and sanitized."
+        "no": "Ikke helt. Grensen går ved starten på nedkjølingen – ikke ved gjæringskaret, og ikke først ved tappingen. Fra da av må alt som rører vørteren eller ølet være rent og sanitert, også utstyr som bare er i bruk en kort stund, som kjøleren og slangen.",
+        "en": "Not quite. The boundary is the start of cooling – not the fermenter, and not only at packaging. From then on, everything that touches the wort or beer must be clean and sanitized, including equipment that is only used briefly, such as the chiller and the hose."
       }
     },
     {
@@ -307,16 +307,16 @@
         {
           "id": "b",
           "text": {
-            "no": "Ingen steder – alle slike midler håndteres på nøyaktig samme måte.",
-            "en": "Nowhere – all such products are handled in exactly the same way."
+            "no": "I bruksanvisningen til bryggeutstyret du skal rengjøre.",
+            "en": "In the manual for the brewing equipment you are cleaning."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "I oppskriften på ølet du skal brygge.",
-            "en": "In the recipe for the beer you are brewing."
+            "no": "Hos andre hjemmebryggere, siden slike midler stort sett brukes likt.",
+            "en": "From other homebrewers, since such products are mostly used the same way."
           },
           "correct": false
         }
@@ -326,8 +326,8 @@
         "en": "Correct. Follow the product label and use the protection specified for the product. The safety data sheet gives the detail."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Produktene er ulike, så det er produktets egen etikett du følger, og sikkerhetsdatabladet gir detaljene – blant annet hvilken beskyttelse du skal bruke.",
-        "en": "Not quite. Products differ, so you follow the product's own label, and the safety data sheet gives the detail – including which protection to use."
+        "no": "Ikke helt. Det er produktet selv som avgjør hvordan det skal håndteres, så verken bruksanvisningen til utstyret eller andres vaner kan erstatte det. Følg produktets etikett – sikkerhetsdatabladet gir detaljene, blant annet hvilken beskyttelse du skal bruke.",
+        "en": "Not quite. The product itself determines how it must be handled, so neither the equipment manual nor other brewers' habits can replace that. Follow the product label – the safety data sheet gives the detail, including which protection to use."
       }
     },
     {
@@ -344,35 +344,35 @@
         {
           "id": "a",
           "text": {
-            "no": "I et rom med god ventilasjon, fordi CO₂ fra gjæringen kan samle seg i små, lukkede rom og fortrenge oksygen.",
-            "en": "In a ventilated space, because CO₂ from fermentation can build up in small, closed spaces and displace oxygen."
+            "no": "I et rom med god ventilasjon, så CO₂ fra gjæringen ikke samler seg.",
+            "en": "In a well-ventilated room, so CO₂ from fermentation does not build up."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "I et lite, lukket skap – CO₂ lukter så tydelig at du merker det i tide.",
-            "en": "In a small, closed cupboard – CO₂ smells so clearly that you will notice it in time."
+            "no": "I et lite, lukket skap – du kjenner lukten av CO₂ i god tid hvis den samler seg.",
+            "en": "In a small, closed cupboard – you will smell the CO₂ in good time if it builds up."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Hvor som helst – gjæringen lager ingen gass.",
-            "en": "Anywhere – fermentation produces no gas."
+            "no": "Hvor som helst – gassen går ut gjennom gjæringslåsen og forsvinner av seg selv.",
+            "en": "Anywhere – the gas escapes through the airlock and disappears by itself."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Gjæringen produserer CO₂, som er fargeløs og luktfri. I et lite, lukket eller dårlig ventilert rom kan den samle seg og fortrenge oksygenet, så la ølet gjære et sted med god ventilasjon.",
-        "en": "Correct. Fermentation produces CO₂, which is colourless and odourless. In a small, closed or poorly ventilated space it can build up and displace oxygen, so ferment in a ventilated space."
+        "no": "Riktig. CO₂ er fargeløs og luktfri, så du verken ser eller lukter den. I et lite, lukket eller dårlig ventilert rom kan den samle seg og fortrenge oksygenet – derfor bør karet stå i et rom med god ventilasjon.",
+        "en": "Correct. CO₂ is colourless and odourless, so you can neither see nor smell it. In a small, closed or poorly ventilated space it can build up and displace oxygen – which is why the fermenter belongs in a well-ventilated room."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Gjæringen produserer CO₂, og CO₂ kan verken ses eller luktes. I et lite, lukket eller dårlig ventilert rom kan den samle seg og fortrenge oksygenet – la derfor ølet gjære i et rom med god ventilasjon.",
-        "en": "Not quite. Fermentation produces CO₂, and CO₂ can be neither seen nor smelled. In a small, closed or poorly ventilated space it can build up and displace oxygen – so ferment in a ventilated space."
+        "no": "Ikke helt. CO₂ fra gjæringen havner i rommet der karet står – også når den går ut gjennom gjæringslåsen – og den kan verken ses eller luktes. I et lite, lukket eller dårlig ventilert rom kan den samle seg og fortrenge oksygenet, så la ølet gjære i et rom med god ventilasjon.",
+        "en": "Not quite. CO₂ from fermentation ends up in the room where the fermenter stands – including when it escapes through the airlock – and it can be neither seen nor smelled. In a small, closed or poorly ventilated space it can build up and displace oxygen, so ferment in a well-ventilated room."
       }
     },
     {
