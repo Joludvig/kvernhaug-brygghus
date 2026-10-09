@@ -144,8 +144,8 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-MALT-0002"],
       "prompt": {
-        "no": "Du setter sammen din første alt-korn-oppskrift. Hvilken type malt bør det meste av kornblandingen bestå av?",
-        "en": "You are putting together your first all-grain recipe. Which type of malt should make up most of the grist?"
+        "no": "Du setter sammen en øloppskrift. Hvilken type malt bør det meste av kornblandingen bestå av?",
+        "en": "You are putting together a beer recipe. Which type of malt should make up most of the grist?"
       },
       "options": [
         {
@@ -684,8 +684,8 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-WATER-0002", "FACT-WATER-0003"],
       "prompt": {
-        "no": "Du skal bruke vann fra springen til neste brygg og vil unngå medisinsk smak i ølet. Hva gjør du først?",
-        "en": "You will use tap water for your next brew and want to avoid a medicinal flavour in the beer. What do you do first?"
+        "no": "Du skal bruke springvann til neste brygg. Hva bør du gjøre først?",
+        "en": "You will use tap water for your next brew. What should you do first?"
       },
       "options": [
         {
