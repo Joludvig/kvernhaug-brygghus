@@ -85,7 +85,7 @@ import streamlit as st
 
 from config import DEMO_MODE
 from bryggeskole import course_stage as _course_stage
-from bryggeskole.answer_order import finn_korrekt_indeks, velg_alternativ_rekkefolge
+from bryggeskole.answer_order import velg_alternativ_rekkefolge
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
 from bryggeskole.malt_roles_strip import render_malt_roles_strip_svg
@@ -597,7 +597,6 @@ def _ny_modul_sesjon():
         "siste_feedback": None,
         "fullfort_denne_okten": False,
         "rekkefolger": {},
-        "forrige_korrekt_indeks": {},
     }
 
 
@@ -730,6 +729,8 @@ def _hent_alternativ_rekkefolge(sesjon, sporsmal):
     for dette spørsmålet i denne runden, eller trekker og fryser en ny
     første gang spørsmålet vises i runden -- uendret gjennom reruns/
     submit/back-resume, per issue #338s "Answer-option order"-krav.
+    Hvert spørsmåls rekkefølge trekkes uavhengig av tidligere spørsmål --
+    ingen tilstand på tvers av spørsmål (se bryggeskole/answer_order.py).
     RNG-en er ekte tilfeldig i produksjon (random.Random()); testene
     injiserer sin egen kontrollerte RNG direkte mot
     bryggeskole.answer_order, ikke via denne funksjonen."""
@@ -739,11 +740,9 @@ def _hent_alternativ_rekkefolge(sesjon, sporsmal):
     if qid in rekkefolger_for_runde:
         return rekkefolger_for_runde[qid]
 
-    forrige_indeks = sesjon["forrige_korrekt_indeks"].get(runde)
-    rekkefolge_raw = velg_alternativ_rekkefolge(sporsmal["options"], forrige_indeks, random.Random())
+    rekkefolge_raw = velg_alternativ_rekkefolge(sporsmal["options"], random.Random())
     id_rekkefolge = [o["id"] for o in rekkefolge_raw]
     rekkefolger_for_runde[qid] = id_rekkefolge
-    sesjon["forrige_korrekt_indeks"][runde] = finn_korrekt_indeks(rekkefolge_raw)
     return id_rekkefolge
 
 

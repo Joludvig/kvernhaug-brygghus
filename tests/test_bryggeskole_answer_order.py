@@ -1,14 +1,22 @@
 """
-Ren, RNG-injisert dekning for bryggeskole/answer_order.py (issue #338,
-"Answer-option order"). Ingen statistisk "håp om variasjon"-testing --
-hvert testtilfelle injiserer en kontrollert/fake RNG og verifiserer et
-eksakt, deterministisk utfall, per issue #338 sitt eget krav
-("deterministic RNG tests (patched/injected RNG, not statistical
-'hope for variation' tests)").
+Dekning for bryggeskole/answer_order.py (issue #338, "Answer-option order").
+
+Kjernen er RNG-injisert og deterministisk: hvert testtilfelle injiserer en
+kontrollert/fake RNG og verifiserer et eksakt utfall. I tillegg finnes noen
+få regresjonstester med en SEEDET random.Random som sjekker en invariant
+(ikke en fordeling): forrige spørsmåls korrekte posisjon begrenser aldri
+neste trekning.
+
+Bevisst reversering av gammel #338-oppførsel: modulen utelukket tidligere
+forrige korrekte posisjon, som lekket informasjon på tvers av spørsmål.
+Visningsrekkefølgen skal ikke bære informasjon om hva som er riktig;
+samme korrekte posisjon på flere spørsmål på rad er derfor tillatt.
 
 Kjøres med:
     python3 -m unittest tests.test_bryggeskole_answer_order -v
 """
+import inspect
+import random
 import unittest
 
 from bryggeskole.answer_order import (
@@ -49,27 +57,27 @@ class TestVelgAlternativRekkefolgeGrunnleggende(unittest.TestCase):
     def test_tre_alternativer_ingen_forrige_kandidater_er_alle_posisjoner(self):
         options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
         rng = _FakeRng(choice_resultat=0)
-        velg_alternativ_rekkefolge(options, None, rng)
+        velg_alternativ_rekkefolge(options, rng)
         self.assertEqual(rng.siste_choice_kandidater, [0, 1, 2])
 
     def test_korrekt_alternativ_havner_pa_indeksen_choice_returnerer(self):
         options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
         rng = _FakeRng(choice_resultat=2)
-        rekkefolge = velg_alternativ_rekkefolge(options, None, rng)
+        rekkefolge = velg_alternativ_rekkefolge(options, rng)
         self.assertEqual(rekkefolge[2]["id"], "a")
         self.assertTrue(rekkefolge[2]["correct"])
 
     def test_samme_id_er_bevart_kun_rekkefolgen_endres(self):
         options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
         rng = _FakeRng(choice_resultat=1)
-        rekkefolge = velg_alternativ_rekkefolge(options, None, rng)
+        rekkefolge = velg_alternativ_rekkefolge(options, rng)
         self.assertEqual({o["id"] for o in rekkefolge}, {"a", "b", "c"})
         self.assertEqual(len(rekkefolge), 3)
 
     def test_distraktorer_shuffles_med_injisert_rng(self):
         options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
         rng = _FakeRng(choice_resultat=0, shuffle_reversert=True)
-        rekkefolge = velg_alternativ_rekkefolge(options, None, rng)
+        rekkefolge = velg_alternativ_rekkefolge(options, rng)
         # Distraktorene ["b", "c"] reverseres av fake-shufflen til ["c", "b"];
         # korrekt ("a") settes inn på indeks 0.
         self.assertEqual([o["id"] for o in rekkefolge], ["a", "c", "b"])
@@ -77,48 +85,51 @@ class TestVelgAlternativRekkefolgeGrunnleggende(unittest.TestCase):
         self.assertEqual([o["id"] for o in rng.shuffle_kall[0]], ["b", "c"])
 
 
-class TestUnngarSammeKorrektPosisjonSomForrigeSporsmal(unittest.TestCase):
-    def test_forrige_korrekt_indeks_ekskluderes_fra_kandidatene(self):
-        options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
-        rng = _FakeRng(choice_resultat=1)
-        velg_alternativ_rekkefolge(options, 0, rng)
-        self.assertEqual(rng.siste_choice_kandidater, [1, 2])
+class TestKorrektPosisjonErUavhengigAvForrigeSporsmal(unittest.TestCase):
+    def _tre(self):
+        return [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
 
-    def test_ny_korrekt_posisjon_er_faktisk_ulik_forrige(self):
-        options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
-        rng = _FakeRng(choice_resultat=1)
-        rekkefolge = velg_alternativ_rekkefolge(options, 0, rng)
-        ny_indeks = finn_korrekt_indeks(rekkefolge)
-        self.assertNotEqual(ny_indeks, 0)
-        self.assertEqual(ny_indeks, 1)
+    def test_funksjonen_tar_ingen_forrige_posisjon(self):
+        # Ingen tilstand fra tidligere spørsmål kan sendes inn.
+        self.assertEqual(list(inspect.signature(velg_alternativ_rekkefolge).parameters), ["options", "rng"])
 
-    def test_ikke_tilstotende_gjenbruk_er_tillatt_kandidatene_utelater_kun_forrige(self):
-        # Spørsmål 1: korrekt havnet på indeks 2. Spørsmål 2: forrige=2,
-        # kandidatene skal da være [0, 1] -- ikke en lengre "aldri brukt
-        # før"-historikk over hele runden.
-        options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
+    def test_alle_posisjoner_er_alltid_kandidater(self):
+        rng = _FakeRng(choice_resultat=1)
+        velg_alternativ_rekkefolge(self._tre(), rng)
+        self.assertEqual(rng.siste_choice_kandidater, [0, 1, 2])
+
+    def test_samme_korrekte_posisjon_kan_komme_to_ganger_pa_rad(self):
+        forste = velg_alternativ_rekkefolge(self._tre(), _FakeRng(choice_resultat=2))
+        andre = velg_alternativ_rekkefolge(self._tre(), _FakeRng(choice_resultat=2))
+        self.assertEqual(finn_korrekt_indeks(forste), 2)
+        self.assertEqual(finn_korrekt_indeks(andre), 2)
+
+    def test_med_ett_alternativ_er_den_eneste_posisjonen_kandidat(self):
         rng = _FakeRng(choice_resultat=0)
-        velg_alternativ_rekkefolge(options, 2, rng)
-        self.assertEqual(rng.siste_choice_kandidater, [0, 1])
-
-    def test_med_kun_to_alternativer_forrige_ekskluderes_til_den_ene_gjenvaerende(self):
-        options = [_alternativ("a", True), _alternativ("b", False)]
-        rng = _FakeRng(choice_resultat=1)
-        velg_alternativ_rekkefolge(options, 0, rng)
-        self.assertEqual(rng.siste_choice_kandidater, [1])
-
-    def test_med_ett_alternativ_forrige_kan_ikke_ekskluderes_faller_tilbake_til_alle(self):
-        options = [_alternativ("a", True)]
-        rng = _FakeRng(choice_resultat=0)
-        rekkefolge = velg_alternativ_rekkefolge(options, 0, rng)
+        rekkefolge = velg_alternativ_rekkefolge([_alternativ("a", True)], rng)
         self.assertEqual(rng.siste_choice_kandidater, [0])
         self.assertEqual(rekkefolge[0]["id"], "a")
 
-    def test_forrige_korrekt_indeks_none_ekskluderer_ingenting(self):
-        options = [_alternativ("a", True), _alternativ("b", False), _alternativ("c", False)]
-        rng = _FakeRng(choice_resultat=0)
-        velg_alternativ_rekkefolge(options, None, rng)
-        self.assertEqual(rng.siste_choice_kandidater, [0, 1, 2])
+    def test_seedet_trekning_gir_samme_posisjon_pa_rad_for_hver_posisjon(self):
+        # Invariant, ikke fordeling: uansett hvilken korrekt posisjon som
+        # kom sist, kan den komme igjen. Seedet slik at testen er
+        # deterministisk; ingen prosentandeler asserteres.
+        rng = random.Random(20261009)
+        posisjoner = [finn_korrekt_indeks(velg_alternativ_rekkefolge(self._tre(), rng)) for _ in range(3000)]
+        gjentatt = {p for forrige, p in zip(posisjoner, posisjoner[1:]) if p == forrige}
+        self.assertEqual(gjentatt, {0, 1, 2})
+
+    def test_seedet_trekning_gir_alle_overganger_mellom_posisjoner(self):
+        rng = random.Random(20261009)
+        posisjoner = [finn_korrekt_indeks(velg_alternativ_rekkefolge(self._tre(), rng)) for _ in range(3000)]
+        overganger = set(zip(posisjoner, posisjoner[1:]))
+        self.assertEqual(overganger, {(a, b) for a in range(3) for b in range(3)})
+
+    def test_samme_seed_gir_samme_rekkefolger(self):
+        def kjor():
+            rng = random.Random(7)
+            return [[o["id"] for o in velg_alternativ_rekkefolge(self._tre(), rng)] for _ in range(20)]
+        self.assertEqual(kjor(), kjor())
 
 
 class TestEvalueringAlltidPaIdAldriIndeks(unittest.TestCase):
@@ -128,7 +139,7 @@ class TestEvalueringAlltidPaIdAldriIndeks(unittest.TestCase):
         c = _alternativ("c", False)
         options = [a, b, c]
         rng = _FakeRng(choice_resultat=1)
-        rekkefolge = velg_alternativ_rekkefolge(options, None, rng)
+        rekkefolge = velg_alternativ_rekkefolge(options, rng)
         for original in (a, b, c):
             self.assertIn(original, rekkefolge)
 
@@ -137,16 +148,16 @@ class TestFeilFormPaAlternativer(unittest.TestCase):
     def test_ingen_korrekt_alternativ_gir_feil(self):
         options = [_alternativ("a", False), _alternativ("b", False)]
         with self.assertRaises(AnswerOrderError):
-            velg_alternativ_rekkefolge(options, None, _FakeRng())
+            velg_alternativ_rekkefolge(options, _FakeRng())
 
     def test_flere_korrekte_alternativer_gir_feil(self):
         options = [_alternativ("a", True), _alternativ("b", True)]
         with self.assertRaises(AnswerOrderError):
-            velg_alternativ_rekkefolge(options, None, _FakeRng())
+            velg_alternativ_rekkefolge(options, _FakeRng())
 
     def test_tom_liste_gir_feil(self):
         with self.assertRaises(AnswerOrderError):
-            velg_alternativ_rekkefolge([], None, _FakeRng())
+            velg_alternativ_rekkefolge([], _FakeRng())
 
     def test_finn_korrekt_indeks_uten_korrekt_alternativ_gir_feil(self):
         with self.assertRaises(AnswerOrderError):
