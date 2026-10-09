@@ -45,6 +45,7 @@ Ikke les hele denne listen for enhver oppgave. For en liten, avgrenset endring h
 | [docs/development/CODING_STYLE.md](docs/development/CODING_STYLE.md) | Detaljerte kodekonvensjoner |
 | [docs/development/TESTING.md](docs/development/TESTING.md) | Testisolasjon, `AppTest`-mønster |
 | [docs/development/VAULT.md](docs/development/VAULT.md) | Når/hvordan Obsidian Vault-en oppdateres |
+| [docs/development/BRYGGESKOLE_QUIZ_DESIGN_STANDARD_V1_1.md](docs/development/BRYGGESKOLE_QUIZ_DESIGN_STANDARD_V1_1.md) | Bryggeskolen: standard for utforming av quizspørsmål (les før du skriver eller endrer spørsmål) |
 | [web/README.md](web/README.md) | Web-arkitektur i detalj |
 | [web/CHANGELOG.md](web/CHANGELOG.md) | Historisk runde-for-runde web-utvikling |
 
