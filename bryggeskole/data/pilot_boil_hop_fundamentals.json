@@ -14,8 +14,8 @@
       "id": "CHUNK-BOILHOP-B",
       "source_claims": ["FACT-BOIL-0002", "FACT-BOIL-0003", "FACT-BOIL-0004"],
       "text": {
-        "no": "En kraftig, åpen koking gjør to ting til: den bidrar til å drive ut DMS (dimetylsulfid) - et flyktig stoff som kan dannes fra en precursor i malten under oppvarming - før det rekker å bli med over i den ferdige ølen. Legg merke til at det er DMS selv som er flyktig, ikke precursoren i malten. Kokingen får også proteiner og polyfenoler i vørteren til å koagulere og felle ut som «hot break» - noe annet enn kjøldis, som oppstår senere under avkjøling. I de første minuttene etter at det begynner å koke kraftig, stiger det ofte skum raskt - hold et øye med kjelen i denne perioden, spesielt hvis den er godt fylt, så unngår du at den koker over.",
-        "en": "A vigorous, open boil does two more things: it helps drive off DMS (dimethyl sulfide) - a volatile compound that can form from a precursor in the malt during heating - before it can carry over into the finished beer. Note that it is DMS itself that is volatile, not the precursor in the malt. Boiling also causes proteins and polyphenols in the wort to coagulate and precipitate out as \"hot break\" - a different phenomenon from chill haze, which forms later during cooling. In the first minutes after a vigorous boil begins, foam often rises quickly - keep an eye on the kettle during this window, especially if it's fairly full, to avoid a boil-over."
+        "no": "En kraftig, åpen koking gjør to ting til: den bidrar til å drive ut DMS (dimetylsulfid) - et flyktig stoff som kan dannes fra en precursor i malten under oppvarming - før det rekker å bli med over i den ferdige ølen. Legg merke til at det er DMS selv som er flyktig, ikke precursoren i malten. Kokingen får også proteiner og polyfenoler i vørteren til å koagulere og felle ut som «hot break» - noe annet enn chill haze, en uklarhet som kan vise seg senere i det ferdige ølet når det er kaldt, og som forsvinner igjen når ølet blir varmere. I de første minuttene etter at det begynner å koke kraftig, stiger det ofte skum raskt - hold et øye med kjelen i denne perioden, spesielt hvis den er godt fylt, så unngår du at den koker over.",
+        "en": "A vigorous, open boil does two more things: it helps drive off DMS (dimethyl sulfide) - a volatile compound that can form from a precursor in the malt during heating - before it can carry over into the finished beer. Note that it is DMS itself that is volatile, not the precursor in the malt. Boiling also causes proteins and polyphenols in the wort to coagulate and precipitate out as \"hot break\" - a different phenomenon from chill haze, a haze that can show up later in the finished beer when it is cold, and that clears again as the beer warms up. In the first minutes after a vigorous boil begins, foam often rises quickly - keep an eye on the kettle during this window, especially if it's fairly full, to avoid a boil-over."
       }
     },
     {
@@ -374,15 +374,15 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-BOIL-0003"],
       "prompt": {
-        "no": "Er 'hot break' og 'kjøldis' det samme fenomenet?",
+        "no": "Er 'hot break' og 'chill haze' det samme fenomenet?",
         "en": "Are 'hot break' and 'chill haze' the same phenomenon?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - hot break er koagulering av proteiner og polyfenoler UNDER koking, mens kjøldis er et annet fenomen som oppstår SENERE, under avkjøling.",
-            "en": "No - hot break is the coagulation of proteins and polyphenols DURING boiling, while chill haze is a different phenomenon that forms LATER, during cooling."
+            "no": "Nei - hot break er koagulering av proteiner og polyfenoler UNDER koking, mens chill haze er en uklarhet som kan vise seg SENERE, i det ferdige ølet når det er kaldt.",
+            "en": "No - hot break is the coagulation of proteins and polyphenols DURING boiling, while chill haze is a haze that can show up LATER, in the finished beer when it is cold."
           },
           "correct": true
         },
@@ -397,19 +397,19 @@
         {
           "id": "c",
           "text": {
-            "no": "Nei - hot break oppstår under avkjøling, og kjøldis oppstår under koking.",
+            "no": "Nei - hot break oppstår under avkjøling, og chill haze oppstår under koking.",
             "en": "No - hot break occurs during cooling, and chill haze occurs during boiling."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Kokingen får proteiner og polyfenoler til å koagulere og felle ut som hot break; kjøldis er et annet, senere fenomen som oppstår under avkjøling - ikke det samme.",
-        "en": "Correct. Boiling causes proteins and polyphenols to coagulate and precipitate as hot break; chill haze is a different, later phenomenon that forms during cooling - not the same thing."
+        "no": "Riktig. Kokingen får proteiner og polyfenoler til å koagulere og felle ut som hot break; chill haze er et annet, senere fenomen - en uklarhet i det ferdige ølet når det er kaldt - ikke det samme.",
+        "en": "Correct. Boiling causes proteins and polyphenols to coagulate and precipitate as hot break; chill haze is a different, later phenomenon - a haze in the finished beer when it is cold - not the same thing."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Hot break skjer UNDER koking, mens kjøldis er et eget fenomen som oppstår SENERE, under avkjøling - de to må ikke forveksles.",
-        "en": "Not quite. Hot break happens DURING boiling, while chill haze is a separate phenomenon that forms LATER, during cooling - the two should not be confused."
+        "no": "Ikke helt. Hot break skjer UNDER koking, mens chill haze er en egen uklarhet som viser seg SENERE, i det ferdige ølet når det er kaldt - de to må ikke forveksles.",
+        "en": "Not quite. Hot break happens DURING boiling, while chill haze is a separate haze that shows up LATER, in the finished beer when it is cold - the two should not be confused."
       }
     }
   ]

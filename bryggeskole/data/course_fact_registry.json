@@ -654,25 +654,27 @@
     },
     {
       "id": "FACT-TRANSFER-0001",
-      "claim": "Homebrewers commonly move wort/beer between vessels either by gravity (relying on an elevation difference between vessels, requiring no pump) or with a pump (works regardless of relative vessel height, at the cost of added equipment and cleaning); a closed/sealed transfer path (e.g. a hose run vessel-to-vessel with minimal open-air contact) reduces splashing and airborne contamination/oxygen exposure compared with an open pour or open racking, at the cost of added setup complexity.",
+      "claim": "Homebrewers commonly move wort/beer between vessels either by gravity (relying on an elevation difference between vessels, requiring no pump) or with a pump (which can move liquid uphill or between vessels at the same level, so the receiving vessel need not sit lower, at the cost of added equipment and cleaning; a pump still has operating limits -- the centrifugal pumps most popular with homebrewers are not self-priming and stop moving liquid if a large enough air bubble enters the line, which is why they are commonly placed at or near the lowest point of the tubing); a closed/sealed transfer path (e.g. a hose run vessel-to-vessel with minimal open-air contact) reduces splashing and airborne contamination/oxygen exposure compared with an open pour or open racking, at the cost of added setup complexity.",
       "classification": "practical_experience",
       "status": "verified",
-      "verified_at": "2026-09-23T10:00:00Z",
+      "verified_at": "2026-10-08T21:00:00+02:00",
       "sources": [
         {
           "tier": "B",
           "type": "Brew Your Own technical article on transferring beer",
-          "ref": "https://byo.com/articles/transferring-beer-techniques/"
+          "ref": "BYO, Chris Colby, Transferring Beer -- https://byo.com/articles/transferring-beer-techniques/",
+          "note": "Live source check 2026-10-08 (Quiz QA Phase 2, local run); Chief independent spot-check PASS 2026-10-08, source approved. Supports, verbatim: 'The advantage of using a pump is that liquid can be moved uphill or between vessels at the same level.'; 'The most popular kind of pump for homebrewers is a centrifugal pump.'; 'Centrifugal pumps are not self-priming and the pump will quit moving liquid if there is a large enough bubble in the stream of liquid.'; 'Situating your pump at or near the lowest point in the tubing goes a long way towards avoiding this problem.' Does not support (not adopted): any numeric lift/head, flow or temperature limit; the named pump model and price. Page dates: not shown on the page."
         },
         {
           "tier": "B",
           "type": "established homebrewing technical text (John Palmer, How to Brew, Chapter 9)",
-          "ref": "https://howtobrew.com/section-1/chapter-9/"
+          "ref": "https://howtobrew.com/section-1/chapter-9/",
+          "note": "Not re-opened in the 2026-10-08 revision (site TLS certificate expired at check time). The revised pump wording rests on the BYO source alone."
         }
       ],
       "concepts": ["transfer.method_tradeoffs"],
       "modules": ["cool_transfer.fundamentals"],
-      "notes": "Describes the trade-off directions only -- does not claim one method is universally 'correct', does not recommend a specific pump/hose product, and does not assert a numeric contamination-rate difference between methods. Wording trap: do not present gravity or pump transfer as inherently superior; do not imply an open transfer always causes contamination, or that a closed transfer eliminates the risk."
+      "notes": "Describes the trade-off directions only -- does not claim one method is universally 'correct', does not recommend a specific pump/hose product, and does not assert a numeric contamination-rate difference between methods. Wording trap: do not present gravity or pump transfer as inherently superior; do not imply an open transfer always causes contamination, or that a closed transfer eliminates the risk. REVISION 2026-10-08 (Quiz QA Phase 2, Chief decision): the earlier absolute 'works regardless of relative vessel height' was removed. A pump removes the need for the receiving vessel to sit lower, but it has operating limits; the only limits claimed are the BYO-supported ones (common homebrew centrifugal pumps are not self-priming, stop on a large air bubble, and are commonly placed at the lowest point of the tubing). Deliberately NOT claimed: any numeric lift/head or flow limit, that every pump is non-self-priming, or any product-specific behaviour. Wording trap: never 'regardless of height difference', 'no height requirement' or equivalent."
     },
     {
       "id": "FACT-PACK-0001",

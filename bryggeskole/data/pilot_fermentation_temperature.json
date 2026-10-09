@@ -387,8 +387,8 @@
         {
           "id": "a",
           "text": {
-            "no": "Ikke ennå – ta flere målinger med litt tid imellom, og regn den som ferdig når tallet har sluttet å endre seg.",
-            "en": "Not yet – take more readings some time apart, and treat it as finished when the number has stopped changing."
+            "no": "Ikke ennå – ta flere målinger med litt tid imellom. Når tallet har sluttet å endre seg, er gjæringen sannsynligvis ferdig.",
+            "en": "Not yet – take more readings some time apart. When the number has stopped changing, fermentation has plausibly finished."
           },
           "correct": true
         },

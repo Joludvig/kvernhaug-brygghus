@@ -22,8 +22,8 @@
       "id": "CHUNK-SAFE-C",
       "source_claims": ["FACT-COOL-0003", "FACT-COOL-0001"],
       "text": {
-        "no": "**Hvor sanitering begynner å bety noe.** Kokingen beskytter vørteren med varme bare mens den faktisk er ved eller nær kokepunktet. Så snart nedkjølingen starter, er den beskyttelsen borte. Fra da av må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og ethvert verktøy du bruker videre. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikroorganismer kan vokse – men kokingen gjør ikke utstyret ditt trygt for resten av bryggedagen. Modulen om kjøling og overføring går nærmere inn på dette.",
-        "en": "**Where sanitizing starts to matter.** Boiling protects the wort with heat only while it is actually at or near boiling temperature. As soon as cooling begins, that protection is gone. From then on, everything that will touch the wort or beer must be clean and sanitized: the chiller, the transfer hose, the fermenter, the airlock and any tool you use from here on. Cooling quickly reduces the time the wort spends in a temperature range where unwanted microorganisms can grow – but the boil does not make your equipment safe for the rest of brew day. The module on cooling and transfer goes into this in more detail."
+        "no": "**Hvor sanitering begynner å bety noe.** Kokingen beskytter vørteren med varme bare mens den faktisk er ved eller nær kokepunktet. Den svært varme vørteren har fortsatt en varmevirkning i starten av nedkjølingen, men den avtar etter hvert som temperaturen synker, og den gjør ikke utstyret trygt. Regn derfor starten på nedkjølingen som grensen: fra da av må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert: kjøleren, overføringsslangen, gjæringskaret, gjæringslåsen og ethvert verktøy du bruker videre. Rask nedkjøling reduserer tiden vørteren tilbringer i et temperaturområde der uønskede mikroorganismer kan vokse – men kokingen gjør ikke utstyret ditt trygt for resten av bryggedagen. Modulen om kjøling og overføring går nærmere inn på dette.",
+        "en": "**Where sanitizing starts to matter.** Boiling protects the wort with heat only while it is actually at or near boiling temperature. The very hot wort still has some thermal effect as cooling begins, but that effect fades as the temperature falls, and it does not make your equipment safe. So treat the start of cooling as the boundary: from then on, everything that will touch the wort or beer must be clean and sanitized: the chiller, the transfer hose, the fermenter, the airlock and any tool you use from here on. Cooling quickly reduces the time the wort spends in a temperature range where unwanted microorganisms can grow – but the boil does not make your equipment safe for the rest of brew day. The module on cooling and transfer goes into this in more detail."
       }
     },
     {
@@ -157,23 +157,23 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-COOL-0003"],
       "prompt": {
-        "no": "Når slutter kokingen å beskytte vørteren med varme?",
-        "en": "When does the boil stop protecting the wort with heat?"
+        "no": "Fra hvilket tidspunkt må alt som rører vørteren, være rent og sanitert?",
+        "en": "From what point must everything that touches the wort be clean and sanitized?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Så snart nedkjølingen starter – fra da av må alt som rører vørteren være rent og sanitert.",
-            "en": "As soon as cooling begins – from then on, everything that touches the wort must be clean and sanitized."
+            "no": "Fra nedkjølingen starter – det er grensen der alt som rører vørteren, må være rent og sanitert.",
+            "en": "From when cooling begins – that is the boundary from which everything that touches the wort must be clean and sanitized."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Aldri – en god koking beskytter vørteren resten av bryggedagen.",
-            "en": "Never – a good boil protects the wort for the rest of brew day."
+            "no": "Ikke på bryggedagen – en god koking beskytter vørteren resten av dagen.",
+            "en": "Not on brew day – a good boil protects the wort for the rest of the day."
           },
           "correct": false
         },
@@ -187,12 +187,12 @@
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Kokingen beskytter med varme bare mens vørteren er ved eller nær kokepunktet. Fra nedkjølingen starter, må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert.",
-        "en": "Correct. The boil protects with heat only while the wort is at or near boiling temperature. From the moment cooling begins, everything that touches the wort or beer must be clean and sanitized."
+        "no": "Riktig. Kokingen beskytter med varme bare mens vørteren er ved eller nær kokepunktet, og varmevirkningen avtar når temperaturen synker. Starten på nedkjølingen er derfor grensen: fra da av må alt som kommer i kontakt med vørteren eller ølet være rent og sanitert.",
+        "en": "Correct. The boil protects with heat only while the wort is at or near boiling temperature, and the thermal effect fades as the temperature falls. So the start of cooling is the boundary: from then on, everything that touches the wort or beer must be clean and sanitized."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Kokingen gjør ikke utstyret trygt for resten av bryggedagen. Varmebeskyttelsen er borte så snart nedkjølingen starter, og fra da av må alt som rører vørteren være rent og sanitert.",
-        "en": "Not quite. The boil does not make your equipment safe for the rest of brew day. The heat protection is gone as soon as cooling begins, and from then on everything that touches the wort must be clean and sanitized."
+        "no": "Ikke helt. Kokingen gjør ikke utstyret trygt for resten av bryggedagen. Starten på nedkjølingen er grensen, og fra da av må alt som rører vørteren være rent og sanitert.",
+        "en": "Not quite. The boil does not make your equipment safe for the rest of brew day. The start of cooling is the boundary, and from then on everything that touches the wort must be clean and sanitized."
       }
     },
     {

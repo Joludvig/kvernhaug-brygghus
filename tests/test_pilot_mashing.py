@@ -449,8 +449,8 @@ class TestMeskingKompetentGuardrails(unittest.TestCase):
         for banned in ("ordentlig", "riktige måten", "ekte", "avansert", "proper", "real brewing", "advanced",
                        "alltid", "always", "aldri", "never"):
             self.assertNotIn(banned, self.teaching)
-        self.assertIn("ingen av metodene er bedre enn de andre", self.chunks["CHUNK-MASH-D"]["no"])
-        self.assertIn("none of the methods is better than the others", self.chunks["CHUNK-MASH-D"]["en"])
+        self.assertIn("ingen av metodene er universelt best", self.chunks["CHUNK-MASH-D"]["no"])
+        self.assertIn("no method is universally best", self.chunks["CHUNK-MASH-D"]["en"])
 
     def test_m1_boundary(self):
         d = self.chunks["CHUNK-MASH-D"]
