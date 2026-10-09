@@ -2,16 +2,26 @@
 Bryggeskole -- ren, RNG-injisert alternativ-visningsrekkefølge for
 spørsmål (issue #338, "Answer-option order").
 
-Krav, hentet direkte fra issue #338:
+Krav:
 - tilfeldig posisjon for korrekt svar per spørsmål;
-- når mer enn én posisjon finnes, ALDRI samme korrekte posisjon som
-  forrige spørsmål i samme runde (ikke-tilstøtende gjenbruk er greit --
-  denne modulen husker kun ÉN forrige posisjon, aldri en lengre historikk);
+- hvert spørsmåls rekkefølge trekkes UAVHENGIG av tidligere spørsmål:
+  den forrige korrekte posisjonen begrenser aldri neste trekning, den
+  samme korrekte posisjonen kan komme flere ganger på rad, og serier med
+  samme posisjon er tillatt;
 - distraktorer randomiseres i de gjenværende posisjonene;
 - evaluering skjer alltid på alternativ-id, aldri synlig indeks -- denne
   modulen endrer bare VISNINGSREKKEFØLGEN til en ny liste med de SAMME
   alternativ-dict-ene (samme id-er/tekst/correct-felt), aldri selve
   alternativenes identitet.
+
+Bevisst reversering av gammel #338-oppførsel: modulen utelukket tidligere
+forrige spørsmåls korrekte posisjon ("aldri samme korrekte posisjon som
+forrige spørsmål"). Det gjorde rekkefølgen av korrekte posisjoner
+avhengig av hverandre og lekket informasjon på tvers av spørsmål: en
+lærer som visste hvor det korrekte svaret lå sist, kunne utelukke den
+posisjonen og gjette mellom to i stedet for tre. Visningsrekkefølgen skal
+ikke bære noen informasjon om hva som er riktig, og er derfor nå
+uavhengig per spørsmål.
 
 Å FRYSE den valgte rekkefølgen per modul+spørsmål+runde gjennom
 reruns/submit/back-resume er UI-laget (ui/bryggeskole_panel.py) sitt
@@ -21,8 +31,7 @@ per kall, uten å vite noe om økter/runder selv.
 Rent, side-effektfritt: ingen Streamlit-avhengighet, ingen tilstand, ingen
 modulnivå-tilfeldighet -- `rng` er alltid injisert av kalleren (en
 random.Random-instans eller kompatibel), slik at all oppførsel er
-deterministisk-testbar med en kontrollert/fake RNG i stedet for
-statistiske "håp om variasjon"-tester.
+deterministisk-testbar med en kontrollert/fake RNG.
 """
 
 _MIN_ALTERNATIVER = 1
@@ -36,17 +45,12 @@ class AnswerOrderError(ValueError):
     assumes that guarantee silently."""
 
 
-def velg_alternativ_rekkefolge(options, forrige_korrekt_indeks, rng):
+def velg_alternativ_rekkefolge(options, rng):
     """Returnerer en NY liste med de samme alternativ-dict-ene som
     `options` (samme objekter, kun ny rekkefølge) med korrekt svar plassert
-    på en tilfeldig posisjon.
-
-    `forrige_korrekt_indeks` er indeksen det korrekte svaret hadde i FORRIGE
-    spørsmål i samme runde (fra en tidligere finn_korrekt_indeks()-kall),
-    eller None for rundens første spørsmål. Når mer enn én posisjon finnes
-    å velge mellom, ekskluderes akkurat denne ene indeksen fra kandidatene
-    -- resten av utvalget (og all distraktor-rekkefølge) er uniformt
-    tilfeldig via `rng`.
+    på en tilfeldig posisjon blant ALLE posisjoner, uavhengig av tidligere
+    spørsmål. Resten av alternativene (distraktorene) stokkes tilfeldig i
+    de gjenværende posisjonene.
 
     `rng` må være en random.Random-instans (eller noe med samme
     `.choice(seq)`/`.shuffle(list)`-kontrakt), alltid injisert av kalleren.
@@ -59,14 +63,7 @@ def velg_alternativ_rekkefolge(options, forrige_korrekt_indeks, rng):
         raise AnswerOrderError(f"Forventet nøyaktig ett korrekt alternativ, fant {len(korrekte)}.")
     korrekt_alternativ = korrekte[0]
 
-    n = len(options)
-    kandidat_indekser = list(range(n))
-    if forrige_korrekt_indeks is not None and n > 1 and forrige_korrekt_indeks in kandidat_indekser:
-        uten_forrige = [i for i in kandidat_indekser if i != forrige_korrekt_indeks]
-        if uten_forrige:
-            kandidat_indekser = uten_forrige
-
-    ny_korrekt_indeks = rng.choice(kandidat_indekser)
+    ny_korrekt_indeks = rng.choice(list(range(len(options))))
 
     distraktorer = [o for o in options if o is not korrekt_alternativ]
     rng.shuffle(distraktorer)
@@ -79,9 +76,9 @@ def velg_alternativ_rekkefolge(options, forrige_korrekt_indeks, rng):
 def finn_korrekt_indeks(rekkefolge):
     """Returnerer indeksen til det korrekte alternativet i en allerede
     ordnet alternativ-liste (typisk output fra
-    velg_alternativ_rekkefolge()) -- brukes til å huske «forrige spørsmåls
-    korrekte posisjon» til neste velg_alternativ_rekkefolge()-kall i samme
-    runde."""
+    velg_alternativ_rekkefolge()). Ren hjelpefunksjon for lesing av en
+    rekkefølge; verdien brukes ALDRI til å begrense neste spørsmåls
+    rekkefølge."""
     for i, option in enumerate(rekkefolge):
         if option.get("correct") is True:
             return i

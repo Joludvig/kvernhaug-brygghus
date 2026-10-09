@@ -660,6 +660,52 @@ class TestAlternativRekkefolgeFrysing(_MedIsolertTilstand):
         self.assertEqual(len(at.success), 1, "Den faktisk korrekte id-en skal telle som riktig svar uansett visningsposisjon.")
 
 
+class TestRekkefolgeErUavhengigPerSporsmal(unittest.TestCase):
+    """Visningsrekkefølgen bærer ingen informasjon om hva som er riktig:
+    ingen tilstand på tvers av spørsmål, samme korrekte posisjon på rad er
+    tillatt, og rekkefølgen er likevel frosset per spørsmål og runde."""
+
+    class _FastRng:
+        def __init__(self, posisjon):
+            self.posisjon = posisjon
+
+        def choice(self, kandidater):
+            return kandidater[self.posisjon]
+
+        def shuffle(self, liste):
+            pass
+
+    @staticmethod
+    def _sporsmal(qid):
+        return {"id": qid, "options": [
+            {"id": "a", "correct": True}, {"id": "b", "correct": False}, {"id": "c", "correct": False}]}
+
+    def test_ny_modulsesjon_har_ingen_tilstand_om_forrige_korrekte_posisjon(self):
+        from ui.bryggeskole_panel import _ny_modul_sesjon
+        sesjon = _ny_modul_sesjon()
+        self.assertIn("rekkefolger", sesjon)  # frysing per spørsmål og runde består
+        self.assertNotIn("forrige_korrekt_indeks", sesjon)
+
+    def test_samme_korrekte_posisjon_pa_to_sporsmal_pa_rad(self):
+        from ui.bryggeskole_panel import _hent_alternativ_rekkefolge, _ny_modul_sesjon
+        sesjon = _ny_modul_sesjon()
+        with mock.patch("ui.bryggeskole_panel.random.Random", lambda: self._FastRng(2)):
+            forste = _hent_alternativ_rekkefolge(sesjon, self._sporsmal("Q-X-001"))
+            andre = _hent_alternativ_rekkefolge(sesjon, self._sporsmal("Q-X-002"))
+        self.assertEqual(forste.index("a"), 2)
+        self.assertEqual(andre.index("a"), 2)
+
+    def test_rekkefolgen_er_frosset_for_samme_sporsmal_og_runde(self):
+        from ui.bryggeskole_panel import _hent_alternativ_rekkefolge, _ny_modul_sesjon
+        sesjon = _ny_modul_sesjon()
+        sporsmal = self._sporsmal("Q-X-001")
+        with mock.patch("ui.bryggeskole_panel.random.Random", lambda: self._FastRng(1)):
+            forste = _hent_alternativ_rekkefolge(sesjon, sporsmal)
+        with mock.patch("ui.bryggeskole_panel.random.Random", lambda: self._FastRng(0)):
+            igjen = _hent_alternativ_rekkefolge(sesjon, sporsmal)
+        self.assertEqual(forste, igjen)
+
+
 # ─── 8: aldri rå mastery/confidence/attempts eller rå tall i UI-teksten ────
 
 class TestIngenRaaTilstandVisesLaereren(_MedIsolertTilstand):
