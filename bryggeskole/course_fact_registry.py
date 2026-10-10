@@ -397,3 +397,33 @@ def find_verified_records(path, concept=None, module=None):
     if module is not None:
         records = [record for record in records if module in (record.get("modules") or [])]
     return records
+
+
+class VerifiedFactLookup:
+    """A per-operation view of which fact IDs are verified, for checking
+    many IDs within ONE operation (e.g. one pilot-content validation)
+    without re-reading and re-validating the registry once per ID.
+
+    The registry at `path` is read and fail-closed validated through
+    read_verified_records() on the first contains() call -- never earlier,
+    so an operation that checks no ID never touches the registry -- and at
+    most once per instance. A malformed registry raises
+    CourseFactRegistryError from that call, exactly like
+    get_verified_record(); the failed read is not remembered, so a later
+    call reads again. Only the verified IDs are kept, as a frozenset, so no
+    record object is shared with the caller.
+
+    This is not a cache: there is no module-level or shared state, and a new
+    instance always re-reads the file. Callers create one per operation and
+    discard it when the operation ends. contains(fact_id) is True exactly
+    when get_verified_record(path, fact_id) would return a record, so a
+    missing ID and an unverified ID stay indistinguishable."""
+
+    def __init__(self, path):
+        self._path = path
+        self._verified_ids = None
+
+    def contains(self, fact_id):
+        if self._verified_ids is None:
+            self._verified_ids = frozenset(record["id"] for record in read_verified_records(self._path))
+        return fact_id in self._verified_ids

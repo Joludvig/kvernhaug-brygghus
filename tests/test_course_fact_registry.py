@@ -18,13 +18,16 @@ import json
 import os
 import re
 import unittest
+from unittest import mock
 
+from bryggeskole import course_fact_registry
 from bryggeskole.course_fact_registry import (
     CLASSIFICATIONS,
     REGISTRY_SCHEMA_VERSION,
     SOURCE_TIERS,
     STATUSES,
     CourseFactRegistryError,
+    VerifiedFactLookup,
     find_verified_records,
     get_verified_record,
     read_registry_file,
@@ -1697,6 +1700,127 @@ class TestTrustedApiNeverLeaksSharedMutableState(unittest.TestCase):
         records[0]["concepts"] = ["mutated"]
         fresh = read_verified_records(self._PATH)
         self.assertNotEqual(fresh[0].get("concepts"), ["mutated"])
+
+
+class TestVerifiedFactLookup(unittest.TestCase):
+    """VerifiedFactLookup: one read-and-validate per instance (per
+    operation), no state shared between instances, the same verdict as
+    get_verified_record() for every id, and fail-closed on a malformed
+    registry."""
+
+    _PATH = _fixture_path("verified_consumer_mixed.json")
+
+    def _counting_reader(self):
+        real = course_fact_registry.read_verified_records
+        calls = []
+
+        def counted(path):
+            calls.append(path)
+            return real(path)
+
+        patcher = mock.patch.object(course_fact_registry, "read_verified_records", counted)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        return calls
+
+    def test_same_verdict_as_get_verified_record_for_every_id(self):
+        lookup = VerifiedFactLookup(self._PATH)
+        ids = [r["id"] for r in _load_json(self._PATH)["records"]] + ["FACT-TEST-9999"]
+        for fact_id in ids:
+            with self.subTest(fact_id=fact_id):
+                self.assertEqual(lookup.contains(fact_id), get_verified_record(self._PATH, fact_id) is not None)
+
+    def test_same_verdict_against_the_production_registry(self):
+        lookup = VerifiedFactLookup(_PRODUCTION_REGISTRY)
+        for record in _load_json(_PRODUCTION_REGISTRY)["records"]:
+            with self.subTest(fact_id=record["id"]):
+                self.assertEqual(
+                    lookup.contains(record["id"]),
+                    get_verified_record(_PRODUCTION_REGISTRY, record["id"]) is not None,
+                )
+
+    def test_unverified_and_missing_ids_are_indistinguishable(self):
+        lookup = VerifiedFactLookup(self._PATH)
+        for fact_id in ("FACT-TEST-0023", "FACT-TEST-0025", "FACT-TEST-0026", "FACT-TEST-9999"):
+            self.assertIs(lookup.contains(fact_id), False)
+
+    def test_reads_lazily_and_at_most_once_per_instance(self):
+        calls = self._counting_reader()
+        lookup = VerifiedFactLookup(self._PATH)
+        self.assertEqual(calls, [])
+        for fact_id in ("FACT-TEST-0020", "FACT-TEST-0021", "FACT-TEST-0023", "FACT-TEST-9999"):
+            lookup.contains(fact_id)
+        self.assertEqual(calls, [self._PATH])
+
+    def test_a_new_instance_reads_the_registry_again(self):
+        calls = self._counting_reader()
+        VerifiedFactLookup(self._PATH).contains("FACT-TEST-0020")
+        VerifiedFactLookup(self._PATH).contains("FACT-TEST-0020")
+        self.assertEqual(len(calls), 2)
+
+    def test_malformed_registry_fails_closed_and_is_not_remembered(self):
+        lookup = VerifiedFactLookup(_fixture_path("invalid_document_shape.json"))
+        with self.assertRaises(CourseFactRegistryError):
+            lookup.contains("FACT-TEST-0001")
+        with self.assertRaises(CourseFactRegistryError):
+            lookup.contains("FACT-TEST-0001")
+
+    def test_holds_no_record_objects(self):
+        lookup = VerifiedFactLookup(self._PATH)
+        lookup.contains("FACT-TEST-0020")
+        self.assertIsInstance(lookup._verified_ids, frozenset)
+        self.assertTrue(all(isinstance(fact_id, str) for fact_id in lookup._verified_ids))
+
+
+class TestPilotValidationReadsTheRegistryOncePerCall(unittest.TestCase):
+    """Every pilot module resolves all of a document's source_claims
+    against ONE fresh registry read per validate_pilot_content() call
+    (before: one full read-and-validate per claim). Each call still reads
+    and validates the registry itself, and a malformed registry still
+    fails closed."""
+
+    _PILOT_MODULES = (
+        "pilot_boil_hop", "pilot_cleaning_safety", "pilot_cool_transfer", "pilot_fermentation",
+        "pilot_mashing", "pilot_measurement", "pilot_method_context", "pilot_package",
+        "pilot_raw_materials", "pilot_recipe", "pilot_sensory",
+    )
+
+    def _modules(self):
+        import importlib
+        return [importlib.import_module(f"bryggeskole.{name}") for name in self._PILOT_MODULES]
+
+    def test_one_registry_read_per_validation_call(self):
+        real = course_fact_registry.read_verified_records
+        for module in self._modules():
+            with self.subTest(module=module.__name__):
+                data = module.read_pilot_file()
+                calls = []
+
+                def counted(path):
+                    calls.append(path)
+                    return real(path)
+
+                with mock.patch.object(course_fact_registry, "read_verified_records", counted):
+                    self.assertEqual(module.validate_pilot_content(data), [])
+                    self.assertEqual(len(calls), 1)
+                    self.assertEqual(module.validate_pilot_content(data), [])
+                    self.assertEqual(len(calls), 2)
+
+    def test_malformed_registry_still_fails_closed(self):
+        broken = _fixture_path("invalid_document_shape.json")
+        for module in self._modules():
+            with self.subTest(module=module.__name__):
+                with self.assertRaises(CourseFactRegistryError):
+                    module.read_pilot_file(registry_path=broken)
+
+    def test_unverified_claim_is_still_reported(self):
+        for module in self._modules():
+            with self.subTest(module=module.__name__):
+                data = module.read_pilot_file()
+                claimed = next(c for c in data["chunks"] if c.get("source_claims"))
+                claimed["source_claims"] = ["FACT-TEST-9999"]
+                errors = module.validate_pilot_content(data)
+                self.assertTrue(any("FACT-TEST-9999" in e for e in errors), errors)
 
 
 class TestContractDocExistsAndIsInternallyConsistent(unittest.TestCase):
