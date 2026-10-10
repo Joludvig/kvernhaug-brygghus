@@ -113,24 +113,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Gjæren er som regel mer aktiv, og gjæringen går gjerne raskere.",
-            "en": "The yeast is generally more active, and fermentation tends to go faster."
+            "no": "Gjæren blir som regel mer aktiv, og gjæringen går gjerne raskere.",
+            "en": "The yeast generally becomes more active, and fermentation tends to go faster."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Gjæren er alltid like aktiv, uansett hvor i området du gjærer.",
-            "en": "The yeast is always equally active, no matter where in the range you ferment."
+            "no": "Gjæren blir som regel mindre aktiv, og gjæringen går gjerne saktere.",
+            "en": "The yeast generally becomes less active, and fermentation tends to go slower."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Gjæren blir automatisk mindre aktiv jo varmere det er.",
-            "en": "The yeast automatically becomes less active the warmer it gets."
+            "no": "Aktiviteten endres lite; temperaturen påvirker mest smaken.",
+            "en": "Activity changes little; the temperature mainly affects the flavour."
           },
           "correct": false
         }
@@ -140,8 +140,8 @@
         "en": "Correct. Within the strain's workable range, warmer conditions generally make the yeast more active, and fermentation can go faster - but this is a general tendency, not a fixed rule for every situation."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Misforståelsen her er å tro at temperatur ikke påvirker aktiviteten i det hele tatt, eller at varmere alltid betyr mindre aktiv gjær. Innenfor stammens arbeidsområde er sammenhengen motsatt: varmere forhold gjør som regel gjæren mer aktiv, ikke mindre.",
-        "en": "Not quite. The misconception here is thinking temperature doesn't affect activity at all, or that warmer always means less active yeast. Within the strain's workable range, the relationship is the opposite: warmer conditions generally make the yeast more active, not less."
+        "no": "Ikke helt. Innenfor stammens arbeidsområde gjør varmere forhold som regel gjæren mer aktiv, ikke mindre, og temperaturen påvirker både aktiviteten og smaken. Dette er en generell retning, ikke en fast regel for enhver stamme og situasjon.",
+        "en": "Not quite. Within the strain's workable range, warmer conditions generally make the yeast more active, not less, and temperature affects both activity and flavour. This is a general direction, not a fixed rule for every strain and situation."
       }
     },
     {
@@ -341,24 +341,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Gjæringen endrer seg over tid – en oppstartsperiode, en mest aktiv periode der det meste av sukkeret brukes, og en roligere periode – og delene glir over i hverandre, så ett øyeblikk beskriver ikke hele prosessen.",
-            "en": "Fermentation changes over time – a start-up period, a most active period when most of the sugar is used, and a slower period – and the stages blend into each other, so one moment does not describe the whole process."
+            "no": "Gjæringen endrer tempo underveis, så ett blikk viser bare ett øyeblikk.",
+            "en": "Fermentation changes pace along the way, so one look shows only one moment."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Gjæringen går i ett jevnt tempo fra tilsetting til slutt, så ett blikk forteller alt.",
-            "en": "Fermentation runs at one steady pace from pitching to finish, so one look tells you everything."
+            "no": "Gjæringen går i et jevnt tempo, så ett blikk viser hvor langt den har kommet.",
+            "en": "Fermentation runs at a steady pace, so one look shows how far it has come."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Alle gjæringer følger samme faste tidsplan, så du kan lese hvor gjæringen står ut fra hvor lenge den har gått.",
-            "en": "Every fermentation follows the same fixed timetable, so you can tell where it stands from how long it has been running."
+            "no": "Gjæringen følger en fast tidsplan, så tiden siden tilsettingen viser hvor den står.",
+            "en": "Fermentation follows a fixed timetable, so the time since pitching shows where it stands."
           },
           "correct": false
         }
