@@ -62,42 +62,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-MASH-0001"],
       "prompt": {
-        "no": "Under mesking blir noe av stivelsen brutt ned til gjærbart sukker, mens en del blir omdannet til dekstriner. Hvilken rolle spiller disse dekstrinene i den ferdige ølen?",
-        "en": "During mashing, some of the starch is broken down into fermentable sugar, while some is converted into dextrins. What role do these dextrins play in the finished beer?"
+        "no": "Under mesking blir noe av stivelsen brutt ned til gjærbart sukker, mens en del blir omdannet til dekstriner. Hva bidrar dekstrinene med i det ferdige ølet?",
+        "en": "During mashing, some of the starch is broken down into fermentable sugar, while some is converted into dextrins. What do the dextrins contribute to the finished beer?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "De blir værende i den ferdige ølen og bidrar til kropp og fylde, siden vanlig bryggjær ikke kan gjære dem til alkohol.",
-            "en": "They remain in the finished beer and contribute body and fullness, since ordinary brewing yeast cannot ferment them into alcohol."
+            "no": "Kropp og fylde, siden vanlig bryggjær ikke gjærer dem.",
+            "en": "Body and fullness, since ordinary brewing yeast does not ferment them."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "De blir gjæret til alkohol på samme måte som annet sukker i vørteren.",
-            "en": "They are fermented into alcohol in the same way as other sugars in the wort."
+            "no": "Mer alkohol, siden gjæren gjærer dem som annet sukker.",
+            "en": "More alcohol, since the yeast ferments them like other sugars."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "De filtreres bort fra vørteren under lauting, og finnes derfor ikke igjen i den ferdige ølen.",
-            "en": "They are filtered out of the wort during lautering, so they don't remain in the finished beer."
+            "no": "Ingenting, siden de skilles ut sammen med kornet etter meskingen.",
+            "en": "Nothing, since they are removed together with the grain after the mash."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Dekstriner er større karbohydrater som vanlig bryggjær ikke kan gjære; de blir værende i den ferdige ølen og bidrar til kropp og fylde i stedet for alkohol.",
-        "en": "Correct. Dextrins are larger carbohydrates that ordinary brewing yeast cannot ferment; they remain in the finished beer and contribute body and fullness rather than alcohol."
+        "no": "Riktig. Dekstriner er større karbohydrater som vanlig bryggjær ikke gjærer. De blir værende i det ferdige ølet og bidrar til kropp og fylde, ikke til alkohol.",
+        "en": "Correct. Dextrins are larger carbohydrates that ordinary brewing yeast does not ferment. They remain in the finished beer and contribute body and fullness, not alcohol."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Dekstriner blir verken gjæret til alkohol eller filtrert bort under bryggeprosessen - de blir værende i den ferdige ølen og bidrar til kropp og fylde i stedet for alkohol.",
-        "en": "Not quite. Dextrins are neither fermented into alcohol nor filtered out during the brewing process - they remain in the finished beer and contribute body and fullness rather than alcohol."
+        "no": "Ikke helt. Vanlig bryggjær gjærer ikke dekstrinene, og de forsvinner heller ikke med kornet. De blir værende i det ferdige ølet og bidrar til kropp og fylde i stedet for alkohol.",
+        "en": "Not quite. Ordinary brewing yeast does not ferment the dextrins, and they do not leave with the grain either. They remain in the finished beer and contribute body and fullness rather than alcohol."
       }
     },
     {
@@ -107,42 +107,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-MASH-0002"],
       "prompt": {
-        "no": "En bryggevenn leser om en studie der mesketemperaturen ble variert mellom 65 og 80 grader, og sier: 'Da må vel en varmere mesking gi en mer gjærbar vørter?' Stemmer det, ut fra hva studien fant?",
-        "en": "A brewing friend reads about a study where mash temperature was varied between 65 and 80 degrees Celsius, and says: 'A warmer mash must give a more fermentable wort, right?' Is that correct, based on what the study found?"
+        "no": "I studien du har lest om, ble mesketemperaturen variert mellom 65 og 80 grader. Hva fant studien om en varmere mesking?",
+        "en": "In the study you have read about, mash temperature was varied between 65 and 80 degrees Celsius. What did the study find about a warmer mash?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - studien fant det motsatte: en varmere mesking ga en mindre gjærbar vørter enn en kaldere mesking.",
-            "en": "No - the study found the opposite: a warmer mash produced a less fermentable wort than a cooler mash."
+            "no": "Den ga en mindre gjærbar vørter enn en kaldere mesking.",
+            "en": "It produced a less fermentable wort than a cooler mash."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - studien viste at en varmere mesking ga en mer gjærbar vørter.",
-            "en": "Yes - the study showed that a warmer mash produced a more fermentable wort."
+            "no": "Den ga en mer gjærbar vørter enn en kaldere mesking.",
+            "en": "It produced a more fermentable wort than a cooler mash."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Mesketemperatur hadde ingen målbar effekt på gjærbarhet i studien.",
-            "en": "Mash temperature had no measurable effect on fermentability in the study."
+            "no": "Den ga like gjærbar vørter; bare mesketykkelsen gjorde en forskjell.",
+            "en": "It produced equally fermentable wort; only mash thickness made a difference."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Studien mellom 65 og 80 grader fant det motsatte: en varmere mesking ga en mindre gjærbar vørter enn en kaldere mesking.",
-        "en": "Correct. The study between 65 and 80 degrees Celsius found the opposite: a warmer mash produced a less fermentable wort than a cooler mash."
+        "no": "Riktig. I studien ga en varmere mesking en mindre gjærbar vørter enn en kaldere mesking, og mesketykkelsen påvirket også resultatet. Det viser en retning fra én studie, ikke en fasit for hvor mye det utgjør i din egen brygging.",
+        "en": "Correct. In the study, a warmer mash produced a less fermentable wort than a cooler mash, and mash thickness also affected the outcome. That shows a direction from one study, not a fixed answer for how much it matters in your own brewing."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Studien mellom 65 og 80 grader fant at en varmere mesking ga en mindre gjærbar vørter enn en kaldere mesking - altså motsatt av det bryggevennen antok.",
-        "en": "Not quite. The study between 65 and 80 degrees Celsius found that a warmer mash produced a less fermentable wort than a cooler mash - the opposite of what the friend assumed."
+        "no": "Ikke helt. Studien fant ikke at en varmere mesking ga mer gjærbar vørter, og det var ikke bare mesketykkelsen som betydde noe. En varmere mesking ga en mindre gjærbar vørter enn en kaldere mesking, og mesketykkelsen påvirket også resultatet.",
+        "en": "Not quite. The study did not find that a warmer mash gave a more fermentable wort, and it was not only mash thickness that mattered. A warmer mash produced a less fermentable wort than a cooler mash, and mash thickness also affected the outcome."
       }
     },
     {
@@ -152,42 +152,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-MASH-0004"],
       "prompt": {
-        "no": "En bryggevenn sier: 'Det finnes én riktig mesketemperatur - finner du bare den og alltid bruker den, blir alle oppskrifter riktige.' Basert på det du har lært, hvordan bør du svare?",
-        "en": "A brewing friend says: 'There's one correct mash temperature - if you just find it and always use it, every recipe will turn out right.' Based on what you've learned, how should you respond?"
+        "no": "Hvorfor finnes det ingen mesketemperatur som er riktig for alle oppskrifter?",
+        "en": "Why is there no mash temperature that is right for every recipe?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Er enig - når du har funnet riktig mesketemperatur, fungerer den likt for alle oppskrifter.",
-            "en": "Agree - once you find the right mash temperature, it works the same way for every recipe."
+            "no": "Fordi mesketykkelse og maltens enzyminnhold også påvirker resultatet.",
+            "en": "Because mash thickness and the malt's enzyme content also affect the result."
           },
           "correct": false
         },
         {
           "id": "b",
           "text": {
-            "no": "Er uenig - mesketemperatur er bare én av flere faktorer (som mesketykkelse og maltens enzyminnhold) som påvirker resultatet, så det finnes ingen universell temperatur som passer alle oppskrifter.",
-            "en": "Disagree - mash temperature is only one of several factors (like mash thickness and the malt's enzyme content) that affect the result, so there's no single universal temperature that fits every recipe."
+            "no": "Fordi mesketemperaturen har liten betydning for hvor gjærbar vørteren blir.",
+            "en": "Because mash temperature has little effect on how fermentable the wort becomes."
           },
           "correct": true
         },
         {
           "id": "c",
           "text": {
-            "no": "Er uenig - mesketemperatur har ingen reell effekt på ølen, så det spiller ingen rolle hvilken du velger.",
-            "en": "Disagree - mash temperature has no real effect on the beer, so it doesn't matter which one you pick."
+            "no": "Fordi hver maltsort må meskes ved sin egen faste temperatur.",
+            "en": "Because every type of malt has to be mashed at its own fixed temperature."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Mesketemperatur har betydning, men er bare én av flere faktorer som spiller inn - mesketykkelse og maltens eget enzyminnhold har også betydning. Den kombinasjonen er grunnen til at ingen enkelt mesketemperatur er universelt riktig for alle oppskrifter.",
-        "en": "Correct. Mash temperature matters, but it's only one of several factors at play - mash thickness and the malt's own enzyme content matter too. That combination is why no single mash temperature is universally correct for every recipe."
+        "no": "Riktig. Mesketemperatur har betydning, men er bare én av flere faktorer: mesketykkelse og maltens eget enzyminnhold spiller også inn. Derfor bør temperaturvalget ses i sammenheng med de andre faktorene.",
+        "en": "Correct. Mash temperature matters, but it is only one of several factors: mash thickness and the malt's own enzyme content also play a role. That is why the temperature choice should be considered together with the other factors."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Mesketemperatur har betydning, men er ikke den eneste faktoren, og heller ikke et fast tall som passer alt - mesketykkelse og maltens enzyminnhold har også betydning, og det er derfor ingen enkelt universell mesketemperatur passer alle oppskrifter.",
-        "en": "Not quite. Mash temperature does matter, but it isn't the only factor, and it also isn't a single fixed number that works for everything - mash thickness and the malt's enzyme content matter too, which is why no single universal mash temperature fits every recipe."
+        "no": "Ikke helt. Mesketemperaturen påvirker hvor gjærbar vørteren blir, men den virker sammen med andre faktorer, og det finnes heller ingen fast temperatur for hver malt. Mesketykkelse og maltens enzyminnhold påvirker også resultatet, så temperaturvalget må ses i sammenheng med dem.",
+        "en": "Not quite. Mash temperature does affect how fermentable the wort becomes, but it works together with other factors, and there is no fixed temperature for each malt either. Mash thickness and the malt's enzyme content also affect the result, so the temperature choice has to be considered together with them."
       }
     },
     {
@@ -205,7 +205,7 @@
         {
           "id": "a",
           "text": {
-            "no": "Bare den som bruker et eget silekar, skiller egentlig vørteren fra kornet; de to andre hopper over steget.",
+            "no": "Bare den med eget silekar skiller egentlig vørteren fra kornet; de to andre hopper over steget.",
             "en": "Only the brewer with a separate lauter tun really separates the wort from the grain; the other two skip that step."
           },
           "correct": false
@@ -213,8 +213,8 @@
         {
           "id": "b",
           "text": {
-            "no": "De gjør den samme jobben – skiller vørteren fra kornet – med ulikt utstyr. Ingen av metodene er universelt best – hvilken som passer best, avhenger av utstyr, plass, budsjett og arbeidsflyt.",
-            "en": "They do the same job – separating the wort from the grain – with different equipment. No method is universally best – which one fits best depends on equipment, space, budget and workflow."
+            "no": "De gjør den samme jobben med ulikt utstyr, og ingen av metodene er universelt best.",
+            "en": "They do the same job with different equipment, and no method is universally best."
           },
           "correct": true
         },
@@ -251,24 +251,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Samle den første vørteren og hell den forsiktig tilbake over kornsengen til vørteren renner stort sett fri for kornpartikler – den trenger ikke å være helt klar.",
-            "en": "Collect the first runnings and gently pour them back over the grain bed until the wort runs largely free of grain particles – it does not need to be perfectly clear."
+            "no": "Heller den forsiktig tilbake over kornsengen til den er stort sett fri for kornbiter.",
+            "en": "Gently pour it back over the grain bed until it is largely free of bits of grain."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Fortsett å resirkulere til vørteren er helt klar; alt annet er en feil.",
-            "en": "Keep recirculating until the wort is perfectly clear; anything else is a mistake."
+            "no": "Heller den tilbake over kornsengen igjen og igjen, til vørteren er helt klar.",
+            "en": "Pour it back over the grain bed again and again, until the wort is perfectly clear."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Grumsete første vørter betyr at meskingen har mislyktes, så du må begynne på nytt.",
-            "en": "Cloudy first runnings mean the mash has failed, so you have to start again."
+            "no": "Setter inn en finere sil, siden kornsengen ikke kan filtrere vørteren.",
+            "en": "Put in a finer strainer, since the grain bed cannot filter the wort."
           },
           "correct": false
         }
@@ -278,8 +278,8 @@
         "en": "Correct. When wort drains through a grain bed, the first runnings are often cloudy. The grain bed acts as the filter, and many brewers gently pour the first runnings back over it until the wort is largely free of grain particles. It does not need to be perfectly clear."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Grumsete første vørter er vanlig når vørteren renner gjennom en kornseng, og betyr ikke at noe har gått galt. Mange bryggere heller den forsiktig tilbake over kornsengen til den er stort sett fri for kornpartikler – helt klar trenger den ikke å være.",
-        "en": "Not quite. Cloudy first runnings are common when wort drains through a grain bed and do not mean anything has gone wrong. Many brewers gently pour them back over the grain bed until the wort is largely free of grain particles – it does not need to be perfectly clear."
+        "no": "Ikke helt. Vørteren trenger ikke å være helt klar, og du trenger ingen ekstra sil: selve kornsengen fungerer som filter. Mange bryggere heller den første vørteren forsiktig tilbake over kornsengen til den er stort sett fri for kornpartikler.",
+        "en": "Not quite. The wort does not need to be perfectly clear, and you do not need an extra strainer: the grain bed itself acts as the filter. Many brewers gently pour the first runnings back over the grain bed until the wort is largely free of grain particles."
       }
     },
     {
@@ -290,31 +290,31 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-MASH-0006"],
       "prompt": {
-        "no": "Mesken har rent av, og en bryggevenn sier: «Nå er alt sukkeret ute av kornet – det er ingen vits i å gjøre noe mer.» Stemmer det?",
-        "en": "The mash has drained, and a brewing friend says: \"All the sugar is out of the grain now – there is no point in doing anything more.\" Is that right?"
+        "no": "Mesken har rent av. Hva stemmer om kornet som ligger igjen?",
+        "en": "The mash has drained. What is true of the grain that is left?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Ja – alt sukkeret renner ut med den første vørteren.",
-            "en": "Yes – all the sugar runs out with the first runnings."
+            "no": "Sukkeret har rent ut med den første vørteren, så kornet er tomt.",
+            "en": "The sugar has run out with the first runnings, so the grain is spent."
           },
           "correct": false
         },
         {
           "id": "b",
           "text": {
-            "no": "Nei – men den senere avrenningen er sterkere enn den første, så det beste kommer til slutt.",
-            "en": "No – but the later runnings are stronger than the first, so the best comes last."
+            "no": "Det holder på sukkerrik vørter, og senere avrenninger blir sterkere enn den første.",
+            "en": "It holds sugar-rich wort, and later runnings come out stronger than the first."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei – det våte kornet holder fortsatt på sukkerrik vørter. Skyller du kornet (sparging), får du ut mer. Brygger du uten skylling, bruker du hele vannmengden i meskingen og godtar at mer sukker blir igjen.",
-            "en": "No – the wet grain still holds sugar-rich wort. If you rinse the grain (sparging), you recover more. If you brew without sparging, you put the full water volume into the mash and accept that more sugar stays behind."
+            "no": "Det holder på sukkerrik vørter, og skylling får ut mer av den.",
+            "en": "It holds sugar-rich wort, and sparging recovers more of it."
           },
           "correct": true
         }
@@ -343,24 +343,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Bruk vennens tall uendret – vannmengdene er de samme uansett anlegg.",
-            "en": "Use your friend's numbers unchanged – water volumes are the same whatever the system."
+            "no": "Bruk vennens tall, siden samme oppskrift trenger samme vannmengder.",
+            "en": "Use your friend's numbers, since the same recipe needs the same water volumes."
           },
           "correct": false
         },
         {
           "id": "b",
           "text": {
-            "no": "Planlegg med tallene for ditt eget utstyr – hvor mye kornet holder igjen, dødvolum og vannmengder er ikke like mellom oppsett.",
-            "en": "Plan with your own equipment's numbers – what the grain holds back, dead space and water volumes are not the same between setups."
+            "no": "Planlegg med tallene for ditt eget utstyr, siden oppsettene ikke er like.",
+            "en": "Plan with your own equipment's numbers, since the setups are not the same."
           },
           "correct": true
         },
         {
           "id": "c",
           "text": {
-            "no": "Bytt til metoden med minst tap, siden den alltid er den beste.",
-            "en": "Switch to the method with the lowest losses, since that is always the best one."
+            "no": "Bytt til samme metode som vennen, så passer vennens tall også for deg.",
+            "en": "Switch to the same method as your friend, so your friend's numbers fit you too."
           },
           "correct": false
         }
@@ -370,8 +370,8 @@
         "en": "Correct. Water volumes, dead space and how much the grain holds back vary with equipment and method. That is why you plan with your own system's numbers, not one shared answer for every setup."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Vannmengder, dødvolum og hvor mye kornet holder igjen varierer med utstyr og metode, så en annens tall passer ikke automatisk ditt anlegg – og ingen metode er alltid best. Planlegg med tallene for ditt eget utstyr.",
-        "en": "Not quite. Water volumes, dead space and how much the grain holds back vary with equipment and method, so someone else's numbers do not automatically fit your system – and no method is always best. Plan with your own equipment's numbers."
+        "no": "Ikke helt. Vannmengdene følger ikke bare oppskriften, og samme metode gjør ikke to anlegg like: vannmengder, dødvolum og hvor mye kornet holder igjen varierer mellom oppsett. Planlegg med tallene for ditt eget utstyr.",
+        "en": "Not quite. Water volumes do not just follow the recipe, and the same method does not make two systems alike: water volumes, dead space and how much the grain holds back vary between setups. Plan with your own equipment's numbers."
       }
     },
     {
@@ -389,24 +389,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Regn ut effektiviteten med mange desimaler – da vet du nøyaktig hva som gikk galt.",
-            "en": "Calculate the efficiency to many decimal places – then you know exactly what went wrong."
+            "no": "Regn ut effektiviteten med mange desimaler, så vet du nøyaktig hva som gikk galt.",
+            "en": "Calculate the efficiency to many decimal places, then you know exactly what went wrong."
           },
           "correct": false
         },
         {
           "id": "b",
           "text": {
-            "no": "Endre mesketemperatur, vannmengde og skyllemetode på én gang neste gang, så finner du feilen raskest.",
-            "en": "Change the mash temperature, the water volume and the sparging method all at once next time, so you find the problem fastest."
+            "no": "Endre mesketemperatur, vannmengde og skylling på én gang, så finner du feilen raskere.",
+            "en": "Change the mash temperature, water volume and sparging all at once, so you find the problem faster."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Noter volumet (og om det er målt varmt eller avkjølt) og tettheten, sammenlign med planen, skriv én hypotese og velg én bevisst endring til et senere brygg.",
-            "en": "Note the volume (and whether it was measured hot or cooled) and the gravity, compare them with the plan, write one hypothesis and choose one deliberate change for a future brew."
+            "no": "Sammenlign målingene med planen, skriv én hypotese og velg én endring til et senere brygg.",
+            "en": "Compare the readings with the plan, write one hypothesis and choose one change for a future brew."
           },
           "correct": true
         }
