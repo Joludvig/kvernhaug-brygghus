@@ -159,16 +159,16 @@
         {
           "id": "a",
           "text": {
-            "no": "Fordi mesketykkelse og maltens enzyminnhold også påvirker resultatet.",
-            "en": "Because mash thickness and the malt's enzyme content also affect the result."
+            "no": "Fordi mesketemperaturen bare påvirker hvor raskt meskingen går, ikke resultatet.",
+            "en": "Because mash temperature only affects how fast the mash goes, not the result."
           },
           "correct": false
         },
         {
           "id": "b",
           "text": {
-            "no": "Fordi mesketemperaturen har liten betydning for hvor gjærbar vørteren blir.",
-            "en": "Because mash temperature has little effect on how fermentable the wort becomes."
+            "no": "Fordi mesketemperaturen virker sammen med mesketykkelse og maltens enzyminnhold.",
+            "en": "Because mash temperature works together with mash thickness and the malt's enzyme content."
           },
           "correct": true
         },
