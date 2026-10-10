@@ -189,31 +189,31 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-MALT-0003"],
       "prompt": {
-        "no": "Hva gir spesialmalt ulik farge og smak?",
-        "en": "What gives specialty malts their different colour and flavour?"
+        "no": "To spesialmalter ser ulike ut og smaker ulikt allerede i sekken. Hva er hovedgrunnen til forskjellen?",
+        "en": "Two specialty malts already look and taste different in the bag. What is the main reason for the difference?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Forholdene malten tørkes, brennes eller ristes under, som utvikler ulik farge og smak.",
-            "en": "The conditions the malt is dried, kilned or roasted under, which develop different colour and flavour."
+            "no": "Hvordan maltene er tørket, brent eller ristet.",
+            "en": "How the malts were dried, kilned or roasted."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Hvilken humle som tilsettes senere i bryggeprosessen.",
-            "en": "Which hops are added later in the brewing process."
+            "no": "Hvor stor andel av kornblandingen de er ment å utgjøre.",
+            "en": "How large a share of the grist they are meant to make up."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Hvilken gjær som brukes til å gjære ølet.",
-            "en": "Which yeast is used to ferment the beer."
+            "no": "Hvor mye enzymer maltene har fått under spiringen.",
+            "en": "How many enzymes the malts gained during germination."
           },
           "correct": false
         }
@@ -223,8 +223,8 @@
         "en": "Correct. The drying, kilning and roasting conditions develop different colour and flavour, and malt colour affects the beer's colour. Colour is not a direct predictor of flavour."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Humle og gjær bidrar til ølet på sine egne måter, men maltens egen farge og smak kommer fra hvordan den tørkes, brennes eller ristes.",
-        "en": "Not quite. Hops and yeast contribute to the beer in their own ways, but a malt's own colour and flavour come from how it is dried, kilned or roasted."
+        "no": "Ikke helt. Andelen av kornblandingen avgjør hvor sterkt en malt bidrar i oppskriften, ikke hvordan malten selv ser ut og smaker. Og det er ikke enzymene som gir fargen: kraftigere oppvarming gir tvert imot mindre enzymer igjen. Det er hvordan malten tørkes, brennes eller ristes som gir ulik farge og smak.",
+        "en": "Not quite. The share of the grist decides how strongly a malt contributes to the recipe, not how the malt itself looks and tastes. And it is not the enzymes that give the colour: more intense heating actually leaves fewer enzymes. It is how the malt is dried, kilned or roasted that gives different colour and flavour."
       }
     },
     {
@@ -249,16 +249,16 @@
         {
           "id": "b",
           "text": {
-            "no": "Ingenting endres, for andelen til en malt har ingen betydning for ølet.",
-            "en": "Nothing changes, because a malt's share has no effect on the beer."
+            "no": "Bare fargen endres, mens smaken blir som før.",
+            "en": "Only the colour changes, while the flavour stays as before."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Maltens bidrag blir svakere, fordi mer av den gjør den mindre merkbar.",
-            "en": "The malt's contribution becomes weaker, because more of it makes it less noticeable."
+            "no": "Ingen merkbar endring, siden det er basismalten som bestemmer maltkarakteren.",
+            "en": "No noticeable change, since it is the base malt that decides the malt character."
           },
           "correct": false
         }
@@ -268,8 +268,8 @@
         "en": "Correct. The share each malt has of the grist affects how strongly it contributes to the recipe's malt character."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Andelen hver malt har av kornblandingen påvirker hvor sterkt den bidrar til oppskriftens maltkarakter, så mer av en malt gir et sterkere bidrag.",
-        "en": "Not quite. The share each malt has of the grist affects how strongly it contributes to the recipe's malt character, so more of a malt gives a stronger contribution."
+        "no": "Ikke helt. Spesialmalt gir smak og ikke bare farge, og det er ikke bare basismalten som bestemmer maltkarakteren. Andelen hver malt har av kornblandingen påvirker hvor sterkt akkurat den malten bidrar, så mer av en malt gir et sterkere bidrag.",
+        "en": "Not quite. Specialty malt gives flavour and not just colour, and it is not only the base malt that decides the malt character. The share each malt has of the grist affects how strongly that particular malt contributes, so more of a malt gives a stronger contribution."
       }
     },
     {
@@ -421,8 +421,8 @@
         {
           "id": "a",
           "text": {
-            "no": "Den forbruker gjærbare sukkerarter og produserer alkohol og karbondioksid, og gir også smaks- og aromastoffer.",
-            "en": "It consumes fermentable sugars and produces alcohol and carbon dioxide, and it also gives flavour and aroma compounds."
+            "no": "Den forbruker gjærbare sukkerarter og lager alkohol og karbondioksid.",
+            "en": "It consumes fermentable sugars and makes alcohol and carbon dioxide."
           },
           "correct": true
         },
@@ -437,8 +437,8 @@
         {
           "id": "c",
           "text": {
-            "no": "Den gir bare karbondioksid, mens alkoholen kommer direkte fra malten.",
-            "en": "It only gives carbon dioxide, while the alcohol comes straight from the malt."
+            "no": "Den lager karbondioksid, mens alkoholen kommer fra malten under meskingen.",
+            "en": "It makes carbon dioxide, while the alcohol comes from the malt during mashing."
           },
           "correct": false
         }
@@ -511,24 +511,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Du vet at alegjær typisk gjæres varmere enn lagergjær, og velger temperaturmålet etter veiledningen for akkurat denne stammen.",
-            "en": "You know ale yeast is typically fermented warmer than lager yeast, and you choose the temperature target from the guidance for this particular strain."
+            "no": "Du går ut fra at ale typisk gjæres varmere enn lager, og følger veiledningen for akkurat denne stammen.",
+            "en": "You assume ale is typically fermented warmer than lager, and follow the guidance for this particular strain."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Du bruker ett fast temperaturmål som gjelder for all alegjær, uansett stamme.",
-            "en": "You use one fixed temperature target that applies to all ale yeast, whatever the strain."
+            "no": "Du går ut fra at ale typisk gjæres varmere enn lager, og bruker samme temperatur som for all annen ale.",
+            "en": "You assume ale is typically fermented warmer than lager, and use the same temperature as for any other ale."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Du gjør ingen temperaturplanlegging, siden ale- og lagergjær gjærer likt.",
-            "en": "You do no temperature planning, since ale and lager yeast ferment the same way."
+            "no": "Du går ut fra at ale typisk gjæres kjøligere enn lager, og bruker samme temperatur som for all annen ale.",
+            "en": "You assume ale is typically fermented cooler than lager, and use the same temperature as for any other ale."
           },
           "correct": false
         }
@@ -538,8 +538,8 @@
         "en": "Correct. Ale and lager are typically distinguished by working temperature, but that is a beginner pattern and not a universal rule. The temperature target should be chosen from the guidance for the specific strain."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Ale- og lagergjær har typisk ulik arbeidstemperatur, og det finnes ikke ett felles tall for all ale eller lager. Temperaturmålet velges ut fra veiledningen for den konkrete stammen.",
-        "en": "Not quite. Ale and lager yeasts typically have different working temperatures, and there is no shared number for all ales or lagers. The temperature target is chosen from the guidance for the specific strain."
+        "no": "Ikke helt. Alestammer knyttes typisk til varmere gjæring enn lagerstammer, men det er et nybegynnermønster, ikke ett felles tall for all ale. Temperaturmålet velges ut fra veiledningen for akkurat den stammen du har valgt.",
+        "en": "Not quite. Ale strains are typically associated with warmer fermentation than lager strains, but that is a beginner pattern, not one shared number for all ales. The temperature target is chosen from the guidance for the particular strain you have chosen."
       }
     },
     {
@@ -594,8 +594,8 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-YEAST-0004"],
       "prompt": {
-        "no": "Hvordan bestemmer du hvor mye gjær du skal pitche?",
-        "en": "How do you decide how much yeast to pitch?"
+        "no": "Hvordan bestemmer du hvor mye gjær du skal tilsette (pitche)?",
+        "en": "How do you decide how much yeast to add (pitch)?"
       },
       "options": [
         {
@@ -646,24 +646,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Vann utgjør mesteparten av ølet, så vannkvaliteten kan ha betydning for det ferdige ølet.",
-            "en": "Water makes up most of beer, so water quality can matter to the finished beer."
+            "no": "Vann utgjør mesteparten av ølet, så kvaliteten kan påvirke det ferdige ølet.",
+            "en": "Water makes up most of beer, so its quality can affect the finished beer."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Vann er bare et løsemiddel som ikke påvirker det ferdige ølet.",
-            "en": "Water is just a solvent that does not affect the finished beer."
+            "no": "Vann er bare et løsemiddel for malt og humle, så kvaliteten betyr lite for ølet.",
+            "en": "Water is just a solvent for malt and hops, so its quality matters little to the beer."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Vann er viktig bare for bryggerier, ikke for hjemmebryggere.",
-            "en": "Water matters only for breweries, not for homebrewers."
+            "no": "Vann er viktig for store bryggerier, men kvaliteten betyr lite i små hjemmebrygg.",
+            "en": "Water matters for large breweries, but its quality matters little in small homebrews."
           },
           "correct": false
         }
@@ -673,8 +673,8 @@
         "en": "Correct. Water makes up most of beer, so its quality can matter to the finished beer."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Vann utgjør mesteparten av ølet, så vannkvaliteten kan ha betydning for det ferdige ølet, også for hjemmebryggere.",
-        "en": "Not quite. Water makes up most of beer, so water quality can matter to the finished beer, for homebrewers too."
+        "no": "Ikke helt. Vann er ikke bare et løsemiddel uten betydning, og det gjelder ikke bare store bryggerier. Vann utgjør mesteparten av ølet, så vannkvaliteten kan ha betydning for det ferdige ølet, også for hjemmebryggere.",
+        "en": "Not quite. Water is not just a solvent without importance, and this does not apply only to large breweries. Water makes up most of beer, so water quality can matter to the finished beer, for homebrewers too."
       }
     },
     {
