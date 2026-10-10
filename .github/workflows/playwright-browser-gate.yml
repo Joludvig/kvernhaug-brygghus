@@ -19,6 +19,16 @@ name: Playwright Critical Browser Gate
 #     e.g. the retained #188 method-card offset and the open #191/A2-03
 #     navigation-containment gap are deliberately NOT asserted here).
 #
+# FAST PATH (quiz-content-only PRs). This job is a REQUIRED status context
+# ("Playwright Critical Browser Gate"), so it must always run and finish; a
+# workflow-level `paths:` filter would leave it missing/pending and block the
+# merge. The job therefore always runs, classifies the COMPLETE PR diff with
+# scripts/ci/classify_pr_changes.py and, only when every changed file is a
+# bryggeskole/data/pilot_*.json quiz file, skips the browser work (browser
+# install, browser matrix, runtime gates) and finishes successfully with an
+# explicit log message. Any other change, and any doubt, runs the full gate
+# exactly as before.
+#
 # Deliberately NOT this gate's job (see ci-tests.yml, untouched by this
 # workflow): the full Python regression suite, or the Node "contract"
 # tests under tests/js/ -- both remain the responsibility of the
@@ -43,6 +53,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          # Full history so the classifier can diff the PR against its base.
+          fetch-depth: 0
 
       - name: Assert exact checked-out head (fail-closed)
         run: |
@@ -55,46 +67,71 @@ jobs:
             exit 1
           fi
 
+      - name: Classify changed files (QUIZ_CONTENT_ONLY FAST PATH or FULL CI)
+        id: classify
+        run: >-
+          python3 scripts/ci/classify_pr_changes.py
+          --event "${{ github.event_name }}"
+          --base "${{ github.event.pull_request.base.sha }}"
+          --head "${{ github.event.pull_request.head.sha }}"
+
+      - name: Browser gate skipped (pilot quiz content only)
+        if: steps.classify.outputs.mode == 'QUIZ_CONTENT_ONLY'
+        run: |
+          echo "Browser execution is skipped: this PR changes only bryggeskole/data/pilot_*.json quiz content."
+          echo "No web/, UI, code, test or workflow file changed, so there is no browser-visible code change to exercise."
+          echo "The required check still ran and passed; the quiz data is validated by the CI Test Gate fast path."
+
       - name: Set up Python (for the local static web server)
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Set up Node
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: "npm"
 
       - name: Install Node dependencies
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: npm ci --ignore-scripts
 
       - name: Install Playwright browsers (Chromium + Firefox only)
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: npx playwright install --with-deps chromium firefox
 
       - name: Run Playwright Critical Browser Gate
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: npx playwright test
 
       - name: Install Python dependencies for Streamlit runtime visual gate
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: pip install -r requirements.txt
 
       - name: Run Bryggeskole Streamlit SVG runtime gate
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: npm run test:bryggeskole-svg-runtime
 
       - name: Run Bryggeskole module-grid responsive runtime gate
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: npm run test:bryggeskole-grid-runtime
 
       # Stage UI specs that depend on or write learner history run on their
       # own servers and isolated state dirs (see the two configs). Until those
       # specs exist, --pass-with-no-tests keeps these steps green.
       - name: Run Bryggeskole stage UI progress runtime gate (seeded, isolated state)
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: npm run test:bryggeskole-stage-progress-runtime
 
       - name: Run Bryggeskole stage UI final-matrix runtime gate (isolated state)
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: npm run test:bryggeskole-stage-final-runtime
 
       - name: Upload Playwright report (on failure)
-        if: failure()
+        if: failure() && steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
