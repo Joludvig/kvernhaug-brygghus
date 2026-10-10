@@ -59,42 +59,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-BOIL-0001"],
       "prompt": {
-        "no": "En bryggevenn sier: 'Når vørteren koker, blir alt sterilt, så jeg trenger ikke tenke på hygiene resten av bryggedagen.' Stemmer det, ut fra det du har lært om hva kokingen gjør?",
-        "en": "A brewing friend says: 'Once the wort boils, everything becomes sterile, so I don't need to think about hygiene for the rest of brew day.' Is that correct, based on what you've learned about what boiling does?"
+        "no": "Vørteren har akkurat begynt å koke. Hva skjer med enzymene fra meskingen?",
+        "en": "The wort has just started to boil. What happens to the enzymes from the mash?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - kokingen stopper mesking og reduserer mikrobebelastningen på det tidspunktet, men gjør ikke vørteren, kjelen eller utstyret sterilt for resten av bryggedagen.",
-            "en": "No - boiling stops mashing and reduces the microbial load at that point in time, but it does not make the wort, kettle, or equipment sterile for the rest of brew day."
+            "no": "De blir inaktive, så stivelse ikke lenger brytes ned til sukker.",
+            "en": "They become inactive, so starch is no longer broken down into sugar."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - kokingen gjør alt sterilt, så videre hygiene ikke spiller noen rolle.",
-            "en": "Yes - boiling makes everything sterile, so further hygiene doesn't matter."
+            "no": "De jobber raskere i varmen, så mer stivelse blir til sukker.",
+            "en": "They work faster in the heat, so more starch turns into sugar."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - kokingen har ingen effekt på mikrober i det hele tatt.",
-            "en": "No - boiling has no effect on microbes at all."
+            "no": "De påvirkes ikke, for meskingen stopper fordi stivelsen er brukt opp.",
+            "en": "They are not affected, because mashing stops when the starch is used up."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Kokingen reduserer mikrobebelastningen som følger med fra mesking/lautring, men gjør ikke vørteren eller utstyret sterilt for resten av prosessen - god hygiene ved avkjøling, overføring og gjæring er fortsatt viktig.",
-        "en": "Correct. Boiling reduces the microbial load carried over from mashing/lautering, but it does not make the wort or equipment sterile for the rest of the process - good hygiene during chilling, transfer, and fermentation still matters."
+        "no": "Riktig. Den høye temperaturen gjør enzymene fra meskingen inaktive, så kokingen stopper meskingen helt. Kokingen reduserer også mikrobebelastningen, men gjør ikke vørteren eller utstyret sterilt.",
+        "en": "Correct. The high temperature inactivates the enzymes from the mash, so boiling stops mashing completely. Boiling also reduces the microbial load, but it does not make the wort or equipment sterile."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Kokingen reduserer mikrobebelastningen på det tidspunktet, men gjør verken vørteren eller utstyret sterilt etterpå - hygiene ved avkjøling, overføring og gjæring er fortsatt viktig.",
-        "en": "Not quite. Boiling does reduce the microbial load at that point, but it doesn't make the wort or equipment sterile afterward - hygiene during chilling, transfer, and fermentation still matters."
+        "no": "Ikke helt. Enzymene jobber ikke raskere når vørteren koker, og meskingen stopper ikke fordi stivelsen er brukt opp. Den høye temperaturen gjør enzymene inaktive, så stivelse ikke lenger brytes ned til sukker.",
+        "en": "Not quite. The enzymes do not work faster once the wort boils, and mashing does not stop because the starch is used up. The high temperature inactivates the enzymes, so starch is no longer broken down into sugar."
       }
     },
     {
@@ -104,31 +104,31 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-BOIL-0002"],
       "prompt": {
-        "no": "En bryggevenn sier: 'Precursoren i malten som DMS dannes fra, er selv flyktig - det er den vi koker bort.' Stemmer det?",
-        "en": "A brewing friend says: 'The precursor in the malt that DMS forms from is itself volatile - that's what we boil off.' Is that correct?"
+        "no": "Malten inneholder en precursor som kan danne DMS under oppvarming. Hva er det en kraftig, åpen koking driver ut?",
+        "en": "The malt contains a precursor that can form DMS during heating. What does a vigorous, open boil drive off?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - det er DMS selv som er flyktig og kokes bort, ikke precursoren i malten.",
-            "en": "No - it is DMS itself that is volatile and gets boiled off, not the precursor in the malt."
+            "no": "DMS, som dannes fra precursoren under oppvarmingen.",
+            "en": "DMS, which forms from the precursor during heating."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - precursoren er flyktig og forsvinner under koking.",
-            "en": "Yes - the precursor is volatile and disappears during boiling."
+            "no": "Precursoren, før den rekker å danne DMS.",
+            "en": "The precursor, before it can form DMS."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - verken precursoren eller DMS er flyktige.",
-            "en": "No - neither the precursor nor DMS is volatile."
+            "no": "Både precursoren og DMS, siden begge er flyktige.",
+            "en": "Both the precursor and DMS, since both are volatile."
           },
           "correct": false
         }
@@ -149,42 +149,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-BOIL-0004"],
       "prompt": {
-        "no": "Vørteren din nærmer seg kokepunktet i en kjele som er ganske full, og du ser skum begynne å stige raskt. Hva er en fornuftig respons, basert på det du har lært?",
-        "en": "Your wort is approaching a boil in a fairly full kettle, and you see foam starting to rise quickly. What's a sensible response, based on what you've learned?"
+        "no": "Vørteren har akkurat begynt å koke kraftig i en ganske full kjele, og skummet stiger raskt. Hva gjør du?",
+        "en": "The wort has just started to boil vigorously in a fairly full kettle, and the foam is rising quickly. What do you do?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Følg nøye med, og reduser varmen kort eller stå klar til å håndtere skummet - dette er et kjent tidspunkt for kok-over i en godt fylt kjele.",
-            "en": "Watch closely, and briefly reduce the heat or be ready to manage the foam - this is a known window for a boil-over in a fairly full kettle."
+            "no": "Blir ved kjelen og følger med til skummet har lagt seg.",
+            "en": "Stay by the kettle and keep watching until the foam has settled."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ignorer det - skum ved kokestart skjer aldri og kan trygt overses.",
-            "en": "Ignore it - foam at boil start never happens and can safely be overlooked."
+            "no": "Går fra kjelen en stund, siden skummet legger seg av seg selv.",
+            "en": "Leave the kettle for a while, since the foam settles by itself."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Skru varmen helt av til skummet er borte, og fortsett aldri kokingen etterpå.",
-            "en": "Turn the heat off completely until the foam is gone, and never resume the boil afterward."
+            "no": "Skrur opp varmen, så kokingen kommer raskere forbi skummingen.",
+            "en": "Turn the heat up, so the boil gets past the foaming sooner."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. I de første minuttene etter at en kraftig koking starter, stiger det ofte skum raskt nok til at kjelen kan koke over hvis den er godt fylt og du ikke følger med - å redusere varmen kort eller holde et øye med kjelen er vanlig praksis i dette vinduet.",
-        "en": "Correct. In the first minutes after a vigorous boil begins, foam commonly rises fast enough to cause a boil-over in a fairly full kettle if you're not watching - briefly reducing heat or staying attentive during this window is common practice."
+        "no": "Riktig. I de første minuttene etter at kokingen blir kraftig, stiger skummet ofte raskt, og en godt fylt kjele kan koke over hvis du ikke følger med. Å skru ned varmen en kort stund er en vanlig måte å holde skummet under kontroll på.",
+        "en": "Correct. In the first minutes after the boil turns vigorous, foam often rises quickly, and a fairly full kettle can boil over if you are not watching. Briefly turning the heat down is a common way to keep the foam under control."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Skum som stiger raskt rett etter kokestart er en kjent kok-over-risiko i en godt fylt kjele - løsningen er å følge med og eventuelt redusere varmen kort, ikke å ignorere det eller stoppe kokingen for godt.",
-        "en": "Not quite. Foam rising quickly right after boil start is a known boil-over risk in a fairly full kettle - the response is to watch closely and briefly reduce heat if needed, not to ignore it or stop the boil for good."
+        "no": "Ikke helt. Skummet stiger raskest i de første minuttene etter kokestart, så dette er ikke tiden for å gå fra kjelen, og mer varme gjør det ikke tryggere. Følg med på kjelen i denne perioden, spesielt når den er godt fylt.",
+        "en": "Not quite. The foam rises fastest in the first minutes after the boil starts, so this is not the time to leave the kettle, and more heat does not make it safer. Keep an eye on the kettle during this window, especially when it is fairly full."
       }
     },
     {
@@ -194,31 +194,31 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-HOP-0001"],
       "prompt": {
-        "no": "En bryggevenn sier: 'Jo lenger jeg koker en humletilsetning, desto mer bitterhet får jeg - uten noen øvre grense.' Stemmer det, basert på det du har lært om isomerisering?",
-        "en": "A brewing friend says: 'The longer I boil a hop addition, the more bitterness I get - with no upper limit.' Is that correct, based on what you've learned about isomerization?"
+        "no": "Du lar en humletilsetning koke lenger og lenger. Hva skjer med bitterheten fra den tilsetningen?",
+        "en": "You let a hop addition boil longer and longer. What happens to the bitterness from that addition?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - lengre koketid gir mer bitterhet fra en gitt tilsetning, men utnyttelsen flater ut mot en praktisk øvre grense i stedet for å øke i det uendelige.",
-            "en": "No - longer boil time increases bitterness contribution from a given addition, but utilization levels off toward a practical ceiling instead of increasing without bound."
+            "no": "Den øker, men stadig mindre for hvert ekstra minutt.",
+            "en": "It increases, but by less and less with each extra minute."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - bitterheten øker lineært og uten grense jo lenger du koker.",
-            "en": "Yes - bitterness increases linearly and without limit the longer you boil."
+            "no": "Den øker like mye for hvert ekstra minutt, uten noen grense.",
+            "en": "It increases by the same amount with each extra minute, without limit."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - koketid har ingen effekt på bitterhet i det hele tatt.",
-            "en": "No - boil time has no effect on bitterness at all."
+            "no": "Den avtar, fordi bitterstoffene kokes bort over tid.",
+            "en": "It decreases, because the bittering compounds boil off over time."
           },
           "correct": false
         }
@@ -228,8 +228,8 @@
         "en": "Correct. Isomerization of alpha acids is time-dependent, so longer boil time increases bitterness contribution - but utilization approaches a practical ceiling rather than increasing without bound."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Lengre koketid gir mer bitterhet fra en tilsetning, men den effekten flater ut mot en praktisk øvre grense - den øker ikke i det uendelige.",
-        "en": "Not quite. Longer boil time does increase bitterness from an addition, but that effect levels off toward a practical ceiling - it doesn't increase without bound."
+        "no": "Ikke helt. Bitterheten øker med koketiden fordi isomeriseringen av alfasyrer tar tid, men økningen flater ut mot en praktisk øvre grense. Det er aromaoljene, ikke bitterstoffene, som kokes bort.",
+        "en": "Not quite. Bitterness increases with boil time because isomerizing the alpha acids takes time, but the increase levels off toward a practical ceiling. It is the aroma oils, not the bittering compounds, that boil off."
       }
     },
     {
@@ -239,42 +239,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-HOP-0002", "FACT-HOP-0003"],
       "prompt": {
-        "no": "Du planlegger en svært aromatisk pale ale med lav bitterhet, og en bryggevenn foreslår å tilsette all humlen helt i starten av kokingen. Er det et godt råd, basert på det du har lært?",
-        "en": "You're planning a very aromatic, low-bitterness pale ale, and a brewing friend suggests adding all the hops right at the start of the boil. Is that good advice, based on what you've learned?"
+        "no": "Du vil ha mye humlearoma og lav bitterhet. Hvilken av disse strategiene passer best?",
+        "en": "You want lots of hop aroma and low bitterness. Which of these strategies fits best?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - en tidlig tilsetning gir mest bitterhet og lite aroma; for å få mye aroma med lav bitterhet bør du heller bruke en sen tilsetning eller whirlpool, gjerne kombinert med en mindre tidlig tilsetning for grunnbitterhet.",
-            "en": "No - an early addition gives the most bitterness and little aroma; to get a lot of aroma with low bitterness, you should instead use a late or whirlpool addition, possibly combined with a smaller early addition for base bitterness."
+            "no": "Legg mesteparten sent i kokingen eller i whirlpool; en mindre tidlig tilsetning kan brukes til grunnbitterhet.",
+            "en": "Put most of it late in the boil or in the whirlpool; a smaller early addition can be used for base bitterness."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - alt av humlen bør alltid tilsettes tidlig, uansett ønsket resultat.",
-            "en": "Yes - all the hops should always be added early, regardless of the desired outcome."
+            "no": "Legg mesteparten tidlig i kokingen; lang koketid kan bevare mest aroma.",
+            "en": "Put most of it early in the boil; a long boil time can preserve the most aroma."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Det spiller ingen rolle når humlen tilsettes - resultatet blir det samme.",
-            "en": "It doesn't matter when the hops are added - the result is the same either way."
+            "no": "Fordel like mye tidlig og sent; tidspunktet kan endre aromaen, men ikke bitterheten.",
+            "en": "Split it equally early and late; the timing can change the aroma, but not the bitterness."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Bitterhet og aroma beveger seg i motsatt retning med koketid: en tidlig tilsetning gir mest bitterhet og mindre aroma, mens en sen eller whirlpool-tilsetning bevarer mer aroma og gir lavere bitterhetsutnyttelse - derfor kombinerer bryggere ofte flere tidspunkt for å få begge deler.",
-        "en": "Correct. Bitterness and aroma move in opposite directions with boil time: an early addition gives the most bitterness and less aroma, while a late or whirlpool addition retains more aroma and reaches lower bitterness utilization - which is why brewers commonly combine multiple timings to get both."
+        "no": "Riktig. En sen tilsetning eller whirlpool beholder generelt mer aroma og gir generelt lavere bitterhetsutnyttelse enn en tidlig tilsetning, men ikke null bitterhet. En mindre tidlig tilsetning kan brukes til grunnbitterhet. Å kombinere flere tidspunkt er en vanlig strategi, ikke et krav.",
+        "en": "Correct. A late or whirlpool addition generally keeps more aroma and generally reaches lower bitterness utilization than an early addition, though not zero bitterness. A smaller early addition can be used for base bitterness. Combining several timings is a common strategy, not a requirement."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Tidspunktet for humletilsetning har stor betydning: en tidlig tilsetning gir mest bitterhet og mindre aroma, mens en sen eller whirlpool-tilsetning bevarer mer aroma - for en aromatisk, lav-bitter øl er en sen/whirlpool-tilsetning et bedre valg.",
-        "en": "Not quite. Hop timing matters a great deal: an early addition gives the most bitterness and less aroma, while a late or whirlpool addition retains more aroma - for an aromatic, low-bitterness beer, a late/whirlpool addition is the better choice."
+        "no": "Ikke helt. Lang koketid bevarer ikke aromaen: aromaoljene kokes bort jo lenger humlen koker. Og tidspunktet påvirker også bitterheten, siden lengre koketid generelt gir mer bitterhet. Når målet er mye aroma og lav bitterhet, passer det derfor best å legge mesteparten av humlen sent eller i whirlpool.",
+        "en": "Not quite. A long boil does not preserve the aroma: the aroma oils boil off the longer the hops boil. And timing also affects bitterness, since a longer boil generally gives more bitterness. When the goal is lots of aroma and low bitterness, it therefore fits best to put most of the hops late or in the whirlpool."
       }
     },
     {
@@ -291,35 +291,35 @@
         {
           "id": "a",
           "text": {
-            "no": "Fordi bitterhet og aroma beveger seg i motsatt retning med koketid, så flere tidspunkt lar dem oppnå begge deler i samme øl.",
-            "en": "Because bitterness and aroma move in opposite directions with boil time, so multiple timings let them achieve both in the same beer."
+            "no": "Fordi bitterhet og aroma trekker i hver sin retning med koketiden.",
+            "en": "Because bitterness and aroma pull in opposite directions with boil time."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Fordi det finnes en fast oppskrift på 60/20/5 minutter som alltid må følges.",
-            "en": "Because there's a fixed 60/20/5-minute schedule that must always be followed."
+            "no": "Fordi en sen tilsetning gir mest bitterhet og en tidlig gir mest aroma.",
+            "en": "Because a late addition gives the most bitterness and an early one the most aroma."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Fordi én enkelt tilsetning aldri gir noen bitterhet eller aroma i det hele tatt.",
-            "en": "Because a single addition never gives any bitterness or aroma at all."
+            "no": "Fordi humle som koker lenge, mister både bitterheten og aromaen sin.",
+            "en": "Because hops that boil for a long time lose both their bitterness and their aroma."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Siden bitterhet favoriseres av lang koketid og aroma av kort koketid, lar en kombinasjon av tidlig og sen/whirlpool-tilsetning bryggeren forfølge begge målene uavhengig av hverandre, uten å følge noe fast tidsskjema.",
-        "en": "Correct. Since bitterness is favored by long boil time and aroma by short boil time, combining an early addition with a late/whirlpool addition lets the brewer pursue both goals independently, without following any fixed schedule."
+        "no": "Riktig. Lengre koketid gir mer bitterhet, mens kortere koketid bevarer mer aroma. Ved å kombinere en tidlig tilsetning med en sen eller whirlpool-tilsetning kan bryggeren få begge deler i samme øl.",
+        "en": "Correct. A longer boil gives more bitterness, while a shorter boil keeps more aroma. By combining an early addition with a late or whirlpool addition, the brewer can get both in the same beer."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Det finnes ingen fast, universell tidsplan, og én enkelt tilsetning gir både bitterhet og aroma i et visst omfang - poenget er at flere tidspunkt lar bryggeren målrette bitterhet og aroma hver for seg, siden de beveger seg i motsatt retning med koketid.",
-        "en": "Not quite. There's no fixed, universal schedule, and a single addition does contribute some bitterness and some aroma - the point is that multiple timings let the brewer target bitterness and aroma independently, since they move in opposite directions with boil time."
+        "no": "Ikke helt. Det er den tidlige tilsetningen som gir mest bitterhet, og lang koking øker bitterheten i stedet for å fjerne den. Bitterhet og aroma beveger seg i motsatt retning med koketiden, så flere tidspunkt lar bryggeren få begge deler.",
+        "en": "Not quite. It is the early addition that gives the most bitterness, and a long boil increases bitterness rather than removing it. Bitterness and aroma move in opposite directions with boil time, so several timings let the brewer get both."
       }
     },
     {
@@ -329,42 +329,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-HOP-0001", "FACT-HOP-0002"],
       "prompt": {
-        "no": "En bryggevenn sier: 'Whirlpool er egentlig bare en veldig sen koketilsetning - samme ting, bare med et annet navn.' Stemmer det?",
-        "en": "A brewing friend says: 'Whirlpool is really just a very late boil addition - same thing, just a different name.' Is that correct?"
+        "no": "Hva skiller en whirlpool-tilsetning fra en sen koketilsetning?",
+        "en": "What distinguishes a whirlpool addition from a late boil addition?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - whirlpool tilsettes ETTER at aktiv koking er stoppet og holdes ved en lavere, ikke-kokende temperatur, mens en sen koketilsetning fortsatt er i aktiv koking; forskjellen i temperatur og tid gir ulik bitterhets-/aromabalanse.",
-            "en": "No - whirlpool hops are added AFTER active boiling has stopped and held at a lower, non-boiling temperature, while a late boil addition is still in active boiling; the difference in temperature and time gives a different bitterness/aroma balance."
+            "no": "Humlen tilsettes etter at kokingen er stoppet, og holdes varm uten å koke.",
+            "en": "The hops go in after the boil has stopped and are held hot without boiling."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - det er nøyaktig samme teknikk med et annet navn.",
-            "en": "Yes - it's exactly the same technique under a different name."
+            "no": "Humlen tilsettes rett før kokingen stopper, og koker med de siste minuttene.",
+            "en": "The hops go in just before the boil stops and boil for the last few minutes."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - whirlpool gir alltid null bitterhet, uansett hvor lenge eller varmt den holdes.",
-            "en": "No - whirlpool always gives zero bitterness, no matter how long or hot it's held."
+            "no": "Humlen tilsettes når vørteren er kjølt ned, så den gir aroma uten bitterhet.",
+            "en": "The hops go in once the wort has cooled, so they give aroma without bitterness."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Whirlpool/hop-stand er en egen teknikk - humlen tilsettes etter at aktiv koking er stoppet og holdes varm, men ikke kokende, en periode. Både lavere temperatur og kortere tid gjør at whirlpool vanligvis gir lavere bitterhetsutnyttelse enn en koketilsetning og bevarer mer aroma - men en varm, lang whirlpool kan likevel bidra med merkbar bitterhet, ikke null.",
-        "en": "Correct. Whirlpool/hop-stand is a distinct technique - the hops are added after active boiling has stopped and held hot, but not boiling, for a period. Both the lower temperature and shorter time mean whirlpool typically reaches lower bitterness utilization than a boil addition and retains more aroma - but a hot, long whirlpool can still contribute material bitterness, not zero."
+        "no": "Riktig. Whirlpool/hop-stand er en egen teknikk: humlen tilsettes etter at aktiv koking er stoppet, og holdes varm, men ikke kokende, en periode. Det gir vanligvis lavere bitterhet og mer aroma enn en koketilsetning, men en varm, lang whirlpool kan likevel gi merkbar bitterhet.",
+        "en": "Correct. Whirlpool/hop-stand is a distinct technique: the hops are added after active boiling has stopped and held hot, but not boiling, for a period. That usually gives lower bitterness and more aroma than a boil addition, but a hot, long whirlpool can still give material bitterness."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Whirlpool er en egen teknikk, ikke bare en sen koketilsetning: humlen tilsettes etter at aktiv koking er stoppet og holdes ved lavere, ikke-kokende temperatur - og selv om utnyttelsen vanligvis er lavere enn ved en koketilsetning, er den ikke null ved en varm, lang whirlpool.",
-        "en": "Not quite. Whirlpool is a distinct technique, not just a late boil addition: the hops are added after active boiling has stopped and held at a lower, non-boiling temperature - and while utilization is typically lower than a boil addition, it isn't zero for a hot, long whirlpool."
+        "no": "Ikke helt. En whirlpool-tilsetning koker ikke med de siste minuttene, og vørteren er ikke kjølt ned: humlen tilsettes etter at aktiv koking er stoppet, og holdes varm, men ikke kokende. Bitterheten blir vanligvis lavere enn ved en koketilsetning, men ikke null.",
+        "en": "Not quite. A whirlpool addition does not boil for the last few minutes, and the wort has not been cooled: the hops are added after active boiling has stopped and held hot, but not boiling. Bitterness is usually lower than from a boil addition, but not zero."
       }
     },
     {
@@ -374,42 +374,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-BOIL-0003"],
       "prompt": {
-        "no": "Er 'hot break' og 'chill haze' det samme fenomenet?",
-        "en": "Are 'hot break' and 'chill haze' the same phenomenon?"
+        "no": "Hva er hot break?",
+        "en": "What is hot break?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - hot break er koagulering av proteiner og polyfenoler UNDER koking, mens chill haze er en uklarhet som kan vise seg SENERE, i det ferdige ølet når det er kaldt.",
-            "en": "No - hot break is the coagulation of proteins and polyphenols DURING boiling, while chill haze is a haze that can show up LATER, in the finished beer when it is cold."
+            "no": "Proteiner og polyfenoler som koagulerer og feller ut under kokingen.",
+            "en": "Proteins and polyphenols that coagulate and precipitate during the boil."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - det er nøyaktig samme fenomen, bare med to forskjellige navn.",
-            "en": "Yes - it's exactly the same phenomenon, just with two different names."
+            "no": "En uklarhet som kan vise seg i det ferdige ølet når det er kaldt.",
+            "en": "A haze that can show up in the finished beer when it is cold."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - hot break oppstår under avkjøling, og chill haze oppstår under koking.",
-            "en": "No - hot break occurs during cooling, and chill haze occurs during boiling."
+            "no": "Skummet som stiger raskt i de første minuttene av kokingen.",
+            "en": "The foam that rises quickly in the first minutes of the boil."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Kokingen får proteiner og polyfenoler til å koagulere og felle ut som hot break; chill haze er et annet, senere fenomen - en uklarhet i det ferdige ølet når det er kaldt - ikke det samme.",
-        "en": "Correct. Boiling causes proteins and polyphenols to coagulate and precipitate as hot break; chill haze is a different, later phenomenon - a haze in the finished beer when it is cold - not the same thing."
+        "no": "Riktig. Kokingen får proteiner og polyfenoler i vørteren til å koagulere og felle ut som hot break. Chill haze er noe annet: en uklarhet som kan vise seg senere i det ferdige ølet når det er kaldt.",
+        "en": "Correct. Boiling causes proteins and polyphenols in the wort to coagulate and precipitate as hot break. Chill haze is something else: a haze that can show up later in the finished beer when it is cold."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Hot break skjer UNDER koking, mens chill haze er en egen uklarhet som viser seg SENERE, i det ferdige ølet når det er kaldt - de to må ikke forveksles.",
-        "en": "Not quite. Hot break happens DURING boiling, while chill haze is a separate haze that shows up LATER, in the finished beer when it is cold - the two should not be confused."
+        "no": "Ikke helt. Uklarheten i kaldt, ferdig øl er chill haze, et annet og senere fenomen, og skummet ved kokestart er heller ikke hot break. Hot break er proteiner og polyfenoler som koagulerer og feller ut under kokingen.",
+        "en": "Not quite. The haze in cold, finished beer is chill haze, a different and later phenomenon, and the foam at the start of the boil is not hot break either. Hot break is proteins and polyphenols that coagulate and precipitate during the boil."
       }
     }
   ]
