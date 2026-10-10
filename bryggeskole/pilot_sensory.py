@@ -47,7 +47,7 @@ import json
 import os
 import re
 
-from bryggeskole.course_fact_registry import get_verified_record
+from bryggeskole.course_fact_registry import VerifiedFactLookup
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_PILOT_PATH = os.path.join(_HERE, "data", "pilot_sensory_evaluation.json")
@@ -127,7 +127,7 @@ def _validate_bilingual_text(value, path, errors):
             errors.append(f"{path}: missing or empty '{lang}' text.")
 
 
-def _validate_source_claims(value, path, errors, registry_path):
+def _validate_source_claims(value, path, errors, verified_facts):
     if not isinstance(value, list) or not value:
         errors.append(f"{path}: 'source_claims' must be a non-empty list.")
         return
@@ -141,7 +141,7 @@ def _validate_source_claims(value, path, errors, registry_path):
             errors.append(f"{item_path}: duplicate claim id {claim_id!r}.")
             continue
         seen.add(claim_id)
-        if get_verified_record(registry_path, claim_id) is None:
+        if not verified_facts.contains(claim_id):
             errors.append(
                 f"{item_path}: claim id {claim_id!r} is not a verified Course Fact "
                 f"Registry record (missing or not verified -- these are deliberately "
@@ -149,7 +149,7 @@ def _validate_source_claims(value, path, errors, registry_path):
             )
 
 
-def _validate_basis_and_claims(item, path, errors, registry_path):
+def _validate_basis_and_claims(item, path, errors, verified_facts):
     """Scoped basis rule (issue #472). Returns the item's basis if it is
     valid, else None. `fact` delegates to the unchanged source-claim
     validator; `methodology` requires an empty source_claims list."""
@@ -168,7 +168,7 @@ def _validate_basis_and_claims(item, path, errors, registry_path):
     else:
         # basis == "fact", or missing/invalid basis (already reported): the
         # normal non-empty, verified-only rule still applies.
-        _validate_source_claims(item["source_claims"], path, errors, registry_path)
+        _validate_source_claims(item["source_claims"], path, errors, verified_facts)
     return basis
 
 
@@ -188,7 +188,7 @@ def _validate_concepts(value, path, errors):
         seen.add(concept)
 
 
-def _validate_chunk(chunk, index, errors, seen_ids, registry_path):
+def _validate_chunk(chunk, index, errors, seen_ids, verified_facts):
     path = f"chunks[{index}]"
     if not isinstance(chunk, dict):
         errors.append(f"{path}: chunk must be an object, got {type(chunk).__name__}.")
@@ -211,7 +211,7 @@ def _validate_chunk(chunk, index, errors, seen_ids, registry_path):
         else:
             seen_ids.add(chunk_id)
 
-    _validate_basis_and_claims(chunk, path, errors, registry_path)
+    _validate_basis_and_claims(chunk, path, errors, verified_facts)
 
     if "text" in chunk:
         _validate_bilingual_text(chunk["text"], f"{path}.text", errors)
@@ -270,7 +270,7 @@ def _validate_options(value, path, errors):
         )
 
 
-def _validate_question(question, index, errors, seen_ids, registry_path):
+def _validate_question(question, index, errors, seen_ids, verified_facts):
     path = f"questions[{index}]"
     if not isinstance(question, dict):
         errors.append(f"{path}: question must be an object, got {type(question).__name__}.")
@@ -302,7 +302,7 @@ def _validate_question(question, index, errors, seen_ids, registry_path):
     if "concepts" in question:
         _validate_concepts(question["concepts"], path, errors)
 
-    basis = _validate_basis_and_claims(question, path, errors, registry_path)
+    basis = _validate_basis_and_claims(question, path, errors, verified_facts)
     if basis == "methodology" and isinstance(question.get("concepts"), list):
         for concept in question["concepts"]:
             if concept not in METHODOLOGY_CONCEPTS:
@@ -333,7 +333,7 @@ def validate_pilot_content(data, registry_path=DEFAULT_REGISTRY_PATH):
 
     Every `source_claims` entry (chunk or question) is checked against
     the Course Fact Registry's trusted, verified-only API
-    (get_verified_record) at `registry_path` -- never the raw reader --
+    (VerifiedFactLookup) at `registry_path` -- never the raw reader --
     so a missing claim id and an id that exists but is not `verified`
     both fail identically (§18.3 of BRYGGESKOLE_COURSE_FACT_REGISTRY_V1.md).
     If the registry file itself is malformed, CourseFactRegistryError
@@ -341,6 +341,7 @@ def validate_pilot_content(data, registry_path=DEFAULT_REGISTRY_PATH):
     error string, since there is no meaningful pilot-content verdict
     without a valid registry to check claims against."""
     errors = []
+    verified_facts = VerifiedFactLookup(registry_path)
     if not isinstance(data, dict):
         return [f"Pilot content document must be a JSON object, got {type(data).__name__}."]
 
@@ -363,7 +364,7 @@ def validate_pilot_content(data, registry_path=DEFAULT_REGISTRY_PATH):
     else:
         seen_chunk_ids = set()
         for index, chunk in enumerate(chunks):
-            _validate_chunk(chunk, index, errors, seen_chunk_ids, registry_path)
+            _validate_chunk(chunk, index, errors, seen_chunk_ids, verified_facts)
 
     questions = data.get("questions")
     if not isinstance(questions, list):
@@ -371,7 +372,7 @@ def validate_pilot_content(data, registry_path=DEFAULT_REGISTRY_PATH):
     else:
         seen_question_ids = set()
         for index, question in enumerate(questions):
-            _validate_question(question, index, errors, seen_question_ids, registry_path)
+            _validate_question(question, index, errors, seen_question_ids, verified_facts)
 
     return errors
 
