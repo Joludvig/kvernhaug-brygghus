@@ -125,24 +125,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Målt OG og FG er tettheter du leser av i ditt eget brygg – OG før gjæringen starter og FG når den er ferdig. Planlagt OG og FG er oppskriftens forventede eller beregnede verdier.",
-            "en": "Measured OG and FG are gravities you read in your own brew – OG before fermentation begins and FG when it has finished. Planned OG and FG are the recipe's expected or calculated values."
+            "no": "Målt OG/FG leser du av i ditt eget brygg; planlagt OG/FG er oppskriftens forventede verdier.",
+            "en": "Measured OG/FG are what you read in your own brew; planned OG/FG are the recipe's expected values."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Det er ingen forskjell – oppskriftens OG og FG er det samme som det du måler, så du kan skrive dem inn i bryggeloggen.",
-            "en": "There is no difference – the recipe's OG and FG are the same as what you measure, so you can write them into your brew log."
+            "no": "Planlagt OG/FG er de riktige tallene; målt OG/FG viser hvor nær brygget ditt kom dem.",
+            "en": "Planned OG/FG are the correct numbers; measured OG/FG show how close your brew came to them."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Planlagt FG er den laveste tettheten ølet kan nå, og målt FG viser hvor mye sukker det ferdige ølet inneholder.",
-            "en": "Planned FG is the lowest gravity the beer can reach, and measured FG shows how much sugar the finished beer contains."
+            "no": "Målt OG/FG regnes ut fra oppskriften; planlagt OG/FG er det du leser av underveis.",
+            "en": "Measured OG/FG are calculated from the recipe; planned OG/FG are what you read along the way."
           },
           "correct": false
         }
@@ -152,8 +152,8 @@
         "en": "Correct. Measured OG and FG are numbers you actually read: OG before fermentation begins and FG when it has finished. Planned OG and FG are the recipe's expected or calculated values – a plan you can compare your measurements with."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Målt OG og FG er tettheter du faktisk leser av i ditt eget brygg. Planlagt OG og FG i oppskriften er forventede eller beregnede verdier – nyttige som plan, men ikke en måling. Skriv ned det du målte, også når det ikke stemmer med planen.",
-        "en": "Not quite. Measured OG and FG are gravities you actually read in your own brew. The planned OG and FG in the recipe are expected or calculated values – useful as a plan, but not a measurement. Write down what you measured, even when it does not match the plan."
+        "no": "Ikke helt. Målt OG og FG er tettheter du faktisk leser av i ditt eget brygg. Planlagt OG og FG i oppskriften er forventede eller beregnede verdier – nyttige som plan, men ikke en fasit og ikke en måling. Skriv ned det du målte, også når det ikke stemmer med planen.",
+        "en": "Not quite. Measured OG and FG are gravities you actually read in your own brew. The planned OG and FG in the recipe are expected or calculated values – useful as a plan, but not the right answer and not a measurement. Write down what you measured, even when it does not match the plan."
       }
     },
     {
@@ -175,24 +175,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Flere tetthetsmålinger tatt på samme måte, med litt tid imellom, som viser at tallet har sluttet å endre seg.",
-            "en": "Several gravity readings taken the same way, some time apart, showing that the number has stopped changing."
+            "no": "Flere tetthetsmålinger tatt på samme måte, med litt tid imellom, som viser samme tall.",
+            "en": "Several gravity readings taken the same way, some time apart, that show the same number."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "At luftlåsen er stille – det viser at gjæringen er ferdig.",
-            "en": "That the airlock is quiet – that shows fermentation is finished."
+            "no": "At luftlåsen har vært helt stille i lang tid, uten en eneste boble.",
+            "en": "That the airlock has been completely quiet for a long time, without a single bubble."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Én tetthetsmåling i dag.",
-            "en": "One gravity reading today."
+            "no": "Én tetthetsmåling som ligger nær FG-en oppskriften planla.",
+            "en": "One gravity reading that is close to the FG the recipe planned."
           },
           "correct": false
         }
@@ -202,8 +202,8 @@
         "en": "Correct. When repeated readings some time apart stop changing, that indicates fermentation has plausibly finished. The airlock is not a reliable sign, and one reading on its own does not show that the number holds."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Luftlåsen er ikke et pålitelig tegn, og én måling viser ikke at tallet holder seg. Det som teller, er gjentatte tetthetsmålinger med litt tid imellom som slutter å endre seg.",
-        "en": "Not quite. The airlock is not a reliable sign, and one reading does not show that the number holds. What counts is repeated gravity readings, some time apart, that stop changing."
+        "no": "Ikke helt. Luftlåsen er ikke et pålitelig tegn, og én måling viser ikke at tallet holder seg – heller ikke når den ligger nær planlagt FG. Et bedre grunnlag er gjentatte tetthetsmålinger med litt tid imellom som slutter å endre seg.",
+        "en": "Not quite. The airlock is not a reliable sign, and one reading does not show that the number is holding – not even when it is close to the planned FG. A better basis is repeated gravity readings some time apart that stop changing."
       }
     },
     {
@@ -223,24 +223,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Det målte tallet som det er, og at det skiller seg fra planen – en forskjell å se nærmere på.",
-            "en": "The measured number as it is, and that it differs from the plan – a difference to look into."
+            "no": "Det målte tallet, og et notat om at det skiller seg fra planen.",
+            "en": "The measured number, and a note that it differs from the plan."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Oppskriftens planlagte FG, siden det er det riktige tallet.",
-            "en": "The recipe's planned FG, since that is the right number."
+            "no": "Oppskriftens planlagte FG, siden målingen trolig er unøyaktig.",
+            "en": "The recipe's planned FG, since the reading is probably inaccurate."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "At brygget er mislykket.",
-            "en": "That the brew has failed."
+            "no": "Venter med loggen til tallet har kommet ned til planlagt FG.",
+            "en": "Hold off on the log until the number has come down to the planned FG."
           },
           "correct": false
         }
@@ -250,8 +250,8 @@
         "en": "Correct. You write down what you actually measured. The recipe's FG is a plan, and the difference is something to look into – not a grade and not a diagnosis."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Loggen skal vise det du faktisk målte, ikke planen. En forskjell fra planen er noe å se nærmere på, ikke en karakter eller en diagnose.",
-        "en": "Not quite. The log should show what you actually measured, not the plan. A difference from the plan is something to look into, not a grade or a diagnosis."
+        "no": "Ikke helt. Loggen skal vise det du faktisk målte, også når det ikke stemmer med planen – ikke planen i stedet, og ikke først når tallet passer. En forskjell fra planen er noe å se nærmere på, ikke en karakter eller en diagnose.",
+        "en": "Not quite. The log should show what you actually measured, even when it does not match the plan – not the plan instead, and not only once the number fits. A difference from the plan is something to look into, not a grade or a diagnosis."
       }
     },
     {
@@ -279,16 +279,16 @@
         {
           "id": "b",
           "text": {
-            "no": "Temperaturen gjærprodusenten anbefaler.",
-            "en": "The temperature the yeast producer recommends."
+            "no": "Temperaturen gjærprodusenten anbefaler, og hvilken gjærstamme du bruker.",
+            "en": "The temperature the yeast producer recommends, and which yeast strain you use."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Temperaturen du sikter mot i planen din.",
-            "en": "The temperature you are aiming for in your plan."
+            "no": "Temperaturen du sikter mot, og hvor lenge du planlegger å holde den.",
+            "en": "The temperature you are aiming for, and how long you plan to hold it."
           },
           "correct": false
         }
@@ -298,8 +298,8 @@
         "en": "Correct. A measurement is what you actually read, and where or how you measured it tells you what the number refers to. A recommended temperature or one you aim for is a plan, not a measurement."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Det er en plan, ikke en måling. I loggen skriver du temperaturen du faktisk leste av, og hvor eller hvordan du målte den.",
-        "en": "Not quite. That is a plan, not a measurement. In the log you write the temperature you actually read, and where or how you measured it."
+        "no": "Ikke helt. En anbefalt temperatur eller en temperatur du sikter mot er en plan, ikke en måling. I loggen skriver du temperaturen du faktisk leste av, og hvor eller hvordan du målte den.",
+        "en": "Not quite. A recommended temperature or a temperature you are aiming for is a plan, not a measurement. In the log you write the temperature you actually read, and where or how you measured it."
       }
     },
     {
@@ -321,24 +321,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Prøvens temperatur – hydrometeret er laget for å vise riktig ved én referansetemperatur, som står på instrumentet eller i bruksanvisningen.",
-            "en": "The sample's temperature – the hydrometer is made to read correctly at one reference temperature, stated on the instrument or in its instructions."
+            "no": "Prøvens temperatur, siden hydrometeret ditt er laget for én bestemt referansetemperatur.",
+            "en": "The sample's temperature, since your hydrometer is made for one specific reference temperature."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ingenting mer – et hydrometer viser riktig uansett temperatur.",
-            "en": "Nothing more – a hydrometer reads correctly at any temperature."
+            "no": "Bare tettheten, siden prøvens temperatur ikke påvirker avlesningen.",
+            "en": "Only the gravity, since the sample's temperature does not affect the reading."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Ingenting mer – alle hydrometre har samme referansetemperatur.",
-            "en": "Nothing more – all hydrometers have the same reference temperature."
+            "no": "Prøvens temperatur, siden alle hydrometre er laget for samme referansetemperatur.",
+            "en": "The sample's temperature, since all hydrometers are made for the same reference temperature."
           },
           "correct": false
         }
@@ -348,8 +348,8 @@
         "en": "Correct. A hydrometer reads correctly at one reference temperature, stated on the instrument or in its instructions. A sample at a different temperature can give a different reading, so you note the sample's temperature."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Et hydrometer er laget for én referansetemperatur, og ulike hydrometre kan ha ulike referansetemperaturer. En prøve med en annen temperatur kan gi en annen avlesning, så noter prøvens temperatur.",
-        "en": "Not quite. A hydrometer is made for one reference temperature, and different hydrometers can have different reference temperatures. A sample at a different temperature can give a different reading, so note the sample's temperature."
+        "no": "Ikke helt. Prøvens temperatur kan påvirke avlesningen, og ulike hydrometre kan ha ulike referansetemperaturer – den som gjelder ditt, står på instrumentet eller i bruksanvisningen. Noter derfor prøvens temperatur.",
+        "en": "Not quite. The sample's temperature can affect the reading, and different hydrometers can have different reference temperatures – the one for yours is stated on the instrument or in its instructions. So note the sample's temperature."
       }
     },
     {
@@ -369,24 +369,24 @@
         {
           "id": "a",
           "text": {
-            "no": "«FG målt høyere enn planlagt.» Og for seg: «Gjetning: kanskje gjæren? Usikker ennå.»",
-            "en": "\"FG measured higher than planned.\" And separately: \"Guess: maybe the yeast? Still uncertain.\""
+            "no": "«FG målt høyere enn planlagt.» Eget notat: «Gjetning: for kald gjæring? Usikker ennå.»",
+            "en": "\"FG measured higher than planned.\" Separate note: \"Guess: fermentation too cold? Still uncertain.\""
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "«Gjæren var dårlig.»",
-            "en": "\"The yeast was bad.\""
+            "no": "«FG målt høyere enn planlagt.» Eget notat: «Årsak: gjæringen ble for kald.»",
+            "en": "\"FG measured higher than planned.\" Separate note: \"Cause: fermentation was too cold.\""
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "«Brygget feilet fordi gjæringen stoppet.»",
-            "en": "\"The brew failed because fermentation stopped.\""
+            "no": "«Gjæringen stoppet for tidlig.» Eget notat: «Årsak: gjæringen ble for kald.»",
+            "en": "\"Fermentation stopped too early.\" Separate note: \"Cause: fermentation was too cold.\""
           },
           "correct": false
         }
@@ -396,8 +396,8 @@
         "en": "Correct. First what you measured, and then separately what you think might be the cause, marked as a guess. \"Still uncertain\" is a complete answer."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Det svaret blander en gjetning inn som om den var en måling. Skriv først det du målte, og så for seg det du tror, merket som en gjetning.",
-        "en": "Not quite. That answer mixes a guess in as if it were a measurement. Write what you measured first, and then separately what you think, marked as a guess."
+        "no": "Ikke helt. Det du målte, skal stå som en måling, og det du tror er årsaken, skal stå for seg og merkes som en gjetning – ikke skrives som om det var sikkert. Skriv først det du målte, og så det du tror.",
+        "en": "Not quite. What you measured should stand as a measurement, and what you think caused it should stand separately and be marked as a guess – not written as if it were certain. Write first what you measured, and then what you think."
       }
     },
     {
