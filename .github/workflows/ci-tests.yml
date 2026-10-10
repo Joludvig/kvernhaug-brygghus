@@ -16,6 +16,16 @@ name: CI Test Gate
 #     `node tests/js/*.js` does not execute every expanded filename as a
 #     separate program)
 #
+# FAST PATH (quiz-content-only PRs). The required status context `test` must
+# always run and finish -- a workflow-level `paths:` filter would leave it
+# missing/pending and block the merge -- so the job always runs and only
+# chooses how much to do. scripts/ci/classify_pr_changes.py classifies the
+# COMPLETE PR diff: if every changed file is a bryggeskole/data/pilot_*.json
+# quiz file, the job runs the Bryggeskole data/contract tests below instead
+# of the whole repository suite. Anything else (code, tests, workflows,
+# web/, the fact registry, the stage map, unknown files), every push to
+# master and every doubtful case runs the FULL suite, unchanged.
+#
 # Deliberately NOT covered here: Agent Bridge behavior (see
 # claude-agent-bridge.yml, untouched by this workflow) and web deployment
 # (merged web/ code is not deployed web code until the owner deploys it).
@@ -40,6 +50,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so the classifier can diff the PR against its base.
+          fetch-depth: 0
+
+      - name: Classify changed files (QUIZ_CONTENT_ONLY FAST PATH or FULL CI)
+        id: classify
+        run: >-
+          python3 scripts/ci/classify_pr_changes.py
+          --event "${{ github.event_name }}"
+          --base "${{ github.event.pull_request.base.sha }}"
+          --head "${{ github.event.pull_request.head.sha }}"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -49,6 +70,7 @@ jobs:
           cache-dependency-path: requirements.txt
 
       - name: Set up Node
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -57,16 +79,56 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Python test suite
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: python -m unittest discover -s tests -b
 
+      # Fast path only: the Bryggeskole pilot data / contract tests. Covers
+      # pilot JSON validity and locked shape (all test_pilot_* modules incl.
+      # their wording guardrails), the fact registry and claim integrity, the
+      # course-stage map and allocation contract, NO/EN and data-shape
+      # constraints, the answer-order and mastery modules, and the panels that
+      # render the pilot data. The AppTest UI suites (test_ui_bryggeskole_*)
+      # and the Node/browser tests are not affected by quiz text alone.
+      - name: Run Bryggeskole quiz-content tests (fast path)
+        if: steps.classify.outputs.mode == 'QUIZ_CONTENT_ONLY'
+        run: >-
+          python -m unittest -b
+          tests.test_ci_quiz_fast_path
+          tests.test_pilot_boil_hop
+          tests.test_pilot_cleaning_safety
+          tests.test_pilot_cool_transfer
+          tests.test_pilot_fermentation
+          tests.test_pilot_mashing
+          tests.test_pilot_measurement
+          tests.test_pilot_method_context
+          tests.test_pilot_package
+          tests.test_pilot_raw_materials
+          tests.test_pilot_recipe
+          tests.test_pilot_sensory
+          tests.test_course_fact_registry
+          tests.test_course_stage_map
+          tests.test_course_stage_allocation_contract
+          tests.test_bryggeskole_answer_order
+          tests.test_bryggeskole_malt_roles_strip
+          tests.test_bryggeskole_mastery
+          tests.test_bryggeskole_mastery_store
+          tests.test_raavarer_learn_plan_bridges
+          tests.test_hop_panel
+          tests.test_yeast_panel
+          tests.test_process_panel
+
       - name: Run Node contract tests -- calculation golden vectors
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: node tests/js/test_calculation_golden_vectors.js
 
       - name: Run Node contract tests -- .kbhrecipe
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: node tests/js/test_kbhrecipe_contract.js
 
       - name: Run Node contract tests -- .kbhbrew
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: node tests/js/test_kbhbrew_contract.js
 
       - name: Run Node contract tests -- Streamlit runtime guard
+        if: steps.classify.outputs.mode != 'QUIZ_CONTENT_ONLY'
         run: node tests/js/test_streamlit_runtime_guard.js
