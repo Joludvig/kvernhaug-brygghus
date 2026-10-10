@@ -229,8 +229,8 @@
         {
           "id": "a",
           "text": {
-            "no": "Om de er laget for å tåle trykket og ikke er skadet.",
-            "en": "Whether they are made to withstand the pressure and are not damaged."
+            "no": "Om de er laget for å tåle trykket og brukes innenfor grensene sine.",
+            "en": "Whether they are made to withstand the pressure and are used within their limits."
           },
           "correct": true
         },
@@ -252,12 +252,12 @@
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Under flaskekondisjonering holder flasken trykk. En flaske som er skadet eller ikke laget for det trykket, kan svikte eller lekke – bruk derfor trykkegnede flasker og hold deg innenfor grensene deres.",
-        "en": "Correct. During bottle conditioning the bottle holds pressure. A bottle that is damaged or not made for that pressure can fail or leak – so use pressure-suitable bottles and stay within their limits."
+        "no": "Riktig. Under flaskekondisjonering bygges det opp trykk i flasken. En flaske som ikke er laget for det trykket, kan svikte eller lekke – bruk derfor flasker som er laget for trykket, og hold deg innenfor grensene deres.",
+        "en": "Correct. During bottle conditioning, pressure builds up in the bottle. A bottle that is not made for that pressure can fail or leak – so use bottles that are made for the pressure, and stay within their limits."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Rene flasker og en tett kork trenger du også, men det gjør ikke en flaske trykkegnet. Det som avgjør, er om flasken er laget for trykket og ikke er skadet.",
-        "en": "Not quite. You also need clean bottles and a tight cap, but that does not make a bottle pressure-suitable. What decides it is whether the bottle is made for the pressure and is not damaged."
+        "no": "Ikke helt. Rene flasker og en tett kork trenger du også, men det gjør ikke en flaske trykkegnet. Det som avgjør, er om flasken er laget for trykket og brukes innenfor grensene sine.",
+        "en": "Not quite. You also need clean bottles and a tight cap, but that does not make a bottle pressure-suitable. What decides it is whether the bottle is made for the pressure and is used within its limits."
       }
     },
     {
