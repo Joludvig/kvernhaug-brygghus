@@ -58,24 +58,24 @@
         {
           "id": "a",
           "text": {
-            "no": "For å korte ned tiden vørteren står i et temperaturområde der uønskede mikroorganismer kan vokse.",
-            "en": "To shorten the time the wort spends in a temperature range where unwanted microorganisms can grow."
+            "no": "For å korte ned tiden vørteren står i temperaturer der uønskede mikroorganismer kan vokse.",
+            "en": "To shorten the time the wort spends at temperatures where unwanted microorganisms can grow."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "For å gjøre vørteren steril, slik at ingen mikroorganismer kan overleve før gjæren tilsettes.",
-            "en": "To make the wort sterile, so that no microorganisms can survive before the yeast is added."
+            "no": "For å drepe uønskede mikroorganismer med temperaturfallet, slik at de ikke kan vokse.",
+            "en": "To kill unwanted microorganisms with the temperature drop, so that they can no longer grow."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "For å bli fortere ferdig – hvor raskt vørteren kjøles, betyr lite for hvordan ølet blir.",
-            "en": "To finish sooner – how fast the wort cools makes little difference to how the beer turns out."
+            "no": "For å spare tid, siden varmen fra kokingen beskytter vørteren helt til den er kald.",
+            "en": "To save time, since the heat from the boil protects the wort until it is cold."
           },
           "correct": false
         }
@@ -85,8 +85,8 @@
         "en": "Correct. Rapid cooling reduces the time the wort spends in a temperature range where unwanted microorganisms can grow, before the yeast is added. It is a risk reduction, not a guarantee."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Nedkjølingen gjør ikke vørteren steril, og farten er ikke bare et spørsmål om å bli ferdig: jo raskere vørteren kjøles, jo kortere står den i et temperaturområde der uønskede mikroorganismer kan vokse. Det reduserer risikoen, men garanterer ikke null infeksjonsrisiko.",
-        "en": "Not quite. Cooling does not make the wort sterile, and speed is not just about finishing sooner: the faster the wort cools, the shorter it spends in a temperature range where unwanted microorganisms can grow. That reduces the risk, but does not guarantee zero infection risk."
+        "no": "Ikke helt. Temperaturfallet dreper ikke mikroorganismene, og varmen fra kokingen beskytter vørteren bare i starten av nedkjølingen før virkningen avtar. Rask nedkjøling korter ned tiden vørteren står i temperaturer der uønskede mikroorganismer kan vokse. Det reduserer risikoen, men garanterer ikke null infeksjonsrisiko.",
+        "en": "Not quite. The temperature drop does not kill the microorganisms, and the heat from the boil protects the wort only at the start of cooling before the effect fades. Rapid cooling shortens the time the wort spends at temperatures where unwanted microorganisms can grow. That reduces the risk, but does not guarantee zero infection risk."
       }
     },
     {
@@ -96,42 +96,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-COOL-0002"],
       "prompt": {
-        "no": "Er cold break og hot break det samme fenomenet?",
-        "en": "Are cold break and hot break the same phenomenon?"
+        "no": "Når i bryggeprosessen dannes hot break og cold break?",
+        "en": "When in the brewing process do hot break and cold break form?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - hot break oppstår UNDER kokingen, mens cold break er et annet fenomen som oppstår SENERE, når vørteren kjøles ned mot pitchetemperatur.",
-            "en": "No - hot break forms DURING boiling, while cold break is a different phenomenon that forms LATER, as the wort cools toward pitching temperature."
+            "no": "Hot break under kokingen, og cold break når vørteren kjøles ned etterpå.",
+            "en": "Hot break during the boil, and cold break as the wort cools afterwards."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - det er nøyaktig samme fenomen, bare med to forskjellige navn.",
-            "en": "Yes - it's exactly the same phenomenon, just with two different names."
+            "no": "Cold break under kokingen, og hot break når vørteren kjøles ned etterpå.",
+            "en": "Cold break during the boil, and hot break as the wort cools afterwards."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Nei - cold break oppstår under kokingen, og hot break oppstår under nedkjøling.",
-            "en": "No - cold break forms during boiling, and hot break forms during cooling."
+            "no": "Begge under kokingen: hot break tidlig, og cold break mot slutten.",
+            "en": "Both during the boil: hot break early, and cold break towards the end."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Hot break dannes under selve kokingen; cold break er et eget, temperaturdrevet fenomen som oppstår senere, mens vørteren kjøles mot pitchetemperatur - ikke det samme, og ikke i samme rekkefølge.",
-        "en": "Correct. Hot break forms during the boil itself; cold break is a separate, temperature-driven phenomenon that forms later, as the wort cools toward pitching temperature - not the same thing, and not in the order the wrong answers suggest."
+        "no": "Riktig. Hot break dannes under selve kokingen. Cold break er et eget, temperaturdrevet fenomen som oppstår senere, mens vørteren kjøles ned. De to skjer på forskjellige tidspunkt.",
+        "en": "Correct. Hot break forms during the boil itself. Cold break is a separate, temperature-driven phenomenon that forms later, as the wort cools. The two happen at different points in the process."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Hot break skjer UNDER kokingen, mens cold break er et eget fenomen som oppstår SENERE, under nedkjøling - de to må ikke forveksles eller byttes om.",
-        "en": "Not quite. Hot break happens DURING boiling, while cold break is a separate phenomenon that forms LATER, during cooling - the two should not be confused or swapped."
+        "no": "Ikke helt. Hot break dannes under kokingen, ikke under nedkjølingen, og cold break dannes først når vørteren kjøles ned etter kokingen. De to må ikke forveksles eller byttes om.",
+        "en": "Not quite. Hot break forms during the boil, not during cooling, and cold break only forms once the wort cools after the boil. The two should not be confused or swapped."
       }
     },
     {
@@ -148,24 +148,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Rengjør slangen og saniterer den før den kommer i kontakt med vørteren.",
-            "en": "Clean the hose and sanitize it before it comes into contact with the wort."
+            "no": "Vasker slangen godt og saniterer den etterpå, før vørteren renner gjennom.",
+            "en": "Wash the hose well and sanitize it afterwards, before the wort runs through."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Bruker den som den er – den varme vørteren tar knekken på det som sitter i slangen.",
-            "en": "Use it as it is – the hot wort will kill whatever is left in the hose."
+            "no": "Vasker slangen godt; den varme vørteren som renner gjennom, tar seg av resten.",
+            "en": "Wash the hose well; the hot wort running through will take care of the rest."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Skyller slangen godt med varmt vann – da er den klar til bruk.",
-            "en": "Rinse the hose well with hot water – then it is ready to use."
+            "no": "Saniterer slangen grundig; saniteringsmiddelet fjerner også de gamle restene.",
+            "en": "Sanitize the hose thoroughly; the sanitizer also removes the old residue."
           },
           "correct": false
         }
@@ -175,8 +175,8 @@
         "en": "Correct. From the start of cooling, everything that touches the wort or beer must be clean and sanitized – a hose included. Cleaning removes the residue, and sanitizing reduces the microorganisms on the clean surface."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Varmen i vørteren gjør ikke en uvasket slange trygg, og skylling med vann er ikke det samme som sanitering. Slangen må både rengjøres og saniteres før den møter vørteren.",
-        "en": "Not quite. The heat in the wort does not make an unwashed hose safe, and rinsing with water is not the same as sanitizing. The hose must be both cleaned and sanitized before it touches the wort."
+        "no": "Ikke helt. Varmen i vørteren gjør ikke slangen trygg, og sanitering erstatter ikke rengjøring: saniteringsmiddelet skal virke på en flate som allerede er ren. Slangen må både rengjøres og saniteres før den møter vørteren.",
+        "en": "Not quite. The heat in the wort does not make the hose safe, and sanitizing does not replace cleaning: the sanitizer is meant to work on a surface that is already clean. The hose must be both cleaned and sanitized before it touches the wort."
       }
     },
     {
@@ -231,42 +231,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-OXY-0002", "FACT-OXY-0003"],
       "prompt": {
-        "no": "Det er tre dager inn i en aktiv gjæring, og en bryggevenn foreslår å røre kraftig i gjæringskaret for å «gi gjæren mer oksygen og gjøre den sunnere». Er det et godt råd?",
-        "en": "It's three days into active fermentation, and a brewing friend suggests stirring vigorously in the fermenter to \"give the yeast more oxygen and make it healthier.\" Is that good advice?"
+        "no": "Gjæringen har vært godt i gang i tre dager. Hva stemmer om å røre kraftig i gjæringskaret slik at det kommer luft inn i ølet?",
+        "en": "Fermentation has been well underway for three days. What is true about stirring the fermenter vigorously so that air gets into the beer?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Nei - når gjæringen først er aktiv, bør unødvendig oksygeneksponering minimeres; å røre inn luft nå øker risikoen for oksidert smak i stedet for å hjelpe gjæren.",
-            "en": "No - once fermentation is actively underway, unnecessary oxygen exposure should be minimized; stirring in air now increases the risk of oxidized flavor instead of helping the yeast."
+            "no": "Det bør unngås, fordi oksygen nå kan gi oksidert smak i ølet.",
+            "en": "It should be avoided, because oxygen can now cause oxidised flavours in the beer."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Ja - gjær trenger stadig mer oksygen jo lenger gjæringen pågår.",
-            "en": "Yes - yeast needs progressively more oxygen the longer fermentation continues."
+            "no": "Det kan hjelpe, fordi gjæren trenger oksygen for å gjøre ferdig gjæringen.",
+            "en": "It can help, because the yeast needs oxygen to finish fermentation."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Det spiller ingen rolle - oksygen har nøyaktig samme effekt før og etter pitching.",
-            "en": "It doesn't matter - oxygen has exactly the same effect before and after pitching."
+            "no": "Det spiller liten rolle, fordi oksygen bare betyr noe før gjæren tilsettes.",
+            "en": "It makes little difference, because oxygen only matters before the yeast is added."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Pre-pitch og aktiv gjæring er to forskjellige tidsvinduer: der oksygen før/ved pitching kan være nyttig for gjæren, bør unødvendig oksygeneksponering minimeres når gjæringen først er godt i gang, siden det kan gi oksidert smak og redusert holdbarhet.",
-        "en": "Correct. Pre-pitch and active fermentation are two different time windows: while oxygen before/at pitching can be useful for the yeast, unnecessary oxygen exposure should be minimized once fermentation is well underway, since it can cause oxidized flavor and reduced shelf life."
+        "no": "Riktig. Før og rundt tilsettingen av gjæren kan oksygen være nyttig, men når gjæringen først er godt i gang, bør unødvendig oksygen holdes unna. Da kan det gi oksidert smak, svakere humlearoma og kortere holdbarhet.",
+        "en": "Correct. Before and around adding the yeast, oxygen can be useful, but once fermentation is well underway, unnecessary oxygen should be kept out. It can then cause oxidised flavours, diminished hop aroma and reduced shelf life."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Oksygenbehovet endrer seg med tidspunktet: nyttig for gjæren før/ved pitching, men generelt uønsket når gjæringen først er aktiv - å tilsette luft nå er ikke et godt råd.",
-        "en": "Not quite. Oxygen need changes with timing: useful for the yeast before/at pitching, but generally undesirable once fermentation is actively underway - adding air now is not good advice."
+        "no": "Ikke helt. Å røre inn luft hjelper ikke gjæren nå, og oksygen betyr fortsatt noe etter at gjæren er tilsatt: når gjæringen er godt i gang, er unødvendig oksygen generelt uønsket og kan gi oksidert smak.",
+        "en": "Not quite. Stirring in air does not help the yeast now, and oxygen still matters after the yeast is added: once fermentation is well underway, unnecessary oxygen is generally undesirable and can cause oxidised flavours."
       }
     },
     {
@@ -276,31 +276,31 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-TRANSFER-0001"],
       "prompt": {
-        "no": "Hva er den viktigste forskjellen på å overføre med tyngdekraft og med pumpe?",
-        "en": "What is the main difference between transferring by gravity and with a pump?"
+        "no": "Med tyngdekraft må mottakerkaret stå lavere enn karet du tapper fra. Hva stemmer om å bruke pumpe i stedet?",
+        "en": "With gravity, the receiving vessel must sit lower than the vessel you drain from. What is true about using a pump instead?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Med tyngdekraft må mottakerkaret stå lavere; med pumpe slipper du det, men får mer utstyr å rengjøre.",
-            "en": "With gravity the receiving vessel must sit lower; with a pump it need not, but you get more equipment to clean."
+            "no": "Da kan karene stå på samme nivå, men du får mer utstyr å rengjøre.",
+            "en": "The vessels can then sit at the same level, but you get more equipment to clean."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Med tyngdekraft må mottakerkaret stå lavere; med pumpe slipper du det, og rengjøringen blir enklere.",
-            "en": "With gravity the receiving vessel must sit lower; with a pump it need not, and cleaning gets easier."
+            "no": "Da kan karene stå på samme nivå, men pumpen må stå høyest i slangeløpet.",
+            "en": "The vessels can then sit at the same level, but the pump must sit highest in the tubing."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Med tyngdekraft blir det mer sprut og luft; med pumpe blir overføringen lukket og uten luftkontakt.",
-            "en": "With gravity you get more splashing and air; with a pump the transfer is closed, with no air contact."
+            "no": "Da kan karene stå på samme nivå, og overføringen blir lukket og fri for luft.",
+            "en": "The vessels can then sit at the same level, and the transfer becomes closed and free of air."
           },
           "correct": false
         }
@@ -310,8 +310,8 @@
         "en": "Correct. It is a practical trade-off: gravity needs an elevation difference between the vessels but no pump, while a pump can move liquid uphill or between vessels at the same level, but needs more equipment and cleaning. The pump also has its own limits: the most common homebrew pumps are not self-priming and must be filled with liquid."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. En pumpe gir mer utstyr å rengjøre, ikke mindre. Og om overføringen er lukket, er et eget valg, uavhengig av tyngdekraft eller pumpe. Hovedforskjellen er høydeforskjellen mot utstyret og rengjøringen.",
-        "en": "Not quite. A pump means more equipment to clean, not less. And whether the transfer is closed is a separate choice, independent of gravity or pump. The main difference is the height difference versus the equipment and cleaning."
+        "no": "Ikke helt. De vanligste hjemmebryggpumpene er ikke selvsugende, så de plasseres gjerne lavest i slangeløpet, ikke høyest. Og en pumpe gjør ikke overføringen lukket av seg selv; det er et eget valg. Det pumpen koster, er mer utstyr og rengjøring.",
+        "en": "Not quite. The most common homebrew pumps are not self-priming, so they are usually placed at the lowest point of the tubing, not the highest. And a pump does not make the transfer closed by itself; that is a separate choice. What the pump costs is more equipment and cleaning."
       }
     }
   ]
