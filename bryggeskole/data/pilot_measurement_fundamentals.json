@@ -419,24 +419,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Hydrometeret måler tettheten. Refraktometeret måler brytningsindeksen, ofte vist som Brix, og kan på vørter som ikke har begynt å gjære, brukes til å anslå tettheten.",
-            "en": "The hydrometer measures gravity. The refractometer measures the refractive index, often shown as Brix, and on wort that has not started fermenting it can be used to estimate gravity."
+            "no": "Hydrometeret måler tettheten; refraktometeret måler brytningsindeksen, altså hvordan prøven bryter lyset.",
+            "en": "The hydrometer measures gravity; the refractometer measures the refractive index, that is how the sample bends light."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "De måler det samme, så tallene skal alltid være like.",
-            "en": "They measure the same thing, so the numbers should always be the same."
+            "no": "Hydrometeret måler tettheten; refraktometeret måler også tettheten, bare med lys.",
+            "en": "The hydrometer measures gravity; the refractometer also measures gravity, just with light."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Refraktometeret måler tettheten direkte, også når det er alkohol i prøven.",
-            "en": "The refractometer measures gravity directly, even when there is alcohol in the sample."
+            "no": "Hydrometeret måler brytningsindeksen; refraktometeret måler tettheten.",
+            "en": "The hydrometer measures the refractive index; the refractometer measures gravity."
           },
           "correct": false
         }
@@ -446,8 +446,8 @@
         "en": "Correct. The hydrometer measures gravity, while the refractometer measures the refractive index. On wort that has not started fermenting, the refractometer can be used to estimate gravity – an estimate, not an exact conversion."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. De to instrumentene måler ulike ting: hydrometeret tettheten, refraktometeret brytningsindeksen. Når det er alkohol i prøven, gir den rå refraktometeravlesningen ikke lenger tettheten direkte.",
-        "en": "Not quite. The two instruments measure different things: the hydrometer gravity, the refractometer the refractive index. Once alcohol is present, the raw refractometer reading no longer gives gravity directly."
+        "no": "Ikke helt. Hydrometeret måler tettheten. Refraktometeret måler noe annet – brytningsindeksen, ofte vist som Brix – og ikke tettheten direkte. På vørter som ikke har begynt å gjære, kan det brukes til å anslå tettheten.",
+        "en": "Not quite. The hydrometer measures gravity. The refractometer measures something else – the refractive index, often shown as Brix – not gravity directly. On wort that has not started fermenting, it can be used to estimate gravity."
       }
     },
     {
@@ -469,24 +469,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Måler med hydrometeret, eller bruker refraktometeret med en egnet korreksjon som også bruker den opprinnelige avlesningen fra før gjæringen.",
-            "en": "Measure with the hydrometer, or use the refractometer with an appropriate correction that also uses the original reading from before fermentation."
+            "no": "Måler med hydrometeret, eller bruker en egnet refraktometerkorreksjon med avlesningen fra før gjæringen.",
+            "en": "Measure with the hydrometer, or use an appropriate refractometer correction with the reading from before fermentation."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Leser av refraktometeret og skriver tallet rett inn som tettheten.",
-            "en": "Read the refractometer and write the number straight in as the gravity."
+            "no": "Bruker refraktometeret og regner om som på vørteren før gjæringen; det gir tettheten.",
+            "en": "Use the refractometer and convert as for the wort before fermentation; that gives the gravity."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Bruker refraktometeret og regner om avlesningen på samme måte som for vørteren før gjæringen – da blir tettheten riktig.",
-            "en": "Use the refractometer and convert the reading the same way as for the wort before fermentation – then the gravity is right."
+            "no": "Bruker refraktometeret og fører avlesningen rett inn som tettheten, siden den er ny.",
+            "en": "Use the refractometer and enter the reading straight in as the gravity, since it is fresh."
           },
           "correct": false
         }
@@ -519,24 +519,24 @@
         {
           "id": "a",
           "text": {
-            "no": "At hydrometeret viser riktig ved vannpunktet – ikke at hele skalaen og alle senere målinger er riktige.",
-            "en": "That the hydrometer reads correctly at the water point – not that the whole scale and every later reading are right."
+            "no": "At det viser riktig ved vannpunktet, der du sjekket det.",
+            "en": "That it reads correctly at the water point, where you checked it."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "At hydrometeret er nøyaktig over hele skalaen.",
-            "en": "That the hydrometer is accurate across the whole scale."
+            "no": "At det viser riktig over hele skalaen, siden vannpunktet stemmer.",
+            "en": "That it reads correctly across the whole scale, since the water point is right."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "At du ikke lenger trenger å notere prøvens temperatur.",
-            "en": "That you no longer need to note the sample's temperature."
+            "no": "At du kan stole på senere målinger uten å notere prøvens temperatur.",
+            "en": "That you can trust later readings without noting the sample's temperature."
           },
           "correct": false
         }
@@ -569,24 +569,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Begge tallene, hvert med trinnet det gjelder og om vørteren var varm eller avkjølt – varm vørter tar mer plass, og tap underveis kan også endre volumet.",
-            "en": "Both numbers, each with the stage it belongs to and whether the wort was hot or cooled – hot wort takes up more volume, and losses along the way can also change the volume."
+            "no": "Begge tallene, hvert med trinnet og om vørteren var varm eller avkjølt.",
+            "en": "Both numbers, each with the stage and whether the wort was hot or cooled."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Bare ett av tallene, siden det andre må være feil.",
-            "en": "Only one of the numbers, since the other one must be wrong."
+            "no": "Bare tallet fra gjæringskaret, siden det varme tallet er misvisende.",
+            "en": "Only the number from the fermenter, since the hot number is misleading."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "At forskjellen bare skyldes fordamping.",
-            "en": "That the difference is due only to evaporation."
+            "no": "Begge tallene, og at forskjellen er det som fordampet underveis.",
+            "en": "Both numbers, and that the difference is what evaporated along the way."
           },
           "correct": false
         }
@@ -596,8 +596,8 @@
         "en": "Correct. Hot and cooled wort are not measurements you can swap, and evaporation and losses can change the volume independently of temperature. So you write the stage and whether the wort was hot or cooled."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Den samme vørteren tar mer plass varm enn avkjølt, og tap kan i tillegg endre volumet. Begge tallene kan være riktige målinger – skriv dem med trinn og temperaturtilstand.",
-        "en": "Not quite. The same wort takes up more volume hot than cooled, and losses can change the volume as well. Both numbers can be correct measurements – write them with their stage and whether the wort was hot or cooled."
+        "no": "Ikke helt. Begge tallene er målinger, men de kan ikke byttes om: den samme vørteren tar mer plass varm enn avkjølt, og tap underveis kan også endre volumet. Skriv begge, med trinnet og om vørteren var varm eller avkjølt, uten å gjøre én forklaring til fasit.",
+        "en": "Not quite. Both numbers are measurements, but they are not interchangeable: the same wort takes up more volume hot than cooled, and losses along the way can also change the volume. Write both, with the stage and whether the wort was hot or cooled, without making one explanation the answer."
       }
     },
     {
@@ -617,24 +617,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Den rå avlesningen som den er, og korreksjonen for avviket ved siden av – den rå avlesningen står urørt.",
-            "en": "The raw reading as it is, and the correction for the offset alongside – the raw reading stays untouched."
+            "no": "Den rå avlesningen som den er, og korreksjonen for avviket ved siden av.",
+            "en": "The raw reading as it is, and the correction for the offset alongside."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Bare det korrigerte tallet, så loggen blir ryddig.",
-            "en": "Only the corrected number, so the log stays tidy."
+            "no": "Det korrigerte tallet i stedet for den rå avlesningen, så loggen blir ryddig.",
+            "en": "The corrected number instead of the raw reading, so the log stays tidy."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Det korrigerte tallet med så mange desimaler som mulig, så det blir mest nøyaktig.",
-            "en": "The corrected number with as many decimals as possible, so it is as accurate as it can be."
+            "no": "Den rå avlesningen, og et korrigert tall med en ekstra desimal fra utregningen.",
+            "en": "The raw reading, and a corrected number with an extra decimal from the working."
           },
           "correct": false
         }
@@ -665,24 +665,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Temperaturen du leste av, og hvor eller hvordan du målte den – ved siden av målet i planen.",
-            "en": "The temperature you read, and where or how you measured it – alongside the target in the plan."
+            "no": "Temperaturen du leste av, og hvor eller hvordan du målte den, ved siden av målet.",
+            "en": "The temperature you read, and where or how you measured it, alongside the target."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Temperaturen i planen, siden det var den du siktet mot.",
-            "en": "The temperature in the plan, since that is the one you were aiming for."
+            "no": "Temperaturen i planen, siden det var den mesken skulle ligge på.",
+            "en": "The temperature in the plan, since that is where the mash was meant to be."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "At mesken mislyktes, og at ølet derfor blir dårlig.",
-            "en": "That the mash failed, and that the beer will therefore be bad."
+            "no": "Temperaturen du leste av, uten å skrive hvor du målte, siden bare tallet teller.",
+            "en": "The temperature you read, without writing where you measured, since only the number counts."
           },
           "correct": false
         }
@@ -692,8 +692,8 @@
         "en": "Correct. The target is a plan, and the reading is a measurement. You write the reading and where or how you measured it, alongside the target."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Loggen skal vise det du faktisk leste av og hvor du målte det, ved siden av målet – ikke målet i stedet for målingen, og ikke en dom over brygget.",
-        "en": "Not quite. The log should show what you actually read and where you measured it, alongside the target – not the target instead of the measurement, and not a verdict on the brew."
+        "no": "Ikke helt. Loggen skal vise det du faktisk leste av, ved siden av målet – ikke målet i stedet for målingen. Og hvor eller hvordan du målte, hører med, fordi det forteller hva tallet gjelder.",
+        "en": "Not quite. The log should show what you actually read, alongside the target – not the target instead of the measurement. And where or how you measured belongs with it, because it tells you what the number refers to."
       }
     },
     {
@@ -713,24 +713,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Skrive én hypotese, merket som en hypotese, og én bevisst endring du vil prøve neste gang.",
-            "en": "Write one hypothesis, marked as a hypothesis, and one deliberate change you want to try next time."
+            "no": "Skrive én hypotese, merket som en hypotese, og velge én bevisst endring til neste brygg.",
+            "en": "Write one hypothesis, marked as a hypothesis, and choose one deliberate change for the next brew."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Skrive årsaken som sikker og endre flere ting samtidig neste gang.",
-            "en": "Write the cause as certain and change several things at once next time."
+            "no": "Skrive én hypotese, merket som en hypotese, og endre alt som kan ha påvirket FG-en neste gang.",
+            "en": "Write one hypothesis, marked as a hypothesis, and change everything that may have affected the FG next time."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Skrive at gjæren var årsaken, siden FG-en ble høy.",
-            "en": "Write that the yeast was the cause, since the FG came out high."
+            "no": "Skrive den mest sannsynlige årsaken som funnet, og justere alt som kan ha bidratt neste gang.",
+            "en": "Write the most likely cause as established, and adjust everything that may have contributed next time."
           },
           "correct": false
         }
@@ -740,8 +740,8 @@
         "en": "Correct. A hypothesis is a possible explanation you want to test, not a truth. With one deliberate change at a time, it is easier to see what the change did."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. En høy FG alene forteller ikke årsaken. Skriv én hypotese, merket som en hypotese, og velg én bevisst endring – endrer du flere ting samtidig, er det vanskelig å se hva som virket.",
-        "en": "Not quite. A high FG on its own does not tell you the cause. Write one hypothesis, marked as a hypothesis, and choose one deliberate change – if you change several things at once, it is hard to see what worked."
+        "no": "Ikke helt. En høy FG alene forteller ikke årsaken, så forklaringen skrives som en hypotese, ikke som noe du har funnet. Og endrer du flere ting samtidig, er det vanskelig å se hva hver endring gjorde – velg én bevisst endring.",
+        "en": "Not quite. A high FG alone does not tell you the cause, so the explanation is written as a hypothesis, not as something you have established. And if you change several things at once, it is hard to see what each change did – choose one deliberate change."
       }
     }
   ]
