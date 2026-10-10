@@ -239,42 +239,42 @@
       "difficulty": "intermediate",
       "source_claims": ["FACT-HOP-0002", "FACT-HOP-0003"],
       "prompt": {
-        "no": "Du planlegger en pale ale med mye humlearoma og lav bitterhet. Hvordan fordeler du humlen?",
-        "en": "You are planning a pale ale with lots of hop aroma and low bitterness. How do you split the hops?"
+        "no": "Du vil ha mye humlearoma og lav bitterhet. Hvilken av disse strategiene passer best?",
+        "en": "You want lots of hop aroma and low bitterness. Which of these strategies fits best?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Mesteparten sent i kokingen eller i whirlpool, og en mindre tilsetning tidlig.",
-            "en": "Most of it late in the boil or in the whirlpool, and a smaller addition early."
+            "no": "Legg mesteparten sent i kokingen eller i whirlpool; en mindre tidlig tilsetning kan brukes til grunnbitterhet.",
+            "en": "Put most of it late in the boil or in the whirlpool; a smaller early addition can be used for base bitterness."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Alt tidlig i kokingen, så aromaen får lengst mulig tid til å trekke ut.",
-            "en": "All of it early in the boil, so the aroma has as long as possible to extract."
+            "no": "Legg mesteparten tidlig i kokingen; lang koketid kan bevare mest aroma.",
+            "en": "Put most of it early in the boil; a long boil time can preserve the most aroma."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Like mye tidlig og sent, siden tidspunktet bare påvirker aromaen.",
-            "en": "Equal amounts early and late, since the timing only affects the aroma."
+            "no": "Fordel like mye tidlig og sent; tidspunktet kan endre aromaen, men ikke bitterheten.",
+            "en": "Split it equally early and late; the timing can change the aroma, but not the bitterness."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Aromaoljene kokes bort jo lenger humlen koker, så en sen tilsetning eller whirlpool beholder generelt mer aroma og gir lavere bitterhet. En mindre tidlig tilsetning gir litt grunnbitterhet, og det er derfor bryggere ofte kombinerer flere tidspunkt.",
-        "en": "Correct. The aroma oils boil off the longer the hops boil, so a late or whirlpool addition generally keeps more aroma and gives lower bitterness. A smaller early addition gives some base bitterness, which is why brewers often combine several timings."
+        "no": "Riktig. En sen tilsetning eller whirlpool beholder generelt mer aroma og gir generelt lavere bitterhetsutnyttelse enn en tidlig tilsetning, men ikke null bitterhet. En mindre tidlig tilsetning kan brukes til grunnbitterhet. Å kombinere flere tidspunkt er en vanlig strategi, ikke et krav.",
+        "en": "Correct. A late or whirlpool addition generally keeps more aroma and generally reaches lower bitterness utilization than an early addition, though not zero bitterness. A smaller early addition can be used for base bitterness. Combining several timings is a common strategy, not a requirement."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Lang koketid trekker ikke ut mer aroma: aromaoljene kokes bort. Og tidspunktet påvirker også bitterheten, siden en tidlig tilsetning generelt gir mer bitterhet. For mye aroma og lav bitterhet bør det meste av humlen tilsettes sent eller i whirlpool.",
-        "en": "Not quite. A long boil does not extract more aroma: the aroma oils boil off. And timing also affects bitterness, since an early addition generally gives more bitterness. For lots of aroma and low bitterness, most of the hops should go in late or in the whirlpool."
+        "no": "Ikke helt. Lang koketid bevarer ikke aromaen: aromaoljene kokes bort jo lenger humlen koker. Og tidspunktet påvirker også bitterheten, siden lengre koketid generelt gir mer bitterhet. Når målet er mye aroma og lav bitterhet, passer det derfor best å legge mesteparten av humlen sent eller i whirlpool.",
+        "en": "Not quite. A long boil does not preserve the aroma: the aroma oils boil off the longer the hops boil. And timing also affects bitterness, since a longer boil generally gives more bitterness. When the goal is lots of aroma and low bitterness, it therefore fits best to put most of the hops late or in the whirlpool."
       }
     },
     {
