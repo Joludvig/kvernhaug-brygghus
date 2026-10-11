@@ -50,6 +50,7 @@ async function geometri(page) {
       main: rect(main),
       malt: rect(document.querySelector('.st-key-bs_leksjon_med_visual svg')),
       svg: rect(document.querySelector('svg[viewBox^="0 0 1065 "]')),
+      bred: rect(document.querySelector('.st-key-bs_leksjon_bred_visual svg')),
       tekstFont: tekstP ? parseFloat(getComputedStyle(tekstP).fontSize) : null,
       tittelFont: tittel ? parseFloat(getComputedStyle(tittel).fontSize) : null,
       tittel: tittel ? tittel.innerText.trim() : null,
@@ -110,6 +111,36 @@ test.describe('Bryggeskole learning pages: width and composition (lang=no)', () 
     const g = await geometri(page);
     expect(g.svg.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
     expect(g.svg.width).toBeGreaterThan(g.side.width);
+    expect(g.hscroll).toBe(false);
+  });
+
+  // #508: on a screen wider than a diagram's own max-width, the SVG used to
+  // centre itself (inline margin:0 auto) and start 80-200px right of the
+  // text. It must share the text's left edge, at its unchanged size.
+  for (const [modul, sider] of [['metodevalg', 3], ['koking', 2]]) {
+    test(`wide desktop: the ${modul} diagram starts at the text's left edge`, async ({ page, viewport }) => {
+      test.skip(viewport.width <= 480, 'desktop scenario');
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await apneModul(page, modul);
+      await ventPaSide(page, 1, sider);
+      const g = await geometri(page);
+      expect(g.bred, 'the wide diagram is in its own aligned wrapper').not.toBeNull();
+      expect(Math.abs(g.bred.left - g.side.left)).toBeLessThanOrEqual(4);
+      expect(g.bred.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
+      expect(g.bred.width).toBeGreaterThan(g.side.width);
+      expect(g.bred.right).toBeLessThanOrEqual(1920);
+      expect(g.hscroll).toBe(false);
+    });
+  }
+
+  test('mobile: a wide diagram fits the viewport below the text', async ({ page, viewport }) => {
+    test.skip(viewport.width > 480, 'mobile scenario');
+    await apneModul(page, 'metodevalg');
+    await ventPaSide(page, 1, 3);
+    const g = await geometri(page);
+    expect(g.bred.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
+    expect(Math.abs(g.bred.left - g.side.left)).toBeLessThanOrEqual(4);
+    expect(g.bred.right).toBeLessThanOrEqual(viewport.width + 1);
     expect(g.hscroll).toBe(false);
   });
 
