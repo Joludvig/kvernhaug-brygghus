@@ -387,7 +387,9 @@ class TestS2Bridge(_S3Test):
             with self.subTest(miljo=knapp):
                 at = self._oversikt(knapp)
                 self._klikk(at, "bs_apne_modul_mesking_btn")
-                self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
+                # #508: Mesking Foundation has two learning pages.
+                self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 2"])
+                self._klikk(at, "bs_bolk_neste_mesking_btn")
                 self._klikk(at, "bs_start_sporsmal_mesking_btn")
                 self.assertIsNone(at.radio(key="bs_valg_mesking_r1_q0").value)
                 self.assertTrue(_knapp(at, "bs_svar_btn_mesking_r1_q0").disabled)

@@ -1,6 +1,6 @@
 # V2.2 — Bryggeskole course stage UI contract (Foundation → Kompetent hjemmebrygger)
 
-Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15); 1.2 (2026-10-05): S1 merged, S2 status (§15); 1.3 (2026-10-05): S2 Chief GREEN, S3 status (§15); 1.4 (2026-10-05): S2+S3 merged, S4 status (§15); 1.5 (2026-10-05): S4 merged, S5 verified, stage UI complete locally/offline (§15)
+Version: 1.0 (2026-10-05, offline); 1.1 (2026-10-05): Chief review GREEN, defaults approved, explicit-stage-choice refinement (§3, §7.3, §17), S1 status (§15); 1.2 (2026-10-05): S1 merged, S2 status (§15); 1.3 (2026-10-05): S2 Chief GREEN, S3 status (§15); 1.4 (2026-10-05): S2+S3 merged, S4 status (§15); 1.5 (2026-10-05): S4 merged, S5 verified, stage UI complete locally/offline (§15); 1.6 (2026-10-11): Mesking Foundation basic mash procedure after owner acceptance #508 (§5.1, §6.2)
 
 Status:
 - **Contract for review.** Docs only. It implements nothing: no app behaviour, UI, mastery store, lesson JSON, registry or
@@ -190,7 +190,8 @@ Why not the alternatives:
 - **Page map.** `bryggeskole/data/course_learning_pages.json` groups **adjacent** chunks of one (module, stage) into
   pages, each with an id (`<module>.<stage>.<n>`), a bilingual title and its ordered chunk ids, plus explicit
   bilingual subheadings only for chunks without an authored heading. It is presentation data only: no fact, stage,
-  question or mastery truth. 84 chunks → 50 pages (Foundation 27, Kompetent 23).
+  question or mastery truth. 85 chunks → 51 pages (Foundation 28, Kompetent 23); 1.6 (#508) adds
+  `mesking.foundation.2` «Temperatur og tid i meskingen» (CHUNK-MASH-G).
 - **Validation** (`bryggeskole/learning_pages.py`, fail-closed, all errors collected):
   - every page's module and stage exist, and that stage has chunks;
   - titles and subheadings are non-empty in NO and EN;
@@ -249,7 +250,7 @@ Cost: the map must follow content changes. The validator makes drift a failing t
 | Råvarer | RAW-A…K | Q-RAW-001, 002, 003, 005, 007, 008, 013, 014 | — | Q-RAW-004, 006, 009, 010, 011, 012 (§D.4) |
 | Rengjøring og sikkerhet | SAFE-A…G | Q-SAFE-001…008 | — | — |
 | Forberedelse/metode | METHOD-A…E | Q-METHOD-001…006 | — | — |
-| Mesking | MASH-A | Q-MASH-001 | MASH-B…F | Q-MASH-002…008 (§D.1, §F.2) |
+| Mesking | MASH-A, G | Q-MASH-001, 009, 010 | MASH-B…F | Q-MASH-002…008 (§D.1, §F.2) |
 | Koking/humle | BOILHOP-A, **B (interim, §6.3)**, C, D, E | Q-BOILHOP-001, 003, 004, 005, 006 | BOILHOP-F | Q-BOILHOP-002, 007, 008 (§D.2) |
 | Kjøling/overføring | COOLXFER-A, B, C, **D (interim, §6.3)**, E | Q-COOLXFER-001, 002, 003, 006 | — | Q-COOLXFER-004, 005 (§D.3) |
 | Gjæring | FERM-A…D | Q-FERM-001…003 | FERM-E…K | Q-FERM-004…011 |
@@ -258,10 +259,10 @@ Cost: the map must follow content changes. The validator makes drift a failing t
 | Oppskriftsforståelse | — | — | REC-A…G | Q-REC-001…007 (§C.10) |
 | Smak og evaluering | — | — | SENS-A…G | Q-SENS-001…010 (§C.11, §D.5) |
 
-Totals:
-- Foundation: 47 questions over 9 modules, and 48 chunks.
+Totals (1.6, after the #508 Mesking Foundation basic mash procedure: + CHUNK-MASH-G, Q-MASH-009/010):
+- Foundation: 49 questions over 9 modules, and 49 chunks.
 - Kompetent: 54 questions over 9 modules, and 36 chunks.
-- Together: 101 questions; every one of the 84 chunks is mapped exactly once.
+- Together: 103 questions; every one of the 85 chunks is mapped exactly once.
 
 Koking review items (§D.2 "review at implementation"):
 - Q-BOILHOP-004 and 005 stay with their Foundation concepts (early/late timing);

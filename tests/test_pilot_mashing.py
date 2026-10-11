@@ -45,17 +45,26 @@ _REGISTRY_FIXTURE = os.path.join(
 _PRODUCTION_PILOT = DEFAULT_PILOT_PATH
 _PRODUCTION_REGISTRY = DEFAULT_REGISTRY_PATH
 
-# Foundation (#337) uses FACT-MASH-0001/0002/0004. The Kompetent slice
-# (mashing Kompetent contract §6.1/§7.1) adds the verified M1/M2 records
-# FACT-MASH-0005/0006 and reuses the verified FACT-METHOD-0001…0005.
-_FOUNDATION_FACTS = {"FACT-MASH-0001", "FACT-MASH-0002", "FACT-MASH-0004"}
+# The original #337 pilot (CHUNK-MASH-A…C, Q-MASH-001…003) uses
+# FACT-MASH-0001/0002/0004. The Kompetent slice (mashing Kompetent contract
+# §6.1/§7.1) adds the verified M1/M2 records FACT-MASH-0005/0006 and reuses
+# the verified FACT-METHOD-0001…0005. The Foundation basic mash procedure
+# (#508; stage allocation contract §D.1) adds FACT-MASH-0007/0008.
+_CORE_FACTS = {"FACT-MASH-0001", "FACT-MASH-0002", "FACT-MASH-0004"}
+_PROCEDURE_FACTS = {"FACT-MASH-0007", "FACT-MASH-0008"}
 _KOMPETENT_FACTS = {
     "FACT-MASH-0005", "FACT-MASH-0006",
     "FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0004", "FACT-METHOD-0005",
 }
-_ALL_FACTS = _FOUNDATION_FACTS | _KOMPETENT_FACTS
+_ALL_FACTS = _CORE_FACTS | _PROCEDURE_FACTS | _KOMPETENT_FACTS
 
-_FOUNDATION_CHUNK_IDS = ["CHUNK-MASH-A", "CHUNK-MASH-B", "CHUNK-MASH-C"]
+# Pilot order: the Foundation stage (MASH-A, MASH-G; Q-MASH-001, 009, 010)
+# is a contiguous prefix, then the Kompetent items (stage map, §D.1).
+_FOUNDATION_STAGE_CHUNK_IDS = ["CHUNK-MASH-A", "CHUNK-MASH-G"]
+_FOUNDATION_STAGE_QUESTION_IDS = ["Q-MASH-001", "Q-MASH-009", "Q-MASH-010"]
+_FOUNDATION_STAGE_FACTS = {"FACT-MASH-0001", "FACT-MASH-0007", "FACT-MASH-0008"}
+_CORE_CHUNK_IDS = ["CHUNK-MASH-A", "CHUNK-MASH-B", "CHUNK-MASH-C"]
+_CORE_QUESTION_IDS = ["Q-MASH-001", "Q-MASH-002", "Q-MASH-003"]
 _KOMPETENT_CHUNKS = [
     ("CHUNK-MASH-D", "fact",
      ["FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0005", "FACT-MASH-0005"]),
@@ -71,7 +80,10 @@ _KOMPETENT_QUESTIONS = [
     ("Q-MASH-008", "scenario", "methodology", ["mashing.preboil_check"], []),
 ]
 _KOMPETENT_IDS = {r[0] for r in _KOMPETENT_CHUNKS + _KOMPETENT_QUESTIONS}
-_EXPECTED_CHUNK_IDS = _FOUNDATION_CHUNK_IDS + [r[0] for r in _KOMPETENT_CHUNKS]
+_EXPECTED_CHUNK_IDS = (_FOUNDATION_STAGE_CHUNK_IDS + ["CHUNK-MASH-B", "CHUNK-MASH-C"]
+                       + [r[0] for r in _KOMPETENT_CHUNKS])
+_EXPECTED_QUESTION_IDS = (_FOUNDATION_STAGE_QUESTION_IDS + ["Q-MASH-002", "Q-MASH-003"]
+                          + [r[0] for r in _KOMPETENT_QUESTIONS])
 
 
 def _fixture_path(name):
@@ -149,14 +161,21 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
     def test_foundation_then_kompetent_chunks_in_order(self):
         self.assertEqual([c["id"] for c in self.data["chunks"]], _EXPECTED_CHUNK_IDS)
 
-    def test_three_foundation_plus_five_kompetent_questions(self):
-        self.assertEqual([q["id"] for q in self.data["questions"]], [f"Q-MASH-00{n}" for n in range(1, 9)])
+    def test_foundation_prefix_then_kompetent_questions(self):
+        self.assertEqual([q["id"] for q in self.data["questions"]], _EXPECTED_QUESTION_IDS)
 
-    def test_foundation_chunk_source_claims_cover_exactly_fact_mash_0001_0002_0004(self):
+    def test_core_chunk_source_claims_cover_exactly_fact_mash_0001_0002_0004(self):
         referenced = set()
-        for chunk in self.data["chunks"][:3]:
+        for chunk in self.data["chunks"]:
+            if chunk["id"] in _CORE_CHUNK_IDS:
+                referenced.update(chunk["source_claims"])
+        self.assertEqual(referenced, _CORE_FACTS)
+
+    def test_foundation_stage_chunk_source_claims(self):
+        referenced = set()
+        for chunk in self.data["chunks"][:2]:
             referenced.update(chunk["source_claims"])
-        self.assertEqual(referenced, _FOUNDATION_FACTS)
+        self.assertEqual(referenced, _FOUNDATION_STAGE_FACTS)
 
     def test_chunk_source_claims_cover_all_facts(self):
         referenced = set()
@@ -170,8 +189,11 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
         self.assertIn("scenario", types)
 
     def test_question_source_claims_are_subset_of_the_allowed_facts(self):
+        for question in self.data["questions"]:
+            if question["id"] in _CORE_QUESTION_IDS:
+                self.assertTrue(set(question["source_claims"]) <= _CORE_FACTS)
         for question in self.data["questions"][:3]:
-            self.assertTrue(set(question["source_claims"]) <= _FOUNDATION_FACTS)
+            self.assertTrue(set(question["source_claims"]) <= _FOUNDATION_STAGE_FACTS)
         for question in self.data["questions"]:
             self.assertTrue(set(question["source_claims"]) <= _ALL_FACTS)
 
@@ -200,6 +222,8 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
                 "mashing.starch_conversion",
                 "mashing.dextrins",
                 "mashing.temperature",
+                # Foundation basic mash procedure (#508): mash time.
+                "mashing.duration",
                 "mashing.fermentability",
                 "mashing.process_variables",
                 # Kompetent: two new fact concepts, one methodology concept
@@ -210,7 +234,7 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
                 "method.planning_variables",
             },
         )
-        self.assertEqual(len(concepts), 9)
+        self.assertEqual(len(concepts), 10)
 
     def test_every_question_declares_stable_id_concepts_difficulty_and_source_claims(self):
         for question in self.data["questions"]:
@@ -387,26 +411,28 @@ def _kompetent_text(data, teaching_only=False, ids=None):
 
 class TestMeskingKompetentShape(unittest.TestCase):
     """Mashing Kompetent contract §6.1/§7.1: CHUNK-MASH-D..F and
-    Q-MASH-004..008 appended in the same module after an unchanged
-    Foundation."""
+    Q-MASH-004..008 at the end of the same module, after the unchanged
+    #337 items (CHUNK-MASH-A…C, Q-MASH-001…003) and the Foundation basic
+    mash procedure (CHUNK-MASH-G, Q-MASH-009/010; #508)."""
 
     def setUp(self):
         self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
 
-    def test_foundation_items_unchanged_and_carry_no_basis(self):
-        self.assertEqual([c["id"] for c in self.data["chunks"][:3]], _FOUNDATION_CHUNK_IDS)
-        self.assertEqual([q["id"] for q in self.data["questions"][:3]], ["Q-MASH-001", "Q-MASH-002", "Q-MASH-003"])
-        for item in self.data["chunks"][:3] + self.data["questions"][:3]:
+    def test_core_items_unchanged_and_carry_no_basis(self):
+        core = [i for i in self.data["chunks"] + self.data["questions"]
+                if i["id"] in _CORE_CHUNK_IDS + _CORE_QUESTION_IDS]
+        self.assertEqual([i["id"] for i in core], _CORE_CHUNK_IDS + _CORE_QUESTION_IDS)
+        for item in core:
             self.assertNotIn("basis", item, item["id"])
 
     def test_kompetent_chunks_match_the_locked_shape(self):
-        got = [(c["id"], c["basis"], c["source_claims"]) for c in self.data["chunks"][3:]]
+        got = [(c["id"], c["basis"], c["source_claims"]) for c in self.data["chunks"][4:]]
         self.assertEqual(got, [tuple(r) for r in _KOMPETENT_CHUNKS])
 
     def test_kompetent_questions_match_the_locked_shape(self):
-        got = [(q["id"], q["type"], q["basis"], q["concepts"], q["source_claims"]) for q in self.data["questions"][3:]]
+        got = [(q["id"], q["type"], q["basis"], q["concepts"], q["source_claims"]) for q in self.data["questions"][5:]]
         self.assertEqual(got, [tuple(r) for r in _KOMPETENT_QUESTIONS])
-        for q in self.data["questions"][3:]:
+        for q in self.data["questions"][5:]:
             self.assertEqual(q["difficulty"], "intermediate", q["id"])
             self.assertEqual(len(q["options"]), 3, q["id"])
             self.assertEqual(sum(o["correct"] for o in q["options"]), 1, q["id"])
@@ -495,3 +521,85 @@ class TestMeskingKompetentGuardrails(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _visible(item):
+    """Every learner-visible string of a chunk or question, lower-cased."""
+    parts = list(item["text"].values()) if "text" in item else []
+    for key in ("prompt", "feedback_correct", "feedback_incorrect"):
+        parts.extend(item.get(key, {}).values())
+    for o in item.get("options", []):
+        parts.extend(o["text"].values())
+    return " ".join(parts).lower()
+
+
+class TestMeskingFoundationProcedure(unittest.TestCase):
+    """Foundation basic mash procedure (#508 owner acceptance; Chief source
+    gate PASS 2026-10-11; stage allocation contract §D.1): CHUNK-MASH-G and
+    Q-MASH-009/010 directly after the Foundation concept, number-free and
+    inside the FACT-MASH-0007/0008 boundaries."""
+
+    def setUp(self):
+        self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
+        self.chunks = {c["id"]: c for c in self.data["chunks"]}
+        self.questions = {q["id"]: q for q in self.data["questions"]}
+
+    def test_contiguous_foundation_prefix(self):
+        self.assertEqual([c["id"] for c in self.data["chunks"][:2]], _FOUNDATION_STAGE_CHUNK_IDS)
+        self.assertEqual([q["id"] for q in self.data["questions"][:3]], _FOUNDATION_STAGE_QUESTION_IDS)
+
+    def test_chunk_g_shape(self):
+        g = self.chunks["CHUNK-MASH-G"]
+        self.assertEqual(g["basis"], "fact")
+        self.assertEqual(g["source_claims"], ["FACT-MASH-0007", "FACT-MASH-0008"])
+        self.assertTrue(g["text"]["no"].startswith("**Temperatur og tid i meskingen.**"))
+        self.assertTrue(g["text"]["en"].startswith("**Temperature and time in the mash.**"))
+
+    def test_questions_shape_and_single_concept_credit(self):
+        # Quiz standard A5: each question credits exactly its one objective.
+        expected = {
+            "Q-MASH-009": (["mashing.temperature"], ["FACT-MASH-0007"], "b"),
+            "Q-MASH-010": (["mashing.duration"], ["FACT-MASH-0008"], "c"),
+        }
+        for qid, (concepts, claims, correct) in expected.items():
+            q = self.questions[qid]
+            with self.subTest(qid=qid):
+                self.assertEqual(q["type"], "scenario")
+                self.assertEqual(q["basis"], "fact")
+                self.assertEqual(q["difficulty"], "beginner")
+                self.assertEqual(q["concepts"], concepts)
+                self.assertEqual(q["source_claims"], claims)
+                self.assertEqual([o["id"] for o in q["options"]], ["a", "b", "c"])
+                self.assertEqual([o["id"] for o in q["options"] if o["correct"]], [correct])
+
+    def test_correct_options_match_their_objective(self):
+        # Manual semantic review, pinned: 009's key checks and keeps the
+        # mash near the target; 010's key leaves the grain in the mash and
+        # separates afterwards.
+        key9 = next(o for o in self.questions["Q-MASH-009"]["options"] if o["correct"])["text"]
+        self.assertIn("nær måltemperaturen", key9["no"])
+        self.assertIn("holder på varmen", key9["no"])
+        self.assertIn("close to the target temperature", key9["en"])
+        key10 = next(o for o in self.questions["Q-MASH-010"]["options"] if o["correct"])["text"]
+        self.assertIn("lar kornet ligge i mesken", key10["no"].lower())
+        self.assertIn("etterpå", key10["no"])
+        self.assertIn("afterwards", key10["en"])
+
+    def test_no_numbers_or_excluded_rules(self):
+        items = [self.chunks["CHUNK-MASH-G"], self.questions["Q-MASH-009"], self.questions["Q-MASH-010"]]
+        for item in items:
+            visible = _visible(item)
+            with self.subTest(item=item["id"]):
+                self.assertNotRegex(visible, r"[0-9]")
+                for banned in ("°", "grader", "degree", "minutt", "minute", "jod", "iodine", "mashout",
+                               "konstant", "constant", "gjærbar", "fermentab"):
+                    self.assertNotIn(banned, visible)
+        # "Exactly" appears only as the named misconception (a distractor and
+        # the incorrect feedback), never in the teaching or the key.
+        teaching = " ".join(
+            list(self.chunks["CHUNK-MASH-G"]["text"].values())
+            + [t for q in items[1:] for o in q["options"] if o["correct"] for t in o["text"].values()]
+            + [t for q in items[1:] for t in q["feedback_correct"].values()]
+        ).lower()
+        for banned in ("nøyaktig", "exact", "hele tiden", "all the time", "alltid", "always"):
+            self.assertNotIn(banned, teaching)

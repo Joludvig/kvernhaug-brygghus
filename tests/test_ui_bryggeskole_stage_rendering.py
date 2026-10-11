@@ -163,7 +163,10 @@ class TestNormalEntryIsTheFoundationStage(_TrinnTest):
         at = self._ny_apptest()
         self._apne_modul(at, "mesking")
         self.assertEqual(at.session_state[_TRINN_KEY], "foundation")
-        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
+        # #508: Mesking Foundation has two learning pages.
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 2"])
+        _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 2 av 2"])
         _knapp(at, "bs_start_sporsmal_mesking_btn")
         self.assertIn("mesking@foundation", at.session_state["bs_modul_sesjon"])
         self.assertNotIn("mesking", at.session_state["bs_modul_sesjon"])
@@ -172,13 +175,16 @@ class TestNormalEntryIsTheFoundationStage(_TrinnTest):
 class TestMixedModulesByStage(_TrinnTest):
     def test_mesking_foundation(self):
         at, visning = self._gjennomfor_trinn("mesking", "foundation")
-        self.assertEqual([c["id"] for c in visning["chunks"]], ["CHUNK-MASH-A"])
-        self.assertEqual([q["id"] for q in visning["questions"]], ["Q-MASH-001"])
+        self.assertEqual([c["id"] for c in visning["chunks"]], ["CHUNK-MASH-A", "CHUNK-MASH-G"])
+        self.assertEqual([q["id"] for q in visning["questions"]], ["Q-MASH-001", "Q-MASH-009", "Q-MASH-010"])
         # Foundation keeps today's widget keys.
         self.assertEqual(self._aktiv_modul, "mesking")
         tekst = " ".join(_alle_synlige_tekster(at))
-        self.assertIn(panel._konsept_label("mashing.starch_conversion", "no"), tekst)
-        for k in ("mashing.temperature", "mashing.grain_separation", "mashing.preboil_check"):
+        # #508: the basic mash procedure credits temperature and time in
+        # Foundation; the Kompetent-only concepts stay out.
+        for k in ("mashing.starch_conversion", "mashing.temperature", "mashing.duration"):
+            self.assertIn(panel._konsept_label(k, "no"), tekst)
+        for k in ("mashing.fermentability", "mashing.grain_separation", "mashing.preboil_check"):
             self.assertNotIn(panel._konsept_label(k, "no"), tekst)
 
     def test_mesking_kompetent(self):
@@ -306,7 +312,8 @@ class TestKeyIsolationAndSessions(_TrinnTest):
         # today's keys, no value carried over.
         at.session_state[_TRINN_KEY] = "foundation"
         at.run()
-        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 2"])
+        _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
         _knapp(at, "bs_start_sporsmal_mesking_btn").click().run()
         self.assertIsNone(at.radio(key="bs_valg_mesking_r1_q0").value)
         self.assertTrue(_knapp(at, "bs_svar_btn_mesking_r1_q0").disabled)
@@ -431,7 +438,7 @@ class TestInvalidMapFallsBackToTheSingleFlow(_TrinnTest):
         # context uses the learner's lens (Foundation here), never a guess.
         at = self._ny_apptest()
         self._apne_i_trinn(at, "mesking", "bryggemester")
-        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 2"])
         self.assertIn("Trinn 1 · Foundation", self._sti_tekst(at))
 
     def _sti_tekst(self, at):

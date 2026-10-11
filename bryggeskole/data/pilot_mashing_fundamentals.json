@@ -11,6 +11,15 @@
       }
     },
     {
+      "id": "CHUNK-MASH-G",
+      "basis": "fact",
+      "source_claims": ["FACT-MASH-0007", "FACT-MASH-0008"],
+      "text": {
+        "no": "**Temperatur og tid i meskingen.** Oppskriften oppgir en måltemperatur for mesken. Når malten er rørt inn i meskevannet, sjekker du at mesken ligger nær den temperaturen. Mens mesken står, prøver du å holde den nær måltemperaturen, først og fremst ved å holde på varmen – for eksempel med lokk eller isolasjon – eller med anleggets egen temperaturstyring. Meskingen tar også tid: enzymene trenger tid på å omdanne stivelsen, så kornet blir liggende i mesken i den tiden oppskriften oppgir. Først etter det går du videre og skiller vørteren fra kornet. Temperatur og tid er altså to praktiske deler av meskingen som du følger fra oppskriften.",
+        "en": "**Temperature and time in the mash.** The recipe gives a target temperature for the mash. Once the malt is stirred into the mash water, you check that the mash is close to that temperature. While the mash rests, you try to keep it close to the target temperature, mainly by keeping the heat in – for example with a lid or insulation – or with your system's own temperature control. The mash also takes time: the enzymes need time to convert the starch, so the grain stays in the mash for the time the recipe gives. Only after that do you move on and separate the wort from the grain. Temperature and time are two practical parts of the mash that you follow from the recipe."
+      }
+    },
+    {
       "id": "CHUNK-MASH-B",
       "source_claims": ["FACT-MASH-0002"],
       "text": {
@@ -98,6 +107,98 @@
       "feedback_incorrect": {
         "no": "Ikke helt. Vanlig bryggjær gjærer ikke dekstrinene, og de forsvinner heller ikke med kornet. De blir værende i det ferdige ølet og bidrar til kropp og fylde i stedet for alkohol.",
         "en": "Not quite. Ordinary brewing yeast does not ferment the dextrins, and they do not leave with the grain either. They remain in the finished beer and contribute body and fullness rather than alcohol."
+      }
+    },
+    {
+      "id": "Q-MASH-009",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["mashing.temperature"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MASH-0007"],
+      "prompt": {
+        "no": "Oppskriften oppgir en måltemperatur for mesken, og du har akkurat rørt malten inn i meskevannet. Hva gjør du med temperaturen nå?",
+        "en": "The recipe gives a target temperature for the mash, and you have just stirred the malt into the mash water. What do you do about the temperature now?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Ingenting – det var meskevannet før malten kom oppi som skulle ha riktig temperatur.",
+            "en": "Nothing – it was the mash water before the malt went in that had to be at the right temperature."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Sjekker at mesken ligger nær måltemperaturen, og holder på varmen mens den står.",
+            "en": "Check that the mash is close to the target temperature, and keep the heat in while it rests."
+          },
+          "correct": true
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Varmer mesken hele tiden så den holder nøyaktig samme temperatur, uansett utstyr.",
+            "en": "Keep heating the mash all the time so it stays at exactly the same temperature, whatever the equipment."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Oppskriften gir måltemperaturen for mesken. Når malten er rørt inn, sjekker du at mesken ligger nær den, og mens mesken står, prøver du å holde den nær målet – først og fremst ved å holde på varmen, eller med anleggets egen temperaturstyring.",
+        "en": "Correct. The recipe gives the target temperature for the mash. Once the malt is stirred in, you check that the mash is close to it, and while the mash rests you try to keep it close to the target – mainly by keeping the heat in, or with your system's own temperature control."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Det er mesken, ikke bare vannet før malten kom oppi, som skal ligge nær måltemperaturen fra oppskriften. Sjekk den når malten er rørt inn, og prøv å holde den nær målet mens mesken står, først og fremst ved å holde på varmen. Målet er å ligge nær måltemperaturen, ikke å treffe ett nøyaktig tall.",
+        "en": "Not quite. It is the mash, not just the water before the malt went in, that should be close to the recipe's target temperature. Check it once the malt is stirred in, and try to keep it close to the target while the mash rests, mainly by keeping the heat in. The aim is to stay close to the target temperature, not to hit one exact number."
+      }
+    },
+    {
+      "id": "Q-MASH-010",
+      "type": "scenario",
+      "basis": "fact",
+      "concepts": ["mashing.duration"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-MASH-0008"],
+      "prompt": {
+        "no": "Oppskriften du følger, oppgir en mesketid. Hva gjør du i løpet av den tiden?",
+        "en": "The recipe you are following gives a mash time. What do you do during that time?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Skiller vørteren fra kornet, siden omdanningen skjer med en gang malten er rørt inn.",
+            "en": "Separate the wort from the grain, since conversion happens as soon as the malt is stirred in."
+          },
+          "correct": false
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Varmer opp meskevannet før malten kommer oppi, siden tiden gjelder oppvarmingen av vannet.",
+            "en": "Heat the mash water before the malt goes in, since the time refers to heating the water."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Lar kornet ligge i mesken mens stivelsen omdannes, og skiller ut vørteren etterpå.",
+            "en": "Leave the grain in the mash while the starch converts, and separate the wort afterwards."
+          },
+          "correct": true
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Meskingen tar tid: enzymene trenger tid på å omdanne stivelsen, så kornet blir liggende i mesken i den tiden oppskriften oppgir. Først etterpå skiller du vørteren fra kornet.",
+        "en": "Correct. The mash takes time: the enzymes need time to convert the starch, so the grain stays in the mash for the time the recipe gives. Only afterwards do you separate the wort from the grain."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Mesketiden er tiden kornet ligger i mesken etter at malten er rørt inn i meskevannet. Omdanningen skjer ikke med en gang – enzymene trenger tid – så du skiller vørteren fra kornet først når mesketiden er over.",
+        "en": "Not quite. The mash time is the time the grain stays in the mash after the malt is stirred into the mash water. Conversion does not happen straight away – the enzymes need time – so you separate the wort from the grain only once the mash time is over."
       }
     },
     {

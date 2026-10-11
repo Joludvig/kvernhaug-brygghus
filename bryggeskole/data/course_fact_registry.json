@@ -320,6 +320,78 @@
       "notes": "Mesking Kompetent M2 (mashing Kompetent contract section 9; stage contract section F.2: D19 wort collection travels with D18). All four optional clauses were robustly supported and are kept. Wording trap: no efficiency or yield maths, no PPG/points-per-pound; no sparge-water formula or absorption factor; no gravity cut-offs; no temperatures; no tannin/pH rules; no parti-gyle as course content (it is only evidence that later runnings are weaker); no fly-vs-batch ranking; never 'no-sparge tastes richer' or makes better or worse beer; no milling; no conversion check. OWNERSHIP: FACT-METHOD-0004 owns equipment planning numbers (absorption, dead space, losses); FACT-MEAS-0001 and FACT-MEAS-0005 own pre-boil gravity and hot/cooled volume; FACT-METHOD-0002 already says that sparging recovers further sugar in the traditional layout. INDEPENDENCE: John Palmer, the Oxford Companion entry (Keith Thomas), BYO (Joe Vella) and Craft Beer & Brewing (Libby Murphy; Dave Carpenter) are independent lines; Dave Carpenter's 'Lautering and Sparging' and his Illustrated Guide ch. 15 (https://beerandbrewing.com/the-illustrated-guide-to-homebrewing-chapter-15-collecting-wort, 2023-09-02, read as corroboration, not cited) are one line; the Grainfather and KegLand manuals are separate producers and support only their own system's procedure, never a general claim. Non-Kunze (curriculum map section 19.1 gap, printed pp. 257, 259-260). SOURCE-ACCESS LIMITATIONS: Local Claude read every cited source in full on 2026-10-05 from the original page HTML or PDF (source pack docs/development/v22_mashing_m1_m2_source_pack.md); howtobrew.com served an expired TLS certificate that day and was fetched read-only without certificate checking; the Grainfather PDF shows no date. Chief live source spot-check PASS 2026-10-05 (M1 PASS, M2 PASS), recorded offline during the GitHub outage (no issue number exists yet). VERIFIED_AT PROVENANCE: 2026-10-05T12:25:09+02:00 is when the Chief's live source spot-check PASS for M1/M2 was received locally (the local session log records the brief at 2026-10-05T10:25:09Z, truncated to whole seconds). The spot-check itself happened on or before that moment; its exact clock time is not recorded."
     },
     {
+      "id": "FACT-MASH-0007",
+      "claim": "In a mash, the crushed malt and hot water are held at a planned target temperature that the recipe or mash schedule specifies. After the grain and water are mixed, the brewer checks that the mash has reached the intended target, and while the mash rests the brewer aims to keep it close to that target, mainly by keeping the heat in (for example a covered or insulated vessel) or by using the system's normal temperature control. Mash temperature is therefore a practical process variable the brewer follows.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-11T21:23:49Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "homebrewing text (John Palmer, How to Brew) -- author sells the book, commercial interest",
+          "ref": "John Palmer, How to Brew, Section 3, Chapter 16 - The Methods of Mashing (Single Infusion) and Chapter 19 - Mashing Your First Batch (steps 4 and 6) (copyright 1999-2015, with Author's Notes 2025) -- https://howtobrew.com/section-3/chapter-16/ ; https://howtobrew.com/section-3/chapter-19/",
+          "note": "Chief source gate PASS 2026-10-11 (#508). Supports: a target mash temperature; the mash is held at the saccharification temperature with the goal of a steady temperature (ch. 16); after mash-in, check that the mash has stabilized at the target (ch. 19 step 4); cover the tun between stirrings (ch. 19 step 6). Does not support (not used): every number, the 'couple of degrees' tolerance, stirring intervals, strike/infusion maths, hot/cold-water correction, the warmer/cooler direction (ch. 14). Expired TLS certificate on 2026-10-11."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer)",
+          "ref": "The Oxford Companion to Beer (ed. Garrett Oliver, Oxford University Press 2012), entries 'saccharification' and 'infusion mash', via Craft Beer & Brewing -- https://www.beerandbrewing.com/dictionary/Do5AiUH8r0 ; https://www.beerandbrewing.com/dictionary/n6lWhwoxVM",
+          "note": "Chief source gate PASS 2026-10-11 (#508). Supports: the saccharification rest is 'the time period and temperature(s) at which the mash is held'; at the end of mash-in the correct temperature must have been achieved; the infusion mash tun is insulated. Does not support (not used): 65 C, mashout 76.6 C, the beta/alpha amylase direction, checking during the rest."
+        },
+        {
+          "tier": "B",
+          "type": "homebrewing organization guide (American Homebrewers Association)",
+          "ref": "Duncan Bryant, American Homebrewers Association, 'Brew in a Bag (BIAB)' (PDF, 2013) -- https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf",
+          "note": "Chief source gate PASS 2026-10-11 (#508). Supports (pp. 2-3): the recipe gives the target mash temperature; reach the target; cover the mash. It advises avoiding temperature checks until the end of the mash to prevent heat loss, so this record claims no repeated or frequent checking. Does not support (not used): any number, the strike-temperature offset, top-up water, efficiency, the iodine test."
+        },
+        {
+          "tier": "B",
+          "type": "retailer brewing instructions -- equipment/ingredient seller, commercial interest; corroboration only",
+          "ref": "MoreBeer!, All Grain Brewing Instructions (no author or date shown) -- https://morebeer.com/collections/all-grain-brewing-instructions",
+          "note": "Corroboration only. Supports: most recipes set the temperature the mash is held at; stir to a consistent mash temperature; a lid retains heat; a missed target temperature can be corrected. Does not support (not used): any number, the dry/malty direction, the flame caution, recirculation."
+        }
+      ],
+      "concepts": ["mashing.temperature"],
+      "modules": ["mashing.fundamentals", "method_context.fundamentals"],
+      "notes": "Mesking Foundation R1 (issue #508 owner acceptance finding: Mesking Foundation taught no temperature or time; Chief source gate PASS 2026-10-11 on #508). OWNERSHIP: this record owns only the practical procedure (planned target from the recipe/schedule, check it was reached after mixing, keep close to it while the mash rests). FACT-MASH-0002 owns the fermentability direction from one 65-80 C study (Kompetent) and FACT-MASH-0004 owns 'several factors / no universal mash temperature'; neither is restated here. Also grounds CHUNK-METHOD-A's 'controlled temperature' clause (method_context.fundamentals). Wording traps: no numeric temperature, range or tolerance; never 'hold exactly' or 'must stay constant'; no 'check every N minutes' or frequent-check rule (the sources disagree: Palmer monitors at each stir, the AHA advises against checking to avoid heat loss); no warmer/cooler fermentability direction; no enzyme optima; no strike-water calculation; no correction procedure; heat-keeping methods are examples, never a rule; no equipment ranking. INDEPENDENCE: John Palmer (How to Brew; chapters 14, 16 and 19 are one line), the Oxford Companion to Beer (entries 'saccharification' and 'infusion mash' are one line; Craft Beer & Brewing is only the host) and the American Homebrewers Association (Duncan Bryant) are independent lines; MoreBeer is a retailer with commercial interest and is corroboration only, never the sole support for a clause. SOURCE-ACCESS LIMITATIONS: Local Claude read every cited source on 2026-10-11 from the original page HTML or PDF (source-gate report D:\\Development\\KBH_MASH_FOUNDATION_R1_R2_SOURCE_GATE.md, kept outside the repo); howtobrew.com served an expired TLS certificate and was fetched read-only without certificate checking; the Oxford Companion was read through the licensed Craft Beer & Brewing dictionary, not the printed book; MoreBeer shows no author or date; the AHA PDF date is from its metadata. VERIFIED_AT PROVENANCE: 2026-10-11T21:23:49Z is when the Chief source-gate PASS (implementation brief 'KBH - MESKING FOUNDATION GAP - IMPLEMENTATION') was received locally (session log, truncated to whole seconds). The Chief review itself happened on or before that moment; its exact clock time is not recorded."
+    },
+    {
+      "id": "FACT-MASH-0008",
+      "claim": "Starch conversion in the mash is not instantaneous: the mash rests at its temperature for a planned period that the recipe or mash schedule specifies, while the malt enzymes convert the starch. The grain remains in the mash during that period, and the wort is separated from the grain after the mash rest. How long conversion takes can vary, so mash time is a process variable the brewer follows rather than one universal figure.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-11T21:23:49Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "homebrewing text (John Palmer, How to Brew) -- author sells the book, commercial interest",
+          "ref": "John Palmer, How to Brew, Section 3, Chapter 14 - How the Mash Works ('Other Factors for Starch Conversion') and Chapter 19 - Mashing Your First Batch (step 6 and 'Conducting the Lauter') (copyright 1999-2015, with Author's Notes 2025) -- https://howtobrew.com/section-3/chapter-14/ ; https://howtobrew.com/section-3/chapter-19/",
+          "note": "Chief source gate PASS 2026-10-11 (#508). Supports: the time required to completely convert the mash can vary, and more time is generally needed for good extract and fermentability (ch. 14); the mash is left to sit for the planned time and the lauter follows once that time has gone by (ch. 19). Does not support (not used): every minute figure, enzyme-activity timing, the iodine-test discussion, the sparge steep. Expired TLS certificate on 2026-10-11."
+        },
+        {
+          "tier": "B",
+          "type": "brewing reference work (Oxford Companion to Beer)",
+          "ref": "The Oxford Companion to Beer (ed. Garrett Oliver, Oxford University Press 2012), entries 'saccharification' and 'infusion mash', via Craft Beer & Brewing -- https://www.beerandbrewing.com/dictionary/Do5AiUH8r0 ; https://www.beerandbrewing.com/dictionary/n6lWhwoxVM",
+          "note": "Chief source gate PASS 2026-10-11 (#508). Supports: the saccharification rest is a time period at which the mash is held, and its length depends on the enzymatic power of the malt. Does not support (not used): 30-60 min, 'at least 1 h', 90 min."
+        },
+        {
+          "tier": "B",
+          "type": "homebrewing organization guide (American Homebrewers Association)",
+          "ref": "Duncan Bryant, American Homebrewers Association, 'Brew in a Bag (BIAB)' (PDF, 2013) -- https://www.homebrewersassociation.org/wp-content/uploads/How-To-Brew-in-a-Bag.pdf",
+          "note": "Chief source gate PASS 2026-10-11 (#508). Supports (p. 3): cover and wait for the recipe's mash time, and pull the bag out only when conversion is complete; mash duration is a process variable. Does not support (not used): 60 minutes, 'longer is better' (the source frames longer mashes as some brewers' efficiency experience), the iodine/hydrometer conversion check."
+        },
+        {
+          "tier": "B",
+          "type": "retailer brewing instructions -- equipment/ingredient seller, commercial interest; corroboration only",
+          "ref": "MoreBeer!, All Grain Brewing Instructions (no author or date shown) -- https://morebeer.com/collections/all-grain-brewing-instructions",
+          "note": "Corroboration only. Supports: recipes set how long the mash is held; that time lets the grain's enzymes convert starch to sugar; recirculation and sparging follow the rest. Does not support (not used): 60 minutes, 'full conversion' at a fixed time."
+        }
+      ],
+      "concepts": ["mashing.duration"],
+      "modules": ["mashing.fundamentals"],
+      "notes": "Mesking Foundation R2 (issue #508 owner acceptance finding; Chief source gate PASS 2026-10-11 on #508; new concept mashing.duration by Chief decision). OWNERSHIP: this record owns only time (conversion is not instantaneous, the planned rest, the grain stays in the mash, separation follows the rest, time is a followed variable). FACT-MASH-0001 owns what conversion is; FACT-MASH-0005 owns how the wort is separated by method; FACT-MASH-0006 owns wort collection and sparging. Wording traps: no numeric or universal duration; never 'longer is better' or 'conversion is complete after N minutes'; no conversion or iodine test (FACT-MASH-0003 stays draft); no mashout. INDEPENDENCE: John Palmer (How to Brew; chapters 14, 16 and 19 are one line), the Oxford Companion to Beer (entries 'saccharification' and 'infusion mash' are one line; Craft Beer & Brewing is only the host) and the American Homebrewers Association (Duncan Bryant) are independent lines; MoreBeer is a retailer with commercial interest and is corroboration only, never the sole support for a clause. SOURCE-ACCESS LIMITATIONS: Local Claude read every cited source on 2026-10-11 from the original page HTML or PDF (source-gate report D:\\Development\\KBH_MASH_FOUNDATION_R1_R2_SOURCE_GATE.md, kept outside the repo); howtobrew.com served an expired TLS certificate and was fetched read-only without certificate checking; the Oxford Companion was read through the licensed Craft Beer & Brewing dictionary, not the printed book; MoreBeer shows no author or date; the AHA PDF date is from its metadata. VERIFIED_AT PROVENANCE: 2026-10-11T21:23:49Z is when the Chief source-gate PASS (implementation brief 'KBH - MESKING FOUNDATION GAP - IMPLEMENTATION') was received locally (session log, truncated to whole seconds). The Chief review itself happened on or before that moment; its exact clock time is not recorded."
+    },
+    {
       "id": "FACT-BOIL-0001",
       "claim": "Boiling wort to an active, sustained boil inactivates the malt enzymes that were active during mashing (stopping further starch conversion) and reduces the wort's microbial load carried over from the mash/lauter.",
       "classification": "documented_fact",

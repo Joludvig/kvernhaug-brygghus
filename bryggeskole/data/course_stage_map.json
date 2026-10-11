@@ -42,10 +42,10 @@
     {
       "module": "mesking",
       "topic_id": "PILOT-MASHING-FUNDAMENTALS",
-      "notes": "Stage allocation contract §D.1 (MASH-B/C, Q-002/003) and the Mesking Kompetent slice (MASH-D..F, Q-004..008).",
+      "notes": "Stage allocation contract §D.1 (MASH-B/C, Q-002/003), the Mesking Kompetent slice (MASH-D..F, Q-004..008) and the Foundation basic mash procedure (MASH-G, Q-009/010; #508).",
       "foundation": {
-        "chunks": ["CHUNK-MASH-A"],
-        "questions": ["Q-MASH-001"]
+        "chunks": ["CHUNK-MASH-A", "CHUNK-MASH-G"],
+        "questions": ["Q-MASH-001", "Q-MASH-009", "Q-MASH-010"]
       },
       "kompetent": {
         "chunks": ["CHUNK-MASH-B", "CHUNK-MASH-C", "CHUNK-MASH-D", "CHUNK-MASH-E", "CHUNK-MASH-F"],

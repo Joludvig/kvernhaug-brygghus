@@ -30,7 +30,7 @@ _PLAN = {
     ("raavarer", "foundation"): 4,
     ("rengjoring", "foundation"): 3,
     ("metodevalg", "foundation"): 3,
-    ("mesking", "foundation"): 1,
+    ("mesking", "foundation"): 2,  # #508: + "Temperatur og tid i meskingen"
     ("mesking", "kompetent"): 4,
     ("koking", "foundation"): 2,
     ("koking", "kompetent"): 1,
@@ -91,8 +91,8 @@ class TestProductionMap(_Production):
                 self.assertEqual(page["title"][lang], page["title"][lang].strip())
 
     def test_baseline_page_totals(self):
-        self.assertEqual(len(self.pages), 50)
-        self.assertEqual(sum(p["stage"] == "foundation" for p in self.pages), 27)
+        self.assertEqual(len(self.pages), 51)
+        self.assertEqual(sum(p["stage"] == "foundation" for p in self.pages), 28)
         self.assertEqual(sum(p["stage"] == "kompetent" for p in self.pages), 23)
         counts = {}
         for page in self.pages:
@@ -116,7 +116,7 @@ class TestProductionMap(_Production):
                 mapped = [c for p in lp.pages_for_stage(self.data, module_id, stage) for c in p["chunks"]]
                 self.assertEqual(mapped, self._stage_chunk_ids(module_id, stage), (module_id, stage))
                 total += len(mapped)
-        self.assertEqual(total, 84)
+        self.assertEqual(total, 85)
 
     def test_every_chunk_exactly_once_and_no_unknown_or_question_ids(self):
         mapped = [c for p in self.pages for c in p["chunks"]]

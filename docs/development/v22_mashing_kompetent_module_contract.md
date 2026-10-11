@@ -64,6 +64,9 @@ The smallest unblocking fact round is two records (§9). The rest of the slice i
 - Forberedelse/metode CHUNK-METHOD-A…E and their questions are unchanged. This slice applies them and does not restate the
   layouts.
 - The Kompetent items are appended after CHUNK-MASH-C / Q-MASH-003 in the **same Mesking module and card** (still 11 cards).
+- Pointer 2026-10-11 (owner acceptance #508): Mesking Foundation later gained the basic mash procedure, CHUNK-MASH-G and
+  Q-MASH-009/010 (FACT-MASH-0007/0008), placed directly after CHUNK-MASH-A / Q-MASH-001 so Foundation stays a contiguous
+  prefix (stage allocation contract §D.1). Every item of this Kompetent slice is unchanged.
 
 ## 3. Learning outcomes (Kompetent)
 

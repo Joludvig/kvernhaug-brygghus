@@ -309,6 +309,7 @@ _KONSEPT_LABELS = {
     "mashing.starch_conversion": {"no": "Stivelsesomdanning", "en": "Starch conversion"},
     "mashing.dextrins": {"no": "Dekstriner", "en": "Dextrins"},
     "mashing.temperature": {"no": "Mesketemperatur", "en": "Mash temperature"},
+    "mashing.duration": {"no": "Mesketid", "en": "Mash time"},
     "mashing.fermentability": {"no": "Gjærbarhet", "en": "Fermentability"},
     "mashing.process_variables": {"no": "Andre prosessfaktorer", "en": "Other process variables"},
     "mashing.grain_separation": {"no": "Skille vørter fra korn", "en": "Separating wort from grain"},
