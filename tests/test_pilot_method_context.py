@@ -48,6 +48,10 @@ _ALL_FACTS = {
     "FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003",
     "FACT-METHOD-0004", "FACT-METHOD-0005",
 }
+# #508 provenance repair: FACT-MASH-0007 grounds CHUNK-METHOD-A's existing
+# "controlled temperature" clause. Chunk-only -- no Method question uses it
+# and the chunk text is unchanged.
+_CHUNK_ONLY_FACTS = {"FACT-MASH-0007"}
 
 _EXPECTED_CHUNK_IDS = [
     "CHUNK-METHOD-A", "CHUNK-METHOD-B", "CHUNK-METHOD-C", "CHUNK-METHOD-D", "CHUNK-METHOD-E",
@@ -143,7 +147,7 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
         referenced = set()
         for chunk in self.data["chunks"]:
             referenced.update(chunk["source_claims"])
-        self.assertEqual(referenced, _ALL_FACTS)
+        self.assertEqual(referenced, _ALL_FACTS | _CHUNK_ONLY_FACTS)
 
     def test_at_least_one_concept_check_and_one_scenario_question(self):
         types = [q["type"] for q in self.data["questions"]]
@@ -160,7 +164,7 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
             all_claims.update(chunk["source_claims"])
         for question in self.data["questions"]:
             all_claims.update(question["source_claims"])
-        self.assertEqual(all_claims, _ALL_FACTS)
+        self.assertEqual(all_claims, _ALL_FACTS | _CHUNK_ONLY_FACTS)
 
     def test_every_fact_is_referenced_by_at_least_one_question(self):
         referenced = set()
@@ -205,7 +209,7 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
         # module's own question just re-teaches the same underlying facts
         # under a new, module-local concept id.
         chunk_a = next(c for c in self.data["chunks"] if c["id"] == "CHUNK-METHOD-A")
-        self.assertEqual(set(chunk_a["source_claims"]), {"FACT-MASH-0001", "FACT-BOIL-0001"})
+        self.assertEqual(chunk_a["source_claims"], ["FACT-MASH-0001", "FACT-BOIL-0001", "FACT-MASH-0007"])
         question = next(q for q in self.data["questions"] if "method.shared_process" in q["concepts"])
         self.assertEqual(set(question["source_claims"]), {"FACT-MASH-0001", "FACT-BOIL-0001"})
 

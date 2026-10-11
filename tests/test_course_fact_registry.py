@@ -260,6 +260,8 @@ _MEASUREMENT_KOMPETENT_VERIFIED_IDS = ["FACT-MEAS-0004", "FACT-MEAS-0005"]
 _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS = ["FACT-MEAS-0006"]
 _FERMENTATION_KOMPETENT_VERIFIED_IDS = ["FACT-BREW-0004", "FACT-BREW-0005"]
 _MASHING_KOMPETENT_VERIFIED_IDS = ["FACT-MASH-0005", "FACT-MASH-0006"]
+# Mesking Foundation R1/R2 (#508): the basic mash procedure, temperature and time.
+_MASHING_FOUNDATION_PROCEDURE_VERIFIED_IDS = ["FACT-MASH-0007", "FACT-MASH-0008"]
 _SAFETY_VERIFIED_IDS = ["FACT-SAFE-0001", "FACT-SAFE-0002", "FACT-SAFE-0003"]
 _SENSORY_VERIFIED_IDS = ["FACT-SENSORY-0001", "FACT-SENSORY-0002", "FACT-SENSORY-0003"]
 _ALL_PRODUCTION_VERIFIED_IDS = sorted(
@@ -269,7 +271,7 @@ _ALL_PRODUCTION_VERIFIED_IDS = sorted(
     + _HOP_CORE_VERIFIED_IDS + _RECIPE_VERIFIED_IDS + _MEASUREMENT_VERIFIED_IDS
     + _MEASUREMENT_KOMPETENT_VERIFIED_IDS + _MEASUREMENT_INSTRUMENT_CHECK_VERIFIED_IDS
     + _SAFETY_VERIFIED_IDS + _SENSORY_VERIFIED_IDS + _FERMENTATION_KOMPETENT_VERIFIED_IDS
-    + _MASHING_KOMPETENT_VERIFIED_IDS
+    + _MASHING_KOMPETENT_VERIFIED_IDS + _MASHING_FOUNDATION_PROCEDURE_VERIFIED_IDS
 )
 
 
@@ -358,7 +360,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # documented_fact.
         # Issue #523 (over-priming risk) adds FACT-PACK-0005: 1
         # documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 48)
+        # Issue #508 (Mesking Foundation R1/R2, Chief source gate PASS
+        # 2026-10-11) adds FACT-MASH-0007..0008: 2 documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 50)
         # Measurement M7 (offline, Chief live source spot-check 2026-10-05;
         # no GitHub issue yet) adds FACT-MEAS-0006: 1
         # professional_interpretation.
@@ -470,18 +474,23 @@ class TestProductionRegistryMashingFactPackVerifiedOnlyApi(unittest.TestCase):
 
     def test_returns_exactly_the_three_mashing_ids(self):
         # The Mesking Kompetent M1/M2 records (FACT-MASH-0005..0006) are
-        # covered by TestProductionRegistryMashingKompetentM1M2.
+        # covered by TestProductionRegistryMashingKompetentM1M2, the
+        # Foundation R1/R2 records (FACT-MASH-0007..0008, #508) by
+        # TestProductionRegistryMashingFoundationR1R2.
         ids = {r["id"] for r in read_verified_records(_PRODUCTION_REGISTRY) if r["id"].startswith("FACT-MASH-")}
-        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS + _MASHING_KOMPETENT_VERIFIED_IDS))
-        self.assertEqual(ids - set(_MASHING_KOMPETENT_VERIFIED_IDS), set(_MASHING_VERIFIED_IDS))
+        later = set(_MASHING_KOMPETENT_VERIFIED_IDS + _MASHING_FOUNDATION_PROCEDURE_VERIFIED_IDS)
+        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS) | later)
+        self.assertEqual(ids - later, set(_MASHING_VERIFIED_IDS))
 
-    def test_concept_filter_mashing_temperature_returns_expected_two(self):
+    def test_concept_filter_mashing_temperature_returns_expected_three(self):
+        # FACT-MASH-0007 (#508) adds the practical procedure to the
+        # direction (0002) and the several-factors framing (0004).
         ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept="mashing.temperature")}
-        self.assertEqual(ids, {"FACT-MASH-0002", "FACT-MASH-0004"})
+        self.assertEqual(ids, {"FACT-MASH-0002", "FACT-MASH-0004", "FACT-MASH-0007"})
 
-    def test_module_filter_mashing_fundamentals_returns_all_three(self):
+    def test_module_filter_mashing_fundamentals_returns_the_foundation_records(self):
         ids = {r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, module="mashing.fundamentals")}
-        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS))
+        self.assertEqual(ids, set(_MASHING_VERIFIED_IDS + _MASHING_FOUNDATION_PROCEDURE_VERIFIED_IDS))
 
     def test_provenance_and_source_refs_survive_trusted_reads(self):
         expected = {
@@ -1516,6 +1525,72 @@ class TestProductionRegistryFermentationKompetentG1G2(unittest.TestCase):
         self.assertIn("INDEPENDENCE", records["FACT-BREW-0004"]["notes"])
         self.assertIn("FACT-SENSORY-0001", records["FACT-BREW-0005"]["notes"])
         self.assertIn("dropped entirely", records["FACT-BREW-0005"]["notes"])
+
+
+class TestProductionRegistryMashingFoundationR1R2(unittest.TestCase):
+    """Mesking Foundation R1/R2 (issue #508 owner acceptance; Chief source
+    gate PASS 2026-10-11): FACT-MASH-0007 (mash temperature procedure) and
+    FACT-MASH-0008 (mash time). Number-free, bounded claims."""
+
+    _CONCEPTS = {"FACT-MASH-0007": "mashing.temperature", "FACT-MASH-0008": "mashing.duration"}
+    _MODULES = {
+        "FACT-MASH-0007": ["mashing.fundamentals", "method_context.fundamentals"],
+        "FACT-MASH-0008": ["mashing.fundamentals"],
+    }
+
+    def _records(self):
+        return {fid: get_verified_record(_PRODUCTION_REGISTRY, fid) for fid in self._CONCEPTS}
+
+    def test_verified_documented_facts_with_foundation_modules(self):
+        for fact_id, record in self._records().items():
+            with self.subTest(fact_id=fact_id):
+                self.assertIsNotNone(record)
+                self.assertEqual(record["classification"], "documented_fact")
+                self.assertEqual(record["concepts"], [self._CONCEPTS[fact_id]])
+                self.assertEqual(record["modules"], self._MODULES[fact_id])
+                # The local receipt of the Chief PASS (session log), not an
+                # invented clock time.
+                self.assertEqual(record["verified_at"], "2026-10-11T21:23:49Z")
+                self.assertIn("VERIFIED_AT PROVENANCE", record["notes"])
+                self.assertIn("#508", record["notes"])
+
+    def test_mashing_duration_maps_to_exactly_one_record(self):
+        ids = [r["id"] for r in find_verified_records(_PRODUCTION_REGISTRY, concept="mashing.duration")]
+        self.assertEqual(ids, ["FACT-MASH-0008"])
+
+    def test_claims_carry_no_numbers_and_no_excluded_rules(self):
+        for fact_id, record in self._records().items():
+            claim = record["claim"].lower()
+            with self.subTest(fact_id=fact_id):
+                self.assertNotRegex(claim, r"[0-9]")
+                for banned in ("exactly", "constant", "every ", "frequent", "longer is better", "iodine",
+                               "mashout", "strike", "warmer", "cooler", "drier", "fuller", "optimum"):
+                    self.assertNotIn(banned, claim)
+
+    def test_r1_keeps_the_bounded_procedure(self):
+        claim = self._records()["FACT-MASH-0007"]["claim"]
+        for needle in ("planned target temperature", "recipe or mash schedule specifies",
+                       "checks that the mash has reached the intended target",
+                       "aims to keep it close to that target", "keeping the heat in",
+                       "system's normal temperature control", "practical process variable"):
+            self.assertIn(needle, claim)
+
+    def test_r2_keeps_the_bounded_time_clauses(self):
+        claim = self._records()["FACT-MASH-0008"]["claim"]
+        for needle in ("not instantaneous", "planned period", "recipe or mash schedule specifies",
+                       "grain remains in the mash", "separated from the grain after the mash rest",
+                       "can vary", "rather than one universal figure"):
+            self.assertIn(needle, claim)
+
+    def test_independent_non_commercial_lines(self):
+        for fact_id, record in self._records().items():
+            refs = " ".join(s["ref"] for s in record["sources"])
+            with self.subTest(fact_id=fact_id):
+                for line in ("John Palmer, How to Brew", "Oxford Companion to Beer",
+                             "American Homebrewers Association", "MoreBeer"):
+                    self.assertIn(line, refs)
+                morebeer = next(s for s in record["sources"] if "MoreBeer" in s["ref"])
+                self.assertIn("corroboration only", morebeer["type"])
 
 
 class TestProductionRegistryMashingKompetentM1M2(unittest.TestCase):

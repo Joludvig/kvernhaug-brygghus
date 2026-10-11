@@ -4,7 +4,7 @@
   "chunks": [
     {
       "id": "CHUNK-METHOD-A",
-      "source_claims": ["FACT-MASH-0001", "FACT-BOIL-0001"],
+      "source_claims": ["FACT-MASH-0001", "FACT-BOIL-0001", "FACT-MASH-0007"],
       "text": {
         "no": "Uansett om du brygger med meskepose (BIAB), et tradisjonelt meskekar eller en alt-i-ett bryggemaskin, gjennomgår ølet ditt nøyaktig de samme grunnleggende trinnene: du mesker malten i vann med kontrollert temperatur slik at enzymer omdanner stivelse til gjærbart sukker, du skiller vørten fra kornresten, du koker vørten, og deretter kjøler, gjærer og pakker du ølet. Utstyret og fremgangsmåten for å gjennomføre disse trinnene varierer mellom metodene - selve prosessen gjør det ikke.",
         "en": "Whether you brew with a mash bag (BIAB), a traditional mash tun, or an all-in-one brewing machine, your beer goes through exactly the same fundamental steps: you mash the grain in temperature-controlled water so enzymes convert starch into fermentable sugar, you separate the wort from the spent grain, you boil the wort, and then you cool, ferment and package the beer. The equipment and handling used to carry out these steps differ between methods - the underlying process does not."

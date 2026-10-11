@@ -133,13 +133,14 @@ class TestTotals(_WithProduction):
         return sum(len(e[stage][kind]) for e in self.stage_map["modules"])
 
     def test_stage_totals(self):
-        self.assertEqual((self._count("foundation", "chunks"), self._count("foundation", "questions")), (48, 47))
+        # #508: Mesking Foundation gains CHUNK-MASH-G and Q-MASH-009/010.
+        self.assertEqual((self._count("foundation", "chunks"), self._count("foundation", "questions")), (49, 49))
         self.assertEqual((self._count("kompetent", "chunks"), self._count("kompetent", "questions")), (36, 54))
 
     def test_totals_equal_the_real_content(self):
         real_chunks = sum(len(p["chunks"]) for p in self.pilots.values())
         real_questions = sum(len(p["questions"]) for p in self.pilots.values())
-        self.assertEqual((real_chunks, real_questions), (84, 101))
+        self.assertEqual((real_chunks, real_questions), (85, 103))
         self.assertEqual(self._count("foundation", "chunks") + self._count("kompetent", "chunks"), real_chunks)
         self.assertEqual(self._count("foundation", "questions") + self._count("kompetent", "questions"), real_questions)
 
@@ -171,10 +172,11 @@ class TestAllocationFollowsTheContracts(_WithProduction):
 
     def test_appended_kompetent_slices_follow_their_foundation(self):
         # (Foundation chunk count, Foundation question count): everything after
-        # the Foundation prefix is Kompetent (Mesking §D.1 + Kompetent slice;
-        # Gjæring, Pakking and Måling Kompetent slices).
+        # the Foundation prefix is Kompetent (Mesking §D.1 incl. the #508 basic
+        # mash procedure + Kompetent slice; Gjæring, Pakking and Måling
+        # Kompetent slices).
         for module_id, (n_chunks, n_questions) in {
-            "mesking": (1, 1), "gjaring": (4, 3), "pakking": (5, 6), "maaling": (5, 6),
+            "mesking": (2, 3), "gjaring": (4, 3), "pakking": (5, 6), "maaling": (5, 6),
         }.items():
             with self.subTest(module=module_id):
                 pilot = self.pilots[module_id]
@@ -242,9 +244,10 @@ class TestLookupApi(_WithProduction):
         komp = items_for_stage(self.stage_map, "mesking", pilot, "kompetent")
         self.assertEqual([c["id"] for c in komp["chunks"]], [f"CHUNK-MASH-{c}" for c in "BCDEF"])
         self.assertEqual([q["id"] for q in komp["questions"]], [f"Q-MASH-00{n}" for n in range(2, 9)])
-        self.assertIs(komp["chunks"][0], pilot["chunks"][1])
+        self.assertIs(komp["chunks"][0], pilot["chunks"][2])
         found = items_for_stage(self.stage_map, "mesking", pilot, "foundation")
-        self.assertEqual([c["id"] for c in found["chunks"]], ["CHUNK-MASH-A"])
+        self.assertEqual([c["id"] for c in found["chunks"]], ["CHUNK-MASH-A", "CHUNK-MASH-G"])
+        self.assertEqual([q["id"] for q in found["questions"]], ["Q-MASH-001", "Q-MASH-009", "Q-MASH-010"])
 
     def test_questions_only_stage_has_no_chunks(self):
         items = items_for_stage(self.stage_map, "kjoling", self.pilots["kjoling"], "kompetent")

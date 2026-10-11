@@ -32,8 +32,10 @@ const BREDDER = [1280, 900, 750, 390];
 const HOYDE = 900;
 const KORT = ['raavarer', 'rengjoring', 'metodevalg', 'mesking', 'koking', 'kjoling', 'gjaring', 'pakking',
   'maaling', 'oppskrift', 'smak'];
-// The shortest lesson per stage (1 block; 1 and 3 questions).
-const KORT_LEKSJON = { foundation: 'mesking', kompetent: 'koking' };
+// The shortest lesson per stage: Foundation Gjæring (2 learning pages, 3
+// questions; Mesking ties since #508 but is the module that changed) and
+// Kompetent Koking (1 page, 3 questions).
+const KORT_LEKSJON = { foundation: 'gjaring', kompetent: 'koking' };
 
 const TEKST = {
   no: {
@@ -285,7 +287,7 @@ async function gaGjennomLeksjon(page, lang, miljo, trinn, kontekst) {
     await klikkKey(page, `bs_prov_igjen_${base}_btn`);
   } else {
     if (!(await page.locator(`.st-key-bs_start_sporsmal_${base}_btn`).count())) {
-      await klikkKey(page, `bs_bolk_neste_${base}_btn`); // never reached with 1-block lessons
+      await klikkKey(page, `bs_bolk_neste_${base}_btn`); // page 1 of the 2-page Foundation lesson
     }
     await ventPaKey(page, `bs_start_sporsmal_${base}_btn`);
     await klikkKey(page, `bs_start_sporsmal_${base}_btn`);

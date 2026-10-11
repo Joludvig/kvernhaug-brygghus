@@ -162,6 +162,18 @@
       ]
     },
     {
+      "id": "mesking.foundation.2",
+      "module": "mesking",
+      "stage": "foundation",
+      "title": {
+        "no": "Temperatur og tid i meskingen",
+        "en": "Temperature and time in the mash"
+      },
+      "chunks": [
+        "CHUNK-MASH-G"
+      ]
+    },
+    {
       "id": "mesking.kompetent.1",
       "module": "mesking",
       "stage": "kompetent",

@@ -2584,7 +2584,12 @@ class TestGjaringKompetent(_MedIsolertTilstand):
 
 
 # ─── Mesking Kompetent (meskekontrakten §6.1/§7.1): bolk D–F og
-# Q-MASH-004…008 i samme modul og samme kort, etter Foundation A–C ─────────
+# Q-MASH-004…008 i samme modul og samme kort, etter A–C og (#508) den
+# grunnleggende meskeprosedyren G / Q-MASH-009…010 ───────────────────────
+
+def _mesk_q_idx(qid):
+    """Spørsmålets plass i hele Mesking-flyten (pilotrekkefølge)."""
+    return [q["id"] for q in les_mesking_pilot()["questions"]].index(qid)
 
 class TestMeskingKompetent(_MedIsolertTilstand):
     _ETIKETT = {"no": "Metode, ikke en faktapåstand", "en": "Method, not a fact claim"}
@@ -2620,17 +2625,19 @@ class TestMeskingKompetent(_MedIsolertTilstand):
                         at.session_state["sprak"] = "en"
                         at.run()
                     self._apne_modul(at, "mesking", miljo_knapp)
-                    for idx in range(6):
+                    n = len(pilot["chunks"])
+                    self.assertEqual(n, 7)  # A, G (#508), B, C, D, E, F
+                    for idx in range(n):
                         chunk = pilot["chunks"][idx]
-                        teller = (f"Læringsside {idx + 1} av 6" if sprak == "no"
-                                  else f"Learning page {idx + 1} of 6")
+                        teller = (f"Læringsside {idx + 1} av {n}" if sprak == "no"
+                                  else f"Learning page {idx + 1} of {n}")
                         self.assertEqual(self._bolk_teller(at), [teller])
-                        if idx >= 3:
-                            self.assertIn(self._KOMPETENT_TITLER[sprak][idx - 3],
+                        if chunk["id"] in ("CHUNK-MASH-D", "CHUNK-MASH-E", "CHUNK-MASH-F"):
+                            self.assertIn(self._KOMPETENT_TITLER[sprak]["DEF".index(chunk["id"][-1])],
                                           " ".join(_alle_synlige_tekster(at)))
                         har_etikett = self._ETIKETT[sprak] in [c.value for c in at.caption]
                         self.assertEqual(har_etikett, chunk.get("basis") == "methodology", chunk["id"])
-                        if idx < 5:
+                        if idx < n - 1:
                             _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
                             self.assertEqual(len(at.exception), 0)
                     _knapp(at, "bs_start_sporsmal_mesking_btn")
@@ -2639,10 +2646,11 @@ class TestMeskingKompetent(_MedIsolertTilstand):
         at = self._ny_apptest()
         self._apne_modul_og_start_sporsmal(at, "mesking")
         fasit = _korrekt_svar_ider(les_mesking_pilot())
-        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(3)})
-        # Første Kompetent-spørsmål (Q-MASH-004, indeks 3).
-        self.assertIsNone(at.radio(key=self._valg_key(3, 1)).value)
-        self.assertTrue(_knapp(at, "bs_svar_btn_mesking_r1_q3").disabled)
+        q4 = _mesk_q_idx("Q-MASH-004")
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(q4)})
+        # Første spørsmål i Kompetent-utvidelsen (Q-MASH-004).
+        self.assertIsNone(at.radio(key=self._valg_key(q4, 1)).value)
+        self.assertTrue(_knapp(at, f"bs_svar_btn_mesking_r1_q{q4}").disabled)
 
     def test_riktig_og_feil_tilbakemelding_pa_kompetentsporsmal(self):
         at = self._ny_apptest()
@@ -2650,17 +2658,18 @@ class TestMeskingKompetent(_MedIsolertTilstand):
         pilot = les_mesking_pilot()
         fasit = _korrekt_svar_ider(pilot)
         feil = _feil_svar_ider(pilot)
-        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(4)})
-        # Q-MASH-005 (vorlauf, indeks 4): feil svar gir forklarende tilbakemelding.
-        self._besvar_sporsmal(at, 4, 1, feil[4])
+        q5, q8 = _mesk_q_idx("Q-MASH-005"), _mesk_q_idx("Q-MASH-008")
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(q5)})
+        # Q-MASH-005 (vorlauf): feil svar gir forklarende tilbakemelding.
+        self._besvar_sporsmal(at, q5, 1, feil[q5])
         tekst = " ".join(_alle_synlige_tekster(at))
-        self.assertIn(pilot["questions"][4]["feedback_incorrect"]["no"], tekst)
-        self._fortsett(at, 4, 1)
-        self._fullfor_alle_sporsmal(at, 1, {5: fasit[5], 6: fasit[6]})
-        # Q-MASH-008 (metodespørsmålet, indeks 7): riktig svar.
-        self._besvar_sporsmal(at, 7, 1, fasit[7])
+        self.assertIn(pilot["questions"][q5]["feedback_incorrect"]["no"], tekst)
+        self._fortsett(at, q5, 1)
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(q5 + 1, q8)})
+        # Q-MASH-008 (metodespørsmålet): riktig svar.
+        self._besvar_sporsmal(at, q8, 1, fasit[q8])
         tekst = " ".join(_alle_synlige_tekster(at))
-        self.assertIn(pilot["questions"][7]["feedback_correct"]["no"], tekst)
+        self.assertIn(pilot["questions"][q8]["feedback_correct"]["no"], tekst)
 
     def test_full_flyt_etiketter_og_prov_igjen_i_begge_miljo(self):
         for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
@@ -2668,7 +2677,7 @@ class TestMeskingKompetent(_MedIsolertTilstand):
                 at = self._ny_apptest()
                 self._apne_modul_og_start_sporsmal(at, "mesking", miljo_knapp)
                 fasit = _korrekt_svar_ider(les_mesking_pilot())
-                self.assertEqual(len(fasit), 8)
+                self.assertEqual(len(fasit), 10)  # + Q-MASH-009/010 (#508)
                 self._fullfor_alle_sporsmal(at, 1, fasit)
                 self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
                 tekst = " ".join(_alle_synlige_tekster(at))
