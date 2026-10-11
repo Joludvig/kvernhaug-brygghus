@@ -103,7 +103,7 @@
         {
           "id": "a",
           "text": {
-            "no": "Hele kornmengden mekses i posen, og du skiller vørten fra kornet ved å løfte posen opp.",
+            "no": "Hele kornmengden meskes i posen, og du skiller vørten fra kornet ved å løfte posen opp.",
             "en": "The whole grain bill is mashed in the bag, and you separate the wort from the grain by lifting the bag out."
           },
           "correct": true
@@ -111,7 +111,7 @@
         {
           "id": "b",
           "text": {
-            "no": "Bare en del av kornet mekses i posen, og resten av sukkeret kommer fra maltekstrakt.",
+            "no": "Bare en del av kornet meskes i posen, og resten av sukkeret kommer fra maltekstrakt.",
             "en": "Only part of the grain is mashed in the bag, and the rest of the sugar comes from malt extract."
           },
           "correct": false
@@ -126,11 +126,11 @@
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Ved BIAB mekses hele kornmengden i en pose i kjelen, og du skiller vørt fra korn ved å løfte posen opp. Det er all-grain-brygging i færre kar.",
+        "no": "Riktig. Ved BIAB meskes hele kornmengden i en pose i kjelen, og du skiller vørt fra korn ved å løfte posen opp. Det er all-grain-brygging i færre kar.",
         "en": "Correct. With BIAB the whole grain bill is mashed in a bag in the kettle, and you separate wort from grain by lifting the bag out. It is all-grain brewing in fewer vessels."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Ved BIAB mekses hele kornmengden, uten ekstrakt, og posen brukes i meskingen – ikke under kokingen. Vørten skilles fra kornet ved at du løfter posen opp av kjelen.",
+        "no": "Ikke helt. Ved BIAB meskes hele kornmengden, uten ekstrakt, og posen brukes i meskingen – ikke under kokingen. Vørten skilles fra kornet ved at du løfter posen opp av kjelen.",
         "en": "Not quite. With BIAB the whole grain bill is mashed, without extract, and the bag is used in the mash – not during the boil. The wort is separated from the grain by lifting the bag out of the kettle."
       }
     },
