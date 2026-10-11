@@ -440,7 +440,7 @@ class TestFoundationCompletionSlice(unittest.TestCase):
             self.assertTrue(bilingual["no"].strip() and bilingual["en"].strip())
 
     def test_after_pitching_wording(self):
-        self.assertIn("etter pitching gjærer gjæren det forgjærbare sukkeret", self.teaching)
+        self.assertIn("etter at gjæren er tilsatt, gjærer den det forgjærbare sukkeret", self.teaching)
         self.assertIn("lager alkohol og co₂", self.teaching)
         self.assertIn("after pitching, the yeast ferments the fermentable sugar", self.teaching)
 

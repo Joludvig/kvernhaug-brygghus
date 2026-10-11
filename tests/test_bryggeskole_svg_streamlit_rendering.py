@@ -110,7 +110,7 @@ _CASES = [
     (
         render_method_context_flow_svg,
         {
-            "no": ["BIAB", "Tradisjonelt alt-korn", "Alt-i-ett", "Meskekar/lauterkar", "Kjele"],
+            "no": ["BIAB", "Tradisjonell all-grain", "Alt-i-ett", "Meskekar/lauterkar", "Kjele"],
             "en": ["BIAB", "Traditional all-grain", "All-in-one", "Mash/lauter vessel", "Kettle"],
         },
         {"rect", "line", "path"},

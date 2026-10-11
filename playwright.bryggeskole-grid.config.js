@@ -35,6 +35,9 @@ const { defineConfig, devices } = require('@playwright/test');
 const { resolveStreamlitPythonCommand } = require('./tests/playwright_streamlit/streamlit_runtime');
 
 const PORT = 8525;
+// learning-page-layout.spec.js needs app.py's layout="wide", so it talks to
+// a wide twin of the harness on its own port (second webServer below).
+const WIDE_PORT = 8526;
 
 // Same validated resolver as playwright.streamlit.config.js -- no silent
 // `py -3` fallback (see streamlit_runtime.js).
@@ -47,7 +50,9 @@ module.exports = defineConfig({
   // nav-buttons-responsive.spec.js (issue #398 responsive follow-up)
   // uses the same harness, so it shares this config/port.
   // stage-selector-smoke.spec.js (stage UI S3) uses it too.
-  testMatch: ['**/module-grid-responsive.spec.js', '**/nav-buttons-responsive.spec.js', '**/stage-selector-smoke.spec.js'],
+  // learning-page-layout.spec.js (owner acceptance #508) uses the wide twin.
+  testMatch: ['**/module-grid-responsive.spec.js', '**/nav-buttons-responsive.spec.js', '**/stage-selector-smoke.spec.js',
+    '**/learning-page-layout.spec.js'],
   fullyParallel: true,
   workers: process.env.CI ? undefined : 1,
   forbidOnly: !!process.env.CI,
@@ -61,18 +66,31 @@ module.exports = defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  webServer: {
-    command:
-      `${STREAMLIT_PYTHON} -m streamlit run tests/fixtures/streamlit_harness/bryggeskole_harness.py ` +
-      `--server.headless true --server.port ${PORT} --server.address 127.0.0.1 ` +
-      '--browser.gatherUsageStats false',
-    url: `http://127.0.0.1:${PORT}/`,
-    // Never reuse: an already-running server on this port could be reading
-    // or writing learner state somewhere other than the temp dir above.
-    reuseExistingServer: false,
-    env: { ...process.env, KVERNHAUG_BRYGGESKOLE_STATE_DIR: STATE_DIR },
-    timeout: 60_000,
-  },
+  webServer: [
+    {
+      command:
+        `${STREAMLIT_PYTHON} -m streamlit run tests/fixtures/streamlit_harness/bryggeskole_harness.py ` +
+        `--server.headless true --server.port ${PORT} --server.address 127.0.0.1 ` +
+        '--browser.gatherUsageStats false',
+      url: `http://127.0.0.1:${PORT}/`,
+      // Never reuse: an already-running server on this port could be reading
+      // or writing learner state somewhere other than the temp dir above.
+      reuseExistingServer: false,
+      env: { ...process.env, KVERNHAUG_BRYGGESKOLE_STATE_DIR: STATE_DIR },
+      timeout: 60_000,
+    },
+    {
+      command:
+        `${STREAMLIT_PYTHON} -m streamlit run tests/fixtures/streamlit_harness/bryggeskole_wide_harness.py ` +
+        `--server.headless true --server.port ${WIDE_PORT} --server.address 127.0.0.1 ` +
+        '--browser.gatherUsageStats false',
+      url: `http://127.0.0.1:${WIDE_PORT}/`,
+      reuseExistingServer: false,
+      // Same isolated temp state dir; the layout spec never answers questions.
+      env: { ...process.env, KVERNHAUG_BRYGGESKOLE_STATE_DIR: STATE_DIR },
+      timeout: 60_000,
+    },
+  ],
   projects: [
     {
       name: 'chromium-desktop',

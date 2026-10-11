@@ -85,6 +85,7 @@ import streamlit as st
 
 from config import DEMO_MODE
 from bryggeskole import course_stage as _course_stage
+from bryggeskole import learning_pages as _learning_pages
 from bryggeskole.answer_order import velg_alternativ_rekkefolge
 from bryggeskole.boil_timeline import render_boil_timeline_svg
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
@@ -324,7 +325,7 @@ _KONSEPT_LABELS = {
     "cool.speed": {"no": "Nedkjølingshastighet", "en": "Cooling speed"},
     "cool.cold_break": {"no": "Cold break", "en": "Cold break"},
     "cool.sanitation_boundary": {"no": "Saniteringsgrense", "en": "Sanitation boundary"},
-    "oxygen.pre_pitch": {"no": "Oksygen før pitching", "en": "Pre-pitch oxygen"},
+    "oxygen.pre_pitch": {"no": "Oksygen før gjærtilsetting", "en": "Pre-pitch oxygen"},
     "oxygen.post_pitch": {"no": "Oksygen under gjæring", "en": "Oxygen during fermentation"},
     "oxygen.timing_distinction": {"no": "Oksygen-tidspunkt", "en": "Oxygen timing"},
     "transfer.method_tradeoffs": {"no": "Overføringsmetoder", "en": "Transfer methods"},
@@ -344,13 +345,13 @@ _KONSEPT_LABELS = {
     "yeast.attenuation": {"no": "Attenuering", "en": "Attenuation"},
     "yeast.ale_vs_lager": {"no": "Ale- og lagergjær", "en": "Ale and lager yeast"},
     "yeast.choice_principle": {"no": "Valg av gjær", "en": "Choosing yeast"},
-    "yeast.pitch_principle": {"no": "Pitching-prinsipp", "en": "Pitching principle"},
+    "yeast.pitch_principle": {"no": "Tilsetting av gjær", "en": "Pitching principle"},
     "water.majority_ingredient": {"no": "Vann som råvare", "en": "Water as an ingredient"},
     "water.chlorine_chloramine": {"no": "Klor og kloramin", "en": "Chlorine and chloramine"},
     "water.source_awareness": {"no": "Kjenn din vannkilde", "en": "Know your water source"},
     "method.shared_process": {"no": "Delt bryggeprosess", "en": "Shared brewing process"},
     "method.biab": {"no": "Meskepose (BIAB)", "en": "Mash bag (BIAB)"},
-    "method.traditional_allgrain": {"no": "Tradisjonelt alt-korn-oppsett", "en": "Traditional all-grain setup"},
+    "method.traditional_allgrain": {"no": "Tradisjonelt all-grain-oppsett", "en": "Traditional all-grain setup"},
     "method.all_in_one": {"no": "Alt-i-ett bryggemaskin", "en": "All-in-one brewing machine"},
     "method.planning_variables": {"no": "Metodeavhengig planlegging", "en": "Method-dependent planning"},
     "method.no_hierarchy": {"no": "Ingen metodehierarki", "en": "No method hierarchy"},
@@ -413,6 +414,7 @@ _TRINN_STATE_KEY = "bs_aktiv_trinn"
 _TRINN_VALG_KEY = "bs_trinn"
 _TRINN_EKSPLISITT_KEY = "bs_trinn_valgt_eksplisitt"
 _TRINNKART_CACHE_KEY = "_bs_trinnkart"
+_SIDEKART_CACHE_KEY = "_bs_sidekart"
 _TRINN_VALG_NOKKEL = {
     "foundation": "bryggeskole.trinn.foundation",
     "kompetent": "bryggeskole.trinn.kompetent",
@@ -509,6 +511,26 @@ def _hent_trinnkart():
     return st.session_state[_TRINNKART_CACHE_KEY]
 
 
+def _hent_sidekart():
+    """The validated learning-page map (stage UI contract §5.1), or None
+    when there is no valid stage map or the page map cannot be loaded or
+    validated. Read once per Streamlit session; a failure is logged once
+    and never repaired. None means today's lesson: one chunk per screen."""
+    if _SIDEKART_CACHE_KEY not in st.session_state:
+        kart = _hent_trinnkart()
+        sider = None
+        if kart is not None:
+            try:
+                sider = _learning_pages.load_learning_pages(stage_map=kart)
+            except (ValueError, OSError) as exc:
+                _LOGGER.warning(
+                    "Bryggeskole: learning page map unavailable (%s); using one chunk per lesson screen.",
+                    type(exc).__name__,
+                )
+        st.session_state[_SIDEKART_CACHE_KEY] = sider
+    return st.session_state[_SIDEKART_CACHE_KEY]
+
+
 def _valgt_trinn():
     """The learner's stage lens (the `bs_trinn` value); Foundation until the
     overview has set it."""
@@ -586,12 +608,12 @@ def _bytt_til_kompetent_eksplisitt():
 def _ny_modul_sesjon():
     return {
         "fase": "leksjon",
-        # Læringsbolkene vises ÉN om gangen (issue #338: "overview ->
-        # chunks -> question..."). Posisjonen ligger her, per modul, slik
-        # at en tur til skoleoversikten og tilbake gjenopptar nøyaktig
-        # samme bolk -- og slik at Mesking og Gjæring har helt uavhengig
-        # leksjonsfremdrift i samme økt.
-        "bolk_idx": 0,
+        # Leksjonen vises ÉN læringsside om gangen (issue #338: "overview
+        # -> chunks -> question...", #508: sider i stedet for enkeltbolker).
+        # Posisjonen ligger her, per (modul, trinn), slik at en tur til
+        # skoleoversikten og tilbake gjenopptar nøyaktig samme side -- og
+        # slik at modulene har helt uavhengig leksjonsfremdrift i samme økt.
+        "side_idx": 0,
         "sporsmal_idx": 0,
         "runde": 0,
         "siste_feedback": None,
@@ -699,12 +721,12 @@ def _tilbake_til_oversikt():
     st.session_state[_TRINN_STATE_KEY] = None
 
 
-def _bla_bolk(sesjon_id, delta, totalt):
-    """Flytter leksjonsposisjonen én bolk fram/tilbake, klemt innenfor
-    modulens egne bolker. `sesjon_id` is the (module, stage) session key
-    (_sesjon_nokkel()); for the single flow it is the module id."""
+def _bla_side(sesjon_id, delta, totalt):
+    """Flytter leksjonsposisjonen én læringsside fram/tilbake, klemt
+    innenfor leksjonens egne sider. `sesjon_id` is the (module, stage)
+    session key (_sesjon_nokkel()); for the single flow it is the module id."""
     sesjon = _modul_sesjon(sesjon_id)
-    sesjon["bolk_idx"] = max(0, min(totalt - 1, sesjon["bolk_idx"] + delta))
+    sesjon["side_idx"] = max(0, min(totalt - 1, sesjon.get("side_idx", 0) + delta))
 
 
 def _start_sporsmal_runde(sesjon_id):
@@ -907,13 +929,50 @@ def _injiser_bryggeskole_css():
     `width`), uten noen pikselverdi. Streamlits mobilregel
     (`@media (max-width: 640px)` → `min-width: calc(100% - 1.5rem)`) røres
     ikke, så mobilens stablede oppsett er uendret. Dekket av
-    tests/playwright_streamlit/nav-buttons-responsive.spec.js."""
+    tests/playwright_streamlit/nav-buttons-responsive.spec.js.
+
+    Owner acceptance #508 (learning pages): the lesson text was too small
+    and ran across the whole wide page. `.st-key-bs_leksjon_side` (one
+    learning page: title, subheadings, chunk bodies) gets a reading measure
+    of 42rem -- left-aligned, and on a narrow screen it simply fills the
+    column, so no media query. Chunk bodies (`bs_leksjon_tekst_<n>`) go
+    from 1.15rem to 1.2rem; page title (h3) and subheadings (h4) get their
+    own sizes and no anchor icons. `.st-key-bs_leksjon_med_visual` caps the
+    Råvarer Malt text|visual row at 70rem, so its 3:2 text column also lands
+    at 42rem. The question text keeps its own 1.15rem rule, unchanged.
+    Covered by tests/playwright_streamlit/learning-page-layout.spec.js."""
     st.markdown(
         """
         <style>
-        .st-key-bs_leksjon_tekst p, .st-key-bs_sporsmal_tekst p {
+        .st-key-bs_sporsmal_tekst p {
             font-size: 1.15rem;
             line-height: 1.7;
+        }
+        .st-key-bs_leksjon_side {
+            max-width: 42rem;
+        }
+        .st-key-bs_leksjon_med_visual {
+            max-width: 70rem;
+        }
+        .st-key-bs_leksjon_side [class*="st-key-bs_leksjon_tekst_"] p,
+        .st-key-bs_leksjon_side [class*="st-key-bs_leksjon_tekst_"] li {
+            font-size: 1.2rem;
+            line-height: 1.7;
+        }
+        .st-key-bs_leksjon_side h3 {
+            font-size: 1.5rem;
+            line-height: 1.3;
+            margin: 0.25rem 0 0.5rem;
+            padding: 0;
+        }
+        .st-key-bs_leksjon_side h4 {
+            font-size: 1.25rem;
+            line-height: 1.35;
+            margin: 1rem 0 0.25rem;
+            padding: 0;
+        }
+        .st-key-bs_leksjon_side [data-testid="stHeaderActionElements"] {
+            display: none;
         }
         .st-key-bs_sporsmal_tekst p {
             font-weight: 600;
@@ -1204,72 +1263,128 @@ def _render_leksjon_kun_sporsmal(sesjon_id, base):
             )
 
 
-def _render_leksjon(modul_id, sesjon, pilot, sprak, sesjon_id=None, base=None, trinn=None):
-    """ÉN læringsbolk om gangen (issue #338 / Chief review PR #340).
+def _leksjonssider(modul_id, chunks, trinn):
+    """The learning pages of the lesson context, as (page or None, [chunk
+    dicts]) pairs (stage UI contract §5.1). A stage lesson with a valid page
+    map shows its pages: adjacent chunks of that stage under one real title.
+    Otherwise -- the single flow, or no valid page map -- every chunk is its
+    own screen without a lifted title, as before #508."""
+    sidekart = _hent_sidekart() if trinn is not None else None
+    if sidekart is not None:
+        etter_id = {c["id"]: c for c in chunks}
+        sider = _learning_pages.pages_for_stage(sidekart, modul_id, trinn)
+        if [cid for side in sider for cid in side["chunks"]] == list(etter_id):
+            return [(side, [etter_id[cid] for cid in side["chunks"]]) for side in sider]
+    return [(None, [chunk]) for chunk in chunks]
 
-    Tidligere ble alle pilotens chunks rendret i én lang skjerm og
-    læreren hoppet rett til spørsmålene. Nå er leksjonen en egen liten
-    reise: bolk 1 -> Neste -> bolk 2 -> ... -> Start spørsmål, med
-    posisjonen lagret per modul, slik at en tur innom skoleoversikten
-    gjenopptar nøyaktig samme bolk.
+
+def _side_posisjon(sesjon, sider):
+    """The session's page position, clamped to the lesson's pages. A session
+    created before learning pages has only a chunk position (`bolk_idx`,
+    e.g. across a hot reload): it resumes on the page holding that chunk."""
+    if "side_idx" not in sesjon:
+        bolk_idx, forste = sesjon.get("bolk_idx", 0), 0
+        sesjon["side_idx"] = len(sider) - 1
+        for n, (_side, side_chunks) in enumerate(sider):
+            forste += len(side_chunks)
+            if bolk_idx < forste:
+                sesjon["side_idx"] = n
+                break
+    # Defensivt klem: innholdet kan i prinsippet ha blitt kortere siden
+    # posisjonen ble lagret (kun mulig ved innholdsendring i dev).
+    sesjon["side_idx"] = max(0, min(sesjon["side_idx"], len(sider) - 1))
+    return sesjon["side_idx"]
+
+
+def _side_visual(modul_id, side_chunks, sprak):
+    """The module's visual for one learning page, rendered once below (or,
+    for the Malt page, beside) the page text; None when the page has none."""
+    if modul_id == _MODUL_RAAVARER:
+        # Råvarer-modulens ene Malt-visual (issue #460): kvalitativ
+        # basismalt->spesialmalt-stripe, kun på siden med bolken som dekker
+        # FACT-MALT-0002 (basis vs. spesialmalt) -- se
+        # bryggeskole/malt_roles_strip.py sin docstring.
+        if any("FACT-MALT-0002" in c["source_claims"] for c in side_chunks):
+            return render_malt_roles_strip_svg(sprak)
+        return None
+    # Each of these modules has exactly one static diagram, visible through
+    # the whole lesson (issue #366/#370/#374/#380 contracts §4) -- see each
+    # renderer's docstring.
+    renderer = {
+        _MODUL_KOKING: render_boil_timeline_svg,
+        _MODUL_KJOLING: render_cool_transfer_flow_svg,
+        _MODUL_PAKKING: render_package_flow_svg,
+        _MODUL_METODEVALG: render_method_context_flow_svg,
+    }.get(modul_id)
+    return renderer(sprak) if renderer else None
+
+
+def _render_sidetekst(modul_id, side, side_chunks, sprak):
+    """One learning page's text: the page title as a real heading, then per
+    chunk its subheading (if any), its body and -- directly under that
+    chunk, never page-wide -- the methodology label (issue #472 D1b) when
+    its basis is methodology."""
+    render = _MODULER[modul_id]["pilot"].render_chunk
+    tekster = {c["id"]: render(c, sprak)["text"] for c in side_chunks}
+    if side is None:
+        seksjoner = [(c["id"], None, tekster[c["id"]]) for c in side_chunks]
+    else:
+        seksjoner = _learning_pages.page_sections(side, tekster, sprak)
+    basis = {c["id"]: c.get("basis") for c in side_chunks}
+    with st.container(key="bs_leksjon_side"):
+        if side is not None:
+            st.subheader(side["title"][sprak], anchor=False)
+        for n, (chunk_id, underoverskrift, tekst) in enumerate(seksjoner):
+            with st.container(key=f"bs_leksjon_tekst_{n}"):
+                if underoverskrift:
+                    st.markdown(f"#### {underoverskrift}")
+                st.markdown(tekst)
+            if basis[chunk_id] == "methodology":
+                # Liten, sekundær merking -- metode, ikke en faktapåstand.
+                # Andre piloter har ingen "basis" og påvirkes ikke.
+                st.caption(t("bryggeskole.metode_etikett"))
+
+
+def _render_leksjon(modul_id, sesjon, pilot, sprak, sesjon_id=None, base=None, trinn=None):
+    """ÉN læringsside om gangen (issue #338 / Chief review PR #340; #508).
+
+    Leksjonen er en egen liten reise: side 1 -> Neste -> side 2 -> ... ->
+    Start spørsmål, med posisjonen lagret per (modul, trinn), slik at en
+    tur innom skoleoversikten gjenopptar nøyaktig samme side.
 
     Stage UI S2: `pilot` is the lesson context's view (_trinn_visning()),
     so a stage shows only its own chunks; `sesjon_id`/`base` are the
     (module, stage) session key and widget-key base (both the module id for
-    the single flow)."""
+    the single flow). A learning page groups adjacent chunks of the stage
+    (_leksjonssider()); the chunks themselves are unchanged."""
     sesjon_id = sesjon_id or modul_id
     base = base or modul_id
     st.write("---")
     chunks = pilot["chunks"]
-    totalt = len(chunks)
-    if totalt == 0:
+    if not chunks:
         _render_leksjon_kun_sporsmal(sesjon_id, base)
         return
-    # Defensivt klem: innholdet kan i prinsippet ha blitt kortere siden
-    # posisjonen ble lagret (kun mulig ved innholdsendring i dev).
-    idx = max(0, min(sesjon["bolk_idx"], totalt - 1))
-    sesjon["bolk_idx"] = idx
+    sider = _leksjonssider(modul_id, chunks, trinn)
+    totalt = len(sider)
+    idx = _side_posisjon(sesjon, sider)
+    side, side_chunks = sider[idx]
 
-    st.caption(t("bryggeskole.leksjon.bolk_teller", n=idx + 1, totalt=totalt))
-    with st.container(key="bs_leksjon_tekst"):
-        st.markdown(_MODULER[modul_id]["pilot"].render_chunk(chunks[idx], sprak)["text"])
-    if chunks[idx].get("basis") == "methodology":
-        # Issue #472 (D1b): liten, sekundær merking -- metode, ikke en
-        # faktapåstand. Andre piloter har ingen "basis" og påvirkes ikke.
-        st.caption(t("bryggeskole.metode_etikett"))
-
-    if modul_id == _MODUL_RAAVARER:
-        # Råvarer-modulens ene Malt-visual (issue #460): kvalitativ
-        # basismalt->spesialmalt-stripe, kun i bolken som dekker
-        # FACT-MALT-0002 (basis vs. spesialmalt) -- se
-        # bryggeskole/malt_roles_strip.py sin docstring.
-        if "FACT-MALT-0002" in chunks[idx]["source_claims"]:
-            st.markdown(render_malt_roles_strip_svg(sprak), unsafe_allow_html=True)
-    elif modul_id == _MODUL_KOKING:
-        # Koking-modulens eneste visuelle krav (issue #366 kontrakt §4):
-        # ett statisk, ikke-interaktivt tidslinjediagram, synlig gjennom
-        # hele leksjonen (ikke bare første/siste bolk) -- se
-        # bryggeskole/boil_timeline.py sin docstring.
-        st.markdown(render_boil_timeline_svg(sprak), unsafe_allow_html=True)
-    elif modul_id == _MODUL_KJOLING:
-        # Kjøling/overføring-modulens eneste visuelle krav (issue #370
-        # kontrakt §4): ett statisk kjele->kjøling->overføring->gjæringskar
-        # flytdiagram med sanitert-sone-skyggelegging, synlig gjennom hele
-        # leksjonen -- se bryggeskole/cool_transfer_flow.py sin docstring.
-        st.markdown(render_cool_transfer_flow_svg(sprak), unsafe_allow_html=True)
-    elif modul_id == _MODUL_PAKKING:
-        # Pakking-modulens eneste visuelle krav (issue #374 kontrakt §4):
-        # ett statisk gjæringskar->delt sti->flaske/fat->servering/lagring
-        # flytdiagram med to likeverdige pakkestier, synlig gjennom hele
-        # leksjonen -- se bryggeskole/package_flow.py sin docstring.
-        st.markdown(render_package_flow_svg(sprak), unsafe_allow_html=True)
-    elif modul_id == _MODUL_METODEVALG:
-        # Forberedelse/metode-modulens eneste visuelle krav (issue #380
-        # kontrakt §4): tre likeverdige rader (BIAB/tradisjonelt/
-        # alt-i-ett) som alle munner ut i den identiske
-        # kok->kjøl->gjær->pakk-prosessen, synlig gjennom hele leksjonen --
-        # se bryggeskole/method_context_flow.py sin docstring.
-        st.markdown(render_method_context_flow_svg(sprak), unsafe_allow_html=True)
+    st.caption(t("bryggeskole.leksjon.side_teller", n=idx + 1, totalt=totalt))
+    visual = _side_visual(modul_id, side_chunks, sprak)
+    if side is not None and modul_id == _MODUL_RAAVARER and visual is not None:
+        # The one compact visual sits beside its page text on desktop
+        # (Streamlit stacks the columns, text first, on a narrow screen).
+        # The wide process diagrams stay full width below the text.
+        with st.container(key="bs_leksjon_med_visual"):
+            tekst_kolonne, visual_kolonne = st.columns((3, 2), vertical_alignment="top")
+            with tekst_kolonne:
+                _render_sidetekst(modul_id, side, side_chunks, sprak)
+            with visual_kolonne:
+                st.markdown(visual, unsafe_allow_html=True)
+    else:
+        _render_sidetekst(modul_id, side, side_chunks, sprak)
+        if visual is not None:
+            st.markdown(visual, unsafe_allow_html=True)
 
     # Issue #398: navigasjonsknappene brukte tidligere width="stretch",
     # som strekker hver knapp til å fylle HELE sin halv-brede kolonne --
@@ -1300,17 +1415,17 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak, sesjon_id=None, base=None, t
             st.button(
                 t("bryggeskole.leksjon.forrige"), key=f"bs_bolk_forrige_{base}_btn",
                 width="content", disabled=idx == 0,
-                on_click=_bla_bolk, args=(sesjon_id, -1, totalt),
+                on_click=_bla_side, args=(sesjon_id, -1, totalt),
             )
         with col2:
             if idx + 1 < totalt:
                 st.button(
                     t("bryggeskole.leksjon.neste"), key=f"bs_bolk_neste_{base}_btn",
                     width="content", type="primary",
-                    on_click=_bla_bolk, args=(sesjon_id, 1, totalt),
+                    on_click=_bla_side, args=(sesjon_id, 1, totalt),
                 )
             else:
-                # «Start spørsmål» finnes KUN på siste bolk -- det er det som
+                # «Start spørsmål» finnes KUN på siste side -- det er det som
                 # gjør leksjonen til en sekvens og ikke en scroll-skjerm.
                 st.button(
                     t("bryggeskole.leksjon.start_sporsmal"), key=f"bs_start_sporsmal_{base}_btn",

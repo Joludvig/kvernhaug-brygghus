@@ -934,9 +934,9 @@ class TestEnBolkOmGangen(_MedIsolertTilstand):
         at = self._ny_apptest()
         self._apne_modul(at, "mesking")
         totalt = len(les_mesking_pilot()["chunks"])
-        self.assertIn(f"Læringsbolk 1 av {totalt}", " ".join(c.value for c in at.caption))
+        self.assertIn(f"Læringsside 1 av {totalt}", " ".join(c.value for c in at.caption))
         _knapp(at, "bs_bolk_neste_mesking_btn").click().run()
-        self.assertIn(f"Læringsbolk 2 av {totalt}", " ".join(c.value for c in at.caption))
+        self.assertIn(f"Læringsside 2 av {totalt}", " ".join(c.value for c in at.caption))
 
     def test_tilbake_til_oversikt_gjenopptar_samme_bolk(self):
         at = self._ny_apptest()
@@ -1596,7 +1596,7 @@ class TestMetodevalgModulen(_MedIsolertTilstand):
         self._apne_modul(at, "metodevalg")
         markdown_verdier = [m.value for m in at.markdown]
         self.assertTrue(any("<svg" in v for v in markdown_verdier))
-        self.assertTrue(any("Tradisjonelt alt-korn" in v for v in markdown_verdier))
+        self.assertTrue(any("Tradisjonell all-grain" in v for v in markdown_verdier))
 
     def test_metodevalg_far_full_leksjon_sporsmal_oppsummering_flyt(self):
         at = self._ny_apptest()
@@ -2172,7 +2172,7 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
     _ETIKETT_NO = "Metode, ikke en faktapåstand"
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_maaling_er_niende_kort_for_smak_i_begge_miljo(self):
         # Måling er fortsatt posisjon 9; Oppskriftsforståelse ligger nå
@@ -2215,7 +2215,7 @@ class TestMaalingOgBryggeloggFoundation(_MedIsolertTilstand):
         pilot = les_maaling_pilot()
         self.assertEqual(len(pilot["chunks"]), 10)
         for idx, chunk in enumerate(pilot["chunks"]):
-            self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 10"])
+            self.assertEqual(self._bolk_teller(at), [f"Læringsside {idx + 1} av 10"])
             har_etikett = self._ETIKETT_NO in [c.value for c in at.caption]
             self.assertEqual(har_etikett, chunk["basis"] == "methodology", chunk["id"])
             if idx < len(pilot["chunks"]) - 1:
@@ -2271,7 +2271,7 @@ class TestMaalingKompetent(_MedIsolertTilstand):
     )
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_fortsatt_elleve_kort_og_ett_maalingskort(self):
         at = self._ny_apptest()
@@ -2295,8 +2295,8 @@ class TestMaalingKompetent(_MedIsolertTilstand):
                         _knapp(at, "bs_bolk_neste_maaling_btn").click().run()
                     for idx, tittel in enumerate(self._KOMPETENT_TITLER[sprak]):
                         chunk = pilot["chunks"][5 + idx]
-                        teller = (f"Læringsbolk {6 + idx} av 10" if sprak == "no"
-                                  else f"Learning block {6 + idx} of 10")
+                        teller = (f"Læringsside {6 + idx} av 10" if sprak == "no"
+                                  else f"Learning page {6 + idx} of 10")
                         self.assertEqual(self._bolk_teller(at), [teller])
                         self.assertIn(tittel, " ".join(_alle_synlige_tekster(at)))
                         etikett = self._ETIKETT_NO if sprak == "no" else "Method, not a fact claim"
@@ -2378,7 +2378,7 @@ class TestMaalingKompetent(_MedIsolertTilstand):
 # og ett spørsmål på Målings delte konsept; Pakking peker til Måling ──────
 
 class TestFoundationGjaringFerdigOgPakkingLenke(_MedIsolertTilstand):
-    _GJAR_NO = "Etter pitching gjærer gjæren det forgjærbare sukkeret"
+    _GJAR_NO = "Etter at gjæren er tilsatt, gjærer den det forgjærbare sukkeret"
     _GJAR_EN = "After pitching, the yeast ferments the fermentable sugar"
     _PAKK_NO = "Og før du pakker: bruk sjekken for ferdig gjæring som du lærer i Måling og bryggelogg."
     _PAKK_EN = "And before you package: use the completion check taught in Measurement and brew log."
@@ -2402,7 +2402,7 @@ class TestFoundationGjaringFerdigOgPakkingLenke(_MedIsolertTilstand):
                         _knapp(at, "bs_bolk_neste_gjaring_btn").click().run()
                     self.assertIn(forventet, " ".join(_alle_synlige_tekster(at)))
                     teller = [c.value for c in at.caption
-                              if c.value.startswith(("Læringsbolk", "Learning block"))]
+                              if c.value.startswith(("Læringsside", "Learning page"))]
                     self.assertTrue(teller and teller[0].endswith(("4 av 11", "4 of 11")), teller)
 
     def test_pakking_peker_til_maaling_norsk_og_engelsk_i_begge_miljo(self):
@@ -2459,7 +2459,7 @@ class TestGjaringKompetent(_MedIsolertTilstand):
     _GJENBRUKTE_KONSEPTER = ("yeast.pitch_principle", "yeast.attenuation", "measurement.fermentation_complete")
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_fortsatt_elleve_kort_og_ett_gjaringskort_pa_plass_sju(self):
         for miljo_knapp, tittel in (("bs_velg_hjemmebrygger_btn", "**Gjæring (bøtte/FermZilla)**"),
@@ -2484,8 +2484,8 @@ class TestGjaringKompetent(_MedIsolertTilstand):
                     self._apne_modul(at, "gjaring", miljo_knapp)
                     for idx in range(11):
                         chunk = pilot["chunks"][idx]
-                        teller = (f"Læringsbolk {idx + 1} av 11" if sprak == "no"
-                                  else f"Learning block {idx + 1} of 11")
+                        teller = (f"Læringsside {idx + 1} av 11" if sprak == "no"
+                                  else f"Learning page {idx + 1} of 11")
                         self.assertEqual(self._bolk_teller(at), [teller])
                         if idx >= 4:
                             self.assertIn(self._KOMPETENT_TITLER[sprak][idx - 4],
@@ -2594,7 +2594,7 @@ class TestMeskingKompetent(_MedIsolertTilstand):
                             "mashing.preboil_check")
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_fortsatt_elleve_kort_mesking_pa_plass_fire_pakking_pa_plass_atte(self):
         for miljo_knapp, mesk, pakk in (("bs_velg_hjemmebrygger_btn", "**Mesking (kjele/BIAB)**", "**Pakking**"),
@@ -2620,8 +2620,8 @@ class TestMeskingKompetent(_MedIsolertTilstand):
                     self._apne_modul(at, "mesking", miljo_knapp)
                     for idx in range(6):
                         chunk = pilot["chunks"][idx]
-                        teller = (f"Læringsbolk {idx + 1} av 6" if sprak == "no"
-                                  else f"Learning block {idx + 1} of 6")
+                        teller = (f"Læringsside {idx + 1} av 6" if sprak == "no"
+                                  else f"Learning page {idx + 1} of 6")
                         self.assertEqual(self._bolk_teller(at), [teller])
                         if idx >= 3:
                             self.assertIn(self._KOMPETENT_TITLER[sprak][idx - 3],
@@ -2725,7 +2725,7 @@ class TestPakkingKompetent(_MedIsolertTilstand):
                             "oxygen.post_pitch")
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_fortsatt_elleve_kort_og_ett_pakkekort_pa_plass_atte(self):
         for miljo_knapp, tittel in (("bs_velg_hjemmebrygger_btn", "**Pakking**"),
@@ -2750,8 +2750,8 @@ class TestPakkingKompetent(_MedIsolertTilstand):
                     self._apne_modul(at, "pakking", miljo_knapp)
                     for idx in range(9):
                         chunk = pilot["chunks"][idx]
-                        teller = (f"Læringsbolk {idx + 1} av 9" if sprak == "no"
-                                  else f"Learning block {idx + 1} of 9")
+                        teller = (f"Læringsside {idx + 1} av 9" if sprak == "no"
+                                  else f"Learning page {idx + 1} of 9")
                         self.assertEqual(self._bolk_teller(at), [teller])
                         if idx >= 5:
                             self.assertIn(self._KOMPETENT_TITLER[sprak][idx - 5],
@@ -2846,7 +2846,7 @@ class TestSmakFeilbolker(_MedIsolertTilstand):
     }
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_sju_bolker_metode_merking_kun_pa_metodebolker_i_begge_miljo(self):
         pilot = les_smak_pilot()
@@ -2854,7 +2854,7 @@ class TestSmakFeilbolker(_MedIsolertTilstand):
             at = self._ny_apptest()
             self._apne_modul(at, "smak", miljo_knapp)
             for idx, chunk in enumerate(pilot["chunks"]):
-                self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 7"])
+                self.assertEqual(self._bolk_teller(at), [f"Læringsside {idx + 1} av 7"])
                 har_etikett = self._ETIKETT_NO in [c.value for c in at.caption]
                 self.assertEqual(har_etikett, chunk["basis"] == "methodology", (miljo_knapp, chunk["id"]))
                 if idx < len(pilot["chunks"]) - 1:
@@ -2931,7 +2931,7 @@ class TestOppskriftsforstaaelse(_MedIsolertTilstand):
     }
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_oppskrift_er_tiende_kort_mellom_maaling_og_smak_i_begge_miljo(self):
         for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
@@ -2964,7 +2964,7 @@ class TestOppskriftsforstaaelse(_MedIsolertTilstand):
         self._apne_modul(at, "oppskrift")
         pilot = les_oppskrift_pilot()
         for idx, chunk in enumerate(pilot["chunks"]):
-            self.assertEqual(self._bolk_teller(at), [f"Læringsbolk {idx + 1} av 7"])
+            self.assertEqual(self._bolk_teller(at), [f"Læringsside {idx + 1} av 7"])
             har_etikett = self._ETIKETT_NO in [c.value for c in at.caption]
             self.assertEqual(har_etikett, chunk["basis"] == "methodology", chunk["id"])
             if idx < len(pilot["chunks"]) - 1:

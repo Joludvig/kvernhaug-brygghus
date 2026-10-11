@@ -84,7 +84,7 @@ _LABELS = {
         "sanitized_zone": "Sanitert håndteringssone",
         "gravity_path": "Tyngdekraft",
         "pump_path": "Pumpe",
-        "oxygen_pre": "Oksygenering kan være nyttig før pitching - behov avhenger av gjær",
+        "oxygen_pre": "Oksygenering kan være nyttig før gjærtilsetting - behov avhenger av gjær",
         "oxygen_post": "Unngå unødvendig oksygen etter aktiv gjæring",
     },
     "en": {

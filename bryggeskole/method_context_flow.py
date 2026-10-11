@@ -84,7 +84,7 @@ _LABELS = {
     "no": {
         "title": "Metodevalg: samme prosess, tre utstyrsoppsett",
         "row_biab": "BIAB",
-        "row_traditional": "Tradisjonelt alt-korn",
+        "row_traditional": "Tradisjonell all-grain",
         "row_all_in_one": "Alt-i-ett",
         "biab_combined": "Kjele + pose (meskepose/BIAB)",
         "traditional_mash": "Meskekar/lauterkar",

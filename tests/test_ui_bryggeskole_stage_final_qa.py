@@ -42,6 +42,7 @@ from tests.test_ui_bryggeskole_panel import (
     _korrekt_svar_ider,
 )
 from tests.test_ui_bryggeskole_stage_selector import _alle_foundation, _seed, _visning
+from tests.test_ui_bryggeskole_stage_rendering import _sider
 from ui import bryggeskole_panel as panel
 
 _LENS = "bs_trinn"
@@ -164,7 +165,7 @@ class TestEveryPairEndToEnd(_S5Test):
                           _t(panel._MODULER[modul_id]["tittel_nokkel"], sprak)])
         self.assertEqual(self._sti(at), [sti])
         visning = _visning(modul_id, trinn)
-        teller = _t("bryggeskole.leksjon.bolk_teller", sprak, n=1, totalt=len(visning["chunks"]))
+        teller = _t("bryggeskole.leksjon.side_teller", sprak, n=1, totalt=len(_sider(modul_id, trinn)))
         if visning["chunks"]:
             self.assertIn(teller, [c.value for c in at.caption])
         else:

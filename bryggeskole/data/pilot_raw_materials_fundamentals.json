@@ -70,7 +70,7 @@
       "id": "CHUNK-RAW-I",
       "source_claims": ["FACT-YEAST-0005", "FACT-YEAST-0004"],
       "text": {
-        "no": "Velg gjær ut fra ølet og prosessen du har planlagt, og bruk produsentens opplysninger, som egnede stiler, smaksprofil, utgjæring og anbefalt gjæringstemperatur. Når du pitcher, bruk nok frisk gjær og følg produsentens veiledning for akkurat den gjæren. Riktig mengde avhenger av gjærproduktet og gjæringsforholdene, ikke av én universell celleregel.",
+        "no": "Velg gjær ut fra ølet og prosessen du har planlagt, og bruk produsentens opplysninger, som egnede stiler, smaksprofil, utgjæring og anbefalt gjæringstemperatur. Når du tilsetter gjæren, bruk nok frisk gjær og følg produsentens veiledning for akkurat den gjæren. Riktig mengde avhenger av gjærproduktet og gjæringsforholdene, ikke av én universell celleregel.",
         "en": "Choose yeast against the beer and process you have planned, using the producer's information such as suitable styles, flavour profile, attenuation and recommended fermentation temperature. When you pitch, use enough healthy yeast and follow the producer's guidance for that particular yeast. The right amount depends on the yeast product and the fermentation conditions, not on one universal cell-count rule."
       }
     },
