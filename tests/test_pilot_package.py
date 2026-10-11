@@ -17,6 +17,7 @@ Run with:
 """
 import io
 import json
+import re
 import os
 import unittest
 
@@ -285,6 +286,28 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
         for banned in ("cornelius", "corny keg", "ss brewtech", "grainfather"):
             self.assertNotIn(banned, raw)
 
+    def test_damaged_is_not_broadened_to_bottles(self):
+        # FACT-PACK-0003 notes (#448, #526): the opened 'damaged' evidence is
+        # keg/valve/coupler scope; no bottle-specific source exists. Damaged
+        # keg/coupler/fitting wording stays allowed.
+        bottle_damage = re.compile(
+            r"\b(skadet|skadede|sprukket|sprukne|sprukken|damaged|cracked|chipped)\s+(glass)?\s?(flask|bottle)"
+            r"|\b(glass)?(flask|bottle)\w*\s+(som er\s+|that (is|are)\s+)?"
+            r"(skadet|skadede|sprukket|sprukne|sprukken|damaged|cracked|chipped)\b")
+        self.assertIsNone(bottle_damage.search("et fat eller en kobling som er skadet"))
+        self.assertIsNone(bottle_damage.search("a keg or fitting that's damaged"))
+        self.assertIsNotNone(bottle_damage.search("en skadet flaske"))
+        self.assertIsNotNone(bottle_damage.search("cracked bottles"))
+        visible = []
+        for chunk in self.data["chunks"]:
+            visible.extend(chunk["text"].values())
+        for q in self.data["questions"]:
+            for field in ("prompt", "feedback_correct", "feedback_incorrect"):
+                visible.extend(q[field].values())
+            for o in q["options"]:
+                visible.extend(o["text"].values())
+        self.assertIsNone(bottle_damage.search(" ".join(visible).lower()))
+
 
 class TestRenderChunk(unittest.TestCase):
     def setUp(self):
@@ -472,19 +495,24 @@ class TestPakkingKompetentShape(unittest.TestCase):
         self.data = read_pilot_file(_PRODUCTION_PILOT, registry_path=_PRODUCTION_REGISTRY)
 
     def test_foundation_items_unchanged_and_carry_no_basis(self):
+        # Q-PACK-010 (#523): the dedicated Foundation oxygen.post_pitch
+        # question, kept in the Foundation block before the Kompetent items.
         self.assertEqual([c["id"] for c in self.data["chunks"][:5]], _FOUNDATION_CHUNK_IDS)
-        self.assertEqual([q["id"] for q in self.data["questions"][:5]], [f"Q-PACK-00{n}" for n in range(1, 6)])
-        for item in self.data["chunks"][:5] + self.data["questions"][:5]:
+        self.assertEqual([q["id"] for q in self.data["questions"][:6]],
+                         [f"Q-PACK-00{n}" for n in range(1, 6)] + ["Q-PACK-010"])
+        for item in self.data["chunks"][:5] + self.data["questions"][:6]:
             self.assertNotIn("basis", item, item["id"])
+        q10 = self.data["questions"][5]
+        self.assertEqual((q10["concepts"], q10["source_claims"]), (["oxygen.post_pitch"], ["FACT-OXY-0002"]))
 
     def test_kompetent_chunks_match_the_locked_shape(self):
         got = [(c["id"], c["basis"], c["source_claims"]) for c in self.data["chunks"][5:]]
         self.assertEqual(got, [tuple(r) for r in _KOMPETENT_CHUNKS])
 
     def test_kompetent_questions_match_the_locked_shape(self):
-        got = [(q["id"], q["type"], q["basis"], q["concepts"], q["source_claims"]) for q in self.data["questions"][5:]]
+        got = [(q["id"], q["type"], q["basis"], q["concepts"], q["source_claims"]) for q in self.data["questions"][6:]]
         self.assertEqual(got, [tuple(r) for r in _KOMPETENT_QUESTIONS])
-        for q in self.data["questions"][5:]:
+        for q in self.data["questions"][6:]:
             self.assertEqual(q["difficulty"], "intermediate", q["id"])
             self.assertEqual(len(q["options"]), 3, q["id"])
             self.assertEqual(sum(o["correct"] for o in q["options"]), 1, q["id"])
