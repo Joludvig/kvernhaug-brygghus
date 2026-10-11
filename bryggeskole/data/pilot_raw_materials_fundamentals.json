@@ -14,7 +14,7 @@
       "id": "CHUNK-RAW-B",
       "source_claims": ["FACT-MALT-0002", "FACT-MALT-0003"],
       "text": {
-        "no": "Malt deles ofte i to grupper: basismalt og spesialmalt. Basismalt har høyt enzyminnhold sammen med sukkerartene som trengs til gjæring. Spesialmalt lages ved å endre malting- og tørkeforholdene for å utvikle smak, farge eller andre egenskaper. Kraftigere oppvarming gir mindre enzymer igjen, og mange spesialmalter er laget for å brukes i mindre mengder. Hvordan malten tørkes, brennes eller ristes gir ulik farge og smak, og maltens farge påvirker ølets farge. Farge er likevel ikke en direkte forutsigelse av smak.",
+        "no": "Malt deles ofte i to grupper: basismalt og spesialmalt. Basismalt har høyt enzyminnhold sammen med sukkerartene som trengs til gjæring. Spesialmalt lages ved å endre malting- og tørkeforholdene for å utvikle smak, farge eller andre egenskaper. Kraftigere oppvarming gir mindre enzymer igjen, og mange spesialmalter er laget for å brukes i mindre mengder. Hvordan malten tørkes, brennes eller ristes gir ulik farge og smak, og maltens farge påvirker ølets farge. Fargen sier likevel ikke direkte hvordan ølet smaker.",
         "en": "Malts are commonly divided into two groups: base malt and specialty malt. Base malts have high enzyme levels together with the sugars needed for fermentation. Specialty malts are made by altering the malting and drying conditions to develop flavour, colour or other functions. More intense heating leaves fewer enzymes, and many specialty malts are designed to be used in smaller amounts. How the malt is dried, kilned or roasted gives different colour and flavour, and the malt's colour affects the colour of the beer. Colour is still not a direct predictor of flavour."
       }
     },
@@ -54,7 +54,7 @@
       "id": "CHUNK-RAW-G",
       "source_claims": ["FACT-YEAST-0001", "FACT-YEAST-0002"],
       "text": {
-        "no": "**Gjær.** Under gjæring forbruker ølgjæren gjærbare sukkerarter og produserer alkohol og karbondioksid. Gjærens stoffskifte gir også smaks- og aromastoffer. Gjærens attenuering (forgjæringsgrad) er andelen av sukkerartene i vørteren som gjæren forbruker. Høyere attenuering gir generelt mindre restsukker og kan gi et tørrere øl. Faktisk attenuering avhenger likevel av både gjæren og av gjæringsforhold og vørter.",
+        "no": "**Gjær.** Under gjæring forbruker ølgjæren gjærbare sukkerarter og produserer alkohol og karbondioksid. Gjærens stoffskifte gir også smaks- og aromastoffer. Gjærens utgjæring er andelen av sukkerartene i vørteren som gjæren forbruker. Høyere utgjæring gir generelt mindre restsukker og kan gi et tørrere øl. Faktisk utgjæring avhenger likevel av både gjæren og av gjæringsforhold og vørter.",
         "en": "**Yeast.** During fermentation, brewer's yeast consumes fermentable sugars and produces alcohol and carbon dioxide. Yeast metabolism also produces flavour and aroma compounds. A yeast's attenuation is the proportion of the wort's sugars that the yeast consumes. Higher attenuation generally leaves less residual sugar and can give a drier beer. Actual attenuation still depends on the yeast as well as on fermentation and wort conditions."
       }
     },
@@ -70,7 +70,7 @@
       "id": "CHUNK-RAW-I",
       "source_claims": ["FACT-YEAST-0005", "FACT-YEAST-0004"],
       "text": {
-        "no": "Velg gjær ut fra ølet og prosessen du har planlagt, og bruk produsentens opplysninger, som egnede stiler, smaksprofil, attenuering og anbefalt gjæringstemperatur. Når du pitcher, bruk nok frisk gjær og følg produsentens veiledning for akkurat den gjæren. Riktig mengde avhenger av gjærproduktet og gjæringsforholdene, ikke av én universell celleregel.",
+        "no": "Velg gjær ut fra ølet og prosessen du har planlagt, og bruk produsentens opplysninger, som egnede stiler, smaksprofil, utgjæring og anbefalt gjæringstemperatur. Når du pitcher, bruk nok frisk gjær og følg produsentens veiledning for akkurat den gjæren. Riktig mengde avhenger av gjærproduktet og gjæringsforholdene, ikke av én universell celleregel.",
         "en": "Choose yeast against the beer and process you have planned, using the producer's information such as suitable styles, flavour profile, attenuation and recommended fermentation temperature. When you pitch, use enough healthy yeast and follow the producer's guidance for that particular yeast. The right amount depends on the yeast product and the fermentation conditions, not on one universal cell-count rule."
       }
     },
