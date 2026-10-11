@@ -218,7 +218,7 @@ Cost: the map must follow content changes. The validator makes drift a failing t
 |---|---|---|---|---|
 | Råvarer | RAW-A…K | Q-RAW-001, 002, 003, 005, 007, 008, 013, 014 | — | Q-RAW-004, 006, 009, 010, 011, 012 (§D.4) |
 | Rengjøring og sikkerhet | SAFE-A…G | Q-SAFE-001…008 | — | — |
-| Forberedelse/metode | METHOD-A…E | Q-METHOD-001…005 | — | — |
+| Forberedelse/metode | METHOD-A…E | Q-METHOD-001…006 | — | — |
 | Mesking | MASH-A | Q-MASH-001 | MASH-B…F | Q-MASH-002…008 (§D.1, §F.2) |
 | Koking/humle | BOILHOP-A, **B (interim, §6.3)**, C, D, E | Q-BOILHOP-001, 003, 004, 005, 006 | BOILHOP-F | Q-BOILHOP-002, 007, 008 (§D.2) |
 | Kjøling/overføring | COOLXFER-A, B, C, **D (interim, §6.3)**, E | Q-COOLXFER-001, 002, 003, 006 | — | Q-COOLXFER-004, 005 (§D.3) |
@@ -229,9 +229,9 @@ Cost: the map must follow content changes. The validator makes drift a failing t
 | Smak og evaluering | — | — | SENS-A…G | Q-SENS-001…010 (§C.11, §D.5) |
 
 Totals:
-- Foundation: 45 questions over 9 modules, and 48 chunks.
+- Foundation: 46 questions over 9 modules, and 48 chunks.
 - Kompetent: 54 questions over 9 modules, and 36 chunks.
-- Together: 99 questions; every one of the 84 chunks is mapped exactly once.
+- Together: 100 questions; every one of the 84 chunks is mapped exactly once.
 
 Koking review items (§D.2 "review at implementation"):
 - Q-BOILHOP-004 and 005 stay with their Foundation concepts (early/late timing);
