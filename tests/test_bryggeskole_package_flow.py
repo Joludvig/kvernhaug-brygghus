@@ -40,10 +40,10 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_package_flow_svg("en")
-        self.assertIn('viewBox="0 0 1145 400"', svg)
+        self.assertIn('viewBox="0 0 840 400"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
-        self.assertIn("max-width:1145px", svg)
+        self.assertIn("max-width:840px", svg)
 
     def test_minimum_legible_font_size_and_contrast_background(self):
         # Issue #397: labels must not regress back to the pre-fix 9-11px
@@ -56,7 +56,7 @@ class TestRenderPackageFlowSvg(unittest.TestCase):
         svg = render_package_flow_svg("en")
         for font_size in re.findall(r'font-size="([\d.]+)"', svg):
             self.assertGreaterEqual(float(font_size), 13)
-        self.assertIn('<rect x="0" y="0" width="1145" height="400"', svg)
+        self.assertIn('<rect x="0" y="0" width="840" height="400"', svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -166,7 +166,7 @@ def _leaf_text_nodes(svg):
 
 
 class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
-    VIEWBOX_WIDTH = 1145
+    VIEWBOX_WIDTH = 840
     VIEWBOX_HEIGHT = 400
 
     def test_every_text_lines_estimated_width_fits_inside_viewbox(self):
@@ -197,7 +197,7 @@ class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
         matches = re.findall(r'x="(-?\d+(?:\.\d+)?)"', svg)
         for value in matches:
             self.assertGreaterEqual(float(value), 0)
-            self.assertLessEqual(float(value), 1145)
+            self.assertLessEqual(float(value), 840)
 
 
 # ─── Owner-QA correction (issue #397 follow-up): every box-contained
@@ -208,15 +208,15 @@ class TestLongLabelLayoutStaysInsideViewbox(unittest.TestCase):
 # weaker "fits somewhere in the whole diagram" property. ──────────────────
 
 # (x0, x1) for every box a label is drawn inside, matching the geometry
-# render_package_flow_svg() itself computes (path_x0=390, box_w=195,
-# gap=52, fermenter/serve widths unchanged from #397).
+# render_package_flow_svg() itself computes (#508 reflow: path_x0=260,
+# box_w=160, gap=36, fermenter 24-190, serve 656-816).
 _BOX_X_RANGES = {
-    "fermenter": (50, 285),
-    "bottle_transfer": (390, 585),
-    "bottle_step": (637, 832),
-    "keg_transfer": (390, 585),
-    "keg_step": (637, 832),
-    "serve_store": (885, 1090),
+    "fermenter": (24, 190),
+    "bottle_transfer": (260, 420),
+    "bottle_step": (456, 616),
+    "keg_transfer": (260, 420),
+    "keg_step": (456, 616),
+    "serve_store": (656, 816),
 }
 
 
@@ -254,8 +254,8 @@ class TestBoxLabelsNeverClipTheirOwnBox(unittest.TestCase):
         # fortsatt være tydelig separate" -- the two rows' boxes must not
         # touch or overlap after the height reduction.
         svg = render_package_flow_svg("en")
-        bottle_rect = re.search(r'<rect x="390" y="(\d+)" width="195" height="(\d+)" fill="#f7d9a0"', svg)
-        keg_rect = re.search(r'<rect x="390" y="(\d+)" width="195" height="(\d+)" fill="#f7d9a0"', svg[bottle_rect.end():])
+        bottle_rect = re.search(r'<rect x="260" y="(\d+)" width="160" height="(\d+)" fill="#f7d9a0"', svg)
+        keg_rect = re.search(r'<rect x="260" y="(\d+)" width="160" height="(\d+)" fill="#f7d9a0"', svg[bottle_rect.end():])
         bottle_bottom = int(bottle_rect.group(1)) + int(bottle_rect.group(2))
         keg_top = int(keg_rect.group(1))
         self.assertGreater(keg_top, bottle_bottom, "bottle and keg rows must not touch/overlap")
@@ -285,8 +285,8 @@ class TestTopAndBottomLabelSpacingIssue397Final(unittest.TestCase):
         for lang in ("no", "en"):
             svg = render_package_flow_svg(lang)
             nodes = _leaf_text_nodes(svg)
-            title_y = self._node_at(nodes, 573, 20)[1]
-            zone_label_y = self._node_at(nodes, 740, 14)[1]
+            title_y = self._node_at(nodes, 420, 20)[1]
+            zone_label_y = self._node_at(nodes, 538, 14)[1]
             self.assertGreaterEqual(
                 zone_label_y - title_y, 30,
                 f"{lang}: title (y={title_y}) and sanitized-zone label (y={zone_label_y}) "
@@ -297,8 +297,8 @@ class TestTopAndBottomLabelSpacingIssue397Final(unittest.TestCase):
         for lang in ("no", "en"):
             svg = render_package_flow_svg(lang)
             nodes = _leaf_text_nodes(svg)
-            title_y = self._node_at(nodes, 573, 20)[1]
-            zone_label_y = self._node_at(nodes, 740, 14)[1]
+            title_y = self._node_at(nodes, 420, 20)[1]
+            zone_label_y = self._node_at(nodes, 538, 14)[1]
             self.assertGreaterEqual(title_y, 0)
             self.assertLessEqual(title_y, self.VIEWBOX_HEIGHT)
             self.assertGreaterEqual(zone_label_y, 0)
@@ -308,8 +308,8 @@ class TestTopAndBottomLabelSpacingIssue397Final(unittest.TestCase):
         for lang in ("no", "en"):
             svg = render_package_flow_svg(lang)
             nodes = _leaf_text_nodes(svg)
-            oxygen_y = self._node_at(nodes, 340, 13)[1]
-            pressure_y = self._node_at(nodes, 740, 13)[1]
+            oxygen_y = self._node_at(nodes, 225, 13)[1]
+            pressure_y = self._node_at(nodes, 538, 13)[1]
             self.assertLessEqual(
                 oxygen_y, self.VIEWBOX_HEIGHT - self.MIN_BOTTOM_BORDER_MARGIN,
                 f"{lang}: oxygen_label (y={oxygen_y}) is within "

@@ -53,9 +53,9 @@ import textwrap
 LANGUAGES = ("no", "en")
 
 # SVG viewBox width in user units (kept in sync with the literal
-# "0 0 1090 340" in the returned markup below -- see
+# "0 0 780 360" in the returned markup below -- see
 # test_is_responsive_and_preserves_viewbox).
-_VIEWBOX_WIDTH = 1090
+_VIEWBOX_WIDTH = 780
 
 # Explicit opaque card background (issue #397) -- guarantees the
 # original light-backdrop-tuned palette keeps correct contrast
@@ -150,6 +150,40 @@ def _centered_label_markup(text, anchor_x, y, font_size, fill):
     return f'<text text-anchor="middle" font-size="{font_size}" fill="{fill}">{tspans}</text>'
 
 
+_BOX_LABEL_PADDING = 12
+
+
+def _split_before_paren(text):
+    head, _, tail = text.partition(" (")
+    return [head, "(" + tail]
+
+
+def _box_label_markup(text, cx, cy, font_size, fill, box_width, padding=_BOX_LABEL_PADDING):
+    """Renders `text` centered (both axes) inside a box of `box_width`,
+    wrapping onto stacked <tspan> lines when one line would not fit the
+    box (#508 reflow: the stage boxes are narrower than in the old
+    panoramic strip). A label with a parenthetical part breaks before
+    the parenthesis first, so «Kjele (etter koking)» reads as two clean
+    lines instead of splitting inside the brackets. Same estimate and
+    tspan spacing as bryggeskole/package_flow.py's helper of this name."""
+    max_chars = _max_chars_for_width(max(1, box_width - 2 * padding), font_size)
+    if len(text) <= max_chars:
+        lines = [text]
+    elif " (" in text and all(len(part) <= max_chars for part in _split_before_paren(text)):
+        lines = _split_before_paren(text)
+    else:
+        lines = textwrap.wrap(text, width=max_chars, break_long_words=False, break_on_hyphens=False) or [text]
+    if len(lines) == 1:
+        return f'<text x="{cx}" y="{cy + font_size * 0.35}" text-anchor="middle" font-size="{font_size}" fill="{fill}">{lines[0]}</text>'
+    line_height = font_size * _LINE_HEIGHT_FACTOR
+    start_y = cy - (len(lines) - 1) * line_height / 2 + font_size * 0.35
+    tspans = " ".join(
+        f'<tspan x="{cx}" y="{start_y + i * line_height}">{line}</tspan>'
+        for i, line in enumerate(lines)
+    )
+    return f'<text text-anchor="middle" font-size="{font_size}" fill="{fill}">{tspans}</text>'
+
+
 def _flatten_svg_markup(svg):
     """Collapses the human-readable, multi-line <svg>...</svg> markup onto
     a single line (see the module docstring for why this matters at
@@ -169,13 +203,21 @@ def render_cool_transfer_flow_svg(language):
     _require_language(language)
     labels = _LABELS[language]
 
-    kettle_x0, kettle_x1 = 50, 260
-    cooling_x0, cooling_x1 = 260, 545
-    transfer_x0, transfer_x1 = 545, 830
-    fermenter_x0, fermenter_x1 = 830, 1040
+    # #508 reflow: the flow was a 1090x340 (3.2:1) panoramic strip,
+    # rendered at ~0.75x on a 1280-1440px desktop. It is now a compact
+    # 780x360 (2.2:1) figure: the same four stages in the same order, the
+    # same sanitized zone from cooling onward, the gravity/pump variants
+    # and both oxygen-timing notes -- with narrower, taller boxes.
+    kettle_x0, kettle_x1 = 30, 190
+    cooling_x0, cooling_x1 = 210, 360
+    transfer_x0, transfer_x1 = 380, 580
+    fermenter_x0, fermenter_x1 = 600, 750
+    box_y0, box_y1 = 104, 214
+    mid_y = (box_y0 + box_y1) / 2
+    zone_x0, zone_x1 = cooling_x0 - 10, fermenter_x1 + 10
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 1090 340" width="100%" preserveAspectRatio="xMidYMid meet"
-  style="max-width:1090px;height:auto;display:block;margin:0 auto;"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 780 360" width="100%" preserveAspectRatio="xMidYMid meet"
+  style="max-width:780px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
 
@@ -185,32 +227,32 @@ def render_cool_transfer_flow_svg(language):
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="1090" height="340" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
-  <text x="545" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
+  <rect x="0" y="0" width="780" height="360" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <text x="390" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
-  <rect x="{cooling_x0}" y="91" width="{fermenter_x1 - cooling_x0}" height="143" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
-  <text x="{(cooling_x0 + fermenter_x1) / 2}" y="81" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['sanitized_zone']}</text>
+  <rect x="{zone_x0}" y="{box_y0 - 18}" width="{zone_x1 - zone_x0}" height="{box_y1 - box_y0 + 36}" fill="#dceedd" stroke="#5a8f63" stroke-dasharray="5,4"/>
+  <text x="{(zone_x0 + zone_x1) / 2}" y="{box_y0 - 28}" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['sanitized_zone']}</text>
 
-  <rect x="{kettle_x0}" y="117" width="{kettle_x1 - kettle_x0}" height="78" fill="#f2c14e" stroke="#7a5230"/>
-  <text x="{(kettle_x0 + kettle_x1) / 2}" y="163" text-anchor="middle" font-size="14" fill="#5a2d0c">{labels['kettle']}</text>
+  <rect x="{kettle_x0}" y="{box_y0}" width="{kettle_x1 - kettle_x0}" height="{box_y1 - box_y0}" fill="#f2c14e" stroke="#7a5230"/>
+  {_box_label_markup(labels['kettle'], (kettle_x0 + kettle_x1) / 2, mid_y, 14, "#5a2d0c", kettle_x1 - kettle_x0)}
 
-  <rect x="{cooling_x0 + 13}" y="117" width="{cooling_x1 - cooling_x0 - 26}" height="78" fill="#aee1f2" stroke="#2c6e8e"/>
-  <text x="{(cooling_x0 + cooling_x1) / 2}" y="163" text-anchor="middle" font-size="14" fill="#1d4a5f">{labels['cooling']}</text>
+  <rect x="{cooling_x0}" y="{box_y0}" width="{cooling_x1 - cooling_x0}" height="{box_y1 - box_y0}" fill="#aee1f2" stroke="#2c6e8e"/>
+  {_box_label_markup(labels['cooling'], (cooling_x0 + cooling_x1) / 2, mid_y, 14, "#1d4a5f", cooling_x1 - cooling_x0)}
 
-  <rect x="{transfer_x0 + 13}" y="117" width="{transfer_x1 - transfer_x0 - 26}" height="78" fill="#f7d9a0" stroke="#a6742f"/>
-  <text x="{(transfer_x0 + transfer_x1) / 2}" y="146" text-anchor="middle" font-size="14" fill="#5a3d10">{labels['transfer']}</text>
-  <line x1="{transfer_x0 + 33}" y1="166" x2="{transfer_x1 - 72}" y2="156" stroke="#5a3d10" stroke-width="2" marker-end="url(#ctf-arrow)"/>
-  <text x="{transfer_x0 + 20}" y="189" font-size="12" fill="#5a3d10">{labels['gravity_path']}</text>
-  <line x1="{transfer_x0 + 33}" y1="179" x2="{transfer_x1 - 72}" y2="182" stroke="#5a3d10" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#ctf-arrow)"/>
-  <text x="{transfer_x1 - 78}" y="202" font-size="12" fill="#5a3d10">{labels['pump_path']}</text>
+  <rect x="{transfer_x0}" y="{box_y0}" width="{transfer_x1 - transfer_x0}" height="{box_y1 - box_y0}" fill="#f7d9a0" stroke="#a6742f"/>
+  <text x="{(transfer_x0 + transfer_x1) / 2}" y="{box_y0 + 26}" text-anchor="middle" font-size="14" fill="#5a3d10">{labels['transfer']}</text>
+  <line x1="{transfer_x0 + 20}" y1="{box_y0 + 50}" x2="{transfer_x1 - 24}" y2="{box_y0 + 46}" stroke="#5a3d10" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <text x="{transfer_x0 + 20}" y="{box_y0 + 66}" font-size="12" fill="#5a3d10">{labels['gravity_path']}</text>
+  <line x1="{transfer_x0 + 20}" y1="{box_y0 + 80}" x2="{transfer_x1 - 24}" y2="{box_y0 + 84}" stroke="#5a3d10" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#ctf-arrow)"/>
+  <text x="{transfer_x0 + 20}" y="{box_y0 + 100}" font-size="12" fill="#5a3d10">{labels['pump_path']}</text>
 
-  <rect x="{fermenter_x0 + 13}" y="117" width="{fermenter_x1 - fermenter_x0 - 26}" height="78" fill="#c9b7e0" stroke="#5c3d84"/>
-  <text x="{(fermenter_x0 + fermenter_x1) / 2}" y="163" text-anchor="middle" font-size="14" fill="#37235a">{labels['fermenter']}</text>
+  <rect x="{fermenter_x0}" y="{box_y0}" width="{fermenter_x1 - fermenter_x0}" height="{box_y1 - box_y0}" fill="#c9b7e0" stroke="#5c3d84"/>
+  {_box_label_markup(labels['fermenter'], (fermenter_x0 + fermenter_x1) / 2, mid_y, 14, "#37235a", fermenter_x1 - fermenter_x0)}
 
-  <line x1="{kettle_x1}" y1="156" x2="{cooling_x0 + 6}" y2="156" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
-  <line x1="{cooling_x1 - 6}" y1="156" x2="{transfer_x0 + 6}" y2="156" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
-  <line x1="{transfer_x1 - 6}" y1="156" x2="{fermenter_x0 + 6}" y2="156" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <line x1="{kettle_x1}" y1="{mid_y}" x2="{cooling_x0 - 2}" y2="{mid_y}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <line x1="{cooling_x1}" y1="{mid_y}" x2="{transfer_x0 - 2}" y2="{mid_y}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
+  <line x1="{transfer_x1}" y1="{mid_y}" x2="{fermenter_x0 - 2}" y2="{mid_y}" stroke="#3a2a1a" stroke-width="2" marker-end="url(#ctf-arrow)"/>
 
-  {_centered_label_markup(labels['oxygen_pre'], (cooling_x1 + transfer_x0) / 2, 267, 13, "#1d4a5f")}
-  {_centered_label_markup(labels['oxygen_post'], (fermenter_x0 + fermenter_x1) / 2, 299, 13, "#37235a")}
+  {_centered_label_markup(labels['oxygen_pre'], (cooling_x1 + transfer_x0) / 2, 260, 13, "#1d4a5f")}
+  {_centered_label_markup(labels['oxygen_post'], (fermenter_x0 + fermenter_x1) / 2, 286, 13, "#37235a")}
 </svg>""")
