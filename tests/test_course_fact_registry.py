@@ -245,7 +245,7 @@ _COOL_TRANSFER_VERIFIED_IDS = [
     "FACT-TRANSFER-0001",
 ]
 _PACKAGE_VERIFIED_IDS = [
-    "FACT-PACK-0001", "FACT-PACK-0002", "FACT-PACK-0003", "FACT-PACK-0004",
+    "FACT-PACK-0001", "FACT-PACK-0002", "FACT-PACK-0003", "FACT-PACK-0004", "FACT-PACK-0005",
 ]
 _METHOD_CONTEXT_VERIFIED_IDS = [
     "FACT-METHOD-0001", "FACT-METHOD-0002", "FACT-METHOD-0003", "FACT-METHOD-0004", "FACT-METHOD-0005",
@@ -312,7 +312,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # Issue #374 (V2.2 G3G) adds the fifth fact pack -- package
         # fundamentals (FACT-PACK-0001..0004): 3 documented_fact
         # (FACT-PACK-0001..0003), 1 professional_interpretation
-        # (FACT-PACK-0004). Issue #380 (V2.2 G3I) adds the sixth fact pack
+        # (FACT-PACK-0004); issue #523 adds FACT-PACK-0005 (documented_fact),
+        # so FACT-PACK-0001..0003 + 0005 are documented_fact and
+        # FACT-PACK-0004 is professional_interpretation. Issue #380 (V2.2 G3I) adds the sixth fact pack
         # -- method-context fundamentals (FACT-METHOD-0001..0005): 3
         # documented_fact (FACT-METHOD-0001..0003), 2
         # professional_interpretation (FACT-METHOD-0004..0005). Issue #426
@@ -354,7 +356,9 @@ class TestProductionRegistryFileIsValidAndHasNoRealVerifiedClaims(unittest.TestC
         # Mesking Kompetent M1/M2 (offline, Chief live source spot-check
         # 2026-10-05; no GitHub issue yet) adds FACT-MASH-0005..0006: 2
         # documented_fact.
-        self.assertEqual(classifications.count("documented_fact"), 47)
+        # Issue #523 (over-priming risk) adds FACT-PACK-0005: 1
+        # documented_fact.
+        self.assertEqual(classifications.count("documented_fact"), 48)
         # Measurement M7 (offline, Chief live source spot-check 2026-10-05;
         # no GitHub issue yet) adds FACT-MEAS-0006: 1
         # professional_interpretation.

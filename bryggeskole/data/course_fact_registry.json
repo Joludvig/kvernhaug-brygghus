@@ -783,6 +783,30 @@
       "notes": "A synthesis/interpretation drawing on FACT-PACK-0001/FACT-PACK-0002/FACT-PACK-0003 and reused FACT-COOL-0003/FACT-OXY-0002, not a new independently measured result. Does not claim every homebrewer's context makes both methods equally convenient in practice -- only that neither is inherently a 'better beer' marker. Wording trap: never present bottling as 'the beginner method' and kegging as 'the real/serious brewer method,' or vice versa; never imply a brewer must eventually 'graduate' from one to the other; keep the 'natural completion point' framing as an end to the process, not a claim that packaging is the end of the brewer's learning journey."
     },
     {
+      "id": "FACT-PACK-0005",
+      "claim": "In bottle conditioning, the amount of fermentable priming sugar in the sealed package affects how much CO2 the renewed fermentation produces. An excess of fermentable priming sugar can result in more carbonation and more internal package pressure than intended, so the priming amount needs to be matched to the beer and the intended carbonation.",
+      "classification": "documented_fact",
+      "status": "verified",
+      "verified_at": "2026-10-11T12:29:00Z",
+      "sources": [
+        {
+          "tier": "B",
+          "type": "Brewers Association best-practice guidance (Preventing Package Over-pressurization, full PDF) -- US commercial-brewery scope (FSMA framing)",
+          "ref": "https://cdn.brewersassociation.org/wp-content/uploads/2020/01/Preventing-Package-Over-Pressurization.pdf",
+          "note": "Read in full 2026-10-11 (Chief independently spot-checked for the #523 source gate). Direct support: p.3 'Yeast considerations' -- the priming-sugar calculations assure that there is not an excess of fermentable extract, 'which can lead to excess carbon dioxide production and package over-pressurization'; p.5 DON'T list -- do not add a fermentable sugar before packaging without quantifying the potential carbonation (pressure) it could create; p.4 DO list -- better slightly under-carbonated than over-carbonated. Its figures, worked examples, pressure chart and failure/injury statements are not carried by this record."
+        },
+        {
+          "tier": "B",
+          "type": "homebrewing trade magazine Q&A column (Ashton Lewis, Brew Your Own, 'Bottle-Condition Like A Champ, Over-Carbonation Issues and Hop Creep'; no date shown) -- corroborates over-carbonation only",
+          "ref": "https://byo.com/articles/bottle-condition-like-a-champ-over-carbonation-issues-and-hop-creep/",
+          "note": "Read 2026-10-11: over-carbonation 'normally happens when too much priming sugar is added before bottling' and can also come from bottling beer with residual fermentable extract. It does not address package pressure, and it links exploding bottles only to diastatic yeast -- not used for the pressure half."
+        }
+      ],
+      "concepts": ["package.priming"],
+      "modules": ["package.fundamentals"],
+      "notes": "Issue #523 item 2 (source gate PASS -- narrow, Chief 2026-10-11). OWNERSHIP: this record owns only the direction excess priming sugar -> more carbonation and more package pressure than intended. FACT-PACK-0001 owns the normal bottle-conditioning mechanism and the no-universal-amount principle. FACT-PACK-0003 owns pressure-suitable packaging and the package leakage/failure consequences; package failure or breakage is deliberately NOT part of this claim. Wording traps: do not conflate over-priming with bottling before fermentation is complete (a separate route to over-pressure); do not present over-priming as the only or main cause of package over-pressurization (residual extract, further attenuation and contamination are other routes); no sugar amounts, CO2 volumes, pressure figures or thresholds; no bottle-type recommendations; no universal breakage claim (not every over-primed bottle fails); no explosion, bottle-bomb or injury wording. SOURCE LIMITATIONS: the pressure half rests primarily on one Tier B Brewers Association source with US commercial-brewery scope (FSMA framing), whose 'excess of fermentable extract' wording sits in its priming-calculation section; BYO independently corroborates over-carbonation only; no Tier A manufacturer source stating the over-priming consequence was found (the Lallemand CBC-1 best-practice PDF and calculator behind FACT-PACK-0001 were re-read and contain no over-priming statement)."
+    },
+    {
       "id": "FACT-METHOD-0001",
       "claim": "In Brew In A Bag (BIAB), the full grain bill is mashed while contained inside a porous bag placed directly in the same kettle/mash vessel used for the rest of the brew day. Instead of draining wort through a separate lauter tun or false bottom, wort/grain separation happens by lifting the bag out of the kettle (commonly allowing it to drain, and sometimes followed by a simple dunk in additional hot water) -- functionally combining the mash and separation steps into fewer vessels than the traditional layout in FACT-METHOD-0002.",
       "classification": "documented_fact",

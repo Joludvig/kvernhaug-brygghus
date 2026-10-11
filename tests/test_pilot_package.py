@@ -52,14 +52,21 @@ _PRODUCTION_REGISTRY = DEFAULT_REGISTRY_PATH
 _ALL_FACTS = {
     "FACT-COOL-0003", "FACT-OXY-0002",
     "FACT-PACK-0001", "FACT-PACK-0002", "FACT-PACK-0003", "FACT-PACK-0004",
-    "FACT-BREW-0005",
+    "FACT-BREW-0005", "FACT-PACK-0005",
 }
+# Issue #523: FACT-PACK-0005 (over-priming -> more carbonation and pressure
+# than intended) is deliberately taught once in CHUNK-PACK-F and not quizzed:
+# Q-PACK-006 already assesses amount -> carbonation and Q-PACK-004 assesses
+# pressure suitability. Adding it to Q-PACK-006 only to satisfy the
+# question-coverage rule would misstate that question's provenance (Quiz
+# Design Standard A5). This is the one explicit package-local exception.
+_CHUNK_ONLY_FACTS = {"FACT-PACK-0005"}
 
 _FOUNDATION_CHUNK_IDS = [
     "CHUNK-PACK-A", "CHUNK-PACK-B", "CHUNK-PACK-C", "CHUNK-PACK-D", "CHUNK-PACK-E",
 ]
 _KOMPETENT_CHUNKS = [
-    ("CHUNK-PACK-F", "fact", ["FACT-PACK-0001"]),
+    ("CHUNK-PACK-F", "fact", ["FACT-PACK-0001", "FACT-PACK-0005"]),
     ("CHUNK-PACK-G", "methodology", []),
     ("CHUNK-PACK-H", "fact", ["FACT-BREW-0005"]),
     ("CHUNK-PACK-I", "fact", ["FACT-OXY-0002"]),
@@ -185,10 +192,11 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
         self.assertEqual(all_claims, _ALL_FACTS)
 
     def test_every_fact_is_referenced_by_at_least_one_question(self):
+        # Every package fact except the explicit _CHUNK_ONLY_FACTS (#523).
         referenced = set()
         for question in self.data["questions"]:
             referenced.update(question["source_claims"])
-        self.assertEqual(referenced, _ALL_FACTS)
+        self.assertEqual(referenced, _ALL_FACTS - _CHUNK_ONLY_FACTS)
 
     def test_exactly_the_expected_concepts(self):
         concepts = set()
