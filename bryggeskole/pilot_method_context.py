@@ -19,7 +19,7 @@ docs/development/v22_g3h_prepare_method_module_contract.md):
   FACT-BOIL-0001, already taught by pilot_mashing.py/pilot_boil_hop.py
   under their own concept ids) plus five new verified
   FACT-METHOD-0001..0005 records;
-- five bilingual (NO/EN) learning chunks, plus five questions/scenarios,
+- five bilingual (NO/EN) learning chunks, plus six questions/scenarios,
   each declaring source_claims that must resolve to a *verified* Course
   Fact Registry record;
 - a pure, fail-closed content validator plus pure renderer/view-model

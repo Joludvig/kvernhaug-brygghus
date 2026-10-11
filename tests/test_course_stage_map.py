@@ -133,13 +133,13 @@ class TestTotals(_WithProduction):
         return sum(len(e[stage][kind]) for e in self.stage_map["modules"])
 
     def test_stage_totals(self):
-        self.assertEqual((self._count("foundation", "chunks"), self._count("foundation", "questions")), (48, 45))
+        self.assertEqual((self._count("foundation", "chunks"), self._count("foundation", "questions")), (48, 46))
         self.assertEqual((self._count("kompetent", "chunks"), self._count("kompetent", "questions")), (36, 54))
 
     def test_totals_equal_the_real_content(self):
         real_chunks = sum(len(p["chunks"]) for p in self.pilots.values())
         real_questions = sum(len(p["questions"]) for p in self.pilots.values())
-        self.assertEqual((real_chunks, real_questions), (84, 99))
+        self.assertEqual((real_chunks, real_questions), (84, 100))
         self.assertEqual(self._count("foundation", "chunks") + self._count("kompetent", "chunks"), real_chunks)
         self.assertEqual(self._count("foundation", "questions") + self._count("kompetent", "questions"), real_questions)
 
