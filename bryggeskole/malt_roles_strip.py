@@ -77,7 +77,7 @@ def render_malt_roles_strip_svg(language):
     labels = _LABELS[language]
 
     return _flatten_svg_markup(f"""<svg viewBox="0 0 560 270" width="100%" preserveAspectRatio="xMidYMid meet"
-  style="max-width:560px;height:auto;display:block;margin:0 auto;"
+  style="max-width:42rem;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
 
