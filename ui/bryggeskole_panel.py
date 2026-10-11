@@ -938,8 +938,10 @@ def _injiser_bryggeskole_css():
     column, so no media query. Chunk bodies (`bs_leksjon_tekst_<n>`) go
     from 1.15rem to 1.2rem; page title (h3) and subheadings (h4) get their
     own sizes and no anchor icons. `.st-key-bs_leksjon_med_visual` caps the
-    Råvarer Malt text|visual row at 70rem, so its 3:2 text column also lands
-    at 42rem. The question text keeps its own 1.15rem rule, unchanged.
+    Råvarer Malt text|visual row at 84rem with two equal columns, so the text
+    column lands at the same 42rem measure and the malt visual gets a whole
+    column of up to 42rem (#508: at 70rem / 3:2 it was too small to read).
+    The question text keeps its own 1.15rem rule, unchanged.
     Covered by tests/playwright_streamlit/learning-page-layout.spec.js."""
     st.markdown(
         """
@@ -952,7 +954,7 @@ def _injiser_bryggeskole_css():
             max-width: 42rem;
         }
         .st-key-bs_leksjon_med_visual {
-            max-width: 70rem;
+            max-width: 84rem;
         }
         .st-key-bs_leksjon_side [class*="st-key-bs_leksjon_tekst_"] p,
         .st-key-bs_leksjon_side [class*="st-key-bs_leksjon_tekst_"] li {
@@ -1376,7 +1378,7 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak, sesjon_id=None, base=None, t
         # (Streamlit stacks the columns, text first, on a narrow screen).
         # The wide process diagrams stay full width below the text.
         with st.container(key="bs_leksjon_med_visual"):
-            tekst_kolonne, visual_kolonne = st.columns((3, 2), vertical_alignment="top")
+            tekst_kolonne, visual_kolonne = st.columns((1, 1), vertical_alignment="top")
             with tekst_kolonne:
                 _render_sidetekst(modul_id, side, side_chunks, sprak)
             with visual_kolonne:

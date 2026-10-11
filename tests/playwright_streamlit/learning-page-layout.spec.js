@@ -74,6 +74,23 @@ test.describe('Bryggeskole learning pages: width and composition (lang=no)', () 
     expect(g.malt.left).toBeGreaterThanOrEqual(g.side.right - 1);
     expect(g.malt.top).toBeLessThan(g.side.bottom);
     expect(g.hscroll).toBe(false);
+    // #508: the visual must be readable, not a thin side strip. Two equal
+    // columns: at 1280px with the sidebar open it got 320px under the old
+    // 3:2 split; now it takes about half of the row.
+    expect(g.malt.width).toBeGreaterThanOrEqual(380);
+    expect(g.malt.width).toBeGreaterThanOrEqual(0.9 * g.side.width);
+
+    // On a wide desktop the visual scales up past the old 560px SVG cap
+    // (it was 440px here before), while the text keeps its 42rem measure.
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await expect.poll(async () => (await geometri(page)).malt.width, { timeout: 10_000 }).toBeGreaterThanOrEqual(560);
+    g = await geometri(page);
+    expect(g.side.width).toBeLessThanOrEqual(42 * g.rem + 1);
+    expect(g.malt.width).toBeLessThanOrEqual(42 * g.rem + 1);
+    expect(g.malt.left).toBeGreaterThanOrEqual(g.side.right - 1);
+    expect(g.malt.top).toBeLessThan(g.side.bottom);
+    expect(g.hscroll).toBe(false);
+    await page.setViewportSize(viewport);
 
     // A text-only page: the same measure, clearly narrower than the page.
     await page.locator('.st-key-bs_bolk_neste_raavarer_btn button').click();
