@@ -82,24 +82,24 @@
         {
           "id": "a",
           "text": {
-            "no": "Å skrive ned det du faktisk sanser, adskilt fra hva du tror det skyldes.",
-            "en": "Writing down what you actually perceive, kept separate from what you think caused it."
+            "no": "Å skrive ned det du sanser, uten å blande inn hva du tror det skyldes.",
+            "en": "Writing down what you sense, without mixing in what you think caused it."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Å gi ølet én samlet karakter.",
-            "en": "Giving the beer one overall grade."
+            "no": "Å skrive ned bare det som er galt, så du vet hva som må rettes.",
+            "en": "Writing down only what is wrong, so you know what needs fixing."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Å fastslå hva som gikk galt i bryggingen.",
-            "en": "Establishing what went wrong in the brew."
+            "no": "Å skrive ned hva du tror skjedde i bryggingen, så du finner feilen.",
+            "en": "Writing down what you think happened in the brew, so you find the fault."
           },
           "correct": false
         }
@@ -109,8 +109,8 @@
         "en": "Correct. NOTE is about writing down your observations in your own words, and keeping them separate from interpretation."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. NOTÉR er ikke en karakter og ikke en diagnose – det er å skrive ned det du faktisk sanser, adskilt fra hva du tror det skyldes.",
-        "en": "Not quite. NOTE is not a grade and not a diagnosis – it is writing down what you actually perceive, kept separate from what you think caused it."
+        "no": "Ikke helt. NOTÉR handler ikke bare om det som er galt, og ikke om å forklare hva som skjedde i bryggingen. Det er å skrive ned det du faktisk sanser, adskilt fra hva du tror det skyldes.",
+        "en": "Not quite. NOTE is not only about what is wrong, and not about explaining what happened in the brew. It is writing down what you actually perceive, kept separate from what you think caused it."
       }
     },
     {
@@ -128,35 +128,35 @@
         {
           "id": "a",
           "text": {
-            "no": "Rene glass uten lukt og like forhold for begge ølene.",
-            "en": "Clean, odour-free glasses and the same conditions for both beers."
+            "no": "Å smake dem side om side, under like forhold og i rene glass uten lukt.",
+            "en": "Tasting them side by side, under the same conditions and in clean, odour-free glasses."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Å smake det ene i dag og det andre om en stund, i ulike glass.",
-            "en": "Tasting one today and the other some time later, in different glasses."
+            "no": "Å smake dem på hver sin dag, så smakssansen er uthvilt for hvert øl.",
+            "en": "Tasting them on separate days, so your sense of taste is rested for each beer."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Å smake det du tror er best først, så du vet hva du ser etter.",
-            "en": "Tasting the one you think is best first, so you know what to look for."
+            "no": "Å smake dem fra ulike glass, så du ikke blander hvilket øl som er hvilket.",
+            "en": "Tasting them from different glasses, so you do not mix up which beer is which."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Rene glass og like forhold gjør at forskjellen du kjenner, kommer fra ølet – ikke fra måten du smakte på.",
-        "en": "Correct. Clean glasses and the same conditions mean the difference you notice comes from the beer – not from the way you tasted."
+        "no": "Riktig. Like forhold og rene glass gjør at forskjellen du kjenner, kommer fra ølet – ikke fra måten du smakte på. Forventninger kan også påvirke det du opplever, og at en annen skjenker uten å si hvilket øl som er hvilket, kan redusere noe av den effekten.",
+        "en": "Correct. The same conditions and clean glasses mean the difference you notice comes from the beer – not from how you tasted. Expectations can also influence what you perceive, and having someone else pour without saying which beer is which can reduce some of that effect."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Ulike glass og forhold kan gi forskjeller som ikke kommer fra ølet, og forventninger kan påvirke det du opplever. Sammenlign med rene glass og like forhold.",
-        "en": "Not quite. Different glasses and conditions can create differences that do not come from the beer, and expectations can influence what you perceive. Compare with clean glasses and the same conditions."
+        "no": "Ikke helt. Ulike dager eller ulike glass kan gi forskjeller som ikke kommer fra ølet. Smak dem side om side, under like forhold og i rene glass uten lukt.",
+        "en": "Not quite. Different days or different glasses can create differences that do not come from the beer. Taste them side by side, under the same conditions and in clean, odour-free glasses."
       }
     },
     {
@@ -174,8 +174,8 @@
         {
           "id": "a",
           "text": {
-            "no": "«Ølet ser uklart ut.»",
-            "en": "\"The beer looks hazy.\""
+            "no": "«Ølet ser uklart ut, og skummet forsvinner raskt.»",
+            "en": "\"The beer looks hazy, and the foam disappears quickly.\""
           },
           "correct": true
         },
@@ -190,8 +190,8 @@
         {
           "id": "c",
           "text": {
-            "no": "«Neste gang lar jeg det stå lenger.»",
-            "en": "\"Next time I will let it stand longer.\""
+            "no": "«Neste gang lar jeg det stå lenger før tapping.»",
+            "en": "\"Next time I will let it stand longer before packaging.\""
           },
           "correct": false
         }
@@ -220,35 +220,35 @@
         {
           "id": "a",
           "text": {
-            "no": "Observasjonen, og at du ennå ikke vet årsaken – det er et fullverdig svar.",
-            "en": "The observation, and that you do not know the cause yet – that is a complete answer."
+            "no": "Hvordan preget lukter eller smaker, og at årsaken ennå er ukjent.",
+            "en": "How the character smells or tastes, and that the cause is still unknown."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Den årsaken som virker mest sannsynlig, skrevet som om den er bevist.",
-            "en": "The most likely-seeming cause, written as if it were proven."
+            "no": "Venter med å skrive det ned til du har funnet ut hva det skyldes.",
+            "en": "Hold off writing it down until you have worked out what caused it."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Ingenting, siden du ikke vet svaret.",
-            "en": "Nothing, since you do not know the answer."
+            "no": "Den årsaken som virker mest sannsynlig, så loggen ikke står uten svar.",
+            "en": "The cause that seems most likely, so the log is not left without an answer."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Skriv ned det du sanset, og at årsaken ennå er usikker. «Jeg vet ikke ennå» er et gyldig svar.",
-        "en": "Correct. Write down what you perceived, and that the cause is still uncertain. \"I don't know yet\" is a valid answer."
+        "no": "Riktig. Skriv ned det du sanset, og at årsaken ennå er ukjent. «Jeg vet ikke ennå» er et fullverdig svar.",
+        "en": "Correct. Write down what you perceived, and that the cause is still unknown. \"I don't know yet\" is a complete answer."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Én observasjon beviser ikke en årsak, men den er likevel verdt å skrive ned. Noter det du sanset, og at du ennå ikke vet hva det skyldes.",
-        "en": "Not quite. One observation does not prove a cause, but it is still worth writing down. Note what you perceived, and that you do not know the cause yet."
+        "no": "Ikke helt. Observasjonen er verdt å skrive ned nå, selv om du ikke vet årsaken, og en gjetning skal ikke stå som årsak. Noter det du sanset, og at du ennå ikke vet hva det skyldes.",
+        "en": "Not quite. The observation is worth writing down now, even if you do not know the cause, and a guess should not stand as the cause. Note what you perceived, and that you do not yet know what caused it."
       }
     },
     {
@@ -259,42 +259,42 @@
       "difficulty": "beginner",
       "source_claims": ["FACT-SENSORY-0001"],
       "prompt": {
-        "no": "Den lyse lageren din lukter smør, og det var ikke meningen. Hva er det beste å skrive i loggen?",
-        "en": "Your pale lager smells buttery, and that was not intended. What is the best thing to write in the log?"
+        "no": "Den lyse lageren din lukter tydelig av smør, og det var ikke meningen. Hvordan tolker du det?",
+        "en": "Your pale lager smells clearly of butter, and that was not intended. How do you interpret it?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "«Lukter smør, ikke tilsiktet.» Og for seg: «Kan være diacetyl – én mulighet, usikker ennå.»",
-            "en": "\"Smells buttery, not intended.\" And separately: \"Could be diacetyl – one possibility, still uncertain.\""
+            "no": "Smørlukt forbindes med diacetyl, så det er én mulig forklaring å følge opp.",
+            "en": "A buttery smell is associated with diacetyl, so it is one possible explanation to follow up."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "«Dette er diacetyl, og gjæren sviktet.»",
-            "en": "\"This is diacetyl, and the yeast failed.\""
+            "no": "Det er diacetyl, siden smørlukt viser at gjæren ikke har gjort jobben sin.",
+            "en": "It is diacetyl, since a buttery smell shows the yeast has not done its job."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Ingenting – smørpreg er alltid greit i alle øl.",
-            "en": "Nothing – a buttery character is always fine in every beer."
+            "no": "Det kan du se bort fra, siden litt smørpreg er vanlig i mange øl.",
+            "en": "You can ignore it, since a little buttery character is common in many beers."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Smørpreg forbindes med diacetyl, men lukten alene beviser ikke årsaken. Diacetyl er som regel uønsket når den er tydelig uten at det var meningen, så det er verdt å notere og følge opp.",
-        "en": "Correct. A buttery character is associated with diacetyl, but the smell alone does not prove the cause. Diacetyl is generally undesirable when it is prominent without being intended, so it is worth noting and following up."
+        "no": "Riktig. Smørpreg forbindes med diacetyl, men lukten alene beviser ikke at det er diacetyl, eller hva som ga den. Når preget er tydelig uten at det var meningen, er det som regel uønsket og verdt å notere og følge opp.",
+        "en": "Correct. A buttery character is associated with diacetyl, but the smell alone does not prove it is diacetyl, or what produced it. When the character is prominent without being intended, it is generally undesirable and worth noting and following up."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. En smørlukt er en observasjon, ikke et bevis – og når den er tydelig uten at det var meningen, er den verdt å notere. Skriv det du kjente, og hold diacetyl som én mulig forklaring.",
-        "en": "Not quite. A buttery smell is an observation, not proof – and when it is prominent without being intended, it is worth noting. Write what you perceived, and keep diacetyl as one possible explanation."
+        "no": "Ikke helt. En smørlukt er en observasjon, ikke et bevis på diacetyl eller på at gjæren ikke gjorde jobben sin. Og når den er tydelig uten at det var meningen, er den som regel uønsket – ikke noe å se bort fra. Hold diacetyl som én mulig forklaring.",
+        "en": "Not quite. A buttery smell is an observation, not proof of diacetyl or that the yeast did not do its job. And when it is prominent without being intended, it is generally undesirable – not something to ignore. Keep diacetyl as one possible explanation."
       }
     },
     {
@@ -312,35 +312,35 @@
         {
           "id": "a",
           "text": {
-            "no": "Noter lukten. DMS er én mulighet, og kokingen er én ting å se på – men lukten alene beviser ikke at kokingen var for kort.",
-            "en": "Note the smell. DMS is one possibility, and the boil is one thing to look at – but the smell alone does not prove the boil was too short."
+            "no": "DMS er én mulig forklaring, og kokingen er én av tingene du kan se på.",
+            "en": "DMS is one possible explanation, and the boil is one of the things you can look at."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Kokingen var helt sikkert for kort.",
-            "en": "The boil was definitely too short."
+            "no": "Kokingen var for kort, siden kokt mais viser at DMS ikke ble kokt bort.",
+            "en": "The boil was too short, since cooked corn shows the DMS was not boiled off."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Lukten betyr ingenting og er ikke verdt å notere.",
-            "en": "The smell means nothing and is not worth noting."
+            "no": "Det kan du se bort fra, siden kokt mais er en vanlig lukt fra malten.",
+            "en": "You can ignore it, since cooked corn is a common smell from the malt."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Kokt mais er en vanlig beskrivelse av DMS, og en kraftig, lang nok koking er én viktig kontroll. Men en beskrivelse er ikke en diagnose.",
-        "en": "Correct. Cooked corn is a common descriptor for DMS, and a vigorous, sufficiently long boil is one important control. But a descriptor is not a diagnosis."
+        "no": "Riktig. Kokt mais er en vanlig beskrivelse av DMS, og en kraftig, lang nok koking er én viktig kontroll. Men en beskrivelse er ikke en diagnose: lukten alene beviser ikke hva som skjedde i kokingen.",
+        "en": "Correct. Cooked corn is a common descriptor for DMS, and a vigorous, sufficiently long boil is one important control. But a descriptor is not a diagnosis: the smell alone does not prove what happened in the boil."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Noter lukten, og hold DMS som én mulig forklaring. Lukten alene beviser ikke hva som skjedde i kokingen.",
-        "en": "Not quite. Note the smell, and keep DMS as one possible explanation. The smell alone does not prove what happened in the boil."
+        "no": "Ikke helt. Lukten beviser ikke hva som skjedde i kokingen, men den er heller ikke noe å se bort fra: kokt mais er en vanlig beskrivelse av DMS. Noter lukten, og hold DMS som én mulig forklaring.",
+        "en": "Not quite. The smell does not prove what happened in the boil, but it is not something to ignore either: cooked corn is a common descriptor for DMS. Note the smell, and keep DMS as one possible explanation."
       }
     },
     {
@@ -443,31 +443,31 @@
       "difficulty": "beginner",
       "source_claims": [],
       "prompt": {
-        "no": "En venn smaker ølet ditt og liker det ikke. Hva bør avgjøre om ølet har en feil?",
-        "en": "A friend tastes your beer and does not like it. What should decide whether the beer has a fault?"
+        "no": "Ølet ditt har et tydelig preg som ikke alle liker. Hva bør avgjøre om preget er en feil?",
+        "en": "Your beer has a distinct character that not everyone likes. What should decide whether the character is a fault?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Om preget er uønsket, hvor sterkt det er, og om det passer ølet du ville lage.",
-            "en": "Whether the character is unintended, how strong it is, and whether it fits the beer you wanted to make."
+            "no": "Om du ønsket preget, hvor sterkt det er, og om det passer ølet du ville lage.",
+            "en": "Whether you wanted the character, how strong it is, and whether it fits the beer you wanted to make."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Om flere enn vennen din heller ikke liker det – da er det trolig en feil.",
-            "en": "Whether more people than your friend also dislike it – then it is probably a fault."
+            "no": "Om de fleste som smaker det, liker det – gjør de ikke det, er det trolig en feil.",
+            "en": "Whether most people who taste it like it – if they don't, it is probably a fault."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Om ølet passer stilen – havner det utenfor stilen, er det en feil.",
-            "en": "Whether the beer fits the style – if it falls outside the style, it is a fault."
+            "no": "Om ølet ligger innenfor stilen – havner det utenfor, er det trolig en feil.",
+            "en": "Whether the beer sits inside the style – if it falls outside, it is probably a fault."
           },
           "correct": false
         }
@@ -477,8 +477,8 @@
         "en": "Correct. Someone disliking a beer does not make it a fault. Ask instead: Did I intend this, how strong is it, and does it fit the beer I wanted to make?"
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Verken hvor mange som liker ølet, eller om det ligger innenfor en stil, avgjør alene om noe er en feil. Det avhenger av hva du ønsket, hvor sterkt preget er, og sammenhengen – og et tydelig preg du ikke ønsket, er verdt å notere.",
-        "en": "Not quite. Neither how many people like the beer nor whether it fits a style decides on its own whether something is a fault. It depends on what you intended, how strong the character is, and the context – and a clear character you did not intend is worth noting."
+        "no": "Ikke helt. Verken hvor mange som liker ølet, eller om det ligger innenfor en stil, avgjør alene om noe er en feil. Det avhenger av hva du ønsket, hvor sterkt preget er, og sammenhengen – og et tydelig preg du ikke ønsket, er verdt å notere og følge opp.",
+        "en": "Not quite. Neither how many people like the beer nor whether it sits inside a style decides on its own whether something is a fault. It depends on what you wanted, how strong the character is and the context – and a distinct character you did not want is worth noting and following up."
       }
     },
     {
@@ -489,42 +489,42 @@
       "difficulty": "beginner",
       "source_claims": [],
       "prompt": {
-        "no": "Ølet ble annerledes enn du ønsket, og du har flere ideer om hva som kan være årsaken. Hva er den beste planen for neste brygg?",
-        "en": "The beer turned out differently from what you intended, and you have several ideas about what might have caused it. What is the best plan for the next batch?"
+        "no": "Du har smakt ferdig på ølet og notert det du sanset. Hvordan vurderer du resultatet?",
+        "en": "You have finished tasting the beer and noted what you perceived. How do you evaluate the result?"
       },
       "options": [
         {
           "id": "a",
           "text": {
-            "no": "Å velge én bevisst endring og se på den som en test av hypotesen din.",
-            "en": "Choosing one deliberate change and treating it as a test of your hypothesis."
+            "no": "Sammenligner det med ølet du ville lage, og beskriver forskjellen med ord.",
+            "en": "Compare it with the beer you set out to make, and describe the difference in words."
           },
           "correct": true
         },
         {
           "id": "b",
           "text": {
-            "no": "Å endre alt du kan på en gang, så noe av det sikkert virker.",
-            "en": "Changing everything you can at once, so something is bound to work."
+            "no": "Gir det én samlet karakter, så resultatet blir lett å sammenligne.",
+            "en": "Give it one overall grade, so the result is easy to compare."
           },
           "correct": false
         },
         {
           "id": "c",
           "text": {
-            "no": "Å ikke endre noe, men skrive at problemet er løst.",
-            "en": "Changing nothing, but writing that the problem is solved."
+            "no": "Vurderer det opp mot hva andre liker, siden det er de som skal drikke det.",
+            "en": "Judge it against what others like, since they are the ones who will drink it."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Med én bevisst endring blir resultatet i neste brygg lettere å tolke – men det beviser ikke årsaken.",
-        "en": "Correct. With one deliberate change, the result in the next batch is easier to interpret – but it does not prove the cause."
+        "no": "Riktig. Sammenlign ølet du fikk med ølet du ville lage, og beskriv forskjellen med ord – ikke med en karakter. Da ser du hva som faktisk ble annerledes, og har noe konkret å følge opp i neste brygg.",
+        "en": "Correct. Compare the beer you got with the beer you set out to make, and describe the difference in words – not with a grade. Then you see what actually turned out differently, and have something concrete to follow up in the next brew."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Endrer du mange ting samtidig, kan du ikke vite hvilken endring som virket. Velg én bevisst endring, og se på den som en test – ikke som et bevis.",
-        "en": "Not quite. If you change many things at once, you cannot know which change worked. Choose one deliberate change, and treat it as a test – not as proof."
+        "no": "Ikke helt. En samlet karakter sier ikke hva som ble annerledes, og andres smak er ikke målestokken for ølet du ville lage. Sammenlign med ølet du siktet mot, og beskriv forskjellen med ord.",
+        "en": "Not quite. One overall grade does not say what turned out differently, and other people's taste is not the yardstick for the beer you set out to make. Compare with the beer you aimed for, and describe the difference in words."
       }
     }
   ]
