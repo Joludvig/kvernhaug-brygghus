@@ -45,10 +45,10 @@
     {
       "id": "CHUNK-PACK-F",
       "basis": "fact",
-      "source_claims": ["FACT-PACK-0001"],
+      "source_claims": ["FACT-PACK-0001", "FACT-PACK-0005"],
       "text": {
-        "no": "**Primemengde og karbonering.** Primesukkeret starter en ny, liten gjæring i den lukkede flasken, og CO₂-en den lager, karbonerer ølet. Mengden primesukker påvirker derfor hvor karbonert ølet blir. Hvor mye som trengs, avhenger av det konkrete ølet – blant annet hvor mye CO₂ det allerede inneholder, temperaturen og ølstilen – og av hvor mye karbonering du ønsker. Det finnes ikke én mengde som passer alle brygg.",
-        "en": "**Priming amount and carbonation.** Priming sugar starts a new, small fermentation in the sealed bottle, and the CO₂ it makes carbonates the beer. So the amount of priming sugar affects how carbonated the beer becomes. How much is needed depends on the specific beer – including how much CO₂ it already holds, its temperature and its style – and on how much carbonation you want. There is no single amount that fits every batch."
+        "no": "**Primemengde og karbonering.** Primesukkeret starter en ny, liten gjæring i den lukkede flasken, og CO₂-en den lager, karbonerer ølet. Mengden primesukker påvirker derfor hvor karbonert ølet blir. For mye primesukker kan gi høyere karbonering og mer trykk enn ønsket i den lukkede flasken. Hvor mye som trengs, avhenger av det konkrete ølet – blant annet hvor mye CO₂ det allerede inneholder, temperaturen og ølstilen – og av hvor mye karbonering du ønsker. Det finnes ikke én mengde som passer alle brygg.",
+        "en": "**Priming amount and carbonation.** Priming sugar starts a new, small fermentation in the sealed bottle, and the CO₂ it makes carbonates the beer. So the amount of priming sugar affects how carbonated the beer becomes. Too much priming sugar can give more carbonation and more pressure than intended in the sealed bottle. How much is needed depends on the specific beer – including how much CO₂ it already holds, its temperature and its style – and on how much carbonation you want. There is no single amount that fits every batch."
       }
     },
     {
