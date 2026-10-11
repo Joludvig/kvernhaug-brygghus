@@ -1,0 +1,664 @@
+{
+  "schema_version": 1,
+  "notes": "Presentation only: groups adjacent chunks of one (module, stage) into learner-facing learning pages, in canonical stage order. Never a fact, stage, question or mastery truth; authored chunks stay the content/provenance unit. Validated by bryggeskole/learning_pages.py.",
+  "pages": [
+    {
+      "id": "raavarer.foundation.1",
+      "module": "raavarer",
+      "stage": "foundation",
+      "title": {
+        "no": "Malt",
+        "en": "Malt"
+      },
+      "chunks": [
+        "CHUNK-RAW-A",
+        "CHUNK-RAW-B",
+        "CHUNK-RAW-C"
+      ]
+    },
+    {
+      "id": "raavarer.foundation.2",
+      "module": "raavarer",
+      "stage": "foundation",
+      "title": {
+        "no": "Humle",
+        "en": "Hops"
+      },
+      "chunks": [
+        "CHUNK-RAW-D",
+        "CHUNK-RAW-E",
+        "CHUNK-RAW-F"
+      ]
+    },
+    {
+      "id": "raavarer.foundation.3",
+      "module": "raavarer",
+      "stage": "foundation",
+      "title": {
+        "no": "Gjær",
+        "en": "Yeast"
+      },
+      "chunks": [
+        "CHUNK-RAW-G",
+        "CHUNK-RAW-H",
+        "CHUNK-RAW-I"
+      ]
+    },
+    {
+      "id": "raavarer.foundation.4",
+      "module": "raavarer",
+      "stage": "foundation",
+      "title": {
+        "no": "Vann",
+        "en": "Water"
+      },
+      "chunks": [
+        "CHUNK-RAW-J",
+        "CHUNK-RAW-K"
+      ]
+    },
+    {
+      "id": "rengjoring.foundation.1",
+      "module": "rengjoring",
+      "stage": "foundation",
+      "title": {
+        "no": "Rengjøring og sanitering er to forskjellige ting",
+        "en": "Cleaning and sanitizing are two different things"
+      },
+      "chunks": [
+        "CHUNK-SAFE-A",
+        "CHUNK-SAFE-B"
+      ]
+    },
+    {
+      "id": "rengjoring.foundation.2",
+      "module": "rengjoring",
+      "stage": "foundation",
+      "title": {
+        "no": "Hvor sanitering begynner å bety noe",
+        "en": "Where sanitizing starts to matter"
+      },
+      "chunks": [
+        "CHUNK-SAFE-C",
+        "CHUNK-SAFE-D"
+      ]
+    },
+    {
+      "id": "rengjoring.foundation.3",
+      "module": "rengjoring",
+      "stage": "foundation",
+      "title": {
+        "no": "Varme, CO₂ og trykk",
+        "en": "Heat, CO₂ and pressure"
+      },
+      "chunks": [
+        "CHUNK-SAFE-E",
+        "CHUNK-SAFE-F",
+        "CHUNK-SAFE-G"
+      ]
+    },
+    {
+      "id": "metodevalg.foundation.1",
+      "module": "metodevalg",
+      "stage": "foundation",
+      "title": {
+        "no": "Samme prosess – ulikt utstyr",
+        "en": "Same process – different equipment"
+      },
+      "chunks": [
+        "CHUNK-METHOD-A"
+      ]
+    },
+    {
+      "id": "metodevalg.foundation.2",
+      "module": "metodevalg",
+      "stage": "foundation",
+      "title": {
+        "no": "Tre måter å sette opp bryggingen",
+        "en": "Three ways to set up the brew"
+      },
+      "chunks": [
+        "CHUNK-METHOD-B",
+        "CHUNK-METHOD-C",
+        "CHUNK-METHOD-D"
+      ],
+      "subheadings": {
+        "CHUNK-METHOD-B": {
+          "no": "Meskepose (BIAB)",
+          "en": "Mash bag (BIAB)"
+        },
+        "CHUNK-METHOD-C": {
+          "no": "Tradisjonelt oppsett",
+          "en": "Traditional setup"
+        },
+        "CHUNK-METHOD-D": {
+          "no": "Alt-i-ett-maskin",
+          "en": "All-in-one machine"
+        }
+      }
+    },
+    {
+      "id": "metodevalg.foundation.3",
+      "module": "metodevalg",
+      "stage": "foundation",
+      "title": {
+        "no": "Planlegg for ditt eget utstyr",
+        "en": "Plan for your own equipment"
+      },
+      "chunks": [
+        "CHUNK-METHOD-E"
+      ]
+    },
+    {
+      "id": "mesking.foundation.1",
+      "module": "mesking",
+      "stage": "foundation",
+      "title": {
+        "no": "Hva skjer under meskingen",
+        "en": "What happens in the mash"
+      },
+      "chunks": [
+        "CHUNK-MASH-A"
+      ]
+    },
+    {
+      "id": "mesking.kompetent.1",
+      "module": "mesking",
+      "stage": "kompetent",
+      "title": {
+        "no": "Mesketemperatur og gjærbarhet",
+        "en": "Mash temperature and fermentability"
+      },
+      "chunks": [
+        "CHUNK-MASH-B",
+        "CHUNK-MASH-C"
+      ]
+    },
+    {
+      "id": "mesking.kompetent.2",
+      "module": "mesking",
+      "stage": "kompetent",
+      "title": {
+        "no": "Skille vørteren fra kornet",
+        "en": "Separating wort from grain"
+      },
+      "chunks": [
+        "CHUNK-MASH-D"
+      ]
+    },
+    {
+      "id": "mesking.kompetent.3",
+      "module": "mesking",
+      "stage": "kompetent",
+      "title": {
+        "no": "Samle vørteren",
+        "en": "Collecting the wort"
+      },
+      "chunks": [
+        "CHUNK-MASH-E"
+      ]
+    },
+    {
+      "id": "mesking.kompetent.4",
+      "module": "mesking",
+      "stage": "kompetent",
+      "title": {
+        "no": "Sjekk før kokingen",
+        "en": "A check before the boil"
+      },
+      "chunks": [
+        "CHUNK-MASH-F"
+      ]
+    },
+    {
+      "id": "koking.foundation.1",
+      "module": "koking",
+      "stage": "foundation",
+      "title": {
+        "no": "Hva kokingen gjør",
+        "en": "What the boil does"
+      },
+      "chunks": [
+        "CHUNK-BOILHOP-A",
+        "CHUNK-BOILHOP-B"
+      ]
+    },
+    {
+      "id": "koking.foundation.2",
+      "module": "koking",
+      "stage": "foundation",
+      "title": {
+        "no": "Bitterhet og aroma fra humlen",
+        "en": "Bitterness and aroma from hops"
+      },
+      "chunks": [
+        "CHUNK-BOILHOP-C",
+        "CHUNK-BOILHOP-D",
+        "CHUNK-BOILHOP-E"
+      ]
+    },
+    {
+      "id": "koking.kompetent.1",
+      "module": "koking",
+      "stage": "kompetent",
+      "title": {
+        "no": "Whirlpool og hop-stand",
+        "en": "Whirlpool and hop stand"
+      },
+      "chunks": [
+        "CHUNK-BOILHOP-F"
+      ]
+    },
+    {
+      "id": "kjoling.foundation.1",
+      "module": "kjoling",
+      "stage": "foundation",
+      "title": {
+        "no": "Rask nedkjøling og cold break",
+        "en": "Fast cooling and cold break"
+      },
+      "chunks": [
+        "CHUNK-COOLXFER-A",
+        "CHUNK-COOLXFER-B"
+      ]
+    },
+    {
+      "id": "kjoling.foundation.2",
+      "module": "kjoling",
+      "stage": "foundation",
+      "title": {
+        "no": "Hygienegrensen starter ved nedkjølingen",
+        "en": "The hygiene boundary starts at cooling"
+      },
+      "chunks": [
+        "CHUNK-COOLXFER-C"
+      ]
+    },
+    {
+      "id": "kjoling.foundation.3",
+      "module": "kjoling",
+      "stage": "foundation",
+      "title": {
+        "no": "Oksygen – tidspunktet avgjør",
+        "en": "Oxygen – timing matters"
+      },
+      "chunks": [
+        "CHUNK-COOLXFER-D"
+      ]
+    },
+    {
+      "id": "kjoling.foundation.4",
+      "module": "kjoling",
+      "stage": "foundation",
+      "title": {
+        "no": "Overføring mellom kar",
+        "en": "Transferring between vessels"
+      },
+      "chunks": [
+        "CHUNK-COOLXFER-E"
+      ]
+    },
+    {
+      "id": "gjaring.foundation.1",
+      "module": "gjaring",
+      "stage": "foundation",
+      "title": {
+        "no": "Temperatur og gjæren",
+        "en": "Temperature and the yeast"
+      },
+      "chunks": [
+        "CHUNK-FERM-A",
+        "CHUNK-FERM-B",
+        "CHUNK-FERM-C"
+      ]
+    },
+    {
+      "id": "gjaring.foundation.2",
+      "module": "gjaring",
+      "stage": "foundation",
+      "title": {
+        "no": "Når er gjæringen ferdig?",
+        "en": "When is fermentation finished?"
+      },
+      "chunks": [
+        "CHUNK-FERM-D"
+      ]
+    },
+    {
+      "id": "gjaring.kompetent.1",
+      "module": "gjaring",
+      "stage": "kompetent",
+      "title": {
+        "no": "Hva gjæren gjør med vørteren",
+        "en": "What yeast does with the wort"
+      },
+      "chunks": [
+        "CHUNK-FERM-E",
+        "CHUNK-FERM-F"
+      ]
+    },
+    {
+      "id": "gjaring.kompetent.2",
+      "module": "gjaring",
+      "stage": "kompetent",
+      "title": {
+        "no": "Gjæringen over tid",
+        "en": "Fermentation over time"
+      },
+      "chunks": [
+        "CHUNK-FERM-G",
+        "CHUNK-FERM-H"
+      ]
+    },
+    {
+      "id": "gjaring.kompetent.3",
+      "module": "gjaring",
+      "stage": "kompetent",
+      "title": {
+        "no": "Biprodukter: diacetyl som eksempel",
+        "en": "By-products: diacetyl as the example"
+      },
+      "chunks": [
+        "CHUNK-FERM-I",
+        "CHUNK-FERM-J"
+      ]
+    },
+    {
+      "id": "gjaring.kompetent.4",
+      "module": "gjaring",
+      "stage": "kompetent",
+      "title": {
+        "no": "Gjæringslogg og praktisk resonnering",
+        "en": "Fermentation log and practical reasoning"
+      },
+      "chunks": [
+        "CHUNK-FERM-K"
+      ]
+    },
+    {
+      "id": "pakking.foundation.1",
+      "module": "pakking",
+      "stage": "foundation",
+      "title": {
+        "no": "Sanitering og ferdig gjæring før pakking",
+        "en": "Sanitation and finished fermentation before packaging"
+      },
+      "chunks": [
+        "CHUNK-PACK-A"
+      ]
+    },
+    {
+      "id": "pakking.foundation.2",
+      "module": "pakking",
+      "stage": "foundation",
+      "title": {
+        "no": "To måter å karbonere",
+        "en": "Two ways to carbonate"
+      },
+      "chunks": [
+        "CHUNK-PACK-B",
+        "CHUNK-PACK-C"
+      ],
+      "subheadings": {
+        "CHUNK-PACK-B": {
+          "no": "Flaskekondisjonering",
+          "en": "Bottle conditioning"
+        },
+        "CHUNK-PACK-C": {
+          "no": "Tvangskarbonering",
+          "en": "Force carbonation"
+        }
+      }
+    },
+    {
+      "id": "pakking.foundation.3",
+      "module": "pakking",
+      "stage": "foundation",
+      "title": {
+        "no": "Oksygen og trykk når du pakker",
+        "en": "Oxygen and pressure when you package"
+      },
+      "chunks": [
+        "CHUNK-PACK-D"
+      ]
+    },
+    {
+      "id": "pakking.foundation.4",
+      "module": "pakking",
+      "stage": "foundation",
+      "title": {
+        "no": "Flaske eller fat",
+        "en": "Bottle or keg"
+      },
+      "chunks": [
+        "CHUNK-PACK-E"
+      ]
+    },
+    {
+      "id": "pakking.kompetent.1",
+      "module": "pakking",
+      "stage": "kompetent",
+      "title": {
+        "no": "Primemengde og karbonering",
+        "en": "Priming amount and carbonation"
+      },
+      "chunks": [
+        "CHUNK-PACK-F",
+        "CHUNK-PACK-G"
+      ]
+    },
+    {
+      "id": "pakking.kompetent.2",
+      "module": "pakking",
+      "stage": "kompetent",
+      "title": {
+        "no": "Klarhet og oksygen",
+        "en": "Clarity and oxygen"
+      },
+      "chunks": [
+        "CHUNK-PACK-H",
+        "CHUNK-PACK-I"
+      ]
+    },
+    {
+      "id": "maaling.foundation.1",
+      "module": "maaling",
+      "stage": "foundation",
+      "title": {
+        "no": "Mål først, gjett etterpå",
+        "en": "Measure first, guess later"
+      },
+      "chunks": [
+        "CHUNK-MEAS-A",
+        "CHUNK-MEAS-B"
+      ]
+    },
+    {
+      "id": "maaling.foundation.2",
+      "module": "maaling",
+      "stage": "foundation",
+      "title": {
+        "no": "Når er gjæringen ferdig?",
+        "en": "When is fermentation finished?"
+      },
+      "chunks": [
+        "CHUNK-MEAS-C"
+      ]
+    },
+    {
+      "id": "maaling.foundation.3",
+      "module": "maaling",
+      "stage": "foundation",
+      "title": {
+        "no": "Temperatur – og hvor du målte den",
+        "en": "Temperature – and where you measured it"
+      },
+      "chunks": [
+        "CHUNK-MEAS-D"
+      ]
+    },
+    {
+      "id": "maaling.foundation.4",
+      "module": "maaling",
+      "stage": "foundation",
+      "title": {
+        "no": "En minimal bryggelogg",
+        "en": "A minimal brew log"
+      },
+      "chunks": [
+        "CHUNK-MEAS-E"
+      ]
+    },
+    {
+      "id": "maaling.kompetent.1",
+      "module": "maaling",
+      "stage": "kompetent",
+      "title": {
+        "no": "Hydrometer eller refraktometer?",
+        "en": "Hydrometer or refractometer?"
+      },
+      "chunks": [
+        "CHUNK-MEAS-F",
+        "CHUNK-MEAS-G"
+      ]
+    },
+    {
+      "id": "maaling.kompetent.2",
+      "module": "maaling",
+      "stage": "kompetent",
+      "title": {
+        "no": "Volum og rå avlesninger",
+        "en": "Volume and raw readings"
+      },
+      "chunks": [
+        "CHUNK-MEAS-H",
+        "CHUNK-MEAS-I"
+      ]
+    },
+    {
+      "id": "maaling.kompetent.3",
+      "module": "maaling",
+      "stage": "kompetent",
+      "title": {
+        "no": "Én hypotese og én bevisst endring",
+        "en": "One hypothesis and one deliberate change"
+      },
+      "chunks": [
+        "CHUNK-MEAS-J"
+      ]
+    },
+    {
+      "id": "oppskrift.kompetent.1",
+      "module": "oppskrift",
+      "stage": "kompetent",
+      "title": {
+        "no": "Les oppskriften som en plan",
+        "en": "Read the recipe as a plan"
+      },
+      "chunks": [
+        "CHUNK-REC-A"
+      ]
+    },
+    {
+      "id": "oppskrift.kompetent.2",
+      "module": "oppskrift",
+      "stage": "kompetent",
+      "title": {
+        "no": "Fra OG til FG",
+        "en": "From OG to FG"
+      },
+      "chunks": [
+        "CHUNK-REC-B"
+      ]
+    },
+    {
+      "id": "oppskrift.kompetent.3",
+      "module": "oppskrift",
+      "stage": "kompetent",
+      "title": {
+        "no": "Farge og bitterhet i oppskriften",
+        "en": "Colour and bitterness in the recipe"
+      },
+      "chunks": [
+        "CHUNK-REC-C",
+        "CHUNK-REC-D"
+      ]
+    },
+    {
+      "id": "oppskrift.kompetent.4",
+      "module": "oppskrift",
+      "stage": "kompetent",
+      "title": {
+        "no": "Balanse og stil",
+        "en": "Balance and style"
+      },
+      "chunks": [
+        "CHUNK-REC-E",
+        "CHUNK-REC-F"
+      ]
+    },
+    {
+      "id": "oppskrift.kompetent.5",
+      "module": "oppskrift",
+      "stage": "kompetent",
+      "title": {
+        "no": "Lag oppskriften bevisst",
+        "en": "Build the recipe deliberately"
+      },
+      "chunks": [
+        "CHUNK-REC-G"
+      ]
+    },
+    {
+      "id": "smak.kompetent.1",
+      "module": "smak",
+      "stage": "kompetent",
+      "title": {
+        "no": "Smak med vilje",
+        "en": "Taste on purpose"
+      },
+      "chunks": [
+        "CHUNK-SENS-A",
+        "CHUNK-SENS-B"
+      ]
+    },
+    {
+      "id": "smak.kompetent.2",
+      "module": "smak",
+      "stage": "kompetent",
+      "title": {
+        "no": "Smør, grønt eple og svovel",
+        "en": "Butter, green apple and sulphur"
+      },
+      "chunks": [
+        "CHUNK-SENS-C"
+      ]
+    },
+    {
+      "id": "smak.kompetent.3",
+      "module": "smak",
+      "stage": "kompetent",
+      "title": {
+        "no": "Kokt mais, papp og syrlighet",
+        "en": "Cooked corn, cardboard and sourness"
+      },
+      "chunks": [
+        "CHUNK-SENS-D",
+        "CHUNK-SENS-E"
+      ]
+    },
+    {
+      "id": "smak.kompetent.4",
+      "module": "smak",
+      "stage": "kompetent",
+      "title": {
+        "no": "Feil eller karakter?",
+        "en": "Fault or character?"
+      },
+      "chunks": [
+        "CHUNK-SENS-F",
+        "CHUNK-SENS-G"
+      ]
+    }
+  ]
+}

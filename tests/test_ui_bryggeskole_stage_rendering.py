@@ -20,6 +20,7 @@ _MedIsolertTilstand).
 Run with:
     python -m unittest tests.test_ui_bryggeskole_stage_rendering
 """
+import functools
 import io
 import json
 import logging
@@ -30,6 +31,7 @@ import unittest
 from unittest import mock
 
 from bryggeskole import course_stage
+from bryggeskole import learning_pages
 from bryggeskole.mastery_store import read_mastery_state
 from modules.i18n import t as t_ren
 from tests.test_ui_bryggeskole_panel import (
@@ -58,6 +60,17 @@ def _visning(modul_id, trinn):
     return dict(pilot, **course_stage.items_for_stage(_stage_map(), modul_id, pilot, trinn))
 
 
+@functools.lru_cache(maxsize=None)
+def _sidekart():
+    return learning_pages.load_learning_pages()
+
+
+def _sider(modul_id, trinn):
+    """The learning pages of one (module, stage), from the same validated
+    page map the panel uses."""
+    return learning_pages.pages_for_stage(_sidekart(), modul_id, trinn)
+
+
 def _base(modul_id, trinn):
     return modul_id + ("_k" if trinn == "kompetent" else "")
 
@@ -84,24 +97,33 @@ class _TrinnTest(_MedIsolertTilstand):
         return at
 
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def _leksjonstekst(self, at):
         return [m.value for m in at.markdown if m.value.strip()]
 
-    def _gjennomga_leksjon(self, at, modul_id, chunks, sprak="no"):
-        """Walks the stage lesson block by block and checks each block's
-        text and counter against `chunks` (the expected stage chunks)."""
+    def _gjennomga_leksjon(self, at, modul_id, trinn, chunks, sprak="no"):
+        """Walks the stage lesson page by page and checks each page's
+        counter, title and chunk bodies against the page map, and that the
+        pages together hold exactly `chunks` (the expected stage chunks)."""
         base = self._aktiv_modul
         render = panel._MODULER[modul_id]["pilot"].render_chunk
-        for i, chunk in enumerate(chunks):
+        sider = _sider(modul_id, trinn)
+        self.assertEqual([c for side in sider for c in side["chunks"]], [c["id"] for c in chunks])
+        etter_id = {c["id"]: c for c in chunks}
+        for i, side in enumerate(sider):
             self.assertEqual(self._bolk_teller(at), [
-                f"Læringsbolk {i + 1} av {len(chunks)}" if sprak == "no" else f"Learning block {i + 1} of {len(chunks)}"
+                f"Læringsside {i + 1} av {len(sider)}" if sprak == "no" else f"Learning page {i + 1} of {len(sider)}"
             ])
-            self.assertIn(render(chunk, sprak)["text"], self._leksjonstekst(at), chunk["id"])
-            if i + 1 < len(chunks):
+            self.assertEqual([s.value for s in at.subheader][-1], side["title"][sprak])
+            tekster = {cid: render(etter_id[cid], sprak)["text"] for cid in side["chunks"]}
+            for chunk_id, _sub, body in learning_pages.page_sections(side, tekster, sprak):
+                self.assertIn(body, self._leksjonstekst(at), chunk_id)
+            if i + 1 < len(sider):
+                self.assertEqual([b.key for b in at.button if b.key.startswith("bs_start_sporsmal_")], [])
                 _knapp(at, f"bs_bolk_neste_{base}_btn").click().run()
                 self.assertEqual(len(at.exception), 0)
+        _knapp(at, f"bs_start_sporsmal_{base}_btn")
 
     def _svar_alle(self, at, visning, runde=1, svar=None, sprak="no"):
         """Answers every stage question (correct unless `svar` overrides),
@@ -125,7 +147,7 @@ class _TrinnTest(_MedIsolertTilstand):
         self._apne_i_trinn(at, modul_id, trinn, miljo_knapp, sprak if sprak != "no" else None)
         visning = _visning(modul_id, trinn)
         if visning["chunks"]:
-            self._gjennomga_leksjon(at, modul_id, visning["chunks"], sprak)
+            self._gjennomga_leksjon(at, modul_id, trinn, visning["chunks"], sprak)
         self._start_sporsmalsrunde(at)
         self._svar_alle(at, visning, sprak=sprak)
         _knapp(at, f"bs_prov_igjen_{self._aktiv_modul}_btn")
@@ -141,7 +163,7 @@ class TestNormalEntryIsTheFoundationStage(_TrinnTest):
         at = self._ny_apptest()
         self._apne_modul(at, "mesking")
         self.assertEqual(at.session_state[_TRINN_KEY], "foundation")
-        self.assertEqual(self._bolk_teller(at), ["Læringsbolk 1 av 1"])
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
         _knapp(at, "bs_start_sporsmal_mesking_btn")
         self.assertIn("mesking@foundation", at.session_state["bs_modul_sesjon"])
         self.assertNotIn("mesking", at.session_state["bs_modul_sesjon"])
@@ -235,13 +257,13 @@ class TestQuestionsOnlyStage(_TrinnTest):
         _knapp(at, "bs_trinn_repeter_kjoling_k_btn").click().run()
         self.assertEqual(at.session_state[_TRINN_KEY], "foundation")
         self.assertEqual(at.session_state["bs_aktiv_modul"], "kjoling")
-        self.assertEqual(self._bolk_teller(at), ["Læringsbolk 1 av 5"])
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 4"])
         _knapp(at, "bs_bolk_neste_kjoling_btn")
 
 
 class TestSingleStageModules(_TrinnTest):
     def test_foundation_only_modules_requested_as_kompetent(self):
-        for modul_id, antall in (("rengjoring", 7), ("metodevalg", 5)):
+        for modul_id, antall in (("rengjoring", 3), ("metodevalg", 3)):
             with self.subTest(modul=modul_id):
                 at = self._ny_apptest()
                 self._apne_i_trinn(at, modul_id, "kompetent")
@@ -250,10 +272,10 @@ class TestSingleStageModules(_TrinnTest):
                 self.assertEqual([b.key for b in at.button if b.key.startswith(f"bs_start_sporsmal_{modul_id}")], [])
                 self.assertNotIn(f"{modul_id}@kompetent", at.session_state["bs_modul_sesjon"])
                 _knapp(at, f"bs_trinn_repeter_{modul_id}_k_btn").click().run()
-                self.assertEqual(self._bolk_teller(at), [f"Læringsbolk 1 av {antall}"])
+                self.assertEqual(self._bolk_teller(at), [f"Læringsside 1 av {antall}"])
 
     def test_kompetent_only_modules_requested_as_foundation(self):
-        for modul_id, antall in (("oppskrift", 7), ("smak", 7)):
+        for modul_id, antall in (("oppskrift", 5), ("smak", 4)):
             with self.subTest(modul=modul_id):
                 at = self._ny_apptest()
                 self._apne_i_trinn(at, modul_id, "foundation", sprak="en")
@@ -261,7 +283,7 @@ class TestSingleStageModules(_TrinnTest):
                 self.assertIn(t_ren("bryggeskole.trinn.horer_til_kompetent", "en"), [i.value for i in at.info])
                 self.assertNotIn(f"{modul_id}@foundation", at.session_state["bs_modul_sesjon"])
                 _knapp(at, f"bs_trinn_til_kompetent_{modul_id}_btn").click().run()
-                self.assertEqual(self._bolk_teller(at), [f"Learning block 1 of {antall}"])
+                self.assertEqual(self._bolk_teller(at), [f"Learning page 1 of {antall}"])
                 _knapp(at, f"bs_bolk_neste_{modul_id}_k_btn")
 
 
@@ -284,7 +306,7 @@ class TestKeyIsolationAndSessions(_TrinnTest):
         # today's keys, no value carried over.
         at.session_state[_TRINN_KEY] = "foundation"
         at.run()
-        self.assertEqual(self._bolk_teller(at), ["Læringsbolk 1 av 1"])
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
         _knapp(at, "bs_start_sporsmal_mesking_btn").click().run()
         self.assertIsNone(at.radio(key="bs_valg_mesking_r1_q0").value)
         self.assertTrue(_knapp(at, "bs_svar_btn_mesking_r1_q0").disabled)
@@ -368,7 +390,7 @@ class TestBreadcrumb(_TrinnTest):
 class TestInvalidMapFallsBackToTheSingleFlow(_TrinnTest):
     def _sjekk_fallback(self, at):
         pilot = _pilot("mesking")
-        self.assertEqual(self._bolk_teller(at), [f"Læringsbolk 1 av {len(pilot['chunks'])}"])
+        self.assertEqual(self._bolk_teller(at), [f"Læringsside 1 av {len(pilot['chunks'])}"])
         _knapp(at, "bs_bolk_neste_mesking_btn")
         self.assertEqual([b.key for b in at.button if "_k_" in (b.key or "")], [])
         self.assertNotIn("Trinn", " ".join(c.value for c in at.caption))
@@ -409,11 +431,182 @@ class TestInvalidMapFallsBackToTheSingleFlow(_TrinnTest):
         # context uses the learner's lens (Foundation here), never a guess.
         at = self._ny_apptest()
         self._apne_i_trinn(at, "mesking", "bryggemester")
-        self.assertEqual(self._bolk_teller(at), ["Læringsbolk 1 av 1"])
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
         self.assertIn("Trinn 1 · Foundation", self._sti_tekst(at))
 
     def _sti_tekst(self, at):
         return next(c.value for c in at.caption if "▸" in c.value)
+
+
+def _elementer(node):
+    """The rendered elements under `node`, in display order, as (type,
+    value) pairs; containers and columns are walked through."""
+    ut = []
+    for barn in node.children.values():
+        if getattr(barn, "children", None):
+            ut.extend(_elementer(barn))
+        else:
+            verdi = getattr(barn, "value", None) if barn.type in ("markdown", "caption", "subheader") else None
+            ut.append((barn.type, verdi))
+    return ut
+
+
+_MALT_SVG = '<svg viewBox="0 0 560 270"'
+
+
+class TestLearningPages(_TrinnTest):
+    """Owner acceptance #508: a stage lesson shows learning pages -- adjacent
+    chunks under one real title -- instead of one chunk per screen."""
+
+    def _side_elementer(self, at):
+        """The lesson page's own elements: after the page counter, before the
+        nav row."""
+        alle = _elementer(at.main)
+        start = next(i for i, (typ, v) in enumerate(alle)
+                     if typ == "caption" and v.startswith(("Læringsside", "Learning page")))
+        slutt = next(i for i, (typ, _v) in enumerate(alle) if typ == "button" and i > start)
+        return alle[start + 1:slutt]
+
+    def _bodies(self, modul_id, chunk_ids, sprak="no"):
+        render = panel._MODULER[modul_id]["pilot"].render_chunk
+        etter_id = {c["id"]: c for c in _pilot(modul_id)["chunks"]}
+        return [learning_pages.split_heading(render(etter_id[c], sprak)["text"])[1] for c in chunk_ids]
+
+    def test_malt_page_title_once_three_chunks_and_visual_beside(self):
+        for sprak in ("no", "en"):
+            with self.subTest(sprak=sprak):
+                at = self._ny_apptest()
+                self._apne_i_trinn(at, "raavarer", "foundation", sprak=sprak if sprak != "no" else None)
+                self.assertEqual(self._bolk_teller(at),
+                                 ["Læringsside 1 av 4" if sprak == "no" else "Learning page 1 of 4"])
+                elementer = self._side_elementer(at)
+                self.assertEqual([v for typ, v in elementer if typ == "subheader"], ["Malt"])
+                markdown = [v for typ, v in elementer if typ == "markdown"]
+                bodies = self._bodies("raavarer", ["CHUNK-RAW-A", "CHUNK-RAW-B", "CHUNK-RAW-C"], sprak)
+                for body in bodies:
+                    self.assertIn(body, markdown)
+                self.assertEqual([markdown.index(b) for b in bodies], sorted(markdown.index(b) for b in bodies),
+                                 "chunks render in page order")
+                self.assertFalse(any("**Malt.**" in v for v in markdown), "the embedded title is lifted, not repeated")
+                self.assertFalse(any(v.startswith("####") for v in markdown))
+                self.assertEqual(sum(v.startswith(_MALT_SVG) for v in markdown), 1)
+                self.assertEqual(len(at.columns), 2 + 3, "text | visual columns plus the nav row")
+                _knapp(at, "bs_bolk_neste_raavarer_btn").click().run()
+                markdown = [v for typ, v in self._side_elementer(at) if typ == "markdown"]
+                self.assertEqual(sum(v.startswith(_MALT_SVG) for v in markdown), 0)
+                self.assertEqual(len(at.columns), 3, "no columns on a page without the Malt visual")
+
+    def test_authored_headings_become_subheadings_on_grouped_pages(self):
+        at = self._ny_apptest()
+        self._apne_i_trinn(at, "rengjoring", "foundation")
+        for _ in range(2):
+            _knapp(at, "bs_bolk_neste_rengjoring_btn").click().run()
+        elementer = self._side_elementer(at)
+        self.assertEqual([v for typ, v in elementer if typ == "subheader"], ["Varme, CO₂ og trykk"])
+        self.assertEqual([v for typ, v in elementer if typ == "markdown" and v.startswith("####")],
+                         ["#### Varm vørter og overkoking", "#### CO₂ fra gjæringen", "#### Trykk i flasker og fat"])
+        self.assertFalse(any(typ == "markdown" and v.startswith("**") for typ, v in elementer))
+
+    def test_map_subheadings_only_where_the_chunk_has_none(self):
+        at = self._ny_apptest()
+        self._apne_i_trinn(at, "metodevalg", "foundation", sprak="en")
+        _knapp(at, "bs_bolk_neste_metodevalg_btn").click().run()
+        elementer = self._side_elementer(at)
+        self.assertEqual([v for typ, v in elementer if typ == "subheader"], ["Three ways to set up the brew"])
+        self.assertEqual([v for typ, v in elementer if typ == "markdown" and v.startswith("####")],
+                         ["#### Mash bag (BIAB)", "#### Traditional setup", "#### All-in-one machine"])
+        # The method flow is a wide diagram: once, full width below the text.
+        markdown = [v for typ, v in elementer if typ == "markdown"]
+        self.assertEqual(sum(v.startswith("<svg") for v in markdown), 1)
+        self.assertTrue(markdown[-1].startswith("<svg"))
+        self.assertEqual(len(at.columns), 3)
+
+    def test_methodology_label_stays_under_its_own_chunk(self):
+        pilot = _pilot("pakking")
+        basis = {c["id"]: c.get("basis") for c in pilot["chunks"]}
+        side = _sider("pakking", "kompetent")[0]
+        self.assertEqual([basis[c] for c in side["chunks"]], ["fact", "methodology"])
+        at = self._ny_apptest()
+        self._apne_i_trinn(at, "pakking", "kompetent")
+        etikett = t_ren("bryggeskole.metode_etikett", "no")
+        bodies = self._bodies("pakking", side["chunks"])
+        rekkefolge = [v for typ, v in self._side_elementer(at) if typ in ("markdown", "caption")]
+        self.assertEqual(rekkefolge.count(etikett), 1, "never a page-wide methodology label")
+        self.assertLess(rekkefolge.index(bodies[0]), rekkefolge.index(bodies[1]))
+        self.assertEqual(rekkefolge.index(etikett), rekkefolge.index(bodies[1]) + 1)
+
+    def test_every_wide_visual_renders_once_per_page(self):
+        for modul_id, trinn in (("koking", "foundation"), ("koking", "kompetent"), ("kjoling", "foundation"),
+                                ("pakking", "foundation"), ("pakking", "kompetent")):
+            with self.subTest(modul=modul_id, trinn=trinn):
+                at = self._ny_apptest()
+                self._apne_i_trinn(at, modul_id, trinn)
+                antall = len(_sider(modul_id, trinn))
+                for n in range(antall):
+                    markdown = [v for typ, v in self._side_elementer(at) if typ == "markdown"]
+                    self.assertEqual(sum(v.startswith("<svg") for v in markdown), 1, n)
+                    if n + 1 < antall:
+                        _knapp(at, f"bs_bolk_neste_{self._aktiv_modul}_btn").click().run()
+
+    def test_previous_next_resume_and_start_only_after_the_last_page(self):
+        at = self._ny_apptest()
+        self._apne_i_trinn(at, "gjaring", "kompetent")
+        self.assertTrue(_knapp(at, "bs_bolk_forrige_gjaring_k_btn").disabled)
+        _knapp(at, "bs_bolk_neste_gjaring_k_btn").click().run()
+        _knapp(at, "bs_bolk_neste_gjaring_k_btn").click().run()
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 3 av 4"])
+        _knapp(at, "bs_bolk_forrige_gjaring_k_btn").click().run()
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 2 av 4"])
+        self.assertEqual(at.session_state["bs_modul_sesjon"]["gjaring@kompetent"]["side_idx"], 1)
+        # Leave and reopen: the same page.
+        _knapp(at, "bs_tilbake_gjaring_k_btn").click().run()
+        _knapp(at, "bs_apne_modul_gjaring_btn").click().run()
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 2 av 4"])
+        # The other stage of the module keeps its own position.
+        at.session_state[_TRINN_KEY] = "foundation"
+        at.run()
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 2"])
+        at.session_state[_TRINN_KEY] = "kompetent"
+        at.run()
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 2 av 4"])
+        _knapp(at, "bs_bolk_neste_gjaring_k_btn").click().run()
+        self.assertEqual([b.key for b in at.button if b.key.startswith("bs_start_sporsmal_")], [])
+        _knapp(at, "bs_bolk_neste_gjaring_k_btn").click().run()
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 4 av 4"])
+        self.assertEqual([b.key for b in at.button if b.key.startswith("bs_bolk_neste_")], [])
+        _knapp(at, "bs_start_sporsmal_gjaring_k_btn").click().run()
+        self.assertIsNone(at.radio(key="bs_valg_gjaring_k_r1_q0").value)
+
+    def test_a_session_from_before_pages_resumes_on_the_page_holding_its_chunk(self):
+        at = self._ny_apptest()
+        self._apne_i_trinn(at, "raavarer", "foundation")
+        sesjoner = at.session_state["bs_modul_sesjon"]
+        gammel = dict(sesjoner["raavarer@foundation"])
+        del gammel["side_idx"]
+        gammel["bolk_idx"] = 5  # CHUNK-RAW-F, the last chunk of the Humle page
+        sesjoner["raavarer@foundation"] = gammel
+        at.session_state["bs_modul_sesjon"] = sesjoner
+        at.run()
+        self.assertEqual(len(at.exception), 0, at.exception)
+        self.assertEqual(self._bolk_teller(at), ["Læringsside 2 av 4"])
+        self.assertEqual([s.value for s in at.subheader][-1], "Humle")
+
+    def test_an_invalid_page_map_falls_back_to_one_chunk_per_screen(self):
+        feil = learning_pages.LearningPagesError(["pages[0]: broken"])
+        with mock.patch.object(panel._learning_pages, "load_learning_pages", side_effect=feil), \
+                self.assertLogs("ui.bryggeskole_panel", level=logging.WARNING) as logg:
+            at = self._ny_apptest()
+            self._apne_i_trinn(at, "raavarer", "foundation")
+            visning = _visning("raavarer", "foundation")
+            self.assertEqual(self._bolk_teller(at), [f"Læringsside 1 av {len(visning['chunks'])}"])
+            render = panel._MODULER["raavarer"]["pilot"].render_chunk
+            self.assertIn(render(visning["chunks"][0], "no")["text"], self._leksjonstekst(at))
+            self.assertEqual([s.value for s in at.subheader], ["🌿 Råvarer"])
+            _knapp(at, "bs_bolk_neste_raavarer_btn").click().run()
+            self.assertEqual(len(at.exception), 0)
+            self.assertEqual(self._bolk_teller(at), [f"Læringsside 2 av {len(visning['chunks'])}"])
+        self.assertEqual(len(logg.records), 1, "The fallback is logged once per session, not on every rerun.")
+        self.assertIn("LearningPagesError", logg.output[0])
 
 
 class TestStageRenderingSource(unittest.TestCase):

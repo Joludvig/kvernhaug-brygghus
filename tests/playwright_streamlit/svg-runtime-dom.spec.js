@@ -63,7 +63,7 @@ const VISUALS = [
     // which are deliberately drawn once per row (three times total) and
     // therefore would NOT satisfy this spec's own exact-count-of-1 check.
     labels: {
-      no: ['BIAB', 'Tradisjonelt alt-korn', 'Alt-i-ett'],
+      no: ['BIAB', 'Tradisjonell all-grain', 'Alt-i-ett'],
       en: ['BIAB', 'Traditional all-grain', 'All-in-one'],
     },
     shapeSelector: 'rect, line',

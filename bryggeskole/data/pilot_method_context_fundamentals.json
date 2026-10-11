@@ -14,7 +14,7 @@
       "id": "CHUNK-METHOD-B",
       "source_claims": ["FACT-METHOD-0001"],
       "text": {
-        "no": "Ved meskepose (BIAB) mesker du hele kornmengden mens den ligger i en pose direkte i samme kjele du bruker resten av bryggedagen. I stedet for å tappe vørten gjennom et eget lauterkar, skiller du vørt fra korn ved å løfte posen opp av kjelen. Dette kombinerer mesking og utskilling i færre kar enn det tradisjonelle oppsettet - det er fortsatt ordentlig meskebasert alt-korn-brygging, ikke en forenklet erstatning for den.",
+        "no": "Ved meskepose (BIAB) mesker du hele kornmengden mens den ligger i en pose direkte i samme kjele du bruker resten av bryggedagen. I stedet for å tappe vørten gjennom et eget lauterkar, skiller du vørt fra korn ved å løfte posen opp av kjelen. Dette kombinerer mesking og utskilling i færre kar enn det tradisjonelle oppsettet - det er fortsatt ordentlig meskebasert all-grain-brygging, ikke en forenklet erstatning for den.",
         "en": "With Brew In A Bag (BIAB), you mash the entire grain bill while it's contained in a bag placed directly inside the same kettle you use for the rest of the brew day. Instead of draining the wort through a separate lauter tun, you separate wort from grain by lifting the bag out of the kettle. This combines mashing and separation into fewer vessels than the traditional layout - it's still genuine mash-based all-grain brewing, not a simplified substitute for it."
       }
     },
@@ -38,7 +38,7 @@
       "id": "CHUNK-METHOD-E",
       "source_claims": ["FACT-METHOD-0004", "FACT-METHOD-0005"],
       "text": {
-        "no": "Vannmengder, dødvolum, håndtering av korn og hvordan du resirkulerer eller skyller kan variere en god del mellom meskepose, tradisjonelt oppsett og alt-i-ett, så den praktiske planleggingen din bør ta hensyn til ditt eget utstyr - det finnes ikke ett universelt tall som passer alle tre. Samtidig er meskepose, tradisjonelt alt-korn-oppsett og alt-i-ett-maskiner alle fullverdige, mye brukte metoder: det riktige valget avhenger av utstyr, plass, budsjett og arbeidsflyt du foretrekker - ingen av dem er en «finere» eller mer ekte brygging enn de andre.",
+        "no": "Vannmengder, dødvolum, håndtering av korn og hvordan du resirkulerer eller skyller kan variere en god del mellom meskepose, tradisjonelt oppsett og alt-i-ett, så den praktiske planleggingen din bør ta hensyn til ditt eget utstyr - det finnes ikke ett universelt tall som passer alle tre. Samtidig er meskepose, tradisjonelt all-grain-oppsett og alt-i-ett-maskiner alle fullverdige, mye brukte metoder: det riktige valget avhenger av utstyr, plass, budsjett og arbeidsflyt du foretrekker - ingen av dem er en «finere» eller mer ekte brygging enn de andre.",
         "en": "Water volumes, dead space, grain handling and how you recirculate or sparge can differ meaningfully between BIAB, a traditional setup and an all-in-one system, so your practical planning should account for your own equipment - there's no single universal number that fits all three. At the same time, BIAB, traditional separate-vessel all-grain and all-in-one machines are all fully legitimate, widely used methods: the right choice depends on your equipment, space, budget and preferred workflow - none of them is a \"more real\" or superior way to brew than the others."
       }
     }
@@ -126,7 +126,7 @@
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Ved BIAB mekses hele kornmengden i en pose i kjelen, og du skiller vørt fra korn ved å løfte posen opp. Det er alt-korn-brygging i færre kar.",
+        "no": "Riktig. Ved BIAB mekses hele kornmengden i en pose i kjelen, og du skiller vørt fra korn ved å løfte posen opp. Det er all-grain-brygging i færre kar.",
         "en": "Correct. With BIAB the whole grain bill is mashed in a bag in the kettle, and you separate wort from grain by lifting the bag out. It is all-grain brewing in fewer vessels."
       },
       "feedback_incorrect": {

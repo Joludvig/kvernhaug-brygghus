@@ -60,7 +60,7 @@ class TestRenderMethodContextFlowSvg(unittest.TestCase):
     def test_norwegian_labels_present(self):
         svg = render_method_context_flow_svg("no")
         for expected in (
-            "BIAB", "Tradisjonelt alt-korn", "Alt-i-ett",
+            "BIAB", "Tradisjonell all-grain", "Alt-i-ett",
             "Kjele + pose (meskepose/BIAB)", "Meskekar/lauterkar", "Kjele",
             "Integrert kar + kurv/malt-rør",
         ):

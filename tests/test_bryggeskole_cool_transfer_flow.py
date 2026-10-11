@@ -65,7 +65,7 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
         for expected in (
             "Kjele (etter koking)", "Kjøling", "Overføring", "Gjæringskar",
             "Sanitert håndteringssone", "Tyngdekraft", "Pumpe",
-            "Oksygenering kan være nyttig før pitching",
+            "Oksygenering kan være nyttig før gjærtilsetting",
         ):
             self.assertIn(expected, svg)
 
@@ -134,7 +134,7 @@ _OXYGEN_POST_MESSAGE = {
     "en": "Avoid unnecessary oxygen once fermentation is active",
 }
 _OXYGEN_PRE_MESSAGE = {
-    "no": "Oksygenering kan være nyttig før pitching - behov avhenger av gjær",
+    "no": "Oksygenering kan være nyttig før gjærtilsetting - behov avhenger av gjær",
     "en": "Aeration can help before pitching - need depends on the yeast",
 }
 

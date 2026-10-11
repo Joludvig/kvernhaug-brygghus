@@ -42,6 +42,7 @@ from tests.test_ui_bryggeskole_panel import (
     _knapp,
     _korrekt_svar_ider,
 )
+from tests.test_ui_bryggeskole_stage_rendering import _sider
 from ui import bryggeskole_panel as panel
 
 _LENS = "bs_trinn"
@@ -342,9 +343,9 @@ class TestCards(_S3Test):
                     # Foundation content with today's keys.
                     self.assertTrue(any(b.key == f"bs_tilbake_{modul_id}_btn" for b in at.button))
                     self.assertEqual(
-                        len(_visning(modul_id, "foundation")["chunks"]),
+                        len(_sider(modul_id, "foundation")),
                         int(re.search(r"(\d+)\D*$", [c.value for c in at.caption
-                                                      if c.value.startswith(("Læringsbolk", "Learning block"))][0]).group(1)))
+                                                      if c.value.startswith(("Læringsside", "Learning page"))][0]).group(1)))
                     self._tilbake(at, modul_id)
                     # The global lens is still Kompetent; other cards untouched.
                     self.assertEqual(self._lens(at).value, "kompetent")
@@ -379,14 +380,14 @@ class TestCards(_S3Test):
 
 class TestS2Bridge(_S3Test):
     def _bolk_teller(self, at):
-        return [c.value for c in at.caption if c.value.startswith(("Læringsbolk", "Learning block"))]
+        return [c.value for c in at.caption if c.value.startswith(("Læringsside", "Learning page"))]
 
     def test_foundation_default_opens_mesking_foundation_with_todays_keys(self):
         for knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
             with self.subTest(miljo=knapp):
                 at = self._oversikt(knapp)
                 self._klikk(at, "bs_apne_modul_mesking_btn")
-                self.assertEqual(self._bolk_teller(at), ["Læringsbolk 1 av 1"])
+                self.assertEqual(self._bolk_teller(at), ["Læringsside 1 av 1"])
                 self._klikk(at, "bs_start_sporsmal_mesking_btn")
                 self.assertIsNone(at.radio(key="bs_valg_mesking_r1_q0").value)
                 self.assertTrue(_knapp(at, "bs_svar_btn_mesking_r1_q0").disabled)
@@ -399,7 +400,7 @@ class TestS2Bridge(_S3Test):
                 self._velg_trinn(at, "kompetent")
                 self._klikk(at, "bs_apne_modul_mesking_btn")
                 self.assertEqual(self._bolk_teller(at),
-                                 ["Læringsbolk 1 av 5" if sprak == "no" else "Learning block 1 of 5"])
+                                 ["Læringsside 1 av 4" if sprak == "no" else "Learning page 1 of 4"])
                 self._aktiv_modul = "mesking_k"
                 self._start_sporsmalsrunde(at)
                 self.assertIsNone(at.radio(key="bs_valg_mesking_k_r1_q0").value)
@@ -478,8 +479,8 @@ class TestEveryModuleAndStageFromTheCards(_S3Test):
                 base = modul_id + ("_k" if trinn == "kompetent" else "")
                 self._aktiv_modul = base
                 visning = _visning(modul_id, trinn)
-                teller = [c.value for c in at.caption if c.value.startswith("Læringsbolk")]
-                self.assertEqual(teller, [f"Læringsbolk 1 av {len(visning['chunks'])}"] if visning["chunks"] else [])
+                teller = [c.value for c in at.caption if c.value.startswith("Læringsside")]
+                self.assertEqual(teller, [f"Læringsside 1 av {len(_sider(modul_id, trinn))}"] if visning["chunks"] else [])
                 self._start_sporsmalsrunde(at)
                 for idx in range(len(visning["questions"])):
                     self.assertIsNone(at.radio(key=f"bs_valg_{base}_r1_q{idx}").value)

@@ -160,11 +160,13 @@ Why not the alternatives:
 
 ## 5. Lesson-flow behaviour
 
-- A module session is keyed by **(module, stage)**. The three steps are unchanged — lesson (one chunk at a time) →
-  questions → summary — but each step contains **only that stage's chunks and questions**, in their existing JSON order.
+- A module session is keyed by **(module, stage)**. The three steps are unchanged — lesson (one learning page at a
+  time, §5.1) → questions → summary — but each step contains **only that stage's chunks and questions**, in their
+  existing JSON order.
 - Breadcrumb: `Bryggeskole ▸ 🏠 Hjemmebrygger ▸ Trinn 2 · Kompetent ▸ Mesking`. Environment and stage are both visible
   and never merged.
-- Block counter: "Læringsbolk n av N" counts within the stage (Mesking Kompetent: 5 blocks B–F; Foundation: 1 block A).
+- Page counter: "Læringsside n av N" / "Learning page n of N" counts the learning pages of the stage (§5.1; Mesking
+  Kompetent: 4 pages over chunks B–F; Foundation: 1 page, chunk A).
 - **Stage with questions but no chunks** (Kompetent view of Råvarer and Kjøling/overføring): the lesson step shows one
   short intro caption — "Trinn 2 i denne modulen er dypere spørsmål om det du lærte i Foundation." — plus a "Repeter
   Foundation-leksjonen" link, then "Start spørsmål". No fake chunk is created.
@@ -174,12 +176,40 @@ Why not the alternatives:
   questions. "Over tid" stays the **shared** concept mastery, so a concept practised in both stages shows one cumulative
   value.
 - Methodology captions, answer-order freezing, no preselection and the disabled "Sjekk svar" until a choice are all
-  unchanged.
+  unchanged. A methodology caption stays directly under its own chunk, also on a page that groups it with fact chunks.
 - Widget/session keys:
   - **Foundation keeps today's keys exactly** (`bs_valg_{modul}_r{runde}_q{idx}`, `bs_bolk_neste_{modul}_btn`, …);
   - **Kompetent adds a stage infix** `_k` (`bs_valg_{modul}_k_r{runde}_q{idx}`, `bs_bolk_neste_{modul}_k_btn`, …);
   - so the two stages of one module can never share a radio value. A future stage gets its own infix from the stage
     table.
+
+### 5.1 Learning pages (owner acceptance #508)
+
+- **Two units.** The authored chunk stays the content and provenance unit: id, text, `source_claims`, `basis` and its
+  stage in the stage map are unchanged. The **learning page** is the presentation unit: what one lesson screen shows.
+- **Page map.** `bryggeskole/data/course_learning_pages.json` groups **adjacent** chunks of one (module, stage) into
+  pages, each with an id (`<module>.<stage>.<n>`), a bilingual title and its ordered chunk ids, plus explicit
+  bilingual subheadings only for chunks without an authored heading. It is presentation data only: no fact, stage,
+  question or mastery truth. 84 chunks → 50 pages (Foundation 27, Kompetent 23).
+- **Validation** (`bryggeskole/learning_pages.py`, fail-closed, all errors collected):
+  - every page's module and stage exist, and that stage has chunks;
+  - titles and subheadings are non-empty in NO and EN;
+  - no unknown chunk ids and no question ids;
+  - every chunk belongs to that exact module and stage;
+  - per (module, stage), the pages' chunk lists concatenate to the canonical stage chunk list exactly, so every stage
+    chunk appears once, in order, with adjacent grouping only and no cross-stage page;
+  - page order is deterministic (canonical module order, Foundation before Kompetent, ids numbered 1..n).
+- **Headings.** The page title renders as a real heading. A chunk's authored leading `**Heading.**` prefix is lifted
+  out of the body at render time: suppressed when it equals the page title, otherwise shown as a subheading. Nothing is
+  guessed; stored chunk text is unchanged.
+- **Navigation.** Previous/Next move one page; "Start spørsmål" appears only on the last page. The position is the
+  session's `side_idx` per (module, stage); a session from before pages resumes on the page holding its `bolk_idx`
+  chunk. Widget keys are unchanged.
+- **Fallback.** If the page map cannot be loaded or validated, the panel logs once and shows one chunk per screen
+  without lifted headings — never a crash. The single flow (no valid stage map) always uses that one-chunk view. The
+  fallback is not permission for stale data: `tests/test_learning_pages.py` fails CI when the committed map drifts
+  from the content, so a PR that adds, moves or removes a chunk must update the page map in the same PR.
+- **Progress and mastery** stay question-based. Reading pages never counts as progress and never writes mastery.
 
 ## 6. Stage metadata model
 
@@ -378,7 +408,8 @@ Targets: 1280 / 900 / 750 / 390 px, sidebar expanded and collapsed, NO and EN, b
 - **Tests:** tests that assume "all questions of a module in one flow" (for example TestMeskingKompetent,
   TestPakkingKompetent, the Gjæring/Måling Kompetent classes and the DEMO_MODE subprocess) must move to stage-aware
   helpers in S2. This is an intended, listed test migration (§17), not a regression.
-- **Fallback:** an invalid or missing stage map gives exactly today's behaviour (§6.1).
+- **Fallback:** an invalid or missing stage map gives exactly today's behaviour (§6.1); an invalid or missing learning
+  page map gives one chunk per lesson screen (§5.1).
 - **Learn bridges** (Humle, Bryggdag, Gjær, history) stay stage-agnostic and unchanged.
 
 ## 12. Legacy presentation-mode interaction

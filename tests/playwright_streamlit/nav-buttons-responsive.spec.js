@@ -27,7 +27,7 @@ const MODUL = 'rengjoring';
 // auto-collapses.
 const DESKTOP_BREDDER = [1280, 900, 750, 660];
 const HOYDE = 900;
-const BOLK = /Læringsbolk (\d+) av (\d+)/;
+const BOLK = /Læringsside (\d+) av (\d+)/;
 
 async function bolk(page) {
   const tekster = await page.locator('[data-testid="stCaptionContainer"]').allInnerTexts();
