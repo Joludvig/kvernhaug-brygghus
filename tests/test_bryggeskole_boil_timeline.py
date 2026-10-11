@@ -23,10 +23,10 @@ class TestRenderBoilTimelineSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_boil_timeline_svg("en")
-        self.assertIn('viewBox="0 0 1065 285"', svg)
+        self.assertIn('viewBox="0 0 760 310"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
-        self.assertIn("max-width:1065px", svg)
+        self.assertIn("max-width:760px", svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -72,12 +72,12 @@ class TestRenderBoilTimelineSvg(unittest.TestCase):
 
     def test_directional_cues_stay_inside_viewbox(self):
         # The two teaching cues must be visible, not merely present as
-        # clipped strings outside the 0..1065 viewBox.
+        # clipped strings outside the 0..760 viewBox (#508 reflow).
         svg = render_boil_timeline_svg("en")
-        self.assertIn('x1="430" y1="65" x2="235" y2="65"', svg)
-        self.assertIn('x="332" y="55" text-anchor="middle"', svg)
-        self.assertIn('x1="638" y1="65" x2="832" y2="65"', svg)
-        self.assertIn('x="735" y="55" text-anchor="middle"', svg)
+        self.assertIn('x1="330" y1="86" x2="100" y2="86"', svg)
+        self.assertIn('x="215" y="74" text-anchor="middle"', svg)
+        self.assertIn('x1="430" y1="86" x2="660" y2="86"', svg)
+        self.assertIn('x="545" y="74" text-anchor="middle"', svg)
         self.assertIn("arrow-left", svg)
         self.assertIn("arrow-right", svg)
 
@@ -89,7 +89,7 @@ class TestRenderBoilTimelineSvg(unittest.TestCase):
         svg = render_boil_timeline_svg("en")
         for font_size in re.findall(r'font-size="([\d.]+)"', svg):
             self.assertGreaterEqual(float(font_size), 13)
-        self.assertIn('<rect x="0" y="0" width="1065" height="285"', svg)
+        self.assertIn('<rect x="0" y="0" width="760" height="310"', svg)
 
     def test_no_streamlit_import(self):
         import bryggeskole.boil_timeline as module

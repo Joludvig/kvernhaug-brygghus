@@ -49,7 +49,15 @@ async function geometri(page) {
       side: rect(sideEl),
       main: rect(main),
       malt: rect(document.querySelector('.st-key-bs_leksjon_med_visual svg')),
-      svg: rect(document.querySelector('svg[viewBox^="0 0 1065 "]')),
+      bred: rect(document.querySelector('.st-key-bs_leksjon_bred_visual svg')),
+      // Smallest SVG font size as rendered: font-size in viewBox units
+      // times the SVG's actual scale.
+      bredMinFont: (() => {
+        const svg = document.querySelector('.st-key-bs_leksjon_bred_visual svg');
+        if (!svg) return null;
+        const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+        return Math.min(...[...svg.querySelectorAll('text')].map((t) => parseFloat(t.getAttribute('font-size')))) * scale;
+      })(),
       tekstFont: tekstP ? parseFloat(getComputedStyle(tekstP).fontSize) : null,
       tittelFont: tittel ? parseFloat(getComputedStyle(tittel).fontSize) : null,
       tittel: tittel ? tittel.innerText.trim() : null,
@@ -108,8 +116,63 @@ test.describe('Bryggeskole learning pages: width and composition (lang=no)', () 
     await apneModul(page, 'koking');
     await ventPaSide(page, 1, 2);
     const g = await geometri(page);
-    expect(g.svg.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
-    expect(g.svg.width).toBeGreaterThan(g.side.width);
+    expect(g.bred.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
+    expect(g.bred.width).toBeGreaterThan(g.side.width);
+    expect(g.hscroll).toBe(false);
+  });
+
+  // #508: on a screen wider than a diagram's own max-width, the SVG used to
+  // centre itself (inline margin:0 auto) and start 80-200px right of the
+  // text. It must share the text's left edge, at its unchanged size.
+  const BREDE = [['metodevalg', 3], ['koking', 2], ['kjoling', 4], ['pakking', 4]];
+  for (const [modul, sider] of BREDE) {
+    test(`wide desktop: the ${modul} diagram starts at the text's left edge`, async ({ page, viewport }) => {
+      test.skip(viewport.width <= 480, 'desktop scenario');
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await apneModul(page, modul);
+      await ventPaSide(page, 1, sider);
+      const g = await geometri(page);
+      expect(g.bred, 'the wide diagram is in its own aligned wrapper').not.toBeNull();
+      expect(Math.abs(g.bred.left - g.side.left)).toBeLessThanOrEqual(4);
+      expect(g.bred.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
+      expect(g.bred.width).toBeGreaterThan(g.side.width);
+      expect(g.bred.right).toBeLessThanOrEqual(1920);
+      expect(g.hscroll).toBe(false);
+    });
+  }
+
+  // #508 refined: the wide figures read as thin panoramic strips (Koking
+  // 3.7:1, Kjøling 3.2:1, Pakking 2.9:1) with tiny text at 1280-1440px.
+  // Koking/Kjøling/Pakking were reflowed to <= 2.5:1 teaching figures;
+  // Metode (2.3:1) kept its geometry. Bounded ratio, not one exact shape.
+  for (const [modul, sider] of BREDE) {
+    test(`desktop: the ${modul} figure is a proportionate teaching figure`, async ({ page, viewport }) => {
+      test.skip(viewport.width <= 480, 'desktop scenario');
+      await apneModul(page, modul);
+      await ventPaSide(page, 1, sider);
+      const g = await geometri(page);
+      const ratio = g.bred.width / (g.bred.bottom - g.bred.top);
+      expect(ratio, `${modul} aspect ratio`).toBeLessThanOrEqual(2.5);
+      expect(ratio, `${modul} aspect ratio`).toBeGreaterThanOrEqual(1.5);
+      expect(g.bred.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
+      expect(Math.abs(g.bred.left - g.side.left)).toBeLessThanOrEqual(4);
+      expect(g.bred.right).toBeLessThanOrEqual(viewport.width);
+      if (modul !== 'metodevalg') {
+        // Before the reflow these rendered their smallest text at 9-10px here.
+        expect(g.bredMinFont, `${modul} smallest figure text (px)`).toBeGreaterThanOrEqual(11);
+      }
+      expect(g.hscroll).toBe(false);
+    });
+  }
+
+  test('mobile: a wide diagram fits the viewport below the text', async ({ page, viewport }) => {
+    test.skip(viewport.width > 480, 'mobile scenario');
+    await apneModul(page, 'metodevalg');
+    await ventPaSide(page, 1, 3);
+    const g = await geometri(page);
+    expect(g.bred.top).toBeGreaterThanOrEqual(g.side.bottom - 1);
+    expect(Math.abs(g.bred.left - g.side.left)).toBeLessThanOrEqual(4);
+    expect(g.bred.right).toBeLessThanOrEqual(viewport.width + 1);
     expect(g.hscroll).toBe(false);
   });
 

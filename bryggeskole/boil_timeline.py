@@ -97,14 +97,22 @@ def render_boil_timeline_svg(language):
     _require_language(language)
     labels = _LABELS[language]
 
-    boil_x0, boil_x1 = 80, 805
-    whirlpool_x1 = 990
-    hot_break_x1 = 210
-    early_x = 285
-    late_x = 730
+    # #508 reflow: the timeline was a 1065x285 (3.7:1) panoramic strip,
+    # rendered at ~0.75x on a 1280-1440px desktop. It is now a compact
+    # 760x310 (2.45:1) teaching figure: the same left-to-right chronology,
+    # zones, markers and opposing cues, with the labels on three rows below
+    # the bar so nothing has to squeeze side by side; a thin dashed leader
+    # ties each hop marker to its label.
+    boil_x0, boil_x1 = 60, 560
+    whirlpool_x1 = 700
+    hot_break_x1 = 200
+    early_x = 240
+    late_x = 440
+    bar_y0, bar_y1 = 118, 174
+    bar_mid = (bar_y0 + bar_y1) / 2
 
-    return _flatten_svg_markup(f"""<svg viewBox="0 0 1065 285" width="100%" preserveAspectRatio="xMidYMid meet"
-  style="max-width:1065px;height:auto;display:block;margin:0 auto;"
+    return _flatten_svg_markup(f"""<svg viewBox="0 0 760 310" width="100%" preserveAspectRatio="xMidYMid meet"
+  style="max-width:760px;height:auto;display:block;margin:0 auto;"
   xmlns="http://www.w3.org/2000/svg" role="img" aria-label="{labels['title']}">
   <title>{labels['title']}</title>
 
@@ -121,26 +129,28 @@ def render_boil_timeline_svg(language):
     </pattern>
   </defs>
 
-  <rect x="0" y="0" width="1065" height="285" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
-  <text x="533" y="32" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
+  <rect x="0" y="0" width="760" height="310" rx="14" fill="{_CARD_BACKGROUND_FILL}" stroke="{_CARD_BORDER_STROKE}"/>
+  <text x="380" y="36" text-anchor="middle" font-size="20" font-weight="700" fill="#3a2a1a">{labels['title']}</text>
 
-  <line x1="430" y1="65" x2="235" y2="65" stroke="#b23b2e" stroke-width="2" marker-end="url(#arrow-left)"/>
-  <text x="332" y="55" text-anchor="middle" font-size="14" fill="#b23b2e">{labels['bitterness_cue']}</text>
-  <line x1="638" y1="65" x2="832" y2="65" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrow-right)"/>
-  <text x="735" y="55" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['aroma_cue']}</text>
+  <line x1="330" y1="86" x2="100" y2="86" stroke="#b23b2e" stroke-width="2" marker-end="url(#arrow-left)"/>
+  <text x="215" y="74" text-anchor="middle" font-size="14" fill="#b23b2e">{labels['bitterness_cue']}</text>
+  <line x1="430" y1="86" x2="660" y2="86" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrow-right)"/>
+  <text x="545" y="74" text-anchor="middle" font-size="14" fill="#2e7d32">{labels['aroma_cue']}</text>
 
-  <rect x="{boil_x0}" y="117" width="{boil_x1 - boil_x0}" height="52" fill="#f2c14e" stroke="#7a5230"/>
-  <rect x="{boil_x0}" y="117" width="{hot_break_x1 - boil_x0}" height="52" fill="#f7a072" stroke="#7a5230"/>
-  <text x="{(boil_x0 + hot_break_x1) / 2}" y="150" text-anchor="middle" font-size="13" fill="#5a2d0c">{labels['hot_break']}</text>
+  <rect x="{boil_x0}" y="{bar_y0}" width="{boil_x1 - boil_x0}" height="{bar_y1 - bar_y0}" fill="#f2c14e" stroke="#7a5230"/>
+  <rect x="{boil_x0}" y="{bar_y0}" width="{hot_break_x1 - boil_x0}" height="{bar_y1 - bar_y0}" fill="#f7a072" stroke="#7a5230"/>
+  <text x="{(boil_x0 + hot_break_x1) / 2}" y="{bar_mid + 5}" text-anchor="middle" font-size="13" fill="#5a2d0c">{labels['hot_break']}</text>
 
-  <rect x="{boil_x1}" y="117" width="{whirlpool_x1 - boil_x1}" height="52" fill="url(#whirlpool-hatch)" stroke="#7a5230" stroke-dasharray="4,3"/>
-  <text x="{(boil_x1 + whirlpool_x1) / 2}" y="195" text-anchor="middle" font-size="14" fill="#5a2d0c">{labels['whirlpool']}</text>
+  <rect x="{boil_x1}" y="{bar_y0}" width="{whirlpool_x1 - boil_x1}" height="{bar_y1 - bar_y0}" fill="url(#whirlpool-hatch)" stroke="#7a5230" stroke-dasharray="4,3"/>
 
-  <text x="{boil_x0}" y="195" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['boil_start']}</text>
-  <text x="{boil_x1}" y="195" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['boil_end']} / {labels['flameout']}</text>
+  <line x1="{early_x}" y1="{bar_y1}" x2="{early_x}" y2="250" stroke="#7a5230" stroke-width="1" stroke-dasharray="2,3"/>
+  <line x1="{late_x}" y1="{bar_y1}" x2="{late_x}" y2="250" stroke="#7a5230" stroke-width="1" stroke-dasharray="2,3"/>
+  <circle cx="{early_x}" cy="{bar_mid}" r="6.5" fill="#3a2a1a"/>
+  <circle cx="{late_x}" cy="{bar_mid}" r="6.5" fill="#3a2a1a"/>
 
-  <circle cx="{early_x}" cy="143" r="6.5" fill="#3a2a1a"/>
-  <text x="{early_x}" y="234" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['early_marker']}</text>
-  <circle cx="{late_x}" cy="143" r="6.5" fill="#3a2a1a"/>
-  <text x="{late_x}" y="234" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['late_marker']}</text>
+  <text x="{boil_x0}" y="202" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['boil_start']}</text>
+  <text x="{boil_x1}" y="202" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['boil_end']} / {labels['flameout']}</text>
+  <text x="{(boil_x1 + whirlpool_x1) / 2}" y="230" text-anchor="middle" font-size="14" fill="#5a2d0c">{labels['whirlpool']}</text>
+  <text x="{early_x}" y="268" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['early_marker']}</text>
+  <text x="{late_x}" y="268" text-anchor="middle" font-size="14" fill="#3a2a1a">{labels['late_marker']}</text>
 </svg>""")

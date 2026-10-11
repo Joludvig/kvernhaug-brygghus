@@ -941,6 +941,12 @@ def _injiser_bryggeskole_css():
     Råvarer Malt text|visual row at 84rem with two equal columns, so the text
     column lands at the same 42rem measure and the malt visual gets a whole
     column of up to 42rem (#508: at 70rem / 3:2 it was too small to read).
+    `.st-key-bs_leksjon_bred_visual` holds a wide process diagram below the
+    text (Metode, Koking, Kjøling, Pakking): each SVG centres itself with an
+    inline `margin:0 auto`, so on a wide screen it started up to ~200px
+    right of the text's left edge (#508). The rule pins it to that edge;
+    `!important` is needed only to beat the inline style. Size and
+    max-width are unchanged.
     The question text keeps its own 1.15rem rule, unchanged.
     Covered by tests/playwright_streamlit/learning-page-layout.spec.js."""
     st.markdown(
@@ -955,6 +961,10 @@ def _injiser_bryggeskole_css():
         }
         .st-key-bs_leksjon_med_visual {
             max-width: 84rem;
+        }
+        .st-key-bs_leksjon_bred_visual svg {
+            margin-left: 0 !important;
+            margin-right: auto !important;
         }
         .st-key-bs_leksjon_side [class*="st-key-bs_leksjon_tekst_"] p,
         .st-key-bs_leksjon_side [class*="st-key-bs_leksjon_tekst_"] li {
@@ -1385,7 +1395,12 @@ def _render_leksjon(modul_id, sesjon, pilot, sprak, sesjon_id=None, base=None, t
                 st.markdown(visual, unsafe_allow_html=True)
     else:
         _render_sidetekst(modul_id, side, side_chunks, sprak)
-        if visual is not None:
+        if visual is not None and modul_id != _MODUL_RAAVARER:
+            # #508: a wide diagram below the text starts at the text's own
+            # left edge instead of centring itself in the wider column.
+            with st.container(key="bs_leksjon_bred_visual"):
+                st.markdown(visual, unsafe_allow_html=True)
+        elif visual is not None:
             st.markdown(visual, unsafe_allow_html=True)
 
     # Issue #398: navigasjonsknappene brukte tidligere width="stretch",

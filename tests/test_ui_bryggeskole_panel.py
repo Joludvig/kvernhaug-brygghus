@@ -1550,7 +1550,9 @@ class TestPakkingModulen(_MedIsolertTilstand):
         self._apne_modul(at, "pakking")
         tekster = " ".join(_alle_synlige_tekster(at))
         self.assertIn("Packaging", tekster)
-        markdown_verdier = [m.value for m in at.markdown]
+        # Visible text, tags dropped: since the #508 reflow the box label
+        # wraps onto two <tspan> lines («Ready to» / «serve/store»).
+        markdown_verdier = [" ".join(re.sub(r"<[^>]+>", " ", m.value).split()) for m in at.markdown]
         self.assertTrue(any("Ready to serve/store" in v for v in markdown_verdier))
 
     def test_pakking_widget_nokler_er_modul_scopede(self):

@@ -11,6 +11,13 @@ import unittest
 from bryggeskole.cool_transfer_flow import render_cool_transfer_flow_svg
 
 
+def _visible_text(svg):
+    """The SVG's text as a reader sees it: tags dropped, whitespace
+    collapsed, so a label wrapped onto <tspan> lines (e.g. «Kjele» /
+    «(etter koking)» since the #508 reflow) still reads as one phrase."""
+    return " ".join(re.sub(r"<[^>]+>", " ", svg).split())
+
+
 class TestRenderCoolTransferFlowSvg(unittest.TestCase):
     def test_unsupported_language_raises(self):
         with self.assertRaises(ValueError):
@@ -23,10 +30,10 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
 
     def test_is_responsive_and_preserves_viewbox(self):
         svg = render_cool_transfer_flow_svg("en")
-        self.assertIn('viewBox="0 0 1090 340"', svg)
+        self.assertIn('viewBox="0 0 780 360"', svg)
         self.assertIn('width="100%"', svg)
         self.assertIn('preserveAspectRatio="xMidYMid meet"', svg)
-        self.assertIn("max-width:1090px", svg)
+        self.assertIn("max-width:780px", svg)
 
     def test_minimum_legible_font_size_and_contrast_background(self):
         # Issue #397: labels must not regress back to the pre-fix 9-11px
@@ -36,7 +43,7 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
         svg = render_cool_transfer_flow_svg("en")
         for font_size in re.findall(r'font-size="([\d.]+)"', svg):
             self.assertGreaterEqual(float(font_size), 12)
-        self.assertIn('<rect x="0" y="0" width="1090" height="340"', svg)
+        self.assertIn('<rect x="0" y="0" width="780" height="360"', svg)
 
     def test_no_interactivity_anywhere(self):
         for lang in ("no", "en"):
@@ -61,7 +68,7 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
         # one contiguous substring. Its full message is instead verified,
         # reconstructed from its wrapped lines, by
         # test_oxygen_post_wrapped_lines_reconstruct_the_original_message.
-        svg = render_cool_transfer_flow_svg("no")
+        svg = _visible_text(render_cool_transfer_flow_svg("no"))
         for expected in (
             "Kjele (etter koking)", "Kjøling", "Overføring", "Gjæringskar",
             "Sanitert håndteringssone", "Tyngdekraft", "Pumpe",
@@ -72,7 +79,7 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
     def test_english_labels_present(self):
         # See the note on test_norwegian_labels_present: oxygen_post is
         # verified separately because it wraps onto multiple lines.
-        svg = render_cool_transfer_flow_svg("en")
+        svg = _visible_text(render_cool_transfer_flow_svg("en"))
         for expected in (
             "Kettle (post-boil)", "Cooling", "Transfer", "Fermenter",
             "Sanitized handling zone", "Gravity", "Pump",
@@ -102,7 +109,7 @@ class TestRenderCoolTransferFlowSvg(unittest.TestCase):
         matches = re.findall(r'x="(-?\d+(?:\.\d+)?)"', svg)
         for value in matches:
             self.assertGreaterEqual(float(value), 0)
-            self.assertLessEqual(float(value), 1090)
+            self.assertLessEqual(float(value), 780)
 
     def test_no_streamlit_import(self):
         import bryggeskole.cool_transfer_flow as module
@@ -165,8 +172,8 @@ def _last_text_block(svg):
 
 
 class TestLongOxygenLabelLayoutStaysInsideViewbox(unittest.TestCase):
-    VIEWBOX_WIDTH = 1090
-    VIEWBOX_HEIGHT = 340
+    VIEWBOX_WIDTH = 780
+    VIEWBOX_HEIGHT = 360
 
     def test_every_text_lines_estimated_width_fits_inside_viewbox(self):
         for lang in ("no", "en"):
