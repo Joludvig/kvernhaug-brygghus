@@ -227,12 +227,12 @@
     {
       "id": "Q-METHOD-005",
       "type": "scenario",
-      "concepts": ["method.planning_variables", "method.no_hierarchy"],
+      "concepts": ["method.planning_variables"],
       "difficulty": "intermediate",
-      "source_claims": ["FACT-METHOD-0004", "FACT-METHOD-0005"],
+      "source_claims": ["FACT-METHOD-0004"],
       "prompt": {
-        "no": "Du har brygget med meskepose (BIAB) og skal over på en alt-i-ett-maskin fordi den passer bedre med plassen og arbeidsflyten din. Hva gjør du med vannmengdene fra BIAB-oppskriftene dine?",
-        "en": "You have brewed with a mash bag (BIAB) and are moving to an all-in-one machine because it suits your space and workflow better. What do you do with the water volumes from your BIAB recipes?"
+        "no": "Du har brygget med meskepose (BIAB) og skal over på en alt-i-ett-maskin. Hva gjør du med vannmengdene fra BIAB-oppskriftene dine?",
+        "en": "You have brewed with a mash bag (BIAB) and are moving to an all-in-one machine. What do you do with the water volumes from your BIAB recipes?"
       },
       "options": [
         {
@@ -254,19 +254,64 @@
         {
           "id": "c",
           "text": {
-            "no": "Bruker dem uendret, siden maskinen er mer avansert og jevner ut forskjellene selv.",
-            "en": "Use them unchanged, since the machine is more advanced and evens out the differences itself."
+            "no": "Legger til et fast tillegg av vann, siden det samme tillegget passer for alle oppsett.",
+            "en": "Add a fixed extra amount of water, since the same extra amount suits every setup."
           },
           "correct": false
         }
       ],
       "feedback_correct": {
-        "no": "Riktig. Mesk- og koke-kjemien er den samme, men vannmengder, dødvolum og håndtering kan variere mellom utstyr, så planleggingen må tilpasses den nye maskinen. Byttet er et praktisk valg – maskinen gir ikke i seg selv bedre øl.",
-        "en": "Correct. The mash and boil chemistry is the same, but water volumes, dead space and handling can vary between equipment, so the planning must be adjusted to the new machine. The switch is a practical choice – the machine does not make better beer in itself."
+        "no": "Riktig. Mesk- og koke-kjemien er den samme, men vannmengder, dødvolum og håndtering kan variere mellom utstyr, så planleggingen må tilpasses den nye maskinen. Det finnes ikke ett universelt tall eller tillegg som passer alle oppsett.",
+        "en": "Correct. The mash and boil chemistry is the same, but water volumes, dead space and handling can vary between equipment, so the planning must be adjusted to the new machine. There is no single universal number or extra amount that suits every setup."
       },
       "feedback_incorrect": {
-        "no": "Ikke helt. Selv om den grunnleggende prosessen er den samme, kan vannmengder og dødvolum variere mellom oppsett, og ingen metode er i seg selv mer avansert eller retter opp tallene for deg. Gå gjennom planleggingen på nytt for det nye utstyret.",
-        "en": "Not quite. Even though the basic process is the same, water volumes and dead space can vary between setups, and no method is more advanced in itself or fixes the numbers for you. Go through the planning again for the new equipment."
+        "no": "Ikke helt. Selv om mesk- og koke-kjemien er den samme, kan vannmengder og dødvolum variere mellom oppsett, og det finnes ikke ett fast tillegg som passer alle. Gå gjennom planleggingen på nytt for det nye utstyret.",
+        "en": "Not quite. Even though the mash and boil chemistry is the same, water volumes and dead space can vary between setups, and there is no fixed extra amount that suits them all. Go through the planning again for the new equipment."
+      }
+    },
+    {
+      "id": "Q-METHOD-006",
+      "type": "scenario",
+      "concepts": ["method.no_hierarchy"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-METHOD-0005"],
+      "prompt": {
+        "no": "To bryggere lager det samme ølet, den ene med meskepose (BIAB) og den andre med en alt-i-ett-maskin. Hva bør avgjøre hvilken metode som passer for hver av dem?",
+        "en": "Two brewers make the same beer, one with a mash bag (BIAB) and the other with an all-in-one machine. What should decide which method suits each of them?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Utstyret, plassen, budsjettet og arbeidsflyten som passer hver av dem.",
+            "en": "The equipment, space, budget and workflow that suit each of them."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Hvor erfarne de er, siden man vanligvis går fra pose til maskin etter hvert.",
+            "en": "How experienced they are, since you usually move from bag to machine over time."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Hvilken metode som gir mest kontroll, siden mer kontroll gir et bedre øl.",
+            "en": "Which method gives the most control, since more control gives a better beer."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Meskepose, tradisjonelt oppsett og alt-i-ett er alle fullverdige metoder med den samme grunnleggende prosessen. Valget avhenger av utstyr, plass, budsjett og arbeidsflyt – ingen av dem gir i seg selv et bedre øl, og ingen er et trinn du må videre fra.",
+        "en": "Correct. Mash bag, the traditional setup and all-in-one are all complete methods with the same basic process. The choice depends on equipment, space, budget and workflow – none of them makes a better beer in itself, and none is a step you have to move on from."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Ingen av metodene er et trinn du må gå videre fra, og mer utstyr eller kontroll gir ikke i seg selv et bedre øl. Valget avhenger av utstyret, plassen, budsjettet og arbeidsflyten til hver brygger.",
+        "en": "Not quite. None of the methods is a step you have to move on from, and more equipment or control does not make a better beer in itself. The choice depends on each brewer's equipment, space, budget and workflow."
       }
     }
   ]

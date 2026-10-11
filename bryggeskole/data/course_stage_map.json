@@ -32,7 +32,7 @@
       "topic_id": "PILOT-METHOD-CONTEXT-FUNDAMENTALS",
       "foundation": {
         "chunks": ["CHUNK-METHOD-A", "CHUNK-METHOD-B", "CHUNK-METHOD-C", "CHUNK-METHOD-D", "CHUNK-METHOD-E"],
-        "questions": ["Q-METHOD-001", "Q-METHOD-002", "Q-METHOD-003", "Q-METHOD-004", "Q-METHOD-005"]
+        "questions": ["Q-METHOD-001", "Q-METHOD-002", "Q-METHOD-003", "Q-METHOD-004", "Q-METHOD-005", "Q-METHOD-006"]
       },
       "kompetent": {
         "chunks": [],

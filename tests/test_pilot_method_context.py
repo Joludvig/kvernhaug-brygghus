@@ -175,6 +175,16 @@ class TestProductionPilotContentIsValid(unittest.TestCase):
         self.assertEqual(concepts, _EXPECTED_CONCEPTS)
         self.assertEqual(len(concepts), 6)
 
+    def test_planning_and_no_hierarchy_are_separate_questions(self):
+        # Quiz Design Standard v1.1 A5/section 10 (PR #529): the old
+        # double-barrel Q-METHOD-005 was split. Mastery credit goes to every
+        # declared concept, so each question declares only what it assesses.
+        questions = {q["id"]: q for q in self.data["questions"]}
+        self.assertEqual(questions["Q-METHOD-005"]["concepts"], ["method.planning_variables"])
+        self.assertEqual(questions["Q-METHOD-005"]["source_claims"], ["FACT-METHOD-0004"])
+        self.assertEqual(questions["Q-METHOD-006"]["concepts"], ["method.no_hierarchy"])
+        self.assertEqual(questions["Q-METHOD-006"]["source_claims"], ["FACT-METHOD-0005"])
+
     def test_every_question_declares_stable_id_concepts_difficulty_and_source_claims(self):
         for question in self.data["questions"]:
             self.assertRegex(question["id"], r"^Q-[A-Z0-9]+-\d{3}$")
