@@ -65,7 +65,7 @@ Facts from the content that constrain the design:
 - Concepts **cross stages**. For example:
   - `measurement.fermentation_complete`: Q-MEAS-002 and Q-FERM-003 are Foundation, Q-FERM-007 is Kompetent;
   - `package.priming`: Q-PACK-002 Foundation, Q-PACK-006 Kompetent;
-  - `oxygen.post_pitch`: Q-PACK-004 Foundation, Q-COOLXFER-005 and Q-PACK-009 Kompetent;
+  - `oxygen.post_pitch`: Q-PACK-010 Foundation, Q-COOLXFER-005 and Q-PACK-009 Kompetent;
   - `sensory.observation_vs_interpretation`: Q-MEAS-006 Foundation, Q-SENS-003/004 Kompetent.
 
   So **stage progress cannot be derived from concept mastery**, and concepts must stay shared.
@@ -223,15 +223,15 @@ Cost: the map must follow content changes. The validator makes drift a failing t
 | Koking/humle | BOILHOP-A, **B (interim, §6.3)**, C, D, E | Q-BOILHOP-001, 003, 004, 005, 006 | BOILHOP-F | Q-BOILHOP-002, 007, 008 (§D.2) |
 | Kjøling/overføring | COOLXFER-A, B, C, **D (interim, §6.3)**, E | Q-COOLXFER-001, 002, 003, 006 | — | Q-COOLXFER-004, 005 (§D.3) |
 | Gjæring | FERM-A…D | Q-FERM-001…003 | FERM-E…K | Q-FERM-004…011 |
-| Pakking | PACK-A…E | Q-PACK-001…005 | PACK-F…I | Q-PACK-006…009 |
+| Pakking | PACK-A…E | Q-PACK-001…005, 010 | PACK-F…I | Q-PACK-006…009 |
 | Måling og bryggelogg | MEAS-A…E | Q-MEAS-001…006 | MEAS-F…J | Q-MEAS-007…013 |
 | Oppskriftsforståelse | — | — | REC-A…G | Q-REC-001…007 (§C.10) |
 | Smak og evaluering | — | — | SENS-A…G | Q-SENS-001…010 (§C.11, §D.5) |
 
 Totals:
-- Foundation: 46 questions over 9 modules, and 48 chunks.
+- Foundation: 47 questions over 9 modules, and 48 chunks.
 - Kompetent: 54 questions over 9 modules, and 36 chunks.
-- Together: 100 questions; every one of the 84 chunks is mapped exactly once.
+- Together: 101 questions; every one of the 84 chunks is mapped exactly once.
 
 Koking review items (§D.2 "review at implementation"):
 - Q-BOILHOP-004 and 005 stay with their Foundation concepts (early/late timing);

@@ -2767,10 +2767,10 @@ class TestPakkingKompetent(_MedIsolertTilstand):
         at = self._ny_apptest()
         self._apne_modul_og_start_sporsmal(at, "pakking")
         fasit = _korrekt_svar_ider(les_pakking_pilot())
-        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(5)})
-        # Første Kompetent-spørsmål (Q-PACK-006, indeks 5).
-        self.assertIsNone(at.radio(key=self._valg_key(5, 1)).value)
-        self.assertTrue(_knapp(at, "bs_svar_btn_pakking_r1_q5").disabled)
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(6)})
+        # Første Kompetent-spørsmål (Q-PACK-006, indeks 6, etter Foundation Q-PACK-001…005 og 010).
+        self.assertIsNone(at.radio(key=self._valg_key(6, 1)).value)
+        self.assertTrue(_knapp(at, "bs_svar_btn_pakking_r1_q6").disabled)
 
     def test_feil_svar_gir_tilbakemelding_pa_metodesporsmalet(self):
         at = self._ny_apptest()
@@ -2778,11 +2778,11 @@ class TestPakkingKompetent(_MedIsolertTilstand):
         pilot = les_pakking_pilot()
         fasit = _korrekt_svar_ider(pilot)
         feil = _feil_svar_ider(pilot)
-        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(6)})
-        # Q-PACK-007 (primeverktøy, indeks 6).
-        self._besvar_sporsmal(at, 6, 1, feil[6])
+        self._fullfor_alle_sporsmal(at, 1, {i: fasit[i] for i in range(7)})
+        # Q-PACK-007 (primeverktøy, indeks 7).
+        self._besvar_sporsmal(at, 7, 1, feil[7])
         tekst = " ".join(_alle_synlige_tekster(at))
-        self.assertIn(pilot["questions"][6]["feedback_incorrect"]["no"], tekst)
+        self.assertIn(pilot["questions"][7]["feedback_incorrect"]["no"], tekst)
 
     def test_full_flyt_etiketter_og_prov_igjen_i_begge_miljo(self):
         for miljo_knapp in ("bs_velg_hjemmebrygger_btn", "bs_velg_bryggeri_btn"):
@@ -2790,7 +2790,7 @@ class TestPakkingKompetent(_MedIsolertTilstand):
                 at = self._ny_apptest()
                 self._apne_modul_og_start_sporsmal(at, "pakking", miljo_knapp)
                 fasit = _korrekt_svar_ider(les_pakking_pilot())
-                self.assertEqual(len(fasit), 9)
+                self.assertEqual(len(fasit), 10)
                 self._fullfor_alle_sporsmal(at, 1, fasit)
                 self.assertEqual(len(at.exception), 0, f"Uventet unntak: {at.exception}")
                 tekst = " ".join(_alle_synlige_tekster(at))

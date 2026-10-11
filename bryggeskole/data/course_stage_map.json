@@ -95,7 +95,7 @@
       "topic_id": "PILOT-PACKAGE-FUNDAMENTALS",
       "foundation": {
         "chunks": ["CHUNK-PACK-A", "CHUNK-PACK-B", "CHUNK-PACK-C", "CHUNK-PACK-D", "CHUNK-PACK-E"],
-        "questions": ["Q-PACK-001", "Q-PACK-002", "Q-PACK-003", "Q-PACK-004", "Q-PACK-005"]
+        "questions": ["Q-PACK-001", "Q-PACK-002", "Q-PACK-003", "Q-PACK-004", "Q-PACK-005", "Q-PACK-010"]
       },
       "kompetent": {
         "chunks": ["CHUNK-PACK-F", "CHUNK-PACK-G", "CHUNK-PACK-H", "CHUNK-PACK-I"],

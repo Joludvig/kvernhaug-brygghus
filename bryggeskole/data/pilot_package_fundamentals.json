@@ -306,6 +306,51 @@
       }
     },
     {
+      "id": "Q-PACK-010",
+      "type": "concept_check",
+      "concepts": ["oxygen.post_pitch"],
+      "difficulty": "beginner",
+      "source_claims": ["FACT-OXY-0002"],
+      "prompt": {
+        "no": "Du skal overføre ølet til flaske eller fat. Hva gjelder for oksygen på dette tidspunktet?",
+        "en": "You are going to transfer the beer to bottle or keg. What applies to oxygen at this point?"
+      },
+      "options": [
+        {
+          "id": "a",
+          "text": {
+            "no": "Unødvendig skvulping og luft bør unngås, siden gjæringen er godt i gang.",
+            "en": "Unnecessary splashing and air should be avoided, since fermentation is well underway."
+          },
+          "correct": true
+        },
+        {
+          "id": "b",
+          "text": {
+            "no": "Litt luft ved overføringen er bra, siden gjæren fortsatt skal jobbe litt.",
+            "en": "A little air during the transfer is good, since the yeast still has some work to do."
+          },
+          "correct": false
+        },
+        {
+          "id": "c",
+          "text": {
+            "no": "Oksygen betyr lite nå, siden ølet snart blir lukket inne i flaske eller fat.",
+            "en": "Oxygen matters little now, since the beer will soon be sealed in a bottle or keg."
+          },
+          "correct": false
+        }
+      ],
+      "feedback_correct": {
+        "no": "Riktig. Når gjæringen først er godt i gang, er oksygen som regel uønsket. Derfor unngår du unødvendig skvulping og luftkontakt når du overfører ølet – det er den samme regelen som før, ikke en ny.",
+        "en": "Correct. Once fermentation is well underway, oxygen is generally undesirable. So you avoid unnecessary splashing and air contact when you transfer the beer – it is the same rule as before, not a new one."
+      },
+      "feedback_incorrect": {
+        "no": "Ikke helt. Ølet trenger ikke luft nå, og oksygen betyr fortsatt noe selv om ølet snart blir lukket inne: når gjæringen er godt i gang, er oksygen som regel uønsket. Unngå derfor unødvendig skvulping og luftkontakt – uten at det betyr at én skvulp ødelegger alt.",
+        "en": "Not quite. The beer does not need air now, and oxygen still matters even though the beer will soon be sealed: once fermentation is well underway, oxygen is generally undesirable. So avoid unnecessary splashing and air contact – without that meaning one splash ruins everything."
+      }
+    },
+    {
       "id": "Q-PACK-006",
       "type": "scenario",
       "basis": "fact",
