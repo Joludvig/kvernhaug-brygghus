@@ -76,11 +76,23 @@ def _lagre_pantry(data):
 | Masterdata-scaffold (`app.py::last_json_data`) | ✅ (ingen fil opprettes) | n/a — ren lesefallback |
 | Import / scraper (`import_panel.py` og alt bak den) | ✅ (helt gatet) | Nei — se under |
 | Bryggedagsjournal per oppskrift (`recipe_card.py`, brewday-resultat) | ✅ (helt gatet) | Nei — se under |
+| Bryggeskole-tilbakemelding (`bryggeskole/feedback.py` / `bryggeskole_feedback_panel.py`, #542) | ✅ (skriver aldri til disk, heller ikke utenfor demo) | ✅ — sender til eksternt endpoint, se under |
 
 ## Bevisst fortsatt avslått, og hvorfor
 
 - **Import / scraper / leverandørpanel**: ingen trygg "demo"-ekvivalent finnes — funksjonen *er* nettverkskall og skriving til masterdata/brukerens produktbibliotek. Å late som dette virker i demo ville enten kreve ekte nettverkskall fra en offentlig demo-container (uønsket) eller en helt separat fake-pipeline (uforholdsmessig kompleksitet for liten gevinst). Forblir bak `import_panel.py`s eksisterende `if DEMO_MODE: return`-gate.
 - **Bryggedagsjournal-visning per oppskrift**: slår opp ekte loggnotater via `hent_logg(oppskriftsnavn)`, nøkkelbasert på oppskriftsnavn. Siden demo-oppskriftene sannsynligvis har navn som overlapper med brukerens ekte private oppskrifter, er risikoen at demo-visningen ved et uhell viser innhold fra brukerens ekte, private bryggedagsnotater. Latt stå bak `if not DEMO_MODE:` inntil det finnes en navnekollisjon-sikker løsning.
+
+## Bevisst unntak: Bryggeskole-tilbakemelding (#542)
+
+Tilbakemeldingsskjemaet i Bryggeskolen er et **eksplisitt, owner-godkjent unntak** fra demoens vane om å ikke gjøre nettverkskall. Den offentlige demoen er nettopp der representative testbrukere (#540) prøver kurset, så frivillig feedback må kunne overleve økt/reload.
+
+- Feedbacken sendes server-side som én HTTPS POST til `BRYGGESKOLE_FEEDBACK_WEBHOOK_URL` (secret/env, aldri committet).
+- Ingenting skrives til lokal disk, verken i demo eller utenfor.
+- Ingen mastery-, fremgangs- eller brukerdata følger med; payloaden er anonym og hvitlistet.
+- Uten konfigurert endpoint vises en rolig melding, og ingenting sendes.
+
+Kontrakt og owner-oppsett: [BRYGGESKOLE_FEEDBACK.md](BRYGGESKOLE_FEEDBACK.md).
 
 ## Regel for nytt arbeid
 

@@ -109,6 +109,7 @@ from bryggeskole import pilot_package as _pilot_pakking
 from bryggeskole import pilot_raw_materials as _pilot_raavarer
 from bryggeskole import pilot_recipe as _pilot_oppskrift
 from bryggeskole import pilot_sensory as _pilot_smak
+from ui import bryggeskole_feedback_panel as _tilbakemelding
 from ui.i18n import gjeldende_sprak, t
 
 # Hver pilotmodul definerer sin EGEN PilotContentError-klasse (bevisst
@@ -1250,6 +1251,10 @@ def _render_skoleoversikt(miljo, sprak):
                     width="stretch", on_click=_apne_modul, args=(modul_id,),
                 )
 
+    # Issue #542: voluntary, anonymous acceptance feedback -- below the
+    # course, never in its way, and separate from mastery/progress.
+    _tilbakemelding.render_inngang("bs_feedback_apne_oversikt_btn", miljo, trinn)
+
 
 def _render_repeter_foundation_knapp(base):
     st.button(
@@ -1633,6 +1638,13 @@ def _render_oppsummering(modul_id, pilot, sprak, sesjon_id=None, base=None):
                 width="content", on_click=_tilbake_til_oversikt,
             )
 
+    # Issue #542: a gentle suggestion after a finished round; it blocks
+    # nothing (the buttons above stay the way on).
+    _tilbakemelding.render_inngang(
+        f"bs_feedback_apne_{base}_btn", st.session_state["bs_miljo"], _aktivt_trinn(), modul_id,
+        forklaring_nokkel="bryggeskole.feedback.inngang_etter_modul",
+    )
+
 
 def _render_ingen_trinndel(trinn, base):
     """Stage UI S2 (contract §4, §6.2): the module has no content at the
@@ -1718,6 +1730,13 @@ def render_bryggeskole_panel():
         return
 
     st.button(t("bryggeskole.bytt_miljo"), key="bs_bytt_miljo_btn", on_click=_bytt_miljo)
+
+    # Issue #542: the feedback form is its own view. It never touches
+    # bs_aktiv_modul, so closing it returns to the overview or the summary
+    # it was opened from.
+    if _tilbakemelding.tilbakemelding_er_apen():
+        _tilbakemelding.render_tilbakemelding(tuple(_MODULER))
+        return
 
     aktiv_modul = st.session_state["bs_aktiv_modul"]
     if aktiv_modul is None:
