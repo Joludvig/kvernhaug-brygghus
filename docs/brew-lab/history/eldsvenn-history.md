@@ -103,6 +103,8 @@ Concrete brew observations from the Eldsvenn thread include:
 - approximately **90%** of the yeast slurry pitched
 - notably large early krausen
 - spunding later recorded at **5 psi**
+- after the krausen had fallen/disappeared, the brewer moved the FermZilla in circular motions to loosen sediment from the vessel wall and encourage it toward the centre/yeast collector
+- in a later follow-up, the brewer said the beer would **soon go to cold crash**; no FG, package result or tasting result is established by that statement
 
 A **small beer / parti-gyle** was made from the same Eldsvenn brewing session. User-authored chat records the intended yeast order explicitly: the main Eldsvenn got the **1318 first**, then the **remaining 1318** went to the small beer.
 
