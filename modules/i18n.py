@@ -344,8 +344,10 @@ TEKSTER = {
         "gjaering.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Gjæring.",
         "gjaering.temp_maal.label": "Planlagt gjæringstemperatur (°C)",
         "gjaering.temp_maal.hjelp": (
-            "Valgfritt. Kvernhaug lagrer ikke et verifisert temperaturområde for "
-            "den valgte gjærstammen — følg gjeldende veiledning for akkurat denne "
+            "Valgfritt. Dette er ditt eget planlagte mål — Kvernhaug fyller det ikke "
+            "ut for deg. Der produsentens ideelle område er dokumentert for stammen, "
+            "vises det med kilde i bryggedagsplanen; ellers har Kvernhaug ikke noe "
+            "verifisert område for den. Følg gjeldende veiledning for akkurat denne "
             "stammen/produsenten, ikke en generell «ale varmt / lager kaldt»-regel."
         ),
         # issue #400, rotårsak A -- samme avgrensede fiks som
@@ -645,9 +647,11 @@ TEKSTER = {
         "gjaering.laer_bro.footer": "Want to practice more? Open Brew School → Fermentation.",
         "gjaering.temp_maal.label": "Planned fermentation temperature (°C)",
         "gjaering.temp_maal.hjelp": (
-            "Optional. Kvernhaug does not store a verified temperature range for "
-            "the selected yeast strain — follow current guidance for that exact "
-            "strain/manufacturer, not a general 'ales warm / lagers cold' rule."
+            "Optional. This is your own planned target — Kvernhaug does not fill it "
+            "in for you. Where the manufacturer's ideal range is documented for the "
+            "strain, it is shown with its source in the brew-day plan; otherwise "
+            "Kvernhaug has no verified range for it. Follow current guidance for "
+            "that exact strain/manufacturer, not a general 'ales warm / lagers cold' rule."
         ),
         "koking.humle_panel.header": "🌿 Hop additions",
         "koking.humle_panel.legg_til_knapp": "➕ Add hop",

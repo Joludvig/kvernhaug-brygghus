@@ -557,6 +557,16 @@
       "standard lager"
     ],
     "attenuation": 0.82,
+    "fermenteringstemp": {
+      "min_c": 12,
+      "max_c": 18,
+      "betydning": "ideal_fermentation_range",
+      "claim_type": "documented_fact",
+      "source_type": "manufacturer_product_page",
+      "source_ref": "https://fermentis.com/en/product/saflager-w-34-70/",
+      "source_date": null,
+      "verified_at": "2026-11-01T17:39:54+01:00"
+    },
     "aliases": [
       "W-34/70",
       "SafLager W-34/70",

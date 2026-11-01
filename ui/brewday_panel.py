@@ -2,7 +2,7 @@ import streamlit as st
 from config import DEMO_MODE
 from modules.brewday_calc import (
     lag_brewday_plan, TILSETNINGER,
-    beregn_effektivitet, beregn_post_boil_og,
+    beregn_effektivitet, beregn_post_boil_og, fermenteringstemp_linjer,
 )
 from modules.calculations import beregn_abv_standard
 from modules.kbhbrew_history_ui import parse_actual_tallfelt
@@ -244,7 +244,10 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             st.write("")
             st.markdown("**🧫 Gjær & Fermentering**")
             st.write(f"- **{plan['gjaer_navn']}** — {plan['pakker']} pakke(r)")
-            st.write(f"- Temp: **{plan['temp_min']}–{plan['temp_maks']}°C**")
+            for _temp_linje in fermenteringstemp_linjer(
+                plan, (ctx.get("recipe") or {}).get("fermentation_temp_target_c")
+            ):
+                st.write(f"- {_temp_linje}")
             for note in plan["noter"]:
                 st.info(note)
 

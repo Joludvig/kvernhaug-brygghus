@@ -70,8 +70,8 @@
       "name": "Gjær canonical master",
       "type": "canonical_dataset",
       "schema_version": 1,
-      "data_version": 1,
-      "data_version_note": "stabilization baseline -- first revision tracked under this model, not a claim about prior history",
+      "data_version": 2,
+      "data_version_note": "bumped 1 -> 2 in #546: first documented manufacturer fermentation-temperature range (fermenteringstemp, W-34/70) added; baseline was 1",
       "source_path": "data/master_gjaer_v2.json",
       "generated_at": null,
       "verified_at": null,
@@ -79,7 +79,7 @@
       "provenance": null,
       "checksum": {
         "algorithm": "sha256",
-        "value": "c9bad9e47ea65c408b20b13846fd82649f715c5d3104ccc3216d620846fce8d2"
+        "value": "9aa3aa647d817b9de6f60628c1bba8348e281ee2a794552b077de97a53127325"
       },
       "artifacts": [
         {

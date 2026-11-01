@@ -1,3 +1,4 @@
+from modules.brewday_calc import fermenteringstemp_linjer
 from modules.export_format import (
     fmt_kg, fmt_gram, fmt_ibu_bid,
     fmt_og, fmt_fg, fmt_abv,
@@ -147,6 +148,10 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     </table>"""
 
     # ── Gjær notes ────────────────────────────────────────────────────────
+    temp_li = "".join(
+        f"<li>{esc(linje)}</li>"
+        for linje in fermenteringstemp_linjer(plan, (ctx.get("recipe") or {}).get("fermentation_temp_target_c"))
+    )
     noter_li = "".join(f"<li class='note'>ℹ️ {esc(n)}</li>" for n in plan["noter"])
     dms_note = (
         "<li class='note'>90 min anbefalt for Pilsnermalt</li>"
@@ -584,7 +589,7 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     <ul class="cb-list">
       <li><span class="cb">☐</span> <strong>{esc(plan['gjaer_navn'])}</strong></li>
       <li><span class="cb">☐</span> {plan['pakker']} pakke(r) anbefalt</li>
-      <li>Fermenterer {plan['temp_min']}–{plan['temp_maks']}°C</li>
+      {temp_li}
       {noter_li}
     </ul>
     <div class="ferm-grid">

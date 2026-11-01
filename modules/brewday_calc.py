@@ -1,6 +1,9 @@
+import datetime
 import math
+from urllib.parse import urlparse
 from modules.calculations import beregn_total_ibu
 from modules.equipment import last_equipment
+from modules.recipe import resolve_fermentation_temp_target_c
 from modules.process_profiles import (
     NO_SPARGE, beregn_dekoksjon_uttak, beregn_reiterated_mash,
     sjekk_utstyrsbegrensninger,
@@ -55,6 +58,114 @@ _TEMP = {
     "spesialgjær":          (18, 22),
     "wild/brett-lignende":  (18, 24),
 }
+
+
+
+_FERMTEMP_BETYDNING = "ideal_fermentation_range"
+_FERMTEMP_CLAIM_TYPE = "documented_fact"
+_FERMTEMP_PRODUSENT_KILDETYPER = ("manufacturer_product_page", "manufacturer_datasheet")
+
+
+def _kilde_vert(ref):
+    """Vertsnavn fra en http(s)-kildehenvisning, ellers "". Ren parsing — ingen
+    nettverkskall — og fanger parserfeil (f.eks. «https://[»)."""
+    if not isinstance(ref, str):
+        return ""
+    try:
+        deler = urlparse(ref)
+        if deler.scheme not in ("http", "https"):
+            return ""
+        return deler.hostname or ""
+    except ValueError:
+        return ""
+
+
+def _verifisert_tidspunkt(verdi):
+    """Hele verified_at-verdien må være et ISO 8601-tidspunkt MED tidssone
+    (CORE_STATUS_PROVENANCE: verified_at er et timestamp). Returnerer
+    datetime eller None."""
+    if not isinstance(verdi, str):
+        return None
+    try:
+        tidspunkt = datetime.datetime.fromisoformat(verdi)
+    except ValueError:
+        return None
+    return tidspunkt if tidspunkt.tzinfo is not None else None
+
+
+def _gyldig_produsent_fermenteringstemp(ft):
+    """True bare når `fermenteringstemp` oppfyller HELE beviskravet (se
+    docs/MASTER_DATA_FLOW.md): endelige tall med min_c < max_c, betydning
+    «ideal_fermentation_range», claim_type «documented_fact», produsentkildetype,
+    http(s)-kildehenvisning med brukbart vertsnavn og et fullt ISO 8601-
+    tidspunkt med tidssone i verified_at. Mangler eller
+    avviker noe, påstås ikke «produsentens ideelle område»."""
+    if not isinstance(ft, dict):
+        return False
+    lo = resolve_fermentation_temp_target_c(ft.get("min_c"))
+    hi = resolve_fermentation_temp_target_c(ft.get("max_c"))
+    if lo is None or hi is None or not lo < hi:
+        return False
+    if ft.get("betydning") != _FERMTEMP_BETYDNING or ft.get("claim_type") != _FERMTEMP_CLAIM_TYPE:
+        return False
+    if ft.get("source_type") not in _FERMTEMP_PRODUSENT_KILDETYPER:
+        return False
+    if not _kilde_vert(ft.get("source_ref")):
+        return False
+    return _verifisert_tidspunkt(ft.get("verified_at")) is not None
+
+
+def _gjaer_fermenteringstemp(gjaer_info, gjaer_key):
+    """Fermenteringstemperaturområde med eksplisitt opphav.
+
+    Dokumentert produsentdata (masterdata-feltet `fermenteringstemp` på selve
+    gjærstammen) går foran, men bare når beviskravet i
+    _gyldig_produsent_fermenteringstemp() er oppfylt. Ellers brukes den
+    generelle kategoriveiledningen i _TEMP, merket som det — den gjelder ikke
+    den valgte stammen. Bryggerens egen planlagte temperatur
+    (recipe["fermentation_temp_target_c"]) er et helt separat tall og
+    berøres aldri her."""
+    ft = (gjaer_info or {}).get("fermenteringstemp")
+    if _gyldig_produsent_fermenteringstemp(ft):
+        return {
+            "temp_min": ft["min_c"],
+            "temp_maks": ft["max_c"],
+            "temp_kilde": "produsent",
+            "temp_kilde_ref": ft["source_ref"],
+            "temp_kilde_dato": _verifisert_tidspunkt(ft["verified_at"]).date().isoformat(),
+        }
+    temp_min, temp_maks = _TEMP.get(gjaer_key, (18, 22))
+    return {
+        "temp_min": temp_min,
+        "temp_maks": temp_maks,
+        "temp_kilde": "generell_kategori",
+        "temp_kilde_ref": None,
+        "temp_kilde_dato": None,
+    }
+
+
+def fermenteringstemp_linjer(plan, planlagt_c=None):
+    """Tekstlinjer for gjæringstemperatur, felles for appens bryggedagspanel
+    og det eksporterte bryggedagsarket, slik at de ikke kan komme i utakt.
+    Skiller dokumentert produsentdata, generell kategoriveiledning og
+    bryggerens egen planlagte temperatur."""
+    def _tall(v):
+        return f"{v:g}"
+    omraade = f"{_tall(plan['temp_min'])}–{_tall(plan['temp_maks'])}°C"
+    if plan.get("temp_kilde") == "produsent":
+        kilde = _kilde_vert(plan.get("temp_kilde_ref")).removeprefix("www.")
+        detaljer = ", ".join(x for x in (
+            f"kilde: {kilde}" if kilde else "",
+            f"kontrollert {plan['temp_kilde_dato']}" if plan.get("temp_kilde_dato") else "",
+        ) if x)
+        linjer = [f"Produsentens ideelle område: {omraade}" + (f" ({detaljer})" if detaljer else "")]
+    else:
+        linjer = [f"Generell veiledning for gjærtypen: {omraade} (ikke dokumentert for denne gjærstammen)"]
+    planlagt = resolve_fermentation_temp_target_c(planlagt_c)
+    if planlagt is not None:
+        linjer.append(f"Din planlagte gjæringstemperatur: {_tall(planlagt)}°C")
+    return linjer
+
 
 # Pitching rate in million cells / mL / °P
 _PITCH_RATE = {
@@ -301,11 +412,11 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
     ibu_faktisk_prosess  = round(beregn_total_ibu(_humle_calc_faktisk, _humle_data_by_id, batch_volum_l, og), 1)
 
     pakker         = beregn_pakker(og, batch_volum_l, gjaer_key)
-    temp_min, temp_maks = _TEMP.get(gjaer_key, (18, 22))
+    ferm_temp      = _gjaer_fermenteringstemp(gjaer_info, gjaer_key)
 
     noter = []
     if gjaer_key == "lager":
-        noter.append("Lagergjær — fermenterer kaldt (8–12°C). Bruk dobbel pitching rate.")
+        noter.append("Lagergjær — fermenterer kaldere enn ale. Bruk dobbel pitching rate.")
     elif gjaer_key == "kveik":
         noter.append("Kveik — tåler høy temperatur (30–40°C). Underpitching er OK.")
     elif gjaer_key == "saison":
@@ -333,8 +444,11 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
         "ibu_faktisk_prosess":  ibu_faktisk_prosess,
         "gjaer_navn":           gjaer_info.get("display_name", gjaer_id),
         "pakker":               pakker,
-        "temp_min":             temp_min,
-        "temp_maks":            temp_maks,
+        "temp_min":             ferm_temp["temp_min"],
+        "temp_maks":            ferm_temp["temp_maks"],
+        "temp_kilde":           ferm_temp["temp_kilde"],
+        "temp_kilde_ref":       ferm_temp["temp_kilde_ref"],
+        "temp_kilde_dato":      ferm_temp["temp_kilde_dato"],
         "noter":                noter,
         "er_lager":             gjaer_key == "lager",
         "tilsetninger":         valgte_tilsetninger,
