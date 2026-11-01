@@ -131,7 +131,7 @@ def fmt_ibu_bid(v: float) -> str:
 # LAYER 2 — composite builders
 # ══════════════════════════════════════════════════════════════════════════
 
-def stats_linje(ctx: dict, html: bool = False) -> str:
+def stats_linje(ctx: dict, html: bool = False, effektivitet_label: str = "Effektivitet") -> str:
     """
     Build the stats summary line from a recipe context dict.
 
@@ -151,7 +151,7 @@ def stats_linje(ctx: dict, html: bool = False) -> str:
         f"EBC {fmt_ebc(ctx['ebc'])}",
     ]
     if html:
-        parts.append(f"Effektivitet {ctx['effektivitet'] * 100:.0f}%")
+        parts.append(f"{effektivitet_label} {ctx['effektivitet'] * 100:.0f}%")
     return sep.join(parts)
 
 

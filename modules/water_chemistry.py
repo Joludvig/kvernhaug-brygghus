@@ -20,6 +20,7 @@ import json
 import os
 
 from config import DEMO_MODE
+from modules.i18n import SPRAK_DEFAULT, TEKSTER, t
 
 # ══════════════════════════════════════════════════════════════════════════
 # KILDE- OG MÅLPROFILER PÅ DISK
@@ -288,6 +289,55 @@ def alle_salter():
     return [hent_salt(sid) for sid in _SALT_REKKEFOLGE]
 
 
+# ── VISNINGSTEKST (NO/EN, #548) ──────────────────────────────────────────────
+# Saltenes/syrenes `navn` og `advarsler` i databasen under er og blir norske
+# (lagrede vannbehandlinger bærer dem som snapshot) — kun VISNINGEN oversettes,
+# via salt_id/syre_id. Kjemiske formler er språknøytrale.
+
+def salt_navn(salt_id, sprak=SPRAK_DEFAULT):
+    return t(f"wc.salt.{salt_id}.navn", sprak) if salt_id in SALTER else str(salt_id)
+
+
+def salt_advarsler(salt_id, sprak=SPRAK_DEFAULT):
+    """Advarslene for et salt i valgt språk (norsk = databasens egen tekst)."""
+    advarsler = hent_salt(salt_id)["advarsler"]
+    if sprak == SPRAK_DEFAULT:
+        return advarsler
+    return [t(f"wc.salt.{salt_id}.advarsel", sprak)] if advarsler else []
+
+
+def syre_navn(syre_id, sprak=SPRAK_DEFAULT):
+    return t(f"wc.syre.{syre_id}.navn", sprak) if syre_id in ("melkesyre", "fosforsyre") else str(syre_id)
+
+
+def maalprofil_tekst(profil, felt, sprak=SPRAK_DEFAULT):
+    """Visningstekst (name/description/kort_hjelpetekst/origin) for en
+    målprofil. De medfølgende profilene i data/water_targets.json har norsk
+    tekst; den oversettes KUN når den lagrede teksten er identisk med den
+    medfølgende — en omdøpt eller redigert profil, og brukerens egne
+    profiler, vises alltid uendret."""
+    verdi = (profil or {}).get(felt)
+    if sprak == SPRAK_DEFAULT or not isinstance(verdi, str):
+        return verdi
+    nokkel = f"wc.maal.{(profil or {}).get('target_id')}.{felt}"
+    if nokkel in TEKSTER[SPRAK_DEFAULT] and verdi == TEKSTER[SPRAK_DEFAULT][nokkel]:
+        return t(nokkel, sprak)
+    return verdi
+
+
+def profiltype_tekst(kode, sprak=SPRAK_DEFAULT):
+    """Forståelig etikett for en kjent profile_type-kode (house_profile,
+    custom_profile). Den lagrede koden er uendret; ukjent kode vises som den er."""
+    if kode in ("house_profile", "custom_profile"):
+        return t(f"wp.profiltype.{kode}", sprak)
+    return kode
+
+
+def status_tekst(status, sprak=SPRAK_DEFAULT):
+    """under/over/innenfor/ukjent i valgt språk (statuskodene er uendret)."""
+    return t(f"wc.status.{status}", sprak)
+
+
 # ══════════════════════════════════════════════════════════════════════════
 # IONBEREGNING
 # ══════════════════════════════════════════════════════════════════════════
@@ -461,7 +511,8 @@ STANDARD_VARSELGRENSER = {
 }
 
 
-def generer_varsler(kildevann, maalprofil, sluttprofil, salt_fordeling, syrer=None, grenser=None):
+def generer_varsler(kildevann, maalprofil, sluttprofil, salt_fordeling, syrer=None, grenser=None,
+                    sprak=SPRAK_DEFAULT):
     """Bygger tekstvarsler for UI-panelet. Se STANDARD_VARSELGRENSER for
     hvilke terskler som brukes og at de er husregler, ikke helsegrenser."""
     grenser = {**STANDARD_VARSELGRENSER, **(grenser or {})}
@@ -470,59 +521,60 @@ def generer_varsler(kildevann, maalprofil, sluttprofil, salt_fordeling, syrer=No
     varsler = []
 
     if all(kildevann.get(ion) is None for ion in IONER):
-        varsler.append("Kildevann er ukjent — ingen ionverdier er registrert. Appen dikter ikke opp tall.")
+        varsler.append(t("wc.v.ukjent_kilde", sprak))
     elif kildevann.get("hco3") is None:
-        varsler.append("Alkalitet/HCO3 mangler for kildevannet — meske-pH-vurderingen blir mindre pålitelig.")
+        varsler.append(t("wc.v.hco3_mangler", sprak))
 
     for s in salt_fordeling:
         if 0 < s.get("gram", 0.0) < grenser["vekt_opplosning_g"]:
-            navn = hent_salt(s["salt_id"])["navn"]
-            varsler.append(
-                f"{navn}: total mengde ({s['gram']:.3f} g) er under vektens "
-                f"praktiske oppløsning ({grenser['vekt_opplosning_g']:.2f} g) — "
-                "vurder å lage en fortynnet stamløsning."
-            )
+            varsler.append(t(
+                "wc.v.vekt", sprak, navn=salt_navn(s["salt_id"], sprak),
+                gram=f"{s['gram']:.3f}", opplosning=f"{grenser['vekt_opplosning_g']:.2f}",
+            ))
 
     slutt = sluttprofil["slutt"]
     if slutt.get("na") is not None and slutt["na"] > grenser["na_hoy_ppm"]:
-        varsler.append(f"Høyt natrium: {slutt['na']:.1f} ppm (grense {grenser['na_hoy_ppm']:.0f} ppm) — kan gi salt/skarp smak.")
+        varsler.append(t("wc.v.na", sprak, v=f"{slutt['na']:.1f}", grense=f"{grenser['na_hoy_ppm']:.0f}"))
     if slutt.get("mg") is not None and slutt["mg"] > grenser["mg_hoy_ppm"]:
-        varsler.append(f"Høyt magnesium: {slutt['mg']:.1f} ppm (grense {grenser['mg_hoy_ppm']:.0f} ppm) — kan gi bitter/skarp bismak.")
+        varsler.append(t("wc.v.mg", sprak, v=f"{slutt['mg']:.1f}", grense=f"{grenser['mg_hoy_ppm']:.0f}"))
     if slutt.get("cl") is not None and slutt["cl"] > grenser["cl_svaert_hoy_ppm"]:
-        varsler.append(f"Svært høyt klorid: {slutt['cl']:.1f} ppm (grense {grenser['cl_svaert_hoy_ppm']:.0f} ppm).")
+        varsler.append(t("wc.v.cl", sprak, v=f"{slutt['cl']:.1f}", grense=f"{grenser['cl_svaert_hoy_ppm']:.0f}"))
     if slutt.get("so4") is not None and slutt["so4"] > grenser["so4_svaert_hoy_ppm"]:
-        varsler.append(f"Svært høyt sulfat: {slutt['so4']:.1f} ppm (grense {grenser['so4_svaert_hoy_ppm']:.0f} ppm) — kan gi skarp/tørr bitterhet.")
+        varsler.append(t("wc.v.so4", sprak, v=f"{slutt['so4']:.1f}", grense=f"{grenser['so4_svaert_hoy_ppm']:.0f}"))
     if slutt.get("ca") is not None and slutt["ca"] < grenser["ca_lav_ppm"]:
-        varsler.append(f"Lavt kalsium: {slutt['ca']:.1f} ppm (grense {grenser['ca_lav_ppm']:.0f} ppm) — kan gi svakere enzym-/gjæraktivitet og dårligere klaring.")
+        varsler.append(t("wc.v.ca_lav", sprak, v=f"{slutt['ca']:.1f}", grense=f"{grenser['ca_lav_ppm']:.0f}"))
     if slutt.get("ca") is not None and slutt["ca"] > grenser["ca_hoy_ppm"]:
-        varsler.append(f"Høyt kalsium: {slutt['ca']:.1f} ppm (grense {grenser['ca_hoy_ppm']:.0f} ppm) — trolig unødvendig høy mineralbelastning, vurder å redusere saltmengden.")
+        varsler.append(t("wc.v.ca_hoy", sprak, v=f"{slutt['ca']:.1f}", grense=f"{grenser['ca_hoy_ppm']:.0f}"))
 
     if maalprofil:
         for row in bygg_ionrapport(sluttprofil, maalprofil):
             if row["status"] in ("under", "over") and row["slutt"] is not None:
-                varsler.append(
-                    f"{row['ion'].upper()} ({row['slutt']:.1f} ppm) er {row['status']} målområdet "
-                    f"({row['maal_min']:.0f}–{row['maal_maks']:.0f} ppm)."
-                )
+                varsler.append(t(
+                    "wc.v.utenfor", sprak, ion=row["ion"].upper(), v=f"{row['slutt']:.1f}",
+                    status=status_tekst(row["status"], sprak),
+                    min=f"{row['maal_min']:.0f}", maks=f"{row['maal_maks']:.0f}",
+                ))
         for ion in IONER:
             start_v = kildevann.get(ion)
             max_v = maalprofil.get(f"{ion}_max")
             if start_v is not None and max_v is not None and start_v > max_v:
-                varsler.append(
-                    f"Kildevannets {ion.upper()} ({start_v:.1f} ppm) er allerede over målprofilens "
-                    f"maks ({max_v:.0f} ppm) — salter kan bare tilsette ioner, aldri fjerne dem. "
-                    "Målprofilen kan ikke nås med de valgte saltene alene."
-                )
+                varsler.append(t(
+                    "wc.v.kilde_over", sprak, ion=ion.upper(), v=f"{start_v:.1f}", maks=f"{max_v:.0f}",
+                ))
 
     for syre in syrer:
         if not syre.get("prosent"):
-            varsler.append(f"{syre.get('navn', 'Syre')}: konsentrasjon (%) er ikke angitt — kan ikke beregne syrestyrke presist.")
+            varsler.append(t(
+                "wc.v.syre_prosent", sprak,
+                navn=syre_navn(syre["syre_id"], sprak) if syre.get("syre_id") in ("melkesyre", "fosforsyre")
+                else syre.get("navn", t("wc.v.syre_standardnavn", sprak)),
+            ))
 
     if salt_fordeling:
         total_fordelt = sum(s["gram_mesk"] + s["gram_skyll"] for s in salt_fordeling)
         total_input = sum(s["gram"] for s in salt_fordeling)
         if abs(total_fordelt - total_input) > 0.01:
-            varsler.append("Summen av meske- og skylletilsetning stemmer ikke med totalmengden — mulig avrundingsfeil i fordelingen.")
+            varsler.append(t("wc.v.sum", sprak))
 
     return varsler
 
@@ -531,7 +583,7 @@ def generer_varsler(kildevann, maalprofil, sluttprofil, salt_fordeling, syrer=No
 # ANBEFALINGSMOTOR — MÅLPROFIL
 # ══════════════════════════════════════════════════════════════════════════
 
-def anbefal_vannmaal(stil_navn, maalprofiler=None):
+def anbefal_vannmaal(stil_navn, maalprofiler=None, sprak=SPRAK_DEFAULT):
     """
     Anbefaler en målprofil (target_id) basert på ølstil — samme filosofi
     som modules/process_profiles.py sin anbefal_prosess(): appen ANBEFALER,
@@ -552,24 +604,21 @@ def anbefal_vannmaal(stil_navn, maalprofiler=None):
     stil_navn = (stil_navn or "").strip()
 
     if not maalprofiler:
-        return None, ["Ingen målprofiler er lagret."]
+        return None, [t("wc.anb.ingen", sprak)]
 
     if stil_navn:
         for target_id, profil in maalprofiler.items():
             if stil_navn in (profil.get("anbefalte_stiler") or []):
                 return target_id, [
-                    f"{stil_navn} står oppført under anbefalte stiler for "
-                    f"«{profil.get('name', target_id)}»."
+                    t("wc.anb.stil", sprak, stil=stil_navn,
+                      profil=maalprofil_tekst(profil, "name", sprak) or target_id)
                 ]
 
     if "balansert_ale" in maalprofiler:
-        return "balansert_ale", [
-            "Ingen målprofil er spesifikt knyttet til denne stilen — "
-            "«Balansert ale» er et nøytralt utgangspunkt for de fleste ølstiler."
-        ]
+        return "balansert_ale", [t("wc.anb.balansert", sprak)]
 
     forste_id = next(iter(maalprofiler))
-    return forste_id, ["Ingen spesifikk anbefaling funnet — viser første tilgjengelige målprofil."]
+    return forste_id, [t("wc.anb.forste", sprak)]
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -637,7 +686,7 @@ def vurder_maaloppnaelse(sluttprofil, maalprofil, salter_i_bruk=None):
 # AUTOMATISK SALTFORSLAG
 # ══════════════════════════════════════════════════════════════════════════
 
-def foreslaa_salter(kildevann, maalprofil, vannvolum_liter):
+def foreslaa_salter(kildevann, maalprofil, vannvolum_liter, sprak=SPRAK_DEFAULT):
     """
     Enkel, gjennomsiktig heuristisk solver (V1 — ikke en fullstendig
     optimaliserer): bruker Cl/SO4-midtpunktet i målprofilen og løser direkte
@@ -651,7 +700,7 @@ def foreslaa_salter(kildevann, maalprofil, vannvolum_liter):
     tekst om HVORFOR — presenteres ALDRI som "den eneste korrekte" løsningen.
     """
     if vannvolum_liter is None or vannvolum_liter <= 0:
-        return [], "Ugyldig vannvolum — kan ikke beregne saltforslag."
+        return [], t("wc.fs.ugyldig_volum", sprak)
 
     ca0 = kildevann.get("ca") or 0.0
     cl0 = kildevann.get("cl") or 0.0
@@ -677,13 +726,13 @@ def foreslaa_salter(kildevann, maalprofil, vannvolum_liter):
         forslag.append({"salt_id": "gips", "gram": round(gram_gips, 2), "renhet": 1.0})
 
     if not forslag:
-        forklaring = "Kildevannet ligger allerede nær målområdet for klorid/sulfat — ingen salter foreslått."
+        forklaring = t("wc.fs.naer", sprak)
     else:
         deler = []
         if gram_cacl2 > _TERSKEL_G:
-            deler.append("Kalsiumklorid løfter Ca og Cl")
+            deler.append(t("wc.fs.cacl2", sprak))
         if gram_gips > _TERSKEL_G:
-            deler.append("gips løfter Ca og SO4")
+            deler.append(t("wc.fs.gips", sprak))
         forklaring = ". ".join(deler) + "."
 
     # Solveren skal ALDRI stilltiende late som om målprofilen er fullt
@@ -696,19 +745,10 @@ def foreslaa_salter(kildevann, maalprofil, vannvolum_liter):
         uoppnaelige = sorted(
             a["ion"].upper() for a in vurdering["avvik"] if not a["kan_justeres_med_valgte_salter"]
         )
-        forklaring += (
-            f" Merk: {', '.join(uoppnaelige)} kan IKKE nås med kun kalsiumklorid "
-            "og gips — dette krever andre salter (f.eks. natron for HCO3) eller "
-            "ligger allerede utenfor målområdet i kildevannet, som salter aldri "
-            "kan rette opp (de tilsetter, aldri fjerner, ioner). Målprofilen er "
-            "IKKE fullt oppnådd med dette forslaget alene."
-        )
+        forklaring += t("wc.fs.merk", sprak, ioner=", ".join(uoppnaelige))
     elif vurdering["status"] == "delvis_match":
         justerbare = sorted(a["ion"].upper() for a in vurdering["avvik"])
-        forklaring += (
-            f" {', '.join(justerbare)} er fortsatt utenfor målområdet med denne "
-            "mengden — juster gram-tallene fritt for å nærme deg midten av intervallet."
-        )
+        forklaring += t("wc.fs.delvis", sprak, ioner=", ".join(justerbare))
 
     return forslag, forklaring
 

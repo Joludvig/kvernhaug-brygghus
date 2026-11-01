@@ -10,6 +10,8 @@ isolert (samme mønster som style_engine.py).
 """
 import copy
 
+from modules.i18n import SPRAK_DEFAULT, t
+
 # ── Vanskelighetsgrad ────────────────────────────────────────────────────────
 LETT     = "Lett"
 MIDDELS  = "Middels"
@@ -31,6 +33,109 @@ _SPARGE_NAVN = {
     NO_SPARGE:    "No-sparge (alt vann i mesken, ingen skylling)",
     FLY_SPARGE:   "Fly sparge (kontinuerlig skylling)",
 }
+
+# ── VISNINGSTEKST (NO/EN, #548) ──────────────────────────────────────────────
+# Standardprofilenes tekster lagres og beregnes ALLTID på norsk (lagrede
+# profiler, process_id og datakontrakter er språknøytrale/uendret). Kun
+# VISNINGEN oversettes, og KUN med profilidentitet og feltkontekst: en tekst
+# oversettes bare når profilen er en kjent standardprofil OG teksten er
+# nøyaktig den standardprofilen selv har i akkurat det feltet. Brukerens egne
+# profilnavn og kommentarer (også «Lett», «Infusjon» e.l. som tilfeldigvis
+# ligner en systemtekst) matcher dermed aldri.
+_STEG_KOMMENTAR_NOKLER = {
+    "Hovedmesk — enzymatisk konvertering": "pp.steg.hovedmesk",
+    "Mashout — stopper enzymaktivitet": "pp.steg.mashout",
+    "Lavere temperaturhvile": "pp.steg.lavere",
+    "Høyere temperaturhvile": "pp.steg.hoyere",
+    "Startmesk — før uttak": "pp.steg.startmesk",
+    "Mashout etter dekoksjon er ført tilbake": "pp.steg.mashout_dek",
+    "Mesk 1 — fersk vann": "pp.steg.mesk1",
+    "Mesk 2 — meskevann er vørt fra mesk 1": "pp.steg.mesk2",
+    "Mashout på mesk 2": "pp.steg.mashout_m2",
+    "Kok tykkmesken 10-15 min, rør ofte for å unngå svidd bunn.": "pp.steg.dek_kommentar",
+}
+_PROFIL_FELT_NOKKEL = {
+    "navn": "pp.navn.{pid}",
+    "beskrivelse": "pp.besk.{pid}",
+    "utstyrsbegrensninger": "pp.utstyr.{pid}",
+    "forventet_paavirkning": "pp.paavirkning.{pid}",
+}
+_EGENDEFINERT_PREFIKS = "Egendefinert – basert på "
+
+
+def _er_standardprofil(process_id):
+    return process_id in STANDARDPROFILER
+
+
+def profiltekst_visning(felt, tekst, process_id, sprak=SPRAK_DEFAULT):
+    """Visningstekst for et profilfelt (navn, beskrivelse, utstyrsbegrensninger,
+    forventet_paavirkning) i valgt språk. Oversettes bare når `process_id` er
+    en standardprofil og `tekst` er identisk med standardprofilens egen tekst
+    i dette feltet; ellers uendret."""
+    if sprak == SPRAK_DEFAULT or not isinstance(tekst, str) or not _er_standardprofil(process_id):
+        return tekst
+    mal = _PROFIL_FELT_NOKKEL.get(felt)
+    if mal and tekst and tekst == STANDARDPROFILER[process_id].get(felt):
+        return t(mal.format(pid=process_id), sprak)
+    return tekst
+
+
+def profilnavn_visning(navn, sprak=SPRAK_DEFAULT, process_id=None):
+    """Visningsnavn for en prosessprofil. Det lagrede navnet er alltid norsk.
+    En standardprofil med standardnavn oversettes; «Egendefinert – basert på X»
+    (appens eget navn ved redigering av en standardprofil) oversettes i prefikset
+    og, bare når X er en standardprofils navn, også i X. Alt annet — brukerens
+    eget navn, også når det ligner en systemtekst — beholdes. Uten `process_id`
+    finnes ingen kontekst, og navnet returneres uendret."""
+    if sprak == SPRAK_DEFAULT or not isinstance(navn, str) or not _er_standardprofil(process_id):
+        return navn
+    if process_id == "egendefinert" and navn.startswith(_EGENDEFINERT_PREFIKS):
+        rest = navn[len(_EGENDEFINERT_PREFIKS):]
+        for pid, profil in STANDARDPROFILER.items():
+            if pid != "egendefinert" and rest == profil["navn"]:
+                rest = t(f"pp.navn.{pid}", sprak)
+                break
+        return t("pp.navn.egendefinert_prefiks", sprak) + rest
+    return profiltekst_visning("navn", navn, process_id, sprak)
+
+
+def mesketrinn_kommentar_visning(kommentar, process_id, sprak=SPRAK_DEFAULT):
+    """Kommentar på et meskesteg/dekoksjonssteg i valgt språk. Oversettes bare
+    for en standardprofil (ikke «egendefinert») og bare når teksten er en av
+    den profilens egne standardkommentarer."""
+    if (sprak == SPRAK_DEFAULT or not isinstance(kommentar, str) or not kommentar
+            or not _er_standardprofil(process_id) or process_id == "egendefinert"):
+        return kommentar
+    profil = STANDARDPROFILER[process_id]
+    egne = {s.get("kommentar") for s in profil["mash_steps"]}
+    egne |= {s.get("kommentar") for s in (profil.get("decoction_steps") or [])}
+    nokkel = _STEG_KOMMENTAR_NOKLER.get(kommentar)
+    return t(nokkel, sprak) if nokkel and kommentar in egne else kommentar
+
+
+def vanskelighetsgrad_visning(verdi, sprak=SPRAK_DEFAULT):
+    """Lett/Middels/Krevende (lagrede koder, uendret) i valgt språk."""
+    if verdi in (LETT, MIDDELS, KREVENDE):
+        return t(f"pp.vansk.{verdi}", sprak)
+    return verdi
+
+
+def maskeplan_steg_visning(steg, process_id, sprak=SPRAK_DEFAULT):
+    """Visningslabel for ett steg i brewday-planens `maskeplan`. Appens egne
+    labeler (steg uten profil, eller stegtype-fallback når kommentaren er tom)
+    bærer en `label_nokkel` og oversettes; en kommentar oversettes bare via
+    mesketrinn_kommentar_visning() (standardprofil + standardkommentar)."""
+    nokkel = steg.get("label_nokkel")
+    if nokkel:
+        return t(nokkel, sprak)
+    return mesketrinn_kommentar_visning(steg["label"], process_id, sprak)
+
+
+def sparge_navn(sparge_method, sprak=SPRAK_DEFAULT):
+    """Visningsnavn for en skyllemetode (nøkkelen er uendret, f.eks. batch_sparge)."""
+    if sparge_method in _SPARGE_NAVN:
+        return t(f"pp.sparge.{sparge_method}", sprak)
+    return "—"
 
 
 def _steg(temperatur, varighet, stegtype=INFUSJON, kommentar=""):
@@ -318,7 +423,19 @@ def beregn_dekoksjon_uttak(mesk_volum_l, fra_temp_c, til_temp_c, koke_temp_c=100
 
 # ── REITERATED MASH-BEREGNING ────────────────────────────────────────────────
 
-def beregn_reiterated_mash(total_malt_kg, mesk_1_andel, eq):
+def reiterated_varsler(vann_mesk_2_faktisk, vann_mesk_2_anbefalt, sprak=SPRAK_DEFAULT):
+    """Varslene for en dobbelmesk i valgt språk (én kilde for beregningen
+    og for visningen)."""
+    varsler = [t("pp.rm.v_lang", sprak), t("pp.rm.v_effektivitet", sprak)]
+    if vann_mesk_2_faktisk < vann_mesk_2_anbefalt * 0.85:
+        varsler.append(t(
+            "pp.rm.v_tykk", sprak,
+            faktisk=f"{vann_mesk_2_faktisk:.1f}", anbefalt=f"{vann_mesk_2_anbefalt:.1f}",
+        ))
+    return varsler
+
+
+def beregn_reiterated_mash(total_malt_kg, mesk_1_andel, eq, sprak=SPRAK_DEFAULT):
     """
     Beregner vann-/volumflyt for en dobbelmesk-prosess:
       Mesk 1 (fersk vann) -> vørt 1 -> brukes som meskevann i mesk 2 -> vørt 2.
@@ -346,18 +463,7 @@ def beregn_reiterated_mash(total_malt_kg, mesk_1_andel, eq):
     vann_mesk_2_anbefalt = round(malt_2_kg * ratio, 1)
     vort_2 = round(max(0.0, vann_mesk_2_faktisk - malt_2_kg * absorpsjon), 1)
 
-    varsler = [
-        "Lang bryggedag: to fulle meske- og lauteresykluser etter hverandre.",
-        "Redusert/uforutsigbar effektivitet: mesk 2 meskes med vørt (ikke "
-        "ferskt vann), så utbyttet er vanskeligere å anslå presist enn ved "
-        "vanlig infusjon.",
-    ]
-    if vann_mesk_2_faktisk < vann_mesk_2_anbefalt * 0.85:
-        varsler.append(
-            f"Vørt fra mesk 1 ({vann_mesk_2_faktisk:.1f} L) gir en tykkere mesk 2 enn "
-            f"normalt meskeforhold skulle tilsi ({vann_mesk_2_anbefalt:.1f} L) — "
-            "vurder å øke mesk 1-andelen eller tilsette noe ekstra vann."
-        )
+    varsler = reiterated_varsler(vann_mesk_2_faktisk, vann_mesk_2_anbefalt, sprak)
 
     return {
         "malt_1_kg": malt_1_kg,
@@ -374,7 +480,7 @@ def beregn_reiterated_mash(total_malt_kg, mesk_1_andel, eq):
 
 # ── UTSTYRSSJEKK ─────────────────────────────────────────────────────────────
 
-def sjekk_utstyrsbegrensninger(profile, total_malt_kg, eq):
+def sjekk_utstyrsbegrensninger(profile, total_malt_kg, eq, sprak=SPRAK_DEFAULT):
     """
     Returnerer en liste med tekstvarsler dersom valgt prosessprofil ser ut
     til å overskride utstyrets kapasitet (kjelekapasitet fra
@@ -387,26 +493,24 @@ def sjekk_utstyrsbegrensninger(profile, total_malt_kg, eq):
 
     if profile.get("process_id") == "reiterated_mash":
         andel = (profile.get("reiterated_mash") or {}).get("mesk_1_andel", 0.5)
-        r = beregn_reiterated_mash(total_malt_kg, andel, eq)
+        r = beregn_reiterated_mash(total_malt_kg, andel, eq, sprak)
         for delnavn, malt_kg, vann_l in (
-            ("Mesk 1", r["malt_1_kg"], r["vann_mesk_1_l"]),
-            ("Mesk 2", r["malt_2_kg"], r["vann_mesk_2_l"]),
+            (t("pp.del.mesk1", sprak), r["malt_1_kg"], r["vann_mesk_1_l"]),
+            (t("pp.del.mesk2", sprak), r["malt_2_kg"], r["vann_mesk_2_l"]),
         ):
             volum = vann_l + malt_kg * grain_vol_l_per_kg
             if volum > kjele:
-                varsler.append(
-                    f"{delnavn}: estimert meskevolum {volum:.1f} L overskrider "
-                    f"kjelekapasitet på {kjele:.0f} L."
-                )
+                varsler.append(t(
+                    "pp.utstyr.mesk_del", sprak,
+                    **{"del": delnavn}, vol=f"{volum:.1f}", kjele=f"{kjele:.0f}",
+                ))
     else:
         mesk_vann_l = total_malt_kg * ratio
         volum = mesk_vann_l + total_malt_kg * grain_vol_l_per_kg
         if volum > kjele:
-            varsler.append(
-                f"Estimert meskevolum {volum:.1f} L overskrider kjelekapasitet "
-                f"på {kjele:.0f} L — vurder reiterated mash (dobbel mesk) eller "
-                "et mindre batch."
-            )
+            varsler.append(t(
+                "pp.utstyr.mesk", sprak, vol=f"{volum:.1f}", kjele=f"{kjele:.0f}",
+            ))
 
     return varsler
 
@@ -418,7 +522,8 @@ def sjekk_utstyrsbegrensninger(profile, total_malt_kg, eq):
 _SVAER_HOY_OG = 1.075
 
 
-def anbefal_prosess(stil_navn, stats, total_malt_kg, eq, historisk_autentisitet=False):
+def anbefal_prosess(stil_navn, stats, total_malt_kg, eq, historisk_autentisitet=False,
+                    sprak=SPRAK_DEFAULT):
     """
     Anbefaler en prosessprofil basert på (i prioritert rekkefølge):
       1. Utstyrskapasitet / svært høy OG -> reiterated mash (hardt fysisk problem,
@@ -442,19 +547,16 @@ def anbefal_prosess(stil_navn, stats, total_malt_kg, eq, historisk_autentisitet=
     estimert_meskevolum = total_malt_kg * ratio + total_malt_kg * 0.7
 
     if estimert_meskevolum > kjele:
-        begrunnelse.append(
-            f"Total maltmengde ({total_malt_kg:.1f} kg) gir et estimert "
-            f"meskevolum ({estimert_meskevolum:.1f} L) som overskrider "
-            f"kjelekapasiteten ({kjele:.0f} L)."
-        )
+        begrunnelse.append(t(
+            "pp.anb.kapasitet", sprak, kg=f"{total_malt_kg:.1f}",
+            vol=f"{estimert_meskevolum:.1f}", kjele=f"{kjele:.0f}",
+        ))
         return "reiterated_mash", begrunnelse
 
     if og >= _SVAER_HOY_OG:
-        begrunnelse.append(
-            f"Mål-OG ({og:.3f}) er svært høy (>= {_SVAER_HOY_OG:.3f}) — én enkelt "
-            "mesk vil normalt ikke klare å ekstrahere nok sukker/passe "
-            "meskeforhold i ett kar."
-        )
+        begrunnelse.append(t(
+            "pp.anb.hoy_og", sprak, og=f"{og:.3f}", grense=f"{_SVAER_HOY_OG:.3f}",
+        ))
         return "reiterated_mash", begrunnelse
 
     stil_navn = stil_navn or ""
@@ -462,27 +564,14 @@ def anbefal_prosess(stil_navn, stats, total_malt_kg, eq, historisk_autentisitet=
     dekoksjon_stiler = set(STANDARDPROFILER["enkel_dekoksjon"]["anbefalte_stiler"])
 
     if stil_navn in dekoksjon_stiler and historisk_autentisitet:
-        begrunnelse.append(
-            f"{stil_navn} er historisk knyttet til dekoksjonsmesking, og "
-            "historisk autentisitet er etterspurt."
-        )
+        begrunnelse.append(t("pp.anb.dekoksjon_historisk", sprak, stil=stil_navn))
         return "enkel_dekoksjon", begrunnelse
 
     if stil_navn in hochkurz_stiler:
-        begrunnelse.append(
-            f"{stil_navn} er en tradisjonell tysk/østerriksk lagerstil som "
-            "vanligvis meskes med Hochkurz-stegmesk for rundere maltkarakter."
-        )
+        begrunnelse.append(t("pp.anb.hochkurz", sprak, stil=stil_navn))
         if stil_navn in dekoksjon_stiler:
-            begrunnelse.append(
-                "Dekoksjon er tilgjengelig som et mer historisk autentisk, "
-                "men også mer tidkrevende alternativ."
-            )
+            begrunnelse.append(t("pp.anb.dekoksjon_alt", sprak))
         return "hochkurz", begrunnelse
 
-    begrunnelse.append(
-        "Ingen spesielle krav funnet for valgt/nærmeste stil, maltbase eller "
-        "utstyr — enkel infusjon er raskest og passer de fleste ales, stout "
-        "og moderne lagerstiler."
-    )
+    begrunnelse.append(t("pp.anb.standard", sprak))
     return "enkel_infusjon", begrunnelse

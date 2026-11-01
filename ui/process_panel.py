@@ -7,6 +7,8 @@ from modules.process_profiles import (
     beregn_dekoksjon_uttak, beregn_reiterated_mash,
     INFUSJON, MASHOUT, DEKOKSJON_UTTAK, DEKOKSJON_RETUR,
     BATCH_SPARGE, NO_SPARGE, FLY_SPARGE, _SPARGE_NAVN,
+    profiltekst_visning, profilnavn_visning, sparge_navn,
+    mesketrinn_kommentar_visning, vanskelighetsgrad_visning,
 )
 from bryggeskole import pilot_mashing as _pilot_mesking
 from ui.i18n import gjeldende_sprak, t
@@ -19,11 +21,7 @@ from ui.i18n import gjeldende_sprak, t
 # uendret, akkurat som ui/bryggeskole_panel.py allerede gjør.
 _LAER_BRO_CHUNK_IDER = ("CHUNK-MASH-B", "CHUNK-MASH-C")
 
-_STEGTYPE_LABELS = {
-    INFUSJON: "Infusjon", MASHOUT: "Mashout",
-    DEKOKSJON_UTTAK: "Dekoksjon-uttak", DEKOKSJON_RETUR: "Dekoksjon-retur",
-}
-_STEGTYPE_KEYS = list(_STEGTYPE_LABELS.keys())
+_STEGTYPE_KEYS = [INFUSJON, MASHOUT, DEKOKSJON_UTTAK, DEKOKSJON_RETUR]
 _SPARGE_KEYS = [BATCH_SPARGE, NO_SPARGE, FLY_SPARGE]
 
 
@@ -151,29 +149,26 @@ def _render_laer_bro(sprak):
 
 
 def render_process_panel(ctx, malt_database=None, humle_database=None):
-    st.subheader("🧭 Bryggemåte")
-    st.caption(
-        "Prosessprofilen beskriver HVORDAN ølet meskes og kokes — helt "
-        "adskilt fra oppskriften (malt/humle/gjær). Å bytte bryggemåte "
-        "endrer aldri ingredienslisten."
-    )
+    sprak = gjeldende_sprak()
+    st.subheader(t("pr.tittel"))
+    st.caption(t("pr.intro"))
 
     eq = last_equipment()
     total_malt_kg = sum(m.get("mengde", 0.0) for m in st.session_state.get("valgt_malt", []))
     stil_navn = ctx.get("brygger_stil", "").strip() or ctx["style_analysis"].get("stil", "")
 
     historisk = st.checkbox(
-        "Ønsker historisk autentisitet",
+        t("pr.historisk"),
         key="prosess_historisk_autentisitet",
-        help="Foretrekk historiske teknikker (f.eks. dekoksjon) der stilen støtter det.",
+        help=t("pr.historisk.hjelp"),
     )
 
     anbefalt_id, begrunnelse = anbefal_prosess(
         stil_navn, ctx["recipe"]["stats"], total_malt_kg, eq,
-        historisk_autentisitet=historisk,
+        historisk_autentisitet=historisk, sprak=sprak,
     )
-    anbefalt_navn = hent_standardprofil(anbefalt_id)["navn"]
-    st.info(f"💡 **Anbefalt bryggemåte: {anbefalt_navn}**\n\n" + "\n".join(f"- {b}" for b in begrunnelse))
+    anbefalt_navn = profilnavn_visning(hent_standardprofil(anbefalt_id)["navn"], sprak, anbefalt_id)
+    st.info(t("pr.anbefalt", navn=anbefalt_navn) + "\n\n" + "\n".join(f"- {b}" for b in begrunnelse))
 
     profiler = tilgjengelige_profiler()
     id_til_navn = {p["process_id"]: p["navn"] for p in profiler}
@@ -220,10 +215,7 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
         st.session_state["_prosess_synced_for"] = _aktiv_oppskrift
         st.session_state.pop("_prosess_egendefinert_navn", None)
         if _krever_reparasjon:
-            st.toast(
-                "En inkonsistent prosessprofil ble oppdaget og reparert til standardmalen.",
-                icon="🛠️",
-            )
+            st.toast(t("pr.reparert"), icon="🛠️")
 
     # En "ventende" forfremmelse til Egendefinert (satt av redigerings-
     # deteksjonen lenger ned, i FORRIGE rerun) MÅ appliseres HER — FØR
@@ -236,10 +228,14 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
         st.session_state["_prosess_forrige_id"] = "egendefinert"
         st.session_state["_prosess_egendefinert_navn"] = _pending_navn
 
+    # Tekstene til format_func slås opp FØR lambdaen (ikke inni den): lambdaen
+    # kan kalles utenfor en skriptkjøring (f.eks. av AppTest), og ui.i18n.t
+    # leser språket fra st.session_state ved kall.
+    _anbefalt_suffiks = t("pr.anbefalt_suffiks")
     valgt_id = st.selectbox(
-        "Velg bryggemåte (anbefalingen setter ALDRI valget automatisk — du må selv velge)",
+        t("pr.velg"),
         options=valgbare_id,
-        format_func=lambda pid: id_til_navn[pid] + ("  ⭐ anbefalt" if pid == anbefalt_id else ""),
+        format_func=lambda pid: profilnavn_visning(id_til_navn[pid], sprak, pid) + (_anbefalt_suffiks if pid == anbefalt_id else ""),
         key="valgt_prosess_id",
     )
 
@@ -252,16 +248,16 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
     navn_visning = st.session_state.get("_prosess_egendefinert_navn") or id_til_navn[valgt_id]
 
     info_col1, info_col2, info_col3 = st.columns(3)
-    info_col1.metric("Vanskelighetsgrad", mal["vanskelighetsgrad"])
-    info_col2.metric("Ekstra tidsbruk", f"+{mal['ekstra_tid_min']} min" if mal["ekstra_tid_min"] else "—")
-    info_col3.metric("Skyllemetode", _SPARGE_NAVN.get(st.session_state["prosess_sparge_method"], "—"))
+    info_col1.metric(t("pr.vanskelighetsgrad"), vanskelighetsgrad_visning(mal["vanskelighetsgrad"], sprak))
+    info_col2.metric(t("pr.ekstra_tid"), f"+{mal['ekstra_tid_min']} min" if mal["ekstra_tid_min"] else "—")
+    info_col3.metric(t("pr.skyllemetode"), sparge_navn(st.session_state["prosess_sparge_method"], sprak))
 
     if mal.get("beskrivelse"):
-        st.caption(mal["beskrivelse"])
+        st.caption(profiltekst_visning("beskrivelse", mal["beskrivelse"], valgt_id, sprak))
     if mal.get("utstyrsbegrensninger"):
-        st.caption(f"⚙️ **Utstyr:** {mal['utstyrsbegrensninger']}")
+        st.caption(t("pr.utstyr", x=profiltekst_visning("utstyrsbegrensninger", mal["utstyrsbegrensninger"], valgt_id, sprak)))
     if mal.get("forventet_paavirkning"):
-        st.caption(f"🧬 **Forventet påvirkning på kropp/utgjæring:** {mal['forventet_paavirkning']}")
+        st.caption(t("pr.paavirkning", x=profiltekst_visning("forventet_paavirkning", mal["forventet_paavirkning"], valgt_id, sprak)))
 
     _render_laer_bro(gjeldende_sprak())
 
@@ -271,29 +267,38 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
     # rendres fra den (eventuelt nettopp reparerte) prosess_mash_steps satt
     # over, og aldri kan vise en fysisk gjenværende, gammel widget-verdi.
     revisjon = st.session_state.get("_process_widget_revision", 0)
-    with st.expander("🌡️ Meskesteg (redigerbare)", expanded=False):
+    _stegtype_navn = {k: t(f"pp.stegtype.{k}") for k in _STEGTYPE_KEYS}
+    with st.expander(t("pr.meskesteg"), expanded=False):
         steg_liste = st.session_state["prosess_mash_steps"]
         slett_indeks = None
         for i, steg in enumerate(steg_liste):
             c1, c2, c3, c4, c5 = st.columns([1, 1, 1.3, 2.2, 0.5])
             steg["temperatur"] = c1.number_input(
-                "Temp (°C)", min_value=30.0, max_value=100.0, step=0.5,
+                t("pr.temp"), min_value=30.0, max_value=100.0, step=0.5,
                 value=float(steg["temperatur"]), key=f"mash_temp_{revisjon}_{i}",
             )
             steg["varighet"] = c2.number_input(
-                "Min", min_value=1, max_value=180, step=5,
+                t("pr.min"), min_value=1, max_value=180, step=5,
                 value=int(steg["varighet"]), key=f"mash_time_{revisjon}_{i}",
             )
             steg["stegtype"] = c3.selectbox(
-                "Type", options=_STEGTYPE_KEYS,
-                format_func=lambda k: _STEGTYPE_LABELS[k],
+                t("pr.type"), options=_STEGTYPE_KEYS,
+                format_func=lambda k: _stegtype_navn[k],
                 index=_STEGTYPE_KEYS.index(steg["stegtype"]) if steg["stegtype"] in _STEGTYPE_KEYS else 0,
                 key=f"mash_type_{revisjon}_{i}",
             )
-            steg["kommentar"] = c4.text_input(
-                "Kommentar", value=steg.get("kommentar", ""), key=f"mash_comment_{revisjon}_{i}",
+            # Standardprofilens kommentar vises i valgt språk, men det LAGREDE
+            # steget beholder sin norske tekst så lenge brukeren ikke har
+            # endret den (datakontrakten er uendret). Språket inngår i
+            # widgetnøkkelen slik at et språkbytte gir en fersk widget i
+            # riktig språk i stedet for å beholde den gamle visningsteksten.
+            _lagret_kommentar = steg.get("kommentar", "")
+            _vist_kommentar = mesketrinn_kommentar_visning(_lagret_kommentar, valgt_id, sprak)
+            _ny_kommentar = c4.text_input(
+                t("pr.kommentar"), value=_vist_kommentar, key=f"mash_comment_{revisjon}_{i}_{sprak}",
             )
-            if c5.button("🗑️", key=f"mash_delete_{revisjon}_{i}", help="Fjern steg"):
+            steg["kommentar"] = _lagret_kommentar if _ny_kommentar == _vist_kommentar else _ny_kommentar
+            if c5.button("🗑️", key=f"mash_delete_{revisjon}_{i}", help=t("pr.fjern_steg")):
                 slett_indeks = i
 
         if slett_indeks is not None and len(steg_liste) > 1:
@@ -301,7 +306,7 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
             _ny_widget_revisjon()
             st.rerun()
 
-        if st.button("➕ Legg til meskesteg", key="prosess_legg_til_steg"):
+        if st.button(t("pr.legg_til_steg"), key="prosess_legg_til_steg"):
             steg_liste.append({"temperatur": 66.0, "varighet": 20, "stegtype": INFUSJON, "kommentar": ""})
             _ny_widget_revisjon()
             st.rerun()
@@ -331,74 +336,73 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
             _nytt_navn = f"Egendefinert – basert på {navn_visning}"
             st.session_state["_prosess_pending_egendefinert_navn"] = _nytt_navn
             st.toast(
-                f"Redigering oppdaget — byttet til «{_nytt_navn}» slik at endringene dine ikke overskrives.",
+                t("pr.redigering_oppdaget", navn=profilnavn_visning(_nytt_navn, sprak, "egendefinert")),
                 icon="✏️",
             )
             st.rerun()
 
     st.session_state["prosess_boil_minutes"] = st.number_input(
-        "Total koketid (min)",
+        t("pr.total_koketid"),
         min_value=30, max_value=180, step=5,
         value=int(st.session_state["prosess_boil_minutes"]),
         key="prosess_boil_minutes_input",
     )
     st.session_state["prosess_sparge_method"] = st.selectbox(
-        "Skyllemetode",
+        t("pr.skyllemetode"),
         options=_SPARGE_KEYS,
-        format_func=lambda k: _SPARGE_NAVN[k],
+        format_func=lambda k: sparge_navn(k, sprak),
         index=_SPARGE_KEYS.index(st.session_state["prosess_sparge_method"]),
         key="prosess_sparge_method_input",
     )
 
     # ── Dekoksjon ────────────────────────────────────────────────────────
     if valgt_id == "enkel_dekoksjon":
-        with st.expander("🔥 Dekoksjonsdetaljer", expanded=False):
+        with st.expander(t("pr.dek_tittel"), expanded=False):
             vann_est = beregn_vann(total_malt_kg, ctx["volum"], st.session_state["prosess_boil_minutes"], eq,
                                     sparge_method=st.session_state["prosess_sparge_method"])
             d1, d2, d3 = st.columns(3)
-            fra = d1.number_input("Fra temp (°C)", min_value=30.0, max_value=90.0, step=0.5,
+            fra = d1.number_input(t("pr.dek_fra"), min_value=30.0, max_value=90.0, step=0.5,
                                    value=float(st.session_state["prosess_dek_fra"]), key="prosess_dek_fra_input")
-            til = d2.number_input("Til temp (°C)", min_value=30.0, max_value=100.0, step=0.5,
+            til = d2.number_input(t("pr.dek_til"), min_value=30.0, max_value=100.0, step=0.5,
                                    value=float(st.session_state["prosess_dek_til"]), key="prosess_dek_til_input")
-            koketid_dek = d3.number_input("Koketid uttak (min)", min_value=5, max_value=30, step=1,
+            koketid_dek = d3.number_input(t("pr.dek_koketid"), min_value=5, max_value=30, step=1,
                                            value=int(st.session_state["prosess_dek_koketid"]), key="prosess_dek_koketid_input")
             st.session_state["prosess_dek_fra"] = fra
             st.session_state["prosess_dek_til"] = til
             st.session_state["prosess_dek_koketid"] = koketid_dek
 
             foreslatt = beregn_dekoksjon_uttak(vann_est["mash_vann_l"], fra, til)
-            bruk_auto = st.checkbox("Bruk automatisk beregnet uttaksvolum", value=st.session_state["prosess_dek_uttak"] is None,
+            bruk_auto = st.checkbox(t("pr.dek_auto"), value=st.session_state["prosess_dek_uttak"] is None,
                                      key="prosess_dek_auto")
             if bruk_auto:
                 st.session_state["prosess_dek_uttak"] = None
-                st.metric("Foreslått uttaksvolum", f"{foreslatt:.2f} L")
+                st.metric(t("pr.dek_foreslatt"), f"{foreslatt:.2f} L")
             else:
                 st.session_state["prosess_dek_uttak"] = st.number_input(
-                    "Uttaksvolum (L) — overstyrt manuelt", min_value=0.0, max_value=50.0, step=0.5,
+                    t("pr.dek_manuell"), min_value=0.0, max_value=50.0, step=0.5,
                     value=float(st.session_state["prosess_dek_uttak"] or foreslatt), key="prosess_dek_uttak_input",
                 )
 
     # ── Reiterated mash ──────────────────────────────────────────────────
     if valgt_id == "reiterated_mash":
-        with st.expander("🔁 Dobbelmesk — vann- og volumflyt", expanded=False):
+        with st.expander(t("pr.rm_tittel"), expanded=False):
             andel = st.slider(
-                "Andel av maltmengden i mesk 1", min_value=0.1, max_value=0.9, step=0.05,
+                t("pr.rm_andel"), min_value=0.1, max_value=0.9, step=0.05,
                 value=float(st.session_state["prosess_mesk1_andel"]), key="prosess_mesk1_andel_input",
             )
             st.session_state["prosess_mesk1_andel"] = andel
-            flyt = beregn_reiterated_mash(total_malt_kg, andel, eq)
-            st.markdown(
-                f"**Mesk 1:** {flyt['malt_1_kg']:.2f} kg malt + {flyt['vann_mesk_1_l']:.1f} L ferskt vann "
-                f"→ **{flyt['vort_1_l']:.1f} L vørt**\n\n"
-                f"**Mesk 2:** {flyt['malt_2_kg']:.2f} kg malt + {flyt['vann_mesk_2_l']:.1f} L "
-                f"(= vørten fra mesk 1, IKKE ferskt vann) → **{flyt['vort_2_l']:.1f} L sluttvørt**"
-            )
+            flyt = beregn_reiterated_mash(total_malt_kg, andel, eq, sprak)
+            st.markdown(t(
+                "pr.rm_flyt", m1=f"{flyt['malt_1_kg']:.2f}", v1=f"{flyt['vann_mesk_1_l']:.1f}",
+                w1=f"{flyt['vort_1_l']:.1f}", m2=f"{flyt['malt_2_kg']:.2f}",
+                v2=f"{flyt['vann_mesk_2_l']:.1f}", w2=f"{flyt['vort_2_l']:.1f}",
+            ))
             for v in flyt["varsler"]:
                 st.warning(v)
 
     # ── Utstyrsvarsler ───────────────────────────────────────────────────
     aktiv_profil = _bygg_aktiv_profil(valgt_id, navn_visning, mal)
-    for varsel in sjekk_utstyrsbegrensninger(aktiv_profil, total_malt_kg, eq):
+    for varsel in sjekk_utstyrsbegrensninger(aktiv_profil, total_malt_kg, eq, sprak):
         st.warning(f"⚠️ {varsel}")
 
     # ── Humletid som overstiger total koketid ───────────────────────────
@@ -419,15 +423,13 @@ def render_process_panel(ctx, malt_database=None, humle_database=None):
             f"{(humle_database or {}).get(h['id'], {}).get('display_name', h['id'])} ({h['tid']} min)"
             for h in _humle_over_koketid
         )
-        st.warning(
-            f"⚠️ {len(_humle_over_koketid)} humletilsetning(er) har lengre egen koketid enn "
-            f"total koketid ({_total_koketid} min): {_humle_navn}. Disse kan ikke få full "
-            "IBU-utnyttelse innenfor denne koken — se «Humletilsetninger» i Bryggedag-fanen "
-            "for oppskriftens planlagte IBU vs. prosessens faktisk mulige IBU."
-        )
+        st.warning(t(
+            "pr.humle_over_varsel", n=len(_humle_over_koketid),
+            koketid=_total_koketid, navn=_humle_navn,
+        ))
 
     st.session_state["prosess_brukernotater"] = st.text_area(
-        "Egne notater om denne bryggemåten", value=st.session_state["prosess_brukernotater"],
+        t("pr.notater"), value=st.session_state["prosess_brukernotater"],
         key="prosess_brukernotater_input", height=80,
     )
     aktiv_profil["brukernotater"] = st.session_state["prosess_brukernotater"]
