@@ -1,5 +1,7 @@
 import streamlit as st
 
+from modules.style_engine import sorter_samlet_stiltreff
+
 def render_style_panel(ctx, humle_database):
     st.plotly_chart(ctx["fig_smak"], width="stretch", key="kvernhaug_smakshjul")
     
@@ -29,10 +31,7 @@ def render_style_panel(ctx, humle_database):
 
     st.write("---")
     st.subheader("🎯 Samlet stiltreff (inkl. signaturbonus, prosentvis):")
-    relevante_stiler = sorted(
-        [s for s in ctx['style_analysis']["stil_liste"] if s["score"] >= 5],
-        key=lambda x: (-x["score"], x["prio"])
-    )
+    relevante_stiler = sorter_samlet_stiltreff(ctx['style_analysis']["stil_liste"])
     if not relevante_stiler:
         st.caption("Ingen stiler matcher oppskriften din ennå.")
     for s_item in relevante_stiler:
