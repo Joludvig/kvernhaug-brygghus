@@ -689,6 +689,16 @@ TEKSTER = {
 }
 
 
+# Bryggedagsflyten (#548): bryggemåte, vannkjemi, bryggedagsplan og
+# eksportert ark. Tekstene ligger i modules/i18n_bryggedag.py kun for å
+# holde denne filen håndterbar; de slås inn her slik at t() og NO-fallback
+# er identiske for alle nøkler.
+from modules.i18n_bryggedag import BRYGGEDAG_TEKSTER as _BRYGGEDAG_TEKSTER
+
+for _sprak, _tekster in _BRYGGEDAG_TEKSTER.items():
+    TEKSTER[_sprak].update(_tekster)
+
+
 def t(nokkel: str, sprak: str = SPRAK_DEFAULT, **params) -> str:
     """Slår opp `nokkel` for `sprak`, med fallback til SPRAK_DEFAULT, og
     substituerer ``{param}``-plassholdere fra `params`.

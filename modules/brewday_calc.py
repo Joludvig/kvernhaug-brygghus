@@ -7,7 +7,7 @@ from modules.i18n import SPRAK_DEFAULT, t
 from modules.recipe import resolve_fermentation_temp_target_c
 from modules.process_profiles import (
     NO_SPARGE, beregn_dekoksjon_uttak, beregn_reiterated_mash,
-    sjekk_utstyrsbegrensninger,
+    sjekk_utstyrsbegrensninger, maskeplan_steg_visning,
 )
 
 # ── Brewing additions ─────────────────────────────────────────────────────────
@@ -145,6 +145,21 @@ def _gjaer_fermenteringstemp(gjaer_info, gjaer_key):
     }
 
 
+def tilsetning_visning(tilsetning, sprak=SPRAK_DEFAULT):
+    """Navn/dose/timing/note for en tilsetning i valgt språk. Tilsetningene i
+    TILSETNINGER er systemtekst (norsk, uendret som data); oversettes bare
+    ved visning via tilsetningens id. Ukjent id -> teksten uendret."""
+    tid = tilsetning.get("id")
+    if tid not in TILSETNINGER or sprak == SPRAK_DEFAULT:
+        return {f: tilsetning.get(f, "") for f in ("navn", "dose", "timing", "note")}
+    return {f: t(f"bd.tils.{tid}.{f}", sprak) for f in ("navn", "dose", "timing", "note")}
+
+
+def maskeplan_label_visning(steg, process_id, sprak=SPRAK_DEFAULT):
+    """Meskestegets label i valgt språk (se process_profiles.maskeplan_steg_visning)."""
+    return maskeplan_steg_visning(steg, process_id, sprak)
+
+
 def fermenteringstemp_linjer(plan, planlagt_c=None, sprak=SPRAK_DEFAULT):
     """Tekstlinjer for gjæringstemperatur, felles for appens bryggedagspanel
     og det eksporterte bryggedagsarket, slik at de ikke kan komme i utakt.
@@ -172,9 +187,9 @@ def fermenteringstemp_linjer(plan, planlagt_c=None, sprak=SPRAK_DEFAULT):
 
 
 def bryggedag_noter(plan, sprak=SPRAK_DEFAULT):
-    """Gjærnotene i valgt språk for panel og ark. Bare notene som har en
-    i18n-nøkkel i plan["noter_nokler"] (så langt lagernoten, #546) oversettes;
-    øvrige noter returneres uendret (eldre språkgjeld, se #548)."""
+    """Gjærnotene i valgt språk for panel og ark. Notene oversettes via
+    i18n-nøkkelen i plan["noter_nokler"] (#546/#548); en note uten nøkkel
+    (f.eks. fra en eldre plan) returneres uendret."""
     nokler = plan.get("noter_nokler") or []
     return [
         t(nokler[i], sprak) if i < len(nokler) and nokler[i] else note
@@ -322,15 +337,25 @@ def beregn_post_boil_og(pre_boil_sg, pre_boil_vol, post_boil_vol):
     return round(1.0 + (pre_boil_sg - 1.0) * pre_boil_vol / post_boil_vol, 4)
 
 
+_STEGTYPE_NOKLER = {
+    "pp.stegtype.infusjon", "pp.stegtype.mashout",
+    "pp.stegtype.dekoksjon_uttak", "pp.stegtype.dekoksjon_retur",
+}
+
+
 def _maskeplan_fra_profil(process_profile):
     """Konverterer en prosessprofils mash_steps (temperatur/varighet/stegtype/
     kommentar) til den interne maskeplan-formen (temp_c/varighet_min/label)
     som bryggedagsark-malene allerede vet hvordan de skal vise fram."""
+    # `label_nokkel` settes bare når labelen er appens EGEN stegtype-fallback
+    # (tom kommentar) — aldri for en kommentar, som er profilens/brukerens tekst.
     return [
         {
             "temp_c": steg["temperatur"],
             "varighet_min": steg["varighet"],
             "label": steg.get("kommentar") or steg.get("stegtype", "").replace("_", " ").capitalize(),
+            **({} if steg.get("kommentar") or f"pp.stegtype.{steg.get('stegtype')}" not in _STEGTYPE_NOKLER
+               else {"label_nokkel": f"pp.stegtype.{steg['stegtype']}"}),
         }
         for steg in process_profile["mash_steps"]
     ]
@@ -356,7 +381,8 @@ def _dekoksjonsplan(process_profile, mash_vann_l):
 
 
 def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volum_l, humle_database,
-                      malt_database=None, tilsetninger_valgt=None, process_profile=None):
+                      malt_database=None, tilsetninger_valgt=None, process_profile=None,
+                      sprak=SPRAK_DEFAULT):
     eq            = last_equipment()
     total_korn_kg = sum(m["mengde"] for m in malt_valg)
     malt_ider     = {m["id"] for m in malt_valg}
@@ -371,8 +397,8 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
     else:
         koketid   = _koketid(malt_ider, eq["default_boil_time_min"])
         maskeplan = [
-            {"temp_c": 66, "varighet_min": 60, "label": "Mashing"},
-            {"temp_c": 78, "varighet_min": 5,  "label": "Mashout"},
+            {"temp_c": 66, "varighet_min": 60, "label": "Mashing", "label_nokkel": "bd.mesk.mashing"},
+            {"temp_c": 78, "varighet_min": 5,  "label": "Mashout", "label_nokkel": "pp.stegtype.mashout"},
         ]
 
     sparge_method        = (process_profile or {}).get("sparge_method")
@@ -386,10 +412,10 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
     reiterated_flyt = None
     if process_profile and process_profile.get("reiterated_mash"):
         andel = process_profile["reiterated_mash"].get("mesk_1_andel", 0.5)
-        reiterated_flyt = beregn_reiterated_mash(total_korn_kg, andel, eq)
+        reiterated_flyt = beregn_reiterated_mash(total_korn_kg, andel, eq, sprak)
 
     utstyrsvarsler = (
-        sjekk_utstyrsbegrensninger(process_profile, total_korn_kg, eq)
+        sjekk_utstyrsbegrensninger(process_profile, total_korn_kg, eq, sprak)
         if process_profile else []
     )
 
@@ -436,13 +462,16 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
         noter_nokler.append("bryggedag.gjaer_note.lager")
     elif gjaer_key == "kveik":
         noter.append("Kveik — tåler høy temperatur (30–40°C). Underpitching er OK.")
+        noter_nokler.append("bd.gjaer_note.kveik")
     elif gjaer_key == "saison":
         noter.append("Saison — start lavt (20°C), la temperaturen stige gradvis til 26°C.")
+        noter_nokler.append("bd.gjaer_note.saison")
     elif gjaer_key == "belgisk ale":
         noter.append("Belgisk gjær — temperatur påvirker esterkarakter sterkt. Start lavt for ryddigere profil.")
+        noter_nokler.append("bd.gjaer_note.belgisk")
 
     valgte_tilsetninger = [
-        TILSETNINGER[k] for k in (tilsetninger_valgt or [])
+        {**TILSETNINGER[k], "id": k} for k in (tilsetninger_valgt or [])
         if k in TILSETNINGER
     ]
 

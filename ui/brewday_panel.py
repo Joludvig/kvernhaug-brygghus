@@ -3,11 +3,12 @@ from config import DEMO_MODE
 from modules.brewday_calc import (
     lag_brewday_plan, TILSETNINGER,
     beregn_effektivitet, beregn_post_boil_og, fermenteringstemp_linjer, bryggedag_noter,
+    tilsetning_visning, maskeplan_label_visning,
 )
 from modules.calculations import beregn_abv_standard
 from modules.kbhbrew_history_ui import parse_actual_tallfelt
 from modules.kbhbrew_storage import hent_brew, oppdater_brew_lag
-from modules.process_profiles import normaliser_prosessprofil
+from modules.process_profiles import normaliser_prosessprofil, profilnavn_visning
 from modules.export_format import fmt_og, fmt_fg, fmt_abv, stats_linje
 from modules.brewday_template import render_brewday_html
 from ui.kbhbrew_panel import aktiv_brew_id, render_kbhbrew_create_panel
@@ -21,10 +22,9 @@ from ui.i18n import gjeldende_sprak, t as _t
 # ui/kbhbrew_history_panel.py sin _UKJENT_SENTINEL.
 _BD_MAALINGER_INGEN_SENTINEL = object()
 
-_SJEKKLISTE = [
-    "Utstyr rent", "Meskevann varmt", "Skylling ferdig", "Kok startet",
-    "Humle tilsatt", "Nedkjøling ferdig", "Gjær tilsatt", "Gjæring startet",
-]
+# Sjekklistepunktene vises via i18n-nøklene bdp.sjekk.0..7 (samme rekkefølge,
+# og dermed samme widgetnøkler bd_chk_<i>, som før #548).
+_SJEKKLISTE_ANTALL = 8
 
 _BD_DEFAULTS = [
     ("bd_tilsetninger", []),
@@ -82,7 +82,9 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         malt_database      = malt_database,
         tilsetninger_valgt = st.session_state.get("bd_tilsetninger", []),
         process_profile    = prosess_profil,
+        sprak              = gjeldende_sprak(),
     )
+    sprak = gjeldende_sprak()
 
     # ── HEADER (alltid synlig) ───────────────────────────────────────────────
     st.subheader(ctx["name"])
@@ -90,15 +92,15 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         st.caption(ctx["brygger_stil"])
     st.caption(stats_linje(ctx))
     if plan.get("prosess_profil"):
-        st.caption(f"🧭 Bryggemåte: **{plan['prosess_profil']['navn']}**")
+        st.caption(_t("bdp.bryggemaate", navn=profilnavn_visning(plan['prosess_profil']['navn'], sprak, plan['prosess_profil'].get('process_id'))))
 
     bi1, bi2, bi3 = st.columns(3)
     with bi1:
-        st.text_input("Batchnummer", placeholder="f.eks. 2026-001", key="bd_batchnr")
+        st.text_input(_t("bdp.batchnr"), placeholder=_t("bdp.batchnr.placeholder"), key="bd_batchnr")
     with bi2:
-        st.date_input("Bryggedato", key="bd_dato")
+        st.date_input(_t("bdp.dato"), key="bd_dato")
     with bi3:
-        st.text_input("Brygger", placeholder="Navn", key="bd_brygger")
+        st.text_input(_t("bdp.brygger"), placeholder=_t("bdp.brygger.placeholder"), key="bd_brygger")
 
     render_kbhbrew_create_panel(ctx, malt_database, humle_database, gjaer_database)
     render_kbhbrew_history_panel(malt_database, humle_database, gjaer_database)
@@ -144,47 +146,45 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
     st.write("---")
 
     # ── STEG 1: BRYGGEPLAN ──────────────────────────────────────────────────
-    with st.expander("🗒️ 1. Bryggeplan", expanded=True):
+    with st.expander(_t("bdp.steg1"), expanded=True):
         bd_left, bd_right = st.columns(2)
 
         with bd_left:
-            st.markdown(f"**🌾 Malt — {plan['total_korn_kg']:.2f} kg**")
+            st.markdown(_t("bdp.malt_tittel", kg=f"{plan['total_korn_kg']:.2f}"))
             for i, m in enumerate(plan["malt_liste"]):
                 st.checkbox(f"{m['mengde']:.2f} kg — {m['navn']}", key=f"bd_malt_{i}")
 
             st.write("")
-            st.markdown("**💧 Vann**")
+            st.markdown(_t("bdp.vann_tittel"))
             w = plan["vann"]
             c1, c2, c3 = st.columns(3)
-            c1.metric("Meskevann",  f"{w['mash_vann_l']:.1f} L")
-            c2.metric("Skyllevann", f"{w['sparge_vann_l']:.1f} L")
-            c3.metric("Pre-boil",   f"{w['pre_boil_l']:.1f} L")
+            c1.metric(_t("bdp.meskevann"),  f"{w['mash_vann_l']:.1f} L")
+            c2.metric(_t("bdp.skyllevann"), f"{w['sparge_vann_l']:.1f} L")
+            c3.metric(_t("bdp.preboil"),    f"{w['pre_boil_l']:.1f} L")
 
             if plan["brewzilla_varsel"]:
-                st.warning(
-                    f"⚠️ **BrewZilla 35 Gen4:** Estimert pre-boil {w['pre_boil_l']:.1f} L "
-                    f"overskrider anbefalt maks 30 L. Vurder å redusere batchstørrelse."
-                )
+                st.warning(_t("bdp.brewzilla_varsel", l=f"{w['pre_boil_l']:.1f}"))
 
             st.write("")
-            st.markdown("**🌡️ Mesking**")
+            st.markdown(_t("bdp.mesking_tittel"))
             for steg in plan["maskeplan"]:
-                st.write(f"- {steg['temp_c']}°C  ·  {steg['varighet_min']} min  —  *{steg['label']}*")
+                st.write(
+                    f"- {steg['temp_c']}°C  ·  {steg['varighet_min']} min  —  "
+                    f"*{maskeplan_label_visning(steg, (plan.get('prosess_profil') or {}).get('process_id'), sprak)}*"
+                )
 
             if plan.get("dekoksjon"):
                 d = plan["dekoksjon"]
-                st.caption(
-                    f"🔥 Dekoksjon: ta ut **{d['uttak_liter']:.2f} L** tykkmesk ved "
-                    f"{d['fra_temp_c']}°C, kok {d['koketid_min']} min, før tilbake "
-                    f"for å nå {d['til_temp_c']}°C."
-                )
+                st.caption(_t(
+                    "bdp.dekoksjon", uttak=f"{d['uttak_liter']:.2f}", fra=d['fra_temp_c'],
+                    min=d['koketid_min'], til=d['til_temp_c'],
+                ))
             if plan.get("reiterated_mash_flyt"):
                 r = plan["reiterated_mash_flyt"]
-                st.caption(
-                    f"🔁 Dobbelmesk: Mesk 1 ({r['malt_1_kg']:.2f} kg + {r['vann_mesk_1_l']:.1f} L "
-                    f"ferskt vann → {r['vort_1_l']:.1f} L vørt) brukes som meskevann til "
-                    f"Mesk 2 ({r['malt_2_kg']:.2f} kg → {r['vort_2_l']:.1f} L sluttvørt)."
-                )
+                st.caption(_t(
+                    "bdp.dobbelmesk", m1=f"{r['malt_1_kg']:.2f}", v1=f"{r['vann_mesk_1_l']:.1f}",
+                    w1=f"{r['vort_1_l']:.1f}", m2=f"{r['malt_2_kg']:.2f}", w2=f"{r['vort_2_l']:.1f}",
+                ))
                 for v in r["varsler"]:
                     st.warning(v)
 
@@ -192,28 +192,25 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
                 st.warning(f"⚠️ {varsel}")
 
             st.write("")
-            st.markdown("**🔥 Koking**")
+            st.markdown(_t("bdp.koking_tittel"))
             e1, e2, e3 = st.columns(3)
-            e1.metric("Koketid",        f"{plan['koketid_min']} min")
-            e2.metric("Est. koketap",   f"{plan['estimert_koketap_l']:.1f} L")
-            e3.metric("Est. post-boil", f"{plan['estimert_post_boil_l']:.1f} L")
+            e1.metric(_t("bdp.koketid"),        f"{plan['koketid_min']} min")
+            e2.metric(_t("bdp.koketap"),        f"{plan['estimert_koketap_l']:.1f} L")
+            e3.metric(_t("bdp.postboil_est"),   f"{plan['estimert_post_boil_l']:.1f} L")
             if not plan.get("prosess_profil") and plan["koketid_min"] == 90:
-                st.caption("90 min anbefalt for Pilsnermalt.")
+                st.caption(_t("bd.kok.pilsner_anbefalt"))
 
         with bd_right:
-            st.markdown("**🌿 Humletilsetninger**")
+            st.markdown(_t("bdp.humle_tittel"))
             if plan["humleplan"]:
-                header = "| Tid igjen | Tilsatt etter | Humle | Gram | IBU |\n|-----|-----|-------|------|-----|"
+                header = _t("bdp.humle_header") + "\n|-----|-----|-------|------|-----|"
                 rows   = "\n".join(
                     f"| {'⚠️ ' if h['tid_over_koketid'] else ''}{h['tid']} min "
                     f"| {h['tilsatt_etter_min']} min | {h['navn']} | {h['gram']:.0f} g | {h['ibu_bidrag']:.1f} |"
                     for h in plan["humleplan"]
                 )
                 st.markdown(f"{header}\n{rows}")
-                st.caption(
-                    "«Tid igjen» = humlens egen koketid. «Tilsatt etter» = minutter "
-                    f"etter kokestart, gitt {plan['koketid_min']} min total koketid."
-                )
+                st.caption(_t("bdp.humle_forklaring", koketid=plan['koketid_min']))
 
                 # Umulig humletid: en tilsetning med lengre egen koketid enn
                 # selve kokens totale lengde kan ikke fysisk oppnå IBU-en
@@ -225,74 +222,72 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
                     _humle_navn = ", ".join(
                         f"{h['navn']} ({h['tid']} min)" for h in plan["humle_over_koketid"]
                     )
-                    st.warning(
-                        f"⚠️ {len(plan['humle_over_koketid'])} humle markert over har lengre "
-                        f"egen koketid enn total koketid ({plan['koketid_min']} min): {_humle_navn}. "
-                        "IBU-tabellen over viser oppskriftens PLANLAGTE bidrag (uendret tid) — "
-                        "se sammenligningen under for hva som faktisk er oppnåelig i denne koken."
-                    )
+                    st.warning(_t(
+                        "bdp.humle_over_varsel", n=len(plan['humle_over_koketid']),
+                        koketid=plan['koketid_min'], navn=_humle_navn,
+                    ))
                     ibu_c1, ibu_c2 = st.columns(2)
-                    ibu_c1.metric("IBU — oppskriftens planlagte", f"{plan['ibu_planlagt']:.1f}")
+                    ibu_c1.metric(_t("bdp.ibu_planlagt"), f"{plan['ibu_planlagt']:.1f}")
                     ibu_c2.metric(
-                        "IBU — prosessens faktisk mulige", f"{plan['ibu_faktisk_prosess']:.1f}",
+                        _t("bdp.ibu_faktisk"), f"{plan['ibu_faktisk_prosess']:.1f}",
                         delta=f"{plan['ibu_faktisk_prosess'] - plan['ibu_planlagt']:.1f}",
                         delta_color="inverse",
                     )
             else:
-                st.caption("Ingen humle i oppskriften.")
+                st.caption(_t("bdp.ingen_humle"))
 
             st.write("")
-            st.markdown("**🧫 Gjær & Fermentering**")
-            st.write(f"- **{plan['gjaer_navn']}** — {plan['pakker']} pakke(r)")
+            st.markdown(_t("bdp.gjaer_tittel"))
+            st.write(_t("bdp.gjaer_pakker", navn=plan['gjaer_navn'], pakker=plan['pakker']))
             for _temp_linje in fermenteringstemp_linjer(
                 plan, (ctx.get("recipe") or {}).get("fermentation_temp_target_c"),
-                gjeldende_sprak(),
+                sprak,
             ):
                 st.write(f"- {_temp_linje}")
-            for note in bryggedag_noter(plan, gjeldende_sprak()):
+            for note in bryggedag_noter(plan, sprak):
                 st.info(note)
 
             st.write("")
-            st.markdown("**🧪 Tilsetninger**")
+            st.markdown(_t("bdp.tils_tittel"))
             st.multiselect(
-                "Velg tilsetninger",
+                _t("bdp.tils_velg"),
                 options=list(TILSETNINGER.keys()),
-                format_func=lambda k: TILSETNINGER[k]["navn"],
+                format_func=lambda k: tilsetning_visning({**TILSETNINGER[k], "id": k}, sprak)["navn"],
                 key="bd_tilsetninger",
                 label_visibility="collapsed",
             )
             for k in st.session_state.get("bd_tilsetninger", []):
-                t = TILSETNINGER[k]
-                st.caption(f"**{t['navn']}** · {t['dose']} · {t['timing']}")
+                tv = tilsetning_visning({**TILSETNINGER[k], "id": k}, sprak)
+                st.caption(f"**{tv['navn']}** · {tv['dose']} · {tv['timing']}")
 
     # ── STEG 2: MESKING ─────────────────────────────────────────────────────
-    with st.expander("🌡️ 2. Mesking"):
+    with st.expander(_t("bdp.steg2")):
         m_left, m_right = st.columns(2)
         with m_left:
-            st.text_input("Meskestart", placeholder="08:30", key="bd_mash_start")
-            st.text_input("Meskeslutt", placeholder="09:30", key="bd_mash_end")
+            st.text_input(_t("bdp.mesk_start"), placeholder="08:30", key="bd_mash_start")
+            st.text_input(_t("bdp.mesk_slutt"), placeholder="09:30", key="bd_mash_end")
         with m_right:
             t1, t2, t3 = st.columns(3)
-            t1.number_input("Temp obs. 1 (°C)", min_value=0.0, max_value=100.0, step=0.5,
+            t1.number_input(_t("bdp.mesk_temp", n=1), min_value=0.0, max_value=100.0, step=0.5,
                             format="%.1f", key="bd_mash_temp_1")
-            t2.number_input("Temp obs. 2 (°C)", min_value=0.0, max_value=100.0, step=0.5,
+            t2.number_input(_t("bdp.mesk_temp", n=2), min_value=0.0, max_value=100.0, step=0.5,
                             format="%.1f", key="bd_mash_temp_2")
-            t3.number_input("Temp obs. 3 (°C)", min_value=0.0, max_value=100.0, step=0.5,
+            t3.number_input(_t("bdp.mesk_temp", n=3), min_value=0.0, max_value=100.0, step=0.5,
                             format="%.1f", key="bd_mash_temp_3")
 
     # ── STEG 3: KOKING & PRØVER ─────────────────────────────────────────────
-    with st.expander("🔥 3. Koking & Prøver"):
-        st.markdown("**📐 Pre-boil målinger**")
+    with st.expander(_t("bdp.steg3")):
+        st.markdown(_t("bdp.preboil_maalinger"))
         pb1, pb2, pb3 = st.columns(3)
         with pb1:
             pre_boil_vol = st.number_input(
-                "Pre-boil volum (L)",
+                _t("bdp.preboil_vol"),
                 min_value=0.0, max_value=50.0, step=0.5, format="%.1f",
                 key="bd_pre_boil_vol",
             )
         with pb2:
             pre_boil_sg = st.number_input(
-                "Pre-boil SG",
+                _t("bdp.preboil_sg"),
                 min_value=1.000, max_value=1.200, step=0.001, format="%.3f",
                 key="bd_pre_boil_sg",
             )
@@ -300,83 +295,83 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             koketap      = plan["estimert_koketap_l"]
             post_boil_est = max(0.0, pre_boil_vol - koketap) if pre_boil_vol > 0 else 0.0
             st.metric(
-                "Estimert post-boil",
+                _t("bdp.postboil_estimert"),
                 f"{post_boil_est:.1f} L" if post_boil_est > 0 else "—",
-                help=f"Pre-boil minus {koketap:.1f} L estimert koketap",
+                help=_t("bdp.postboil_hjelp", koketap=f"{koketap:.1f}"),
             )
 
         if pre_boil_vol > 30.0:
-            st.warning(
-                f"⚠️ Målt pre-boil {pre_boil_vol:.1f} L overskrider BrewZilla 35 anbefalt maks (30 L)."
-            )
+            st.warning(_t("bdp.preboil_over_30", l=f"{pre_boil_vol:.1f}"))
 
         if pre_boil_sg > 1.001 and pre_boil_vol > 0 and post_boil_est > 0:
             forventet_og = beregn_post_boil_og(pre_boil_sg, pre_boil_vol, post_boil_est)
             og_diff      = forventet_og - ctx["og"]
             st.write("")
             fo1, fo2, fo3 = st.columns(3)
-            fo1.metric("Planlagt OG",           fmt_og(ctx["og"]))
-            fo2.metric("Forventet OG (etter kok)", fmt_og(forventet_og))
-            fo3.metric("Avvik",                 f"{og_diff:+.3f}",
+            fo1.metric(_t("bdp.planlagt_og"),   fmt_og(ctx["og"]))
+            fo2.metric(_t("bdp.forventet_og"),  fmt_og(forventet_og))
+            fo3.metric(_t("bdp.avvik"),         f"{og_diff:+.3f}",
                        delta_color="inverse" if abs(og_diff) > 0.005 else "off")
 
         # Koking-tilsetninger
-        kok_sett = [t for t in plan["tilsetninger"] if t["fase"] == "koking"]
+        kok_sett = [x for x in plan["tilsetninger"] if x["fase"] == "koking"]
         if kok_sett:
             st.write("")
-            st.markdown("**🧪 Tilsetninger i koking**")
-            for t in kok_sett:
-                st.write(f"- **{t['navn']}** · {t['dose']} · {t['timing']}")
-                st.caption(f"  {t['note']}")
+            st.markdown(_t("bdp.kok_tils_tittel"))
+            for tilsetning in kok_sett:
+                tv = tilsetning_visning(tilsetning, sprak)
+                st.write(f"- **{tv['navn']}** · {tv['dose']} · {tv['timing']}")
+                st.caption(f"  {tv['note']}")
 
         st.write("")
-        st.markdown("**📐 Post-boil**")
+        st.markdown(_t("bdp.postboil_tittel"))
         st.number_input(
-            "Post-boil volum (L)",
+            _t("bdp.postboil_vol"),
             min_value=0.0, max_value=50.0, step=0.5, format="%.1f",
             key="bd_post_boil_vol",
         )
 
     # ── STEG 4: OVERFØRING & OG ─────────────────────────────────────────────
-    with st.expander("⚗️ 4. Overføring & OG"):
+    with st.expander(_t("bdp.steg4")):
         ov1, ov2, ov3 = st.columns(3)
         with ov1:
             st.text_input(
-                f"OG (mål: {fmt_og(ctx['og'])})", placeholder="Faktisk", key="bd_og",
+                _t("bdp.og_maal", x=fmt_og(ctx['og'])), placeholder=_t("bdp.faktisk"), key="bd_og",
             )
         with ov2:
             st.number_input(
-                "Pitching-temperatur (°C)",
+                _t("bdp.pitch_temp"),
                 min_value=0.0, max_value=40.0, step=0.5, format="%.1f",
                 key="bd_pitch_temp",
             )
         with ov3:
             st.text_input(
-                "Notat ved overføring", placeholder="f.eks. klart, god aroma",
+                _t("bdp.overforing_notat"), placeholder=_t("bdp.overforing_notat.placeholder"),
                 key="bd_transfer_note",
             )
 
     # ── STEG 5: GJÆRING ─────────────────────────────────────────────────────
-    with st.expander("🧬 5. Gjæring"):
-        gjær_sett = [t for t in plan["tilsetninger"] if t["fase"] == "gjæring"]
-        for t in gjær_sett:
-            st.info(f"**{t['navn']}:** {t['dose']} — {t['note']}")
+    with st.expander(_t("bdp.steg5")):
+        gjær_sett = [x for x in plan["tilsetninger"] if x["fase"] == "gjæring"]
+        for tilsetning in gjær_sett:
+            tv = tilsetning_visning(tilsetning, sprak)
+            st.info(f"**{tv['navn']}:** {tv['dose']} — {tv['note']}")
 
         ferm1, ferm2 = st.columns(2)
         with ferm1:
-            st.date_input("Gjæringsstart", key="bd_ferm_start")
+            st.date_input(_t("bdp.gjaering_start"), key="bd_ferm_start")
         with ferm2:
-            st.date_input("Cold crash / tapping", key="bd_ferm_slutt")
+            st.date_input(_t("bdp.coldcrash"), key="bd_ferm_slutt")
 
         mon1, mon2 = st.columns(2)
         with mon1:
             st.text_input(
-                "Inkbird-temperatur (°C)", placeholder="f.eks. 20.2",
+                _t("bdp.inkbird"), placeholder=_t("bdp.inkbird.placeholder"),
                 key="bd_inkbird_temp",
             )
         with mon2:
             st.text_input(
-                "Gjæringstrykk", placeholder="f.eks. 0.8 bar",
+                _t("bdp.trykk"), placeholder=_t("bdp.trykk.placeholder"),
                 key="bd_ferm_pressure",
             )
 
@@ -384,18 +379,18 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
         fg1, fg2, fg3 = st.columns(3)
         with fg1:
             st.text_input(
-                f"FG (mål: {fmt_fg(ctx['fg'])})", placeholder="Faktisk", key="bd_fg",
+                _t("bdp.fg_maal", x=fmt_fg(ctx['fg'])), placeholder=_t("bdp.faktisk"), key="bd_fg",
             )
         with fg2:
             st.text_input(
-                f"ABV (mål: {fmt_abv(ctx['abv'])})", placeholder="Beregnet", key="bd_abv",
+                _t("bdp.abv_maal", x=fmt_abv(ctx['abv'])), placeholder=_t("bdp.beregnet"), key="bd_abv",
             )
         with fg3:
             try:
                 og_f  = float(st.session_state.get("bd_og", "") or 0)
                 fg_f  = float(st.session_state.get("bd_fg", "") or 0)
                 if og_f > 1.001 and fg_f > 1.000:
-                    st.metric("Beregnet ABV", f"{beregn_abv_standard(og_f, fg_f):.1f}%")
+                    st.metric(_t("bdp.beregnet_abv"), f"{beregn_abv_standard(og_f, fg_f):.1f}%")
             except (ValueError, TypeError):
                 # Inkluderer Core sin ValueError for ugyldig måling
                 # (f.eks. FG > OG) -- ingen metric vises da, i stedet
@@ -415,17 +410,14 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
     # create_panel()/render_kbhbrew_history_panel().
     if not DEMO_MODE:
         st.write("---")
-        st.markdown("**💾 Lagre målinger til aktivt brygg**")
+        st.markdown(_t("bdp.lagre_tittel"))
         _lagre_mal_brew_id = aktiv_brew_id()
         _lagre_mal_brew = hent_brew(_lagre_mal_brew_id) if _lagre_mal_brew_id else None
         if _lagre_mal_brew is None:
-            st.caption(
-                "Ingen aktivt brygg å lagre til. Start et brygg med «▶️ Start nytt "
-                "brygg» øverst, eller velg et brygg i Brygghistorikk over."
-            )
+            st.caption(_t("bdp.lagre_ingen_aktivt"))
         else:
-            _lagre_mal_navn = ((_lagre_mal_brew.get("snapshot") or {}).get("recipe") or {}).get("navn") or "(uten navn)"
-            st.caption(f"Målbrygg: **{_lagre_mal_navn}** · `{_lagre_mal_brew_id}`")
+            _lagre_mal_navn = ((_lagre_mal_brew.get("snapshot") or {}).get("recipe") or {}).get("navn") or _t("bdp.uten_navn")
+            st.caption(_t("bdp.lagre_maal", navn=_lagre_mal_navn, id=_lagre_mal_brew_id))
             # App A3 (issue #237, fiks A3-3) -- Brygghistorikk sitt
             # eksplisitte utvalg retargetterer BEVISST dette skrivemålet
             # (App A1, issue #170 "Identity safety" #3) -- det beholdes
@@ -440,7 +432,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
                     status=_t(f"brew_history.status.{_lagre_mal_brew.get('status')}"),
                 ))
         if st.button(
-            "💾 Lagre OG/FG/post-boil-volum + bryggedato",
+            _t("bdp.lagre_knapp"),
             key="bd_lagre_maalinger_btn",
             disabled=_lagre_mal_brew is None,
         ):
@@ -452,7 +444,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             if not _fg_ok:
                 _ugyldige_felt.append("FG")
             if _ugyldige_felt:
-                st.error(f"❌ Ugyldig tall i felt: {', '.join(_ugyldige_felt)}. Ingenting ble lagret.")
+                st.error(_t("bdp.lagre_ugyldig", felt=", ".join(_ugyldige_felt)))
             else:
                 _post_boil_verdi = st.session_state.get("bd_post_boil_vol", 0.0)
                 _bd_dato_verdi = st.session_state.get("bd_dato")
@@ -465,10 +457,10 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
                     },
                     brewed_at=_bd_dato_verdi.isoformat() if hasattr(_bd_dato_verdi, "isoformat") else "",
                 )
-                st.success(f"✅ Lagret til `{_lagre_mal_brew_id}`")
+                st.success(_t("bdp.lagre_ok", id=_lagre_mal_brew_id))
 
     # ── STEG 6: EFFEKTIVITET ────────────────────────────────────────────────
-    with st.expander("📊 6. Effektivitet"):
+    with st.expander(_t("bdp.steg6")):
         pre_sg  = st.session_state.get("bd_pre_boil_sg",  1.000)
         pre_vol = st.session_state.get("bd_pre_boil_vol", 0.0)
         try:
@@ -487,26 +479,26 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
 
         ef1, ef2, ef3 = st.columns(3)
         ef1.metric(
-            "Maskeeffektivitet",
+            _t("bdp.eff_mesk"),
             f"{eff['mash_eff'] * 100:.1f}%" if pre_sg > 1.001 and pre_vol > 0 else "—",
         )
         ef2.metric(
-            "Brygghuseffektivitet",
+            _t("bdp.eff_bryggeri"),
             f"{eff['brewhouse_eff'] * 100:.1f}%" if og_faktisk > 1.001 else "—",
         )
-        ef3.metric("Planlagt effektivitet", f"{ctx['effektivitet'] * 100:.0f}%")
+        ef3.metric(_t("bdp.eff_planlagt"), f"{ctx['effektivitet'] * 100:.0f}%")
 
         if pre_sg <= 1.001 or pre_vol <= 0:
-            st.caption("Fyll inn pre-boil SG og volum (Steg 3) for maskeeffektivitet.")
+            st.caption(_t("bdp.eff_fyll_mesk"))
         if og_faktisk <= 1.001:
-            st.caption("Fyll inn faktisk OG (Steg 4) for brygghuseffektivitet.")
+            st.caption(_t("bdp.eff_fyll_bryggeri"))
 
     # ── SJEKKLISTE ──────────────────────────────────────────────────────────
     st.write("---")
-    st.markdown("**✅ Bryggedags-sjekkliste**")
+    st.markdown(_t("bdp.sjekkliste_tittel"))
     chk_cols = st.columns(4)
-    for i, item in enumerate(_SJEKKLISTE):
-        chk_cols[i % 4].checkbox(item, key=f"bd_chk_{i}")
+    for i in range(_SJEKKLISTE_ANTALL):
+        chk_cols[i % 4].checkbox(_t(f"bdp.sjekk.{i}"), key=f"bd_chk_{i}")
 
     # ── PRINT-ARK ───────────────────────────────────────────────────────────
     st.write("")
@@ -533,12 +525,12 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             + ",".join(f"{h['navn']}:{h['tid']}" for h in plan["humle_over_koketid"])
         )
         _eksport_ok = st.checkbox(
-            "Jeg har sett avviket mellom planlagt og faktisk mulig IBU over, og vil eksportere likevel",
+            _t("bdp.bekreft_avvik"),
             key=f"bd_bekreft_humletid_avvik::{_avvik_signatur}",
         )
         if not _eksport_ok:
-            st.caption("🔒 Bryggedagsarket er låst til avviket over er bekreftet.")
-    if st.button("🖨️ Generer Bryggedagsark", width="stretch", key="brewday_print_btn", disabled=not _eksport_ok):
+            st.caption(_t("bdp.last_avvik"))
+    if st.button(_t("bdp.generer"), width="stretch", key="brewday_print_btn", disabled=not _eksport_ok):
         log = {
             "pre_boil_sg":   st.session_state.get("bd_pre_boil_sg",  1.000),
             "pre_boil_vol":  st.session_state.get("bd_pre_boil_vol", 0.0),
@@ -556,14 +548,14 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             "behandling": st.session_state.get("aktiv_vannbehandling"),
             "maalinger":  st.session_state.get("aktiv_vannmaalinger"),
         }
-        html     = render_brewday_html(ctx, plan, log, water=water, sprak=gjeldende_sprak())
+        html     = render_brewday_html(ctx, plan, log, water=water, sprak=sprak)
         fil_navn = ctx["name"].replace(" ", "_").replace("/", "-") + "_bryggedag.html"
         st.download_button(
-            label="📥 Last ned bryggedagsark",
+            label=_t("bdp.last_ned"),
             data=html,
             file_name=fil_navn,
             mime="text/html",
             width="stretch",
             key="brewday_download_btn",
         )
-        st.info("💡 Åpne filen i nettleseren og trykk **Ctrl + P** for å skrive ut.")
+        st.info(_t("bdp.print_hint"))

@@ -215,8 +215,8 @@ class TestGjaerpanelHjelpEr(unittest.TestCase):
 
 class TestSprakNoOgEn(unittest.TestCase):
     """Faktisk rendret NO/EN for panel (via felles helper + ekte AppTest) og
-    eksportert ark. Eldre språkgjeld i resten av bryggedagsvisningen er
-    registrert separat (#548) og testes ikke her."""
+    eksportert ark. Resten av bryggedagsflyten dekkes av
+    tests/test_brewday_flow_i18n.py (#548)."""
 
     def setUp(self):
         self.w = _plan("saflager_w3470", _GJAER["saflager_w3470"])
@@ -243,10 +243,13 @@ class TestSprakNoOgEn(unittest.TestCase):
         self.assertEqual(bryggedag_noter(self.w, "no"), ["Lagergjær — fermenterer kaldere enn ale. Bruk dobbel pitching rate."])
         self.assertEqual(bryggedag_noter(self.w, "en"), ["Lager yeast — ferments cooler than ale. Use a double pitching rate."])
 
-    def test_ukjent_sprak_faller_tilbake_til_norsk_og_andre_noter_urort(self):
+    def test_ukjent_sprak_faller_tilbake_til_norsk(self):
         self.assertIn("Produsentens", fermenteringstemp_linjer(self.w, None, "xx")[0])
         kveik = _plan("k", {"display_name": "K", "gjaertype": "Kveik"})
-        self.assertEqual(bryggedag_noter(kveik, "en"), kveik["noter"])  # ikke utvidet (#548)
+        self.assertEqual(bryggedag_noter(kveik, "xx"), kveik["noter"])
+        self.assertEqual(bryggedag_noter(kveik, "no"), kveik["noter"])
+        # #548: kveik-noten har nå også en EN-oversettelse.
+        self.assertIn("tolerates high temperatures", bryggedag_noter(kveik, "en")[0])
 
     def test_eksportert_ark_no_og_en_deler_kilde_med_panelet(self):
         for sprak in ("no", "en"):
