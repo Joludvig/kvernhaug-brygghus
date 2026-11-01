@@ -3,6 +3,7 @@ import math
 from urllib.parse import urlparse
 from modules.calculations import beregn_total_ibu
 from modules.equipment import last_equipment
+from modules.i18n import SPRAK_DEFAULT, t
 from modules.recipe import resolve_fermentation_temp_target_c
 from modules.process_profiles import (
     NO_SPARGE, beregn_dekoksjon_uttak, beregn_reiterated_mash,
@@ -144,27 +145,41 @@ def _gjaer_fermenteringstemp(gjaer_info, gjaer_key):
     }
 
 
-def fermenteringstemp_linjer(plan, planlagt_c=None):
+def fermenteringstemp_linjer(plan, planlagt_c=None, sprak=SPRAK_DEFAULT):
     """Tekstlinjer for gjæringstemperatur, felles for appens bryggedagspanel
     og det eksporterte bryggedagsarket, slik at de ikke kan komme i utakt.
     Skiller dokumentert produsentdata, generell kategoriveiledning og
-    bryggerens egen planlagte temperatur."""
+    bryggerens egen planlagte temperatur. Teksten slås opp i modules/i18n.py
+    for `sprak` (NO er standard)."""
     def _tall(v):
         return f"{v:g}"
     omraade = f"{_tall(plan['temp_min'])}–{_tall(plan['temp_maks'])}°C"
     if plan.get("temp_kilde") == "produsent":
         kilde = _kilde_vert(plan.get("temp_kilde_ref")).removeprefix("www.")
         detaljer = ", ".join(x for x in (
-            f"kilde: {kilde}" if kilde else "",
-            f"kontrollert {plan['temp_kilde_dato']}" if plan.get("temp_kilde_dato") else "",
+            t("bryggedag.gjaer_temp.kilde", sprak, kilde=kilde) if kilde else "",
+            t("bryggedag.gjaer_temp.kontrollert", sprak, dato=plan["temp_kilde_dato"])
+            if plan.get("temp_kilde_dato") else "",
         ) if x)
-        linjer = [f"Produsentens ideelle område: {omraade}" + (f" ({detaljer})" if detaljer else "")]
+        linjer = [t("bryggedag.gjaer_temp.produsent", sprak, omraade=omraade)
+                  + (f" ({detaljer})" if detaljer else "")]
     else:
-        linjer = [f"Generell veiledning for gjærtypen: {omraade} (ikke dokumentert for denne gjærstammen)"]
+        linjer = [t("bryggedag.gjaer_temp.generell", sprak, omraade=omraade)]
     planlagt = resolve_fermentation_temp_target_c(planlagt_c)
     if planlagt is not None:
-        linjer.append(f"Din planlagte gjæringstemperatur: {_tall(planlagt)}°C")
+        linjer.append(t("bryggedag.gjaer_temp.planlagt", sprak, temp=_tall(planlagt)))
     return linjer
+
+
+def bryggedag_noter(plan, sprak=SPRAK_DEFAULT):
+    """Gjærnotene i valgt språk for panel og ark. Bare notene som har en
+    i18n-nøkkel i plan["noter_nokler"] (så langt lagernoten, #546) oversettes;
+    øvrige noter returneres uendret (eldre språkgjeld, se #548)."""
+    nokler = plan.get("noter_nokler") or []
+    return [
+        t(nokler[i], sprak) if i < len(nokler) and nokler[i] else note
+        for i, note in enumerate(plan["noter"])
+    ]
 
 
 # Pitching rate in million cells / mL / °P
@@ -415,8 +430,10 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
     ferm_temp      = _gjaer_fermenteringstemp(gjaer_info, gjaer_key)
 
     noter = []
+    noter_nokler = []
     if gjaer_key == "lager":
         noter.append("Lagergjær — fermenterer kaldere enn ale. Bruk dobbel pitching rate.")
+        noter_nokler.append("bryggedag.gjaer_note.lager")
     elif gjaer_key == "kveik":
         noter.append("Kveik — tåler høy temperatur (30–40°C). Underpitching er OK.")
     elif gjaer_key == "saison":
@@ -450,6 +467,7 @@ def lag_brewday_plan(malt_valg, humle_valg, gjaer_id, gjaer_info, og, batch_volu
         "temp_kilde_ref":       ferm_temp["temp_kilde_ref"],
         "temp_kilde_dato":      ferm_temp["temp_kilde_dato"],
         "noter":                noter,
+        "noter_nokler":         noter_nokler,
         "er_lager":             gjaer_key == "lager",
         "tilsetninger":         valgte_tilsetninger,
         "prosess_profil":       process_profile,

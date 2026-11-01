@@ -1,4 +1,5 @@
-from modules.brewday_calc import fermenteringstemp_linjer
+from modules.brewday_calc import bryggedag_noter, fermenteringstemp_linjer
+from modules.i18n import SPRAK_DEFAULT
 from modules.export_format import (
     fmt_kg, fmt_gram, fmt_ibu_bid,
     fmt_og, fmt_fg, fmt_abv,
@@ -6,7 +7,8 @@ from modules.export_format import (
 )
 
 
-def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = None) -> str:
+def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = None,
+                        sprak: str = SPRAK_DEFAULT) -> str:
     log = log or {}
     water = water or {}
     w   = plan["vann"]
@@ -150,9 +152,9 @@ def render_brewday_html(ctx: dict, plan: dict, log: dict = None, water: dict = N
     # ── Gjær notes ────────────────────────────────────────────────────────
     temp_li = "".join(
         f"<li>{esc(linje)}</li>"
-        for linje in fermenteringstemp_linjer(plan, (ctx.get("recipe") or {}).get("fermentation_temp_target_c"))
+        for linje in fermenteringstemp_linjer(plan, (ctx.get("recipe") or {}).get("fermentation_temp_target_c"), sprak)
     )
-    noter_li = "".join(f"<li class='note'>ℹ️ {esc(n)}</li>" for n in plan["noter"])
+    noter_li = "".join(f"<li class='note'>ℹ️ {esc(n)}</li>" for n in bryggedag_noter(plan, sprak))
     dms_note = (
         "<li class='note'>90 min anbefalt for Pilsnermalt</li>"
         if plan["koketid_min"] == 90 else ""

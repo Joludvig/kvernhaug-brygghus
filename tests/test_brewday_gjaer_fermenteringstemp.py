@@ -14,7 +14,7 @@ import json
 import os
 import unittest
 
-from modules.brewday_calc import fermenteringstemp_linjer, lag_brewday_plan
+from modules.brewday_calc import bryggedag_noter, fermenteringstemp_linjer, lag_brewday_plan
 from modules.brewday_template import render_brewday_html
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -211,6 +211,98 @@ class TestGjaerpanelHjelpEr(unittest.TestCase):
                 self.assertNotIn(forbudt, tekst)
                 self.assertTrue("dokumentert" in tekst or "documented" in tekst)
                 self.assertTrue("ale varmt" in tekst or "ales warm" in tekst)  # guardrail beholdt
+
+
+class TestSprakNoOgEn(unittest.TestCase):
+    """Faktisk rendret NO/EN for panel (via felles helper + ekte AppTest) og
+    eksportert ark. Eldre språkgjeld i resten av bryggedagsvisningen er
+    registrert separat (#548) og testes ikke her."""
+
+    def setUp(self):
+        self.w = _plan("saflager_w3470", _GJAER["saflager_w3470"])
+        annen = next(k for k, v in _GJAER.items() if v.get("gjaertype") == "Lager" and k != "saflager_w3470")
+        self.g = _plan(annen, _GJAER[annen])
+
+    def test_w3470_no_og_en(self):
+        no = fermenteringstemp_linjer(self.w, 14, "no")
+        en = fermenteringstemp_linjer(self.w, 14, "en")
+        self.assertEqual(no[0], "Produsentens ideelle område: 12–18°C (kilde: fermentis.com, kontrollert 2026-11-01)")
+        self.assertEqual(en[0], "Manufacturer's ideal range: 12–18°C (source: fermentis.com, checked 2026-11-01)")
+        self.assertEqual(no[1], "Din planlagte gjæringstemperatur: 14°C")
+        self.assertEqual(en[1], "Your planned fermentation temperature: 14°C")
+
+    def test_generell_fallback_no_og_en(self):
+        self.assertEqual(
+            fermenteringstemp_linjer(self.g, None, "no")[0],
+            "Generell veiledning for gjærtypen: 8–12°C (ikke dokumentert for denne gjærstammen)")
+        self.assertEqual(
+            fermenteringstemp_linjer(self.g, None, "en")[0],
+            "General guidance for the yeast type: 8–12°C (not documented for this yeast strain)")
+
+    def test_lagernote_no_og_en(self):
+        self.assertEqual(bryggedag_noter(self.w, "no"), ["Lagergjær — fermenterer kaldere enn ale. Bruk dobbel pitching rate."])
+        self.assertEqual(bryggedag_noter(self.w, "en"), ["Lager yeast — ferments cooler than ale. Use a double pitching rate."])
+
+    def test_ukjent_sprak_faller_tilbake_til_norsk_og_andre_noter_urort(self):
+        self.assertIn("Produsentens", fermenteringstemp_linjer(self.w, None, "xx")[0])
+        kveik = _plan("k", {"display_name": "K", "gjaertype": "Kveik"})
+        self.assertEqual(bryggedag_noter(kveik, "en"), kveik["noter"])  # ikke utvidet (#548)
+
+    def test_eksportert_ark_no_og_en_deler_kilde_med_panelet(self):
+        for sprak in ("no", "en"):
+            with self.subTest(sprak=sprak):
+                html = render_brewday_html(_ctx(14), self.w, sprak=sprak)
+                for linje in fermenteringstemp_linjer(self.w, 14, sprak):
+                    self.assertIn(linje.replace("'", "&#x27;"), html)
+                self.assertIn(bryggedag_noter(self.w, sprak)[0], html)
+        en = render_brewday_html(_ctx(14), self.w, sprak="en")
+        self.assertNotIn("Produsentens", en)
+        self.assertNotIn("Lagergjær", en)
+        self.assertNotIn("Din planlagte", en)
+        # standard uten sprak-argument er uendret norsk
+        self.assertIn("Produsentens ideelle område", render_brewday_html(_ctx(14), self.w))
+
+    def test_sprakbytte_endrer_ikke_omraade_eller_maal(self):
+        for sprak in ("no", "en"):
+            linjer = fermenteringstemp_linjer(self.w, 14, sprak)
+            self.assertIn("12–18°C", linjer[0])
+            self.assertIn("14°C", linjer[1])
+        self.assertEqual((self.w["temp_min"], self.w["temp_maks"]), (12, 18))
+
+
+class TestPanelSprakAppTest(unittest.TestCase):
+    """Ekte ui/brewday_panel.py via AppTest."""
+
+    _APP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_brewday_ferm_temp_app.py")
+
+    def _kjor(self, sprak, gjaer_id="saflager_w3470", maal=14.0):
+        from streamlit.testing.v1 import AppTest
+        at = AppTest.from_file(self._APP, default_timeout=30)
+        at.session_state["sprak"] = sprak
+        at.session_state["valgt_gjaer_id"] = gjaer_id
+        at.session_state["gjaering_temp_maal_c"] = maal
+        at.run()
+        self.assertFalse(at.exception, [e.value for e in at.exception])
+        tekst = " ".join(str(m.value) for m in at.markdown) + " " + " ".join(str(i.value) for i in at.info)
+        return tekst
+
+    def test_panel_viser_en_og_no(self):
+        en = self._kjor("en")
+        self.assertIn("Manufacturer's ideal range: 12–18°C (source: fermentis.com, checked 2026-11-01)", en)
+        self.assertIn("Your planned fermentation temperature: 14°C", en)
+        self.assertIn("Lager yeast — ferments cooler than ale. Use a double pitching rate.", en)
+        self.assertNotIn("Produsentens ideelle", en)
+        no = self._kjor("no")
+        self.assertIn("Produsentens ideelle område: 12–18°C (kilde: fermentis.com, kontrollert 2026-11-01)", no)
+        self.assertIn("Din planlagte gjæringstemperatur: 14°C", no)
+        self.assertIn("Lagergjær — fermenterer kaldere enn ale. Bruk dobbel pitching rate.", no)
+
+    def test_panel_generell_fallback_en(self):
+        annen = next(k for k, v in _GJAER.items() if v.get("gjaertype") == "Lager" and k != "saflager_w3470")
+        en = self._kjor("en", gjaer_id=annen, maal=None)
+        self.assertIn("General guidance for the yeast type: 8–12°C (not documented for this yeast strain)", en)
+        self.assertNotIn("Manufacturer's ideal range", en)
+        self.assertNotIn("planned fermentation temperature", en)
 
 
 class TestMasterdataIntegritet(unittest.TestCase):

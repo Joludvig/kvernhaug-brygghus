@@ -342,6 +342,12 @@ TEKSTER = {
         "gjaering.gjaer_panel.velg_label": "Velg gjær:",
         "gjaering.laer_bro.tittel": "🎓 Hvorfor påvirker gjæringstemperatur ølet?",
         "gjaering.laer_bro.footer": "Vil du øve mer? Åpne Bryggeskole → Gjæring.",
+        "bryggedag.gjaer_temp.produsent": "Produsentens ideelle område: {omraade}",
+        "bryggedag.gjaer_temp.kilde": "kilde: {kilde}",
+        "bryggedag.gjaer_temp.kontrollert": "kontrollert {dato}",
+        "bryggedag.gjaer_temp.generell": "Generell veiledning for gjærtypen: {omraade} (ikke dokumentert for denne gjærstammen)",
+        "bryggedag.gjaer_temp.planlagt": "Din planlagte gjæringstemperatur: {temp}°C",
+        "bryggedag.gjaer_note.lager": "Lagergjær — fermenterer kaldere enn ale. Bruk dobbel pitching rate.",
         "gjaering.temp_maal.label": "Planlagt gjæringstemperatur (°C)",
         "gjaering.temp_maal.hjelp": (
             "Valgfritt. Dette er ditt eget planlagte mål — Kvernhaug fyller det ikke "
@@ -645,6 +651,12 @@ TEKSTER = {
         "gjaering.gjaer_panel.velg_label": "Select yeast:",
         "gjaering.laer_bro.tittel": "🎓 Why does fermentation temperature affect the beer?",
         "gjaering.laer_bro.footer": "Want to practice more? Open Brew School → Fermentation.",
+        "bryggedag.gjaer_temp.produsent": "Manufacturer's ideal range: {omraade}",
+        "bryggedag.gjaer_temp.kilde": "source: {kilde}",
+        "bryggedag.gjaer_temp.kontrollert": "checked {dato}",
+        "bryggedag.gjaer_temp.generell": "General guidance for the yeast type: {omraade} (not documented for this yeast strain)",
+        "bryggedag.gjaer_temp.planlagt": "Your planned fermentation temperature: {temp}°C",
+        "bryggedag.gjaer_note.lager": "Lager yeast — ferments cooler than ale. Use a double pitching rate.",
         "gjaering.temp_maal.label": "Planned fermentation temperature (°C)",
         "gjaering.temp_maal.hjelp": (
             "Optional. This is your own planned target — Kvernhaug does not fill it "

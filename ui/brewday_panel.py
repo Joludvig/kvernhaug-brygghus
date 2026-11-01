@@ -2,7 +2,7 @@ import streamlit as st
 from config import DEMO_MODE
 from modules.brewday_calc import (
     lag_brewday_plan, TILSETNINGER,
-    beregn_effektivitet, beregn_post_boil_og, fermenteringstemp_linjer,
+    beregn_effektivitet, beregn_post_boil_og, fermenteringstemp_linjer, bryggedag_noter,
 )
 from modules.calculations import beregn_abv_standard
 from modules.kbhbrew_history_ui import parse_actual_tallfelt
@@ -12,7 +12,7 @@ from modules.export_format import fmt_og, fmt_fg, fmt_abv, stats_linje
 from modules.brewday_template import render_brewday_html
 from ui.kbhbrew_panel import aktiv_brew_id, render_kbhbrew_create_panel
 from ui.kbhbrew_history_panel import render_kbhbrew_history_panel
-from ui.i18n import t as _t
+from ui.i18n import gjeldende_sprak, t as _t
 
 # App A1 (issue #170): et privat sentinel-objekt for å skille "Steg
 # 4/5 sine målefelt er ALDRI synket mot et aktivt brygg før" fra "de er
@@ -245,10 +245,11 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             st.markdown("**🧫 Gjær & Fermentering**")
             st.write(f"- **{plan['gjaer_navn']}** — {plan['pakker']} pakke(r)")
             for _temp_linje in fermenteringstemp_linjer(
-                plan, (ctx.get("recipe") or {}).get("fermentation_temp_target_c")
+                plan, (ctx.get("recipe") or {}).get("fermentation_temp_target_c"),
+                gjeldende_sprak(),
             ):
                 st.write(f"- {_temp_linje}")
-            for note in plan["noter"]:
+            for note in bryggedag_noter(plan, gjeldende_sprak()):
                 st.info(note)
 
             st.write("")
@@ -555,7 +556,7 @@ def render_brewday_panel(ctx, humle_database, gjaer_database, malt_database=None
             "behandling": st.session_state.get("aktiv_vannbehandling"),
             "maalinger":  st.session_state.get("aktiv_vannmaalinger"),
         }
-        html     = render_brewday_html(ctx, plan, log, water=water)
+        html     = render_brewday_html(ctx, plan, log, water=water, sprak=gjeldende_sprak())
         fil_navn = ctx["name"].replace(" ", "_").replace("/", "-") + "_bryggedag.html"
         st.download_button(
             label="📥 Last ned bryggedagsark",
