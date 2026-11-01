@@ -206,6 +206,30 @@ def detect_recipe_signatures(recipe):
     }
 
 
+_MIN_SAMLET_SCORE = 5
+
+
+def sorter_samlet_stiltreff(stil_liste, min_score=_MIN_SAMLET_SCORE):
+    """Samlet stiltreff-rangering (justert score, inkl. signaturbonus og tak).
+
+    Eneste kilde for rekkefølgen "Samlet stiltreff" vises i: analyselisten
+    (ui/style_panel.py), oppskriftskortet og A4-eksporten
+    (modules/card_template.py). Sortering: høyest score først, deretter lavest
+    prio ved likt poeng. Treff under `min_score` regnes som for svake til å
+    vises. Berører ikke scoreformlene og er atskilt fra den numeriske
+    "nærmeste stil" (`analyse["stil"]`, basert på raw_score)."""
+    return sorted(
+        [s for s in stil_liste if s["score"] >= min_score],
+        key=lambda x: (-x["score"], x["prio"]),
+    )
+
+
+def samlet_toppstil(stil_liste):
+    """Høyeste samlede stiltreff, eller None hvis ingen er sterke nok."""
+    rangert = sorter_samlet_stiltreff(stil_liste)
+    return rangert[0] if rangert else None
+
+
 def analyser_stil_og_balanse(recipe):
     """
     Komplett BJCP-stilmatching og skreddersydd kategoriranking for Kvernhaug Brygghus.

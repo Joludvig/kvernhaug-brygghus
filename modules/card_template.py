@@ -11,6 +11,7 @@ from modules.export_format import (
     fmt_og, fmt_fg, fmt_abv, fmt_ibu, fmt_ebc,
     fmt_vol, fmt_kg, fmt_gram, logo_img_tag, esc,
 )
+from modules.style_engine import samlet_toppstil
 from modules.water_chemistry import summer_ionbidrag
 
 # ── Master Design V1 palette ──────────────────────────────────────────────────
@@ -129,28 +130,32 @@ def render_card_html(
     mode:     str = "card",
     logo_b64: str | None = None,
 ) -> str:
-    stil        = esc(ctx["style_analysis"].get("stil", ""))
     brygger_stil = esc(ctx.get("brygger_stil", "").strip())
     gjaer_id    = ctx["recipe"].get("yeast", "")
     gjaer_navn  = esc(gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id))
     summary     = esc(ctx["summary"].replace("**", ""))
 
-    # BJCP-score for dominant match
-    _stil_score = next(
-        (s["score"] for s in ctx["style_analysis"].get("stil_liste", []) if s["stil"] == stil),
-        None,
-    )
+    # Stilmatch (navn + prosent) kommer fra samme høyeste samlede treff som
+    # analyselisten i ui/style_panel.py — ikke fra den numeriske «nærmeste
+    # stil» (style_analysis["stil"]), som kan være en annen stil.
+    _topp = samlet_toppstil(ctx["style_analysis"].get("stil_liste", []))
 
     # Stilblokk: bryggerstil primær + BJCP sekundær, eller bare BJCP
     if brygger_stil:
-        _score_txt = f" · {_stil_score}%" if _stil_score is not None else ""
+        _match_html = ""
+        if _topp is not None:
+            _match_html = (
+                f"<div style='color:{_MUTED}; font-size:0.62em; "
+                f"letter-spacing:0.06em; margin-top:5px;'>"
+                f"Stilmatch: {esc(_topp['stil'])} · {_topp['score']}%</div>"
+            )
         stil_html = (
             f"<div style='color:{_MOSS}; font-size:0.95em; font-style:italic; "
             f"letter-spacing:0.04em; margin-top:7px;'>{brygger_stil}</div>"
-            f"<div style='color:{_MUTED}; font-size:0.62em; "
-            f"letter-spacing:0.06em; margin-top:5px;'>Stilmatch: {stil}{_score_txt}</div>"
+            f"{_match_html}"
         )
     else:
+        stil = esc(_topp["stil"] if _topp is not None else ctx["style_analysis"].get("stil", ""))
         stil_html = (
             f"<div style='color:{_MOSS}; font-size:0.87em; font-style:italic; "
             f"letter-spacing:0.04em; margin-top:7px;'>{stil}</div>"
@@ -376,7 +381,8 @@ def render_a4_html(
     humle_db: dict,
     gjaer_db: dict,
 ) -> str:
-    stil       = esc(ctx["style_analysis"].get("stil", ""))
+    _topp      = samlet_toppstil(ctx["style_analysis"].get("stil_liste", []))
+    stil       = esc(_topp["stil"] if _topp is not None else ctx["style_analysis"].get("stil", ""))
     gjaer_id   = ctx["recipe"].get("yeast", "")
     gjaer_navn = esc(gjaer_db.get(gjaer_id, {}).get("display_name", gjaer_id))
     summary    = esc(ctx["summary"].replace("**", ""))
