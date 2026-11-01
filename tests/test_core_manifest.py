@@ -108,8 +108,14 @@ class TestSchemaVersionOgDataVersionErAtskilte(unittest.TestCase):
                 self.assertIsNot(ds["data_version"], None)
 
     def test_data_version_er_dokumentert_som_stabilization_baseline(self):
+        # malt/humle står på baseline 1. Gjær ble økt til 2 i #546 (første
+        # dokumenterte produsent-fermenteringstemp) og har en egen note.
         manifest = _last_manifest()
-        for ds in manifest["datasets"].values():
+        for navn, ds in manifest["datasets"].items():
+            if navn == "gjaer":
+                self.assertEqual(ds["data_version"], 2)
+                self.assertIn("#546", ds.get("data_version_note", ""))
+                continue
             self.assertEqual(ds["data_version"], 1)
             self.assertIn("stabilization baseline", ds.get("data_version_note", "").lower())
 

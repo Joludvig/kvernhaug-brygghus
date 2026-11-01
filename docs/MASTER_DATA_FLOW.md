@@ -187,10 +187,36 @@ Ingen kjente strukturelle mangler. Ølbrygging-data for gjær (Fermentis US-05, 
 | `butikk_match.vestbrygg.pris` / `.olbrygging.pris` | Pris per butikk |
 | `aliases` | Brukt av matching (`store_matcher.py`) og av "🔗 Match eksisterende" i review — IKKE fjernet/flatenert noe sted lenger, siden det ikke finnes noe eget runtime-lag |
 | `verified`, `source` | Metadata fra opprinnelig seed/import |
+| `fermenteringstemp` (gjær, valgfri) | Dokumentert produsentområde for gjæring, se «Gruppen `fermenteringstemp`» under |
 | `alfa` / `alfa_typisk` (humle) | Begge nøklene forekommer i eksisterende data (historisk navnedrift) |
 
 `calculations.py` og `hop_panel.py` håndterer begge humle-alfa-nøklene med fallback:
 `entry.get("alfa") or entry.get("alfa_typisk") or 5.0`
+
+### Gruppen `fermenteringstemp` (gjær, valgfri og bakoverkompatibel, #546)
+
+Én valgfri gruppe per gjærentry. Entries uten gruppen er gyldige og får en
+ærlig, merket kategorifallback i bryggedagsplanen. Dette er ikke en generell
+proveniensmigrering, og den eldre `verified`-boolen tolkes ikke på nytt.
+
+| Felt | Krav |
+|------|------|
+| `min_c`, `max_c` | Endelige tall (ikke bool/tekst/NaN/±uendelig), `min_c < max_c` |
+| `betydning` | Nøyaktig `ideal_fermentation_range` (produsentens ideelle gjæringsområde) |
+| `claim_type` | Nøyaktig `documented_fact` |
+| `source_type` | `manufacturer_product_page` eller `manufacturer_datasheet` |
+| `source_ref` | http(s)-URL med brukbart vertsnavn (ren parsing, ingen nettverkskall; parserfeil gir fallback) |
+| `source_date` | ISO-dato for selve kilden, eller `null` hvis udatert |
+| `verified_at` | Timestamp (hele verdien valideres): ISO 8601 med tidssone, f.eks. `2026-11-01T17:39:54+01:00`, for faktisk kontroll mot kilden (CORE_STATUS_PROVENANCE). Aldri diktet; ugyldig, manglende eller uten tidssone gir fallback. UI viser bare datoen |
+
+Appen (`modules/brewday_calc.py::_gyldig_produsent_fermenteringstemp`) påstår
+«produsentens ideelle område» bare når alle krav er oppfylt. Mangler eller
+avviker noe, vises generell veiledning merket «ikke dokumentert for denne
+gjærstammen». Bryggerens egen planlagte temperatur
+(`fermentation_temp_target_c`) er et separat tall og påvirkes aldri.
+`schema_version` er uendret (1): feltet er additivt og valgfritt, og ingen
+eksisterende leser brytes. Gjærdatasettets `data_version` er 2 siden #546
+la til første dokumenterte verdi.
 
 ---
 
